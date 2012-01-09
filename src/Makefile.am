@@ -1,3 +1,3 @@
 noinst_PROGRAMS = zs
 
-zs_SOURCES = token.cc
+zs_SOURCES = token.cc token.hh
