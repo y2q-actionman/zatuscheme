@@ -20,8 +20,12 @@ private:
   std::string str_;
 
 public:
-  Token() = delete;
-  Token(std::istream&);
+  Token()
+    : type_(Type::uninitialized), str_(){}
+
+  Token(Type t, std::string s) 
+    : type_(t), str_(s){}
+
   Token(const Token&) = default;
   Token(Token&&) = default;
 
@@ -39,12 +43,8 @@ public:
 
   bool is_syntactic_keyword() const;
   bool is_expression_keyword() const;
-
-private:
-  bool tokenize_identifier(std::istream&);
-  bool tokenize_boolean(std::istream&);
-  bool tokenize_character(std::istream&);
-  bool tokenize_string(std::istream&);
 };
+
+Token tokenize(std::istream&);
 
 #endif // TOKEN_HH

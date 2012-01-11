@@ -45,7 +45,8 @@ streamoff skip_intertoken_space(istream& i, streamoff skipped = 0){
 }
 
 
-bool Token::tokenize_identifier(istream& i){
+static
+Token tokenize_identifier(istream& i){
   auto c = i.peek();
 
   // initial
@@ -54,21 +55,17 @@ bool Token::tokenize_identifier(istream& i){
 
     // subsequent
     do{
-      s.put(static_cast<char>(i.get()));
+      s.put(i.get());
       c = i.peek();
     }while(isalpha(c) || is_special_initial(c) 
            || isdigit(c) || c == '+' || c == '-'
            || c == '.' || c == '@');
 
-    type_ = Token::Type::identifier;
-    str_ = s.str();
-    return true;
+    return Token{Token::Type::identifier, s.str()};
   }else{
     // peculiar_identifier
     if(c == '+' || c ==  '-'){
-      type_ = Token::Type::identifier;
-      str_ = string(1, c);
-      return true;
+      return Token{Token::Type::identifier, string(1, c)};
     }else if(c == '.'){
       const auto init_pos = i.tellg();
       int dots = 0;
@@ -83,29 +80,26 @@ bool Token::tokenize_identifier(istream& i){
         goto error;
       }
 
-      type_ = Token::Type::identifier;
-      str_ = string(3, '.');
-      return true;
+      return Token{Token::Type::identifier, string(3, '.')};
     }
   }
 
  error:
-  return false;
+  return Token{};
 }
 
-bool Token::tokenize_boolean(istream& i){
+static
+Token tokenize_boolean(istream& i){
   if(i.peek() == '#'){
     ostringstream s;
 
-    s.put(static_cast<char>(i.get()));
+    s.put(i.get());
 
     switch(i.peek()){
     case 't': case 'f':
-      s.put(static_cast<char>(i.get()));
+      s.put(i.get());
 
-      type_ = Token::Type::boolean;
-      str_ = s.str();
-      return true;
+      return Token{Token::Type::boolean, s.str()};
     default:
       i.unget();
       goto error;
@@ -113,10 +107,11 @@ bool Token::tokenize_boolean(istream& i){
   }
 
  error:
-  return false;
+  return Token{};
 }
 
-bool Token::tokenize_character(istream& i){
+static
+Token tokenize_character(istream& i){
   auto pos = i.tellg();
   ostringstream s;
 
@@ -137,18 +132,15 @@ bool Token::tokenize_character(istream& i){
 
 
   if(i.peek() != '#') goto error;
-  s.put(static_cast<char>(i.get()));
+  s.put(i.get());
 
   if(i.peek() != '\\') goto error;
-  s.put(static_cast<char>(i.get()));
-
-  type_ = Token::Type::character;
+  s.put(i.get());
 
   switch(i.peek()){
   case 's': {
     static const char target[] = "space";
     if(check_and_push(target, sizeof(target))){
-      str_ = s.str();
       break;
     }else{
       goto single_char;
@@ -157,7 +149,6 @@ bool Token::tokenize_character(istream& i){
   case 'n': {
     static const char target[] = "newline";
     if(check_and_push(target, sizeof(target))){
-      str_ = s.str();
       break;
     }else{
       goto single_char;
@@ -165,38 +156,37 @@ bool Token::tokenize_character(istream& i){
   }
   default: 
   single_char:
-    s.put(static_cast<char>(i.get()));
-    str_ = s.str();
+    s.put(i.get());
+    break;
   }
 
-  return true;
+  return Token{Token::Type::character, s.str()};
 
  error:
   i.seekg(pos);
-  return false;
+  return Token{};
 }
 
-bool Token::tokenize_string(istream& i){
+static
+Token tokenize_string(istream& i){
   auto pos = i.tellg();
   ostringstream s;
 
   if(i.peek() == '"') goto error;
 
   do{
-    s.put(static_cast<char>(i.get()));
+    s.put(i.get());
 
     switch(i.peek()){
     case '"':
-      s.put(static_cast<char>(i.get()));
-      type_ = Token::Type::string;
-      str_ = s.str();
-      return true;
+      s.put(i.get());
+      return Token{Token::Type::string, s.str()};
     case '\\':
-      s.put(static_cast<char>(i.get()));
+      s.put(i.get());
 
       switch(i.peek()){
       case '"': case '\\':
-        s.put(static_cast<char>(i.get()));
+        s.put(i.get());
         break;
       default:
         goto error;
@@ -207,21 +197,30 @@ bool Token::tokenize_string(istream& i){
 
  error:
   i.seekg(pos);
-  return false;
+  return Token{};
 }
 
+static inline
+bool is_inited(const Token& t){
+  return t.type() == Token::Type::uninitialized;
+}
 
-Token::Token(std::istream& o)
-  : type_(Type::uninitialized), str_()
-{
-  if(tokenize_identifier(o)
-     || tokenize_boolean(o)
-     || tokenize_character(o)
-     || tokenize_string(o)){
-    return;
-  }
+Token tokenize(istream& i){
+  Token t;
 
-  throw runtime_error("cannot be tokenized");
+  if(is_inited(t = tokenize_identifier(i)))
+    return t;
+
+  if(is_inited(t = tokenize_boolean(i)))
+    return t;
+
+  if(is_inited(t = tokenize_character(i)))
+    return t;
+
+  if(is_inited(t = tokenize_string(i)))
+    return t;
+
+  return Token{};
 }
 
 bool Token::is_syntactic_keyword() const{
