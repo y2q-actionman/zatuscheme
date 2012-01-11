@@ -3,21 +3,17 @@
 
 AC_PREREQ([2.68])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign color-tests])
 AC_CONFIG_SRCDIR([src/token.cc])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-CFLAGS=" "
-CXXFLAGS=" "
-AC_PROG_CC_C99([gcc])
 AC_PROG_CXX([g++])
+AC_PROG_RANLIB
 
-## add C++0x flags and other warning options
+## add C++0x flags
 ## TODO: check for compiler's C++0x support
-warnings="-Wall -Wextra -Wconversion -Wpointer-arith -Wcast-qual -Wcast-align -Wlogical-op -Wredundant-decls"
-CFLAGS="${CFLAGS} ${warnings}"
-CXXFLAGS="${CXXFLAGS} ${warnings} -std=c++0x"
+CXXFLAGS="${CXXFLAGS} -std=c++0x"
 
 # Checks for libraries.
 

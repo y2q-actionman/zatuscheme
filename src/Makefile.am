@@ -1,3 +1,13 @@
-noinst_PROGRAMS = zs
+include $(top_srcdir)/common.mk
 
-zs_SOURCES = token.cc token.hh
+AM_CXXFLAGS = $(warning_flags)
+
+noinst_LIBRARIES = libzs.a
+libzs_a_SOURCES = zs.hh\
+		token.cc token.hh
+
+noinst_PROGRAMS = zs
+zs_SOURCES = zs.hh main.cc
+zs_LDADD = libzs.a
+
+check_LIBRARIES = libzs.a
