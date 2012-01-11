@@ -5,7 +5,7 @@ AM_CXXFLAGS = $(warning_flags) $(test_flags)
 
 AM_DEFAULT_SOURCE_EXT = .cc
 
-LDADD = ../src/libzs_debug.a
+LDADD = ../src/libzs_test.a
 check_PROGRAMS =
 
 TESTS = $(check_PROGRAMS)

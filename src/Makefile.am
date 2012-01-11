@@ -10,4 +10,6 @@ noinst_PROGRAMS = zs
 zs_SOURCES = zs.hh main.cc
 zs_LDADD = libzs.a
 
-check_LIBRARIES = libzs.a
+check_LIBRARIES = libzs_test.a
+libzs_test_a_SOURCES = $(libzs_a_SOURCES)
+libzs_test_a_CXXFLAGS = $(test_flags) $(AM_CXXFLAGS)
