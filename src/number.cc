@@ -72,45 +72,73 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
 }
 
 
+static inline
+int char_to_int(char c){
+  switch(c){
+  case '0': return 0;
+  case '1': return 1;
+  case '2': return 2;
+  case '3': return 3;
+  case '4': return 4;
+  case '5': return 5;
+  case '6': return 6;
+  case '7': return 7;
+  case '8': return 8;
+  case '9': return 9;
+  case 'a': case 'A': return 10;
+  case 'b': case 'B': return 11;
+  case 'c': case 'C': return 12;
+  case 'd': case 'D': return 13;
+  case 'e': case 'E': return 14;
+  case 'f': case 'F': return 15;
+  default: return -1;
+  }
+}
+
 template<int radix>
 struct is_number_char{
   template<typename CharT>
   inline
-  bool operator()(CharT c) const;
+  int operator()(CharT c) const;
 };
 
 template<>
 template<typename CharT>
 inline
-bool is_number_char<2>::operator()(CharT c) const{
-  return (c == '0') || (c == '1');
-}
-
-template<>
-template<typename CharT>
-inline
-bool is_number_char<8>::operator()(CharT c) const{
+int is_number_char<2>::operator()(CharT c) const{
   switch(c){
-  case '0': case '1': case '2': case '3':
-  case '4': case '5': case '6': case '7':
-    return true;
+  case '0': case '1':
+    return char_to_int(c);
   default:
-    return false;
+    return -1;
   }
 }
 
 template<>
 template<typename CharT>
 inline
-bool is_number_char<10>::operator()(CharT c) const{
-  return isdigit(c);
+int is_number_char<8>::operator()(CharT c) const{
+  switch(c){
+  case '0': case '1': case '2': case '3':
+  case '4': case '5': case '6': case '7':
+    return char_to_int(c);
+  default:
+    return -1;
+  }
 }
 
 template<>
 template<typename CharT>
 inline
-bool is_number_char<16>::operator()(CharT c) const{
-  return isxdigit(c);
+int is_number_char<10>::operator()(CharT c) const{
+  return isdigit(c) ? char_to_int(c) : -1;
+}
+
+template<>
+template<typename CharT>
+inline
+int is_number_char<16>::operator()(CharT c) const{
+  return isxdigit(c) ? char_to_int(c) : -1;
 }
 
 
@@ -123,11 +151,13 @@ Number parse_unsigned(std::istream& i){
   while(1){
     ret *= radix;
 
-    auto c = i.peek();
-    if(!fun(c)) break;
-    
-    i.ignore(1);
-    ret += 1; // MUST FIX!
+    auto n = fun(i.peek());
+    if(n < 0){
+      break;
+    }else{
+      i.ignore(1);
+      ret += n;
+    }
   }
 
   while(1){
