@@ -91,15 +91,13 @@ Token tokenize_identifier(istream& i){
 static
 Token tokenize_boolean(istream& i){
   if(i.peek() == '#'){
-    ostringstream s;
-
-    s.put(i.get());
+    i.get();
 
     switch(i.peek()){
-    case 't': case 'f':
-      s.put(i.get());
-
-      return Token{Token::Type::boolean, s.str()};
+    case 't':
+      return Token{Token::Type::boolean, true};
+    case 'f':
+      return Token{Token::Type::boolean, false};
     default:
       i.unget();
       goto error;
@@ -201,6 +199,55 @@ Token tokenize_string(istream& i){
 }
 
 static inline
+Token tokenize_reserved(istream& i){
+  switch(auto c = i.peek()){
+  case '(':
+    return Token{Token::Type::l_paren, "("};
+  case ')':
+    return Token{Token::Type::r_paren, ")"};
+  case '#':
+    i.ignore(1);
+    if(i.peek() == '('){
+      return Token{Token::Type::vector_paren, "#("};
+    }else{
+      i.unget();
+      return Token{};
+    }
+  case '\'':
+    return Token{Token::Type::quote, "'"};
+  case '`':
+    return Token{Token::Type::backquote, "`"};
+  case ',':
+    i.ignore(1);
+    if(i.peek() == '@'){
+      return Token{Token::Type::comma_at, ",@"};
+    }else{
+      i.unget();
+      return Token{Token::Type::comma, ","};
+    }
+  case '.':
+    return Token{Token::Type::dot, "."};
+  case '[': case ']':
+  case '{': case '}':
+  case '|':
+    return Token{Token::Type::reserved, string(1, c)};
+  default:
+    return Token{};
+  }
+}
+
+static inline
+Token tokenize_number(istream& i){
+  auto n = parse_number(i);
+  if(n.type() != Number::Type::uninitialized){
+    return Token{Token::Type::number, n};
+  }else{
+    return Token{};
+  }
+}
+
+
+static inline
 bool is_inited(const Token& t){
   return t.type() == Token::Type::uninitialized;
 }
@@ -214,12 +261,18 @@ Token tokenize(istream& i){
   if(is_inited(t = tokenize_boolean(i)))
     return t;
 
+  if(is_inited(t = tokenize_number(i)))
+    return t;
+
   if(is_inited(t = tokenize_character(i)))
     return t;
 
   if(is_inited(t = tokenize_string(i)))
     return t;
 
+  if(is_inited(t = tokenize_reserved(i)))
+    return t;
+ 
   return Token{};
 }
 

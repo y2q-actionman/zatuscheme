@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iosfwd>
+#include "number.hh"
 
 class Token {
 public:
@@ -17,22 +18,29 @@ public:
 
 private:
   Type type_;
-  std::string str_;
+  union {
+    std::string str_;
+    Number num_;
+    bool b_;
+  };
 
 public:
   Token()
-    : type_(Type::uninitialized), str_(){}
+    : type_(Type::uninitialized){}
 
-  Token(Type t, std::string s) 
-    : type_(t), str_(s){}
+  Token(Type, const std::string&);
+  Token(Type, std::string&&);
+  Token(Type, const Number&);
+  Token(Type, Number&&);
+  Token(Type, bool);
 
-  Token(const Token&) = default;
-  Token(Token&&) = default;
+  Token(const Token&);
+  Token(Token&&);
 
-  ~Token() = default;
+  ~Token();
 
-  Token& operator=(const Token&) = default;
-  Token& operator=(Token&&) = default;
+  Token& operator=(const Token&);
+  Token& operator=(Token&&);
   
 
   Type type() const
@@ -40,6 +48,9 @@ public:
 
   const std::string& str() const
   { return str_; }
+
+  const Number& number() const
+  { return num_; }
 
   bool is_syntactic_keyword() const;
   bool is_expression_keyword() const;

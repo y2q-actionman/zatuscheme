@@ -390,3 +390,33 @@ Number parse_number(std::istream& i){
     return Number{};
   }
 }
+
+Number to_exact(const Number& n){
+  switch(n.type()){
+  case Number::Type::complex:
+    return Number{}; // not supported
+  case Number::Type::real:
+    return Number{static_cast<Number::real_type>
+        (n.get<Number::integer_type>())};
+  case Number::Type::integer:
+    return n;
+  case Number::Type::uninitialized:
+  default:
+    return Number{};
+  }
+}
+
+Number to_inexact(const Number& n){
+  switch(n.type()){
+  case Number::Type::complex:
+    return n;
+  case Number::Type::real:
+    return n;
+  case Number::Type::integer:
+    return Number{static_cast<Number::integer_type>
+        (n.get<Number::real_type>())};
+  case Number::Type::uninitialized:
+  default:
+    return Number{};
+  }
+}

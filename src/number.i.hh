@@ -5,7 +5,6 @@
 #error "Please include via parent file"
 #endif
 
-#include <cassert>
 
 inline
 Number::Number(const complex_type& c) :
