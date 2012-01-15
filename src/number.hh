@@ -7,6 +7,8 @@
 class Number{
 public:
   typedef std::complex<double> complex_type;
+  typedef double real_type;
+  typedef long integer_type;
 
   enum class Type {
     uninitialized = -1,
@@ -19,8 +21,8 @@ private:
 
   union{
     complex_type z_;
-    double f_;
-    long i_;
+    real_type f_;
+    integer_type i_;
   };
 
 public:
@@ -28,8 +30,8 @@ public:
     type_(Type::uninitialized){}
 
   explicit Number(const complex_type&);
-  explicit Number(double);
-  explicit Number(long);
+  explicit Number(real_type);
+  explicit Number(integer_type);
 
   Number(const Number&) = default;
   Number(Number&&) = default;

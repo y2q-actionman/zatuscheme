@@ -12,11 +12,11 @@ Number::Number(const complex_type& c) :
   type_(Type::complex), z_(c){}
 
 inline
-Number::Number(double d) :
+Number::Number(real_type d) :
   type_(Type::real), f_(d){}
 
 inline
-Number::Number(long i) :
+Number::Number(integer_type i) :
   type_(Type::integer), i_(i){}
 
 
@@ -28,19 +28,19 @@ Number::complex_type Number::get() const{
   case Type::real:
     return complex_type{f_};
   case Type::integer:
-    return complex_type{static_cast<double>(i_)};
+    return complex_type{static_cast<real_type>(i_)};
   default:
     throw "invalid conversion!";
   }
 }
 
 template <>
-double Number::get() const{
+Number::real_type Number::get() const{
   switch(type_){
   case Type::real:
     return f_;
   case Type::integer:
-    return static_cast<double>(i_);
+    return static_cast<real_type>(i_);
   case Type::complex:
   default:
     throw "invalid conversion!";
@@ -48,7 +48,7 @@ double Number::get() const{
 }
 
 template <>
-long Number::get() const{
+Number::integer_type Number::get() const{
   switch(type_){
   case Type::integer:
     return i_;

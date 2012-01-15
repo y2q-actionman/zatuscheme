@@ -1,6 +1,7 @@
 #include <istream>
 #include <utility>
 #include <cctype>
+#include <sstream>
 
 #include "number.hh"
 
@@ -169,9 +170,98 @@ Number parse_unsigned(std::istream& i){
   return Number{static_cast<long>(ret)};
 }
 
+template<typename CharT>
+static inline
+bool check_decimal_suffix(CharT c){
+  switch(c){
+  case 'e': case 's': case 'f': case 'd': case 'l':
+    return true;
+  default:
+    return false;
+  }
+}
+
+static
+Number parse_decimal(std::istream& i){
+  static const auto read_char_func = is_number_char<10>{};
+  const auto pos = i.tellg();
+
+  const auto ignore_sharp = [&]() -> int{
+    int sharps = 0;
+    
+    while(i.peek() == '#'){
+      i.ignore(1);
+      ++sharps;
+    }
+
+    return sharps;
+  };
+  
+  stringstream s;
+  decltype(i.peek()) c;
+  
+  // int_part
+  while((c = read_char_func(i.peek())) >= 0){
+    s.put(i.get());
+  }
+
+  bool dot_start = false;
+  int sharps = 0;
+
+  if(s.str().empty()){
+    if(i.peek() == '.'){
+      dot_start = true;
+    }else{
+      goto error;
+    }
+  }else{
+    sharps = ignore_sharp();
+  }
+
+  if(i.peek() != '.'){
+    if(check_decimal_suffix(i.peek()))
+      goto end;
+    else
+      goto error;
+  }
+  s.put(i.get());
+    
+  if(sharps > 0){
+    ignore_sharp();
+
+    if(check_decimal_suffix(i.peek()))
+      goto end;
+    else
+      goto error;
+  }
+
+  if(dot_start && read_char_func(i.peek()) < 0)
+    goto error;
+
+  while((c = read_char_func(i.peek())) >= 0){
+    s.put(i.get());
+  }
+
+  ignore_sharp();
+  
+  if(read_char_func(i.peek()) < 0)
+    goto error;
+
+ end: {
+    double d;
+    s >> d;
+    return Number{d};
+  }
+
+ error:
+  i.seekg(pos);
+  return Number{};
+}
+
 template<int radix>
 static
 Number parse_real_number(std::istream& i){
+  const auto pos = i.tellg();
   int sign = 0;
 
   switch(i.peek()){
@@ -190,16 +280,22 @@ Number parse_real_number(std::istream& i){
 
   auto u1 = parse_unsigned<radix>(i);
 
-  if(i.peek() != '/')
+  if(radix == 10 && check_decimal_suffix(i.peek())){
+    i.seekg(pos);
+    auto n = parse_decimal(i);
+
+    if(n.type() == Number::Type::real){
+      return Number{n.get<double>() * sign};
+    }
+  }
+
+  if(i.peek() != '/'){
     return Number(sign * u1.get<long>());
-
-  auto u2 = parse_unsigned<radix>(i);
-  
-  return Number(sign * u1.get<double>() / u2.get<double>());
-
-  // TODO: add <decimal 10>
+  }else{
+    auto u2 = parse_unsigned<radix>(i);
+    return Number(sign * u1.get<double>() / u2.get<double>());
+  }
 }
-
 
 template<int radix>
 static
