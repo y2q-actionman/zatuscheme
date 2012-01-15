@@ -52,10 +52,19 @@ public:
   const Number& number() const
   { return num_; }
 
+  bool boolean() const
+  { return b_; }
+
   bool is_syntactic_keyword() const;
   bool is_expression_keyword() const;
 };
 
 Token tokenize(std::istream&);
+
+
+constexpr bool operator==(Token::Type, Token::Type);
+constexpr bool operator!=(Token::Type, Token::Type);
+
+#include "token.i.hh"
 
 #endif // TOKEN_HH

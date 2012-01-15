@@ -8,6 +8,72 @@
 
 using namespace std;
 
+Token& Token::operator=(const Token& other){
+  switch(this->type_){
+  case Type::uninitialized:
+    new (this) Token(other);
+    break;
+    
+  case Type::boolean:
+    new (this) Token(other);
+    break;
+
+  case Type::number:
+    if(other.type() == this->type_){
+      this->num_ = other.num_;
+    }else{
+      num_.~Number();
+      new (this) Token(other);
+    }
+    break;
+
+  default:
+    if(other.type() == this->type_){
+      this->str_ = other.str_;
+    }else{
+      str_.~string();
+      new (this) Token(other);
+    }
+  }
+
+  return *this;
+}
+
+Token& Token::operator=(Token&& other){
+  switch(this->type_){
+  case Type::uninitialized:
+    new (this) Token(std::move(other));
+    break;
+    
+  case Type::boolean:
+    new (this) Token(std::move(other));
+    break;
+
+  case Type::number:
+    if(other.type() == this->type_){
+      this->num_ = std::move(other.num_);
+    }else{
+      num_.~Number();
+      new (this) Token(std::move(other));
+    }
+    break;
+
+  default:
+    if(other.type() == this->type_){
+      this->str_ = std::move(other.str_);
+    }else{
+      str_.~string();
+      new (this) Token(std::move(other));
+    }
+  }
+
+  return *this;
+}
+
+//
+// tokenizer funcs
+//
+
 template<typename charT>
 static inline constexpr
 bool is_delimiter(charT c){
@@ -249,7 +315,7 @@ Token tokenize_number(istream& i){
 
 static inline
 bool is_inited(const Token& t){
-  return t.type() == Token::Type::uninitialized;
+  return t.type() != Token::Type::uninitialized;
 }
 
 Token tokenize(istream& i){

@@ -20,6 +20,7 @@ Number::Number(integer_type i) :
 
 
 template <>
+inline
 Number::complex_type Number::get() const{
   switch(type_){
   case Type::complex:
@@ -34,6 +35,7 @@ Number::complex_type Number::get() const{
 }
 
 template <>
+inline
 Number::real_type Number::get() const{
   switch(type_){
   case Type::real:
@@ -47,6 +49,7 @@ Number::real_type Number::get() const{
 }
 
 template <>
+inline
 Number::integer_type Number::get() const{
   switch(type_){
   case Type::integer:
