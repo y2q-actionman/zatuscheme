@@ -74,15 +74,17 @@ Token& Token::operator=(Token&& other){
 // tokenizer funcs
 //
 
+namespace {
+
 template<typename charT>
-static inline constexpr
+inline constexpr
 bool is_delimiter(charT c){
   return isspace(c) || c == '(' || c == ')'
     || c ==  '"' || c == ';';
 }
 
 template<typename charT>
-static inline
+inline
 bool is_special_initial(charT c){
   switch(c){
   case '!': case '$': case '%': case '&':
@@ -95,7 +97,6 @@ bool is_special_initial(charT c){
   }
 }
 
-static
 streamoff skip_intertoken_space(istream& i, streamoff skipped = 0){
   auto c = i.peek();
 
@@ -111,7 +112,6 @@ streamoff skip_intertoken_space(istream& i, streamoff skipped = 0){
 }
 
 
-static
 Token tokenize_identifier(istream& i){
   auto c = i.peek();
 
@@ -154,7 +154,6 @@ Token tokenize_identifier(istream& i){
   return Token{};
 }
 
-static
 Token tokenize_boolean(istream& i){
   if(i.peek() == '#'){
     i.get();
@@ -174,7 +173,6 @@ Token tokenize_boolean(istream& i){
   return Token{};
 }
 
-static
 Token tokenize_character(istream& i){
   auto pos = i.tellg();
   ostringstream s;
@@ -231,7 +229,6 @@ Token tokenize_character(istream& i){
   return Token{};
 }
 
-static
 Token tokenize_string(istream& i){
   auto pos = i.tellg();
   ostringstream s;
@@ -264,7 +261,6 @@ Token tokenize_string(istream& i){
   return Token{};
 }
 
-static inline
 Token tokenize_reserved(istream& i){
   switch(auto c = i.peek()){
   case '(':
@@ -272,7 +268,7 @@ Token tokenize_reserved(istream& i){
   case ')':
     return Token{Token::Type::r_paren, ")"};
   case '#':
-    i.ignore(1);
+    i.get();
     if(i.peek() == '('){
       return Token{Token::Type::vector_paren, "#("};
     }else{
@@ -284,7 +280,7 @@ Token tokenize_reserved(istream& i){
   case '`':
     return Token{Token::Type::backquote, "`"};
   case ',':
-    i.ignore(1);
+    i.get();
     if(i.peek() == '@'){
       return Token{Token::Type::comma_at, ",@"};
     }else{
@@ -302,7 +298,6 @@ Token tokenize_reserved(istream& i){
   }
 }
 
-static inline
 Token tokenize_number(istream& i){
   auto n = parse_number(i);
   if(n.type() != Number::Type::uninitialized){
@@ -312,11 +307,12 @@ Token tokenize_number(istream& i){
   }
 }
 
-
-static inline
+inline
 bool is_inited(const Token& t){
   return t.type() != Token::Type::uninitialized;
 }
+
+} // namespace
 
 Token tokenize(istream& i){
   Token t;

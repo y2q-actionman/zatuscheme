@@ -8,12 +8,14 @@
 
 using namespace std;
 
+namespace {
+
 enum class Exactness{
   exact, inexact, unspecified
     };
 
 template<typename CharT>
-static inline constexpr
+inline constexpr
 int to_radix(CharT c){
   return (c == 'b') ? 2
     : (c == 'o') ? 8
@@ -23,14 +25,13 @@ int to_radix(CharT c){
 }
 
 template<typename CharT>
-static inline constexpr
+inline constexpr
 Exactness to_exactness(CharT c){
   return (c == 'i') ? Exactness::inexact
     : (c == 'e') ? Exactness::exact
     : Exactness::unspecified;
 }
 
-static
 pair<int, Exactness> parse_number_prefix(std::istream& i){
   int r = 10;
   Exactness e = Exactness::unspecified;
@@ -123,7 +124,7 @@ bool is_number_char<16>::operator()(CharT c) const{
 }
 
 template<typename T>
-static inline
+inline
 int ignore_sharp(T& i){
   int sharps = 0;
 
@@ -135,13 +136,12 @@ int ignore_sharp(T& i){
   return sharps;
 }
 
-static inline
+inline
 bool is_inited(const Number& n){
   return n.type() != Number::Type::uninitialized;
 }
 
 template<int radix>
-static
 Number parse_unsigned(std::istream& i){
   static const auto fun = is_number_char<radix>{};
   const auto pos = i.tellg();
@@ -168,7 +168,7 @@ Number parse_unsigned(std::istream& i){
 }
 
 template<typename CharT>
-static inline
+inline
 bool check_decimal_suffix(CharT c){
   switch(c){
   case 'e': case 's': case 'f': case 'd': case 'l':
@@ -178,7 +178,6 @@ bool check_decimal_suffix(CharT c){
   }
 }
 
-static
 Number parse_decimal(std::istream& i){
   static const auto read_char_func = is_number_char<10>{};
   const auto pos = i.tellg();
@@ -249,7 +248,6 @@ Number parse_decimal(std::istream& i){
 }
 
 template<int radix>
-static
 Number parse_real_number(std::istream& i){
   const auto pos = i.tellg();
   int sign = 0;
@@ -299,7 +297,6 @@ Number parse_real_number(std::istream& i){
 }
 
 template<int radix>
-static
 Number parse_complex(std::istream& i){
   const auto imag_parser = [&](const Number& real,
                                decltype(i.peek()) sign_char) -> Number {
@@ -357,6 +354,8 @@ Number parse_complex(std::istream& i){
   i.seekg(pos);
   return Number{};
 }
+
+} // namespace
 
 Number parse_number(std::istream& i){
   const auto prefix_info = parse_number_prefix(i);
