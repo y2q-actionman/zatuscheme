@@ -10,9 +10,21 @@ using namespace std;
 
 static bool result;
 
-ostream& operator<<(ostream& o, Token::Type t){
-  o << static_cast<int>(t);
-  return o;
+void describe(const Token& tok){
+  clog << "Type=" << static_cast<int>(tok.type());
+  
+  switch(tok.type()){
+  case Token::Type::uninitialized:
+    break;
+  case Token::Type::number:
+    // not implemented
+    break;
+  case Token::Type::boolean:
+    clog << " bool=" << tok.boolean();
+    break;
+  default:
+    clog << " str=" << tok.str();
+  }
 }
 
 void check(const string& input, Token::Type typ, const string& expect){
@@ -20,15 +32,15 @@ void check(const string& input, Token::Type typ, const string& expect){
   Token tok = tokenize(is);
 
   if(tok.type() != typ || tok.str() != expect){
-    cout << "failed: input=" << input
-         << " , expect type=" << typ
+    clog << "failed: input=" << input
+         << " , expect type=" << static_cast<int>(typ)
          << " , expect str=" << expect
          << '\n';
 
-    cout << "        got type=" << tok.type()
-         << " , got str=" << tok.str()
-         << endl;
-    
+    clog << "  gotten token: ";
+    describe(tok);
+    clog << endl;
+
     result = false;
     return;
   }
@@ -71,6 +83,21 @@ int main(){
 
   // identifier
   check("lambda", Token::Type::identifier, "lambda");
+  check("q", Token::Type::identifier, "q");
+  check("list->vector", Token::Type::identifier, "list->vector");
+  check("soup", Token::Type::identifier, "soup");
+  check("+", Token::Type::identifier, "+");
+  check("V17a", Token::Type::identifier, "V17a");
+  check("<=?", Token::Type::identifier, "<=?");
+  check("a34kTMNs", Token::Type::identifier, "a34kTMNs");
+  check("the-word-resursin-has-many-meanings", Token::Type::identifier,
+        "the-word-resursin-has-many-meanings");
+
+  check("+", Token::Type::identifier, "+");
+  check("-", Token::Type::identifier, "-");
+  check("...", Token::Type::identifier, "...");
+
+  // check("..", Token::Type::uninitialized, "");
 
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -139,7 +139,7 @@ Token tokenize_identifier(istream& i){
       do{
         i.ignore(1);
         ++dots;
-      }while(dots < 3 && i.peek() != '.');
+      }while(dots < 3 && i.peek() == '.');
 
       if(dots != 3){
         i.seekg(init_pos);

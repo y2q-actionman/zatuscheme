@@ -16,16 +16,7 @@ public:
       integer
   };
 
-private:
-  Type type_;
 
-  union{
-    complex_type z_;
-    real_type f_;
-    integer_type i_;
-  };
-
-public:
   Number() :
     type_(Type::uninitialized){}
 
@@ -47,6 +38,15 @@ public:
 
   template <typename T>
   T get() const;
+
+private:
+  Type type_;
+
+  union{
+    complex_type z_;
+    real_type f_;
+    integer_type i_;
+  };
 };
 
 Number parse_number(std::istream&);

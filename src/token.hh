@@ -16,15 +16,7 @@ public:
       reserved
       };
 
-private:
-  Type type_;
-  union {
-    std::string str_;
-    Number num_;
-    bool b_;
-  };
 
-public:
   Token()
     : type_(Type::uninitialized){}
 
@@ -57,6 +49,14 @@ public:
 
   bool is_syntactic_keyword() const;
   bool is_expression_keyword() const;
+
+private:
+  Type type_;
+  union {
+    std::string str_;
+    Number num_;
+    bool b_;
+  };
 };
 
 Token tokenize(std::istream&);
