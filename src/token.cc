@@ -26,7 +26,6 @@ Token::Token(const Token& other)
     break;
 
   case Type::identifier:
-  case Type::character:
   case Type::string:
     new (&this->str_) string(other.str_);
     break;
@@ -37,6 +36,10 @@ Token::Token(const Token& other)
 
   case Type::number:
     new (&this->num_) Number(other.num_);
+    break;
+
+  case Type::character:
+    this->c_ = other.c_;
     break;
 
   case Type::notation:
@@ -56,7 +59,6 @@ Token::Token(Token&& other)
     break;
 
   case Type::identifier:
-  case Type::character:
   case Type::string:
     new (&this->str_) string(move(other.str_));
     break;
@@ -67,6 +69,10 @@ Token::Token(Token&& other)
 
   case Type::number:
     new (&this->num_) Number(move(other.num_));
+    break;
+
+  case Type::character:
+    this->c_ = other.c_;
     break;
 
   case Type::notation:
@@ -85,11 +91,9 @@ Token& Token::operator=(const Token& other){
     break;
     
   case Type::identifier:
-  case Type::character:
   case Type::string:
     switch(other.type()){
     case Type::identifier:
-    case Type::character:
     case Type::string:
       this->str_ = other.str_;
       break;
@@ -112,6 +116,14 @@ Token& Token::operator=(const Token& other){
       this->num_ = other.num_;
     }else{
       num_.~Number();
+      new (this) Token(other);
+    }
+    break;
+
+  case Type::character:
+    if(other.type() == this->type()){
+      this->c_ = other.c_;
+    }else{
       new (this) Token(other);
     }
     break;
@@ -139,11 +151,9 @@ Token& Token::operator=(Token&& other){
     break;
     
   case Type::identifier:
-  case Type::character:
   case Type::string:
     switch(other.type()){
     case Type::identifier:
-    case Type::character:
     case Type::string:
       this->str_ = move(other.str_);
       break;
@@ -166,6 +176,14 @@ Token& Token::operator=(Token&& other){
       this->num_ = move(other.num_);
     }else{
       num_.~Number();
+      new (this) Token(move(other));
+    }
+    break;
+
+  case Type::character:
+    if(other.type() == this->type()){
+      this->c_ = other.c_;
+    }else{
       new (this) Token(move(other));
     }
     break;
@@ -290,43 +308,42 @@ Token tokenize_boolean(istream& i){
 }
 
 Token tokenize_character(istream& i){
-  auto pos = i.tellg();
-  ostringstream s;
+  const auto pos = i.tellg();
+  char ret_char;
 
   // function for checking character-name
-  auto check_and_push = [&](const char* str, size_t size) -> bool {
-    auto charpos = i.tellg();
-    char tmp[size];
-    i.get(tmp, sizeof(tmp));
+  const auto check_name = [&](const char* str) -> bool {
+    const auto initpos = i.tellg();
 
-    if(strcmp(tmp, str) == 0){
-      s << tmp;
-      return true;
-    }else{
-      i.seekg(charpos);
-      return false;
+    for(const char* c = str; *c; ++c){
+      if(i.get() != *c){
+        i.seekg(initpos);
+        return false;
+      }
     }
+    return true;
   };
 
 
   if(i.peek() != '#') goto error;
-  s.put(i.get());
+  i.ignore(1);
 
   if(i.peek() != '\\') goto error;
-  s.put(i.get());
+  i.ignore(1);
 
+  // check character name
   switch(i.peek()){
   case 's': {
-    static const char target[] = "space";
-    if(check_and_push(target, sizeof(target))){
+    if(check_name("space")){
+      ret_char = ' ';
       break;
     }else{
       goto single_char;
     }
   }
   case 'n': {
-    static const char target[] = "newline";
-    if(check_and_push(target, sizeof(target))){
+    if(check_name("newline")){
+      ret_char = '\n';
       break;
     }else{
       goto single_char;
@@ -334,11 +351,11 @@ Token tokenize_character(istream& i){
   }
   default: 
   single_char:
-    s.put(i.get());
+    ret_char = i.get();
     break;
   }
 
-  return Token{s.str(), Token::Type::character};
+  return Token{static_cast<char>(ret_char)};
 
  error:
   i.seekg(pos);
@@ -350,17 +367,15 @@ Token tokenize_string(istream& i){
   ostringstream s;
 
   if(i.peek() == '"') goto error;
+  i.ignore(1);
 
-  do{
-    s.put(i.get());
-
+  while(i){
     switch(i.peek()){
     case '"':
-      s.put(i.get());
+      i.ignore(1);
       return Token{s.str(), Token::Type::string};
     case '\\':
-      s.put(i.get());
-
+      i.ignore(1);
       switch(i.peek()){
       case '"': case '\\':
         s.put(i.get());
@@ -369,15 +384,17 @@ Token tokenize_string(istream& i){
         goto error;
       }
       break;
+    default:
+      s.put(i.get());
     }
-  }while(i);
+  }
 
  error:
   i.seekg(pos);
   return Token{};
 }
 
-Token tokenize_reserved(istream& i){
+Token tokenize_notation(istream& i){
   switch(i.peek()){
   case '(':
     return Token{Token::Notation::l_paren};
@@ -440,6 +457,8 @@ bool is_inited(const Token& t){
 Token tokenize(istream& i){
   Token t;
 
+  skip_intertoken_space(i);
+
   if(is_inited(t = tokenize_identifier(i)))
     return t;
 
@@ -455,7 +474,7 @@ Token tokenize(istream& i){
   if(is_inited(t = tokenize_string(i)))
     return t;
 
-  if(is_inited(t = tokenize_reserved(i)))
+  if(is_inited(t = tokenize_notation(i)))
     return t;
  
   return Token{};

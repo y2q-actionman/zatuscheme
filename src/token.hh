@@ -31,6 +31,7 @@ public:
   explicit Token(const Number&);
   explicit Token(Number&&);
   explicit Token(bool);
+  explicit Token(char);
   explicit Token(Notation);
 
   Token(const Token&);
@@ -48,6 +49,7 @@ public:
   std::string str() const;
   Number number() const;
   bool boolean() const;
+  char character() const;
   Notation notation() const;
 
   bool is_syntactic_keyword() const;
@@ -59,6 +61,7 @@ private:
     std::string str_;
     Number num_;
     bool b_;
+    char c_;
     Notation not_;
   };
 };

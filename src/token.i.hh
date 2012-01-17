@@ -43,6 +43,13 @@ Token::Token(bool b)
 }
 
 inline
+Token::Token(char c)
+  : type_(Type::character)
+{
+  c_ = c;
+}
+
+inline
 Token::Token(Notation n)
   : type_(Type::notation)
 {
@@ -54,18 +61,23 @@ Token::~Token(){
   using namespace std;
 
   switch(type_){
-  case Type::uninitialized:
-    break;
-
-  case Type::boolean:
+  case Type::identifier:
+  case Type::string:
+    str_.~string();
     break;
 
   case Type::number:
     num_.~Number();
     break;
 
+  case Type::notation:
+    not_.~Notation();
+    break;
+
+  case Type::uninitialized:
+  case Type::boolean:
+  case Type::character:
   default:
-    str_.~string();
     break;
   }
 
@@ -76,7 +88,6 @@ inline
 std::string Token::str() const{
   switch(type_){
   case Type::identifier:
-  case Type::character:
   case Type::string:
     return str_;
   default:
@@ -92,6 +103,11 @@ Number Token::number() const{
 inline
 bool Token::boolean() const{
   return (type_ == Type::boolean) ? b_ : false;
+}
+
+inline
+char Token::character() const{
+  return (type_ == Type::character) ? c_ : '\0';
 }
 
 inline
