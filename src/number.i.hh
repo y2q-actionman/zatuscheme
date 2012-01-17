@@ -30,7 +30,7 @@ Number::complex_type Number::get() const{
   case Type::integer:
     return complex_type{static_cast<real_type>(i_)};
   default:
-    throw "invalid conversion!";
+    return 0; // invalid conversion!
   }
 }
 
@@ -44,7 +44,7 @@ Number::real_type Number::get() const{
     return static_cast<real_type>(i_);
   case Type::complex:
   default:
-    throw "invalid conversion!";
+    return 0; // invalid conversion!
   }
 }
 
@@ -57,7 +57,7 @@ Number::integer_type Number::get() const{
   case Type::complex:
   case Type::real:
   default:
-    throw "invalid conversion!";
+    return 0; // invalid conversion!
   }
 }
 

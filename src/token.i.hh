@@ -8,82 +8,45 @@
 #include <utility>
 
 inline
-Token::Token(Type t, const std::string& s)
+Token::Token(const std::string& s, Type t)
   : type_(t)
 {
   new (&this->str_) std::string(s);
 }
 
 inline
-Token::Token(Type t, std::string&& s)
+Token::Token(std::string&& s, Type t)
   : type_(t)
 {
   new (&this->str_) std::string(std::move(s));
 }
 
 inline
-Token::Token(Type t, const Number& n)
-  : type_(t)
+Token::Token(const Number& n)
+  : type_(Type::number)
 {
   new (&this->num_) Number(n);
 }
 
 inline
-Token::Token(Type t, Number&& n)
-  : type_(t)
+Token::Token(Number&& n)
+  : type_(Type::number)
 {
   new (&this->num_) Number(std::move(n));
 }
 
 inline
-Token::Token(Type t, bool b)
-  : type_(t)
+Token::Token(bool b)
+  : type_(Type::boolean)
 {
   b_ = b;
 }
 
 inline
-Token::Token(const Token& other)
-  : type_(other.type_)
+Token::Token(Notation n)
+  : type_(Type::notation)
 {
-  switch(other.type_){
-  case Type::uninitialized:
-    break;
-
-  case Type::boolean:
-    this->b_ = other.b_;
-    break;
-
-  case Type::number:
-    new (&this->num_) Number(other.num_);
-    break;
-
-  default:
-    new (&this->str_) std::string(other.str_);
-    break;
-  }
-}
-  
-inline
-Token::Token(Token&& other)
-  : type_(other.type_)
-{
-  switch(other.type_){
-  case Type::uninitialized:
-    break;
-
-  case Type::boolean:
-    this->b_ = other.b_;
-    break;
-
-  case Type::number:
-    new (&this->num_) Number(std::move(other.num_));
-    break;
-
-  default:
-    new (&this->str_) std::string(std::move(other.str_));
-    break;
-  }
+  new(&this->not_) Notation(n);
 }
 
 inline
@@ -107,6 +70,33 @@ Token::~Token(){
   }
 
   type_ = Type::uninitialized;
+}
+
+inline
+std::string Token::str() const{
+  switch(type_){
+  case Type::identifier:
+  case Type::character:
+  case Type::string:
+    return str_;
+  default:
+    return "";
+  }
+}
+
+inline
+Number Token::number() const{
+  return (type_ == Type::number) ? num_ : Number{};
+}
+
+inline
+bool Token::boolean() const{
+  return (type_ == Type::boolean) ? b_ : false;
+}
+
+inline
+Token::Notation Token::notation() const{
+  return (type_ == Type::notation) ? not_ : Notation::unknown;
 }
 
 inline constexpr

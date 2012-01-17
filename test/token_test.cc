@@ -97,11 +97,9 @@ int main(){
   check("-", Token::Type::identifier, "-");
   check("...", Token::Type::identifier, "...");
 
-  // check("..", Token::Type::uninitialized, "");
+  check("..", Token::Type::uninitialized, "");
 
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-
-  

@@ -10,21 +10,28 @@ public:
   enum class Type {
     uninitialized = -1,
       identifier = 0, boolean, number,
-      character, string,
+      character, string, notation
+      };
+
+  enum class Notation {
+    unknown = -1,
       l_paren, r_paren, vector_paren,
       quote, backquote, comma, comma_at, dot,
-      reserved
+      l_bracket, r_bracket,
+      l_brace, r_brace,
+      bar
       };
 
 
   Token()
     : type_(Type::uninitialized){}
 
-  Token(Type, const std::string&);
-  Token(Type, std::string&&);
-  Token(Type, const Number&);
-  Token(Type, Number&&);
-  Token(Type, bool);
+  Token(const std::string&, Type);
+  Token(std::string&&, Type);
+  explicit Token(const Number&);
+  explicit Token(Number&&);
+  explicit Token(bool);
+  explicit Token(Notation);
 
   Token(const Token&);
   Token(Token&&);
@@ -38,14 +45,10 @@ public:
   Type type() const
   { return type_; }
 
-  const std::string& str() const
-  { return str_; }
-
-  const Number& number() const
-  { return num_; }
-
-  bool boolean() const
-  { return b_; }
+  std::string str() const;
+  Number number() const;
+  bool boolean() const;
+  Notation notation() const;
 
   bool is_syntactic_keyword() const;
   bool is_expression_keyword() const;
@@ -56,6 +59,7 @@ private:
     std::string str_;
     Number num_;
     bool b_;
+    Notation not_;
   };
 };
 
