@@ -46,11 +46,8 @@ public:
   Type type() const
   { return type_; }
 
-  std::string str() const;
-  Number number() const;
-  bool boolean() const;
-  char character() const;
-  Notation notation() const;
+  template <typename T>
+  T get() const;
 
   bool is_syntactic_keyword() const;
   bool is_expression_keyword() const;
@@ -65,6 +62,8 @@ private:
     Notation not_;
   };
 };
+
+void describe(std::ostream&, const Token&);
 
 Token tokenize(std::istream&);
 

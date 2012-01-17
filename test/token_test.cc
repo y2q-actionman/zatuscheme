@@ -10,35 +10,18 @@ using namespace std;
 
 static bool result;
 
-void describe(const Token& tok){
-  clog << "Type=" << static_cast<int>(tok.type());
-  
-  switch(tok.type()){
-  case Token::Type::uninitialized:
-    break;
-  case Token::Type::number:
-    // not implemented
-    break;
-  case Token::Type::boolean:
-    clog << " bool=" << tok.boolean();
-    break;
-  default:
-    clog << " str=" << tok.str();
-  }
-}
-
 void check(const string& input, Token::Type typ, const string& expect){
   stringstream is(input);
   Token tok = tokenize(is);
 
-  if(tok.type() != typ || tok.str() != expect){
+  if(tok.type() != typ || tok.get<string>() != expect){
     clog << "failed: input=" << input
          << " , expect type=" << static_cast<int>(typ)
          << " , expect str=" << expect
          << '\n';
 
     clog << "  gotten token: ";
-    describe(tok);
+    describe(clog, tok);
     clog << endl;
 
     result = false;
@@ -47,14 +30,14 @@ void check(const string& input, Token::Type typ, const string& expect){
 
   // constructor
   Token tok_c_con(tok);
-  if(tok.type() != tok_c_con.type() || tok.str() != tok_c_con.str()){
+  if(tok.type() != tok_c_con.type() || tok.get<string>() != tok_c_con.get<string>()){
     cout << "failed on copy construct (input=" << input << ")" << endl;
     result = false;
     return;
   }
 
   Token tok_m_con{move(tok_c_con)};
-  if(tok.type() != tok_m_con.type() || tok.str() != tok_m_con.str()){
+  if(tok.type() != tok_m_con.type() || tok.get<string>() != tok_m_con.get<string>()){
     cout << "failed on move construct (input=" << input << ")" << endl;
     result = false;
     return;
@@ -62,14 +45,14 @@ void check(const string& input, Token::Type typ, const string& expect){
   
   // operator=
   Token tok_c_op = tok;
-  if(tok.type() != tok_c_op.type() || tok.str() != tok_c_op.str()){
+  if(tok.type() != tok_c_op.type() || tok.get<string>() != tok_c_op.get<string>()){
     cout << "failed on copy operator= (input=" << input << ")" << endl;
     result = false;
     return;
   }
 
   Token tok_m_op = std::move(tok_c_op);
-  if(tok.type() != tok_m_op.type() || tok.str() != tok_m_op.str()){
+  if(tok.type() != tok_m_op.type() || tok.get<string>() != tok_m_op.get<string>()){
     cout << "failed on move operator= (input=" << input << ")" << endl;
     result = false;
     return;

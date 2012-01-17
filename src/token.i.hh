@@ -84,8 +84,9 @@ Token::~Token(){
   type_ = Type::uninitialized;
 }
 
+template<>
 inline
-std::string Token::str() const{
+std::string Token::get() const{
   switch(type_){
   case Type::identifier:
   case Type::string:
@@ -95,23 +96,27 @@ std::string Token::str() const{
   }
 }
 
+template<>
 inline
-Number Token::number() const{
+Number Token::get() const{
   return (type_ == Type::number) ? num_ : Number{};
 }
 
+template<>
 inline
-bool Token::boolean() const{
+bool Token::get() const{
   return (type_ == Type::boolean) ? b_ : false;
 }
 
+template<>
 inline
-char Token::character() const{
+char Token::get() const{
   return (type_ == Type::character) ? c_ : '\0';
 }
 
+template<>
 inline
-Token::Notation Token::notation() const{
+Token::Notation Token::get() const{
   return (type_ == Type::notation) ? not_ : Notation::unknown;
 }
 

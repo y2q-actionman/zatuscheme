@@ -9,11 +9,15 @@
 
 #include "token.hh"
 
-#define UNEXP_DEFAULT() do{                                             \
-  fprintf(stderr, "unexpected default case! (file=%s, line=%d)",        \
-          __FILE__, __LINE__);                                          \
-  abort();                                                              \
-  }while(0)
+static
+void
+// [[noreturn]]
+unexp_default(const char* f, int l){
+  fprintf(stderr, "unexpected default case! (file=%s, line=%d)", f, l);
+  abort();
+}
+
+#define UNEXP_DEFAULT() unexp_default(__FILE__, __LINE__)
   
 
 using namespace std;
@@ -496,4 +500,96 @@ bool Token::is_expression_keyword() const{
     || str_ == "let*" || str_ == "letrec"
     || str_ == "do" || str_ == "delay"
     || str_ == "quasiquote";
+}
+
+namespace {
+
+void describe(ostream& o, Token::Notation n){
+  switch(n){
+  case Token::Notation::unknown:
+    o << "unknown";
+    break;
+  case Token::Notation::l_paren:
+    o << "left parensis";
+    break;
+  case Token::Notation::r_paren:
+    o << "right parensis";
+    break;
+  case Token::Notation::vector_paren:
+    o << "vector parensis";
+    break;
+  case Token::Notation::quote:
+    o << "quote";
+    break;
+  case Token::Notation::backquote:
+    o << "backquote";
+    break;
+  case Token::Notation::comma:
+    o << "comma";
+    break;
+  case Token::Notation::comma_at:
+    o << "comma+at";
+    break;
+  case Token::Notation::dot:
+    o << "dot";
+    break;
+  case Token::Notation::l_bracket:
+    o << "left bracket";
+    break;
+  case Token::Notation::r_bracket:
+    o << "right bracket";
+    break;
+  case Token::Notation::l_brace:
+    o << "left brace";
+    break;
+  case Token::Notation::r_brace:
+    o << "right brace";
+    break;
+  case Token::Notation::bar:
+    o << "bar";
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+} // namespace
+
+void describe(ostream& o, const Token& tok){
+  switch(tok.type()){
+  case Token::Type::uninitialized:
+    o << "Token: uninitialized";
+    break;
+
+  case Token::Type::identifier:
+    o << "Token: identifier (" << tok.get<string>() << ")";
+    break;
+
+  case Token::Type::string:
+    o << "Token: string (" << tok.get<string>() << ")";
+    break;
+
+  case Token::Type::boolean:
+    o << "Token: boolean (" << tok.get<bool>() << ")";
+    break;
+
+  case Token::Type::number:
+    o << "Token: number (";
+    tok.get<Number>();
+    o << ")";
+    break;
+
+  case Token::Type::character:
+    o << "Token: character (" << tok.get<char>() << ")";
+    break;
+
+  case Token::Type::notation:
+    o << "Token: notation (";
+    describe(o, tok.get<Token::Notation>());
+    o << ")";
+    break;
+
+  default:
+    UNEXP_DEFAULT();
+  }    
 }
