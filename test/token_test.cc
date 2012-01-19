@@ -110,7 +110,7 @@ void check_ident(istream& i, const string& expect){
   if(tok.type() != Token::Type::identifier || tok.get<string>() != expect){
     fail_message(Token::Type::identifier, i, init_pos, tok,
                  [&](){
-                   clog << "', expect str='" << expect << "'";
+                   clog << ", expect str='" << expect << "'";
                  });
     return;
   }
@@ -121,6 +121,29 @@ void check_ident(istream& i, const string& expect){
 void check_ident(const string& input, const string& expect){
   stringstream is(input);
   return check_ident(is, expect);
+}
+
+void check_notation(istream& i, Token::Notation n){
+  const auto init_pos = i.tellg();
+  const Token tok = tokenize(i);
+
+  if(tok.type() != Token::Type::notation ||
+     tok.get<Token::Notation>() != n){
+    fail_message(Token::Type::notation, i, init_pos, tok,
+                 [&](){
+                   clog << ", expect notation='";
+                   describe(clog, n);
+                   clog << "'";
+                 });
+    return;
+  }
+  
+  check_copy_move<string>(tok);
+}
+
+void check_notation(const string& input, Token::Notation n){
+  stringstream is(input);
+  return check_notation(is, n);
 }
 
 int main(){
@@ -148,8 +171,12 @@ int main(){
   check_uninit(" ;hogehoge\n");
   check_ident("   abc;fhei", "abc");
 
+  // notation
+  check_notation(".", Token::Notation::dot);
+
   // error
   check_uninit("..");
+  check_uninit("....");
 
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -163,6 +163,7 @@ Number parse_unsigned(std::istream& i){
   }
 
  error:
+  i.clear();
   i.seekg(pos);
   return Number{};
 }
@@ -243,6 +244,7 @@ Number parse_decimal(std::istream& i){
   return Number{strtod(s.str().c_str(), nullptr)};
 
  error:
+  i.clear();
   i.seekg(pos);
   return Number{};
 }
@@ -271,12 +273,15 @@ Number parse_real_number(std::istream& i){
     goto error;
 
   // decimal float
-  if(radix == 10 && check_decimal_suffix(i.peek())){
-    i.seekg(pos);
-    auto n = parse_decimal(i);
+  if(radix == 10){
+    i.clear();
+    if(check_decimal_suffix(i.peek())){
+      i.seekg(pos);
+      auto n = parse_decimal(i);
 
-    if(n.type() == Number::Type::real){
-      return Number{n.get<double>() * sign};
+      if(n.type() == Number::Type::real){
+        return Number{n.get<double>() * sign};
+      }
     }
   }
 
@@ -292,6 +297,7 @@ Number parse_real_number(std::istream& i){
   }
 
  error:
+  i.clear();
   i.seekg(pos);
   return Number{};
 }
@@ -326,6 +332,7 @@ Number parse_complex(std::istream& i){
     if(is_inited(n))
       return n;
 
+    i.clear();
     i.seekg(pos);
   }
 
@@ -351,6 +358,7 @@ Number parse_complex(std::istream& i){
   }
 
  error:
+  i.clear();
   i.seekg(pos);
   return Number{};
 }

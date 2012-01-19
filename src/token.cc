@@ -279,12 +279,12 @@ Token tokenize_identifier(istream& i){
       const auto init_pos = i.tellg();
       int dots = 0;
 
-      do{
-        i.ignore(1);
+      while(i.get() == '.' && dots <= 3){
         ++dots;
-      }while(dots < 3 && i.peek() == '.');
+      }
 
       if(dots != 3){
+        i.clear();
         i.seekg(init_pos);
         goto error;
       }
@@ -326,6 +326,7 @@ Token tokenize_character(istream& i){
 
     for(const char* c = str; *c; ++c){
       if(i.get() != *c){
+        i.clear();
         i.seekg(initpos);
         return false;
       }
@@ -367,6 +368,7 @@ Token tokenize_character(istream& i){
   return Token{static_cast<char>(ret_char)};
 
  error:
+  i.clear();
   i.seekg(pos);
   return Token{};
 }
@@ -399,19 +401,20 @@ Token tokenize_string(istream& i){
   }
 
  error:
+  i.clear();
   i.seekg(pos);
   return Token{};
 }
 
 Token tokenize_notation(istream& i){
-  switch(i.peek()){
+  switch(i.get()){
   case '(':
     return Token{Token::Notation::l_paren};
   case ')':
     return Token{Token::Notation::r_paren};
   case '#':
-    i.get();
     if(i.peek() == '('){
+      i.ignore(1);
       return Token{Token::Notation::vector_paren};
     }else{
       i.unget();
@@ -422,15 +425,20 @@ Token tokenize_notation(istream& i){
   case '`':
     return Token{Token::Notation::backquote};
   case ',':
-    i.get();
     if(i.peek() == '@'){
+      i.ignore(1);
       return Token{Token::Notation::comma_at};
     }else{
       i.unget();
       return Token{Token::Notation::comma};
     }
   case '.':
-    return Token{Token::Notation::dot};
+    if(i.peek() == '.'){
+      i.unget();
+      return Token{};
+    }else{
+      return Token{Token::Notation::dot};
+    }
   case '[':
     return Token{Token::Notation::l_bracket};
   case ']':
@@ -443,6 +451,7 @@ Token tokenize_notation(istream& i){
     return Token{Token::Notation::bar};
 
   default:
+    i.unget();
     return Token{};
   }
 }
@@ -594,7 +603,7 @@ void describe(ostream& o, const Token& tok){
     o << tok.get<bool>();
     break;
   case Token::Type::number:
-    describe(o, tok.get<Number>()); // todo: print here
+    describe(o, tok.get<Number>());
     break;
   case Token::Type::character:
     o << tok.get<char>();
