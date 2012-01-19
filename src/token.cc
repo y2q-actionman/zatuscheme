@@ -11,7 +11,7 @@
 
 static
 void
-// [[noreturn]]
+__attribute__((noreturn))// [[noreturn]]
 unexp_default(const char* f, int l){
   fprintf(stderr, "unexpected default case! (file=%s, line=%d)", f, l);
   abort();
@@ -236,13 +236,18 @@ bool is_special_initial(charT c){
 }
 
 streamoff skip_intertoken_space(istream& i, streamoff skipped = 0){
-  auto c = i.peek();
+  const auto c = i.peek();
 
   if(isspace(c)){
     return skip_intertoken_space(i.ignore(1), skipped + 1);
   }else if(c == ';'){
-    auto pos = i.tellg();
-    i.ignore(numeric_limits<decltype(pos)>::max(), '\n');
+    const auto pos = i.tellg();
+
+    do{
+      char tmp[100];
+      i.getline(tmp, sizeof(tmp));
+    }while(!i.eof() && i.fail());
+    
     return skip_intertoken_space(i, i.tellg() - pos);
   }
 
@@ -484,6 +489,7 @@ Token tokenize(istream& i){
   return Token{};
 }
 
+#if 0 // TODO: move this part from here
 bool Token::is_syntactic_keyword() const{
   return is_expression_keyword()
     || str_ == "else" || str_ == "=>"
@@ -501,95 +507,103 @@ bool Token::is_expression_keyword() const{
     || str_ == "do" || str_ == "delay"
     || str_ == "quasiquote";
 }
+#endif
 
 namespace {
 
-void describe(ostream& o, Token::Notation n){
+const char* stringify(Token::Notation n){
   switch(n){
   case Token::Notation::unknown:
-    o << "unknown";
-    break;
+    return "unknown";
   case Token::Notation::l_paren:
-    o << "left parensis";
-    break;
+    return "left parensis";
   case Token::Notation::r_paren:
-    o << "right parensis";
-    break;
+    return "right parensis";
   case Token::Notation::vector_paren:
-    o << "vector parensis";
-    break;
+    return "vector parensis";
   case Token::Notation::quote:
-    o << "quote";
-    break;
+    return "quote";
   case Token::Notation::backquote:
-    o << "backquote";
-    break;
+    return "backquote";
   case Token::Notation::comma:
-    o << "comma";
-    break;
+    return "comma";
   case Token::Notation::comma_at:
-    o << "comma+at";
-    break;
+    return "comma+at";
   case Token::Notation::dot:
-    o << "dot";
-    break;
+    return "dot";
   case Token::Notation::l_bracket:
-    o << "left bracket";
-    break;
+    return "left bracket";
   case Token::Notation::r_bracket:
-    o << "right bracket";
-    break;
+    return "right bracket";
   case Token::Notation::l_brace:
-    o << "left brace";
-    break;
+    return "left brace";
   case Token::Notation::r_brace:
-    o << "right brace";
-    break;
+    return "right brace";
   case Token::Notation::bar:
-    o << "bar";
-    break;
+    return "bar";
   default:
     UNEXP_DEFAULT();
   }
 }
 
-} // namespace
-
-void describe(ostream& o, const Token& tok){
-  switch(tok.type()){
+const char* stringify(Token::Type t){
+  switch(t){
   case Token::Type::uninitialized:
-    o << "Token: uninitialized";
-    break;
-
+    return "uninitialized";
   case Token::Type::identifier:
-    o << "Token: identifier (" << tok.get<string>() << ")";
-    break;
-
+    return "identifier";
   case Token::Type::string:
-    o << "Token: string (" << tok.get<string>() << ")";
-    break;
-
+    return "string";
   case Token::Type::boolean:
-    o << "Token: boolean (" << tok.get<bool>() << ")";
-    break;
-
+    return "boolean";
   case Token::Type::number:
-    o << "Token: number (";
-    tok.get<Number>();
-    o << ")";
-    break;
-
+    return "number";
   case Token::Type::character:
-    o << "Token: character (" << tok.get<char>() << ")";
-    break;
-
+    return "character";
   case Token::Type::notation:
-    o << "Token: notation (";
-    describe(o, tok.get<Token::Notation>());
-    o << ")";
-    break;
-
+    return "notation";
   default:
     UNEXP_DEFAULT();
   }    
+}
+
+} // namespace
+
+void describe(ostream& o, Token::Type t){
+  o << stringify(t);
+}
+
+void describe(ostream& o, Token::Notation n){
+  o << stringify(n);
+}
+
+void describe(ostream& o, const Token& tok){
+  const auto t = tok.type();
+
+  o << "Token: " << stringify(t);
+
+  o << "(";
+  switch(t){
+  case Token::Type::uninitialized:
+    break;
+  case Token::Type::identifier:
+  case Token::Type::string:
+    o << tok.get<string>();
+    break;
+  case Token::Type::boolean:
+    o << tok.get<bool>();
+    break;
+  case Token::Type::number:
+    describe(o, tok.get<Number>()); // todo: print here
+    break;
+  case Token::Type::character:
+    o << tok.get<char>();
+    break;
+  case Token::Type::notation:
+    describe(o, tok.get<Token::Notation>());
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }    
+  o << ")";
 }

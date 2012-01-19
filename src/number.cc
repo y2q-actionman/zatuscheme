@@ -419,3 +419,51 @@ Number to_inexact(const Number& n){
     return Number{};
   }
 }
+
+namespace{
+
+const char* stringify(Number::Type t){
+  switch(t){
+  case Number::Type::uninitialized:
+    return "uninitialized";
+  case Number::Type::complex:
+    return "complex";
+  case Number::Type::real:
+    return "real";
+  case Number::Type::integer:
+    return "integer";
+  default:
+    return "";
+  }
+}
+
+} // namespace
+
+void describe(std::ostream& o, Number::Type t){
+  o << stringify(t);
+}
+
+void describe(std::ostream& o, const Number& n){
+  const auto t = n.type();
+
+  o << "Number: " << stringify(t);
+
+  o << "(";
+  switch(t){
+  case Number::Type::uninitialized:
+    break;
+  case Number::Type::complex:
+    o << n.get<Number::complex_type>();
+    break;
+  case Number::Type::real:
+    o << n.get<Number::real_type>();
+    break;
+  case Number::Type::integer:
+    o << n.get<Number::integer_type>();
+    break;
+  default:
+    break;
+  }    
+  o << ")";
+}
+

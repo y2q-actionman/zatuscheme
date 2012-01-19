@@ -8,13 +8,13 @@
 class Token {
 public:
   enum class Type {
-    uninitialized = -1,
-      identifier = 0, boolean, number,
+    uninitialized = 0,
+      identifier, boolean, number,
       character, string, notation
       };
 
   enum class Notation {
-    unknown = -1,
+    unknown = 0,
       l_paren, r_paren, vector_paren,
       quote, backquote, comma, comma_at, dot,
       l_bracket, r_bracket,
@@ -49,9 +49,6 @@ public:
   template <typename T>
   T get() const;
 
-  bool is_syntactic_keyword() const;
-  bool is_expression_keyword() const;
-
 private:
   Type type_;
   union {
@@ -63,13 +60,14 @@ private:
   };
 };
 
-void describe(std::ostream&, const Token&);
-
 Token tokenize(std::istream&);
-
 
 constexpr bool operator==(Token::Type, Token::Type);
 constexpr bool operator!=(Token::Type, Token::Type);
+
+void describe(std::ostream&, Token::Type);
+void describe(std::ostream&, Token::Notation);
+void describe(std::ostream&, const Token&);
 
 #include "token.i.hh"
 

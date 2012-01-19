@@ -11,8 +11,9 @@ public:
   typedef long integer_type;
 
   enum class Type {
-    uninitialized = -1,
-      complex, real,
+    uninitialized = 0,
+      complex,
+      real,
       integer
   };
 
@@ -53,6 +54,9 @@ Number parse_number(std::istream&);
 
 Number to_exact(const Number&);
 Number to_inexact(const Number&);
+
+void describe(std::ostream&, Number::Type);
+void describe(std::ostream&, const Number&);
 
 #include "number.i.hh"
 
