@@ -33,7 +33,6 @@ Exactness to_exactness(CharT c){
 }
 
 pair<int, Exactness> parse_number_prefix(std::istream& i){
-  const auto pos = i.tellg();
   int r = 10;
   Exactness e = Exactness::unspecified;
   bool r_appeared = false, e_appeared = false;
@@ -74,8 +73,6 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
   return make_pair(r, e);
 
  error:
-  i.clear();
-  i.seekg(pos);
   return make_pair(-1, Exactness::unspecified);
 }
 
@@ -361,14 +358,13 @@ Number parse_complex(std::istream& i){
   }
 
  error:
-  i.clear();
-  i.seekg(pos);
   return Number{};
 }
 
 } // namespace
 
 Number parse_number(std::istream& i){
+  const auto pos = i.tellg();
   const auto prefix_info = parse_number_prefix(i);
 
   Number n;
@@ -386,7 +382,7 @@ Number parse_number(std::istream& i){
   case 16:
     n = parse_complex<16>(i);
   default:
-    return Number{};
+    goto error;
   }
 
   switch(get<1>(prefix_info)){
@@ -397,8 +393,13 @@ Number parse_number(std::istream& i){
   case Exactness::unspecified:
     return n;
   default:
-    return Number{};
+    goto error;
   }
+
+ error:
+  i.clear();
+  i.seekg(pos);
+  return Number{};
 }
 
 Number to_exact(const Number& n){
