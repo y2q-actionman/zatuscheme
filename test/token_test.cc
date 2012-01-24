@@ -129,7 +129,7 @@ void check_boolean(istream& i, bool expect){
 
   if(tok.type() != Token::Type::boolean || tok.get<bool>() != expect){
     fail_message(Token::Type::boolean, i, init_pos, tok,
-                 [&](){
+                 [=](){
                    clog << ", expected bool='" << expect << "'";
                  });
     return;
@@ -149,7 +149,7 @@ void check_character(istream& i, char expect){
 
   if(tok.type() != Token::Type::character || tok.get<char>() != expect){
     fail_message(Token::Type::character, i, init_pos, tok,
-                 [&](){
+                 [=](){
                    clog << ", expected char='" << expect << "'";
                  });
     return;
@@ -190,7 +190,7 @@ void check_notation(istream& i, Token::Notation n){
   if(tok.type() != Token::Type::notation ||
      tok.get<Token::Notation>() != n){
     fail_message(Token::Type::notation, i, init_pos, tok,
-                 [&](){
+                 [=](){
                    clog << ", expected notation='";
                    describe(clog, n);
                    clog << "'";
