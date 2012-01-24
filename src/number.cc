@@ -33,6 +33,7 @@ Exactness to_exactness(CharT c){
 }
 
 pair<int, Exactness> parse_number_prefix(std::istream& i){
+  const auto pos = i.tellg();
   int r = 10;
   Exactness e = Exactness::unspecified;
   bool r_appeared = false, e_appeared = false;
@@ -73,6 +74,8 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
   return make_pair(r, e);
 
  error:
+  i.clear();
+  i.seekg(pos);
   return make_pair(-1, Exactness::unspecified);
 }
 

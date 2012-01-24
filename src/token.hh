@@ -16,7 +16,7 @@ public:
   enum class Notation {
     unknown = 0,
       l_paren, r_paren, vector_paren,
-      quote, backquote, comma, comma_at, dot,
+      quote, quasiquote, comma, comma_at, dot,
       l_bracket, r_bracket,
       l_brace, r_brace,
       bar

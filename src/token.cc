@@ -9,6 +9,8 @@
 
 #include "token.hh"
 
+using namespace std;
+
 static
 void
 __attribute__((noreturn))// [[noreturn]]
@@ -18,9 +20,7 @@ unexp_default(const char* f, int l){
 }
 
 #define UNEXP_DEFAULT() unexp_default(__FILE__, __LINE__)
-  
 
-using namespace std;
 
 Token::Token(const Token& other)
   : type_(other.type_)
@@ -218,7 +218,7 @@ template<typename charT>
 inline constexpr
 bool is_delimiter(charT c){
   return isspace(c) || c == '(' || c == ')'
-    || c ==  '"' || c == ';';
+    || c ==  '"' || c == ';' || c == EOF;
 }
 
 template<typename charT>
@@ -266,7 +266,8 @@ Token tokenize_identifier(istream& i){
     do{
       s.put(i.get());
       c = i.peek();
-    }while(isalpha(c) || is_special_initial(c) 
+    }while(!is_delimiter(c) 
+           || isalpha(c) || is_special_initial(c) 
            || isdigit(c) || c == '+' || c == '-'
            || c == '.' || c == '@');
 
@@ -298,6 +299,8 @@ Token tokenize_identifier(istream& i){
 }
 
 Token tokenize_boolean(istream& i){
+  const auto pos = i.tellg();
+
   if(i.peek() == '#'){
     i.get();
 
@@ -307,7 +310,8 @@ Token tokenize_boolean(istream& i){
     case 'f':
       return Token{false};
     default:
-      i.unget();
+      i.clear();
+      i.seekg(pos);
       goto error;
     }
   }
@@ -325,7 +329,8 @@ Token tokenize_character(istream& i){
     const auto initpos = i.tellg();
 
     for(const char* c = str; *c; ++c){
-      if(i.get() != *c){
+      auto get_c = i.get();
+      if(get_c != *c || is_delimiter(get_c)){
         i.clear();
         i.seekg(initpos);
         return false;
@@ -333,7 +338,6 @@ Token tokenize_character(istream& i){
     }
     return true;
   };
-
 
   if(i.peek() != '#') goto error;
   i.ignore(1);
@@ -359,6 +363,8 @@ Token tokenize_character(istream& i){
       goto single_char;
     }
   }
+  case EOF:
+    goto error;
   default: 
   single_char:
     ret_char = i.get();
@@ -374,10 +380,10 @@ Token tokenize_character(istream& i){
 }
 
 Token tokenize_string(istream& i){
-  auto pos = i.tellg();
+  const auto pos = i.tellg();
   ostringstream s;
 
-  if(i.peek() == '"') goto error;
+  if(i.peek() != '"') goto error;
   i.ignore(1);
 
   while(i){
@@ -407,6 +413,8 @@ Token tokenize_string(istream& i){
 }
 
 Token tokenize_notation(istream& i){
+  const auto pos = i.tellg();
+
   switch(i.get()){
   case '(':
     return Token{Token::Notation::l_paren};
@@ -417,27 +425,31 @@ Token tokenize_notation(istream& i){
       i.ignore(1);
       return Token{Token::Notation::vector_paren};
     }else{
-      i.unget();
+      i.clear();
+      i.seekg(pos);
       return Token{};
     }
   case '\'':
     return Token{Token::Notation::quote};
   case '`':
-    return Token{Token::Notation::backquote};
+    return Token{Token::Notation::quasiquote};
   case ',':
     if(i.peek() == '@'){
       i.ignore(1);
       return Token{Token::Notation::comma_at};
     }else{
-      i.unget();
       return Token{Token::Notation::comma};
     }
   case '.':
-    if(i.peek() == '.'){
-      i.unget();
-      return Token{};
-    }else{
-      return Token{Token::Notation::dot};
+    {
+      const auto c = i.peek();
+      if(c == '.'){
+        i.clear();
+        i.seekg(pos);
+        return Token{};
+      }else{
+        return Token{Token::Notation::dot};
+      }
     }
   case '[':
     return Token{Token::Notation::l_bracket};
@@ -451,7 +463,8 @@ Token tokenize_notation(istream& i){
     return Token{Token::Notation::bar};
 
   default:
-    i.unget();
+    i.clear();
+    i.seekg(pos);
     return Token{};
   }
 }
@@ -532,7 +545,7 @@ const char* stringify(Token::Notation n){
     return "vector parensis";
   case Token::Notation::quote:
     return "quote";
-  case Token::Notation::backquote:
+  case Token::Notation::quasiquote:
     return "backquote";
   case Token::Notation::comma:
     return "comma";
