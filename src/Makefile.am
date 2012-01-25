@@ -7,7 +7,8 @@ libzs_a_SOURCES = zs.hh\
 		token.cc token.hh token.i.hh\
 		number.cc number.hh number.i.hh\
 		lisp_ptr.cc lisp_ptr.hh lisp_ptr.i.hh\
-		cons.cc cons.hh
+		cons.cc cons.hh\
+		keyword.cc keyword.hh
 
 noinst_PROGRAMS = zs
 zs_SOURCES = zs.hh main.cc

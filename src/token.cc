@@ -511,26 +511,6 @@ Token tokenize(istream& i){
   return Token{};
 }
 
-#if 0 // TODO: move this part from here
-bool Token::is_syntactic_keyword() const{
-  return is_expression_keyword()
-    || str_ == "else" || str_ == "=>"
-    || str_ == "define" || str_ == "unquote"
-    || str_ == "unquote-splicing";
-}
-
-bool Token::is_expression_keyword() const{
-  return str_ == "quote" || str_ == "lambda"
-    || str_ == "if" || str_ == "set!"
-    || str_ == "begin" || str_ == "cond"
-    || str_ == "and" || str_ == "or"
-    || str_ == "case" || str_ == "let"
-    || str_ == "let*" || str_ == "letrec"
-    || str_ == "do" || str_ == "delay"
-    || str_ == "quasiquote";
-}
-#endif
-
 namespace {
 
 const char* stringify(Token::Notation n){
