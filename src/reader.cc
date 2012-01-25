@@ -11,10 +11,62 @@ using namespace std;
 
 namespace {
 
+Lisp_ptr read_la(istream&, const Token&);
+
 Lisp_ptr read_list(istream& i){
-  // stub
-  (void)i;
-  return Lisp_ptr{};
+  Token t = tokenize(i);
+
+  // first check
+  if(t.type() == Token::Type::uninitialized){
+    return Lisp_ptr{};
+  }else if(t.type() == Token::Type::notation){
+    switch(t.get<Token::Notation>()){
+    case Token::Notation::r_paren: // empty list
+      return Cons::NIL;
+    case Token::Notation::dot:     // error: dotted list has no car.
+      return Lisp_ptr{};
+    default:
+      break;
+    }
+  }
+
+  // main loop
+  const Lisp_ptr head{new Cons{Lisp_ptr{}, Lisp_ptr{}}};
+  Lisp_ptr last = head;
+
+  do{
+    Lisp_ptr datum{read_la(i, t)};
+    // if(!datum ) ...
+
+    last.get<Cons*>()->rplaca(datum);
+    
+    // check next token
+    t = tokenize(i);
+    if(t.type() == Token::Type::uninitialized){
+      // in future, cleanup working data.
+      return Lisp_ptr{};
+    }else if(t.type() == Token::Type::notation){
+      switch(t.get<Token::Notation>()){
+      case Token::Notation::r_paren: // proper list
+        last.get<Cons*>()->rplacd(Cons::NIL);
+        goto end;
+      case Token::Notation::dot:     // dotted list
+        last.get<Cons*>()->rplacd(read(i));
+        goto end;
+      default:
+        break;
+      }
+    }
+    
+    // readying next cons
+    last.get<Cons*>()->rplacd(Lisp_ptr{new Cons{Lisp_ptr{}, Lisp_ptr{}}});
+    last = last.get<Cons*>()->cdr();
+  }while(i);
+
+ end:
+  // if(last.get<Cons*>()->cdr() == undef) ...
+
+  return head;
 }
 
 Lisp_ptr read_vector(istream& i){
@@ -30,10 +82,9 @@ Lisp_ptr read_abbrev(Keyword k, istream& i){
   return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second}}}};
 }
 
-} // namespace
-
-Lisp_ptr read(istream& i){
-  Token tok = tokenize(i);
+Lisp_ptr read_la(istream& i, const Token& looked_tok){
+  Token tok = (looked_tok.type() != Token::Type::uninitialized)
+    ? looked_tok : tokenize(i);
 
   switch(tok.type()){
     // simple datum
@@ -82,4 +133,10 @@ Lisp_ptr read(istream& i){
   default:
     return Lisp_ptr{};
   }
+}
+
+} // namespace
+
+Lisp_ptr read(istream& i){
+  return read_la(i, Token{});
 }
