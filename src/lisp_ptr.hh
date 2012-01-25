@@ -6,9 +6,12 @@
 /* tag bit map
 
  __00: immediate
+       all 0: NULL / undefined
+
        bit 0~1            : 0
        bit 2              : boolean
        bit ~CHAR_BIT-1    : keyword
+                            (filled with 1 at boolean)
        bit ~(CHAR_BIT * 2): char
        bit ~rest          : (unused)
 

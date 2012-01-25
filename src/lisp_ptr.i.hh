@@ -74,7 +74,8 @@ namespace lisp_ptr_i {
 template<>
 inline
 Lisp_ptr::Lisp_ptr<bool>(bool b)
-  : base_(b ? embed_boolean_bit : 0){}
+  : base_((embed_keyword_mask << embed_keyword_start_bit)
+          | (b ? embed_boolean_bit : 0)){}
 
 template<>
 inline
@@ -121,7 +122,7 @@ inline
 bool Lisp_ptr::get<bool>() const {
     return (tag() == Ptr_tag::immediate)
     ? ((base_ & embed_boolean_bit) != 0)
-    : true; // everything is #t, except #f
+    : true; // everything is #t, except #f and null
 }
 
 template<>

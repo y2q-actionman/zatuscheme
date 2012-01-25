@@ -23,6 +23,13 @@ Lisp_ptr read_vector(istream& i){
   return Lisp_ptr{};
 }
 
+Lisp_ptr read_abbrev(Keyword k, istream& i){
+  Lisp_ptr first{k};
+  Lisp_ptr second{read(i)};
+
+  return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second}}}};
+}
+
 } // namespace
 
 Lisp_ptr read(istream& i){
@@ -57,16 +64,16 @@ Lisp_ptr read(istream& i){
 
       // abbrev prefix
     case Token::Notation::quote:
-      return cons(Lisp_ptr{Keyword::quote}, read(i));
+      return read_abbrev(Keyword::quote, i);
 
     case Token::Notation::quasiquote:
-      return cons(Lisp_ptr{Keyword::quasiquote}, read(i));
+      return read_abbrev(Keyword::quasiquote, i);
 
     case Token::Notation::comma:
-      return cons(Lisp_ptr{Keyword::unquote}, read(i));
+      return read_abbrev(Keyword::unquote, i);
 
     case Token::Notation::comma_at:
-      return cons(Lisp_ptr{Keyword::unquote_splicing}, read(i));
+      return read_abbrev(Keyword::unquote_splicing, i);
       
     default:
       return Lisp_ptr{};
