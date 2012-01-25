@@ -93,8 +93,9 @@ template<typename T>
 inline
 Lisp_ptr::Lisp_ptr(T p)
   : ptr_(p){
-  static_assert(lisp_ptr_i::Type_to_Ptr_tag<T>() <= tag_bit_mask,
-                "invalid Lisp_ptr usage");
+  static_assert(static_cast<unsigned>(lisp_ptr_i::Type_to_Ptr_tag<T>())
+                <= tag_bit_mask,
+                "Lisp_ptr cannot be used with specified type");
   base_ |= static_cast<uintptr_t>(lisp_ptr_i::Type_to_Ptr_tag<T>());
 }
 

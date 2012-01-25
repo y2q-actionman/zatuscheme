@@ -40,7 +40,7 @@ public:
   static constexpr unsigned embed_keyword_start_bit = 3;
   static constexpr unsigned embed_keyword_mask = 0x1fu;
 
-  Lisp_ptr() = delete;
+  Lisp_ptr() : base_(0){}
   template<typename T>
   explicit Lisp_ptr(T);
   Lisp_ptr(const Lisp_ptr&) = default;

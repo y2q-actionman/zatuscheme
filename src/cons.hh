@@ -8,4 +8,10 @@ struct Cons {
   Lisp_ptr cdr_;
 };
 
+inline
+Lisp_ptr cons(Lisp_ptr x, Lisp_ptr y){
+  Cons c{x, y};
+  return Lisp_ptr{ new Cons{c} };
+}
+
 #endif // CONS_HH
