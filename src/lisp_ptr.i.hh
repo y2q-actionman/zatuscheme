@@ -6,6 +6,7 @@
 #endif
 
 #include <climits>
+#include "keyword.hh"
 
 class Cons;
 class Symbol;
@@ -77,6 +78,13 @@ Lisp_ptr::Lisp_ptr<bool>(bool b)
 
 template<>
 inline
+Lisp_ptr::Lisp_ptr<Keyword>(Keyword k)
+  : base_(((static_cast<unsigned>(k) & embed_keyword_mask)
+           << embed_keyword_start_bit)
+          | embed_boolean_bit){}
+
+template<>
+inline
 Lisp_ptr::Lisp_ptr<char>(char c)
   : base_((static_cast<unsigned>(c) << CHAR_BIT)
           | embed_boolean_bit){}
@@ -113,6 +121,15 @@ bool Lisp_ptr::get<bool>() const {
     return (tag() == Ptr_tag::immediate)
     ? ((base_ & embed_boolean_bit) != 0)
     : true; // everything is #t, except #f
+}
+
+template<>
+inline
+Keyword Lisp_ptr::get<Keyword>() const {
+  return (tag() == Ptr_tag::immediate)
+    ? to_keyword((base_ >> embed_keyword_start_bit)
+                 & embed_keyword_mask)
+    : Keyword::unknown;
 }
 
 template<>

@@ -2,7 +2,6 @@
 
 #include <cstring>
 #include <array>
-#include <algorithm>
 
 using namespace std;
 
@@ -43,22 +42,24 @@ keyword_table{{
 
 } // namespace
 
-Keyword to_keyword(const char* s){
-  auto ret = find_if(keyword_table.begin(), keyword_table.end(),
-                     [=](const Entry& e){ 
-                       return strcmp(e.str, s) == 0;
-                     });
+Keyword to_keyword(unsigned u){
+  return keyword_table.at(u).k;
+}
 
-  return (ret != keyword_table.end())
-    ? ret->k : Keyword::unknown;
+Keyword to_keyword(const char* s){
+  for(const auto& e : keyword_table){
+    if(strcmp(e.str, s) == 0)
+      return e.k;
+  }
+
+  return Keyword::unknown;
 }
 
 const char* stringify(Keyword k){
-  auto ret = find_if(keyword_table.begin(), keyword_table.end(),
-                     [=](const Entry& e){ 
-                       return e.k == k;
-                     });
+  for(const auto& e : keyword_table){
+    if(e.k == k)
+      return e.str;
+  }
 
-  return (ret != keyword_table.end())
-    ? ret->str : nullptr;
+  return nullptr;
 }

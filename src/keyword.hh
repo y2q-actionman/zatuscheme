@@ -17,6 +17,7 @@ enum class Keyword{
     MAX
 };
 
+Keyword to_keyword(unsigned);
 Keyword to_keyword(const char*);
 const char* stringify(Keyword);
 
