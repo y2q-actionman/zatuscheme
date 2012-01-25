@@ -120,14 +120,4 @@ Token::Notation Token::get() const{
   return (type_ == Type::notation) ? not_ : Notation::unknown;
 }
 
-inline constexpr
-bool operator==(Token::Type lhs, Token::Type rhs){
-  return static_cast<int>(lhs) == static_cast<int>(rhs);
-}
-
-inline constexpr
-bool operator!=(Token::Type lhs, Token::Type rhs){
-  return static_cast<int>(lhs) != static_cast<int>(rhs);
-}
-
 #endif // TOKEN_I_HH

@@ -62,9 +62,6 @@ private:
 
 Token tokenize(std::istream&);
 
-constexpr bool operator==(Token::Type, Token::Type);
-constexpr bool operator!=(Token::Type, Token::Type);
-
 void describe(std::ostream&, Token::Type);
 void describe(std::ostream&, Token::Notation);
 void describe(std::ostream&, const Token&);
