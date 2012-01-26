@@ -7,15 +7,6 @@
 
 #include <climits>
 
-class Cons;
-class Symbol;
-class Long_ptr;
-class Function;
-class Number;
-class String;
-class Vector;
-class Port;
-
 namespace lisp_ptr_i {
   template<typename T>
   Ptr_tag Type_to_Ptr_tag();

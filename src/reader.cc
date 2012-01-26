@@ -6,7 +6,6 @@
 #include "number.hh"
 #include "cons.hh"
 #include "symbol.hh"
-#include "string.hh"
 
 using namespace std;
 
@@ -73,7 +72,7 @@ Lisp_ptr read_list(istream& i){
 Lisp_ptr read_vector(istream& i){
   // stub
   (void)i;
-  return Lisp_ptr{};
+  return Lisp_ptr{new Long_ptr{new Vector{}}};
 }
 
 Lisp_ptr read_abbrev(Symbol::Keyword k, istream& i){

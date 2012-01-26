@@ -2,6 +2,8 @@
 #define LISP_PTR_HH
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 /* tag bit map
 
@@ -35,6 +37,7 @@ enum class Ptr_tag {
     port
     };
     
+
 class Lisp_ptr{
 public:
   static constexpr unsigned tag_bit_mask = 0x3u;
@@ -87,6 +90,17 @@ private:
   Ptr_tag tag_;
   void* ptr_;
 };
+
+
+// typedefs & declarations
+class Cons;
+class Symbol;
+class Function;
+class Number;
+typedef std::string String;
+typedef std::vector<Lisp_ptr> Vector;
+class Port;
+
 
 #include "lisp_ptr.i.hh"
 
