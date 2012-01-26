@@ -74,15 +74,8 @@ namespace lisp_ptr_i {
 template<>
 inline
 Lisp_ptr::Lisp_ptr<bool>(bool b)
-  : base_((embed_keyword_mask << embed_keyword_start_bit)
+  : base_((0xffu << CHAR_BIT)
           | (b ? embed_boolean_bit : 0)){}
-
-template<>
-inline
-Lisp_ptr::Lisp_ptr<Keyword>(Keyword k)
-  : base_(((static_cast<unsigned>(k) & embed_keyword_mask)
-           << embed_keyword_start_bit)
-          | embed_boolean_bit){}
 
 template<>
 inline
@@ -123,15 +116,6 @@ bool Lisp_ptr::get<bool>() const {
     return (tag() == Ptr_tag::immediate)
     ? ((base_ & embed_boolean_bit) != 0)
     : true; // everything is #t, except #f and null
-}
-
-template<>
-inline
-Keyword Lisp_ptr::get<Keyword>() const {
-  return (tag() == Ptr_tag::immediate)
-    ? to_keyword((base_ >> embed_keyword_start_bit)
-                 & embed_keyword_mask)
-    : Keyword::unknown;
 }
 
 template<>

@@ -42,10 +42,6 @@ keyword_table{{
 
 } // namespace
 
-Keyword to_keyword(unsigned u){
-  return keyword_table.at(u).k;
-}
-
 Keyword to_keyword(const char* s){
   for(const auto& e : keyword_table){
     if(strcmp(e.str, s) == 0)

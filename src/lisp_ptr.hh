@@ -10,9 +10,8 @@
 
        bit 0~1            : 0
        bit 2              : boolean
-       bit ~CHAR_BIT-1    : keyword
-                            (filled with 1 at boolean)
-       bit ~(CHAR_BIT * 2): char
+       bit ~CHAR_BIT-1    : (unused)
+       bit ~(CHAR_BIT * 2): char, or 0xff in boolean
        bit ~rest          : (unused)
 
  __01: cons
@@ -40,8 +39,6 @@ class Lisp_ptr{
 public:
   static constexpr unsigned tag_bit_mask = 0x3u;
   static constexpr unsigned embed_boolean_bit = 0x4u;
-  static constexpr unsigned embed_keyword_start_bit = 3;
-  static constexpr unsigned embed_keyword_mask = 0x1fu;
 
   Lisp_ptr() : base_(0){}
   template<typename T>
