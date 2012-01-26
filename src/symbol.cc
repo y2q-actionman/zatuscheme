@@ -40,17 +40,6 @@ keyword_table{{
     { Symbol::Keyword::quasiquote, "quasiquote" }
 }};
 
-} // namespace
-
-Symbol::Keyword to_keyword(const char* s){
-  for(const auto& e : keyword_table){
-    if(strcmp(e.str, s) == 0)
-      return e.k;
-  }
-
-  return Symbol::Keyword::not_keyword;
-}
-
 const char* stringify(Symbol::Keyword k){
   for(const auto& e : keyword_table){
     if(e.k == k)
@@ -59,3 +48,18 @@ const char* stringify(Symbol::Keyword k){
 
   return nullptr;
 }
+
+} // namespace
+
+Symbol::Symbol(Symbol::Keyword k)
+  : name_(stringify(k)){}
+
+Symbol::Keyword Symbol::keyword() const{
+  for(const auto& e : keyword_table){
+    if(strcmp(e.str, name_) == 0)
+      return e.k;
+  }
+
+  return Symbol::Keyword::not_keyword;
+}
+

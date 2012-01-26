@@ -1,8 +1,6 @@
 #ifndef SYMBOL_HH
 #define SYMBOL_HH
 
-#include <string>
-
 class Symbol{
 public:
   enum class Keyword{
@@ -20,8 +18,8 @@ public:
       };
 
   Symbol() = delete;
-  explicit Symbol(const std::string&);
-  explicit Symbol(const char*);
+  explicit Symbol(const char* s)
+    : name_(s){}
   explicit Symbol(Keyword);
   Symbol(const Symbol&) = default;
   Symbol(Symbol&&) = default;
@@ -33,15 +31,12 @@ public:
 
   const char* name() const
   { return name_ ; }
-  Keyword keyword() const
-  { return k_; }
+
+  Keyword keyword() const;
 
 private:
   const char* const name_;
-  Keyword k_;
+  // TODO: add pointer to symbol table
 };
-
-Symbol::Keyword to_keyword(const char*);
-const char* stringify(Symbol::Keyword);
 
 #endif // SYMBOL_HH
