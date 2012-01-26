@@ -47,7 +47,7 @@ Token::Token(const Token& other)
     break;
 
   case Type::notation:
-    new (&this->not_) Notation(other.not_);
+    this->not_ = other.not_;
     break;
 
   default:
@@ -80,7 +80,7 @@ Token::Token(Token&& other)
     break;
 
   case Type::notation:
-    new (&this->not_) Notation(move(other.not_));
+    this->not_ = other.not_;
     break;
 
   default:
@@ -136,7 +136,6 @@ Token& Token::operator=(const Token& other){
     if(other.type() == this->type()){
       this->not_ = other.not_;
     }else{
-      not_.~Notation();
       new (this) Token(other);
     }
     break;
@@ -196,7 +195,6 @@ Token& Token::operator=(Token&& other){
     if(other.type() == this->type()){
       this->not_ = move(other.not_);
     }else{
-      not_.~Notation();
       new (this) Token(move(other));
     }
     break;

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <cstdio>
 
 /* tag bit map
 
@@ -43,9 +44,9 @@ public:
   static constexpr unsigned tag_bit_mask = 0x3u;
   static constexpr unsigned embed_boolean_bit = 0x4u;
 
-  Lisp_ptr() : base_(0){}
+  Lisp_ptr() : base_(0){} // adding 'constexpr' causes ICE in gcc 4.6.1
   template<typename T>
-  explicit Lisp_ptr(T);
+  explicit constexpr Lisp_ptr(T);
   Lisp_ptr(const Lisp_ptr&) = default;
   Lisp_ptr(Lisp_ptr&&) = default;
 
@@ -71,7 +72,7 @@ class Long_ptr {
 public:
   Long_ptr() = delete;
   template<typename T>
-  explicit Long_ptr(T);
+  explicit constexpr Long_ptr(T);
   Long_ptr(const Long_ptr&) = default;
   Long_ptr(Long_ptr&&) = default;
 
@@ -99,7 +100,7 @@ class Function;
 class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
-class Port;
+typedef FILE Port;
 
 
 #include "lisp_ptr.i.hh"

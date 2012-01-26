@@ -35,26 +35,17 @@ Token::Token(Number&& n)
   new (&this->num_) Number(std::move(n));
 }
 
-inline
+inline constexpr
 Token::Token(bool b)
-  : type_(Type::boolean)
-{
-  b_ = b;
-}
+  : type_(Type::boolean), b_(b){}
 
-inline
+inline constexpr
 Token::Token(char c)
-  : type_(Type::character)
-{
-  c_ = c;
-}
+  : type_(Type::character), c_(c){}
 
-inline
+inline constexpr
 Token::Token(Notation n)
-  : type_(Type::notation)
-{
-  new(&this->not_) Notation(n);
-}
+  : type_(Type::notation), not_(n){}
 
 inline
 Token::~Token(){
@@ -70,13 +61,10 @@ Token::~Token(){
     num_.~Number();
     break;
 
-  case Type::notation:
-    not_.~Notation();
-    break;
-
   case Type::uninitialized:
   case Type::boolean:
   case Type::character:
+  case Type::notation:
   default:
     break;
   }

@@ -23,16 +23,16 @@ public:
       };
 
 
-  Token()
+  constexpr Token()
     : type_(Type::uninitialized){}
 
   Token(const std::string&, Type);
   Token(std::string&&, Type);
   explicit Token(const Number&);
   explicit Token(Number&&);
-  explicit Token(bool);
-  explicit Token(char);
-  explicit Token(Notation);
+  explicit constexpr Token(bool);
+  explicit constexpr Token(char);
+  explicit constexpr Token(Notation);
 
   Token(const Token&);
   Token(Token&&);

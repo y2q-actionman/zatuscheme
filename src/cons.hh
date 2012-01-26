@@ -8,10 +8,8 @@ public:
   static const Lisp_ptr NIL;
 
   Cons() = delete;
-  explicit Cons(Lisp_ptr x) // one element list
-    : car_(x), cdr_(NIL){}
-  Cons(Lisp_ptr x, Lisp_ptr y)
-    : car_(x), cdr_(y){}
+  explicit Cons(Lisp_ptr); // one element list
+  Cons(Lisp_ptr, Lisp_ptr);
   Cons(const Cons&) = default;
   Cons(Cons&&) = default;
 

@@ -18,7 +18,7 @@ public:
   };
 
 
-  Number() :
+  constexpr Number():
     type_(Type::uninitialized){}
 
   explicit Number(const complex_type&);

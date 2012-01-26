@@ -62,25 +62,25 @@ namespace lisp_ptr_i {
 
 
 template<>
-inline
+inline constexpr
 Lisp_ptr::Lisp_ptr<bool>(bool b)
   : base_((0xffu << CHAR_BIT)
           | (b ? embed_boolean_bit : 0)){}
 
 template<>
-inline
+inline constexpr
 Lisp_ptr::Lisp_ptr<char>(char c)
   : base_((static_cast<unsigned>(c) << CHAR_BIT)
           | embed_boolean_bit){}
 
 template<typename T>
-inline
+inline constexpr
 Lisp_ptr::Lisp_ptr(T p)
-  : ptr_(p){
+  : base_(reinterpret_cast<uintptr_t>(p)
+          | static_cast<uintptr_t>(lisp_ptr_i::Type_to_Ptr_tag<T>())){
   static_assert(static_cast<unsigned>(lisp_ptr_i::Type_to_Ptr_tag<T>())
                 <= tag_bit_mask,
                 "Lisp_ptr cannot be used with specified type");
-  base_ |= static_cast<uintptr_t>(lisp_ptr_i::Type_to_Ptr_tag<T>());
 }
 
 
@@ -126,7 +126,7 @@ T Lisp_ptr::get() const {
 
 
 template<typename T>
-inline
+inline constexpr
 Long_ptr::Long_ptr(T p)
   : tag_(lisp_ptr_i::Type_to_Ptr_tag<T>()), ptr_(p){}
   
