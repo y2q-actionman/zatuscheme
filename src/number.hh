@@ -3,6 +3,7 @@
 
 #include <complex>
 #include <iosfwd>
+#include <cstdio>
 
 class Number{
 public:
@@ -55,8 +56,8 @@ Number parse_number(std::istream&);
 Number to_exact(const Number&);
 Number to_inexact(const Number&);
 
-void describe(std::ostream&, Number::Type);
-void describe(std::ostream&, const Number&);
+void describe(FILE*, Number::Type);
+void describe(FILE*, const Number&);
 
 #include "number.i.hh"
 

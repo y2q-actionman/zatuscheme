@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iosfwd>
+#include <cstdio>
 #include "number.hh"
 
 class Token {
@@ -62,9 +63,9 @@ private:
 
 Token tokenize(std::istream&);
 
-void describe(std::ostream&, Token::Type);
-void describe(std::ostream&, Token::Notation);
-void describe(std::ostream&, const Token&);
+void describe(FILE*, Token::Type);
+void describe(FILE*, Token::Notation);
+void describe(FILE*, const Token&);
 
 #include "token.i.hh"
 

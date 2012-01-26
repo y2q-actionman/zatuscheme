@@ -569,41 +569,41 @@ const char* stringify(Token::Type t){
 
 } // namespace
 
-void describe(ostream& o, Token::Type t){
-  o << stringify(t);
+void describe(FILE* f, Token::Type t){
+  fputs(stringify(t), f);
 }
 
-void describe(ostream& o, Token::Notation n){
-  o << stringify(n);
+void describe(FILE* f, Token::Notation n){
+  fputs(stringify(n), f);
 }
 
-void describe(ostream& o, const Token& tok){
+void describe(FILE* f, const Token& tok){
   const auto t = tok.type();
 
-  o << "Token: " << stringify(t);
+  fprintf(f, "Token: %s(", stringify(t));
 
-  o << "(";
   switch(t){
   case Token::Type::uninitialized:
     break;
   case Token::Type::identifier:
   case Token::Type::string:
-    o << tok.get<string>();
+    fputs(tok.get<string>().c_str(), f);
     break;
   case Token::Type::boolean:
-    o << tok.get<bool>();
+    fputs(tok.get<bool>() ? "true" : "false", f);
     break;
   case Token::Type::number:
-    describe(o, tok.get<Number>());
+    describe(f, tok.get<Number>());
     break;
   case Token::Type::character:
-    o << tok.get<char>();
+    fputc(tok.get<char>(), f);
     break;
   case Token::Type::notation:
-    describe(o, tok.get<Token::Notation>());
+    describe(f, tok.get<Token::Notation>());
     break;
   default:
     UNEXP_DEFAULT();
-  }    
-  o << ")";
+  }
+
+  fputc(')', f);
 }

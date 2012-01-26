@@ -451,31 +451,33 @@ const char* stringify(Number::Type t){
 
 } // namespace
 
-void describe(std::ostream& o, Number::Type t){
-  o << stringify(t);
+void describe(FILE* f, Number::Type t){
+  fputs(stringify(t), f);
 }
 
-void describe(std::ostream& o, const Number& n){
+void describe(FILE* f, const Number& n){
   const auto t = n.type();
 
-  o << "Number: " << stringify(t);
+  fprintf(f, "Number: %s(", stringify(t));
 
-  o << "(";
   switch(t){
   case Number::Type::uninitialized:
     break;
-  case Number::Type::complex:
-    o << n.get<Number::complex_type>();
+  case Number::Type::complex: {
+    const auto& z = n.get<Number::complex_type>();
+    fprintf(f, "%g+%gi", z.real(), z.imag());
+  }
     break;
   case Number::Type::real:
-    o << n.get<Number::real_type>();
+    fprintf(f, "%g", n.get<Number::real_type>());
     break;
   case Number::Type::integer:
-    o << n.get<Number::integer_type>();
+    fprintf(f, "%ld", n.get<Number::integer_type>());
     break;
   default:
     break;
-  }    
-  o << ")";
+  }
+
+  fputc(')', f);
 }
 

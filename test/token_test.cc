@@ -1,9 +1,9 @@
 #include <string>
 #include <sstream>
-#include <iostream>
 #include <utility>
 #include <cstdlib>
 #include <memory>
+#include <cstdio>
 
 #include "token.hh"
 
@@ -17,12 +17,12 @@ void check_copy_move(const Token& tok){
   {
     Token tok_c_con(tok);
     if(tok.type() != tok_c_con.type() || tok.get<T>() != tok_c_con.get<T>()){
-      cout << "[failed] on copy construct: ";
+      fputs("[failed] on copy construct: ", stdout);
       goto error;
     }else{
       Token tok_m_con{move(tok_c_con)};
       if(tok.type() != tok_m_con.type() || tok.get<T>() != tok_m_con.get<T>()){
-        cout << "[failed] on move construct ";
+        fputs("[failed] on move construct ", stdout);
         goto error;
       }
     }
@@ -32,12 +32,12 @@ void check_copy_move(const Token& tok){
   {
     Token tok_c_op = tok;
     if(tok.type() != tok_c_op.type() || tok.get<T>() != tok_c_op.get<T>()){
-      cout << "[failed] on copy operator= ";
+      fputs("[failed] on copy operator= ", stdout);
       goto error;
     }else{
       Token tok_m_op = move(tok_c_op);
       if(tok.type() != tok_m_op.type() || tok.get<T>() != tok_m_op.get<T>()){
-        cout << "[failed] on move operator= ";
+        fputs("[failed] on move operator= ", stdout);
         goto error;
       }
     }
@@ -47,15 +47,14 @@ void check_copy_move(const Token& tok){
 
  error:
   result = false;
-  describe(cout, tok);
-  cout << endl;
+  describe(stdout, tok);
+  fputc('\n', stdout);
   return;
 }
 
 template<typename Fun>
 void fail_message(Token::Type t, istream& i, streampos b_pos,
                   const Token& tok, const Fun& callback){
-  clog << "[failed] input='";
 
   { // extract input from stream
     i.clear(); // clear eof
@@ -67,20 +66,18 @@ void fail_message(Token::Type t, istream& i, streampos b_pos,
     i.seekg(b_pos);
     i.get(tmp.get(), size);
 
-    clog << tmp.get();
+    fprintf(stdout, "[failed] input='%s', expect type='",
+            tmp.get());
   }
 
-  clog << "', expect type='";
-  describe(clog, t);
-  clog << "'";
+  describe(stdout, t);
+  fputc('\'', stdout);
 
   callback();
 
-  clog << '\n';
-
-  clog << "\tgotten token: ";
-  describe(clog, tok);
-  clog << endl;
+  fputs("\n\tgotten token: ", stdout);
+  describe(stdout, tok);
+  fputc('\n', stdout);
 
   result = false;
 }
@@ -110,7 +107,7 @@ void check_ident(istream& i, const string& expect){
   if(tok.type() != Token::Type::identifier || tok.get<string>() != expect){
     fail_message(Token::Type::identifier, i, init_pos, tok,
                  [&](){
-                   clog << ", expected str='" << expect << "'";
+                   fprintf(stdout, ", expected str='%s'", expect.c_str());
                  });
     return;
   }
@@ -130,7 +127,7 @@ void check_boolean(istream& i, bool expect){
   if(tok.type() != Token::Type::boolean || tok.get<bool>() != expect){
     fail_message(Token::Type::boolean, i, init_pos, tok,
                  [=](){
-                   clog << ", expected bool='" << expect << "'";
+                   fprintf(stdout, ", expected bool='%s'", expect ? "true" : "false");
                  });
     return;
   }
@@ -150,7 +147,7 @@ void check_character(istream& i, char expect){
   if(tok.type() != Token::Type::character || tok.get<char>() != expect){
     fail_message(Token::Type::character, i, init_pos, tok,
                  [=](){
-                   clog << ", expected char='" << expect << "'";
+                   fprintf(stdout, ", expected char='%c'", expect);
                  });
     return;
   }
@@ -170,7 +167,7 @@ void check_string(istream& i, const string& expect){
   if(tok.type() != Token::Type::string || tok.get<string>() != expect){
     fail_message(Token::Type::string, i, init_pos, tok,
                  [&](){
-                   clog << ", expected str='" << expect << "'";
+                   fprintf(stdout, ", expected str='%s'", expect.c_str());
                  });
     return;
   }
@@ -191,9 +188,9 @@ void check_notation(istream& i, Token::Notation n){
      tok.get<Token::Notation>() != n){
     fail_message(Token::Type::notation, i, init_pos, tok,
                  [=](){
-                   clog << ", expected notation='";
-                   describe(clog, n);
-                   clog << "'";
+                   fputs(", expected notation='", stdout);
+                   describe(stdout, n);
+                   fputc('\'', stdout);
                  });
     return;
   }
