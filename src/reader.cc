@@ -6,6 +6,7 @@
 #include "number.hh"
 #include "cons.hh"
 #include "symbol.hh"
+#include "string.hh"
 
 using namespace std;
 
@@ -98,10 +99,10 @@ Lisp_ptr read_la(istream& i, const Token& looked_tok){
     return Lisp_ptr(tok.get<char>());
 
   case Token::Type::string:
-    return Lisp_ptr{}; // not implemented
+    return Lisp_ptr(new Long_ptr{new String(tok.get<string>())});
 
   case Token::Type::identifier:
-    return Lisp_ptr{}; // not implemented
+    return Lisp_ptr{new Symbol{nullptr}}; // not implemented
 
     // compound datum
   case Token::Type::notation:
