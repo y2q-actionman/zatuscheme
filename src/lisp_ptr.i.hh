@@ -6,7 +6,6 @@
 #endif
 
 #include <climits>
-#include "keyword.hh"
 
 class Cons;
 class Symbol;
