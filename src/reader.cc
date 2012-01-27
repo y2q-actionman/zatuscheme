@@ -34,7 +34,7 @@ Lisp_ptr read_list(istream& i){
   const Lisp_ptr head{new Cons{Lisp_ptr{}, Lisp_ptr{}}};
   Lisp_ptr last = head;
 
-  do{
+  while(1){
     Lisp_ptr datum{read_la(i, t)};
     if(!datum){
       return Lisp_ptr{};
@@ -63,7 +63,7 @@ Lisp_ptr read_list(istream& i){
     // readying next cons
     last.get<Cons*>()->rplacd(Lisp_ptr{new Cons{Lisp_ptr{}, Lisp_ptr{}}});
     last = last.get<Cons*>()->cdr();
-  }while(i);
+  }
 
  end:
   // if(last.get<Cons*>()->cdr() == undef) ...
@@ -72,9 +72,29 @@ Lisp_ptr read_list(istream& i){
 }
 
 Lisp_ptr read_vector(istream& i){
-  // stub
-  (void)i;
-  return Lisp_ptr{new Long_ptr{new Vector{}}};
+  Vector* v = new Vector();
+
+  while(1){
+    auto t = tokenize(i);
+    if(!t){
+      // in future, cleanup working data.
+      return Lisp_ptr{};
+    }else if((t.type() == Token::Type::notation)
+             && (t.get<Token::Notation>()
+                 == Token::Notation::r_paren)){
+      goto end;
+    }else{
+      Lisp_ptr datum{read_la(i, t)};
+      if(!datum){
+        return Lisp_ptr{};
+      }
+
+      v->emplace_back(datum);
+    }
+  }
+
+ end:
+  return Lisp_ptr{new Long_ptr{v}};
 }
 
 Lisp_ptr read_abbrev(Symbol::Keyword k, istream& i){
