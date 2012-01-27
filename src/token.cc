@@ -469,41 +469,34 @@ Token tokenize_notation(istream& i){
 
 Token tokenize_number(istream& i){
   auto n = parse_number(i);
-  if(n.type() != Number::Type::uninitialized){
+  if(n){
     return Token{n};
   }else{
     return Token{};
   }
 }
 
-inline
-bool is_inited(const Token& t){
-  return t.type() != Token::Type::uninitialized;
-}
-
 } // namespace
 
 Token tokenize(istream& i){
-  Token t;
-
   skip_intertoken_space(i);
 
-  if(is_inited(t = tokenize_identifier(i)))
+  if(auto t = tokenize_identifier(i))
     return t;
 
-  if(is_inited(t = tokenize_boolean(i)))
+  if(auto t = tokenize_boolean(i))
     return t;
 
-  if(is_inited(t = tokenize_number(i)))
+  if(auto t = tokenize_number(i))
     return t;
 
-  if(is_inited(t = tokenize_character(i)))
+  if(auto t = tokenize_character(i))
     return t;
 
-  if(is_inited(t = tokenize_string(i)))
+  if(auto t = tokenize_string(i))
     return t;
 
-  if(is_inited(t = tokenize_notation(i)))
+  if(auto t = tokenize_notation(i))
     return t;
  
   return Token{};

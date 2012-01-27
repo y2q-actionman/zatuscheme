@@ -57,6 +57,9 @@ public:
   template<typename T>
   T get() const;
 
+  explicit operator bool() const
+  { return base_; }
+
 private:
   void* ptr_;
   uintptr_t base_;

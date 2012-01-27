@@ -136,11 +136,6 @@ int ignore_sharp(T& i){
   return sharps;
 }
 
-inline
-bool is_inited(const Number& n){
-  return n.type() != Number::Type::uninitialized;
-}
-
 template<int radix>
 Number parse_unsigned(std::istream& i){
   static const auto fun = is_number_char<radix>{};
@@ -269,7 +264,7 @@ Number parse_real_number(std::istream& i){
   }
 
   auto u1 = parse_unsigned<radix>(i);
-  if(!is_inited(u1))
+  if(!u1)
     goto error;
 
   // decimal float
@@ -291,7 +286,7 @@ Number parse_real_number(std::istream& i){
   }else{
     // rational
     auto u2 = parse_unsigned<radix>(i);
-    if(!is_inited(u2))
+    if(!u2)
       goto error;
     return Number(sign * u1.get<double>() / u2.get<double>());
   }
@@ -316,7 +311,7 @@ Number parse_complex(std::istream& i){
     
     Number imag = parse_unsigned<radix>(i);
 
-    if(!is_inited(imag) || i.peek() != 'i')
+    if(!imag || i.peek() != 'i')
       return Number{}; // error
 
     return Number{Number::complex_type{real.get<double>(), imag.get<double>() * sign}};
@@ -329,7 +324,7 @@ Number parse_complex(std::istream& i){
   if(first_char == '+' || first_char == '-'){
     Number n = imag_parser(Number{static_cast<long>(0)}, first_char);
 
-    if(is_inited(n))
+    if(n)
       return n;
 
     i.clear();
@@ -338,7 +333,7 @@ Number parse_complex(std::istream& i){
 
   // has real part
   Number real = parse_real_number<radix>(i);
-  if(!is_inited(real))
+  if(!real)
     goto error;
 
   switch(auto c = i.peek()){
@@ -346,7 +341,7 @@ Number parse_complex(std::istream& i){
     i.ignore(1);
     Number deg = parse_real_number<radix>(i);
 
-    if(!is_inited(deg))
+    if(!deg)
       goto error;
         
     return Number{polar(real.get<double>(), deg.get<double>())};

@@ -17,7 +17,7 @@ Lisp_ptr read_list(istream& i){
   Token t = tokenize(i);
 
   // first check
-  if(t.type() == Token::Type::uninitialized){
+  if(!t){
     return Lisp_ptr{};
   }else if(t.type() == Token::Type::notation){
     switch(t.get<Token::Notation>()){
@@ -36,13 +36,15 @@ Lisp_ptr read_list(istream& i){
 
   do{
     Lisp_ptr datum{read_la(i, t)};
-    // if(!datum ) ...
+    if(!datum){
+      return Lisp_ptr{};
+    }
 
     last.get<Cons*>()->rplaca(datum);
     
     // check next token
     t = tokenize(i);
-    if(t.type() == Token::Type::uninitialized){
+    if(!t){
       // in future, cleanup working data.
       return Lisp_ptr{};
     }else if(t.type() == Token::Type::notation){
@@ -83,8 +85,7 @@ Lisp_ptr read_abbrev(Symbol::Keyword k, istream& i){
 }
 
 Lisp_ptr read_la(istream& i, const Token& looked_tok){
-  Token tok = (looked_tok.type() != Token::Type::uninitialized)
-    ? looked_tok : tokenize(i);
+  auto& tok = (looked_tok) ? looked_tok : tokenize(i);
 
   switch(tok.type()){
     // simple datum

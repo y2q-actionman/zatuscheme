@@ -41,6 +41,9 @@ public:
   template <typename T>
   T get() const;
 
+  explicit operator bool() const
+  { return type_ != Type::uninitialized; }
+
 private:
   Type type_;
 

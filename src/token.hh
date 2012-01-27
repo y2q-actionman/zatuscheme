@@ -50,6 +50,9 @@ public:
   template <typename T>
   T get() const;
 
+  explicit operator bool() const
+  { return type() != Type::uninitialized; }
+
 private:
   Type type_;
   union {
