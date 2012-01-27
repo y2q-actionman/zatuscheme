@@ -5,7 +5,7 @@
 
 class Cons {
 public:
-  static const Lisp_ptr NIL;
+  static constexpr Lisp_ptr NIL = Lisp_ptr{Ptr_tag::cons};
 
   Cons() = delete;
   explicit Cons(Lisp_ptr); // one element list

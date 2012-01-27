@@ -39,12 +39,9 @@ enum class Ptr_tag {
     };
     
 
-class Lisp_ptr{
+union Lisp_ptr{
 public:
-  static constexpr unsigned tag_bit_mask = 0x3u;
-  static constexpr unsigned embed_boolean_bit = 0x4u;
-
-  Lisp_ptr() : base_(0){} // adding 'constexpr' causes ICE in gcc 4.6.1
+  constexpr Lisp_ptr() : base_(0){}
   template<typename T>
   explicit constexpr Lisp_ptr(T);
   Lisp_ptr(const Lisp_ptr&) = default;
@@ -61,10 +58,8 @@ public:
   T get() const;
 
 private:
-  union {
-    void* ptr_;
-    uintptr_t base_;
-  };
+  void* ptr_;
+  uintptr_t base_;
 };
 
 

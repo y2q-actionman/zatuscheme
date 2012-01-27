@@ -8,6 +8,9 @@
 #include <climits>
 
 namespace lisp_ptr_i {
+  static constexpr unsigned tag_bit_mask = 0x3u;
+  static constexpr unsigned embed_boolean_bit = 0x4u;
+
   template<typename T>
   Ptr_tag Type_to_Ptr_tag();
 
@@ -65,13 +68,20 @@ template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<bool>(bool b)
   : base_((0xffu << CHAR_BIT)
-          | (b ? embed_boolean_bit : 0)){}
+          | (b ? lisp_ptr_i::embed_boolean_bit : 0)){}
 
 template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<char>(char c)
   : base_((static_cast<unsigned>(c) << CHAR_BIT)
-          | embed_boolean_bit){}
+          | lisp_ptr_i::embed_boolean_bit){}
+
+template<>
+inline constexpr
+Lisp_ptr::Lisp_ptr<Ptr_tag>(Ptr_tag p)
+: base_((static_cast<unsigned>(p) <= lisp_ptr_i::tag_bit_mask)
+        ? (reinterpret_cast<uintptr_t>(nullptr) | static_cast<uintptr_t>(p))
+        : 0){}
 
 template<typename T>
 inline constexpr
@@ -79,14 +89,14 @@ Lisp_ptr::Lisp_ptr(T p)
   : base_(reinterpret_cast<uintptr_t>(p)
           | static_cast<uintptr_t>(lisp_ptr_i::Type_to_Ptr_tag<T>())){
   static_assert(static_cast<unsigned>(lisp_ptr_i::Type_to_Ptr_tag<T>())
-                <= tag_bit_mask,
+                <= lisp_ptr_i::tag_bit_mask,
                 "Lisp_ptr cannot be used with specified type");
 }
 
 
 inline
 Ptr_tag Lisp_ptr::tag() const {
-  switch(base_ & tag_bit_mask){
+  switch(base_ & lisp_ptr_i::tag_bit_mask){
   case 0x0:
     return Ptr_tag::immediate;
   case 0x1:
@@ -103,8 +113,8 @@ Ptr_tag Lisp_ptr::tag() const {
 template<>
 inline
 bool Lisp_ptr::get<bool>() const {
-    return (tag() == Ptr_tag::immediate)
-    ? ((base_ & embed_boolean_bit) != 0)
+  return (tag() == Ptr_tag::immediate)
+    ? ((base_ & lisp_ptr_i::embed_boolean_bit) != 0)
     : true; // everything is #t, except #f and null
 }
 
@@ -120,7 +130,7 @@ template<typename T>
 inline
 T Lisp_ptr::get() const {
   return (tag() == lisp_ptr_i::Type_to_Ptr_tag<T>())
-    ? static_cast<T>(reinterpret_cast<void*>(base_ & ~tag_bit_mask))
+    ? static_cast<T>(reinterpret_cast<void*>(base_ & ~lisp_ptr_i::tag_bit_mask))
     : nullptr;
 }
 
