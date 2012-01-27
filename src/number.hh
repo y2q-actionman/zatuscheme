@@ -54,7 +54,7 @@ private:
   };
 };
 
-Number parse_number(std::istream&);
+Number parse_number(std::istream&); // requires seekable stream
 
 Number to_exact(const Number&);
 Number to_inexact(const Number&);
