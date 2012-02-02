@@ -1,26 +1,23 @@
 #ifndef SYMBOL_HH
 #define SYMBOL_HH
 
+#include <string>
+
+enum class Keyword;
+
 class Symbol{
 public:
-  enum class Keyword{
-    not_keyword = 0,
+  friend class SymTable;
 
-    // syntactic
-      else_, r_arrow, define, unquote, unquote_splicing,
+  const std::string& name() const
+  { return name_ ; }
 
-    // expression
-      quote, lambda, if_, set_, begin,
-      cond, and_, or_, case_, let,
-      let_star, letrec, do_, delay, quasiquote,
+  Keyword keyword() const;
 
-      MAX
-      };
-
+private:
   Symbol() = delete;
-  explicit Symbol(const char* s)
+  explicit Symbol(const std::string& s)
     : name_(s){}
-  explicit Symbol(Keyword);
   Symbol(const Symbol&) = default;
   Symbol(Symbol&&) = default;
 
@@ -29,13 +26,8 @@ public:
   Symbol& operator=(const Symbol&) = default;
   Symbol& operator=(Symbol&&) = default;
 
-  const char* name() const
-  { return name_ ; }
-
-  Keyword keyword() const;
-
 private:
-  const char* const name_;
+  const std::string& name_;
   // TODO: add pointer to symbol table
 };
 

@@ -6,6 +6,7 @@
 #include "number.hh"
 #include "cons.hh"
 #include "symbol.hh"
+#include "keyword.hh"
 
 using namespace std;
 
@@ -97,8 +98,8 @@ Lisp_ptr read_vector(istream& i){
   return Lisp_ptr{new Long_ptr{v}};
 }
 
-Lisp_ptr read_abbrev(Symbol::Keyword k, istream& i){
-  Lisp_ptr first{new Symbol(k)};
+Lisp_ptr read_abbrev(Keyword k, istream& i){
+  Lisp_ptr first; //{new Symbol(k)};
   Lisp_ptr second{read(i)};
 
   return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second}}}};
@@ -122,7 +123,7 @@ Lisp_ptr read_la(istream& i, const Token& looked_tok){
     return Lisp_ptr(new Long_ptr{new String(tok.get<string>())});
 
   case Token::Type::identifier:
-    return Lisp_ptr{new Symbol{nullptr}}; // not implemented
+    return Lisp_ptr{}; //{new Symbol{nullptr}}; // not implemented
 
     // compound datum
   case Token::Type::notation:
@@ -136,16 +137,16 @@ Lisp_ptr read_la(istream& i, const Token& looked_tok){
 
       // abbrev prefix
     case Token::Notation::quote:
-      return read_abbrev(Symbol::Keyword::quote, i);
+      return read_abbrev(Keyword::quote, i);
 
     case Token::Notation::quasiquote:
-      return read_abbrev(Symbol::Keyword::quasiquote, i);
+      return read_abbrev(Keyword::quasiquote, i);
 
     case Token::Notation::comma:
-      return read_abbrev(Symbol::Keyword::unquote, i);
+      return read_abbrev(Keyword::unquote, i);
 
     case Token::Notation::comma_at:
-      return read_abbrev(Symbol::Keyword::unquote_splicing, i);
+      return read_abbrev(Keyword::unquote_splicing, i);
       
     default:
       return Lisp_ptr{};

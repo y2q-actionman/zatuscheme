@@ -9,7 +9,8 @@ libzs_a_SOURCES = zs.hh\
 		lisp_ptr.cc lisp_ptr.hh lisp_ptr.i.hh\
 		cons.cc cons.hh\
 		symbol.cc symbol.hh\
-		string.hh\
+		symtable.cc symtable.hh\
+		keyword.cc keyword.hh\
 		reader.cc reader.hh
 
 noinst_PROGRAMS = zs
