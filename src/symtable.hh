@@ -1,10 +1,12 @@
 #ifndef SYMTABLE_HH
 #define SYMTABLE_HH
 
-#include <unordered_set>
+#include <unordered_map>
 #include <string>
 
-class Symbol;
+#include "symbol.hh"
+
+enum class Keyword;
 
 class SymTable {
 public:
@@ -18,10 +20,12 @@ public:
   SymTable& operator=(SymTable&&) = default;
 
   Symbol* intern(const std::string&);
+  //Symbol* intern(const std::string&&);
+  Symbol* intern(Keyword);
   void unintern(Symbol*);
 
 private:
-  std::unordered_set<std::string> table_;
+  std::unordered_map<std::string, Symbol> table_;
 };
 
 #endif //SYMTABLE_HH

@@ -4,6 +4,8 @@
 #include <iosfwd>
 #include "lisp_ptr.hh"
 
-Lisp_ptr read(std::istream&);
+class SymTable;
+
+Lisp_ptr read(SymTable&, std::istream&);
 
 #endif // READER_HH
