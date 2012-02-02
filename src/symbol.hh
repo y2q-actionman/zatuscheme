@@ -2,35 +2,37 @@
 #define SYMBOL_HH
 
 #include <string>
-
-enum class Keyword;
+#include "keyword.hh"
 
 class Symbol{
 public:
   friend class SymTable;
 
   Symbol(const Symbol&) = default;
-  //Symbol(Symbol&&);
+  Symbol(Symbol&&) = default;
 
   ~Symbol() = default;
 
   const std::string& name() const
   { return name_ ; }
 
-  Keyword keyword() const;
+  Keyword keyword() const
+  { return k_; }
 
 private:
   Symbol() = delete;
-  explicit Symbol(const std::string& s)
-    : name_(s){}
-  //explicit Symbol(std::string&& s);
+  explicit Symbol(const std::string&);
+  explicit Symbol(std::string&&);
 
   Symbol& operator=(const Symbol&) = default;
-  //Symbol& operator=(Symbol&&) = default;
+  Symbol& operator=(Symbol&&) = default;
 
 private:
-  const std::string name_;
-  // TODO: add pointer to symbol table
+  std::string name_;
+  Keyword k_;
+  // add pointer to symbol table?
 };
+
+#include "symbol.i.hh"
 
 #endif // SYMBOL_HH

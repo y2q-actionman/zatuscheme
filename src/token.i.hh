@@ -18,7 +18,7 @@ inline
 Token::Token(std::string&& s, Type t)
   : type_(t)
 {
-  new (&this->str_) std::string(std::move(s));
+  new (&this->str_) std::string{std::forward<std::string>(s)};
 }
 
 inline
@@ -32,7 +32,7 @@ inline
 Token::Token(Number&& n)
   : type_(Type::number)
 {
-  new (&this->num_) Number(std::move(n));
+  new (&this->num_) Number{std::forward<Number>(n)};
 }
 
 inline constexpr

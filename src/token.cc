@@ -64,7 +64,7 @@ Token::Token(Token&& other)
 
   case Type::identifier:
   case Type::string:
-    new (&this->str_) string(move(other.str_));
+    new (&this->str_) string{forward<string>(other.str_)};
     break;
 
   case Type::boolean:
@@ -72,7 +72,7 @@ Token::Token(Token&& other)
     break;
 
   case Type::number:
-    new (&this->num_) Number(move(other.num_));
+    new (&this->num_) Number{forward<Number>(other.num_)};
     break;
 
   case Type::character:
@@ -150,7 +150,7 @@ Token& Token::operator=(const Token& other){
 Token& Token::operator=(Token&& other){
   switch(this->type_){
   case Type::uninitialized:
-    new (this) Token(move(other));
+    new (this) Token{forward<Token>(other)};
     break;
     
   case Type::identifier:
@@ -158,11 +158,11 @@ Token& Token::operator=(Token&& other){
     switch(other.type()){
     case Type::identifier:
     case Type::string:
-      this->str_ = move(other.str_);
+      this->str_ = forward<string>(other.str_);
       break;
     default:
       str_.~string();
-      new (this) Token(move(other));
+      new (this) Token{forward<Token>(other)};
     }
     break;
 
@@ -170,16 +170,16 @@ Token& Token::operator=(Token&& other){
     if(other.type() == this->type()){
       b_ = other.b_;
     }else{
-      new (this) Token(move(other));
+      new (this) Token{forward<Token>(other)};
     }
     break;
 
   case Type::number:
     if(other.type() == this->type()){
-      this->num_ = move(other.num_);
+      this->num_ = forward<Number>(other.num_);
     }else{
       num_.~Number();
-      new (this) Token(move(other));
+      new (this) Token{forward<Token>(other)};
     }
     break;
 
@@ -187,15 +187,15 @@ Token& Token::operator=(Token&& other){
     if(other.type() == this->type()){
       this->c_ = other.c_;
     }else{
-      new (this) Token(move(other));
+      new (this) Token{forward<Token>(other)};
     }
     break;
 
   case Type::notation:
     if(other.type() == this->type()){
-      this->not_ = move(other.not_);
+      this->not_ = forward<Notation>(other.not_);
     }else{
-      new (this) Token(move(other));
+      new (this) Token{forward<Token>(other)};
     }
     break;
 
