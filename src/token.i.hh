@@ -6,32 +6,94 @@
 #endif
 
 #include <utility>
+#include "decl.hh"
 
+// Type mapping
+template<>
+struct to_type<Token::Type>{
+  template<Token::Type t> struct get;
+};
+
+template<> template<>
+struct to_type<Token::Type>::get<Token::Type::identifier>{
+  typedef std::string type;
+};
+
+template<> template<>
+struct to_type<Token::Type>::get<Token::Type::boolean>{
+  typedef bool type;
+};
+
+template<> template<>
+struct to_type<Token::Type>::get<Token::Type::number>{
+  typedef Number type;
+};
+
+template<> template<>
+struct to_type<Token::Type>::get<Token::Type::character>{
+  typedef char type;
+};
+
+template<> template<>
+struct to_type<Token::Type>::get<Token::Type::string>{
+  typedef std::string type;
+};
+
+template<> template<>
+struct to_type<Token::Type>::get<Token::Type::notation>{
+  typedef Token::Notation type;
+};
+
+
+// std::string -> Token::Type is ambigious
+
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, Number>(){
+  return Token::Type::number;
+}
+
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, bool>(){
+  return Token::Type::boolean;
+}
+
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, char>(){
+  return Token::Type::character;
+}
+
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, Token::Notation>(){
+  return Token::Type::notation;
+}
+
+
+// Token definitions
 inline
 Token::Token(const std::string& s, Type t)
-  : type_(t)
-{
+  : type_(t){
   new (&this->str_) std::string(s);
 }
 
 inline
 Token::Token(std::string&& s, Type t)
-  : type_(t)
-{
+  : type_(t){
   new (&this->str_) std::string{std::forward<std::string>(s)};
 }
 
 inline
 Token::Token(const Number& n)
-  : type_(Type::number)
-{
+  : type_(Type::number){
   new (&this->num_) Number(n);
 }
 
 inline
 Token::Token(Number&& n)
-  : type_(Type::number)
-{
+  : type_(Type::number){
   new (&this->num_) Number{std::forward<Number>(n)};
 }
 

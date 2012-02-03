@@ -5,7 +5,50 @@
 #error "Please include via parent file"
 #endif
 
+#include "decl.hh"
 
+// Type mapping
+template<>
+struct to_type<Number::Type>{
+  template<Number::Type t> struct get;
+};
+
+template<> template<>
+struct to_type<Number::Type>::get<Number::Type::complex>{
+  typedef Number::complex_type type;
+};
+
+template<> template<>
+struct to_type<Number::Type>::get<Number::Type::real>{
+  typedef Number::real_type type;
+};
+
+template<> template<>
+struct to_type<Number::Type>::get<Number::Type::integer>{
+  typedef Number::integer_type type;
+};
+
+
+template<>
+inline constexpr
+Number::Type to_tag<Number::Type, Number::complex_type>(){
+  return Number::Type::complex;
+}
+
+template<>
+inline constexpr
+Number::Type to_tag<Number::Type, Number::real_type>(){
+  return Number::Type::real;
+}
+
+template<>
+inline constexpr
+Number::Type to_tag<Number::Type, Number::integer_type>(){
+  return Number::Type::integer;
+}
+
+
+// Number class definitions
 inline
 Number::Number(const complex_type& c) :
   type_(Type::complex), z_(c){}

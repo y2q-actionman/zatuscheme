@@ -82,17 +82,41 @@ void fail_message(Token::Type t, istream& i, streampos b_pos,
   result = false;
 }
 
-void check_uninit(istream& i){
+template<Token::Type type, typename Fun,
+         typename ex_type = char>
+void check_generic(istream& i,
+                   const Fun& f){
   const auto init_pos = i.tellg();
   const Token tok = tokenize(i);
 
-  if(tok.type() != Token::Type::uninitialized){
-    fail_message(Token::Type::uninitialized, i, init_pos, tok,
-                 [](){});
+  if(tok.type() != type){
+    fail_message(type, i, init_pos, tok, f);
     return;
   }
   
-  check_copy_move<char>(tok);
+  check_copy_move<ex_type>(tok);
+}
+
+template<Token::Type type, typename Fun, 
+         typename ex_type = typename to_type<Token::Type>::get<type>::type>
+void check_generic(istream& i,
+                   const ex_type& expect,
+                   const Fun& f){
+  const auto init_pos = i.tellg();
+  const Token tok = tokenize(i);
+
+  if(tok.type() != type || tok.get<ex_type>() != expect){
+    fail_message(type, i, init_pos, tok, f);
+    return;
+  }
+  
+  check_copy_move<ex_type>(tok);
+}
+
+
+void check_uninit(istream& i){
+  check_generic<Token::Type::uninitialized>
+    (i, [](){});
 }
 
 void check_uninit(const string& input){
@@ -101,18 +125,11 @@ void check_uninit(const string& input){
 }
 
 void check_ident(istream& i, const string& expect){
-  const auto init_pos = i.tellg();
-  const Token tok = tokenize(i);
-
-  if(tok.type() != Token::Type::identifier || tok.get<string>() != expect){
-    fail_message(Token::Type::identifier, i, init_pos, tok,
-                 [&](){
-                   fprintf(stdout, ", expected str='%s'", expect.c_str());
-                 });
-    return;
-  }
-  
-  check_copy_move<string>(tok);
+  check_generic<Token::Type::identifier>
+    (i, expect,
+     [&](){
+      fprintf(stdout, ", expected str='%s'", expect.c_str());
+    });
 }
 
 void check_ident(const string& input, const string& expect){
@@ -121,18 +138,11 @@ void check_ident(const string& input, const string& expect){
 }
 
 void check_boolean(istream& i, bool expect){
-  const auto init_pos = i.tellg();
-  const Token tok = tokenize(i);
-
-  if(tok.type() != Token::Type::boolean || tok.get<bool>() != expect){
-    fail_message(Token::Type::boolean, i, init_pos, tok,
-                 [=](){
-                   fprintf(stdout, ", expected bool='%s'", expect ? "true" : "false");
-                 });
-    return;
-  }
-  
-  check_copy_move<bool>(tok);
+  check_generic<Token::Type::boolean>
+    (i, expect, 
+     [=](){
+      fprintf(stdout, ", expected bool='%s'", expect ? "true" : "false");
+    });
 }
 
 void check_boolean(const string& input, bool expect){
@@ -141,18 +151,11 @@ void check_boolean(const string& input, bool expect){
 }
 
 void check_character(istream& i, char expect){
-  const auto init_pos = i.tellg();
-  const Token tok = tokenize(i);
-
-  if(tok.type() != Token::Type::character || tok.get<char>() != expect){
-    fail_message(Token::Type::character, i, init_pos, tok,
-                 [=](){
-                   fprintf(stdout, ", expected char='%c'", expect);
-                 });
-    return;
-  }
-  
-  check_copy_move<char>(tok);
+  check_generic<Token::Type::character>
+    (i, expect, 
+     [=](){
+      fprintf(stdout, ", expected char='%c'", expect);
+    });
 }
 
 void check_character(const string& input, char expect){
@@ -161,18 +164,11 @@ void check_character(const string& input, char expect){
 }
 
 void check_string(istream& i, const string& expect){
-  const auto init_pos = i.tellg();
-  const Token tok = tokenize(i);
-
-  if(tok.type() != Token::Type::string || tok.get<string>() != expect){
-    fail_message(Token::Type::string, i, init_pos, tok,
-                 [&](){
-                   fprintf(stdout, ", expected str='%s'", expect.c_str());
-                 });
-    return;
-  }
-  
-  check_copy_move<string>(tok);
+  check_generic<Token::Type::string>
+    (i, expect, 
+     [&](){
+      fprintf(stdout, ", expected str='%s'", expect.c_str());
+    });
 }
 
 void check_string(const string& input, const string& expect){
@@ -181,21 +177,13 @@ void check_string(const string& input, const string& expect){
 }
 
 void check_notation(istream& i, Token::Notation n){
-  const auto init_pos = i.tellg();
-  const Token tok = tokenize(i);
-
-  if(tok.type() != Token::Type::notation ||
-     tok.get<Token::Notation>() != n){
-    fail_message(Token::Type::notation, i, init_pos, tok,
-                 [=](){
-                   fputs(", expected notation='", stdout);
-                   describe(stdout, n);
-                   fputc('\'', stdout);
-                 });
-    return;
-  }
-  
-  check_copy_move<string>(tok);
+  check_generic<Token::Type::notation>
+    (i, n,
+     [=](){
+      fputs(", expected notation='", stdout);
+      describe(stdout, n);
+      fputc('\'', stdout);
+    });
 }
 
 void check_notation(const string& input, Token::Notation n){
