@@ -179,9 +179,8 @@ Number parse_decimal(std::istream& i){
   const auto pos = i.tellg();
 
   stringstream s;
-  decltype(i.peek()) c;
   
-  while((c = read_char_func(i.peek())) >= 0){
+  while(read_char_func(i.peek())){
     s.put(i.get());
   }
 
@@ -211,7 +210,7 @@ Number parse_decimal(std::istream& i){
   if(dot_start && read_char_func(i.peek()) < 0)
     goto error; // 2. dot start should have digits
 
-  while((c = read_char_func(i.peek())) >= 0){
+  while(read_char_func(i.peek())){
     s.put(i.get());
   }
 
@@ -231,7 +230,7 @@ Number parse_decimal(std::istream& i){
       goto error; // no number on exp. part
     }
 
-    while((c = read_char_func(i.peek())) >= 0){
+    while(read_char_func(i.peek())){
       s.put(i.get());
     }
   }
@@ -270,7 +269,10 @@ Number parse_real_number(std::istream& i){
   // decimal float
   if(radix == 10){
     i.clear();
-    if(check_decimal_suffix(i.peek())){
+    auto next = i.peek();
+
+    if(check_decimal_suffix(next)
+       || next == '.' || next == '#'){
       i.seekg(pos);
       auto n = parse_decimal(i);
 
