@@ -6,7 +6,8 @@ AM_CXXFLAGS = $(warning_flags) $(test_flags)
 AM_DEFAULT_SOURCE_EXT = .cc
 
 LDADD = ../src/libzs_test.a
-check_PROGRAMS = token_test
+check_PROGRAMS = token_test\
+		parse_number_test
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)
