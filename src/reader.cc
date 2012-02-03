@@ -100,7 +100,7 @@ Lisp_ptr read_vector(SymTable& sym, istream& i){
 }
 
 Lisp_ptr read_abbrev(SymTable& sym, Keyword k, istream& i){
-  Lisp_ptr first{sym.intern(k)};
+  Lisp_ptr first{sym.intern(stringify(k))};
   Lisp_ptr second{read(sym, i)};
 
   return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second}}}};

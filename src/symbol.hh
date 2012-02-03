@@ -2,7 +2,8 @@
 #define SYMBOL_HH
 
 #include <string>
-#include "keyword.hh"
+
+enum class Keyword;
 
 class Symbol{
 public:
@@ -14,24 +15,23 @@ public:
   ~Symbol() = default;
 
   const std::string& name() const
-  { return name_ ; }
-
-  Keyword keyword() const
-  { return k_; }
+  { return *name_ ; }
 
 private:
-  Symbol() = delete;
-  explicit Symbol(const std::string&);
-  explicit Symbol(std::string&&);
+  constexpr Symbol();
+  explicit Symbol(const std::string*);
 
-  Symbol& operator=(const Symbol&) = default;
-  Symbol& operator=(Symbol&&) = default;
+  Symbol& operator=(const Symbol&) = delete;
+  Symbol& operator=(Symbol&&) = delete;
+
+  void rebind(const std::string*);
 
 private:
-  std::string name_;
-  Keyword k_;
+  const std::string* name_;
   // add pointer to symbol table?
 };
+
+Keyword to_keyword(const Symbol&);
 
 #include "symbol.i.hh"
 

@@ -6,14 +6,24 @@
 #endif
 
 #include <utility>
+#include "keyword.hh"
+
+inline constexpr
+Symbol::Symbol()
+  : name_(nullptr){}
 
 inline
-Symbol::Symbol(const std::string& s)
-  : name_(s), k_(to_keyword(s.c_str())){}
+Symbol::Symbol(const std::string* s)
+  : name_(s){}
 
 inline
-Symbol::Symbol(std::string&& s)
-  : name_(std::forward<std::string>(s)),
-    k_(to_keyword(s.c_str())){}
+Keyword to_keyword(const Symbol& s){
+  return to_keyword(s.name().c_str());
+}
+
+inline
+void Symbol::rebind(const std::string* s){
+  name_ = s;
+}
 
 #endif // SYMBOL_I_HH

@@ -19,9 +19,7 @@ public:
   SymTable& operator=(const SymTable&) = default;
   SymTable& operator=(SymTable&&) = default;
 
-  template<typename T>
-  Symbol* intern(T);
-
+  Symbol* intern(const std::string&);
   void unintern(Symbol*);
 
 private:

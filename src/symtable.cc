@@ -1,31 +1,29 @@
 #include "symtable.hh"
 
 #include <utility>
+#include <cassert>
 
 #include "symbol.hh"
-#include "keyword.hh"
 
 using namespace std;
 
-template<typename T>
-Symbol* SymTable::intern(T s){
-  auto ret = table_.find(s);
+Symbol* SymTable::intern(const string& s){
+  auto i = table_.find(s);
 
-  if(ret != table_.end()){
-    return &(ret->second);
+  if(i != table_.end()){
+    return &(i->second);
   }else{
+    // 1. Construct Key string in map.
+    // 2. Let the symbol point the Key string.
+
     // use 'emplace' when implemented.
-    auto i_ret = table_.insert(make_pair(s, Symbol(s)));
-    return &(get<0>(i_ret)->second);
+    auto ins_ret = table_.insert(make_pair(s, Symbol{}));
+    assert(ins_ret.second);
+
+    auto ins_iter = ins_ret.first;
+    ins_iter->second.rebind(&ins_iter->first);
+    return &ins_iter->second;
   }
-}
-
-template Symbol* SymTable::intern(const string&);
-template Symbol* SymTable::intern(string&&);
-
-template<>
-Symbol* SymTable::intern(Keyword k){
-  return intern(stringify(k));
 }
 
 void SymTable::unintern(Symbol* s){
