@@ -123,13 +123,14 @@ bool is_number_char<16>::operator()(CharT c) const{
   return isxdigit(c);
 }
 
-template<typename T>
+template<typename IN, typename OUT>
 inline
-int ignore_sharp(T& i){
+bool eat_sharp(IN& i, OUT& o){
   int sharps = 0;
 
   while(i.peek() == '#'){
     i.ignore(1);
+    o.put('0');
     ++sharps;
   }
 
@@ -148,11 +149,11 @@ Number parse_unsigned(std::istream& i){
   if(s.str().empty()){
     goto error;
   }else{
+    eat_sharp(i, s);
+
     errno = 0;
     long l = strtol(s.str().c_str(), nullptr, radix);
     if(errno) goto error;
-
-    ignore_sharp(i);
 
     return Number{l};
   }
@@ -194,7 +195,7 @@ Number parse_decimal(std::istream& i){
       goto error;
     }
   }else{
-    sharps_before_dot = ignore_sharp(i);
+    sharps_before_dot = eat_sharp(i, s);
   }
 
   if(i.peek() != '.'){
@@ -203,7 +204,7 @@ Number parse_decimal(std::istream& i){
   s.put(i.get());
     
   if(sharps_before_dot > 0){
-    ignore_sharp(i);
+    eat_sharp(i, s);
     goto end; // 4. no frac -- sharps before dot
   }
 
@@ -214,7 +215,7 @@ Number parse_decimal(std::istream& i){
     s.put(i.get());
   }
 
-  ignore_sharp(i);
+  eat_sharp(i, s);
   
  end:
   if(check_decimal_suffix(i.peek()) < 0){

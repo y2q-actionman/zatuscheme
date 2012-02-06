@@ -101,6 +101,20 @@ void check_real(const string& input, double expect){
   return check_real(is, expect);
 }
 
+void check_complex(istream& i, const Number::complex_type& z){
+  check_generic<Number::Type::complex>
+    (i, z,
+     [=](){
+      fprintf(stdout, ", expected complex='(%f %f)'",
+              z.real(), z.imag());
+    });
+}
+
+void check_complex(const string& input, const Number::complex_type& z){
+  stringstream is(input);
+  return check_complex(is, z);
+}
+
 
 int main(){
   result = true;
@@ -111,9 +125,13 @@ int main(){
   // int
   check_int("100", 100);
   check_int("-100", -100);
+  check_int("1##", 100);
 
   // float
   check_real("1.1", strtod("1.1", nullptr));
+
+  // complex
+  check_complex("1.0+1i", Number::complex_type(1, 1));
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
