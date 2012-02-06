@@ -247,7 +247,7 @@ Number parse_decimal(std::istream& i){
 template<int radix>
 Number parse_real_number(std::istream& i){
   const auto pos = i.tellg();
-  int sign = 0;
+  int sign = 1;
 
   switch(i.peek()){
   case '+':
@@ -263,6 +263,9 @@ Number parse_real_number(std::istream& i){
     break;
   }
 
+  const auto unsigned_pos = i.tellg();
+
+
   auto u1 = parse_unsigned<radix>(i);
   if(!u1)
     goto error;
@@ -274,7 +277,7 @@ Number parse_real_number(std::istream& i){
 
     if(check_decimal_suffix(next)
        || next == '.' || next == '#'){
-      i.seekg(pos);
+      i.seekg(unsigned_pos);
       auto n = parse_decimal(i);
 
       if(n.type() == Number::Type::real){
@@ -284,7 +287,7 @@ Number parse_real_number(std::istream& i){
   }
 
   if(i.peek() != '/'){
-  // integer
+    // integer
     return Number(sign * u1.get<long>());
   }else{
     // rational
@@ -302,37 +305,7 @@ Number parse_real_number(std::istream& i){
 
 template<int radix>
 Number parse_complex(std::istream& i){
-  const auto imag_parser = [&](const Number& real,
-                               decltype(i.peek()) sign_char) -> Number {
-    const int sign = (sign_char == '+') ? 1 : -1;
-
-    i.ignore(1);
-
-    if(i.peek() == 'i')
-      return Number{Number::complex_type(real.get<double>(),
-                                         static_cast<double>(sign * 1))};
-    
-    Number imag = parse_unsigned<radix>(i);
-
-    if(!imag || i.peek() != 'i')
-      return Number{}; // error
-
-    return Number{Number::complex_type{real.get<double>(), imag.get<double>() * sign}};
-  };
-
-  const auto pos = i.tellg();
-  auto first_char = i.peek();
-
-  // no real part
-  if(first_char == '+' || first_char == '-'){
-    Number n = imag_parser(Number{static_cast<long>(0)}, first_char);
-
-    if(n)
-      return n;
-
-    i.clear();
-    i.seekg(pos);
-  }
+  const auto first_char = i.peek();
 
   // has real part
   Number real = parse_real_number<radix>(i);
@@ -349,8 +322,28 @@ Number parse_complex(std::istream& i){
         
     return Number{polar(real.get<double>(), deg.get<double>())};
   }
-  case '+': case '-':
-    return imag_parser(real, c);
+  case '+': case '-': {
+    i.ignore(1);
+    const int sign = (c == '+') ? 1 : -1;
+
+    if(i.peek() == 'i'){
+      i.ignore(1);
+      return Number{Number::complex_type(real.get<double>(), sign)};
+    }
+    
+    Number imag = parse_real_number<radix>(i);
+    if(!imag || i.get() != 'i')
+      return Number{}; // error
+
+    return Number{Number::complex_type{real.get<double>(), imag.get<double>() * sign}};
+  }
+  case 'i':
+    i.ignore(1);
+    if(first_char == '+' || first_char == '-'){
+      return Number{Number::complex_type{0, real.get<double>()}};
+    }else{
+      goto error;
+    }
   default:
     return real;
   }

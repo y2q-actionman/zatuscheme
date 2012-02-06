@@ -128,10 +128,13 @@ int main(){
   check_int("1##", 100);
 
   // float
-  check_real("1.1", strtod("1.1", nullptr));
+  check_real("-1.1", -1.1);
+  check_real("3.14159265358979F0", 3.14159265358979e0);
+  check_real("0.6L0", 0.6e0);
 
   // complex
   check_complex("1.0+1i", Number::complex_type(1, 1));
+  check_complex("-2.5+0.0i", Number::complex_type(-2.5, 0));
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
