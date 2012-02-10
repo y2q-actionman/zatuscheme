@@ -296,32 +296,7 @@ Token tokenize_identifier(istream& i){
   return Token{};
 }
 
-Token tokenize_boolean(istream& i){
-  const auto pos = i.tellg();
-
-  if(i.peek() == '#'){
-    i.get();
-
-    switch(i.peek()){
-    case 't':
-      return Token{true};
-    case 'f':
-      return Token{false};
-    default:
-      i.clear();
-      i.seekg(pos);
-      goto error;
-    }
-  }
-
- error:
-  return Token{};
-}
-
 Token tokenize_character(istream& i){
-  const auto pos = i.tellg();
-  char ret_char;
-
   // function for checking character-name
   const auto check_name = [&](const char* str) -> bool {
     const auto initpos = i.tellg();
@@ -337,11 +312,7 @@ Token tokenize_character(istream& i){
     return true;
   };
 
-  if(i.peek() != '#') goto error;
-  i.ignore(1);
-
-  if(i.peek() != '\\') goto error;
-  i.ignore(1);
+  char ret_char;
 
   // check character name
   switch(i.peek()){
@@ -372,17 +343,11 @@ Token tokenize_character(istream& i){
   return Token{static_cast<char>(ret_char)};
 
  error:
-  i.clear();
-  i.seekg(pos);
   return Token{};
 }
 
 Token tokenize_string(istream& i){
-  const auto pos = i.tellg();
   ostringstream s;
-
-  if(i.peek() != '"') goto error;
-  i.ignore(1);
 
   while(i){
     switch(i.peek()){
@@ -405,66 +370,7 @@ Token tokenize_string(istream& i){
   }
 
  error:
-  i.clear();
-  i.seekg(pos);
   return Token{};
-}
-
-Token tokenize_notation(istream& i){
-  const auto pos = i.tellg();
-
-  switch(i.get()){
-  case '(':
-    return Token{Token::Notation::l_paren};
-  case ')':
-    return Token{Token::Notation::r_paren};
-  case '#':
-    if(i.peek() == '('){
-      i.ignore(1);
-      return Token{Token::Notation::vector_paren};
-    }else{
-      i.clear();
-      i.seekg(pos);
-      return Token{};
-    }
-  case '\'':
-    return Token{Token::Notation::quote};
-  case '`':
-    return Token{Token::Notation::quasiquote};
-  case ',':
-    if(i.peek() == '@'){
-      i.ignore(1);
-      return Token{Token::Notation::comma_at};
-    }else{
-      return Token{Token::Notation::comma};
-    }
-  case '.':
-    {
-      const auto c = i.peek();
-      if(c == '.'){
-        i.clear();
-        i.seekg(pos);
-        return Token{};
-      }else{
-        return Token{Token::Notation::dot};
-      }
-    }
-  case '[':
-    return Token{Token::Notation::l_bracket};
-  case ']':
-    return Token{Token::Notation::r_bracket};
-  case '{':
-    return Token{Token::Notation::l_brace};
-  case '}':
-    return Token{Token::Notation::r_brace};
-  case '|':
-    return Token{Token::Notation::bar};
-
-  default:
-    i.clear();
-    i.seekg(pos);
-    return Token{};
-  }
 }
 
 Token tokenize_number(istream& i){
@@ -484,22 +390,74 @@ Token tokenize(istream& i){
   if(auto t = tokenize_identifier(i))
     return t;
 
-  if(auto t = tokenize_boolean(i))
-    return t;
-
   if(auto t = tokenize_number(i))
     return t;
 
-  if(auto t = tokenize_character(i))
-    return t;
 
-  if(auto t = tokenize_string(i))
-    return t;
+  const auto pos = i.tellg();
 
-  if(auto t = tokenize_notation(i))
-    return t;
- 
-  return Token{};
+  switch(i.get()){
+  case '(':
+    return Token{Token::Notation::l_paren};
+  case ')':
+    return Token{Token::Notation::r_paren};
+  case '\'':
+    return Token{Token::Notation::quote};
+  case '`':
+    return Token{Token::Notation::quasiquote};
+  case '[':
+    return Token{Token::Notation::l_bracket};
+  case ']':
+    return Token{Token::Notation::r_bracket};
+  case '{':
+    return Token{Token::Notation::l_brace};
+  case '}':
+    return Token{Token::Notation::r_brace};
+  case '|':
+    return Token{Token::Notation::bar};
+  case ',':
+    if(i.peek() == '@'){
+      i.ignore(1);
+      return Token{Token::Notation::comma_at};
+    }else{
+      return Token{Token::Notation::comma};
+    }
+  case '.':
+    if(i.peek() == '.'){
+      goto error;
+    }else{
+      return Token{Token::Notation::dot};
+    }
+
+  case '"': {
+    if(auto t = tokenize_string(i))
+      return t;
+    goto error;
+  }
+
+  case '#':
+    switch(i.get()){
+    case '(':
+      return Token{Token::Notation::vector_paren};
+    case 't':
+      return Token{true};
+    case 'f':
+      return Token{false};
+    case '\\': {
+      if(auto t = tokenize_character(i))
+        return t;
+      goto error;
+    }
+      
+    default:
+      goto error;
+    }
+  }
+
+ error:
+  i.clear();
+  i.seekg(pos);
+  return {};
 }
 
 namespace {
