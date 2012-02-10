@@ -130,7 +130,7 @@ int main(){
 
   check_int("#b10", 2);
   check_int("#o10", 8);
-  //check_int("#x10", 16);
+  check_int("#x10", 16);
 
   // float
   check_real("-1.1", -1.1);

@@ -388,6 +388,7 @@ Number parse_number(std::istream& i){
     break;
   case 16:
     r = parse_complex<16>(i);
+    break;
   default:
     goto error;
   }
