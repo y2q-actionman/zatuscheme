@@ -212,10 +212,10 @@ ParserRet parse_decimal(std::istream& i){
     
   if(sharps_before_dot > 0){
     eat_sharp(i, s);
-    goto end; // 4. no frac -- sharps before dot
+    goto end; // 4. only sharps after dot
   }
 
-  if(dot_start && read_char_func(i.peek()) < 0)
+  if(dot_start && !read_char_func(i.peek()))
     goto error; // 2. dot start should have digits
 
   while(read_char_func(i.peek())){
@@ -225,7 +225,7 @@ ParserRet parse_decimal(std::istream& i){
   eat_sharp(i, s);
   
  end:
-  if(check_decimal_suffix(i.peek()) < 0){
+  if(check_decimal_suffix(i.peek())){
     i.ignore(1);
     s.put('e');
 
@@ -234,7 +234,7 @@ ParserRet parse_decimal(std::istream& i){
       s.put(i.get());
     }
 
-    if(read_char_func(i.peek()) < 0){
+    if(read_char_func(i.peek())){
       goto error; // no number on exp. part
     }
 
@@ -275,16 +275,17 @@ ParserRet parse_real_number(std::istream& i){
 
 
   auto u1 = parse_unsigned<radix>(i);
-  if(!get<0>(u1))
-    goto error;
+  if(!get<0>(u1)){
+    if(i.peek() == '.'){
+      goto decimal_float_check;
+    }else{
+      goto error;
+    }
+  }
 
-  // decimal float
-  if(radix == 10){
-    i.clear();
-    auto next = i.peek();
-
-    if(check_decimal_suffix(next)
-       || next == '.' || next == '#'){
+  if(check_decimal_suffix(i.peek()) || i.peek() == '.'){
+  decimal_float_check:
+    if(radix == 10){
       i.seekg(unsigned_pos);
       auto n = parse_decimal(i);
 
@@ -293,6 +294,7 @@ ParserRet parse_real_number(std::istream& i){
             Exactness::inexact};
       }
     }
+    goto error;
   }
 
   if(i.peek() != '/'){ // integer?
