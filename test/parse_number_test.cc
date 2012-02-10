@@ -34,7 +34,7 @@ void fail_message(Number::Type t, istream& i,
 
   callback();
 
-  fputs("\n\tgotten token: ", stdout);
+  fputs("\n\tgotten: ", stdout);
   describe(stdout, n);
   fputc('\n', stdout);
 
@@ -131,13 +131,18 @@ int main(){
   check_int("#b10", 2);
   check_int("#o10", 8);
   check_int("#x10", 16);
+  check_int("#x9abcdef", 0x9abcdef);
 
   // float
   check_real("-1.1", -1.1);
-  check_real("3.14159265358979F0", 3.14159265358979e0);
-  check_real("0.6L0", 0.6e0);
   check_real("1.", 1.0);
   check_real(".1", 0.1);
+  check_real("3.14159265358979e0", 3.14159265358979e0);
+  check_real("0.6s0", 0.6e0);
+  check_real(".1f10", 0.1e10);
+  check_real("3.d2", 3e2);
+  check_real("3#.l-3", 30e-3);
+
 
   check_uninit("#b1.0");
   check_uninit("#o1.0");
@@ -148,6 +153,23 @@ int main(){
   check_complex("1.0+1i", Number::complex_type(1, 1));
   check_complex("-2.5+0.0i", Number::complex_type(-2.5, 0));
   check_complex("1.0@3", polar(1.0, 3.0));
+  check_uninit("1.0i");
+  check_complex("+1.0i", Number::complex_type(0, 1.0));
+
+  // prefix
+  check_int("#e1", 1);
+  check_real("#i1", 1.0);
+  check_uninit("#e1.0");
+  check_real("#i1.0", 1.0);
+  check_uninit("#e1.0i");
+  check_complex("#i-1.0i", Number::complex_type(0, -1.0));
+
+  check_int("#o#e10", 8);
+  check_real("#i#x10", 16.0);
+
+  check_uninit("#x#x10");
+  check_uninit("#i#e1");
+
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

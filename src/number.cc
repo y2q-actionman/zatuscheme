@@ -62,6 +62,7 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
   case 'b': case 'o': case 'd': case 'x':
     if(r_appeared) goto error;
     r = to_radix(c);
+    break;
   default:
     goto error;
   }
@@ -234,7 +235,7 @@ ParserRet parse_decimal(std::istream& i){
       s.put(i.get());
     }
 
-    if(read_char_func(i.peek())){
+    if(!read_char_func(i.peek())){
       goto error; // no number on exp. part
     }
 
@@ -419,8 +420,7 @@ Number to_exact(const Number& n){
   case Number::Type::complex:
     return {}; // not supported
   case Number::Type::real:
-    return Number{static_cast<Number::real_type>
-        (n.get<Number::integer_type>())};
+    return {}; // not supported
   case Number::Type::integer:
     return n;
   case Number::Type::uninitialized:
@@ -436,8 +436,8 @@ Number to_inexact(const Number& n){
   case Number::Type::real:
     return n;
   case Number::Type::integer:
-    return Number{static_cast<Number::integer_type>
-        (n.get<Number::real_type>())};
+    return Number{static_cast<Number::real_type>
+        (n.get<Number::integer_type>())};
   case Number::Type::uninitialized:
   default:
     return {};
