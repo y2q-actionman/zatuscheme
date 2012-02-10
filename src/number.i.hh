@@ -54,6 +54,10 @@ Number::Number(const complex_type& c) :
   type_(Type::complex), z_(c){}
 
 inline
+Number::Number(complex_type::value_type r, complex_type::value_type i) :
+  type_(Type::complex), z_(r, i){}
+
+inline
 Number::Number(real_type d) :
   type_(Type::real), f_(d){}
 

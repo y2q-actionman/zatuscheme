@@ -14,31 +14,27 @@ enum class Exactness{
   exact, inexact, unspecified
     };
 
-template<typename CharT>
-inline constexpr
-int to_radix(CharT c){
-  return (c == 'b') ? 2
+pair<int, Exactness> parse_number_prefix(std::istream& i){
+  static const auto to_radix = [](char c){
+    return (c == 'b') ? 2
     : (c == 'o') ? 8
     : (c == 'd') ? 10
     : (c == 'x') ? 16
     : -1;
-}
+  };
 
-template<typename CharT>
-inline constexpr
-Exactness to_exactness(CharT c){
-  return (c == 'i') ? Exactness::inexact
+  static const auto to_exactness = [](char c){
+    return (c == 'i') ? Exactness::inexact
     : (c == 'e') ? Exactness::exact
     : Exactness::unspecified;
-}
+  };
 
-pair<int, Exactness> parse_number_prefix(std::istream& i){
   int r = 10;
   Exactness e = Exactness::unspecified;
   bool r_appeared = false, e_appeared = false;
 
   if(i.peek() != '#')
-    return make_pair(r, e);
+    return {r, e};
   i.ignore(1);
 
   switch(auto c = i.get()){
@@ -55,7 +51,7 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
   }
   
   if(i.peek() != '#')
-    return make_pair(r, e);
+    return {r, e};
   i.ignore(1);
 
   switch(auto c = i.get()){
@@ -70,10 +66,10 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
     goto error;
   }
   
-  return make_pair(r, e);
+  return {r, e};
 
  error:
-  return make_pair(-1, Exactness::unspecified);
+  return {-1, Exactness::unspecified};
 }
 
 
@@ -125,7 +121,7 @@ bool is_number_char<16>::operator()(CharT c) const{
 
 template<typename IN, typename OUT>
 inline
-bool eat_sharp(IN& i, OUT& o){
+int eat_sharp(IN& i, OUT& o){
   int sharps = 0;
 
   while(i.peek() == '#'){
@@ -137,8 +133,13 @@ bool eat_sharp(IN& i, OUT& o){
   return sharps;
 }
 
+
+typedef pair<Number, Exactness> ParserRet;
+
+#define PARSE_ERROR_VALUE (ParserRet{{}, Exactness::unspecified})
+
 template<int radix>
-Number parse_unsigned(std::istream& i){
+ParserRet parse_unsigned(std::istream& i){
   static const auto fun = is_number_char<radix>{};
   const auto pos = i.tellg();
   stringstream s;
@@ -149,19 +150,25 @@ Number parse_unsigned(std::istream& i){
   if(s.str().empty()){
     goto error;
   }else{
-    eat_sharp(i, s);
+    Exactness e;
+
+    if(eat_sharp(i, s) > 0){
+      e = Exactness::inexact;
+    }else{
+      e = Exactness::exact;
+    }
 
     errno = 0;
     long l = strtol(s.str().c_str(), nullptr, radix);
     if(errno) goto error;
 
-    return Number{l};
+    return {Number{l}, e};
   }
 
  error:
   i.clear();
   i.seekg(pos);
-  return Number{};
+  return PARSE_ERROR_VALUE;
 }
 
 template<typename CharT>
@@ -175,7 +182,7 @@ bool check_decimal_suffix(CharT c){
   }
 }
 
-Number parse_decimal(std::istream& i){
+ParserRet parse_decimal(std::istream& i){
   static const auto read_char_func = is_number_char<10>{};
   const auto pos = i.tellg();
 
@@ -236,16 +243,17 @@ Number parse_decimal(std::istream& i){
     }
   }
 
-  return Number{strtod(s.str().c_str(), nullptr)};
+  return {Number{strtod(s.str().c_str(), nullptr)},
+      Exactness::inexact};
 
  error:
   i.clear();
   i.seekg(pos);
-  return Number{};
+  return PARSE_ERROR_VALUE;
 }
 
 template<int radix>
-Number parse_real_number(std::istream& i){
+ParserRet parse_real_number(std::istream& i){
   const auto pos = i.tellg();
   int sign = 1;
 
@@ -267,7 +275,7 @@ Number parse_real_number(std::istream& i){
 
 
   auto u1 = parse_unsigned<radix>(i);
-  if(!u1)
+  if(!get<0>(u1))
     goto error;
 
   // decimal float
@@ -280,47 +288,50 @@ Number parse_real_number(std::istream& i){
       i.seekg(unsigned_pos);
       auto n = parse_decimal(i);
 
-      if(n.type() == Number::Type::real){
-        return Number{n.get<double>() * sign};
+      if(get<0>(n).type() == Number::Type::real){
+        return {Number{get<0>(n).get<double>() * sign},
+            Exactness::inexact};
       }
     }
   }
 
-  if(i.peek() != '/'){
-    // integer
-    return Number(sign * u1.get<long>());
+  if(i.peek() != '/'){ // integer?
+    // FIXME: inexact or super-big integer can be fall into float.
+    return {Number(sign * get<0>(u1).get<long>()), get<1>(u1)};
   }else{
     // rational
     auto u2 = parse_unsigned<radix>(i);
-    if(!u2)
+    if(!get<0>(u2))
       goto error;
-    return Number(sign * u1.get<double>() / u2.get<double>());
+    return {Number(sign * get<0>(u1).get<double>() / get<0>(u2).get<double>()),
+        Exactness::inexact};
   }
 
  error:
   i.clear();
   i.seekg(pos);
-  return Number{};
+  return PARSE_ERROR_VALUE;
 }
 
 template<int radix>
-Number parse_complex(std::istream& i){
+ParserRet parse_complex(std::istream& i){
   const auto first_char = i.peek();
 
   // has real part
-  Number real = parse_real_number<radix>(i);
-  if(!real)
+  auto real = parse_real_number<radix>(i);
+  if(!get<0>(real))
     goto error;
 
   switch(auto c = i.peek()){
   case '@': {// polar literal
     i.ignore(1);
-    Number deg = parse_real_number<radix>(i);
+    auto deg = parse_real_number<radix>(i);
 
-    if(!deg)
+    if(!get<0>(deg))
       goto error;
         
-    return Number{polar(real.get<double>(), deg.get<double>())};
+    return {Number{polar(get<0>(real).get<double>(), get<0>(deg).get<double>())},
+        Exactness::inexact};
   }
   case '+': case '-': {
     i.ignore(1);
@@ -328,19 +339,22 @@ Number parse_complex(std::istream& i){
 
     if(i.peek() == 'i'){
       i.ignore(1);
-      return Number{Number::complex_type(real.get<double>(), sign)};
+      return {Number{get<0>(real).get<double>(), static_cast<double>(sign)},
+          Exactness::inexact};
     }
     
-    Number imag = parse_real_number<radix>(i);
-    if(!imag || i.get() != 'i')
-      return Number{}; // error
+    auto imag = parse_real_number<radix>(i);
+    if(!get<0>(imag) || i.get() != 'i')
+      goto error;
 
-    return Number{Number::complex_type{real.get<double>(), imag.get<double>() * sign}};
+    return {Number{get<0>(real).get<double>(), get<0>(imag).get<double>() * sign},
+        Exactness::inexact};
   }
   case 'i':
     i.ignore(1);
     if(first_char == '+' || first_char == '-'){
-      return Number{Number::complex_type{0, real.get<double>()}};
+      return {Number{0, get<0>(real).get<double>()},
+          Exactness::inexact};
     }else{
       goto error;
     }
@@ -349,7 +363,7 @@ Number parse_complex(std::istream& i){
   }
 
  error:
-  return Number{};
+  return PARSE_ERROR_VALUE;
 }
 
 } // namespace
@@ -358,31 +372,35 @@ Number parse_number(std::istream& i){
   const auto pos = i.tellg();
   const auto prefix_info = parse_number_prefix(i);
 
-  Number n;
+  ParserRet r;
 
   switch(get<0>(prefix_info)){
   case 2:
-    n = parse_complex<2>(i);
+    r = parse_complex<2>(i);
     break;
   case 8:
-    n = parse_complex<8>(i);
+    r = parse_complex<8>(i);
     break;
   case 10:
-    n = parse_complex<10>(i);
+    r = parse_complex<10>(i);
     break;
   case 16:
-    n = parse_complex<16>(i);
+    r = parse_complex<16>(i);
   default:
     goto error;
   }
 
-  switch(get<1>(prefix_info)){
+  if(!get<0>(r)) goto error;
+
+  // TODO: check inexact integer, and warn.
+
+  switch(auto e = get<1>(prefix_info)){
   case Exactness::exact:
-    return to_exact(n);
+    return (get<1>(r) == e) ? get<0>(r) : to_exact(get<0>(r));
   case Exactness::inexact:
-    return to_inexact(n);
+    return (get<1>(r) == e) ? get<0>(r) : to_inexact(get<0>(r));
   case Exactness::unspecified:
-    return n;
+    return get<0>(r);
   default:
     goto error;
   }
@@ -390,13 +408,13 @@ Number parse_number(std::istream& i){
  error:
   i.clear();
   i.seekg(pos);
-  return Number{};
+  return {};
 }
 
 Number to_exact(const Number& n){
   switch(n.type()){
   case Number::Type::complex:
-    return Number{}; // not supported
+    return {}; // not supported
   case Number::Type::real:
     return Number{static_cast<Number::real_type>
         (n.get<Number::integer_type>())};
@@ -404,7 +422,7 @@ Number to_exact(const Number& n){
     return n;
   case Number::Type::uninitialized:
   default:
-    return Number{};
+    return {};
   }
 }
 
@@ -419,7 +437,7 @@ Number to_inexact(const Number& n){
         (n.get<Number::real_type>())};
   case Number::Type::uninitialized:
   default:
-    return Number{};
+    return {};
   }
 }
 

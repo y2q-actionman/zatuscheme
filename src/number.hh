@@ -23,6 +23,7 @@ public:
     type_(Type::uninitialized){}
 
   explicit Number(const complex_type&);
+  Number(complex_type::value_type, complex_type::value_type);
   explicit Number(real_type);
   explicit Number(integer_type);
 
