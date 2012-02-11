@@ -137,6 +137,42 @@ void check_ident(const string& input, const string& expect){
   return check_ident(is, expect);
 }
 
+bool operator==(const Number& n1, const Number& n2){
+  if(n1.type() != n2.type()) return false;
+
+  switch(n1.type()){
+  case Number::Type::uninitialized:
+    return true;
+  case Number::Type::complex:
+    return n1.get<Number::complex_type>() == n2.get<Number::complex_type>();
+  case Number::Type::real:
+    return n1.get<Number::real_type>() == n2.get<Number::real_type>();
+  case Number::Type::integer:
+    return n1.get<Number::integer_type>() == n2.get<Number::integer_type>();
+  default:
+    return false;
+  }
+}
+
+inline
+bool operator!=(const Number& n1, const Number& n2){
+  return !(n1 == n2);
+}
+
+void check_number(istream& i, const Number& n){
+  check_generic<Token::Type::number>
+    (i, n, 
+     [=](){
+      fprintf(stdout, ", expected num='");
+      describe(stdout, n);
+    });
+}
+
+void check_number(const string& input, const Number& n){
+  stringstream is(input);
+  return check_number(is, n);
+}
+
 void check_boolean(istream& i, bool expect){
   check_generic<Token::Type::boolean>
     (i, expect, 
@@ -223,6 +259,7 @@ int main(){
   check_boolean("#f", false);
 
   // number
+  check_number("+1", Number{1l});
   
   // character
   check_uninit("#\\");

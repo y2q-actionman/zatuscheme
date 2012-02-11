@@ -270,30 +270,9 @@ Token tokenize_identifier(istream& i){
            || c == '.' || c == '@');
 
     return Token{s.str(), Token::Type::identifier};
-  }else{
-    // peculiar_identifier
-    if(c == '+' || c ==  '-'){
-      return Token{string(1, c), Token::Type::identifier};
-    }else if(c == '.'){
-      const auto init_pos = i.tellg();
-      int dots = 0;
-
-      while(i.get() == '.' && dots <= 3){
-        ++dots;
-      }
-
-      if(dots != 3){
-        i.clear();
-        i.seekg(init_pos);
-        goto error;
-      }
-
-      return Token{string(3, '.'), Token::Type::identifier};
-    }
   }
 
- error:
-  return Token{};
+  return {};
 }
 
 Token tokenize_character(istream& i){
@@ -343,7 +322,7 @@ Token tokenize_character(istream& i){
   return Token{static_cast<char>(ret_char)};
 
  error:
-  return Token{};
+  return {};
 }
 
 Token tokenize_string(istream& i){
@@ -370,7 +349,7 @@ Token tokenize_string(istream& i){
   }
 
  error:
-  return Token{};
+  return {};
 }
 
 Token tokenize_number(istream& i){
@@ -387,16 +366,9 @@ Token tokenize_number(istream& i){
 Token tokenize(istream& i){
   skip_intertoken_space(i);
 
-  if(auto t = tokenize_identifier(i))
-    return t;
-
-  if(auto t = tokenize_number(i))
-    return t;
-
-
   const auto pos = i.tellg();
 
-  switch(i.get()){
+  switch(auto c = i.get()){
   case '(':
     return Token{Token::Notation::l_paren};
   case ')':
@@ -422,34 +394,67 @@ Token tokenize(istream& i){
     }else{
       return Token{Token::Notation::comma};
     }
-  case '.':
-    if(i.peek() == '.'){
-      goto error;
-    }else{
-      return Token{Token::Notation::dot};
+
+  case '.': {
+    int dots = 1;
+
+    while(i.peek() == '.' && dots <= 3+1){
+      i.get();
+      ++dots;
     }
 
-  case '"': {
-    if(auto t = tokenize_string(i))
-      return t;
-    goto error;
+    switch(dots){
+    case 1:
+      return Token{Token::Notation::dot};
+    case 3:
+      return Token{"...", Token::Type::identifier};
+    default:
+      goto error;
+    }
   }
 
+  case '"':
+    return tokenize_string(i);
+
+  case '+': case '-':
+    if(is_delimiter(i.peek())){
+      return Token{string(1, c), Token::Type::identifier};
+    }else{
+      i.unget();
+      return tokenize_number(i);
+    }
+
   case '#':
-    switch(i.get()){
+    switch(i.peek()){
     case '(':
+      i.get();
       return Token{Token::Notation::vector_paren};
     case 't':
+      i.get();
       return Token{true};
     case 'f':
+      i.get();
       return Token{false};
-    case '\\': {
-      if(auto t = tokenize_character(i))
-        return t;
+    case '\\':
+      i.get();
+      return tokenize_character(i);
+    case 'i': case 'e':
+    case 'b': case 'o':
+    case 'd': case 'x':
+      i.unget();
+      return tokenize_number(i);
+    default:
       goto error;
     }
-      
-    default:
+
+  default:
+    if(isalpha(c) || is_special_initial(c)){
+      i.unget();
+      return tokenize_identifier(i);
+    }else if(isdigit(c)){
+      i.unget();
+      return tokenize_number(i);
+    }else{
       goto error;
     }
   }
