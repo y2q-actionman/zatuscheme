@@ -353,8 +353,13 @@ Token tokenize_string(istream& i){
 }
 
 Token tokenize_number(istream& i){
-  auto n = parse_number(i);
-  if(n){
+  stringstream s;
+
+  while(!is_delimiter(i.peek())){
+    s.put(i.get());
+  }
+
+  if(auto n = parse_number(s)){
     return Token{n};
   }else{
     return Token{};
