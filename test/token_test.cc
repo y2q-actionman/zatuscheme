@@ -260,6 +260,7 @@ int main(){
 
   // number
   check_number("+1", Number{1l});
+  check_number("#x16", Number{0x16l});
   
   // character
   check_uninit("#\\");

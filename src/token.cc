@@ -253,38 +253,31 @@ streamoff skip_intertoken_space(istream& i, streamoff skipped = 0){
 }
 
 
-Token tokenize_identifier(istream& i){
+Token tokenize_identifier(istream& i, char first_char){
+  ostringstream s;
+
+  s.put(first_char);
+
+  // subsequent
   auto c = i.peek();
 
-  // initial
-  if(isalpha(c) || is_special_initial(c)){
-    ostringstream s;
-
-    // subsequent
-    do{
-      s.put(i.get());
-      c = i.peek();
-    }while(!is_delimiter(c) 
-           || isalpha(c) || is_special_initial(c) 
-           || isdigit(c) || c == '+' || c == '-'
-           || c == '.' || c == '@');
-
-    return Token{s.str(), Token::Type::identifier};
+  while(!is_delimiter(c) 
+        || isalpha(c) || is_special_initial(c) 
+        || isdigit(c) || c == '+' || c == '-'
+        || c == '.' || c == '@'){
+    s.put(i.get());
+    c = i.peek();
   }
 
-  return {};
+  return Token{s.str(), Token::Type::identifier};
 }
 
 Token tokenize_character(istream& i){
   // function for checking character-name
   const auto check_name = [&](const char* str) -> bool {
-    const auto initpos = i.tellg();
-
     for(const char* c = str; *c; ++c){
       auto get_c = i.get();
       if(get_c != *c || is_delimiter(get_c)){
-        i.clear();
-        i.seekg(initpos);
         return false;
       }
     }
@@ -295,6 +288,8 @@ Token tokenize_character(istream& i){
 
   // check character name
   switch(i.peek()){
+  case EOF:
+    return {};
   case 's': {
     if(check_name("space")){
       ret_char = ' ';
@@ -311,8 +306,6 @@ Token tokenize_character(istream& i){
       goto single_char;
     }
   }
-  case EOF:
-    goto error;
   default: 
   single_char:
     ret_char = i.get();
@@ -320,9 +313,6 @@ Token tokenize_character(istream& i){
   }
 
   return Token{static_cast<char>(ret_char)};
-
- error:
-  return {};
 }
 
 Token tokenize_string(istream& i){
@@ -330,6 +320,8 @@ Token tokenize_string(istream& i){
 
   while(i){
     switch(i.peek()){
+    case EOF:
+      goto error;
     case '"':
       i.ignore(1);
       return Token{s.str(), Token::Type::string};
@@ -352,8 +344,11 @@ Token tokenize_string(istream& i){
   return {};
 }
 
-Token tokenize_number(istream& i){
+Token tokenize_number(istream& i, char c1, char c2 = 0){
   stringstream s;
+
+  s.put(c1);
+  if(c2) s.put(c2);
 
   while(!is_delimiter(i.peek())){
     s.put(i.get());
@@ -370,8 +365,6 @@ Token tokenize_number(istream& i){
 
 Token tokenize(istream& i){
   skip_intertoken_space(i);
-
-  const auto pos = i.tellg();
 
   switch(auto c = i.get()){
   case '(':
@@ -425,48 +418,38 @@ Token tokenize(istream& i){
     if(is_delimiter(i.peek())){
       return Token{string(1, c), Token::Type::identifier};
     }else{
-      i.unget();
-      return tokenize_number(i);
+      return tokenize_number(i, c);
     }
 
   case '#':
-    switch(i.peek()){
+    switch(auto sharp_c = i.get()){
     case '(':
-      i.get();
       return Token{Token::Notation::vector_paren};
     case 't':
-      i.get();
       return Token{true};
     case 'f':
-      i.get();
       return Token{false};
     case '\\':
-      i.get();
       return tokenize_character(i);
     case 'i': case 'e':
     case 'b': case 'o':
     case 'd': case 'x':
-      i.unget();
-      return tokenize_number(i);
+      return tokenize_number(i, '#', sharp_c);
     default:
       goto error;
     }
 
   default:
     if(isalpha(c) || is_special_initial(c)){
-      i.unget();
-      return tokenize_identifier(i);
+      return tokenize_identifier(i, c);
     }else if(isdigit(c)){
-      i.unget();
-      return tokenize_number(i);
+      return tokenize_number(i, c);
     }else{
       goto error;
     }
   }
 
  error:
-  i.clear();
-  i.seekg(pos);
   return {};
 }
 
