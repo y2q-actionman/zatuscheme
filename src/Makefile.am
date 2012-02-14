@@ -12,7 +12,8 @@ libzs_a_SOURCES = zs.hh\
 		symbol.cc symbol.hh symbol.i.hh\
 		symtable.cc symtable.hh\
 		keyword.cc keyword.hh\
-		reader.cc reader.hh
+		reader.cc reader.hh\
+		printer.cc printer.hh
 
 noinst_PROGRAMS = zs
 zs_SOURCES = zs.hh main.cc
