@@ -13,6 +13,18 @@ using namespace std;
 
 static bool result;
 
+void scat_file(FILE* f){
+  int c;
+
+  printf("### ");
+  while((c = fgetc(f)) != EOF){
+    putchar(c);
+  }
+  putchar('\n');
+
+  rewind(f);
+}
+
 template<typename T>
 void check_copy_move(const Token& tok){
   // constructor
@@ -55,14 +67,13 @@ void check_copy_move(const Token& tok){
 }
 
 template<typename Fun>
-void fail_message(Token::Type t, istream& i, streampos b_pos,
+void fail_message(Token::Type t, FILE* f, const fpos_t* b_pos,
                   const Token& tok, const Fun& callback){
   // extract input from stream
   char buf[PRINT_BUFSIZE];
 
-  i.clear(); // clear eof
-  i.seekg(b_pos);
-  i.get(buf, sizeof(buf));
+  fsetpos(f, b_pos);
+  fgets(buf, sizeof(buf), f);
 
   fprintf(stdout, "[failed] input='%s', expect type='", buf);
   describe(stdout, t);
@@ -79,13 +90,14 @@ void fail_message(Token::Type t, istream& i, streampos b_pos,
 
 template<Token::Type type, typename Fun,
          typename ex_type = char>
-void check_generic(istream& i,
-                   const Fun& f){
-  const auto init_pos = i.tellg();
-  const Token tok = tokenize(i);
+void check_generic(FILE* f, const Fun& fun){
+  fpos_t init_pos;
+  fgetpos(f, &init_pos);
+
+  const Token tok = tokenize(f);
 
   if(tok.type() != type){
-    fail_message(type, i, init_pos, tok, f);
+    fail_message(type, f, &init_pos, tok, fun);
     return;
   }
   
@@ -94,14 +106,15 @@ void check_generic(istream& i,
 
 template<Token::Type type, typename Fun, 
          typename ex_type = typename to_type<Token::Type>::get<type>::type>
-void check_generic(istream& i,
-                   const ex_type& expect,
-                   const Fun& f){
-  const auto init_pos = i.tellg();
-  const Token tok = tokenize(i);
+void check_generic(FILE* f, const ex_type& expect,
+                   const Fun& fun){
+  fpos_t init_pos;
+  fgetpos(f, &init_pos);
+
+  const Token tok = tokenize(f);
 
   if(tok.type() != type || tok.get<ex_type>() != expect){
-    fail_message(type, i, init_pos, tok, f);
+    fail_message(type, f, &init_pos, tok, fun);
     return;
   }
   
@@ -109,20 +122,21 @@ void check_generic(istream& i,
 }
 
 
-void check(istream& i){
+void check(FILE* f){
   check_generic<Token::Type::uninitialized>
-    (i, [](){});
+    (f, [](){});
 }
 
 void check(const string& input){
-  stringstream is(input);
-  return check(is);
+  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  check(f);
+  fclose(f);
 }
 
 template<Token::Type T>
-void check(istream& i, const string& expect){
+void check(FILE* f, const string& expect){
   check_generic<T>
-    (i, expect,
+    (f, expect,
      [&](){
       fprintf(stdout, ", expected str='%s'", expect.c_str());
     });
@@ -130,8 +144,9 @@ void check(istream& i, const string& expect){
 
 template<Token::Type T>
 void check(const string& input, const string& expect){
-  stringstream is(input);
-  return check<T>(is, expect);
+  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  check<T>(f, expect);
+  fclose(f);
 }
 
 bool operator==(const Number& n1, const Number& n2){
@@ -156,34 +171,34 @@ bool operator!=(const Number& n1, const Number& n2){
   return !(n1 == n2);
 }
 
-void check(istream& i, const Number& n){
+void check(FILE* f, const Number& n){
   check_generic<Token::Type::number>
-    (i, n, 
+    (f, n, 
      [=](){
       fprintf(stdout, ", expected num='");
       describe(stdout, n);
     });
 }
 
-void check(istream& i, bool expect){
+void check(FILE* f, bool expect){
   check_generic<Token::Type::boolean>
-    (i, expect, 
+    (f, expect, 
      [=](){
       fprintf(stdout, ", expected bool='%s'", expect ? "true" : "false");
     });
 }
 
-void check(istream& i, char expect){
+void check(FILE* f, char expect){
   check_generic<Token::Type::character>
-    (i, expect, 
+    (f, expect, 
      [=](){
       fprintf(stdout, ", expected char='%c'", expect);
     });
 }
 
-void check(istream& i, Token::Notation n){
+void check(FILE* f, Token::Notation n){
   check_generic<Token::Type::notation>
-    (i, n,
+    (f, n,
      [=](){
       fputs(", expected notation='", stdout);
       describe(stdout, n);
@@ -193,8 +208,9 @@ void check(istream& i, Token::Notation n){
 
 template<typename T>
 void check(const string& input, T&& expect){
-  stringstream is(input);
-  return check(is, expect);
+  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  check(f, expect);
+  fclose(f);
 }
 
 
@@ -258,7 +274,8 @@ int main(){
 
   // consecutive access
   {
-    stringstream ss("(a . b)#(c 'd) e ;... \n f +11 `(,x ,@y \"ho()ge\")");
+    char teststr[] = "(a . b)#(c 'd) e ;... \n f +11 `(,x ,@y \"ho()ge\")";
+    FILE* ss = fmemopen(teststr, sizeof(teststr), "r");
 
     check(ss, N::l_paren);
     check_ident(ss, "a");
@@ -284,6 +301,8 @@ int main(){
     check(ss, N::r_paren);
 
     check(ss);
+
+    fclose(ss);
   }
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

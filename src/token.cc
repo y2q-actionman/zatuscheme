@@ -233,23 +233,22 @@ bool is_special_initial(charT c){
   }
 }
 
-streamoff skip_intertoken_space(istream& i, streamoff skipped = 0){
-  const auto c = i.peek();
-
-  if(isspace(c)){
-    return skip_intertoken_space(i.ignore(1), skipped + 1);
-  }else if(c == ';'){
-    const auto pos = i.tellg();
-
-    do{
-      char tmp[100];
-      i.getline(tmp, sizeof(tmp));
-    }while(!i.eof() && i.fail());
+void skip_intertoken_space(FILE* f){
+  decltype(fgetc(f)) c;
     
-    return skip_intertoken_space(i, i.tellg() - pos);
+  while((c = fgetc(f)) != EOF){
+    if(isspace(c)){
+      continue;
+    }else if(c == ';'){
+      do{
+        c = fgetc(f);
+      }while(c != EOF && c != '\n');
+      ungetc(c, f);
+    }else{
+      ungetc(c, f);
+      return;
+    }
   }
-
-  return skipped;
 }
 
 
@@ -364,7 +363,7 @@ Token tokenize_number(istream& i, char c1, char c2 = 0){
 } // namespace
 
 Token tokenize(istream& i){
-  skip_intertoken_space(i);
+  //skip_intertoken_space(i);
 
   switch(auto c = i.get()){
   case '(':
@@ -451,6 +450,21 @@ Token tokenize(istream& i){
 
  error:
   return {};
+}
+
+Token tokenize(FILE* f){
+  skip_intertoken_space(f);
+
+  stringstream s;
+  auto c = fgetc(f);
+
+  while(c != EOF){
+    s.put(c);
+    c = fgetc(f);
+  }
+  ungetc(c, f);
+
+  return tokenize(s);
 }
 
 namespace {

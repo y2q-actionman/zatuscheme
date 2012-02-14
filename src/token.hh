@@ -2,7 +2,6 @@
 #define TOKEN_HH
 
 #include <string>
-#include <iosfwd>
 #include <cstdio>
 #include "number.hh"
 
@@ -64,7 +63,7 @@ private:
   };
 };
 
-Token tokenize(std::istream&);
+Token tokenize(FILE*);
 
 void describe(FILE*, Token::Type);
 void describe(FILE*, Token::Notation);

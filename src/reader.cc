@@ -13,10 +13,10 @@ using namespace std;
 
 namespace {
 
-Lisp_ptr read_la(SymTable&, istream&, const Token&);
+Lisp_ptr read_la(SymTable&, FILE*, const Token&);
 
-Lisp_ptr read_list(SymTable& sym, istream& i){
-  Token t = tokenize(i);
+Lisp_ptr read_list(SymTable& sym, FILE* f){
+  Token t = tokenize(f);
 
   // first check
   if(!t){
@@ -37,7 +37,7 @@ Lisp_ptr read_list(SymTable& sym, istream& i){
   Lisp_ptr last = head;
 
   while(1){
-    Lisp_ptr datum{read_la(sym, i, t)};
+    Lisp_ptr datum{read_la(sym, f, t)};
     if(!datum){
       return Lisp_ptr{};
     }
@@ -45,7 +45,7 @@ Lisp_ptr read_list(SymTable& sym, istream& i){
     last.get<Cons*>()->rplaca(datum);
     
     // check next token
-    t = tokenize(i);
+    t = tokenize(f);
     if(!t){
       // in future, cleanup working data.
       return Lisp_ptr{};
@@ -55,7 +55,7 @@ Lisp_ptr read_list(SymTable& sym, istream& i){
         last.get<Cons*>()->rplacd(Cons::NIL);
         goto end;
       case Token::Notation::dot:     // dotted list
-        last.get<Cons*>()->rplacd(read(sym, i));
+        last.get<Cons*>()->rplacd(read(sym, f));
         goto end;
       default:
         break;
@@ -73,11 +73,11 @@ Lisp_ptr read_list(SymTable& sym, istream& i){
   return head;
 }
 
-Lisp_ptr read_vector(SymTable& sym, istream& i){
+Lisp_ptr read_vector(SymTable& sym, FILE* f){
   Vector* v = new Vector();
 
   while(1){
-    auto t = tokenize(i);
+    auto t = tokenize(f);
     if(!t){
       // in future, cleanup working data.
       return Lisp_ptr{};
@@ -86,7 +86,7 @@ Lisp_ptr read_vector(SymTable& sym, istream& i){
                  == Token::Notation::r_paren)){
       goto end;
     }else{
-      Lisp_ptr datum{read_la(sym, i, t)};
+      Lisp_ptr datum{read_la(sym, f, t)};
       if(!datum){
         return Lisp_ptr{};
       }
@@ -99,15 +99,15 @@ Lisp_ptr read_vector(SymTable& sym, istream& i){
   return Lisp_ptr{new Long_ptr{v}};
 }
 
-Lisp_ptr read_abbrev(SymTable& sym, Keyword k, istream& i){
+Lisp_ptr read_abbrev(SymTable& sym, Keyword k, FILE* f){
   Lisp_ptr first{sym.intern(stringify(k))};
-  Lisp_ptr second{read(sym, i)};
+  Lisp_ptr second{read(sym, f)};
 
   return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second}}}};
 }
 
-Lisp_ptr read_la(SymTable& sym, istream& i, const Token& looked_tok){
-  auto& tok = (looked_tok) ? looked_tok : tokenize(i);
+Lisp_ptr read_la(SymTable& sym, FILE* f, const Token& looked_tok){
+  auto& tok = (looked_tok) ? looked_tok : tokenize(f);
 
   switch(tok.type()){
     // simple datum
@@ -131,23 +131,23 @@ Lisp_ptr read_la(SymTable& sym, istream& i, const Token& looked_tok){
     switch(tok.get<Token::Notation>()){
 
     case Token::Notation::l_paren: // list
-      return read_list(sym, i);
+      return read_list(sym, f);
 
     case Token::Notation::vector_paren: // vector
-      return read_vector(sym, i);
+      return read_vector(sym, f);
 
       // abbrev prefix
     case Token::Notation::quote:
-      return read_abbrev(sym, Keyword::quote, i);
+      return read_abbrev(sym, Keyword::quote, f);
 
     case Token::Notation::quasiquote:
-      return read_abbrev(sym, Keyword::quasiquote, i);
+      return read_abbrev(sym, Keyword::quasiquote, f);
 
     case Token::Notation::comma:
-      return read_abbrev(sym, Keyword::unquote, i);
+      return read_abbrev(sym, Keyword::unquote, f);
 
     case Token::Notation::comma_at:
-      return read_abbrev(sym, Keyword::unquote_splicing, i);
+      return read_abbrev(sym, Keyword::unquote_splicing, f);
       
     default:
       return Lisp_ptr{};
@@ -160,6 +160,6 @@ Lisp_ptr read_la(SymTable& sym, istream& i, const Token& looked_tok){
 
 } // namespace
 
-Lisp_ptr read(SymTable& sym, istream& i){
-  return read_la(sym, i, Token{});
+Lisp_ptr read(SymTable& sym, FILE* f){
+  return read_la(sym, f, Token{});
 }
