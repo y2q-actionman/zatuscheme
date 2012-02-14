@@ -252,106 +252,100 @@ void skip_intertoken_space(FILE* f){
 }
 
 
-Token tokenize_identifier(istream& i, char first_char){
+Token tokenize_identifier(FILE* f, char first_char){
   ostringstream s;
 
   s.put(first_char);
 
   // subsequent
-  auto c = i.peek();
+  auto c = fgetc(f);
 
   while(!is_delimiter(c) 
         || isalpha(c) || is_special_initial(c) 
         || isdigit(c) || c == '+' || c == '-'
         || c == '.' || c == '@'){
-    s.put(i.get());
-    c = i.peek();
+    s.put(c);
+    c = fgetc(f);
   }
+  ungetc(c, f);
 
   return Token{s.str(), Token::Type::identifier};
 }
 
-Token tokenize_character(istream& i){
+Token tokenize_character(FILE* f){
   // function for checking character-name
   const auto check_name = [&](const char* str) -> bool {
     for(const char* c = str; *c; ++c){
-      auto get_c = i.get();
+      auto get_c = fgetc(f);
       if(get_c != *c || is_delimiter(get_c)){
+        ungetc(get_c, f);
         return false;
       }
     }
     return true;
   };
 
-  char ret_char;
+  auto ret_char = fgetc(f);
 
   // check character name
-  switch(i.peek()){
+  switch(ret_char){
   case EOF:
     return {};
-  case 's': {
-    if(check_name("space")){
+  case 's':
+    if(check_name("pace")){
       ret_char = ' ';
-      break;
-    }else{
-      goto single_char;
     }
-  }
-  case 'n': {
-    if(check_name("newline")){
+    break;
+  case 'n':
+    if(check_name("ewline")){
       ret_char = '\n';
-      break;
-    }else{
-      goto single_char;
     }
-  }
-  default: 
-  single_char:
-    ret_char = i.get();
     break;
   }
 
   return Token{static_cast<char>(ret_char)};
 }
 
-Token tokenize_string(istream& i){
+Token tokenize_string(FILE* f){
   ostringstream s;
+  auto c = fgetc(f);
 
-  while(i){
-    switch(i.peek()){
-    case EOF:
-      goto error;
+  while(c != EOF){
+    switch(c){
     case '"':
-      i.ignore(1);
       return Token{s.str(), Token::Type::string};
     case '\\':
-      i.ignore(1);
-      switch(i.peek()){
+      c = fgetc(f);
+      switch(c){
       case '"': case '\\':
-        s.put(i.get());
+        s.put(c);
         break;
       default:
         goto error;
       }
       break;
     default:
-      s.put(i.get());
+      s.put(c);
     }
+    c = fgetc(f);
   }
 
  error:
   return {};
 }
 
-Token tokenize_number(istream& i, char c1, char c2 = 0){
+Token tokenize_number(FILE* f, char c1, char c2 = 0){
   stringstream s;
 
   s.put(c1);
   if(c2) s.put(c2);
 
-  while(!is_delimiter(i.peek())){
-    s.put(i.get());
+  auto c = fgetc(f);
+  while(!is_delimiter(c)){
+    s.put(c);
+    c = fgetc(f);
   }
+  ungetc(c, f);
 
   if(auto n = parse_number(s)){
     return Token{n};
@@ -362,10 +356,10 @@ Token tokenize_number(istream& i, char c1, char c2 = 0){
 
 } // namespace
 
-Token tokenize(istream& i){
-  //skip_intertoken_space(i);
+Token tokenize(FILE* f){
+  skip_intertoken_space(f);
 
-  switch(auto c = i.get()){
+  switch(auto c = fgetc(f)){
   case '(':
     return Token{Token::Notation::l_paren};
   case ')':
@@ -384,20 +378,23 @@ Token tokenize(istream& i){
     return Token{Token::Notation::r_brace};
   case '|':
     return Token{Token::Notation::bar};
-  case ',':
-    if(i.peek() == '@'){
-      i.ignore(1);
+  case ',': {
+    auto c2 = fgetc(f);
+    if(c2 == '@'){
       return Token{Token::Notation::comma_at};
     }else{
+      ungetc(c2, f);
       return Token{Token::Notation::comma};
     }
+  }
 
   case '.': {
     int dots = 1;
+    auto c2 = fgetc(f);
 
-    while(i.peek() == '.' && dots <= 3+1){
-      i.get();
+    while(c2 == '.'){
       ++dots;
+      c2 = fgetc(f);
     }
 
     switch(dots){
@@ -411,17 +408,20 @@ Token tokenize(istream& i){
   }
 
   case '"':
-    return tokenize_string(i);
+    return tokenize_string(f);
 
-  case '+': case '-':
-    if(is_delimiter(i.peek())){
+  case '+': case '-': {
+    auto c2 = fgetc(f);
+
+    if(is_delimiter(c2)){
       return Token{string(1, c), Token::Type::identifier};
     }else{
-      return tokenize_number(i, c);
+      return tokenize_number(f, c, c2);
     }
+  }
 
   case '#':
-    switch(auto sharp_c = i.get()){
+    switch(auto sharp_c = fgetc(f)){
     case '(':
       return Token{Token::Notation::vector_paren};
     case 't':
@@ -429,20 +429,20 @@ Token tokenize(istream& i){
     case 'f':
       return Token{false};
     case '\\':
-      return tokenize_character(i);
+      return tokenize_character(f);
     case 'i': case 'e':
     case 'b': case 'o':
     case 'd': case 'x':
-      return tokenize_number(i, '#', sharp_c);
+      return tokenize_number(f, '#', sharp_c);
     default:
       goto error;
     }
 
   default:
     if(isalpha(c) || is_special_initial(c)){
-      return tokenize_identifier(i, c);
+      return tokenize_identifier(f, c);
     }else if(isdigit(c)){
-      return tokenize_number(i, c);
+      return tokenize_number(f, c);
     }else{
       goto error;
     }
@@ -450,21 +450,6 @@ Token tokenize(istream& i){
 
  error:
   return {};
-}
-
-Token tokenize(FILE* f){
-  skip_intertoken_space(f);
-
-  stringstream s;
-  auto c = fgetc(f);
-
-  while(c != EOF){
-    s.put(c);
-    c = fgetc(f);
-  }
-  ungetc(c, f);
-
-  return tokenize(s);
 }
 
 namespace {

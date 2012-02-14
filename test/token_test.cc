@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <memory>
 #include <cstdio>
+#include <cstring>
 
 #include "token.hh"
 
@@ -73,7 +74,9 @@ void fail_message(Token::Type t, FILE* f, const fpos_t* b_pos,
   char buf[PRINT_BUFSIZE];
 
   fsetpos(f, b_pos);
-  fgets(buf, sizeof(buf), f);
+  if(!fgets(buf, sizeof(buf), f)){
+    strcpy(buf, "(read error)");
+  }
 
   fprintf(stdout, "[failed] input='%s', expect type='", buf);
   describe(stdout, t);
@@ -258,6 +261,7 @@ int main(){
   check("#\\a", 'a');
   check("#\\b", 'b');
   check("#\\x", 'x');
+  check("#\\s", 's');
   check("#\\space", ' ');
   check("#\\newline", '\n');
 
