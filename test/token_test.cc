@@ -7,6 +7,8 @@
 
 #include "token.hh"
 
+#define PRINT_BUFSIZE 100
+
 using namespace std;
 
 static bool result;
@@ -55,21 +57,14 @@ void check_copy_move(const Token& tok){
 template<typename Fun>
 void fail_message(Token::Type t, istream& i, streampos b_pos,
                   const Token& tok, const Fun& callback){
+  // extract input from stream
+  char buf[PRINT_BUFSIZE];
 
-  { // extract input from stream
-    i.clear(); // clear eof
+  i.clear(); // clear eof
+  i.seekg(b_pos);
+  i.get(buf, sizeof(buf));
 
-    const auto now_pos = i.tellg();
-    const auto size = now_pos - b_pos + 1;
-    const unique_ptr<char[]> tmp(new char[size]);
-
-    i.seekg(b_pos);
-    i.get(tmp.get(), size);
-
-    fprintf(stdout, "[failed] input='%s', expect type='",
-            tmp.get());
-  }
-
+  fprintf(stdout, "[failed] input='%s', expect type='", buf);
   describe(stdout, t);
   fputc('\'', stdout);
 

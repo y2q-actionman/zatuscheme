@@ -7,6 +7,8 @@
 
 #include "number.hh"
 
+#define PRINT_BUFSIZE 100
+
 using namespace std;
 
 static bool result;
@@ -14,20 +16,14 @@ static bool result;
 template<typename Fun>
 void fail_message(Number::Type t, istream& i, 
                   const Number& n, const Fun& callback){
+  // extract input from stream
+  char buf[PRINT_BUFSIZE];
 
-  { // extract input from stream
-    i.clear(); // clear eof
+  i.clear(); // clear eof
+  i.seekg(0, ios_base::beg);
+  i.get(buf, sizeof(buf));
 
-    const auto now_pos = i.tellg();
-    const auto size = now_pos + static_cast<streamoff>(1);
-    const unique_ptr<char[]> tmp(new char[size]);
-
-    i.seekg(0, ios_base::beg);
-    i.get(tmp.get(), size);
-
-    fprintf(stdout, "[failed] input='%s', expect type='",
-            tmp.get());
-  }
+  fprintf(stdout, "[failed] input='%s', expect type='", buf);
 
   describe(stdout, t);
   fputc('\'', stdout);
