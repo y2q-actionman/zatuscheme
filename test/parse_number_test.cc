@@ -61,17 +61,17 @@ void check_generic(istream& i,
 }
 
 
-void check_uninit(istream& i){
+void check(istream& i){
   check_generic<Number::Type::uninitialized>
     (i, [](){});
 }
 
-void check_uninit(const string& input){
+void check(const string& input){
   stringstream is(input);
-  return check_uninit(is);
+  return check(is);
 }
 
-void check_int(istream& i, long expect){
+void check(istream& i, long expect){
   check_generic<Number::Type::integer>
     (i, expect,
      [=](){
@@ -79,12 +79,7 @@ void check_int(istream& i, long expect){
     });
 }
 
-void check_int(const string& input, long expect){
-  stringstream is(input);
-  return check_int(is, expect);
-}
-
-void check_real(istream& i, double expect){
+void check(istream& i, double expect){
   check_generic<Number::Type::real>
     (i, expect,
      [=](){
@@ -92,12 +87,7 @@ void check_real(istream& i, double expect){
     });
 }
 
-void check_real(const string& input, double expect){
-  stringstream is(input);
-  return check_real(is, expect);
-}
-
-void check_complex(istream& i, const Number::complex_type& z){
+void check(istream& i, const Number::complex_type& z){
   check_generic<Number::Type::complex>
     (i, z,
      [=](){
@@ -106,9 +96,10 @@ void check_complex(istream& i, const Number::complex_type& z){
     });
 }
 
-void check_complex(const string& input, const Number::complex_type& z){
+template<typename T>
+void check(const string& input, T&& t){
   stringstream is(input);
-  return check_complex(is, z);
+  return check(is, t);
 }
 
 
@@ -116,55 +107,55 @@ int main(){
   result = true;
 
   // invalids
-  check_uninit("hogehoge");
-  check_uninit(".");
+  check("hogehoge");
+  check(".");
 
   // int
-  check_int("100", 100);
-  check_int("-100", -100);
-  check_int("1##", 100);
+  check("100", 100l);
+  check("-100", -100l);
+  check("1##", 100l);
 
-  check_int("#b10", 2);
-  check_int("#o10", 8);
-  check_int("#x10", 16);
-  check_int("#x9abcdef", 0x9abcdef);
+  check("#b10", 2l);
+  check("#o10", 8l);
+  check("#x10", 16l);
+  check("#x9abcdef", 0x9abcdefl);
 
   // float
-  check_real("-1.1", -1.1);
-  check_real("1.", 1.0);
-  check_real(".1", 0.1);
-  check_real("3.14159265358979e0", 3.14159265358979e0);
-  check_real("0.6s0", 0.6e0);
-  check_real(".1f10", 0.1e10);
-  check_real("3.d2", 3e2);
-  check_real("3#.l-3", 30e-3);
+  check("-1.1", -1.1);
+  check("1.", 1.0);
+  check(".1", 0.1);
+  check("3.14159265358979e0", 3.14159265358979e0);
+  check("0.6s0", 0.6e0);
+  check(".1f10", 0.1e10);
+  check("3.d2", 3e2);
+  check("3#.l-3", 30e-3);
 
 
-  check_uninit("#b1.0");
-  check_uninit("#o1.0");
-  check_uninit("#x1.0");
-  check_real("#d1.0", 1.0);
+  check("#b1.0");
+  check("#o1.0");
+  check("#x1.0");
+  check("#d1.0", 1.0);
 
   // complex
-  check_complex("1.0+1i", Number::complex_type(1, 1));
-  check_complex("-2.5+0.0i", Number::complex_type(-2.5, 0));
-  check_complex("1.0@3", polar(1.0, 3.0));
-  check_uninit("1.0i");
-  check_complex("+1.0i", Number::complex_type(0, 1.0));
+  check("1.0+1i", Number::complex_type(1, 1));
+  check("-2.5+0.0i", Number::complex_type(-2.5, 0));
+  check("1.0@3", polar(1.0, 3.0));
+  check("1.0i");
+  check("+1.0i", Number::complex_type(0, 1.0));
 
   // prefix
-  check_int("#e1", 1);
-  check_real("#i1", 1.0);
-  check_uninit("#e1.0");
-  check_real("#i1.0", 1.0);
-  check_uninit("#e1.0i");
-  check_complex("#i-1.0i", Number::complex_type(0, -1.0));
+  check("#e1", 1l);
+  check("#i1", 1.0);
+  check("#e1.0");
+  check("#i1.0", 1.0);
+  check("#e1.0i");
+  check("#i-1.0i", Number::complex_type(0, -1.0));
 
-  check_int("#o#e10", 8);
-  check_real("#i#x10", 16.0);
+  check("#o#e10", 8l);
+  check("#i#x10", 16.0);
 
-  check_uninit("#x#x10");
-  check_uninit("#i#e1");
+  check("#x#x10");
+  check("#i#e1");
 
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
