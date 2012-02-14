@@ -140,9 +140,8 @@ typedef pair<Number, Exactness> ParserRet;
 #define PARSE_ERROR_VALUE (ParserRet{{}, Exactness::unspecified})
 
 template<int radix>
-ParserRet parse_unsigned(std::istream& i){
+ParserRet parse_unsigned(std::istream& i, stringstream& s){
   static const auto fun = is_number_char<radix>{};
-  stringstream s;
 
   while(fun(i.peek()))
     s.put(i.get());
@@ -180,14 +179,8 @@ bool check_decimal_suffix(CharT c){
   }
 }
 
-ParserRet parse_decimal(std::istream& i){
+ParserRet parse_decimal(std::istream& i, stringstream& s){
   static const auto read_char_func = is_number_char<10>{};
-
-  stringstream s;
-  
-  while(read_char_func(i.peek())){
-    s.put(i.get());
-  }
 
   bool dot_start = false;
   int sharps_before_dot = 0;
@@ -265,10 +258,9 @@ ParserRet parse_real_number(std::istream& i){
     break;
   }
 
-  const auto unsigned_pos = i.tellg();
+  stringstream s;
 
-
-  auto u1 = parse_unsigned<radix>(i);
+  auto u1 = parse_unsigned<radix>(i, s);
   if(!get<0>(u1)){
     if(i.peek() == '.'){
       goto decimal_float_check;
@@ -280,8 +272,7 @@ ParserRet parse_real_number(std::istream& i){
   if(check_decimal_suffix(i.peek()) || i.peek() == '.'){
   decimal_float_check:
     if(radix == 10){
-      i.seekg(unsigned_pos);
-      auto n = parse_decimal(i);
+      auto n = parse_decimal(i, s);
 
       if(get<0>(n).type() == Number::Type::real){
         return {Number{get<0>(n).get<double>() * sign},
@@ -296,7 +287,8 @@ ParserRet parse_real_number(std::istream& i){
     return {Number(sign * get<0>(u1).get<long>()), get<1>(u1)};
   }else{
     // rational
-    auto u2 = parse_unsigned<radix>(i);
+    stringstream s2;
+    auto u2 = parse_unsigned<radix>(i, s2);
     if(!get<0>(u2))
       goto error;
     return {Number(sign * get<0>(u1).get<double>() / get<0>(u2).get<double>()),
