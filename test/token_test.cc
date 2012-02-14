@@ -283,7 +283,7 @@ int main(){
 
   // consecutive access
   {
-    stringstream ss("(a . b)#(c 'd) e ;... \n f `(,x ,@y \"ho()ge\")");
+    stringstream ss("(a . b)#(c 'd) e ;... \n f +11 `(,x ,@y \"ho()ge\")");
 
     check_notation(ss, Token::Notation::l_paren);
     check_ident(ss, "a");
@@ -298,6 +298,7 @@ int main(){
     check_ident(ss, "e");
 
     check_ident(ss, "f");
+    check_number(ss, Number{11l});
     check_notation(ss, Token::Notation::quasiquote);
     check_notation(ss, Token::Notation::l_paren);
     check_notation(ss, Token::Notation::comma);

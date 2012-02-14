@@ -142,7 +142,6 @@ typedef pair<Number, Exactness> ParserRet;
 template<int radix>
 ParserRet parse_unsigned(std::istream& i){
   static const auto fun = is_number_char<radix>{};
-  const auto pos = i.tellg();
   stringstream s;
 
   while(fun(i.peek()))
@@ -167,8 +166,6 @@ ParserRet parse_unsigned(std::istream& i){
   }
 
  error:
-  i.clear();
-  i.seekg(pos);
   return PARSE_ERROR_VALUE;
 }
 
@@ -185,7 +182,6 @@ bool check_decimal_suffix(CharT c){
 
 ParserRet parse_decimal(std::istream& i){
   static const auto read_char_func = is_number_char<10>{};
-  const auto pos = i.tellg();
 
   stringstream s;
   
@@ -248,14 +244,11 @@ ParserRet parse_decimal(std::istream& i){
       Exactness::inexact};
 
  error:
-  i.clear();
-  i.seekg(pos);
   return PARSE_ERROR_VALUE;
 }
 
 template<int radix>
 ParserRet parse_real_number(std::istream& i){
-  const auto pos = i.tellg();
   int sign = 1;
 
   switch(i.peek()){
@@ -311,8 +304,6 @@ ParserRet parse_real_number(std::istream& i){
   }
 
  error:
-  i.clear();
-  i.seekg(pos);
   return PARSE_ERROR_VALUE;
 }
 
@@ -372,7 +363,6 @@ ParserRet parse_complex(std::istream& i){
 } // namespace
 
 Number parse_number(std::istream& i){
-  const auto pos = i.tellg();
   const auto prefix_info = parse_number_prefix(i);
 
   ParserRet r;
@@ -410,8 +400,6 @@ Number parse_number(std::istream& i){
   }
 
  error:
-  i.clear();
-  i.seekg(pos);
   return {};
 }
 
