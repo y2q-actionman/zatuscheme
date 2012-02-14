@@ -109,27 +109,29 @@ void check_generic(istream& i,
 }
 
 
-void check_uninit(istream& i){
+void check(istream& i){
   check_generic<Token::Type::uninitialized>
     (i, [](){});
 }
 
-void check_uninit(const string& input){
+void check(const string& input){
   stringstream is(input);
-  return check_uninit(is);
+  return check(is);
 }
 
-void check_ident(istream& i, const string& expect){
-  check_generic<Token::Type::identifier>
+template<Token::Type T>
+void check(istream& i, const string& expect){
+  check_generic<T>
     (i, expect,
      [&](){
       fprintf(stdout, ", expected str='%s'", expect.c_str());
     });
 }
 
-void check_ident(const string& input, const string& expect){
+template<Token::Type T>
+void check(const string& input, const string& expect){
   stringstream is(input);
-  return check_ident(is, expect);
+  return check<T>(is, expect);
 }
 
 bool operator==(const Number& n1, const Number& n2){
@@ -154,7 +156,7 @@ bool operator!=(const Number& n1, const Number& n2){
   return !(n1 == n2);
 }
 
-void check_number(istream& i, const Number& n){
+void check(istream& i, const Number& n){
   check_generic<Token::Type::number>
     (i, n, 
      [=](){
@@ -163,12 +165,7 @@ void check_number(istream& i, const Number& n){
     });
 }
 
-void check_number(const string& input, const Number& n){
-  stringstream is(input);
-  return check_number(is, n);
-}
-
-void check_boolean(istream& i, bool expect){
+void check(istream& i, bool expect){
   check_generic<Token::Type::boolean>
     (i, expect, 
      [=](){
@@ -176,12 +173,7 @@ void check_boolean(istream& i, bool expect){
     });
 }
 
-void check_boolean(const string& input, bool expect){
-  stringstream is(input);
-  return check_boolean(is, expect);
-}
-
-void check_character(istream& i, char expect){
+void check(istream& i, char expect){
   check_generic<Token::Type::character>
     (i, expect, 
      [=](){
@@ -189,25 +181,7 @@ void check_character(istream& i, char expect){
     });
 }
 
-void check_character(const string& input, char expect){
-  stringstream is(input);
-  return check_character(is, expect);
-}
-
-void check_string(istream& i, const string& expect){
-  check_generic<Token::Type::string>
-    (i, expect, 
-     [&](){
-      fprintf(stdout, ", expected str='%s'", expect.c_str());
-    });
-}
-
-void check_string(const string& input, const string& expect){
-  stringstream is(input);
-  return check_string(is, expect);
-}
-
-void check_notation(istream& i, Token::Notation n){
+void check(istream& i, Token::Notation n){
   check_generic<Token::Type::notation>
     (i, n,
      [=](){
@@ -217,10 +191,16 @@ void check_notation(istream& i, Token::Notation n){
     });
 }
 
-void check_notation(const string& input, Token::Notation n){
+template<typename T>
+void check(const string& input, T&& expect){
   stringstream is(input);
-  return check_notation(is, n);
+  return check(is, expect);
 }
+
+
+#define check_ident check<Token::Type::identifier>
+#define check_string check<Token::Type::string>
+#define N Token::Notation
 
 int main(){
   result = true;
@@ -239,71 +219,71 @@ int main(){
   check_ident("+",  "+");
   check_ident("-",  "-");
   check_ident("...",  "...");
-  check_uninit(".."); // error
-  check_uninit("...."); // error
+  check(".."); // error
+  check("...."); // error
 
   // spaces & comments
   check_ident("   abc", "abc");
   check_ident("   abc    def ", "abc");
   check_ident(" ;hogehoge\n   abc", "abc");
-  check_uninit(" ;hogehoge\n");
+  check(" ;hogehoge\n");
   check_ident("   abc;fhei", "abc");
 
   // boolean
-  check_boolean("#t", true);
-  check_boolean("#f", false);
+  check("#t", true);
+  check("#f", false);
 
   // number
-  check_number("+1", Number{1l});
-  check_number("#x16", Number{0x16l});
+  check("+1", Number{1l});
+  check("#x16", Number{0x16l});
   
   // character
-  check_uninit("#\\");
-  check_character("#\\a", 'a');
-  check_character("#\\b", 'b');
-  check_character("#\\x", 'x');
-  check_character("#\\space", ' ');
-  check_character("#\\newline", '\n');
+  check("#\\");
+  check("#\\a", 'a');
+  check("#\\b", 'b');
+  check("#\\x", 'x');
+  check("#\\space", ' ');
+  check("#\\newline", '\n');
 
   // string
-  check_uninit("\"");
+  check("\"");
   check_string("\"\"", "");
   check_string("\"a\"", "a");
   check_string("\"abcd\nedf jfkdj\"", "abcd\nedf jfkdj");
   check_string("\"\\\"\\\"\"", "\"\"");
 
   // error
-  check_uninit("#z");
+  check("#z");
 
 
   // consecutive access
   {
     stringstream ss("(a . b)#(c 'd) e ;... \n f +11 `(,x ,@y \"ho()ge\")");
 
-    check_notation(ss, Token::Notation::l_paren);
+    check(ss, N::l_paren);
     check_ident(ss, "a");
-    check_notation(ss, Token::Notation::dot);
+    check(ss, N::dot);
     check_ident(ss, "b");
-    check_notation(ss, Token::Notation::r_paren);
-    check_notation(ss, Token::Notation::vector_paren);
+    check(ss, N::r_paren);
+    check(ss, N::vector_paren);
     check_ident(ss, "c");
-    check_notation(ss, Token::Notation::quote);
+    check(ss, N::quote);
     check_ident(ss, "d");
-    check_notation(ss, Token::Notation::r_paren);
+    check(ss, N::r_paren);
     check_ident(ss, "e");
 
     check_ident(ss, "f");
-    check_number(ss, Number{11l});
-    check_notation(ss, Token::Notation::quasiquote);
-    check_notation(ss, Token::Notation::l_paren);
-    check_notation(ss, Token::Notation::comma);
+    check(ss, Number{11l});
+    check(ss, N::quasiquote);
+    check(ss, N::l_paren);
+    check(ss, N::comma);
     check_ident(ss, "x");
-    check_notation(ss, Token::Notation::comma_at);
+    check(ss, N::comma_at);
     check_ident(ss, "y");
     check_string(ss, "ho()ge");
-    check_notation(ss, Token::Notation::r_paren);
+    check(ss, N::r_paren);
 
-    check_uninit(ss);
+    check(ss);
   }
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
