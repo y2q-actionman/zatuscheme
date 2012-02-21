@@ -1,15 +1,10 @@
-#include "printer.hh"
-
 #include <cstdlib>
+
+#include "printer.hh"
 #include "symbol.hh"
 #include "cons.hh"
 #include "number.hh"
-
-#define UNEXP_CASE() do{\
-  fprintf(stderr, "unexpected case!! (%s, %d)\n",       \
-          __FILE__, __LINE__);                          \
-  abort();                                              \
-  }while(0)
+#include "util.hh"
 
 namespace {
 
@@ -30,7 +25,7 @@ void print(FILE* f, const Number* n){
     fprintf(f, "%ld", n->get<Number::integer_type>());
     break;
   default:
-    UNEXP_CASE();
+    UNEXP_DEFAULT();
   }
 }
 
@@ -116,12 +111,12 @@ void print(FILE* f, Lisp_ptr p){
       fprintf(f, "<port %p>", static_cast<void*>(l->get<Port*>()));
       break;
     default:
-      UNEXP_CASE();
+      UNEXP_DEFAULT();
     }
   }
     break;
 
   default:
-    UNEXP_CASE();
+    UNEXP_DEFAULT();
   }
 }

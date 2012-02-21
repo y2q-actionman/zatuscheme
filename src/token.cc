@@ -8,19 +8,9 @@
 #include <cstdlib>
 
 #include "token.hh"
+#include "util.hh"
 
 using namespace std;
-
-static
-void
-__attribute__((noreturn))// [[noreturn]]
-unexp_default(const char* f, int l){
-  fprintf(stderr, "unexpected default case! (file=%s, line=%d)", f, l);
-  abort();
-}
-
-#define UNEXP_DEFAULT() unexp_default(__FILE__, __LINE__)
-
 
 Token::Token(const Token& other)
   : type_(other.type_)
