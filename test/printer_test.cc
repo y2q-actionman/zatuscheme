@@ -32,5 +32,11 @@ int main(){
   check(Lisp_ptr{true}, "#t");
   check(Lisp_ptr{false}, "#f");
 
+  check(Lisp_ptr{'a'}, "#\\a");
+  check(Lisp_ptr{'z'}, "#\\z");
+  check(Lisp_ptr{'0'}, "#\\0");
+  check(Lisp_ptr{' '}, "#\\ ");
+  check(Lisp_ptr{'\\'}, "#\\\\");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

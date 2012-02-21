@@ -78,7 +78,7 @@ void print(FILE* f, Lisp_ptr p){
         fprintf(f, "#f");
       }
     }else{
-      fprintf(f, "%c", c);
+      fprintf(f, "#\\%c", c);
     }
     break;
   }
