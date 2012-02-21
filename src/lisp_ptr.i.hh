@@ -169,7 +169,7 @@ template<>
 inline
 char Lisp_ptr::get<char>() const {
   return (tag() == Ptr_tag::immediate)
-    ? ((base_ >> CHAR_BIT) & (CHAR_BIT - 1))
+    ? ((base_ >> CHAR_BIT) & ((1u << CHAR_BIT) - 1u))
     : '\0';
 }
 

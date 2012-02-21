@@ -1,15 +1,36 @@
+#include <cstring>
+
 #include "printer.hh"
 
 using namespace std;
 
 static bool result;
 
+void check(Lisp_ptr input, const char* expect){
+  char* buf;
+  size_t buf_size;
+
+  FILE* tmp_f = open_memstream(&buf, &buf_size);
+  print(tmp_f, input);
+  fclose(tmp_f);
+
+  if(strncmp(expect, buf, strlen(expect)) != 0){
+    fprintf(stdout, "[failed] expected: %s\n\treturned: %s\n"
+            // "bit repl: %x\n"
+            , expect, buf
+            // , input.base_
+            );
+    result = false;
+  }
+
+  free(buf);
+}
+
 int main(){
   result = true;
 
-  Lisp_ptr p{'0'};
-
-  print(stdout, p);
+  check(Lisp_ptr{true}, "#t");
+  check(Lisp_ptr{false}, "#f");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
