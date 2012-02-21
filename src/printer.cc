@@ -3,12 +3,72 @@
 #include <cstdlib>
 #include "symbol.hh"
 #include "cons.hh"
+#include "number.hh"
+
+#define UNEXP_CASE() do{\
+  fprintf(stderr, "unexpected case!! (%s, %d)\n",       \
+          __FILE__, __LINE__);                          \
+  abort();                                              \
+  }while(0)
 
 namespace {
 
-void print(FILE* f, const Number* n);
-void print(FILE* f, const Vector* n);
-void print(FILE* f, const Cons* n);
+void print(FILE* f, const Number* n){
+  switch(n->type()){
+  case Number::Type::uninitialized:
+    fprintf(f, "(uninitialied number)");
+    break;
+  case Number::Type::complex: {
+    auto&& z = n->get<Number::complex_type>();
+    fprintf(f, "%g+%gi", z.real(), z.imag());
+  }
+    break;
+  case Number::Type::real:
+    fprintf(f, "%g", n->get<Number::real_type>());
+    break;
+  case Number::Type::integer:
+    fprintf(f, "%ld", n->get<Number::integer_type>());
+    break;
+  default:
+    UNEXP_CASE();
+  }
+}
+
+void print(FILE* f, const Vector* v){
+  auto i = v->begin();
+  const auto e = v->end();
+
+  fputs("#(", f);
+
+  while(i != e){
+    print(f, *i);
+    ++i;
+    if(i != e)
+      fputc(' ', f);
+  }
+
+  fputc(')', f);
+}
+
+void print(FILE* f, const Cons* c){
+  fputc('(', f);
+
+  while(c){
+    print(f, c->car());
+
+    Lisp_ptr rest = c->cdr();
+
+    if(rest.tag() == Ptr_tag::cons){
+      fputc(' ', f);
+      c = rest.get<Cons*>();
+    }else{
+      fputs(" . ", f);
+      print(f, rest);
+    }
+  }
+
+  fputc(')', f);
+}
 
 } // namespace
 
@@ -56,16 +116,12 @@ void print(FILE* f, Lisp_ptr p){
       fprintf(f, "<port %p>", static_cast<void*>(l->get<Port*>()));
       break;
     default:
-      fprintf(stderr, "unexpected case!! (%s, %d)\n",
-              __FILE__, __LINE__);
-      abort();
+      UNEXP_CASE();
     }
   }
     break;
 
   default:
-    fprintf(stderr, "unexpected case!! (%s, %d)\n",
-            __FILE__, __LINE__);
-    abort();
+    UNEXP_CASE();
   }
 }
