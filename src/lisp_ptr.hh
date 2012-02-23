@@ -41,6 +41,8 @@ enum class Ptr_tag {
 
 union Lisp_ptr{
 public:
+  static constexpr bool includes(Ptr_tag);
+
   constexpr Lisp_ptr() : base_(0){}
   template<typename T>
   explicit constexpr Lisp_ptr(T);

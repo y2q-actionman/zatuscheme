@@ -1,6 +1,7 @@
 #include <cstring>
 #include <string>
 
+#include "decl.hh"
 #include "printer.hh"
 #include "number.hh"
 #include "symtable.hh"
@@ -20,11 +21,8 @@ void check(Lisp_ptr input, const char* expect){
   fclose(tmp_f);
 
   if(strncmp(expect, buf, strlen(expect)) != 0){
-    fprintf(stdout, "[failed] expected: %s\n\treturned: %s\n"
-            // "bit repl: %x\n"
-            , expect, buf
-            // , input.base_
-            );
+    fprintf(stdout, "[failed] expected: %s\n\treturned: %s\n",
+            expect, buf);
     result = false;
   }
 
@@ -38,43 +36,47 @@ void check_noprint(Lisp_ptr input){
 }
 
 
-void check(bool b, const char* expect){
-  check(Lisp_ptr{b}, expect);
-}
+template<typename T,
+         bool is_direct = Lisp_ptr::includes(to_tag<Ptr_tag, T>())>
+struct check_fn;
 
-void check(char c, const char* expect){
-  check(Lisp_ptr{c}, expect);
-}
+template<typename T>
+struct check_fn<T, true>{
+  static void exec(const T& t, const char* expect){
+    check(Lisp_ptr{t}, expect);
+  }
+};
 
-void check(Cons* c, const char* expect){
-  check(Lisp_ptr{c}, expect);
-}
+template<typename T>
+struct check_fn<T, false>{
+  static void exec(const T& t, const char* expect){
+    Long_ptr lp(t);
+    check(Lisp_ptr{&lp}, expect);
+  }
+};
 
-void check(Symbol* sym, const char* expect){
-  check(Lisp_ptr{sym}, expect);
+
+template<typename T>
+void check(const T& t, const char* expect){
+  check_fn<T>::exec(t, expect);
 }
 
 void check(const char* s, const char* expect){
   string ss{s};
-  Long_ptr lp{&ss};
-  check(Lisp_ptr{&lp}, expect);
+  check(&ss, expect);
 }
 
 void check(Number&& n, const char* expect){
   Number nn{n};
-  Long_ptr lp{&nn};
-  check(Lisp_ptr{&lp}, expect);
+  check(&nn, expect);
 }
 
-void check_noprint(Function* f){
-  Long_ptr lp{f};
+template<typename T>
+void check_noprint(const T& t){
+  Long_ptr lp{t};
   check_noprint(Lisp_ptr{&lp});
 }  
 
-void check_noprint(Port* f){
-  Long_ptr lp{f};
-  check_noprint(Lisp_ptr{&lp});
-}  
 
 
 int main(){
@@ -131,7 +133,21 @@ int main(){
   }
 
   // vector
+  {
+    Vector v1;
+    check(&v1, "#()");
 
+    v1.push_back(Cons::NIL);
+    check(&v1, "#(())");
+
+    v1.push_back(Cons::NIL);
+    check(&v1, "#(() ())");
+
+    Long_ptr v1p{&v1};
+    Vector v2;
+    v2.push_back(Lisp_ptr{&v1p});
+    check(&v2, "#(#(() ()))");
+  }
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

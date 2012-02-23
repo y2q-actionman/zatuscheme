@@ -57,6 +57,18 @@ struct to_type<Ptr_tag>::get<Ptr_tag::port>{
 
 template<>
 inline constexpr
+Ptr_tag to_tag<Ptr_tag, bool>(){
+  return Ptr_tag::immediate;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, char>(){
+  return Ptr_tag::immediate;
+}
+
+template<>
+inline constexpr
 Ptr_tag to_tag<Ptr_tag, Cons*>(){
   return Ptr_tag::cons;
 }
@@ -110,6 +122,14 @@ namespace lisp_ptr_i {
   static constexpr unsigned tag_bit_mask = 0x3u;
   static constexpr unsigned embed_boolean_bit = 0x4u;
 } // namespace lisp_ptr_i
+
+constexpr inline
+bool Lisp_ptr::includes(Ptr_tag t){
+  return (t == Ptr_tag::immediate)
+    || (t == Ptr_tag::cons)
+    || (t == Ptr_tag::symbol)
+    || (t == Ptr_tag::long_ptr);
+}
 
 template<>
 inline constexpr
