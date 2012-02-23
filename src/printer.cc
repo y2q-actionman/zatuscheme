@@ -54,11 +54,12 @@ void print(FILE* f, const Cons* c){
     Lisp_ptr rest = c->cdr();
 
     if(rest.tag() == Ptr_tag::cons){
-      fputc(' ', f);
       c = rest.get<Cons*>();
+      if(c) fputc(' ', f);
     }else{
       fputs(" . ", f);
       print(f, rest);
+      break;
     }
   }
 

@@ -5,6 +5,7 @@
 #include "number.hh"
 #include "symtable.hh"
 #include "symbol.hh"
+#include "cons.hh"
 
 using namespace std;
 
@@ -42,6 +43,10 @@ void check(bool b, const char* expect){
 }
 
 void check(char c, const char* expect){
+  check(Lisp_ptr{c}, expect);
+}
+
+void check(Cons* c, const char* expect){
   check(Lisp_ptr{c}, expect);
 }
 
@@ -107,6 +112,23 @@ int main(){
 
 
   // cons, list
+  check(Cons::NIL, "()");
+  {
+    Cons c1{Cons::NIL, Cons::NIL};
+    check(&c1, "(())");
+
+    Cons c2{Cons::NIL, Lisp_ptr{&c1}};
+    check(&c2, "(() ())");
+
+    Cons c3{Lisp_ptr{true}, Lisp_ptr{&c2}};
+    check(&c3, "(#t () ())");
+
+    Cons c4{Lisp_ptr{true}, Lisp_ptr{false}};
+    check(&c4, "(#t . #f)");
+
+    Cons c5{Lisp_ptr{&c3}, Lisp_ptr{&c4}};
+    check(&c5, "((#t () ()) #t . #f)");
+  }
 
   // vector
 
