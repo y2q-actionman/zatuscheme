@@ -71,6 +71,11 @@ void print(FILE* f, const Cons* c){
 void print(FILE* f, Lisp_ptr p){
   switch(p.tag()){
   case Ptr_tag::immediate: {
+    if(!p){
+      fprintf(f, "<undefined>");
+      break;
+    }
+
     auto c = p.get<char>();
     if(c == static_cast<char>(0xff)){ // boolean
       if(p.get<bool>()){
