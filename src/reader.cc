@@ -33,8 +33,8 @@ Lisp_ptr read_list(SymTable& sym, FILE* f){
   }
 
   // main loop
-  const Lisp_ptr head{new Cons{Lisp_ptr{}, Lisp_ptr{}}};
-  Lisp_ptr last = head;
+  Cons* c = new Cons{Lisp_ptr{}, Lisp_ptr{}};
+  const Lisp_ptr head{c};
 
   while(1){
     Lisp_ptr datum{read_la(sym, f, t)};
@@ -42,7 +42,7 @@ Lisp_ptr read_list(SymTable& sym, FILE* f){
       return Lisp_ptr{};
     }
 
-    last.get<Cons*>()->rplaca(datum);
+    c->rplaca(datum);
     
     // check next token
     t = tokenize(f);
@@ -52,10 +52,15 @@ Lisp_ptr read_list(SymTable& sym, FILE* f){
     }else if(t.type() == Token::Type::notation){
       switch(t.get<Token::Notation>()){
       case Token::Notation::r_paren: // proper list
-        last.get<Cons*>()->rplacd(Cons::NIL);
+        c->rplacd(Cons::NIL);
         goto end;
       case Token::Notation::dot:     // dotted list
-        last.get<Cons*>()->rplacd(read(sym, f));
+        c->rplacd(read(sym, f));
+        t = tokenize(f);
+        if(t.type() != Token::Type::notation
+           || t.get<Token::Notation>() != Token::Notation::r_paren){
+          return Lisp_ptr{}; // error: dotted list has two or more cdrs.
+        }
         goto end;
       default:
         break;
@@ -63,12 +68,13 @@ Lisp_ptr read_list(SymTable& sym, FILE* f){
     }
     
     // readying next cons
-    last.get<Cons*>()->rplacd(Lisp_ptr{new Cons{Lisp_ptr{}, Lisp_ptr{}}});
-    last = last.get<Cons*>()->cdr();
+    Cons* new_c = new Cons{Lisp_ptr{}, Lisp_ptr{}};
+    c->rplacd(Lisp_ptr{new_c});
+    c = new_c;
   }
 
  end:
-  // if(last.get<Cons*>()->cdr() == undef) ...
+  // if(c->cdr() == undef) ...
 
   return head;
 }

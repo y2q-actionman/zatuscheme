@@ -72,11 +72,26 @@ int main(){
   check_undef(st, "\" \\ \"");
 
   // cons, list
+  check(st, "()", "()");
   check(st, "(#t #f)", "(#t #f)");
   check(st, "(a b c d e)", "(a b c d e)");
+  check(st, "(a () b)", "(a () b)");
+  check(st, "((a b) (c d))", "((a b) (c d))");
   check(st, "(a (b . c) d e)", "(a (b . c) d e)");
+  check(st, "(a (b . ()) d e)", "(a (b) d e)");
+  check(st, "((((((((((a))))))))))", "((((((((((a))))))))))");
+  check_undef(st, "(a . b c)");
+  check_undef(st, "(. a)");
+  check_undef(st, "#(a . b . c)");
 
   // vector
+  check(st, "#()", "#()");
+  check(st, "#(a b)", "#(a b)");
+  check(st, "#(a (b c d) e)", "#(a (b c d) e)");
+  check(st, "#(a (b #(c) d) e)", "#(a (b #(c) d) e)");
+  check_undef(st, "#(a . b)");
+  check_undef(st, "#(a . b . c)");
+  check(st, "#((#((#(())))))", "#((#((#(())))))");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
