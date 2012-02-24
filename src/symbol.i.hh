@@ -8,10 +8,6 @@
 #include <utility>
 #include "keyword.hh"
 
-inline constexpr
-Symbol::Symbol()
-  : name_(nullptr){}
-
 inline
 Symbol::Symbol(const std::string* s)
   : name_(s){}

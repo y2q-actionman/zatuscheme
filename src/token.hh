@@ -26,6 +26,7 @@ public:
   constexpr Token()
     : type_(Type::uninitialized){}
 
+  // TODO: move these constructors into private
   Token(const std::string&, Type);
   Token(std::string&&, Type);
   explicit Token(const Number&);

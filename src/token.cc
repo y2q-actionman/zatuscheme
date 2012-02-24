@@ -12,6 +12,42 @@
 
 using namespace std;
 
+inline
+Token::Token(const std::string& s, Type t)
+  : type_(t){
+  new (&this->str_) std::string(s);
+}
+
+inline
+Token::Token(std::string&& s, Type t)
+  : type_(t){
+  new (&this->str_) std::string{std::forward<std::string>(s)};
+}
+
+inline
+Token::Token(const Number& n)
+  : type_(Type::number){
+  new (&this->num_) Number(n);
+}
+
+inline
+Token::Token(Number&& n)
+  : type_(Type::number){
+  new (&this->num_) Number{std::forward<Number>(n)};
+}
+
+inline constexpr
+Token::Token(bool b)
+  : type_(Type::boolean), b_(b){}
+
+inline constexpr
+Token::Token(char c)
+  : type_(Type::character), c_(c){}
+
+inline constexpr
+Token::Token(Notation n)
+  : type_(Type::notation), not_(n){}
+
 Token::Token(const Token& other)
   : type_(other.type_)
 {

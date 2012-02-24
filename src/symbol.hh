@@ -18,7 +18,7 @@ public:
   { return *name_ ; }
 
 private:
-  constexpr Symbol();
+  constexpr Symbol() : name_(nullptr){}
   explicit Symbol(const std::string*);
 
   Symbol& operator=(const Symbol&) = delete;
