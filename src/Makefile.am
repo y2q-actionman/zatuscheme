@@ -14,7 +14,9 @@ libzs_a_SOURCES = zs.hh\
 		symtable.cc symtable.hh\
 		keyword.cc keyword.hh\
 		reader.cc reader.hh\
-		printer.cc printer.hh
+		printer.cc printer.hh\
+		env.cc env.hh\
+		eval.hh
 
 noinst_PROGRAMS = zs
 zs_SOURCES = zs.hh main.cc
