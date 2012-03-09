@@ -119,8 +119,8 @@ Ptr_tag to_tag<Ptr_tag, Port*>(){
 // ptr class definitions
 
 namespace lisp_ptr_i {
-  static constexpr unsigned tag_bit_mask = 0x3u;
-  static constexpr unsigned embed_boolean_bit = 0x4u;
+  static constexpr uintptr_t tag_bit_mask = 0x3u;
+  static constexpr uintptr_t embed_boolean_bit = 0x4u;
 } // namespace lisp_ptr_i
 
 constexpr inline
