@@ -6,6 +6,7 @@
 #endif
 
 #include "decl.hh"
+#include "util.hh"
 
 // Type mapping
 template<>
@@ -77,7 +78,7 @@ Number::complex_type Number::get() const{
   case Type::integer:
     return complex_type{static_cast<real_type>(i_)};
   default:
-    return 0; // invalid conversion!
+    UNEXP_CONVERSION("(unknown)", "complex");
   }
 }
 
@@ -91,7 +92,7 @@ Number::real_type Number::get() const{
     return static_cast<real_type>(i_);
   case Type::complex:
   default:
-    return 0; // invalid conversion!
+    UNEXP_CONVERSION("(number has imag)", "real");
   }
 }
 
@@ -104,7 +105,7 @@ Number::integer_type Number::get() const{
   case Type::complex:
   case Type::real:
   default:
-    return 0; // invalid conversion!
+    UNEXP_CONVERSION("(inexact)", "integer");
   }
 }
 

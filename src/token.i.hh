@@ -7,6 +7,7 @@
 
 #include <utility>
 #include "decl.hh"
+#include "util.hh"
 
 // Type mapping
 template<>
@@ -106,32 +107,44 @@ std::string Token::get() const{
   case Type::string:
     return str_;
   default:
-    return "";
+    UNEXP_CONVERSION("(no string token)", "string");
   }
 }
 
 template<>
 inline
 Number Token::get() const{
-  return (type_ == Type::number) ? num_ : Number{};
+  if(type_ == Type::number)
+    return num_;
+  else
+    UNEXP_CONVERSION("(no number token)", "number");
 }
 
 template<>
 inline
 bool Token::get() const{
-  return (type_ == Type::boolean) ? b_ : false;
+  if(type_ == Type::boolean)
+    return b_;
+  else
+    UNEXP_CONVERSION("(no boolean token)", "boolean");
 }
 
 template<>
 inline
 char Token::get() const{
-  return (type_ == Type::character) ? c_ : '\0';
+  if(type_ == Type::character)
+    return c_;
+  else
+    UNEXP_CONVERSION("(no char token)", "char");
 }
 
 template<>
 inline
 Token::Notation Token::get() const{
-  return (type_ == Type::notation) ? not_ : Notation::unknown;
+  if(type_ == Type::notation)
+    return not_;
+  else
+    UNEXP_CONVERSION("(no notation token)", "notation");
 }
 
 #endif // TOKEN_I_HH

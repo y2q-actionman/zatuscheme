@@ -26,6 +26,13 @@ void scat_file(FILE* f){
   rewind(f);
 }
 
+// for debugging..
+template<>
+inline
+void* Token::get<void*>() const{
+  return reinterpret_cast<void*>(type_);
+}
+
 template<typename T>
 void check_copy_move(const Token& tok){
   // constructor
@@ -91,8 +98,7 @@ void fail_message(Token::Type t, FILE* f, const fpos_t* b_pos,
   result = false;
 }
 
-template<Token::Type type, typename Fun,
-         typename ex_type = char>
+template<Token::Type type, typename Fun>
 void check_generic(FILE* f, const Fun& fun){
   fpos_t init_pos;
   fgetpos(f, &init_pos);
@@ -104,7 +110,7 @@ void check_generic(FILE* f, const Fun& fun){
     return;
   }
   
-  check_copy_move<ex_type>(tok);
+  check_copy_move<void*>(tok);
 }
 
 template<Token::Type type, typename Fun, 
@@ -238,6 +244,7 @@ int main(){
   check_ident("+",  "+");
   check_ident("-",  "-");
   check_ident("...",  "...");
+
   check(".."); // error
   check("...."); // error
 
