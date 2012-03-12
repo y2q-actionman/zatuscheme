@@ -62,6 +62,8 @@ public:
   explicit constexpr operator bool() const
   { return base_ != 0; }
 
+  bool is_bool() const;
+
 private:
   void* ptr_;
   uintptr_t base_;

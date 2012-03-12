@@ -76,15 +76,14 @@ void print(FILE* f, Lisp_ptr p){
       break;
     }
 
-    auto c = p.get<char>();
-    if(c == static_cast<char>(0xff)){ // boolean
+    if(p.is_bool()){ // boolean
       if(p.get<bool>()){
         fprintf(f, "#t");
       }else{
         fprintf(f, "#f");
       }
     }else{
-      fprintf(f, "#\\%c", c);
+      fprintf(f, "#\\%c", p.get<char>());
     }
     break;
   }

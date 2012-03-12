@@ -201,7 +201,13 @@ T Lisp_ptr::get() const {
     : nullptr;
 }
 
+inline
+bool Lisp_ptr::is_bool() const{
+  return (get<char>() == static_cast<char>(0xff));
+}
 
+
+// Long_ptr definitions
 template<typename T>
 inline constexpr
 Long_ptr::Long_ptr(T p)

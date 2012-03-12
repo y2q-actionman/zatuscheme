@@ -16,7 +16,7 @@ libzs_a_SOURCES = zs.hh\
 		reader.cc reader.hh\
 		printer.cc printer.hh\
 		env.cc env.hh\
-		eval.hh
+		eval.cc eval.hh
 
 noinst_PROGRAMS = zs
 zs_SOURCES = zs.hh main.cc
