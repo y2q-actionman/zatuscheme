@@ -6,10 +6,16 @@
 #include "cons.hh"
 #include "env.hh"
 #include "stack.hh"
+#include "function.hh"
 
 using namespace std;
 
 Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
+  if(!p){
+    fprintf(stderr, "eval error: undefined value passed!!");
+    return {};
+  }
+
   switch(p.tag()){
   case Ptr_tag::immediate:
   case Ptr_tag::long_ptr:
@@ -29,24 +35,24 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
     Cons* c = p.get<Cons*>();
     Lisp_ptr first = c->car();
 
+    // special operator?
     if(first.tag() == Ptr_tag::symbol){
       Symbol* sym = first.get<Symbol*>();
       switch(to_keyword(sym->name().c_str())){
-        // dispatch special syntax handlers..
-
         // ...
 
       case Keyword::not_keyword:
-        // macro call?
-        //  trying find macro-function from symbol
-        //    found -> macro expansion
-        //    not found -> goto function calling
         break;
 
       default:
         UNEXP_DEFAULT();
       }
     }
+
+    // macro call?
+    //  try to find macro-function from symbol
+    //    found -> macro expansion
+    //    not found -> goto function calling
 
     // procedure call?
     Lisp_ptr proc = eval(first, e, s);
@@ -55,9 +61,31 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
       return {};
     }
 
-    // try funcall!!
-      
-    break;
+    // push args into stack
+    // TODO: cleanup dismissed stack in error..
+    while(1){
+      Lisp_ptr arg = c->cdr();
+      if(arg.tag() != Ptr_tag::cons){
+        fprintf(stderr, "eval error: arg contains non-cons (dotted list?)");
+        return {};
+      }
+
+      Cons* arg_cell = arg.get<Cons*>();
+      if(!arg_cell) // reached nil
+        break;
+
+      Lisp_ptr evaled = eval(arg_cell->car(), e, s);
+      if(!evaled){
+        fprintf(stderr, "eval error: evaluating func's arg failed!!");
+        return {};
+      }
+      s.push(nullptr, evaled);
+
+      arg = arg_cell->cdr();
+    }
+
+    // call
+    return proc.get<Function*>()->call(e, s);
   }
     
   default:
