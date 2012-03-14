@@ -82,6 +82,9 @@ int main(){
   check(st, "((((((((((a))))))))))", "((((((((((a))))))))))");
   check_undef(st, "(a . b c)");
   check_undef(st, "(. a)");
+  check_undef(st, "((a)");
+  check_undef(st, "(");
+  check_undef(st, ")");
   check_undef(st, "#(a . b . c)");
 
   // vector
