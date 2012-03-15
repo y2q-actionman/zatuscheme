@@ -20,6 +20,7 @@ public:
 
 
   Lisp_ptr find(Symbol*) const;
+  Lisp_ptr set(Symbol*, Lisp_ptr);
   void push(Symbol*, Lisp_ptr);
   void pop(int);
 

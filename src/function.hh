@@ -7,8 +7,8 @@ class Stack;
 
 class Function {
 public:
-  explicit Function(Lisp_ptr p)
-    : code_(p){}
+  explicit Function(Lisp_ptr code)
+    : code_(code){}
   
   Function(const Function&) = default;
   Function(Function&&) = default;
@@ -22,5 +22,7 @@ public:
 private:
   Lisp_ptr code_;
 };
+
+Function* make_function(Lisp_ptr args, Cons* code);
 
 #endif //FUNCTION_HH

@@ -18,17 +18,107 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
   case Keyword::quote:
     return rest->car();
 
-  case Keyword::lambda:
-    // now implementing..
-    return {};
+  case Keyword::lambda: {
+    auto args = rest->car();
+    if(rest->cdr().tag() != Ptr_tag::cons){
+      fprintf(stderr, "eval error: lambda has invalid body!");
+      return {};
+    }
 
-  case Keyword::if_:
-    // now implementing..
-    return {};
+    auto code = rest->cdr().get<Cons*>();
+    if(!code){
+      fprintf(stderr, "eval error: lambda has no body!");
+      return {};
+    }
 
-  case Keyword::set_:
-    // now implementing..
+    return Lisp_ptr{new Long_ptr{make_function(args, code)}};
+  }
+
+  case Keyword::if_: {
+    // extracting
+    auto test = rest->car();
+
+    if(rest->cdr().tag() != Ptr_tag::cons){
+      fprintf(stderr, "eval error: if has invalid conseq!");
+      return {};
+    }
+
+    auto conseq_l = rest->cdr().get<Cons*>();
+    if(!conseq_l){
+      fprintf(stderr, "eval error: if has no conseq!");
+      return {};
+    }
+
+    auto conseq = conseq_l->car();
+
+    if(rest->cdr().tag() != Ptr_tag::cons){
+      fprintf(stderr, "eval error: if has invalid alt!");
+      return {};
+    }
+
+    auto alt = Lisp_ptr{};
+
+    if(auto alt_l = rest->cdr().get<Cons*>()){
+      alt = alt_l->car();
+
+      if(rest->cdr().tag() != Ptr_tag::cons
+         || rest->cdr().get<Cons*>()){
+        fprintf(stderr, "eval error: if has extra alts!");
+        return {};
+      }
+    }
+
+    // evaluating
+    auto test_evaled = eval(test, e, s);
+    if(test_evaled.get<bool>()){
+      return eval(conseq, e, s);
+    }else{
+      return alt ? eval(alt, e, s) : Lisp_ptr{};
+    }
+  }
+
+  case Keyword::set_: {
+    // extracting
+    auto var = rest->car().get<Symbol*>();
+    if(!var){
+      fprintf(stderr, "eval error: set!'s first element is not symbol!");
+      return {};
+    }
+    if(to_keyword(var->name().c_str()) != Keyword::not_keyword){
+      fprintf(stderr, "eval error: set!'s first element is Keyword!");
+      return {};
+    }
+
+    if(rest->cdr().tag() != Ptr_tag::cons){
+      fprintf(stderr, "eval error: set!'s value form is informal!");
+      return {};
+    }
+
+    auto valp = rest->cdr().get<Cons*>();
+    if(!valp){
+      fprintf(stderr, "eval error: set! has no value!");
+      return {};
+    }
+
+    if(valp->cdr().tag() != Ptr_tag::cons
+       || valp->cdr().get<Cons*>()){
+      fprintf(stderr, "eval error: set! has extra forms!");
+      return {};
+    }
+
+    auto val = valp->car();
+
+    // evaluating
+    if(s.find(var)){
+      s.set(var, eval(val, e, s));
+    }else if(e.find(var)){
+      e.set(var, eval(val, e, s));
+    }else{
+      fprintf(stderr, "eval error: set! value is not defined previously!");
+    }
+      
     return {};
+  }
 
   case Keyword::cond:
     // now implementing..
@@ -83,8 +173,7 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
     return {};
     
   case Keyword::define:
-    fprintf(stderr, "eval error: definition cannot be treated in eval!!",
-            stringify(k));
+    fprintf(stderr, "eval error: definition cannot be treated in eval!!");
     return {};
 
   case Keyword::not_keyword:
@@ -131,7 +220,13 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
           fprintf(stderr, "eval error: expresssion (<KEYWORD> . #) is informal!");
           return {};
         }
-        return eval_special(k, c->cdr().get<Cons*>(), e, s);
+
+        Cons* r = c->cdr().get<Cons*>();
+        if(!r){
+          fprintf(stderr, "eval error: expresssion (<KEYWORD>) is informal!");
+          return {};
+        }
+        return eval_special(k, r, e, s);
       }else{
         // macro call?
         //  try to find macro-function from symbol
