@@ -17,6 +17,7 @@ public:
   Function& operator=(Function&&) = default;
 
   Lisp_ptr call(Env&, Stack&);
+  Lisp_ptr call(Env&, Stack&, Lisp_ptr args);
 
 private:
   Lisp_ptr code_;

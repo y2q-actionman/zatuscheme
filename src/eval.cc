@@ -74,6 +74,19 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
     // now implementing..
     return {};
 
+  case Keyword::else_:
+  case Keyword::r_arrow:
+  case Keyword::unquote:
+  case Keyword::unquote_splicing:
+    fprintf(stderr, "eval error: keyword '%s' cannot be used as operator!!",
+            stringify(k));
+    return {};
+    
+  case Keyword::define:
+    fprintf(stderr, "eval error: definition cannot be treated in eval!!",
+            stringify(k));
+    return {};
+
   case Keyword::not_keyword:
     fprintf(stderr, "internal error: should not be procesed normal symbols here!!");
   default:
@@ -95,7 +108,7 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
     return p; // self-evaluating
 
   case Ptr_tag::symbol: {
-    Symbol* sym = p.get<Symbol*>();
+    auto sym = p.get<Symbol*>();
     if(to_keyword(sym->name().c_str()) == Keyword::not_keyword){
       return s.find(sym) ? e.find(sym) : Lisp_ptr{};
     }else{
@@ -105,13 +118,13 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
   }
     
   case Ptr_tag::cons: {
-    Cons* c = p.get<Cons*>();
-    Lisp_ptr first = c->car();
+    auto c = p.get<Cons*>();
+    auto first = c->car();
 
     // special operator?
     if(first.tag() == Ptr_tag::symbol){
-      Symbol* sym = first.get<Symbol*>();
-      Keyword k = to_keyword(sym->name().c_str());
+      auto sym = first.get<Symbol*>();
+      auto k = to_keyword(sym->name().c_str());
 
       if(k != Keyword::not_keyword){
         if(c->cdr().tag() != Ptr_tag::cons){
@@ -129,37 +142,13 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
     }
 
     // procedure call?
-    Lisp_ptr proc = eval(first, e, s);
+    auto proc = eval(first, e, s);
     if(proc.tag() != Ptr_tag::function){
-      fprintf(stderr, "eval error: expr's first element is not procedure!!");
+      fprintf(stderr, "eval error: (# # ...)'s first element is not procedure!!");
       return {};
     }
 
-    // push args into stack
-    // TODO: cleanup dismissed stack in error..
-    while(1){
-      Lisp_ptr arg = c->cdr();
-      if(arg.tag() != Ptr_tag::cons){
-        fprintf(stderr, "eval error: arg contains non-cons (dotted list?)");
-        return {};
-      }
-
-      Cons* arg_cell = arg.get<Cons*>();
-      if(!arg_cell) // reached nil
-        break;
-
-      Lisp_ptr evaled = eval(arg_cell->car(), e, s);
-      if(!evaled){
-        fprintf(stderr, "eval error: evaluating func's arg failed!!");
-        return {};
-      }
-      s.push(nullptr, evaled);
-
-      arg = arg_cell->cdr();
-    }
-
-    // call
-    return proc.get<Function*>()->call(e, s);
+    return proc.get<Function*>()->call(e, s, c->cdr());
   }
     
   default:
