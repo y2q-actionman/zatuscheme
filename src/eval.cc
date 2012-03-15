@@ -10,6 +10,79 @@
 
 using namespace std;
 
+namespace {
+
+Lisp_ptr eval_special(Keyword k, const Cons* rest,
+                      Env& e, Stack& s){
+  switch(k){
+  case Keyword::quote:
+    return rest->car();
+
+  case Keyword::lambda:
+    // now implementing..
+    return {};
+
+  case Keyword::if_:
+    // now implementing..
+    return {};
+
+  case Keyword::set_:
+    // now implementing..
+    return {};
+
+  case Keyword::cond:
+    // now implementing..
+    return {};
+
+  case Keyword::case_:
+    // now implementing..
+    return {};
+
+  case Keyword::and_:
+    // now implementing..
+    return {};
+
+  case Keyword::or_:
+    // now implementing..
+    return {};
+
+  case Keyword::let:
+    // now implementing..
+    return {};
+
+  case Keyword::let_star:
+    // now implementing..
+    return {};
+
+  case Keyword::letrec:
+    // now implementing..
+    return {};
+
+  case Keyword::begin:
+    // now implementing..
+    return {};
+
+  case Keyword::do_:
+    // now implementing..
+    return {};
+
+  case Keyword::delay:
+    // now implementing..
+    return {};
+
+  case Keyword::quasiquote:
+    // now implementing..
+    return {};
+
+  case Keyword::not_keyword:
+    fprintf(stderr, "internal error: should not be procesed normal symbols here!!");
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+} // namespace
+
 Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
   if(!p){
     fprintf(stderr, "eval error: undefined value passed!!");
@@ -38,26 +111,27 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
     // special operator?
     if(first.tag() == Ptr_tag::symbol){
       Symbol* sym = first.get<Symbol*>();
-      switch(to_keyword(sym->name().c_str())){
-        // ...
+      Keyword k = to_keyword(sym->name().c_str());
 
-      case Keyword::not_keyword:
-        break;
-
-      default:
-        UNEXP_DEFAULT();
+      if(k != Keyword::not_keyword){
+        if(c->cdr().tag() != Ptr_tag::cons){
+          fprintf(stderr, "eval error: expresssion (<KEYWORD> . #) is informal!");
+          return {};
+        }
+        return eval_special(k, c->cdr().get<Cons*>(), e, s);
+      }else{
+        // macro call?
+        //  try to find macro-function from symbol
+        //    found -> macro expansion
+        //    not found -> goto function calling
+        ;
       }
     }
-
-    // macro call?
-    //  try to find macro-function from symbol
-    //    found -> macro expansion
-    //    not found -> goto function calling
 
     // procedure call?
     Lisp_ptr proc = eval(first, e, s);
     if(proc.tag() != Ptr_tag::function){
-      fprintf(stderr, "eval error: expr's first element is not procedured!!");
+      fprintf(stderr, "eval error: expr's first element is not procedure!!");
       return {};
     }
 
