@@ -3,9 +3,33 @@
 #include "stack.hh"
 #include "eval.hh"
 #include "cons.hh"
+#include "util.hh"
 
-Lisp_ptr Function::call(Env& e, Stack& s, int argc){
-  return {}; // stub
+Lisp_ptr Function::call(Env& e, Stack& s, int args){
+  // length check
+  if(variadic_){
+    if(args >= required_args_){
+      fprintf(stderr, "funcall error: argcount insufficient! (supplied %d, required %d)\n",
+              args, required_args_);
+      return {};
+    }    
+  }else{
+    if(args != required_args_){
+      fprintf(stderr, "funcall error: argcount mismatch! (supplied %d, required %d)\n",
+              args, required_args_);
+      return {};
+    }
+  }
+
+  // real call
+  switch(type_){
+  case Type::interpreted:
+    return {}; // stub
+  case Type::native:
+    return n_func_(e, s, args);
+  default:
+    UNEXP_DEFAULT();
+  }
 }
 
 Lisp_ptr Function::call(Env& e, Stack& s, Lisp_ptr args){

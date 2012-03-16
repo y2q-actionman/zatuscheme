@@ -7,7 +7,7 @@ class Stack;
 
 class Function {
 public:
-  typedef Lisp_ptr(*NativeFunc)(Env&, Stack&);
+  typedef Lisp_ptr(*NativeFunc)(Env&, Stack&, int);
 
   enum class Type {
     interpreted,
@@ -15,10 +15,12 @@ public:
   };
 
 
-  explicit Function(Lisp_ptr code, int args)
-    : type_(Type::interpreted), args_(args), code_(code){}
-  explicit Function(NativeFunc func, int args)
-    : type_(Type::native), args_(args), n_func_(func){}
+  explicit Function(Lisp_ptr code, int args, bool variadic)
+    : type_(Type::interpreted), required_args_(args),
+      variadic_(variadic), code_(code){}
+  explicit Function(NativeFunc func, int args, bool variadic)
+    : type_(Type::native), required_args_(args),
+      variadic_(variadic), n_func_(func){}
 
   
   Function(const Function&) = default;
@@ -31,7 +33,8 @@ public:
 
 private:
   Type type_; // TODO: merge these two fields into bitfields
-  int args_;
+  int required_args_;
+  bool variadic_;
   union{
     Lisp_ptr code_;
     NativeFunc n_func_;
