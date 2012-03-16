@@ -1,7 +1,7 @@
 #include "keyword.hh"
 
-#include <cstring>
 #include <array>
+#include <cassert>
 
 using namespace std;
 
@@ -15,7 +15,7 @@ struct Entry {
 constexpr
 array<Entry, static_cast<int>(Keyword::MAX)>
 keyword_table{{
-    { Keyword::not_keyword, "" },
+    { Keyword::not_keyword, "\0" },
 
     { Keyword::else_, "else" },
     { Keyword::r_arrow, "=>" },
@@ -43,17 +43,14 @@ keyword_table{{
 } // namespace
 
 const char* stringify(Keyword k){
-  for(const auto& e : keyword_table){
-    if(e.k == k)
-      return e.str;
-  }
-
-  return nullptr;
+  auto& e = keyword_table.at(static_cast<int>(k));
+  assert(e.k == k);
+  return e.str;
 }
 
-Keyword to_keyword(const char* s){
+Keyword to_keyword(const std::string& s){
   for(const auto& e : keyword_table){
-    if(strcmp(e.str, s) == 0)
+    if(s == e.str)
       return e.k;
   }
 

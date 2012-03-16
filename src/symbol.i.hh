@@ -14,7 +14,7 @@ Symbol::Symbol(const std::string* s)
 
 inline
 Keyword to_keyword(const Symbol& s){
-  return to_keyword(s.name().c_str());
+  return to_keyword(s.name());
 }
 
 inline
