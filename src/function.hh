@@ -14,35 +14,39 @@ public:
     native
   };
 
+  struct ArgInfo {
+    bool valid;
+    bool variadic;
+    int required_args;
+  };
 
-  explicit Function(Lisp_ptr code, int args, bool variadic)
-    : type_(Type::interpreted), required_args_(args),
-      variadic_(variadic), code_(code){}
-  explicit Function(NativeFunc func, int args, bool variadic)
-    : type_(Type::native), required_args_(args),
-      variadic_(variadic), n_func_(func){}
 
+  explicit Function(Lisp_ptr code, const ArgInfo& a)
+    : type_(Type::interpreted), argi_(a), code_(code){}
+  explicit Function(NativeFunc func, const ArgInfo& a)
+    : type_(Type::native), argi_(a), n_func_(func){}
+
+  ~Function() = default;
   
-  Function(const Function&) = default;
-  Function(Function&&) = default;
-
-  Function& operator=(const Function&) = default;
-  Function& operator=(Function&&) = default;
-
   Lisp_ptr call(Env&, Stack&, Lisp_ptr args);
 
 private:
-  Type type_; // TODO: merge these two fields into bitfields
-  int required_args_;
-  bool variadic_;
+  const Type type_;
+  const ArgInfo argi_;
   union{
     Lisp_ptr code_;
     NativeFunc n_func_;
   };
 
   Lisp_ptr call(Env&, Stack&, int argc);
+
+  Function(const Function&) = delete;
+  Function(Function&&) = delete;
+
+  Function& operator=(const Function&) = delete;
+  Function& operator=(Function&&) = delete;
 };
 
-Function* make_function(Lisp_ptr args, Cons* code);
+Function::ArgInfo parse_func_arg(Lisp_ptr args);
 
 #endif //FUNCTION_HH
