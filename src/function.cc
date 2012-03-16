@@ -7,16 +7,16 @@
 
 Lisp_ptr Function::call(Env& e, Stack& s, int args){
   // length check
-  if(variadic_){
-    if(args >= required_args_){
+  if(argi_.variadic){
+    if(args >= argi_.required_args){
       fprintf(stderr, "funcall error: argcount insufficient! (supplied %d, required %d)\n",
-              args, required_args_);
+              args, argi_.required_args);
       return {};
     }    
   }else{
-    if(args != required_args_){
+    if(args != argi_.required_args){
       fprintf(stderr, "funcall error: argcount mismatch! (supplied %d, required %d)\n",
-              args, required_args_);
+              args, argi_.required_args);
       return {};
     }
   }

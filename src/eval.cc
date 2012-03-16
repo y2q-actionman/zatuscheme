@@ -25,13 +25,19 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
       return {};
     }
 
-    auto code = rest->cdr().get<Cons*>();
-    if(!code){
+    auto arg_info = parse_func_arg(args);
+    if(!arg_info.valid){
+      fprintf(stderr, "eval error: lambda has invalid args!");
+      return {};
+    }
+
+    auto code = rest->cdr();
+    if(!code.get<Cons*>()){
       fprintf(stderr, "eval error: lambda has no body!");
       return {};
     }
 
-    return Lisp_ptr{new Long_ptr{make_function(args, code)}};
+    return Lisp_ptr{new Long_ptr{new Function(code, arg_info)}};
   }
 
   case Keyword::if_: {
