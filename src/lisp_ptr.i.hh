@@ -6,6 +6,7 @@
 #endif
 
 #include <climits>
+#include <type_traits>
 #include "decl.hh"
 
 // Type mapping
@@ -159,7 +160,8 @@ Lisp_ptr::Lisp_ptr(T p)
   static_assert(static_cast<unsigned>(to_tag<Ptr_tag, T>())
                 <= lisp_ptr_i::tag_bit_mask,
                 "Lisp_ptr cannot be used with specified type");
-  static_assert(alignof(T) <= lisp_ptr_i::required_alignment,
+  static_assert(alignof(typename std::remove_pointer<T>::type)
+                >= lisp_ptr_i::required_alignment,
                 "Lisp_ptr cannot be used with misaligned type");
 }
 

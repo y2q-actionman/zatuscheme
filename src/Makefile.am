@@ -18,7 +18,8 @@ libzs_a_SOURCES = zs.hh\
 		env.cc env.hh\
 		eval.cc eval.hh\
 		stack.cc stack.hh\
-		function.cc function.hh
+		function.cc function.hh\
+		builtin.cc builtin.hh
 
 noinst_PROGRAMS = zs
 zs_SOURCES = zs.hh main.cc

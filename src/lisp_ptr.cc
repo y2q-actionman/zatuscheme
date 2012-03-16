@@ -6,5 +6,4 @@ static_assert((reinterpret_cast<uintptr_t>(nullptr)
 
 static_assert(sizeof(Lisp_ptr) == sizeof(void*), "pointer sizing failed");
 static_assert(sizeof(Lisp_ptr) >= sizeof(char)*2, "pointer cannot be filled by chars");
-static_assert(alignof(Lisp_ptr) >= lisp_ptr_i::required_alignment,
-              "pointer aligning failed");
+static_assert(alignof(Lisp_ptr) >= alignof(void*), "pointer aligning failed");
