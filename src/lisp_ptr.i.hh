@@ -120,6 +120,7 @@ Ptr_tag to_tag<Ptr_tag, Port*>(){
 
 namespace lisp_ptr_i {
   static constexpr uintptr_t tag_bit_mask = 0x3u;
+  static constexpr size_t required_alignment = 4;
   static constexpr uintptr_t embed_boolean_bit = 0x4u;
 } // namespace lisp_ptr_i
 
@@ -158,6 +159,8 @@ Lisp_ptr::Lisp_ptr(T p)
   static_assert(static_cast<unsigned>(to_tag<Ptr_tag, T>())
                 <= lisp_ptr_i::tag_bit_mask,
                 "Lisp_ptr cannot be used with specified type");
+  static_assert(alignof(T) <= lisp_ptr_i::required_alignment,
+                "Lisp_ptr cannot be used with misaligned type");
 }
 
 
