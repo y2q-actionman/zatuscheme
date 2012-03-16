@@ -20,20 +20,20 @@ public:
     int required_args;
   };
 
-
   explicit Function(Lisp_ptr code, const ArgInfo& a)
     : type_(Type::interpreted), argi_(a), code_(code){}
   explicit Function(NativeFunc func, const ArgInfo& a)
     : type_(Type::native), argi_(a), n_func_(func){}
 
-  ~Function() = default;
-  
   Function(const Function&) = default;
   Function(Function&&) = default;
 
+  ~Function() = default;
+  
   Function& operator=(const Function&) = default;
   Function& operator=(Function&&) = default;
 
+  
   Lisp_ptr call(Env&, Stack&, Lisp_ptr args);
 
 private:
