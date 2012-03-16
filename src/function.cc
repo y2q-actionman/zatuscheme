@@ -4,7 +4,7 @@
 #include "eval.hh"
 #include "cons.hh"
 
-Lisp_ptr Function::call(Env& e, Stack& s){
+Lisp_ptr Function::call(Env& e, Stack& s, int argc){
   return {}; // stub
 }
 
@@ -35,7 +35,7 @@ Lisp_ptr Function::call(Env& e, Stack& s, Lisp_ptr args){
   }
 
   // real calling
-  auto ret = this->call(e, s);
+  auto ret = this->call(e, s, argc);
 
   // pop args
   s.pop(argc);

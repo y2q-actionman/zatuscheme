@@ -37,7 +37,7 @@ private:
     NativeFunc n_func_;
   };
 
-  Lisp_ptr call(Env&, Stack&);
+  Lisp_ptr call(Env&, Stack&, int argc);
 };
 
 Function* make_function(Lisp_ptr args, Cons* code);
