@@ -22,7 +22,7 @@ public:
 
   explicit Function(Lisp_ptr code, const ArgInfo& a)
     : type_(Type::interpreted), argi_(a), code_(code){}
-  explicit Function(NativeFunc func, const ArgInfo& a)
+  explicit constexpr Function(NativeFunc func, const ArgInfo& a)
     : type_(Type::native), argi_(a), n_func_(func){}
 
   Function(const Function&) = default;

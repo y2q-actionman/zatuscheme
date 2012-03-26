@@ -6,6 +6,8 @@
 #include "lisp_ptr.hh"
 #include "symtable.hh"
 
+#include <array>
+
 using namespace std;
 
 namespace {
@@ -39,21 +41,18 @@ struct Entry {
   Function func;
 };
 
-static Entry
-builtin_func[] = {
+static const
+array<Entry, 1>
+builtin_func{{
   {"+", Function{plus_2, {true, false, 2}}}
-};
-
-static const size_t builtin_func_size =
-  sizeof(builtin_func) / sizeof(builtin_func[0]);
+}};
 
 } // namespace
 
 void install_builtin(Env& env, SymTable& sym_t){
-  for(int i = 0; i < builtin_func_size; ++i){
-    auto& e = builtin_func[i];
+  for(auto& e : builtin_func){
     Symbol* s = sym_t.intern(e.name);
-    env.set(s, Lisp_ptr{new Long_ptr(&e.func)});
+    env.set(s, Lisp_ptr{new Long_ptr(const_cast<Function*>(&e.func))});
   }
 }
 

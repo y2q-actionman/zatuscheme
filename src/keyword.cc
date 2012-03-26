@@ -12,7 +12,7 @@ struct Entry {
   const char* str;
 };
 
-constexpr
+static constexpr
 array<Entry, static_cast<int>(Keyword::MAX)>
 keyword_table{{
     { Keyword::not_keyword, "\0" },
