@@ -12,6 +12,70 @@ using namespace std;
 
 namespace {
 
+Function::ArgInfo parse_func_arg(Lisp_ptr args);
+
+Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
+  // push args
+  int argc = 0;
+  auto arg = args;
+
+  while(1){
+    if(arg.tag() != Ptr_tag::cons){
+      fprintf(stderr, "eval error: arg contains non-cons (dotted list?)");
+      return {};
+    }
+
+    auto arg_cell = arg.get<Cons*>();
+    if(!arg_cell) // reached nil
+      break;
+
+    auto evaled = eval(arg_cell->car(), e, s);
+    if(!evaled){
+      fprintf(stderr, "eval error: evaluating func's arg failed!!");
+      return {};
+    }
+
+    s.push(nullptr, evaled);
+    arg = arg_cell->cdr();
+    ++argc;
+  }
+
+  // real calling
+  const auto& argi = fun->arg_info();
+
+  // length check (TODO: merge this with pushing phase)
+  if(argi.variadic){
+    if(argc >= argi.required_args){
+      fprintf(stderr, "funcall error: argcount insufficient! (supplied %d, required %d)\n",
+              argc, argi.required_args);
+      return {};
+    }    
+  }else{
+    if(argc != argi.required_args){
+      fprintf(stderr, "funcall error: argcount mismatch! (supplied %d, required %d)\n",
+              argc, argi.required_args);
+      return {};
+    }
+  }
+
+  // real call
+  Lisp_ptr ret;
+
+  switch(fun->type()){
+  case Function::Type::interpreted:
+    ret = Lisp_ptr{}; // stub
+  case Function::Type::native:
+    ret = (fun->func<Function::NativeFunc>())(e, s, argc);
+  default:
+    UNEXP_DEFAULT();
+  }
+
+  // pop args
+  s.pop(argc);
+  
+  return ret;
+}
+
 Lisp_ptr eval_special(Keyword k, const Cons* rest,
                       Env& e, Stack& s){
   switch(k){
@@ -249,7 +313,7 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
       return {};
     }
 
-    return proc.get<Function*>()->call(e, s, c->cdr());
+    return funcall(proc.get<Function*>(), e, s, c->cdr());
   }
     
   default:

@@ -22,8 +22,8 @@ public:
 
   explicit Function(Lisp_ptr code, const ArgInfo& a)
     : type_(Type::interpreted), argi_(a), code_(code){}
-  explicit constexpr Function(NativeFunc func, const ArgInfo& a)
-    : type_(Type::native), argi_(a), n_func_(func){}
+  explicit constexpr Function(NativeFunc f, const ArgInfo& a)
+    : type_(Type::native), argi_(a), n_func_(f){}
 
   Function(const Function&) = default;
   Function(Function&&) = default;
@@ -33,9 +33,16 @@ public:
   Function& operator=(const Function&) = default;
   Function& operator=(Function&&) = default;
 
-  
-  Lisp_ptr call(Env&, Stack&, Lisp_ptr args);
 
+  const Type& type() const
+  { return type_; }
+
+  const ArgInfo& arg_info() const
+  { return argi_; }
+
+  template<typename T>
+  T func() const;
+  
 private:
   const Type type_;
   const ArgInfo argi_;
@@ -43,10 +50,17 @@ private:
     Lisp_ptr code_;
     NativeFunc n_func_;
   };
-
-  Lisp_ptr call(Env&, Stack&, int argc);
 };
 
-Function::ArgInfo parse_func_arg(Lisp_ptr args);
+// TODO: merge with type-mapping templates
+template<> inline
+Lisp_ptr Function::func<Lisp_ptr>() const{
+  return (type_ == Type::interpreted) ? code_ : Lisp_ptr{};
+}
+
+template<> inline
+Function::NativeFunc Function::func<Function::NativeFunc>() const{
+  return (type_ == Type::native) ? n_func_ : nullptr;
+}
 
 #endif //FUNCTION_HH
