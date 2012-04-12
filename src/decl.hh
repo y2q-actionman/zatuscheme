@@ -1,7 +1,7 @@
 #ifndef DECL_HH
 #define DECL_HH
 
-// defines generic facilities.
+// declares generic facilities.
 
 // Type mapping
 template<typename T>

@@ -52,15 +52,6 @@ private:
   };
 };
 
-// TODO: merge with type-mapping templates
-template<> inline
-Lisp_ptr Function::func<Lisp_ptr>() const{
-  return (type_ == Type::interpreted) ? code_ : Lisp_ptr{};
-}
-
-template<> inline
-Function::NativeFunc Function::func<Function::NativeFunc>() const{
-  return (type_ == Type::native) ? n_func_ : nullptr;
-}
+#include "function.i.hh"
 
 #endif //FUNCTION_HH

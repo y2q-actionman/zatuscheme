@@ -1,5 +1,3 @@
-#include <istream>
-
 #include "reader.hh"
 #include "lisp_ptr.hh"
 #include "token.hh"
