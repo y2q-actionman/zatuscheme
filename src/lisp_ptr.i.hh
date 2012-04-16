@@ -5,8 +5,6 @@
 #error "Please include via parent file"
 #endif
 
-#include <climits>
-#include <type_traits>
 #include "decl.hh"
 
 // Type mapping

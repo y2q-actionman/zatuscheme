@@ -1,7 +1,6 @@
 #ifndef LISP_PTR_HH
 #define LISP_PTR_HH
 
-#include <cstdint>
 #include <string>
 #include <vector>
 #include <cstdio>
