@@ -36,45 +36,24 @@ void check_noprint(Lisp_ptr input){
 }
 
 
-template<typename T,
-         bool is_direct = Lisp_ptr::includes(to_tag<Ptr_tag, T>())>
-struct check_fn;
-
-template<typename T>
-struct check_fn<T, true>{
-  static void exec(const T& t, const char* expect){
-    check(Lisp_ptr{t}, expect);
-  }
-};
-
-template<typename T>
-struct check_fn<T, false>{
-  static void exec(const T& t, const char* expect){
-    Long_ptr lp(t);
-    check(Lisp_ptr{&lp}, expect);
-  }
-};
-
-
 template<typename T>
 void check(const T& t, const char* expect){
-  check_fn<T>::exec(t, expect);
+  check(Lisp_ptr{t}, expect);
 }
 
 void check(const char* s, const char* expect){
   string ss{s};
-  check(&ss, expect);
+  check(Lisp_ptr{&ss}, expect);
 }
 
 void check(Number&& n, const char* expect){
   Number nn{n};
-  check(&nn, expect);
+  check(Lisp_ptr{&nn}, expect);
 }
 
 template<typename T>
 void check_noprint(const T& t){
-  Long_ptr lp{t};
-  check_noprint(Lisp_ptr{&lp});
+  check_noprint(Lisp_ptr{t});
 }  
 
 
@@ -143,9 +122,8 @@ int main(){
     v1.push_back(Cons::NIL);
     check(&v1, "#(() ())");
 
-    Long_ptr v1p{&v1};
     Vector v2;
-    v2.push_back(Lisp_ptr{&v1p});
+    v2.push_back(Lisp_ptr{&v1});
     check(&v2, "#(#(() ()))");
   }
 

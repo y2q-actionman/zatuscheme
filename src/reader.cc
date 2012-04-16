@@ -100,7 +100,7 @@ Lisp_ptr read_vector(SymTable& sym, FILE* f){
   }
 
  end:
-  return Lisp_ptr{new Long_ptr{v}};
+  return Lisp_ptr{v};
 }
 
 Lisp_ptr read_abbrev(SymTable& sym, Keyword k, FILE* f){
@@ -119,13 +119,13 @@ Lisp_ptr read_la(SymTable& sym, FILE* f, const Token& looked_tok){
     return Lisp_ptr(tok.get<bool>());
 
   case Token::Type::number:
-    return Lisp_ptr(new Long_ptr{new Number(tok.get<Number>())});
+    return Lisp_ptr(new Number(tok.get<Number>()));
 
   case Token::Type::character:
     return Lisp_ptr(tok.get<char>());
 
   case Token::Type::string:
-    return Lisp_ptr(new Long_ptr{new String(tok.get<string>())});
+    return Lisp_ptr(new String(tok.get<string>()));
 
   case Token::Type::identifier:
     return Lisp_ptr{sym.intern(tok.get<string>())};

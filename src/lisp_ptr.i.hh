@@ -16,6 +16,16 @@ struct to_type<Ptr_tag>{
 };
 
 template<> template<>
+struct to_type<Ptr_tag>::get<Ptr_tag::boolean>{
+  typedef bool type;
+};
+
+template<> template<>
+struct to_type<Ptr_tag>::get<Ptr_tag::character>{
+  typedef char type;
+};
+
+template<> template<>
 struct to_type<Ptr_tag>::get<Ptr_tag::cons>{
   typedef Cons* type;
 };
@@ -23,11 +33,6 @@ struct to_type<Ptr_tag>::get<Ptr_tag::cons>{
 template<> template<>
 struct to_type<Ptr_tag>::get<Ptr_tag::symbol>{
   typedef Symbol* type;
-};
-
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::long_ptr>{
-  typedef Long_ptr* type;
 };
 
 template<> template<>
@@ -59,13 +64,13 @@ struct to_type<Ptr_tag>::get<Ptr_tag::port>{
 template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, bool>(){
-  return Ptr_tag::immediate;
+  return Ptr_tag::boolean;
 }
 
 template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, char>(){
-  return Ptr_tag::immediate;
+  return Ptr_tag::character;
 }
 
 template<>
@@ -78,12 +83,6 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, Symbol*>(){
   return Ptr_tag::symbol;
-}
-
-template<>
-inline constexpr
-Ptr_tag to_tag<Ptr_tag, Long_ptr*>(){
-  return Ptr_tag::long_ptr;
 }
 
 template<>
@@ -119,111 +118,47 @@ Ptr_tag to_tag<Ptr_tag, Port*>(){
 
 // ptr class definitions
 
-namespace lisp_ptr_i {
-  static constexpr uintptr_t tag_bit_mask = 0x3u;
-  static constexpr size_t required_alignment = 4;
-  static constexpr uintptr_t embed_boolean_bit = 0x4u;
-} // namespace lisp_ptr_i
-
-constexpr inline
-bool Lisp_ptr::includes(Ptr_tag t){
-  return (t == Ptr_tag::immediate)
-    || (t == Ptr_tag::cons)
-    || (t == Ptr_tag::symbol)
-    || (t == Ptr_tag::long_ptr);
-}
-
 template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<bool>(bool b)
-  : base_((0xffu << CHAR_BIT)
-          | (b ? lisp_ptr_i::embed_boolean_bit : 0)){}
+: tag_(to_tag<Ptr_tag, bool>()), u_(b){}
 
 template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<char>(char c)
-  : base_((static_cast<unsigned>(c) << CHAR_BIT)
-          | lisp_ptr_i::embed_boolean_bit){}
+: tag_(to_tag<Ptr_tag, char>()), u_(c){}
 
 template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<Ptr_tag>(Ptr_tag p)
-: base_((static_cast<unsigned>(p) <= lisp_ptr_i::tag_bit_mask)
-        ? (reinterpret_cast<uintptr_t>(nullptr) | static_cast<uintptr_t>(p))
-        : 0){}
+: tag_(p), u_(nullptr){}
 
 template<typename T>
 inline constexpr
 Lisp_ptr::Lisp_ptr(T p)
-  : base_(reinterpret_cast<uintptr_t>(p)
-          | static_cast<uintptr_t>(to_tag<Ptr_tag, T>())){
-  static_assert(static_cast<unsigned>(to_tag<Ptr_tag, T>())
-                <= lisp_ptr_i::tag_bit_mask,
-                "Lisp_ptr cannot be used with specified type");
-  static_assert(alignof(typename std::remove_pointer<T>::type)
-                >= lisp_ptr_i::required_alignment,
-                "Lisp_ptr cannot be used with misaligned type");
-}
+  : tag_(to_tag<Ptr_tag, T>()), u_(p){}
 
-
-inline
-Ptr_tag Lisp_ptr::tag() const {
-  switch(base_ & lisp_ptr_i::tag_bit_mask){
-  case 0x0:
-    return Ptr_tag::immediate;
-  case 0x1:
-    return Ptr_tag::cons;
-  case 0x2:
-    return Ptr_tag::symbol;
-  case 0x3:
-    return Ptr_tag::long_ptr;
-  default:
-    return Ptr_tag::unknown;
-  }
-}
 
 template<>
 inline
 bool Lisp_ptr::get<bool>() const {
-  return (tag() == Ptr_tag::immediate)
-    ? ((base_ & lisp_ptr_i::embed_boolean_bit) != 0)
+  return (tag() == to_tag<Ptr_tag, bool>())
+    ? u_.b_
     : true; // anything is #t, except #f and null
 }
 
 template<>
 inline
 char Lisp_ptr::get<char>() const {
-  return (tag() == Ptr_tag::immediate)
-    ? ((base_ >> CHAR_BIT) & ((1u << CHAR_BIT) - 1u))
-    : '\0';
+  return (tag() == to_tag<Ptr_tag, char>())
+    ? u_.c_ : '\0';
 }
 
 template<typename T>
 inline
 T Lisp_ptr::get() const {
   return (tag() == to_tag<Ptr_tag, T>())
-    ? static_cast<T>(reinterpret_cast<void*>(base_ & ~lisp_ptr_i::tag_bit_mask))
-    : nullptr;
-}
-
-inline
-bool Lisp_ptr::is_bool() const{
-  return (get<char>() == static_cast<char>(0xff));
-}
-
-
-// Long_ptr definitions
-template<typename T>
-inline constexpr
-Long_ptr::Long_ptr(T p)
-  : tag_(to_tag<Ptr_tag, T>()), ptr_(p){}
-  
-template<typename T>
-inline
-T Long_ptr::get() const {
-  return (tag() == to_tag<Ptr_tag, T>())
-    ? static_cast<T>(ptr_)
-    : nullptr;
+    ? static_cast<T>(u_.ptr_) : nullptr;
 }
 
 #endif // LISP_PTR_I_HH

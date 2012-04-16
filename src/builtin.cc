@@ -52,7 +52,7 @@ builtin_func{{
 void install_builtin(Env& env, SymTable& sym_t){
   for(auto& e : builtin_func){
     Symbol* s = sym_t.intern(e.name);
-    env.set(s, Lisp_ptr{new Long_ptr(const_cast<Function*>(&e.func))});
+    env.set(s, Lisp_ptr{const_cast<Function*>(&e.func)});
   }
 }
 

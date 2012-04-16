@@ -101,7 +101,7 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
       return {};
     }
 
-    return Lisp_ptr{new Long_ptr{new Function(code, arg_info)}};
+    return Lisp_ptr{new Function(code, arg_info)};
   }
 
   case Keyword::if_: {
@@ -262,8 +262,13 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
   }
 
   switch(p.tag()){
-  case Ptr_tag::immediate:
-  case Ptr_tag::long_ptr:
+  case Ptr_tag::boolean:
+  case Ptr_tag::character:
+  case Ptr_tag::function:
+  case Ptr_tag::number:
+  case Ptr_tag::string:
+  case Ptr_tag::vector:
+  case Ptr_tag::port:
     return p; // self-evaluating
 
   case Ptr_tag::symbol: {

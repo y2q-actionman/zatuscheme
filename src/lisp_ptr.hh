@@ -6,31 +6,12 @@
 #include <vector>
 #include <cstdio>
 
-/* tag bit map
-
- __00: immediate
-       all 0: NULL / undefined
-
-       bit 0~1            : 0
-       bit 2              : boolean
-       bit ~CHAR_BIT-1    : (unused)
-       bit ~(CHAR_BIT * 2): char, or 0xff in boolean
-       bit ~rest          : (unused)
-
- __01: cons
- __10: symbol
- __11: long ptr
-
- */
-
 enum class Ptr_tag {
-  unknown = -1,
-  /* in Lisp_ptr */
-    immediate = 0x0,
-    cons = 0x1,
-    symbol = 0x2,
-    long_ptr = 0x3,
-  /* in Long_ptr */
+  undefined = -1,
+  boolean = 0,
+    character,
+    cons,
+    symbol,
     function,
     number,
     string,
@@ -39,11 +20,9 @@ enum class Ptr_tag {
     };
     
 
-union Lisp_ptr{
+class Lisp_ptr {
 public:
-  static constexpr bool includes(Ptr_tag);
-
-  constexpr Lisp_ptr() : base_(0){}
+  constexpr Lisp_ptr() : tag_(Ptr_tag::undefined), u_(nullptr){}
   template<typename T>
   explicit constexpr Lisp_ptr(T);
   Lisp_ptr(const Lisp_ptr&) = default;
@@ -54,44 +33,28 @@ public:
   Lisp_ptr& operator=(const Lisp_ptr&) = default;
   Lisp_ptr& operator=(Lisp_ptr&&) = default;
 
-  Ptr_tag tag() const;
-
-  template<typename T>
-  T get() const;
-
-  explicit constexpr operator bool() const
-  { return base_ != 0; }
-
-  bool is_bool() const;
-
-private:
-  void* ptr_;
-  uintptr_t base_;
-};
-
-
-class Long_ptr {
-public:
-  Long_ptr() = delete;
-  template<typename T>
-  explicit constexpr Long_ptr(T);
-  Long_ptr(const Long_ptr&) = default;
-  Long_ptr(Long_ptr&&) = default;
-
-  ~Long_ptr() = default;
-
-  Long_ptr& operator=(const Long_ptr&) = default;
-  Long_ptr& operator=(Long_ptr&&) = default;
-
   Ptr_tag tag() const
   { return tag_; }
 
   template<typename T>
   T get() const;
 
+  explicit constexpr operator bool() const
+  { return (tag_ != Ptr_tag::undefined); }
+
 private:
+  union lisp_ptr_u{
+    constexpr lisp_ptr_u(void* p) : ptr_(p){}
+    constexpr lisp_ptr_u(bool b) : b_(b){}
+    constexpr lisp_ptr_u(char c) : c_(c){}
+
+    void* ptr_;
+    bool b_;
+    char c_;
+  };
+
   Ptr_tag tag_;
-  void* ptr_;
+  lisp_ptr_u u_;
 };
 
 
