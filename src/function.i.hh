@@ -38,15 +38,13 @@ Function::Type to_tag<Function::Type, Function::NativeFunc>(){
 
 
 template<> inline
-Lisp_ptr Function::func() const{
+Lisp_ptr Function::get() const{
   return (type_ == to_tag<Function::Type, Lisp_ptr>()) ? code_ : Lisp_ptr{};
 }
 
 template<> inline
-Function::NativeFunc Function::func() const{
+Function::NativeFunc Function::get() const{
   return (type_ == to_tag<Function::Type, NativeFunc>()) ? n_func_ : nullptr;
 }
-
-
 
 #endif // FUNCTION_I_HH

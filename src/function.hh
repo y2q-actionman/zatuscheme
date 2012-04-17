@@ -15,9 +15,18 @@ public:
   };
 
   struct ArgInfo {
-    bool valid;
-    bool variadic;
-    int required_args;
+    const Lisp_ptr head;
+    const int required_args;
+    const bool variadic;
+
+    constexpr ArgInfo()
+      : head({}), required_args(-1), variadic(false){}
+    constexpr ArgInfo(Lisp_ptr h, int rargs, bool v)
+      : head(h), required_args(rargs), variadic(v){}
+
+    explicit operator bool() const{
+      return (head) && (required_args < 0);
+    }
   };
 
   explicit Function(Lisp_ptr code, const ArgInfo& a)
@@ -41,7 +50,7 @@ public:
   { return argi_; }
 
   template<typename T>
-  T func() const;
+  T get() const;
   
 private:
   const Type type_;

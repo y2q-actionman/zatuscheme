@@ -12,7 +12,34 @@ using namespace std;
 
 namespace {
 
-Function::ArgInfo parse_func_arg(Lisp_ptr args);
+Function::ArgInfo parse_func_arg(Lisp_ptr args){
+  int argc = 0;
+  Lisp_ptr p = args;
+
+  while(1){
+    if(p.tag() != Ptr_tag::cons){
+      if(p.tag() != Ptr_tag::symbol){
+        fprintf(stderr, "eval error: informal lambda list! (ended with non-symbol)");
+        return {};
+      }
+
+      return {args, argc, true};
+    }
+
+    Cons* c = p.get<Cons*>();
+    if(!c){
+      return {args, argc, false};
+    }
+
+    if(c->car().tag() != Ptr_tag::symbol){
+      fprintf(stderr, "eval error: informal lambda list! (includes non-symbol)");
+      return {};
+    }
+
+    ++argc;
+    p = c->cdr();
+  }
+}
 
 Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
   // push args
@@ -65,7 +92,7 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
   case Function::Type::interpreted:
     ret = Lisp_ptr{}; // stub
   case Function::Type::native:
-    ret = (fun->func<Function::NativeFunc>())(e, s, argc);
+    ret = (fun->get<Function::NativeFunc>())(e, s, argc);
   default:
     UNEXP_DEFAULT();
   }
@@ -90,7 +117,7 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
     }
 
     auto arg_info = parse_func_arg(args);
-    if(!arg_info.valid){
+    if(!arg_info){
       fprintf(stderr, "eval error: lambda has invalid args!");
       return {};
     }

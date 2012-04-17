@@ -24,6 +24,8 @@ public:
   void push(Symbol*, Lisp_ptr);
   void pop(int);
 
+  Lisp_ptr at(int) const;
+
 private:
   typedef std::pair<Symbol*, Lisp_ptr> Entry;
   std::vector<Entry> stack_;

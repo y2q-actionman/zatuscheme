@@ -13,24 +13,23 @@ using namespace std;
 namespace {
 
 Lisp_ptr plus_2(Env& e, Stack& s, int args){
+  (void)e;
   if(args != 2) return {};
 
-  // Lisp_ptr lp = s.end() - 2;
-  // if(lp.tag() != Ptr_tag::long_ptr
-  //    || lp.get<Long_ptr*>()->tag() != Ptr_tag::number){
-  //   return {};
-  // }
-  // Number* l = lp.get<Long_ptr*>()->get<Number*>();
+  Lisp_ptr p1 = s.at(-args);
+  if(p1.tag() != Ptr_tag::number){
+    return {};
+  }
+  Number* n1 = p1.get<Number*>();
 
-  // Lisp_ptr rp = s.end() - 1;
-  // if(rp.tag() != Ptr_tag::long_ptr
-  //    || rp.get<Long_ptr*>()->tag() != Ptr_tag::number){
-  //   return {};
-  // }
-  // Number* r = rp.get<Long_ptr*>()->get<Number*>();
+  Lisp_ptr p2 = s.at(-args+1);
+  if(p2.tag() != Ptr_tag::number){
+    return {};
+  }
+  Number* n2 = p2.get<Number*>();
 
-  // Number* newn = new Number(l->get<long>() + r->get<long>());
-  // return Lisp_ptr(new Long_ptr(newn));
+  Number* newn = new Number(n1->get<long>() + n2->get<long>());
+  return Lisp_ptr(newn);
 }
 
 
@@ -41,10 +40,10 @@ struct Entry {
   Function func;
 };
 
-static const
+static
 array<Entry, 1>
 builtin_func{{
-  {"+", Function{plus_2, {true, false, 2}}}
+  {"+", Function{plus_2, {Lisp_ptr{}, 2, true}}}
 }};
 
 } // namespace
@@ -52,7 +51,7 @@ builtin_func{{
 void install_builtin(Env& env, SymTable& sym_t){
   for(auto& e : builtin_func){
     Symbol* s = sym_t.intern(e.name);
-    env.set(s, Lisp_ptr{const_cast<Function*>(&e.func)});
+    env.set(s, Lisp_ptr{&e.func});
   }
 }
 

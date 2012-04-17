@@ -28,3 +28,11 @@ void Stack::pop(int i){
   auto it = stack_.end() - i;
   stack_.erase(it, stack_.end());
 }
+
+Lisp_ptr Stack::at(int i) const{
+  if(i >= 0){
+    return stack_.at(i).second;
+  }else{
+    return stack_.at(stack_.size()+i).second;
+  }
+}
