@@ -19,7 +19,7 @@ Function::ArgInfo parse_func_arg(Lisp_ptr args){
   while(1){
     if(p.tag() != Ptr_tag::cons){
       if(p.tag() != Ptr_tag::symbol){
-        fprintf(stderr, "eval error: informal lambda list! (ended with non-symbol)");
+        fprintf(stderr, "eval error: informal lambda list! (ended with non-symbol)\n");
         return {};
       }
 
@@ -32,7 +32,7 @@ Function::ArgInfo parse_func_arg(Lisp_ptr args){
     }
 
     if(c->car().tag() != Ptr_tag::symbol){
-      fprintf(stderr, "eval error: informal lambda list! (includes non-symbol)");
+      fprintf(stderr, "eval error: informal lambda list! (includes non-symbol)\n");
       return {};
     }
 
@@ -42,24 +42,44 @@ Function::ArgInfo parse_func_arg(Lisp_ptr args){
 }
 
 Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
+  const auto& argi = fun->arg_info();
+  Lisp_ptr ret = {};
+
   // push args
   int argc = 0;
   auto arg = args;
 
   while(1){
     if(arg.tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: arg contains non-cons (dotted list?)");
-      return {};
+      fprintf(stderr, "eval error: arg contains non-cons (dotted list?)\n");
+      goto end;
     }
 
     auto arg_cell = arg.get<Cons*>();
-    if(!arg_cell) // reached nil
+
+    if(argc >= argi.required_args){
+      if(argi.variadic){
+        s.push(nullptr, arg);
+      }else{
+        if(arg_cell){
+          fprintf(stderr, "funcall error: argcount mismatch! (more than required %d)\n",
+                  argi.required_args);
+          goto end;
+        }
+      }
       break;
+    }
+
+    if(!arg_cell){ // reached nil
+      fprintf(stderr, "funcall error: argcount mismatch! (less than required %d)\n",
+              argi.required_args);
+      goto end;
+    }
 
     auto evaled = eval(arg_cell->car(), e, s);
     if(!evaled){
-      fprintf(stderr, "eval error: evaluating func's arg failed!!");
-      return {};
+      fprintf(stderr, "eval error: evaluating func's arg failed!!\n");
+      goto end;
     }
 
     s.push(nullptr, evaled);
@@ -67,37 +87,20 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
     ++argc;
   }
 
-  // real calling
-  const auto& argi = fun->arg_info();
-
-  // length check (TODO: merge this with pushing phase)
-  if(argi.variadic){
-    if(argc >= argi.required_args){
-      fprintf(stderr, "funcall error: argcount insufficient! (supplied %d, required %d)\n",
-              argc, argi.required_args);
-      return {};
-    }    
-  }else{
-    if(argc != argi.required_args){
-      fprintf(stderr, "funcall error: argcount mismatch! (supplied %d, required %d)\n",
-              argc, argi.required_args);
-      return {};
-    }
-  }
-
   // real call
-  Lisp_ptr ret;
-
   switch(fun->type()){
   case Function::Type::interpreted:
     ret = Lisp_ptr{}; // stub
+    break;
   case Function::Type::native:
     ret = (fun->get<Function::NativeFunc>())(e, s, argc);
+    break;
   default:
     UNEXP_DEFAULT();
   }
 
   // pop args
+ end:
   s.pop(argc);
   
   return ret;
@@ -112,19 +115,19 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
   case Keyword::lambda: {
     auto args = rest->car();
     if(rest->cdr().tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: lambda has invalid body!");
+      fprintf(stderr, "eval error: lambda has invalid body!\n");
       return {};
     }
 
     auto arg_info = parse_func_arg(args);
     if(!arg_info){
-      fprintf(stderr, "eval error: lambda has invalid args!");
+      fprintf(stderr, "eval error: lambda has invalid args!\n");
       return {};
     }
 
     auto code = rest->cdr();
     if(!code.get<Cons*>()){
-      fprintf(stderr, "eval error: lambda has no body!");
+      fprintf(stderr, "eval error: lambda has no body!\n");
       return {};
     }
 
@@ -136,20 +139,20 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
     auto test = rest->car();
 
     if(rest->cdr().tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: if has invalid conseq!");
+      fprintf(stderr, "eval error: if has invalid conseq!\n");
       return {};
     }
 
     auto conseq_l = rest->cdr().get<Cons*>();
     if(!conseq_l){
-      fprintf(stderr, "eval error: if has no conseq!");
+      fprintf(stderr, "eval error: if has no conseq!\n");
       return {};
     }
 
     auto conseq = conseq_l->car();
 
     if(rest->cdr().tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: if has invalid alt!");
+      fprintf(stderr, "eval error: if has invalid alt!\n");
       return {};
     }
 
@@ -160,7 +163,7 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
 
       if(rest->cdr().tag() != Ptr_tag::cons
          || rest->cdr().get<Cons*>()){
-        fprintf(stderr, "eval error: if has extra alts!");
+        fprintf(stderr, "eval error: if has extra alts!\n");
         return {};
       }
     }
@@ -178,28 +181,28 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
     // extracting
     auto var = rest->car().get<Symbol*>();
     if(!var){
-      fprintf(stderr, "eval error: set!'s first element is not symbol!");
+      fprintf(stderr, "eval error: set!'s first element is not symbol!\n");
       return {};
     }
     if(to_keyword(var->name()) != Keyword::not_keyword){
-      fprintf(stderr, "eval error: set!'s first element is Keyword!");
+      fprintf(stderr, "eval error: set!'s first element is Keyword!\n");
       return {};
     }
 
     if(rest->cdr().tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: set!'s value form is informal!");
+      fprintf(stderr, "eval error: set!'s value form is informal!\n");
       return {};
     }
 
     auto valp = rest->cdr().get<Cons*>();
     if(!valp){
-      fprintf(stderr, "eval error: set! has no value!");
+      fprintf(stderr, "eval error: set! has no value!\n");
       return {};
     }
 
     if(valp->cdr().tag() != Ptr_tag::cons
        || valp->cdr().get<Cons*>()){
-      fprintf(stderr, "eval error: set! has extra forms!");
+      fprintf(stderr, "eval error: set! has extra forms!\n");
       return {};
     }
 
@@ -211,7 +214,7 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
     }else if(e.find(var)){
       e.set(var, eval(val, e, s));
     }else{
-      fprintf(stderr, "eval error: set! value is not defined previously!");
+      fprintf(stderr, "eval error: set! value is not defined previously!\n");
     }
       
     return {};
@@ -265,16 +268,16 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
   case Keyword::r_arrow:
   case Keyword::unquote:
   case Keyword::unquote_splicing:
-    fprintf(stderr, "eval error: keyword '%s' cannot be used as operator!!",
+    fprintf(stderr, "eval error: keyword '%s' cannot be used as operator!!\n",
             stringify(k));
     return {};
     
   case Keyword::define:
-    fprintf(stderr, "eval error: definition cannot be treated in eval!!");
+    fprintf(stderr, "eval error: definition cannot be treated in eval!!\n");
     return {};
 
   case Keyword::not_keyword:
-    fprintf(stderr, "internal error: should not be procesed normal symbols here!!");
+    fprintf(stderr, "internal error: should not be procesed normal symbols here!!\n");
   default:
     UNEXP_DEFAULT();
   }
@@ -284,7 +287,7 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
 
 Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
   if(!p){
-    fprintf(stderr, "eval error: undefined value passed!!");
+    fprintf(stderr, "eval error: undefined value passed!!\n");
     return {};
   }
 
@@ -300,11 +303,17 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
 
   case Ptr_tag::symbol: {
     auto sym = p.get<Symbol*>();
-    if(to_keyword(sym->name()) == Keyword::not_keyword){
-      return s.find(sym) ? e.find(sym) : Lisp_ptr{};
-    }else{
-      fprintf(stderr, "eval error: symbol '%s' is keyword!!", sym->name().c_str());
+    if(to_keyword(sym->name()) != Keyword::not_keyword){
+      fprintf(stderr, "eval error: symbol '%s' is keyword!!\n", sym->name().c_str());
       return {};
+    }
+
+    if(auto rets = s.find(sym)){
+      return rets;
+    }else if(auto rete = e.find(sym)){
+      return rete;
+    }else{
+      Lisp_ptr{};
     }
   }
     
@@ -319,13 +328,13 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
 
       if(k != Keyword::not_keyword){
         if(c->cdr().tag() != Ptr_tag::cons){
-          fprintf(stderr, "eval error: expresssion (<KEYWORD> . #) is informal!");
+          fprintf(stderr, "eval error: expresssion (<KEYWORD> . #) is informal!\n");
           return {};
         }
 
         Cons* r = c->cdr().get<Cons*>();
         if(!r){
-          fprintf(stderr, "eval error: expresssion (<KEYWORD>) is informal!");
+          fprintf(stderr, "eval error: expresssion (<KEYWORD>) is informal!\n");
           return {};
         }
         return eval_special(k, r, e, s);
@@ -341,7 +350,7 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
     // procedure call?
     auto proc = eval(first, e, s);
     if(proc.tag() != Ptr_tag::function){
-      fprintf(stderr, "eval error: (# # ...)'s first element is not procedure!!");
+      fprintf(stderr, "eval error: (# # ...)'s first element is not procedure!!\n");
       return {};
     }
 

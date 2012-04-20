@@ -66,6 +66,9 @@ typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
 typedef FILE Port;
 
+void describe(FILE*, Ptr_tag);
+void describe(FILE*, Lisp_ptr);
+
 
 #include "lisp_ptr.i.hh"
 
