@@ -3,11 +3,12 @@
 
 // declares generic facilities.
 
-// Type mapping
-template<typename T>
-struct to_type;
+// Type mapping - provided by overload
+//   template<EnumType i, typename T>
+//   T to_type() = delete;
 // usage
-//   to_type<Number::Type>::get<Number::Type::integer_type>::type
+//   decltype(to_type<Number::Type::integer_type>())
+
 
 template<typename enum_type, typename Arg>
 enum_type to_tag();

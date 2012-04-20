@@ -9,25 +9,17 @@
 #include "util.hh"
 
 // Type mapping
+template<Number::Type t, typename T>
+T to_type() = delete;
+
 template<>
-struct to_type<Number::Type>{
-  template<Number::Type t> struct get;
-};
+Number::complex_type to_type<Number::Type::complex>() = delete;
 
-template<> template<>
-struct to_type<Number::Type>::get<Number::Type::complex>{
-  typedef Number::complex_type type;
-};
+template<>
+Number::real_type to_type<Number::Type::real>() = delete;
 
-template<> template<>
-struct to_type<Number::Type>::get<Number::Type::real>{
-  typedef Number::real_type type;
-};
-
-template<> template<>
-struct to_type<Number::Type>::get<Number::Type::integer>{
-  typedef Number::integer_type type;
-};
+template<>
+Number::integer_type to_type<Number::Type::integer>() = delete;
 
 
 template<>

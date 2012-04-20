@@ -8,55 +8,35 @@
 #include "decl.hh"
 
 // Type mapping
+template<Ptr_tag t, typename T>
+T to_type() = delete;
+
 template<>
-struct to_type<Ptr_tag>{
-  template<Ptr_tag t> struct get;
-};
+bool to_type<Ptr_tag::boolean>() = delete;
 
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::boolean>{
-  typedef bool type;
-};
+template<>
+char to_type<Ptr_tag::character>() = delete;
 
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::character>{
-  typedef char type;
-};
+template<>
+Cons* to_type<Ptr_tag::cons>() = delete;
 
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::cons>{
-  typedef Cons* type;
-};
+template<>
+Symbol* to_type<Ptr_tag::symbol>() = delete;
 
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::symbol>{
-  typedef Symbol* type;
-};
+template<>
+Function* to_type<Ptr_tag::function>() = delete;
 
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::function>{
-  typedef Function* type;
-};
+template<>
+Number* to_type<Ptr_tag::number>() = delete;
 
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::number>{
-  typedef Number* type;
-};
+template<>
+String* to_type<Ptr_tag::string>() = delete;
 
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::string>{
-  typedef String* type;
-};
+template<>
+Vector* to_type<Ptr_tag::vector>() = delete;
 
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::vector>{
-  typedef Vector* type;
-};
-
-template<> template<>
-struct to_type<Ptr_tag>::get<Ptr_tag::port>{
-  typedef Port* type;
-};
+template<>
+Port* to_type<Ptr_tag::port>() = delete;
 
 
 template<>

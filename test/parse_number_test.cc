@@ -48,7 +48,7 @@ void check_generic(istream& i, const Fun& f){
 }
 
 template<Number::Type type, typename Fun, 
-         typename ex_type = typename to_type<Number::Type>::get<type>::type>
+         typename ex_type = decltype(to_type<type>())>
 void check_generic(istream& i,
                    const ex_type& expect,
                    const Fun& f){

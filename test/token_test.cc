@@ -114,7 +114,7 @@ void check_generic(FILE* f, const Fun& fun){
 }
 
 template<Token::Type type, typename Fun, 
-         typename ex_type = typename to_type<Token::Type>::get<type>::type>
+         typename ex_type = decltype(to_type<type>())>
 void check_generic(FILE* f, const ex_type& expect,
                    const Fun& fun){
   fpos_t init_pos;

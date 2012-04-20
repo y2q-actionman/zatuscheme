@@ -8,20 +8,14 @@
 #include "decl.hh"
 
 // Type mapping
+template<Function::Type t, typename T>
+T to_type() = delete;
+
 template<>
-struct to_type<Function::Type>{
-  template<Function::Type t> struct get;
-};
+Lisp_ptr to_type<Function::Type::interpreted>() = delete;
 
-template<> template<>
-struct to_type<Function::Type>::get<Function::Type::interpreted>{
-  typedef Lisp_ptr type;
-};
-
-template<> template<>
-struct to_type<Function::Type>::get<Function::Type::native>{
-  typedef Function::NativeFunc type;
-};
+template<>
+Function::NativeFunc to_type<Function::Type::native>() = delete;
 
 
 template<>
