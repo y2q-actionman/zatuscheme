@@ -6,6 +6,7 @@ warning_flags = -Wall -Wextra -Wformat=2 -Winit-self -Wshadow\
 #		-Wzero-as-null-pointer-constant
 
 test_flags = -D_FORTIFY_SOURCE=2 -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC
+#	-Wswitch-enum
 #	-Wconversion 
 
 test_envs = MALLOC_CHECK_=2 

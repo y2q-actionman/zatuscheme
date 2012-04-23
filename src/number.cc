@@ -33,39 +33,26 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
   Exactness e = Exactness::unspecified;
   bool r_appeared = false, e_appeared = false;
 
-  if(i.peek() != '#')
-    return {r, e};
-  i.ignore(1);
+  for(int loop = 0; loop < 2; ++loop){
+    if(i.peek() != '#')
+      return {r, e};
+    i.ignore(1);
 
-  switch(auto c = i.get()){
-  case 'i': case 'e':
-    e = to_exactness(c);
-    e_appeared = true;
-    break;
-  case 'b': case 'o': case 'd': case 'x':
-    r = to_radix(c);
-    r_appeared = true;
-    break;
-  default:
-    goto error;
-  }
-  
-  if(i.peek() != '#')
-    return {r, e};
-  i.ignore(1);
-
-  switch(auto c = i.get()){
-  case 'i': case 'e':
-    if(e_appeared) goto error;
-    e = to_exactness(c);
-    break;
-  case 'b': case 'o': case 'd': case 'x':
-    if(r_appeared) goto error;
-    r = to_radix(c);
-    break;
-  default:
-    goto error;
-  }
+    switch(auto c = i.get()){
+    case 'i': case 'e':
+      if(e_appeared) goto error;
+      e = to_exactness(c);
+      e_appeared = true;
+      break;
+    case 'b': case 'o': case 'd': case 'x':
+      if(r_appeared) goto error;
+      r = to_radix(c);
+      r_appeared = true;
+      break;
+    default:
+      goto error;
+    }
+  }  
   
   return {r, e};
 
