@@ -132,6 +132,12 @@ char Lisp_ptr::get<char>() const {
     ? u_.c_ : '\0';
 }
 
+template<>
+inline
+void* Lisp_ptr::get<void*>() const{
+  return u_.ptr_;
+}
+
 template<typename T>
 inline
 T Lisp_ptr::get() const {

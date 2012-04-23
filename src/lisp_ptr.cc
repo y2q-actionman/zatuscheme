@@ -2,11 +2,6 @@
 
 static_assert(sizeof(Lisp_ptr) >= sizeof(char)*2, "pointer cannot be filled by chars");
 
-template<>
-void* Lisp_ptr::get() const{
-  return u_.ptr_;
-}
-
 const char* stringify(Ptr_tag p){
   switch(p){
   case Ptr_tag::undefined:

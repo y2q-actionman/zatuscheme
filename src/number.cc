@@ -382,6 +382,44 @@ Number parse_number(std::istream& i){
   return {};
 }
 
+bool eql(const Number& n, const Number& m){
+  if(n.type() != m.type()) return false;
+
+  switch(n.type()){
+  case Number::Type::uninitialized:
+    return false;
+  case Number::Type::complex:
+    return n.get<Number::complex_type>() == m.get<Number::complex_type>();
+  case Number::Type::real:
+    return n.get<Number::real_type>() == m.get<Number::real_type>();
+  case Number::Type::integer:
+    return n.get<Number::integer_type>() == m.get<Number::integer_type>();
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+void print(FILE* f, const Number& n){
+  switch(n.type()){
+  case Number::Type::uninitialized:
+    fprintf(f, "(uninitialied number)");
+    break;
+  case Number::Type::complex: {
+    auto&& z = n.get<Number::complex_type>();
+    fprintf(f, "%g+%gi", z.real(), z.imag());
+  }
+    break;
+  case Number::Type::real:
+    fprintf(f, "%g", n.get<Number::real_type>());
+    break;
+  case Number::Type::integer:
+    fprintf(f, "%ld", n.get<Number::integer_type>());
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
 Number to_exact(const Number& n){
   switch(n.type()){
   case Number::Type::complex:

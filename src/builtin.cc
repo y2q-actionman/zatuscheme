@@ -14,7 +14,6 @@ namespace {
 
 Lisp_ptr plus_2(Env& e, Stack& s, int args){
   (void)e;
-  if(args != 2) return {};
 
   Lisp_ptr p1 = s.at(-args);
   if(p1.tag() != Ptr_tag::number){
@@ -55,3 +54,22 @@ void install_builtin(Env& env, SymTable& sym_t){
   }
 }
 
+bool eq(Lisp_ptr a, Lisp_ptr b){
+  return (a.tag() == b.tag())
+    && (a.get<void*>() == b.get<void*>());
+}
+
+bool eql(Lisp_ptr a, Lisp_ptr b){
+  if(eq(a, b)) return true;
+
+  switch(a.tag()){
+  case Ptr_tag::number:
+    return (b.tag() == Ptr_tag::number)
+      && eql(*a.get<Number*>(), *b.get<Number*>());
+  case Ptr_tag::character:
+    return (b.tag() == Ptr_tag::character)
+      && a.get<char>() == b.get<char>();
+  default:
+    return false;
+  }
+}

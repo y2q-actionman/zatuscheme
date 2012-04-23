@@ -8,28 +8,7 @@
 
 namespace {
 
-void print(FILE* f, const Number* n){
-  switch(n->type()){
-  case Number::Type::uninitialized:
-    fprintf(f, "(uninitialied number)");
-    break;
-  case Number::Type::complex: {
-    auto&& z = n->get<Number::complex_type>();
-    fprintf(f, "%g+%gi", z.real(), z.imag());
-  }
-    break;
-  case Number::Type::real:
-    fprintf(f, "%g", n->get<Number::real_type>());
-    break;
-  case Number::Type::integer:
-    fprintf(f, "%ld", n->get<Number::integer_type>());
-    break;
-  default:
-    UNEXP_DEFAULT();
-  }
-}
-
-void print(FILE* f, const Vector* v){
+void print_vector(FILE* f, const Vector* v){
   auto i = v->begin();
   const auto e = v->end();
 
@@ -45,7 +24,7 @@ void print(FILE* f, const Vector* v){
   fputc(')', f);
 }
 
-void print(FILE* f, const Cons* c){
+void print_list(FILE* f, const Cons* c){
   fputc('(', f);
 
   while(c){
@@ -83,7 +62,7 @@ void print(FILE* f, Lisp_ptr p){
     break;
 
   case Ptr_tag::cons:
-    print(f, p.get<Cons*>());
+    print_list(f, p.get<Cons*>());
     break;
 
   case Ptr_tag::symbol:
@@ -95,7 +74,7 @@ void print(FILE* f, Lisp_ptr p){
     break;
 
   case Ptr_tag::number:
-    print(f, p.get<Number*>());
+    print(f, *p.get<Number*>());
     break;
 
   case Ptr_tag::string:
@@ -103,7 +82,7 @@ void print(FILE* f, Lisp_ptr p){
     break;
 
   case Ptr_tag::vector:
-    print(f, p.get<Vector*>());
+    print_vector(f, p.get<Vector*>());
     break;
 
   case Ptr_tag::port:

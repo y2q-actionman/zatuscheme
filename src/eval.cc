@@ -60,6 +60,7 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
     if(argc >= argi.required_args){
       if(argi.variadic){
         s.push(nullptr, arg);
+        ++argc;
       }else{
         if(arg_cell){
           fprintf(stderr, "funcall error: argcount mismatch! (more than required %d)\n",

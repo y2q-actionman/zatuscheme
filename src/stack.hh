@@ -25,6 +25,8 @@ public:
   void pop(int);
 
   Lisp_ptr at(int) const;
+  int size() const
+  { return stack_.size(); }
 
 private:
   typedef std::pair<Symbol*, Lisp_ptr> Entry;
