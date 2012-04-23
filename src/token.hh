@@ -66,6 +66,9 @@ private:
 
 Token tokenize(FILE*);
 
+const char* stringify(Token::Notation);
+const char* stringify(Token::Type);
+
 void describe(FILE*, Token::Type);
 void describe(FILE*, Token::Notation);
 void describe(FILE*, const Token&);

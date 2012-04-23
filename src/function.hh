@@ -61,6 +61,8 @@ private:
   };
 };
 
+const char* stringify(Function::Type);
+
 #include "function.i.hh"
 
 #endif //FUNCTION_HH

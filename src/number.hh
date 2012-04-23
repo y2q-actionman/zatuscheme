@@ -60,6 +60,8 @@ Number parse_number(std::istream&);
 Number to_exact(const Number&);
 Number to_inexact(const Number&);
 
+const char* stringify(Number::Type);
+
 void describe(FILE*, Number::Type);
 void describe(FILE*, const Number&);
 

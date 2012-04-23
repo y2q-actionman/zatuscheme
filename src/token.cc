@@ -478,8 +478,6 @@ Token tokenize(FILE* f){
   return {};
 }
 
-namespace {
-
 const char* stringify(Token::Notation n){
   switch(n){
   case Token::Notation::unknown:
@@ -511,7 +509,7 @@ const char* stringify(Token::Notation n){
   case Token::Notation::bar:
     return "bar";
   default:
-    UNEXP_DEFAULT();
+    return "(unknown token notation)";
   }
 }
 
@@ -532,11 +530,9 @@ const char* stringify(Token::Type t){
   case Token::Type::notation:
     return "notation";
   default:
-    UNEXP_DEFAULT();
+    return "(unknown token type)";
   }    
 }
-
-} // namespace
 
 void describe(FILE* f, Token::Type t){
   fputs(stringify(t), f);

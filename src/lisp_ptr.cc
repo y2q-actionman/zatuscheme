@@ -7,36 +7,34 @@ void* Lisp_ptr::get() const{
   return u_.ptr_;
 }
 
-void describe(FILE* f, Ptr_tag p){
+const char* stringify(Ptr_tag p){
   switch(p){
   case Ptr_tag::undefined:
-    fprintf(f, "undefined"); break;
+    return "undefined";
   case Ptr_tag::boolean:
-    fprintf(f, "boolean"); break;
+    return "boolean";
   case Ptr_tag::character:
-    fprintf(f, "character"); break; 
+    return "character";
   case Ptr_tag::cons:
-    fprintf(f, "cons"); break;
+    return "cons";
   case Ptr_tag::symbol:
-    fprintf(f, "symbol"); break;
+    return "symbol";
   case Ptr_tag::function:
-    fprintf(f, "function"); break;
+    return "function";
   case Ptr_tag::number:
-    fprintf(f, "number"); break;
+    return "number";
   case Ptr_tag::string:
-    fprintf(f, "string"); break;
+    return "string";
   case Ptr_tag::vector:
-    fprintf(f, "vector"); break;
+    return "vector";
   case Ptr_tag::port:
-    fprintf(f, "port"); break;
+    return "port";
   default:
-    fprintf(f, "(unknown type!)"); break;
+    return "(unknown PTR type)";
   }
 }
 
 void describe(FILE* f, Lisp_ptr p){
-  fprintf(f, "[");
-  describe(f, p.tag());
-  fprintf(f, "] %p\n", p.get<void*>());
+  fprintf(f, "[%s] %p\n", stringify(p.tag()), p.get<void*>());
 }
 

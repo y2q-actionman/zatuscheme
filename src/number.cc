@@ -411,8 +411,6 @@ Number to_inexact(const Number& n){
   }
 }
 
-namespace{
-
 const char* stringify(Number::Type t){
   switch(t){
   case Number::Type::uninitialized:
@@ -424,11 +422,9 @@ const char* stringify(Number::Type t){
   case Number::Type::integer:
     return "integer";
   default:
-    return "";
+    return "(unknown number type)";
   }
 }
-
-} // namespace
 
 void describe(FILE* f, Number::Type t){
   fputs(stringify(t), f);
