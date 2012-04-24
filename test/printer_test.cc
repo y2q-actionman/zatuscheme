@@ -25,7 +25,7 @@ void check(Lisp_ptr input, const char* expect){
 }
 
 void check_noprint(Lisp_ptr input){
-  FILE* f = tmpfile();
+  FILE* f = fopen("/dev/null", "w");
   print(f, input);
   fclose(f);
 }

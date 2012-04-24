@@ -158,4 +158,3 @@ int main(){
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-

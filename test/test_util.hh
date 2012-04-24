@@ -2,13 +2,10 @@
 #define TEST_UTIL_HH
 
 #include <cstdio>
-
 #include "lisp_ptr.hh"
-#include "symtable.hh"
 
+class SymTable;
 
-struct FILE_deleter;
-struct malloc_deleter;
 
 template<typename Fun>
 bool test_on_print(Lisp_ptr, const char*, const Fun&);

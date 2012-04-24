@@ -61,8 +61,7 @@ int main(){
 
   // self-evaluating
 
-
-
+  // simple func
   check("(+ 1 1)", "2", e, st, symt);
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

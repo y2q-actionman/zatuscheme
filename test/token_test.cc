@@ -73,9 +73,8 @@ void fail_message(Token::Type t, FILE* f, const fpos_t* b_pos,
     strcpy(buf, "(read error)");
   }
 
-  fprintf(stdout, "[failed] input='%s', expect type='", buf);
-  describe(stdout, t);
-  fputc('\'', stdout);
+  fprintf(stdout, "[failed] input='%s', expect type='%s'",
+          buf, stringify(t));
 
   callback();
 

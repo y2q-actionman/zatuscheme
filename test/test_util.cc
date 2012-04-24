@@ -1,5 +1,6 @@
 #include "test_util.hh"
 #include "reader.hh"
+#include "symtable.hh"
 
 Lisp_ptr read_from_string(SymTable& st, const char* s){
   FILE* f = fmemopen((void*)s, strlen(s), "r");
