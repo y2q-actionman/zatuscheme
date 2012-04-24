@@ -101,6 +101,8 @@ int main(){
 
   // === symbol-value ===
   check(test_undef, "tabun-tukattenai-namae");
+
+
   //check("+", "functiondkjfsa");
 
 
@@ -110,7 +112,6 @@ int main(){
 
   // === Special Operator ===
   // syntax: quote
-  check(test_undef, "quote");
   check(test_undef, "(quote)");
   check(read_eql, "(quote 1)", "1");
   check(print_equal, "(quote (1 . 2))", "(1 . 2)");
@@ -119,7 +120,6 @@ int main(){
   // syntax: lambda
 
   // syntax: if
-  check(test_undef, "if");
   check(test_undef, "(if)");
   check(test_undef, "(if 1)");
   // check(read_eql, "(if #t 1)", "1");
@@ -129,8 +129,33 @@ int main(){
   //check("(if #f 1 2 3)", "");
 
   // syntax: set!
-  // check("(set! x 1)", "1");
+  // check(read_eql, "(set! x 1)", "1");
   // check("x", "1");
+
+  // keywords are not available.
+  // check(test_undef, "(set! else 1)");
+  // check(read_eql, "(set! else_ 1)", "1");
+  // check(test_undef, "=>");
+  // check(test_undef, "define");
+  // check(test_undef, "unquote");
+  // check(test_undef, "unquote2");
+  // check(test_undef, "unquote-splicing");
+  // check(test_undef, "quote");
+  // check(test_undef, "lambda");
+  // check(test_undef, "if");
+  // check(test_undef, "set!");
+  // check(test_undef, "begin");
+  // check(test_undef, "cond");
+  // check(test_undef, "and");
+  // check(test_undef, "or");
+  // check(test_undef, "case");
+  // check(test_undef, "let");
+  // check(test_undef, "let*");
+  // check(test_undef, "letrec");
+  // check(test_undef, "do");
+  // check(test_undef, "delay");
+  // check(test_undef, "quasiquote");
+
 
   // macro call
   
