@@ -7,6 +7,7 @@
 #include "builtin.hh"
 #include "symtable.hh"
 #include "reader.hh"
+#include "test_util.hh"
 
 using namespace std;
 
@@ -15,46 +16,40 @@ static bool result = true;
 void check(const char* expr_s, const char* expect_s,
            Env& e, Stack& st, SymTable& symt){
   const auto start_stack_size = st.size();
-  Lisp_ptr expr, expect, evaled;
-  FILE* expr_f = fmemopen((void*)expr_s, strlen(expr_s), "r");
-  FILE* expect_f = fmemopen((void*)expect_s, strlen(expect_s), "r");
 
-  expr = read(symt, expr_f);
+  auto expr = read_from_string(symt, expr_s);
   if(!expr){
     printf("reader error occured in expr!: %s\n", expr_s);
     result = false;
-    goto end;
+    return;
   }
 
-  expect = read(symt, expect_f);
+  auto expect = read_from_string(symt, expect_s);
   if(!expect){
     printf("reader error occured in expect!: %s\n", expect_s);
     result = false;
-    goto end;
+    return;
   }
 
-  evaled = eval(expr, e, st);
+  auto evaled = eval(expr, e, st);
   if(!evaled){
     printf("eval error occured: %s\n", expr_s);
     result = false;
-    goto end;
+    return;
   }
 
   if(!eql(evaled, expect)){
     printf("not eql!: %s vs %s\n", expr_s, expect_s);
     result = false;
-    goto end;
+    return;
   }
 
   if(start_stack_size != st.size()){
     printf("stack is not cleaned!!: %d -> %d (evaled: %s)\n",
            start_stack_size, st.size(), expr_s);
     result = false;
-    goto end;
+    return;
   }
-  
- end:
-  fclose(expr_f);
 }
 
 int main(){
@@ -63,6 +58,10 @@ int main(){
   SymTable symt;
 
   install_builtin(e, symt);
+
+  // self-evaluating
+
+
 
   check("(+ 1 1)", "2", e, st, symt);
 

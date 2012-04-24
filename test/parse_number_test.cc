@@ -23,10 +23,8 @@ void fail_message(Number::Type t, istream& i,
   i.seekg(0, ios_base::beg);
   i.get(buf, sizeof(buf));
 
-  fprintf(stdout, "[failed] input='%s', expect type='", buf);
-
-  describe(stdout, t);
-  fputc('\'', stdout);
+  fprintf(stdout, "[failed] input='%s', expect type='%s'",
+          buf, stringify(t));
 
   callback();
 

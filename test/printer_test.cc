@@ -7,26 +7,21 @@
 #include "symtable.hh"
 #include "symbol.hh"
 #include "cons.hh"
+#include "test_util.hh"
 
 using namespace std;
 
 static bool result;
 
 void check(Lisp_ptr input, const char* expect){
-  char* buf;
-  size_t buf_size;
-
-  FILE* tmp_f = open_memstream(&buf, &buf_size);
-  print(tmp_f, input);
-  fclose(tmp_f);
-
-  if(strncmp(expect, buf, strlen(expect)) != 0){
+  static const auto callback = [expect](const char* str){
     fprintf(stdout, "[failed] expected: %s\n\treturned: %s\n",
-            expect, buf);
+            expect, str);
+  };
+
+  if(!test_on_print(input, expect, callback)){
     result = false;
   }
-
-  free(buf);
 }
 
 void check_noprint(Lisp_ptr input){

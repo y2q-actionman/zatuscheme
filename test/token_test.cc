@@ -14,18 +14,6 @@ using namespace std;
 
 static bool result;
 
-void scat_file(FILE* f){
-  int c;
-
-  printf("### ");
-  while((c = fgetc(f)) != EOF){
-    putchar(c);
-  }
-  putchar('\n');
-
-  rewind(f);
-}
-
 // for debugging..
 template<>
 inline
@@ -158,26 +146,14 @@ void check(const string& input, const string& expect){
   fclose(f);
 }
 
+inline
 bool operator==(const Number& n1, const Number& n2){
-  if(n1.type() != n2.type()) return false;
-
-  switch(n1.type()){
-  case Number::Type::uninitialized:
-    return true;
-  case Number::Type::complex:
-    return n1.get<Number::complex_type>() == n2.get<Number::complex_type>();
-  case Number::Type::real:
-    return n1.get<Number::real_type>() == n2.get<Number::real_type>();
-  case Number::Type::integer:
-    return n1.get<Number::integer_type>() == n2.get<Number::integer_type>();
-  default:
-    return false;
-  }
+  return eql(n1, n2);
 }
 
 inline
 bool operator!=(const Number& n1, const Number& n2){
-  return !(n1 == n2);
+  return !eql(n1, n2);
 }
 
 void check(FILE* f, const Number& n){

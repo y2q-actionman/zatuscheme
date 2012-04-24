@@ -5,36 +5,27 @@
 #include "printer.hh"
 #include "reader.hh"
 #include "symtable.hh"
+#include "test_util.hh"
 
 using namespace std;
 
 static bool result = true;
 
 void check(SymTable& st, const char* input, const char* expect){
-  FILE* in_f = fmemopen((void*)input, strlen(input), "r");
-  char* buf;
-  size_t buf_size;
-  FILE* out_f = open_memstream(&buf, &buf_size);
-
-  Lisp_ptr p{read(st, in_f)};
-
-  fclose(in_f);
-  print(out_f, p);
-  fclose(out_f);
-
-  if(strncmp(expect, buf, strlen(expect)) != 0){
+  static const auto callback = [input, expect](const char* buf){
     fprintf(stdout, "[failed] input:%s, expected: %s\n\treturned: %s\n",
             input, expect, buf);
+  };
+
+  Lisp_ptr p = read_from_string(st, input);
+
+  if(!test_on_print(p, expect, callback)){
     result = false;
   }
-
-  free(buf);
 }
 
 void check_undef(SymTable& st, const char* input){
-  FILE* in_f = fmemopen((void*)input, strlen(input), "r");
-  Lisp_ptr p{read(st, in_f)};
-  fclose(in_f);
+  Lisp_ptr p = read_from_string(st, input);
 
   if(p){
     fprintf(stdout, "[failed] input:%s, expected: (undefined)\n", input);

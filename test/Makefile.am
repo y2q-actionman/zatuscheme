@@ -5,7 +5,8 @@ AM_CXXFLAGS = $(warning_flags) $(test_flags)
 
 AM_DEFAULT_SOURCE_EXT = .cc
 
-LDADD = ../src/libzs_test.a
+LDADD = test_util.o\
+	../src/libzs_test.a
 check_PROGRAMS = token_test\
 		parse_number_test\
 		printer_test\
