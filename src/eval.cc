@@ -314,7 +314,7 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
     }else if(auto rete = e.find(sym)){
       return rete;
     }else{
-      Lisp_ptr{};
+      return Lisp_ptr{};
     }
   }
     

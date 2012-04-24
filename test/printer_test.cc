@@ -14,7 +14,7 @@ using namespace std;
 static bool result;
 
 void check(Lisp_ptr input, const char* expect){
-  static const auto callback = [expect](const char* str){
+  const auto callback = [expect](const char* str){
     fprintf(stdout, "[failed] expected: %s\n\treturned: %s\n",
             expect, str);
   };

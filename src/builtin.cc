@@ -55,21 +55,24 @@ void install_builtin(Env& env, SymTable& sym_t){
 }
 
 bool eq(Lisp_ptr a, Lisp_ptr b){
-  return (a.tag() == b.tag())
-    && (a.get<void*>() == b.get<void*>());
+  if(a.tag() != b.tag()) return false;
+
+  switch(a.tag()){
+  case Ptr_tag::boolean:
+    return a.get<bool>() == b.get<bool>();
+  case Ptr_tag::character:
+    return a.get<char>() == b.get<char>();
+  default:
+    return a.get<void*>() == b.get<void*>();
+  }
 }
 
 bool eql(Lisp_ptr a, Lisp_ptr b){
   if(eq(a, b)) return true;
 
-  switch(a.tag()){
-  case Ptr_tag::number:
-    return (b.tag() == Ptr_tag::number)
-      && eql(*a.get<Number*>(), *b.get<Number*>());
-  case Ptr_tag::character:
-    return (b.tag() == Ptr_tag::character)
-      && a.get<char>() == b.get<char>();
-  default:
-    return false;
+  if(a.tag() == Ptr_tag::number && b.tag() == Ptr_tag::number){
+    return eql(*a.get<Number*>(), *b.get<Number*>());
   }
+
+  return false;
 }
