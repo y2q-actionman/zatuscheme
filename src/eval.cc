@@ -84,183 +84,120 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
   return ret;
 }
 
-Lisp_ptr eval_special(Keyword k, const Cons* rest,
-                      Env& e, Stack& s){
-  switch(k){
-  case Keyword::quote:
-    return rest->car();
-
-  case Keyword::lambda: {
-    auto args = rest->car();
-    if(rest->cdr().tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: lambda has invalid body!\n");
-      return {};
-    }
-
-    auto arg_info = parse_func_arg(args);
-    if(!arg_info){
-      fprintf(stderr, "eval error: lambda has invalid args!\n");
-      return {};
-    }
-
-    auto code = rest->cdr();
-    if(!code.get<Cons*>()){
-      fprintf(stderr, "eval error: lambda has no body!\n");
-      return {};
-    }
-
-    return Lisp_ptr{new Function(code, arg_info)};
+Lisp_ptr eval_lambda(const Cons* rest, Env& e, Stack& s){
+  auto args = rest->car();
+  if(rest->cdr().tag() != Ptr_tag::cons){
+    fprintf(stderr, "eval error: lambda has invalid body!\n");
+    return {};
   }
 
-  case Keyword::if_: {
-    // extracting
-    auto test = rest->car();
+  auto arg_info = parse_func_arg(args);
+  if(!arg_info){
+    fprintf(stderr, "eval error: lambda has invalid args!\n");
+    return {};
+  }
 
-    if(rest->cdr().tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: if has invalid conseq!\n");
+  auto code = rest->cdr();
+  if(!code.get<Cons*>()){
+    fprintf(stderr, "eval error: lambda has no body!\n");
+    return {};
+  }
+
+  return Lisp_ptr{new Function(code, arg_info)};
+}
+
+Lisp_ptr eval_if(const Cons* rest, Env& e, Stack& s){
+  // extracting
+  auto test = rest->car();
+
+  if(rest->cdr().tag() != Ptr_tag::cons){
+    fprintf(stderr, "eval error: if has invalid conseq!\n");
+    return {};
+  }
+
+  auto conseq_l = rest->cdr().get<Cons*>();
+  if(!conseq_l){
+    fprintf(stderr, "eval error: if has no conseq!\n");
+    return {};
+  }
+
+  auto conseq = conseq_l->car();
+
+  if(conseq_l->cdr().tag() != Ptr_tag::cons){
+    fprintf(stderr, "eval error: if has invalid alt!\n");
+    return {};
+  }
+
+  auto alt = Lisp_ptr{};
+
+  if(auto alt_l = conseq_l->cdr().get<Cons*>()){
+    alt = alt_l->car();
+
+    if(alt_l->cdr().tag() != Ptr_tag::cons
+       || alt_l->cdr().get<Cons*>()){
+      fprintf(stderr, "eval error: if has extra alts!\n");
       return {};
-    }
-
-    auto conseq_l = rest->cdr().get<Cons*>();
-    if(!conseq_l){
-      fprintf(stderr, "eval error: if has no conseq!\n");
-      return {};
-    }
-
-    auto conseq = conseq_l->car();
-
-    if(conseq_l->cdr().tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: if has invalid alt!\n");
-      return {};
-    }
-
-    auto alt = Lisp_ptr{};
-
-    if(auto alt_l = conseq_l->cdr().get<Cons*>()){
-      alt = alt_l->car();
-
-      if(alt_l->cdr().tag() != Ptr_tag::cons
-         || alt_l->cdr().get<Cons*>()){
-        fprintf(stderr, "eval error: if has extra alts!\n");
-        return {};
-      }
-    }
-
-    // evaluating
-    auto test_evaled = eval(test, e, s);
-    if(!test_evaled){
-      return {};
-    }else if(test_evaled.get<bool>()){
-      return eval(conseq, e, s);
-    }else{
-      return alt ? eval(alt, e, s) : Lisp_ptr{};
     }
   }
 
-  case Keyword::set_: {
-    // extracting
-    auto var = rest->car().get<Symbol*>();
-    if(!var){
-      fprintf(stderr, "eval error: set!'s first element is not symbol!\n");
-      return {};
-    }
-    if(to_keyword(var->name()) != Keyword::not_keyword){
-      fprintf(stderr, "eval error: set!'s first element is Keyword!\n");
-      return {};
-    }
+  // evaluating
+  auto test_evaled = eval(test, e, s);
+  if(!test_evaled){
+    return {};
+  }else if(test_evaled.get<bool>()){
+    return eval(conseq, e, s);
+  }else{
+    return alt ? eval(alt, e, s) : Lisp_ptr{};
+  }
+}
 
-    if(rest->cdr().tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: set!'s value form is informal!\n");
-      return {};
-    }
+Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
+  // extracting
+  auto var = rest->car().get<Symbol*>();
+  if(!var){
+    fprintf(stderr, "eval error: set!'s first element is not symbol!\n");
+    return {};
+  }
+  if(to_keyword(var->name()) != Keyword::not_keyword){
+    fprintf(stderr, "eval error: set!'s first element is Keyword!\n");
+    return {};
+  }
 
-    auto valp = rest->cdr().get<Cons*>();
-    if(!valp){
-      fprintf(stderr, "eval error: set! has no value!\n");
-      return {};
-    }
+  if(rest->cdr().tag() != Ptr_tag::cons){
+    fprintf(stderr, "eval error: set!'s value form is informal!\n");
+    return {};
+  }
 
-    if(valp->cdr().tag() != Ptr_tag::cons
-       || valp->cdr().get<Cons*>()){
-      fprintf(stderr, "eval error: set! has extra forms!\n");
-      return {};
-    }
+  auto valp = rest->cdr().get<Cons*>();
+  if(!valp){
+    fprintf(stderr, "eval error: set! has no value!\n");
+    return {};
+  }
 
-    auto val = valp->car();
+  if(valp->cdr().tag() != Ptr_tag::cons
+     || valp->cdr().get<Cons*>()){
+    fprintf(stderr, "eval error: set! has extra forms!\n");
+    return {};
+  }
 
-    // evaluating
-    if(s.find(var)){
-      s.set(var, eval(val, e, s));
-    }else if(e.find(var)){
-      e.set(var, eval(val, e, s));
-    }else{
-      fprintf(stderr, "eval error: set! value is not defined previously!\n");
-    }
+  auto val = valp->car();
+
+  // evaluating
+  if(s.find(var)){
+    s.set(var, eval(val, e, s));
+  }else if(e.find(var)){
+    e.set(var, eval(val, e, s));
+  }else{
+    fprintf(stderr, "eval error: set! value is not defined previously!\n");
+  }
       
-    return {};
-  }
+  return {};
+}
 
-  case Keyword::cond:
-    // now implementing..
-    return {};
-
-  case Keyword::case_:
-    // now implementing..
-    return {};
-
-  case Keyword::and_:
-    // now implementing..
-    return {};
-
-  case Keyword::or_:
-    // now implementing..
-    return {};
-
-  case Keyword::let:
-    // now implementing..
-    return {};
-
-  case Keyword::let_star:
-    // now implementing..
-    return {};
-
-  case Keyword::letrec:
-    // now implementing..
-    return {};
-
-  case Keyword::begin:
-    // now implementing..
-    return {};
-
-  case Keyword::do_:
-    // now implementing..
-    return {};
-
-  case Keyword::delay:
-    // now implementing..
-    return {};
-
-  case Keyword::quasiquote:
-    // now implementing..
-    return {};
-
-  case Keyword::else_:
-  case Keyword::r_arrow:
-  case Keyword::unquote:
-  case Keyword::unquote_splicing:
-    fprintf(stderr, "eval error: keyword '%s' cannot be used as operator!!\n",
-            stringify(k));
-    return {};
-    
-  case Keyword::define:
-    fprintf(stderr, "eval error: definition cannot be treated in eval!!\n");
-    return {};
-
-  case Keyword::not_keyword:
-    fprintf(stderr, "internal error: should not be procesed normal symbols here!!\n");
-  default:
-    UNEXP_DEFAULT();
-  }
+Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
+  // under development
+  fprintf(stderr, "eval error: definition cannot be treated in eval!!\n");
+  return {};
 }
 
 } // namespace
@@ -317,7 +254,38 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
           fprintf(stderr, "eval error: expresssion (<KEYWORD>) is informal!\n");
           return {};
         }
-        return eval_special(k, r, e, s);
+
+        switch(k){
+        case Keyword::quote:  return r->car();
+        case Keyword::lambda: return eval_lambda(r, e, s);
+        case Keyword::if_:    return eval_if(r, e, s);
+        case Keyword::set_:   return eval_set(r, e, s);
+
+        case Keyword::cond:   return {}; // under development
+        case Keyword::case_:  return {}; // under development
+        case Keyword::and_:   return {}; // under development
+        case Keyword::or_:    return {}; // under development
+        case Keyword::let:    return {}; // under development
+        case Keyword::let_star: return {}; // under development
+        case Keyword::letrec: return {}; // under development
+        case Keyword::begin:  return {}; // under development
+        case Keyword::do_:    return {}; // under development
+        case Keyword::delay:  return {}; // under development
+        case Keyword::quasiquote: return {}; // under development
+
+        case Keyword::define: return eval_define(r, e, s);
+
+        case Keyword::else_:
+        case Keyword::r_arrow:
+        case Keyword::unquote:
+        case Keyword::unquote_splicing:
+          fprintf(stderr, "eval error: keyword '%s' cannot be used as operator!!\n",
+                  stringify(k));
+          return {};
+
+        default:
+          UNEXP_DEFAULT();
+        }
       }else{
         // macro call?
         //  try to find macro-function from symbol
