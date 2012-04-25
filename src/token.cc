@@ -333,10 +333,10 @@ Token tokenize_character(FILE* f){
 }
 
 Token tokenize_string(FILE* f){
+  decltype(fgetc(f)) c;
   ostringstream s;
-  auto c = fgetc(f);
 
-  while(c != EOF){
+  while((c = fgetc(f)) != EOF){
     switch(c){
     case '"':
       return Token{s.str(), Token::Type::string};
@@ -353,7 +353,6 @@ Token tokenize_string(FILE* f){
     default:
       s.put(c);
     }
-    c = fgetc(f);
   }
 
  error:
@@ -361,15 +360,14 @@ Token tokenize_string(FILE* f){
 }
 
 Token tokenize_number(FILE* f, char c1, char c2 = 0){
+  decltype(fgetc(f)) c;
   stringstream s;
 
   s.put(c1);
   if(c2) s.put(c2);
 
-  auto c = fgetc(f);
-  while(!is_delimiter(c)){
+  while(!is_delimiter(c = fgetc(f))){
     s.put(c);
-    c = fgetc(f);
   }
   ungetc(c, f);
 

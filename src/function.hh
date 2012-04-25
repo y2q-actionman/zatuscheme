@@ -61,6 +61,8 @@ private:
   };
 };
 
+Function::ArgInfo parse_func_arg(Lisp_ptr);
+
 const char* stringify(Function::Type);
 
 #include "function.i.hh"
