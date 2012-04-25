@@ -135,26 +135,6 @@ int main(){
   // keywords are not available.
   // check(test_undef, "(set! else 1)");
   // check(read_eql, "(set! else_ 1)", "1");
-  // check(test_undef, "=>");
-  // check(test_undef, "define");
-  // check(test_undef, "unquote");
-  // check(test_undef, "unquote2");
-  // check(test_undef, "unquote-splicing");
-  // check(test_undef, "quote");
-  // check(test_undef, "lambda");
-  // check(test_undef, "if");
-  // check(test_undef, "set!");
-  // check(test_undef, "begin");
-  // check(test_undef, "cond");
-  // check(test_undef, "and");
-  // check(test_undef, "or");
-  // check(test_undef, "case");
-  // check(test_undef, "let");
-  // check(test_undef, "let*");
-  // check(test_undef, "letrec");
-  // check(test_undef, "do");
-  // check(test_undef, "delay");
-  // check(test_undef, "quasiquote");
 
 
   // macro call

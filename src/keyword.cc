@@ -13,7 +13,7 @@ struct Entry {
 };
 
 static constexpr
-array<Entry, static_cast<int>(Keyword::MAX)>
+array<Entry, static_cast<int>(Keyword::MAX)+1>
 keyword_table{{
     { Keyword::not_keyword, "\0" },
 
@@ -37,7 +37,9 @@ keyword_table{{
     { Keyword::letrec, "letrec" },
     { Keyword::do_, "do" },
     { Keyword::delay, "delay" },
-    { Keyword::quasiquote, "quasiquote" }
+    { Keyword::quasiquote, "quasiquote" },
+
+    { Keyword::MAX, nullptr }
 }};
 
 } // namespace
@@ -57,6 +59,9 @@ Keyword to_keyword(const std::string& s){
 
   return Keyword::not_keyword;
 #else
+  if(s.empty())
+    return Keyword::not_keyword;
+
   Keyword ret = Keyword::not_keyword;
 
   switch(s[0]){
