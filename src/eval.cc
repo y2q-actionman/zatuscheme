@@ -59,13 +59,19 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
     ++argc;
   }
 
+  if(argc != (argi.required_args + (argi.variadic ? 1 : 0))){
+    fprintf(stderr, "eval error: internal argument counter mismatched!! (read %d args)\n",
+            argc);
+    goto end;
+  }
+
   // real call
   switch(fun->type()){
   case Function::Type::interpreted:
     ret = Lisp_ptr{}; // stub
     break;
   case Function::Type::native:
-    ret = (fun->get<Function::NativeFunc>())(e, s, argc);
+    ret = (fun->get<Function::NativeFunc>())(e, s);
     break;
   default:
     UNEXP_DEFAULT();

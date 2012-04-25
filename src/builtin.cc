@@ -12,7 +12,8 @@ using namespace std;
 
 namespace {
 
-Lisp_ptr plus_2(Env& e, Stack& s, int args){
+Lisp_ptr plus_2(Env& e, Stack& s){
+  static const int args = 3;
   (void)e;
 
   Lisp_ptr p1 = s.at(-args);
