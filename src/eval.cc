@@ -123,18 +123,18 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
 
     auto conseq = conseq_l->car();
 
-    if(rest->cdr().tag() != Ptr_tag::cons){
+    if(conseq_l->cdr().tag() != Ptr_tag::cons){
       fprintf(stderr, "eval error: if has invalid alt!\n");
       return {};
     }
 
     auto alt = Lisp_ptr{};
 
-    if(auto alt_l = rest->cdr().get<Cons*>()){
+    if(auto alt_l = conseq_l->cdr().get<Cons*>()){
       alt = alt_l->car();
 
-      if(rest->cdr().tag() != Ptr_tag::cons
-         || rest->cdr().get<Cons*>()){
+      if(alt_l->cdr().tag() != Ptr_tag::cons
+         || alt_l->cdr().get<Cons*>()){
         fprintf(stderr, "eval error: if has extra alts!\n");
         return {};
       }
@@ -142,7 +142,9 @@ Lisp_ptr eval_special(Keyword k, const Cons* rest,
 
     // evaluating
     auto test_evaled = eval(test, e, s);
-    if(test_evaled.get<bool>()){
+    if(!test_evaled){
+      return {};
+    }else if(test_evaled.get<bool>()){
       return eval(conseq, e, s);
     }else{
       return alt ? eval(alt, e, s) : Lisp_ptr{};

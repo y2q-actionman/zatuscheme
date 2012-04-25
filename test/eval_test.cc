@@ -122,11 +122,11 @@ int main(){
   // syntax: if
   check(test_undef, "(if)");
   check(test_undef, "(if 1)");
-  // check(read_eql, "(if #t 1)", "1");
-  //check("(if #f 1)", "");
-  // check("(if #t 1 2)", "1");
-  // check("(if #f 1 2)", "2");
-  //check("(if #f 1 2 3)", "");
+  check(read_eql, "(if #t 1)", "1");
+  check(test_undef, "(if #f 1)");
+  check(read_eql, "(if #t 1 2)", "1");
+  check(read_eql, "(if #f 1 2)", "2");
+  check(test_undef, "(if #f 1 2 3)");
 
   // syntax: set!
   // check(read_eql, "(set! x 1)", "1");
