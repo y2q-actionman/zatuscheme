@@ -48,16 +48,16 @@ inline constexpr
 Token::Token(Notation n)
   : type_(Type::notation), not_(n){}
 
-Token::Token(const Token& other)
-  : type_(other.type_)
-{
+template<typename T>
+inline
+void Token::init_from_other(T other){
   switch(other.type_){
   case Type::uninitialized:
     break;
 
   case Type::identifier:
   case Type::string:
-    new (&this->str_) string(other.str_);
+    new (&this->str_) string(move(other.str_));
     break;
 
   case Type::boolean:
@@ -65,7 +65,7 @@ Token::Token(const Token& other)
     break;
 
   case Type::number:
-    new (&this->num_) Number(other.num_);
+    new (&this->num_) Number(move(other.num_));
     break;
 
   case Type::character:
@@ -80,33 +80,71 @@ Token::Token(const Token& other)
     UNEXP_DEFAULT();
   }
 }
+
+Token::Token(const Token& other)
+  : type_(other.type_)
+{
+  init_from_other<const Token&>(forward<const Token>(other));
+}
   
 Token::Token(Token&& other)
   : type_(other.type_)
 {
-  switch(other.type_){
-  case Type::uninitialized:
-    break;
+  init_from_other<Token&&>(forward<Token>(other));
+}
 
+template<typename T>
+inline
+void Token::assign_from_other(T other){
+  switch(this->type_){
+  case Type::uninitialized:
+    new (this) Token(move(other));
+    break;
+    
   case Type::identifier:
   case Type::string:
-    new (&this->str_) string{forward<string>(other.str_)};
+    switch(other.type()){
+    case Type::identifier:
+    case Type::string:
+      this->str_ = move(other.str_);
+      break;
+    default:
+      str_.~string();
+      new (this) Token(move(other));
+    }
     break;
 
   case Type::boolean:
-    this->b_ = other.b_;
+    if(other.type() == this->type()){
+      b_ = other.b_;
+    }else{
+      new (this) Token(move(other));
+    }
     break;
 
   case Type::number:
-    new (&this->num_) Number{forward<Number>(other.num_)};
+    if(other.type() == this->type()){
+      this->num_ = move(other.num_);
+    }else{
+      num_.~Number();
+      new (this) Token(move(other));
+    }
     break;
 
   case Type::character:
-    this->c_ = other.c_;
+    if(other.type() == this->type()){
+      this->c_ = other.c_;
+    }else{
+      new (this) Token(move(other));
+    }
     break;
 
   case Type::notation:
-    this->not_ = other.not_;
+    if(other.type() == this->type()){
+      this->not_ = move(other.not_);
+    }else{
+      new (this) Token(move(other));
+    }
     break;
 
   default:
@@ -115,120 +153,12 @@ Token::Token(Token&& other)
 }
 
 Token& Token::operator=(const Token& other){
-  switch(this->type_){
-  case Type::uninitialized:
-    new (this) Token(other);
-    break;
-    
-  case Type::identifier:
-  case Type::string:
-    switch(other.type()){
-    case Type::identifier:
-    case Type::string:
-      this->str_ = other.str_;
-      break;
-    default:
-      str_.~string();
-      new (this) Token(other);
-    }
-    break;
-
-  case Type::boolean:
-    if(other.type() == this->type()){
-      b_ = other.b_;
-    }else{
-      new (this) Token(other);
-    }
-    break;
-
-  case Type::number:
-    if(other.type() == this->type()){
-      this->num_ = other.num_;
-    }else{
-      num_.~Number();
-      new (this) Token(other);
-    }
-    break;
-
-  case Type::character:
-    if(other.type() == this->type()){
-      this->c_ = other.c_;
-    }else{
-      new (this) Token(other);
-    }
-    break;
-
-  case Type::notation:
-    if(other.type() == this->type()){
-      this->not_ = other.not_;
-    }else{
-      new (this) Token(other);
-    }
-    break;
-
-  default:
-    UNEXP_DEFAULT();
-  }
-
+  assign_from_other<const Token&>(forward<const Token>(other));
   return *this;
 }
 
 Token& Token::operator=(Token&& other){
-  switch(this->type_){
-  case Type::uninitialized:
-    new (this) Token{forward<Token>(other)};
-    break;
-    
-  case Type::identifier:
-  case Type::string:
-    switch(other.type()){
-    case Type::identifier:
-    case Type::string:
-      this->str_ = forward<string>(other.str_);
-      break;
-    default:
-      str_.~string();
-      new (this) Token{forward<Token>(other)};
-    }
-    break;
-
-  case Type::boolean:
-    if(other.type() == this->type()){
-      b_ = other.b_;
-    }else{
-      new (this) Token{forward<Token>(other)};
-    }
-    break;
-
-  case Type::number:
-    if(other.type() == this->type()){
-      this->num_ = forward<Number>(other.num_);
-    }else{
-      num_.~Number();
-      new (this) Token{forward<Token>(other)};
-    }
-    break;
-
-  case Type::character:
-    if(other.type() == this->type()){
-      this->c_ = other.c_;
-    }else{
-      new (this) Token{forward<Token>(other)};
-    }
-    break;
-
-  case Type::notation:
-    if(other.type() == this->type()){
-      this->not_ = forward<Notation>(other.not_);
-    }else{
-      new (this) Token{forward<Token>(other)};
-    }
-    break;
-
-  default:
-    UNEXP_DEFAULT();
-  }
-
+  assign_from_other<Token&&>(forward<Token>(other));
   return *this;
 }
 
