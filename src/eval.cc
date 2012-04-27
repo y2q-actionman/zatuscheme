@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "eval.hh"
 #include "util.hh"
 #include "keyword.hh"
@@ -159,7 +161,8 @@ Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
     return {};
   }
   if(to_keyword(var->name()) != Keyword::not_keyword){
-    fprintf(stderr, "eval error: set!'s first element is Keyword!\n");
+    fprintf(stderr, "eval error: set!'s first element is Keyword (%s)!\n",
+            var->name().c_str());
     return {};
   }
 
@@ -195,9 +198,85 @@ Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
 }
 
 Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
-  // under development
-  fprintf(stderr, "eval error: definition cannot be treated in eval!!\n");
-  return {};
+  Symbol* var = nullptr;
+  Lisp_ptr value;
+  unique_ptr<Function> func_value;
+
+  // extracting
+  auto first = rest->car();
+
+  switch(first.tag()){
+  case Ptr_tag::symbol: {
+    var = first.get<Symbol*>();
+
+    auto val_l = rest->cdr().get<Cons*>();
+    if(!val_l){
+      fprintf(stderr, "eval error: definition has empty expr!\n");
+      return {};
+    }
+    if(val_l->cdr().tag() != Ptr_tag::cons
+       || val_l->cdr().get<Cons*>()){
+      fprintf(stderr, "eval error: definition has extra expr!\n");
+      return {};
+    }
+
+    value = eval(val_l->car(), e, s);
+  }
+    break;
+
+  case Ptr_tag::cons: {
+    auto lis = first.get<Cons*>();
+    if(!lis){
+      fprintf(stderr, "eval error: defined variable is not found!\n");
+      return {};
+    }
+
+    var = lis->car().get<Symbol*>();
+
+    const auto& arg_info = parse_func_arg(lis->cdr());
+    if(!arg_info){
+      fprintf(stderr, "eval error: defined function argument is informal!\n");
+      return {};
+    }
+    
+    auto code = rest->cdr();
+    if(!code.get<Cons*>()){
+      fprintf(stderr, "eval error: definition has empty body!\n");
+      return {};
+    }
+
+    func_value = unique_ptr<Function>(new Function(code, arg_info));
+    value = Lisp_ptr(func_value.get());
+  }
+    break;
+
+  default:
+    fprintf(stderr, "eval error: informal define syntax!\n");
+    return {};
+  }
+
+  if(!var){
+    fprintf(stderr, "eval error: defined variable name is not a symbol!\n");
+    return {};
+  }
+
+  if(to_keyword(var->name()) != Keyword::not_keyword){
+    fprintf(stderr, "eval error: define's first element is Keyword (%s)!\n",
+            var->name().c_str());
+    return {};
+  }
+
+  // assignment
+  if(s.size() == 0){
+    e.set(var, value);
+  }else if(s.find(var)){
+    s.set(var, value);
+  }else{
+    s.push(var, value);
+  }
+
+  func_value.release();
+  return value;
 }
 
 } // namespace

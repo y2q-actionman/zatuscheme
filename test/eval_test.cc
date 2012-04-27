@@ -132,6 +132,10 @@ int main(){
   // check(read_eql, "(set! x 1)", "1");
   // check("x", "1");
 
+  // syntax: define
+  check(read_eql, "(define x 1)", "1");
+  check(read_eql, "x", "1");
+
   // keywords are not available.
   // check(test_undef, "(set! else 1)");
   // check(read_eql, "(set! else_ 1)", "1");
