@@ -61,50 +61,41 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
 }
 
 
-template<int radix>
-struct is_number_char{
-  template<typename CharT>
-  inline
-  bool operator()(CharT c) const;
-};
-
-template<>
-template<typename CharT>
 inline
-bool is_number_char<2>::operator()(CharT c) const{
+bool is_number_char(int radix, char c){
+  switch(radix){
+  case 16:
   switch(c){
-  case '0': case '1':
+  case 'a': case 'A': case 'b': case 'B':
+  case 'c': case 'C': case 'd': case 'D':
+  case 'e': case 'E': case 'f': case 'F':
     return true;
-  default:
-    return false;
-  }
-}
+  }    
 
-template<>
-template<typename CharT>
-inline
-bool is_number_char<8>::operator()(CharT c) const{
+  case 10:
   switch(c){
-  case '0': case '1': case '2': case '3':
-  case '4': case '5': case '6': case '7':
+  case '8': case '9':
     return true;
-  default:
-    return false;
   }
-}
 
-template<>
-template<typename CharT>
-inline
-bool is_number_char<10>::operator()(CharT c) const{
-  return isdigit(c);
-}
+  case 8:
+  switch(c){
+  case '2': case '3': case '4':
+  case '5': case '6': case '7':
+    return true;
+  }
 
-template<>
-template<typename CharT>
-inline
-bool is_number_char<16>::operator()(CharT c) const{
-  return isxdigit(c);
+  case 2:
+    switch(c){
+    case '0': case '1':
+      return true;
+    }
+
+    return false;
+    
+  default:
+    UNEXP_DEFAULT();
+  }
 }
 
 template<typename IN, typename OUT>
@@ -126,11 +117,8 @@ typedef pair<Number, Exactness> ParserRet;
 
 #define PARSE_ERROR_VALUE (ParserRet{{}, Exactness::unspecified})
 
-template<int radix>
-ParserRet parse_unsigned(std::istream& i, stringstream& s){
-  static const auto fun = is_number_char<radix>{};
-
-  while(fun(i.peek()))
+ParserRet parse_unsigned(int radix, std::istream& i, stringstream& s){
+  while(is_number_char(radix, i.peek()))
     s.put(i.get());
 
   if(s.str().empty()){
@@ -155,9 +143,8 @@ ParserRet parse_unsigned(std::istream& i, stringstream& s){
   return PARSE_ERROR_VALUE;
 }
 
-template<typename CharT>
 inline
-bool check_decimal_suffix(CharT c){
+bool check_decimal_suffix(char c){
   switch(c){
   case 'e': case 's': case 'f': case 'd': case 'l':
     return true;
@@ -167,8 +154,6 @@ bool check_decimal_suffix(CharT c){
 }
 
 ParserRet parse_decimal(std::istream& i, stringstream& s){
-  static const auto read_char_func = is_number_char<10>{};
-
   bool dot_start = false;
   int sharps_before_dot = 0;
 
@@ -192,10 +177,10 @@ ParserRet parse_decimal(std::istream& i, stringstream& s){
     goto end; // 4. only sharps after dot
   }
 
-  if(dot_start && !read_char_func(i.peek()))
+  if(dot_start && !is_number_char(10, i.peek()))
     goto error; // 2. dot start should have digits
 
-  while(read_char_func(i.peek())){
+  while(is_number_char(10, i.peek())){
     s.put(i.get());
   }
 
@@ -211,11 +196,11 @@ ParserRet parse_decimal(std::istream& i, stringstream& s){
       s.put(i.get());
     }
 
-    if(!read_char_func(i.peek())){
+    if(!is_number_char(10, i.peek())){
       goto error; // no number on exp. part
     }
 
-    while(read_char_func(i.peek())){
+    while(is_number_char(10, i.peek())){
       s.put(i.get());
     }
   }
@@ -227,8 +212,7 @@ ParserRet parse_decimal(std::istream& i, stringstream& s){
   return PARSE_ERROR_VALUE;
 }
 
-template<int radix>
-ParserRet parse_real_number(std::istream& i){
+ParserRet parse_real_number(int radix, std::istream& i){
   int sign = 1;
 
   switch(i.peek()){
@@ -247,7 +231,7 @@ ParserRet parse_real_number(std::istream& i){
 
   stringstream s;
 
-  auto u1 = parse_unsigned<radix>(i, s);
+  auto u1 = parse_unsigned(radix, i, s);
   if(!get<0>(u1)){
     if(i.peek() == '.'){
       goto decimal_float_check;
@@ -275,7 +259,7 @@ ParserRet parse_real_number(std::istream& i){
   }else{
     // rational
     stringstream s2;
-    auto u2 = parse_unsigned<radix>(i, s2);
+    auto u2 = parse_unsigned(radix, i, s2);
     if(!get<0>(u2))
       goto error;
     return {Number(sign * get<0>(u1).get<double>() / get<0>(u2).get<double>()),
@@ -286,19 +270,18 @@ ParserRet parse_real_number(std::istream& i){
   return PARSE_ERROR_VALUE;
 }
 
-template<int radix>
-ParserRet parse_complex(std::istream& i){
+ParserRet parse_complex(int radix, std::istream& i){
   const auto first_char = i.peek();
 
   // has real part
-  auto real = parse_real_number<radix>(i);
+  auto real = parse_real_number(radix, i);
   if(!get<0>(real))
     goto error;
 
   switch(auto c = i.peek()){
   case '@': {// polar literal
     i.ignore(1);
-    auto deg = parse_real_number<radix>(i);
+    auto deg = parse_real_number(radix, i);
 
     if(!get<0>(deg))
       goto error;
@@ -316,7 +299,7 @@ ParserRet parse_complex(std::istream& i){
           Exactness::inexact};
     }
     
-    auto imag = parse_real_number<radix>(i);
+    auto imag = parse_real_number(radix, i);
     if(!get<0>(imag) || i.get() != 'i')
       goto error;
 
@@ -346,18 +329,9 @@ Number parse_number(std::istream& i){
 
   ParserRet r;
 
-  switch(get<0>(prefix_info)){
-  case 2:
-    r = parse_complex<2>(i);
-    break;
-  case 8:
-    r = parse_complex<8>(i);
-    break;
-  case 10:
-    r = parse_complex<10>(i);
-    break;
-  case 16:
-    r = parse_complex<16>(i);
+  switch(auto radix = get<0>(prefix_info)){
+  case 2: case 8: case 10: case 16:
+    r = parse_complex(radix, i);
     break;
   default:
     goto error;
