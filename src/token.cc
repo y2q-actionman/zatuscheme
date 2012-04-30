@@ -350,6 +350,7 @@ Token tokenize(FILE* f){
       ++dots;
       c2 = fgetc(f);
     }
+    ungetc(c2, f);
 
     switch(dots){
     case 1:

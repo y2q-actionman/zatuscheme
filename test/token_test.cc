@@ -260,7 +260,7 @@ int main(){
 
   // consecutive access
   {
-    char teststr[] = "(a . b)#(c 'd) e ;... \n f +11 `(,x ,@y \"ho()ge\")";
+    char teststr[] = "(a . b)#(c 'd) e ...;comment\n f +11 `(,x ,@y \"ho()ge\")";
     FILE* ss = fmemopen(teststr, sizeof(teststr), "r");
 
     check(ss, N::l_paren);
@@ -274,6 +274,7 @@ int main(){
     check_ident(ss, "d");
     check(ss, N::r_paren);
     check_ident(ss, "e");
+    check_ident(ss, "...");
 
     check_ident(ss, "f");
     check(ss, Number{11l});
