@@ -53,22 +53,20 @@ Keyword to_keyword(const std::string& s){
   if(s.empty())
     return Keyword::not_keyword;
 
-  Keyword ret = Keyword::not_keyword;
-
   switch(s[0]){
   case '=':
     if(s.compare(1, string::npos, ">") == 0)
-      ret = Keyword::r_arrow;
+      return Keyword::r_arrow;
     break;
 
   case 'a':
     if(s.compare(1, string::npos, "nd") == 0)
-      ret = Keyword::and_;
+      return Keyword::and_;
     break;
 
   case 'b':
     if(s.compare(1, string::npos, "egin") == 0)
-      ret = Keyword::begin;
+      return Keyword::begin;
     break;
 
   case 'c':
@@ -76,11 +74,11 @@ Keyword to_keyword(const std::string& s){
     switch(s[1]){
     case 'a':
       if(s.compare(2, string::npos, "se") == 0)
-        ret = Keyword::case_;
+        return Keyword::case_;
       break;
     case 'o':
       if(s.compare(2, string::npos, "nd") == 0)
-        ret = Keyword::cond;
+        return Keyword::cond;
       break;
     }
     break;
@@ -93,29 +91,29 @@ Keyword to_keyword(const std::string& s){
       switch(s[2]){
       case 'f':
         if(s.compare(3, string::npos, "ine") == 0)
-          ret = Keyword::define;
+          return Keyword::define;
         break;
       case 'l':
         if(s.compare(3, string::npos, "ay") == 0)
-          ret = Keyword::delay;
+          return Keyword::delay;
         break;
       }
       break;
     case 'o':
       if(s.length() == 2)
-        ret = Keyword::do_;
+        return Keyword::do_;
       break;
     }
     break;
 
   case 'e':
     if(s.compare(1, string::npos, "lse") == 0)
-      ret = Keyword::else_;
+      return Keyword::else_;
     break;
 
   case 'i':
     if(s.compare(1, string::npos, "f") == 0)
-      ret = Keyword::if_;
+      return Keyword::if_;
     break;
 
   case 'l':
@@ -123,23 +121,23 @@ Keyword to_keyword(const std::string& s){
     switch(s[1]){
     case 'a':
       if(s.compare(2, string::npos, "mbda") == 0)
-        ret = Keyword::lambda;
+        return Keyword::lambda;
       break;
     case 'e':
       if(s[2] != 't') break;
       if(s.length() == 3)
-        ret = Keyword::let;
+        return Keyword::let;
       else if(s.compare(3, string::npos, "*") == 0)
-        ret = Keyword::let_star;
+        return Keyword::let_star;
       else if(s.compare(3, string::npos, "rec") == 0)
-        ret = Keyword::letrec;
+        return Keyword::letrec;
       break;
     }
     break;
 
   case 'o':
     if(s.compare(1, string::npos, "r") == 0)
-      ret = Keyword::or_;
+      return Keyword::or_;
     break;
 
   case 'q':
@@ -147,30 +145,30 @@ Keyword to_keyword(const std::string& s){
     switch(s[2]){
     case 'a':
       if(s.compare(3, string::npos, "siquote") == 0)
-        ret = Keyword::quasiquote;
+        return Keyword::quasiquote;
       break;
     case 'o':
       if(s.compare(3, string::npos, "te") == 0)
-        ret = Keyword::quote;
+        return Keyword::quote;
       break;
     }
     break;
 
   case 's':
     if(s.compare(1, string::npos, "et!") == 0)
-      ret = Keyword::set_;
+      return Keyword::set_;
     break;
 
   case 'u': {
     auto cmp = s.compare(1, 7, "nquote");
     if(cmp == 0){
-      ret = Keyword::unquote;
+      return Keyword::unquote;
     }else if(cmp > 0 && 
              s.compare(7, string::npos, "-splicing") == 0)
-      ret = Keyword::unquote_splicing;
+      return Keyword::unquote_splicing;
     }
     break;
   }
 
-  return ret;
+  return Keyword::not_keyword;
 }

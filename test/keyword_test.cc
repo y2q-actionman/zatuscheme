@@ -25,7 +25,7 @@ static void check(Keyword k, const char* name){
 
   buf[len] = '_';
   if(to_keyword(buf) == k){
-    printf("[failed] string '%s' => keyword '%d' unexpectedlly\n",
+    printf("[failed] string '%s' => keyword '%d' unexpectedly\n",
            name, static_cast<int>(k));
     result = false;
   }
@@ -33,7 +33,7 @@ static void check(Keyword k, const char* name){
   if(len >= 2){
     buf[len-2] = '\0';
     if(to_keyword(buf) == k){
-      printf("[failed] string '%s' => keyword '%d' unexpectedlly\n",
+      printf("[failed] string '%s' => keyword '%d' unexpectedly\n",
              name, static_cast<int>(k));
       result = false;
     }
