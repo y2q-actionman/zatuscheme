@@ -95,7 +95,7 @@ Token::Token(Token&& other)
 
 template<typename T>
 inline
-void Token::assign_from_other(T other){
+Token& Token::assign_from_other(T other){
   switch(this->type_){
   case Type::uninitialized:
     new (this) Token(move(other));
@@ -150,16 +150,16 @@ void Token::assign_from_other(T other){
   default:
     UNEXP_DEFAULT();
   }
+
+  return *this;
 }
 
 Token& Token::operator=(const Token& other){
-  assign_from_other<const Token&>(forward<const Token>(other));
-  return *this;
+  return assign_from_other<const Token&>(forward<const Token>(other));
 }
 
 Token& Token::operator=(Token&& other){
-  assign_from_other<Token&&>(forward<Token>(other));
-  return *this;
+  return assign_from_other<Token&&>(forward<Token>(other));
 }
 
 //

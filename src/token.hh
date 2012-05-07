@@ -64,7 +64,7 @@ private:
   };
 
   template<typename T> void init_from_other(T other);
-  template<typename T> void assign_from_other(T other);
+  template<typename T> Token& assign_from_other(T other);
 };
 
 Token tokenize(FILE*);
