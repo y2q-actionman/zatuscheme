@@ -33,6 +33,9 @@ Token::Notation to_type<Token::Type::notation>() = delete;
 
 
 // std::string -> Token::Type is ambigious
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, std::string>() = delete;
 
 template<>
 inline constexpr
