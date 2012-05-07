@@ -1,64 +1,55 @@
 #include "keyword.hh"
 
-#include <array>
-#include <cassert>
-
 using namespace std;
 
-namespace {
-
-struct Entry {
-  Keyword k;
-  const char* str;
-};
-
-static constexpr
-array<Entry, static_cast<int>(Keyword::MAX)+1>
-keyword_table{{
-    { Keyword::not_keyword, "\0" },
-
-    { Keyword::else_, "else" },
-    { Keyword::r_arrow, "=>" },
-    { Keyword::define, "define" },
-    { Keyword::unquote, "unquote" },
-    { Keyword::unquote_splicing, "unquote-splicing" },
-
-    { Keyword::quote, "quote" },
-    { Keyword::lambda, "lambda" },
-    { Keyword::if_, "if" },
-    { Keyword::set_, "set!" },
-    { Keyword::begin, "begin" },
-    { Keyword::cond, "cond" },
-    { Keyword::and_, "and" },
-    { Keyword::or_, "or" },
-    { Keyword::case_, "case" },
-    { Keyword::let, "let" },
-    { Keyword::let_star, "let*" },
-    { Keyword::letrec, "letrec" },
-    { Keyword::do_, "do" },
-    { Keyword::delay, "delay" },
-    { Keyword::quasiquote, "quasiquote" },
-
-    { Keyword::MAX, nullptr }
-}};
-
-} // namespace
-
 const char* stringify(Keyword k){
-  auto& e = keyword_table.at(static_cast<int>(k));
-  assert(e.k == k);
-  return e.str;
+  switch(k){
+  case Keyword::else_:
+    return "else";
+  case Keyword::r_arrow:
+    return "=>";
+  case Keyword::define:
+    return "define";
+  case Keyword::unquote:
+    return "unquote";
+  case Keyword::unquote_splicing:
+    return "unquote-splicing";
+  case Keyword::quote:
+    return "quote";
+  case Keyword::lambda:
+    return "lambda";
+  case Keyword::if_:
+    return "if";
+  case Keyword::set_:
+    return "set!";
+  case Keyword::begin:
+    return "begin";
+  case Keyword::cond:
+    return "cond";
+  case Keyword::and_:
+    return "and";
+  case Keyword::or_:
+    return "or";
+  case Keyword::case_:
+    return "case";
+  case Keyword::let:
+    return "let";
+  case Keyword::let_star:
+    return "let*";
+  case Keyword::letrec:
+    return "letrec";
+  case Keyword::do_:
+    return "do";
+  case Keyword::delay:
+    return "delay";
+  case Keyword::quasiquote:
+    return "quasiquote";
+  default:
+    return "(unknown keyword type)";
+  }
 }
 
 Keyword to_keyword(const std::string& s){
-#if 0
-  for(const auto& e : keyword_table){
-    if(s == e.str)
-      return e.k;
-  }
-
-  return Keyword::not_keyword;
-#else
   if(s.empty())
     return Keyword::not_keyword;
 
@@ -182,5 +173,4 @@ Keyword to_keyword(const std::string& s){
   }
 
   return ret;
-#endif
 }
