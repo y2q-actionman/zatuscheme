@@ -1,4 +1,5 @@
 #include <memory>
+#include <cassert>
 
 #include "eval.hh"
 #include "util.hh"
@@ -20,50 +21,48 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
 
   // push args
   int argc = 0;
-  auto arg = args;
 
-  while(1){
-    if(arg.tag() != Ptr_tag::cons){
-      fprintf(stderr, "eval error: arg contains non-cons (dotted list?)\n");
-      goto end;
-    }
+  if(!do_list(args,
+              [&](Lisp_ptr car, Lisp_ptr) -> bool{
+                assert(argc <= argi.required_args);
 
-    auto arg_cell = arg.get<Cons*>();
+                if(argc == argi.required_args)
+                  return false;
 
-    if(argc >= argi.required_args){
-      if(argi.variadic){
-        s.push(nullptr, arg);
-        ++argc;
-      }else{
-        if(arg_cell){
-          fprintf(stderr, "funcall error: argcount mismatch! (more than required %d)\n",
-                  argi.required_args);
-          goto end;
-        }
-      }
-      break;
-    }
+                auto evaled = eval(car, e, s);
+                if(!evaled){
+                  fprintf(stderr, "eval error: evaluating func's arg failed!!\n");
+                  return false;
+                }
 
-    if(!arg_cell){ // reached nil
-      fprintf(stderr, "funcall error: argcount mismatch! (less than required %d)\n",
-              argi.required_args);
-      goto end;
-    }
+                s.push(nullptr, car);
+                ++argc;
 
-    auto evaled = eval(arg_cell->car(), e, s);
-    if(!evaled){
-      fprintf(stderr, "eval error: evaluating func's arg failed!!\n");
-      goto end;
-    }
+                return true;
+              },
+              [&](Lisp_ptr dot_cdr) -> bool{
+                assert(argc <= argi.required_args);
 
-    s.push(nullptr, evaled);
-    arg = arg_cell->cdr();
-    ++argc;
-  }
+                if(argc < argi.required_args){
+                  fprintf(stderr, "eval error: internal argument counter mismatched!! (read %d args)\n",
+                          argc);
+                  return false;
+                }
 
-  if(argc != (argi.required_args + (argi.variadic ? 1 : 0))){
-    fprintf(stderr, "eval error: internal argument counter mismatched!! (read %d args)\n",
-            argc);
+                if(argi.variadic){
+                  s.push(nullptr, dot_cdr);
+                  ++argc;
+                  return true;
+                }else{
+                  if(!nullp(dot_cdr)){
+                    fprintf(stderr, "funcall error: argcount mismatch! (more than required %d)\n",
+                            argi.required_args);
+                    return false;
+                  }
+              
+                  return true;
+                }
+              })){
     goto end;
   }
 

@@ -30,22 +30,6 @@ void print_list(FILE* f, Lisp_ptr l){
 
   fputc('(', f);
 
-#if 0
-  while(c){
-    print(f, c->car());
-
-    Lisp_ptr rest = c->cdr();
-
-    if(rest.tag() == Ptr_tag::cons){
-      c = rest.get<Cons*>();
-      if(c) fputc(' ', f);
-    }else{
-      fputs(" . ", f);
-      print(f, rest);
-      break;
-    }
-  }
-#else
   do_list(l,
           [f](Lisp_ptr car, Lisp_ptr cdr) -> bool{
             print(f, car);
@@ -58,7 +42,6 @@ void print_list(FILE* f, Lisp_ptr l){
               print(f, dot_cdr);
             }
           });
-#endif
 
   fputc(')', f);
 }
