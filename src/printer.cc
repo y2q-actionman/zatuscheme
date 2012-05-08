@@ -31,9 +31,9 @@ void print_list(FILE* f, Lisp_ptr l){
   fputc('(', f);
 
   do_list(l,
-          [f](Lisp_ptr car, Lisp_ptr cdr) -> bool{
-            print(f, car);
-            if(cdr.get<Cons*>()) fputc(' ', f);
+          [f](Cons* cell) -> bool{
+            print(f, cell->car());
+            if(cell->cdr().get<Cons*>()) fputc(' ', f);
             return true;
           },
           [f](Lisp_ptr dot_cdr){

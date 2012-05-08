@@ -23,19 +23,19 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
   int argc = 0;
 
   if(!do_list(args,
-              [&](Lisp_ptr car, Lisp_ptr) -> bool{
+              [&](Cons* cell) -> bool{
                 assert(argc <= argi.required_args);
 
                 if(argc == argi.required_args)
                   return false;
 
-                auto evaled = eval(car, e, s);
+                auto evaled = eval(cell->car(), e, s);
                 if(!evaled){
                   fprintf(stderr, "eval error: evaluating func's arg failed!!\n");
                   return false;
                 }
 
-                s.push(nullptr, car);
+                s.push(nullptr, evaled);
                 ++argc;
 
                 return true;

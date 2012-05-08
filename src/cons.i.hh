@@ -55,7 +55,7 @@ auto do_list(Lisp_ptr lis, MainFun&& m_fun, LastFun&& l_fun)
 
     p = c->cdr();
 
-    if(!m_fun(c->car(), p))
+    if(!m_fun(c))
       break;
   }
 

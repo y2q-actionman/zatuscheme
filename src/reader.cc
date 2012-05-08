@@ -45,7 +45,8 @@ Lisp_ptr read_list(SymTable& sym, FILE* f){
     // check next token
     t = tokenize(f);
     if(!t){
-      // in future, cleanup working data.
+      // TODO: free cons's contents (here or in free_cons_list())
+      free_cons_list(head);
       return Lisp_ptr{};
     }else if(t.type() == Token::Type::notation){
       switch(t.get<Token::Notation>()){
@@ -83,7 +84,8 @@ Lisp_ptr read_vector(SymTable& sym, FILE* f){
   while(1){
     auto t = tokenize(f);
     if(!t){
-      // in future, cleanup working data.
+      // TODO: free vector's contents
+      delete v;
       return Lisp_ptr{};
     }else if((t.type() == Token::Type::notation)
              && (t.get<Token::Notation>()
