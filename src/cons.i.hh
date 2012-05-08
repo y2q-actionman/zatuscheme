@@ -35,4 +35,31 @@ void Cons::rplacd(Lisp_ptr p){
     cdr_ = p;
 }
 
+template<typename MainFun, typename ErrFun>
+int do_list(Lisp_ptr l, MainFun&& m_fun, ErrFun&& e_fun){
+  if(l.tag() != Ptr_tag::cons){
+    e_fun(l);
+    return -1;
+  }    
+
+  int ret = 0;
+  Lisp_ptr next;
+
+  for(auto c = l.get<Cons*>(); c; c = next.get<Cons*>()){
+    next = c->cdr();
+
+    if(!m_fun(c->car(), next))
+      break;
+    ++ret;
+
+    if(next.tag() != Ptr_tag::cons){
+      e_fun(next);
+      break;
+    }
+  }
+
+  return ret;
+}
+
+
 #endif // CONS_I_HH

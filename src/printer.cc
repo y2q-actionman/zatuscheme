@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cassert>
 
 #include "printer.hh"
 #include "symbol.hh"
@@ -24,9 +25,12 @@ void print_vector(FILE* f, const Vector* v){
   fputc(')', f);
 }
 
-void print_list(FILE* f, const Cons* c){
+void print_list(FILE* f, Lisp_ptr l){
+  assert(l.tag() == Ptr_tag::cons);
+
   fputc('(', f);
 
+#if 0
   while(c){
     print(f, c->car());
 
@@ -41,6 +45,18 @@ void print_list(FILE* f, const Cons* c){
       break;
     }
   }
+#else
+  do_list(l,
+          [f](Lisp_ptr car, Lisp_ptr cdr) -> bool{
+            print(f, car);
+            if(cdr.get<Cons*>()) fputc(' ', f);
+            return true;
+          },
+          [f](Lisp_ptr dot_cdr){
+            fputs(" . ", f);
+            print(f, dot_cdr);
+          });
+#endif
 
   fputc(')', f);
 }
@@ -62,7 +78,7 @@ void print(FILE* f, Lisp_ptr p){
     break;
 
   case Ptr_tag::cons:
-    print_list(f, p.get<Cons*>());
+    print_list(f, p);
     break;
 
   case Ptr_tag::symbol:

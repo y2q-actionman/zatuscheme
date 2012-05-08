@@ -28,6 +28,9 @@ private:
   Lisp_ptr cdr_;
 };
 
+template<typename MainFun, typename ErrFun>
+int do_list(Lisp_ptr, MainFun&&, ErrFun&&);
+
 #include "cons.i.hh"
 
 #endif // CONS_HH
