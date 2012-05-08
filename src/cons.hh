@@ -28,8 +28,12 @@ private:
   Lisp_ptr cdr_;
 };
 
-template<typename MainFun, typename ErrFun>
-int do_list(Lisp_ptr, MainFun&&, ErrFun&&);
+inline
+bool nullp(Lisp_ptr);
+
+template<typename MainFun, typename LastFun>
+auto do_list(Lisp_ptr p, MainFun&&, LastFun&& lf)
+  -> decltype(lf(p));
 
 #include "cons.i.hh"
 

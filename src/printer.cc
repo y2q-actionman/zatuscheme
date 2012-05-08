@@ -53,8 +53,10 @@ void print_list(FILE* f, Lisp_ptr l){
             return true;
           },
           [f](Lisp_ptr dot_cdr){
-            fputs(" . ", f);
-            print(f, dot_cdr);
+            if(!nullp(dot_cdr)){
+              fputs(" . ", f);
+              print(f, dot_cdr);
+            }
           });
 #endif
 

@@ -35,30 +35,31 @@ void Cons::rplacd(Lisp_ptr p){
     cdr_ = p;
 }
 
-template<typename MainFun, typename ErrFun>
-int do_list(Lisp_ptr l, MainFun&& m_fun, ErrFun&& e_fun){
-  if(l.tag() != Ptr_tag::cons){
-    e_fun(l);
-    return -1;
-  }    
+inline
+bool nullp(Lisp_ptr p){
+  return (p.tag() == Ptr_tag::cons)
+    && (p.get<Cons*>() == Cons::NIL.get<Cons*>());
+}
 
-  int ret = 0;
-  Lisp_ptr next;
+template<typename MainFun, typename LastFun>
+auto do_list(Lisp_ptr lis, MainFun&& m_fun, LastFun&& l_fun)
+  -> decltype(l_fun(lis)){
+  Lisp_ptr p = lis;
 
-  for(auto c = l.get<Cons*>(); c; c = next.get<Cons*>()){
-    next = c->cdr();
+  while(1){
+    if(p.tag() != Ptr_tag::cons)
+      break; // null or dot list end.
 
-    if(!m_fun(c->car(), next))
+    auto c = p.get<Cons*>();
+    if(!c) break; // reached nil
+
+    p = c->cdr();
+
+    if(!m_fun(c->car(), p))
       break;
-    ++ret;
-
-    if(next.tag() != Ptr_tag::cons){
-      e_fun(next);
-      break;
-    }
   }
 
-  return ret;
+  return l_fun(p);
 }
 
 
