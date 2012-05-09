@@ -28,6 +28,6 @@ const char* stringify(Ptr_tag p){
 }
 
 void describe(FILE* f, Lisp_ptr p){
-  fprintf(f, "[%s] %p\n", stringify(p.tag()), p.get<void*>());
+  fprintf(f, "[%s] %p", stringify(p.tag()), p.get<void*>());
 }
 

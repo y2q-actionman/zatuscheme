@@ -2,6 +2,8 @@
 #define FUNCTION_HH
 
 #include "lisp_ptr.hh"
+#include <cstdio>
+
 class Env;
 class Stack;
 
@@ -25,7 +27,7 @@ public:
       : head(h), required_args(rargs), variadic(v){}
 
     explicit operator bool() const{
-      return (head) && (required_args < 0);
+      return (head) && (required_args >= 0);
     }
   };
 
@@ -64,6 +66,8 @@ private:
 Function::ArgInfo parse_func_arg(Lisp_ptr);
 
 const char* stringify(Function::Type);
+
+void describe(FILE*, const Function::ArgInfo&);
 
 #include "function.i.hh"
 

@@ -41,3 +41,10 @@ const char* stringify(Function::Type t){
     return "(unknown function type)";
   }
 }
+
+void describe(FILE* f, const Function::ArgInfo& argi){
+  fprintf(f, "[code=");
+  describe(f, argi.head);
+  fprintf(f, ", required_args=%d, variadic=%d]",
+          argi.required_args, argi.variadic);
+}
