@@ -6,10 +6,6 @@
 #endif
 
 inline
-Cons::Cons(Lisp_ptr x)
-  : car_(x), cdr_(Cons::NIL){}
-
-inline
 Cons::Cons(Lisp_ptr x, Lisp_ptr y)
   : car_(x), cdr_(y){}
 

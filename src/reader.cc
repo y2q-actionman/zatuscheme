@@ -31,7 +31,7 @@ Lisp_ptr read_list(SymTable& sym, FILE* f){
   }
 
   // main loop
-  Cons* c = new Cons{Lisp_ptr{}, Lisp_ptr{}};
+  Cons* c = new Cons();
   const Lisp_ptr head{c};
 
   while(1){
@@ -67,7 +67,7 @@ Lisp_ptr read_list(SymTable& sym, FILE* f){
     }
     
     // readying next cons
-    Cons* new_c = new Cons{Lisp_ptr{}, Lisp_ptr{}};
+    Cons* new_c = new Cons();
     c->rplacd(Lisp_ptr{new_c});
     c = new_c;
   }
@@ -109,7 +109,7 @@ Lisp_ptr read_abbrev(SymTable& sym, Keyword k, FILE* f){
   Lisp_ptr first{sym.intern(stringify(k))};
   Lisp_ptr second{read(sym, f)};
 
-  return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second}}}};
+  return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second, Cons::NIL}}}};
 }
 
 Lisp_ptr read_la(SymTable& sym, FILE* f, const Token& looked_tok){
