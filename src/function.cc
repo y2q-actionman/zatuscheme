@@ -9,21 +9,17 @@ Function::ArgInfo parse_func_arg(Lisp_ptr args){
   do_list(args,
           [&](Cons* c) -> bool {
             if(c->car().tag() != Ptr_tag::symbol){
-              fprintf(stderr, "eval error: informal lambda list! (includes non-symbol)\n");
-              argc = -1;
               return false;
             }
             ++argc;
             return true;
           },
-          [&](Lisp_ptr dot_cdr) -> Function::ArgInfo {
-            if(argc < 0) return {};
-
-            if(nullp(dot_cdr)){
+          [&](Lisp_ptr last) -> Function::ArgInfo {
+            if(nullp(last)){
               return {args, argc, false};
             }else{
-              if(dot_cdr.tag() != Ptr_tag::symbol){
-                fprintf(stderr, "eval error: informal lambda list! (ended with non-symbol)\n");
+              if(last.tag() != Ptr_tag::symbol){
+                fprintf(stderr, "eval error: informal lambda list! (including non-symbol)\n");
                 return {};
               }
               return {args, argc, true};

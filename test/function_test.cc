@@ -70,6 +70,10 @@ int main(){
   check("(a b . c)", {{}, 2, true});
   check("(a b c . d)", {{}, 3, true});
 
+  check_uninit("(a 1 b)");
+  check_uninit("(a 1 . b)");
+  check_uninit("(a b . 1)");
+
   
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -53,10 +53,10 @@ auto do_list(Lisp_ptr lis, MainFun&& m_fun, LastFun&& l_fun)
     auto c = p.get<Cons*>();
     if(!c) break; // reached nil
 
-    p = c->cdr();
-
     if(!m_fun(c))
       break;
+
+    p = c->cdr();
   }
 
   return l_fun(p);
