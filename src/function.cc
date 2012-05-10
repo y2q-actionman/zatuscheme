@@ -4,31 +4,31 @@
 
 Function::ArgInfo parse_func_arg(Lisp_ptr args){
   int argc = 0;
-  Lisp_ptr p = args;
 
-  while(1){
-    if(p.tag() != Ptr_tag::cons){
-      if(p.tag() != Ptr_tag::symbol){
-        fprintf(stderr, "eval error: informal lambda list! (ended with non-symbol)\n");
-        return {};
-      }
+  return
+  do_list(args,
+          [&](Cons* c) -> bool {
+            if(c->car().tag() != Ptr_tag::symbol){
+              fprintf(stderr, "eval error: informal lambda list! (includes non-symbol)\n");
+              argc = -1;
+              return false;
+            }
+            ++argc;
+            return true;
+          },
+          [&](Lisp_ptr dot_cdr) -> Function::ArgInfo {
+            if(argc < 0) return {};
 
-      return {args, argc, true};
-    }
-
-    Cons* c = p.get<Cons*>();
-    if(!c){
-      return {args, argc, false};
-    }
-
-    if(c->car().tag() != Ptr_tag::symbol){
-      fprintf(stderr, "eval error: informal lambda list! (includes non-symbol)\n");
-      return {};
-    }
-
-    ++argc;
-    p = c->cdr();
-  }
+            if(nullp(dot_cdr)){
+              return {args, argc, false};
+            }else{
+              if(dot_cdr.tag() != Ptr_tag::symbol){
+                fprintf(stderr, "eval error: informal lambda list! (ended with non-symbol)\n");
+                return {};
+              }
+              return {args, argc, true};
+            }
+          });
 }
 
 const char* stringify(Function::Type t){
