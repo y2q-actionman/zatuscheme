@@ -197,6 +197,21 @@ Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
 }
 
 Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
+  static constexpr auto test_varname = [](Symbol* var) -> bool{
+    if(!var){
+      fprintf(stderr, "eval error: defined variable name is not a symbol!\n");
+      return false;
+    }
+
+    if(to_keyword(var->name()) != Keyword::not_keyword){
+      fprintf(stderr, "eval error: define's first element is Keyword (%s)!\n",
+              var->name().c_str());
+      return false;
+    }
+
+    return true;
+  };
+
   Symbol* var = nullptr;
   Lisp_ptr value;
   unique_ptr<Function> func_value;
@@ -207,6 +222,8 @@ Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
   switch(first.tag()){
   case Ptr_tag::symbol: {
     var = first.get<Symbol*>();
+    if(!test_varname(var))
+      return {};
 
     auto val_l = rest->cdr().get<Cons*>();
     if(!val_l){
@@ -231,6 +248,8 @@ Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
     }
 
     var = lis->car().get<Symbol*>();
+    if(!test_varname(var))
+      return {};
 
     const auto& arg_info = parse_func_arg(lis->cdr());
     if(!arg_info){
@@ -251,17 +270,6 @@ Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
 
   default:
     fprintf(stderr, "eval error: informal define syntax!\n");
-    return {};
-  }
-
-  if(!var){
-    fprintf(stderr, "eval error: defined variable name is not a symbol!\n");
-    return {};
-  }
-
-  if(to_keyword(var->name()) != Keyword::not_keyword){
-    fprintf(stderr, "eval error: define's first element is Keyword (%s)!\n",
-            var->name().c_str());
     return {};
   }
 
