@@ -6,8 +6,6 @@
 #include "lisp_ptr.hh"
 #include "symtable.hh"
 
-#include <array>
-
 using namespace std;
 
 namespace {
@@ -40,11 +38,9 @@ struct Entry {
   Function func;
 };
 
-static
-array<Entry, 1>
-builtin_func{{
+static Entry builtin_func[] = {
   {"+", Function{plus_2, {Lisp_ptr{}, 2, true}}}
-}};
+};
 
 } // namespace
 
