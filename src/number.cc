@@ -1,6 +1,5 @@
 #include <istream>
 #include <utility>
-#include <cctype>
 #include <sstream>
 #include <cstdlib>
 

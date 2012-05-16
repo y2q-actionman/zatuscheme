@@ -1,11 +1,6 @@
-#include <cctype>
-#include <cstring>
 #include <istream>
 #include <sstream>
-#include <stdexcept>
-#include <limits>
-#include <cstdio>
-#include <cstdlib>
+#include <utility>
 
 #include "token.hh"
 #include "util.hh"

@@ -31,8 +31,6 @@ private:
   // add pointer to symbol table?
 };
 
-Keyword to_keyword(const Symbol&);
-
 #include "symbol.i.hh"
 
 #endif // SYMBOL_HH

@@ -1,9 +1,7 @@
-#include "symtable.hh"
-
 #include <utility>
 #include <cassert>
 
-#include "symbol.hh"
+#include "symtable.hh"
 
 using namespace std;
 

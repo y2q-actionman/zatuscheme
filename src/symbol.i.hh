@@ -5,17 +5,9 @@
 #error "Please include via parent file"
 #endif
 
-#include <utility>
-#include "keyword.hh"
-
 inline
 Symbol::Symbol(const std::string* s)
   : name_(s){}
-
-inline
-Keyword to_keyword(const Symbol& s){
-  return to_keyword(s.name());
-}
 
 inline
 void Symbol::rebind(const std::string* s){

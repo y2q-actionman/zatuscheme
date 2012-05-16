@@ -4,7 +4,6 @@
 #include "eval.hh"
 #include "util.hh"
 #include "keyword.hh"
-#include "env.hh"
 #include "symbol.hh"
 #include "cons.hh"
 #include "env.hh"

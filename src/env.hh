@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "lisp_ptr.hh"
+class Symbol;
 
 class Env {
 public:
