@@ -26,8 +26,7 @@ private:
   Lisp_ptr cdr_;
 };
 
-inline
-bool nullp(Lisp_ptr);
+inline bool nullp(Lisp_ptr);
 
 template<typename MainFun, typename LastFun>
 auto do_list(Lisp_ptr p, MainFun&&, LastFun&& lf)

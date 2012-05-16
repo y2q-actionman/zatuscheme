@@ -10,6 +10,7 @@
 #include "env.hh"
 #include "stack.hh"
 #include "function.hh"
+#include "printer.hh"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ namespace {
 
 Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
   const auto& argi = fun->arg_info();
+  Lisp_ptr arg_name = argi.head;
   Lisp_ptr ret = {};
 
   // push args
@@ -35,7 +37,9 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
                   return false;
                 }
 
-                s.push(nullptr, evaled);
+                auto arg_name_cell = arg_name.get<Cons*>();
+                s.push(arg_name_cell->car().get<Symbol*>(), evaled);
+                arg_name = arg_name_cell->cdr();
                 ++argc;
 
                 return true;
@@ -50,7 +54,7 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
                 }
 
                 if(argi.variadic){
-                  s.push(nullptr, dot_cdr);
+                  s.push(arg_name.get<Symbol*>(), dot_cdr);
                   ++argc;
                   return true;
                 }else{
@@ -68,9 +72,12 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
 
   // real call
   switch(fun->type()){
-  case Function::Type::interpreted:
-    ret = Lisp_ptr{}; // stub
+  case Function::Type::interpreted: {
+    auto code_head = fun->get<Lisp_ptr>();
+    // TODO: use multiple line!
+    ret = eval(code_head.get<Cons*>()->car(), e, s);
     break;
+  }
   case Function::Type::native:
     ret = (fun->get<Function::NativeFunc>())(e, s);
     break;

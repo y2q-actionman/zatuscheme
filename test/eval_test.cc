@@ -135,6 +135,7 @@ int main(){
   // syntax: define
   check(read_eql, "(define x 1)", "1");
   check(read_eql, "x", "1");
+  check(read_eql, "(+ x x)", "2");
 
   // keywords are not available.
   // check(test_undef, "(set! else 1)");
@@ -143,6 +144,12 @@ int main(){
 
   // macro call
   
+
+
+  // function test (to be moved!)
+  check(print_equal, "(define fun (lambda (y) (+ y y)))", "?");
+  check(print_equal, "fun", "?");
+  check(print_equal, "(fun 2)", "?");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

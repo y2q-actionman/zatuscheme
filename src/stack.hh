@@ -31,6 +31,8 @@ public:
 private:
   typedef std::pair<Symbol*, Lisp_ptr> Entry;
   std::vector<Entry> stack_;
+
+  friend void describe(FILE*, const Stack&);
 };
 
 #endif 
