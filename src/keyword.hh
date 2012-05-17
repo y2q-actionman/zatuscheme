@@ -1,8 +1,6 @@
 #ifndef KEYWORD_HH
 #define KEYWORD_HH
 
-#include <string>
-
 enum class Keyword{
   not_keyword = 0,
 
@@ -18,6 +16,6 @@ enum class Keyword{
     };
 
 const char* stringify(Keyword);
-Keyword to_keyword(const std::string&);
+Keyword to_keyword(const char*);
 
 #endif // KEYWORD_HH

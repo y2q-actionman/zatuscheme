@@ -165,7 +165,7 @@ Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
     fprintf(stderr, "eval error: set!'s first element is not symbol!\n");
     return {};
   }
-  if(to_keyword(var->name()) != Keyword::not_keyword){
+  if(to_keyword(var->name().c_str()) != Keyword::not_keyword){
     fprintf(stderr, "eval error: set!'s first element is Keyword (%s)!\n",
             var->name().c_str());
     return {};
@@ -209,7 +209,7 @@ Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
       return false;
     }
 
-    if(to_keyword(var->name()) != Keyword::not_keyword){
+    if(to_keyword(var->name().c_str()) != Keyword::not_keyword){
       fprintf(stderr, "eval error: define's first element is Keyword (%s)!\n",
               var->name().c_str());
       return false;
@@ -312,7 +312,7 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
 
   case Ptr_tag::symbol: {
     auto sym = p.get<Symbol*>();
-    if(to_keyword(sym->name()) != Keyword::not_keyword){
+    if(to_keyword(sym->name().c_str()) != Keyword::not_keyword){
       fprintf(stderr, "eval error: symbol '%s' is keyword!!\n", sym->name().c_str());
       return {};
     }
@@ -333,7 +333,7 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
     // special operator?
     if(first.tag() == Ptr_tag::symbol){
       auto sym = first.get<Symbol*>();
-      auto k = to_keyword(sym->name());
+      auto k = to_keyword(sym->name().c_str());
 
       if(k != Keyword::not_keyword){
         if(c->cdr().tag() != Ptr_tag::cons){

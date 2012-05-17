@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "keyword.hh"
 
 using namespace std;
@@ -49,123 +51,126 @@ const char* stringify(Keyword k){
   }
 }
 
-Keyword to_keyword(const std::string& s){
-  if(s.empty())
-    return Keyword::not_keyword;
-
+Keyword to_keyword(const char* s){
   switch(s[0]){
   case '=':
-    if(s.compare(1, string::npos, ">") == 0)
+    if(strcmp(s+1, ">") == 0)
       return Keyword::r_arrow;
     break;
 
   case 'a':
-    if(s.compare(1, string::npos, "nd") == 0)
+    if(strcmp(s+1, "nd") == 0)
       return Keyword::and_;
     break;
 
   case 'b':
-    if(s.compare(1, string::npos, "egin") == 0)
+    if(strcmp(s+1, "egin") == 0)
       return Keyword::begin;
     break;
 
   case 'c':
-    if(s.length() != 4) break;
     switch(s[1]){
     case 'a':
-      if(s.compare(2, string::npos, "se") == 0)
+      if(strcmp(s+2, "se") == 0)
         return Keyword::case_;
       break;
     case 'o':
-      if(s.compare(2, string::npos, "nd") == 0)
+      if(strcmp(s+2, "nd") == 0)
         return Keyword::cond;
       break;
     }
     break;
 
   case 'd':
-    if(s.length() < 2) break;
     switch(s[1]){
     case 'e':
-      if(s.length() < 5) break;
       switch(s[2]){
       case 'f':
-        if(s.compare(3, string::npos, "ine") == 0)
+        if(strcmp(s+3, "ine") == 0)
           return Keyword::define;
         break;
       case 'l':
-        if(s.compare(3, string::npos, "ay") == 0)
+        if(strcmp(s+3, "ay") == 0)
           return Keyword::delay;
         break;
       }
       break;
     case 'o':
-      if(s.length() == 2)
+      if(s[2] == '\0')
         return Keyword::do_;
       break;
     }
     break;
 
   case 'e':
-    if(s.compare(1, string::npos, "lse") == 0)
+    if(strcmp(s+1, "lse") == 0)
       return Keyword::else_;
     break;
 
   case 'i':
-    if(s.compare(1, string::npos, "f") == 0)
+    if(strcmp(s+1, "f") == 0)
       return Keyword::if_;
     break;
 
   case 'l':
-    if(s.length() < 3) break;
     switch(s[1]){
     case 'a':
-      if(s.compare(2, string::npos, "mbda") == 0)
+      if(strcmp(s+2, "mbda") == 0)
         return Keyword::lambda;
       break;
     case 'e':
       if(s[2] != 't') break;
-      if(s.length() == 3)
+
+      switch(s[3]){
+      case '\0':
         return Keyword::let;
-      else if(s.compare(3, string::npos, "*") == 0)
-        return Keyword::let_star;
-      else if(s.compare(3, string::npos, "rec") == 0)
-        return Keyword::letrec;
+      case '*':
+        if(s[4] == '\0')
+          return Keyword::let_star;
+        break;
+      case 'r':
+        if(strcmp(s+4, "ec") == 0)
+          return Keyword::letrec;
+        break;
+      }
       break;
     }
     break;
 
   case 'o':
-    if(s.compare(1, string::npos, "r") == 0)
+    if(strcmp(s+1, "r") == 0)
       return Keyword::or_;
     break;
 
   case 'q':
-    if(s.length() < 5 || s[1] != 'u') break;
+    if(s[1] != 'u') break;
     switch(s[2]){
     case 'a':
-      if(s.compare(3, string::npos, "siquote") == 0)
+      if(strcmp(s+3, "siquote") == 0)
         return Keyword::quasiquote;
       break;
     case 'o':
-      if(s.compare(3, string::npos, "te") == 0)
+      if(strcmp(s+3, "te") == 0)
         return Keyword::quote;
       break;
     }
     break;
 
   case 's':
-    if(s.compare(1, string::npos, "et!") == 0)
+    if(strcmp(s+1, "et!") == 0)
       return Keyword::set_;
     break;
 
-  case 'u': {
-    auto cmp = s.compare(1, 7, "nquote");
-    if(cmp == 0){
-      return Keyword::unquote;
-    }else if(cmp > 0 && 
-             s.compare(7, string::npos, "-splicing") == 0)
-      return Keyword::unquote_splicing;
+  case 'u':
+    if(strncmp(s+1, "nquote", sizeof("nquote")-1) == 0){
+      switch(s[7]){
+      case '\0':
+        return Keyword::unquote;
+      case '-':
+        if(strcmp(s+8, "splicing") == 0)
+          return Keyword::unquote_splicing;
+        break;
+      }
     }
     break;
   }
