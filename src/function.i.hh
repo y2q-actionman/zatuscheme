@@ -1,7 +1,7 @@
 #ifndef FUNCTION_I_HH
 #define FUNCTION_I_HH
 
-#ifndef FUNCTION_I_HH
+#ifndef FUNCTION_HH
 #error "Please include via parent file"
 #endif
 

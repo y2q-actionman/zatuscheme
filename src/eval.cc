@@ -371,8 +371,8 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
         case Keyword::r_arrow:
         case Keyword::unquote:
         case Keyword::unquote_splicing:
-          fprintf(stderr, "eval error: keyword '%s' cannot be used as operator!!\n",
-                  stringify(k));
+          fprintf(stderr, "eval error: '%s' cannot be used as operator!!\n",
+                  sym->name().c_str());
           return {};
 
         default:
