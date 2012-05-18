@@ -107,9 +107,6 @@ int main(){
   check(test_undef, "tabun-tukattenai-namae");
 
 
-  //check("+", "functiondkjfsa");
-
-
   // === function call ===
   check(read_eql, "(+ 1 1)", "2");
 
@@ -149,9 +146,9 @@ int main(){
   
 
 
-  // function test (to be moved!)
-  check(test_true, "(define fun (lambda (y) (set! x y) (+ y y)))", "?");
-  check(test_true, "fun", "?");
+  // function test (basic syntax only)
+  check(test_true, "(define fun (lambda (y) (set! x y) (+ y y)))");
+  check(test_true, "fun");
   check(print_equal, "(fun 2)", "4");
   check(print_equal, "x", "2");
 
