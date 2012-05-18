@@ -71,12 +71,19 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
 
   // real call
   switch(fun->type()){
-  case Function::Type::interpreted: {
-    auto code_head = fun->get<Lisp_ptr>();
-    // TODO: use multiple line!
-    ret = eval(code_head.get<Cons*>()->car(), e, s);
+  case Function::Type::interpreted:
+    do_list(fun->get<Lisp_ptr>(),
+            [&](Cons* cell) -> bool {
+              ret = eval(cell->car(), e, s);
+              return true;
+            },
+            [&](Lisp_ptr last_cdr){
+              if(!nullp(last_cdr)){
+                fprintf(stderr, "eval error: body has dot list!\n");
+                ret = Lisp_ptr{};
+              }
+            });
     break;
-  }
   case Function::Type::native:
     ret = (fun->get<Function::NativeFunc>())(e, s);
     break;
@@ -199,7 +206,7 @@ Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
     fprintf(stderr, "eval error: set! value is not defined previously!\n");
   }
       
-  return {};
+  return val;
 }
 
 Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){

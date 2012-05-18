@@ -71,8 +71,12 @@ bool print_equal(Lisp_ptr input, const char* expect_s){
   return test_on_print(input, expect_s, callback);
 }
 
-bool test_undef(Lisp_ptr input, const char*){
-  return input.tag() == Ptr_tag::undefined;
+bool test_undef(Lisp_ptr p, const char*){
+  return !p;
+}
+
+bool test_true(Lisp_ptr p, const char*){
+  return !!p;
 }
 
 int main(){
@@ -128,18 +132,17 @@ int main(){
   check(read_eql, "(if #f 1 2)", "2");
   check(test_undef, "(if #f 1 2 3)");
 
-  // syntax: set!
-  // check(read_eql, "(set! x 1)", "1");
-  // check("x", "1");
-
   // syntax: define
   check(read_eql, "(define x 1)", "1");
   check(read_eql, "x", "1");
   check(read_eql, "(+ x x)", "2");
+  check(test_undef, "(define else 1)");
+  check(read_eql, "(define else_ 1)", "1");
+  check(read_eql, "else_", "1");
 
-  // keywords are not available.
-  // check(test_undef, "(set! else 1)");
-  // check(read_eql, "(set! else_ 1)", "1");
+  // syntax: set!
+  check(read_eql, "(set! x 100)", "100");
+  check(read_eql, "x", "100");
 
 
   // macro call
@@ -147,9 +150,10 @@ int main(){
 
 
   // function test (to be moved!)
-  check(print_equal, "(define fun (lambda (y) (+ y y)))", "?");
-  check(print_equal, "fun", "?");
-  check(print_equal, "(fun 2)", "?");
+  check(test_true, "(define fun (lambda (y) (set! x y) (+ y y)))", "?");
+  check(test_true, "fun", "?");
+  check(print_equal, "(fun 2)", "4");
+  check(print_equal, "x", "2");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
