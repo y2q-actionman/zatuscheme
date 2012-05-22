@@ -35,7 +35,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 auto arg_name_cell = arg_name.get<Cons*>();
-                VM.stack.push(arg_name_cell->car().get<Symbol*>(), evaled);
+                VM.push(arg_name_cell->car().get<Symbol*>(), evaled);
                 arg_name = arg_name_cell->cdr();
                 ++argc;
 
@@ -51,7 +51,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 if(argi.variadic){
-                  VM.stack.push(arg_name.get<Symbol*>(), dot_cdr);
+                  VM.push(arg_name.get<Symbol*>(), dot_cdr);
                   ++argc;
                   return true;
                 }else{
@@ -91,7 +91,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
 
   // pop args
  end:
-  VM.stack.pop(argc);
+  VM.pop(argc);
   
   return ret;
 }
@@ -196,11 +196,7 @@ Lisp_ptr eval_set(const Cons* rest){
   auto val = valp->car();
 
   // evaluating
-  if(VM.stack.find(var)){
-    VM.stack.set(var, eval(val));
-  }else if(VM.env.find(var)){
-    VM.env.set(var, eval(val));
-  }else{
+  if(!VM.local_set(var, eval(val))){
     fprintf(stderr, "eval error: set! value is not defined previously!\n");
   }
       
@@ -285,12 +281,10 @@ Lisp_ptr eval_define(const Cons* rest){
   }
 
   // assignment
-  if(VM.stack.size() == 0){
-    VM.env.set(var, value);
-  }else if(VM.stack.find(var)){
-    VM.stack.set(var, value);
-  }else{
-    VM.stack.push(var, value);
+  if(VM.size() == 0){
+    VM.global_set(var, value);
+  }else if(!VM.local_set(var, value)){
+    VM.push(var, value);
   }
 
   func_value.release();
@@ -322,10 +316,8 @@ Lisp_ptr eval(Lisp_ptr p){
       return {};
     }
 
-    if(auto rets = VM.stack.find(sym)){
-      return rets;
-    }else if(auto rete = VM.env.find(sym)){
-      return rete;
+    if(auto ret = VM.find(sym)){
+      return ret;
     }else{
       return Lisp_ptr{};
     }

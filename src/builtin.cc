@@ -10,13 +10,13 @@ namespace {
 Lisp_ptr plus_2(){
   static const int args = 3;
 
-  Lisp_ptr p1 = VM.stack.at(-args);
+  Lisp_ptr p1 = VM.at(-args);
   if(p1.tag() != Ptr_tag::number){
     return {};
   }
   Number* n1 = p1.get<Number*>();
 
-  Lisp_ptr p2 = VM.stack.at(-args+1);
+  Lisp_ptr p2 = VM.at(-args+1);
   if(p2.tag() != Ptr_tag::number){
     return {};
   }
@@ -43,7 +43,7 @@ static Entry builtin_func[] = {
 void install_builtin(){
   for(auto& e : builtin_func){
     Symbol* s = VM.symtable.intern(e.name);
-    VM.env.set(s, Lisp_ptr{&e.func});
+    VM.global_set(s, Lisp_ptr{&e.func});
   }
 }
 
