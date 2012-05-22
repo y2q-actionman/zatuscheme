@@ -21,6 +21,8 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   // push args
   int argc = 0;
 
+  VM.enter_frame();
+
   if(!do_list(args,
               [&](Cons* cell) -> bool{
                 assert(argc <= argi.required_args);
@@ -35,7 +37,8 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 auto arg_name_cell = arg_name.get<Cons*>();
-                VM.push(arg_name_cell->car().get<Symbol*>(), evaled);
+                VM.local_set(arg_name_cell->car().get<Symbol*>(), evaled);
+                VM.arg_push(evaled);
                 arg_name = arg_name_cell->cdr();
                 ++argc;
 
@@ -51,7 +54,8 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 if(argi.variadic){
-                  VM.push(arg_name.get<Symbol*>(), dot_cdr);
+                  VM.local_set(arg_name.get<Symbol*>(), dot_cdr);
+                  VM.arg_push(dot_cdr);
                   ++argc;
                   return true;
                 }else{
@@ -84,14 +88,16 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
     break;
   case Function::Type::native:
     ret = (fun->get<Function::NativeFunc>())();
+    if(!ret)
+      fprintf(stderr, "eval error: native func returned undef!\n");
     break;
   default:
     UNEXP_DEFAULT();
   }
 
-  // pop args
  end:
-  VM.pop(argc);
+  VM.arg_clear();
+  VM.leave_frame();
   
   return ret;
 }
@@ -193,10 +199,10 @@ Lisp_ptr eval_set(const Cons* rest){
     return {};
   }
 
-  auto val = valp->car();
+  auto val = eval(valp->car());
 
   // evaluating
-  if(!VM.local_set(var, eval(val))){
+  if(!VM.local_set(var, val)){
     fprintf(stderr, "eval error: set! value is not defined previously!\n");
   }
       
@@ -281,10 +287,10 @@ Lisp_ptr eval_define(const Cons* rest){
   }
 
   // assignment
-  if(VM.size() == 0){
+  if(VM.frame_depth() == 1){
     VM.global_set(var, value);
-  }else if(!VM.local_set(var, value)){
-    VM.push(var, value);
+  }else{
+    VM.local_set(var, value);
   }
 
   func_value.release();
@@ -316,11 +322,7 @@ Lisp_ptr eval(Lisp_ptr p){
       return {};
     }
 
-    if(auto ret = VM.find(sym)){
-      return ret;
-    }else{
-      return Lisp_ptr{};
-    }
+    return VM.find(sym);
   }
     
   case Ptr_tag::cons: {

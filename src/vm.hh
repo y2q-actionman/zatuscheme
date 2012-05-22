@@ -1,8 +1,8 @@
 #ifndef VM_HH
 #define VM_HH
 
+#include <vector>
 #include "env.hh"
-#include "stack.hh"
 #include "symtable.hh"
 
 class Symbol;
@@ -12,19 +12,23 @@ public:
   SymTable symtable;
 
 private:
-  Env env;
-  Stack stack;
+  std::vector<Env> frames_;
+  std::vector<Lisp_ptr> args_;
 
 public:
+  VM_t();
+
+  void enter_frame();
+  void leave_frame();
+  int frame_depth() const;
+  
   Lisp_ptr find(Symbol*) const;
   Lisp_ptr local_set(Symbol*, Lisp_ptr);
   Lisp_ptr global_set(Symbol*, Lisp_ptr);
 
-  void push(Symbol*, Lisp_ptr);
-  void pop(int);
-
-  Lisp_ptr at(int) const;
-  int size() const;
+  void arg_push(Lisp_ptr);
+  Lisp_ptr arg_get(int) const;
+  void arg_clear();
 };
 
 extern VM_t VM;

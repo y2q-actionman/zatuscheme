@@ -13,7 +13,7 @@ static bool result = true;
 
 template<typename Fun>
 void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
-  const auto start_stack_size = VM.size();
+  const auto start_stack_size = VM.frame_depth();
 
   auto expr = read_from_string(expr_s);
   if(!expr){
@@ -35,9 +35,9 @@ void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
     return;
   }
 
-  if(start_stack_size != VM.size()){
+  if(start_stack_size != VM.frame_depth()){
     printf("stack is not cleaned!!: %d -> %d (evaled: %s)\n",
-           start_stack_size, VM.size(), expr_s);
+           start_stack_size, VM.frame_depth(), expr_s);
     result = false;
     return;
   }
