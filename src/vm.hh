@@ -33,9 +33,6 @@ public:
 private:
   std::vector<Env> frames_;
   std::vector<Lisp_ptr> args_;
-
-  static Lisp_ptr env_find(const Env&, Symbol*);
-  static Lisp_ptr env_set(Env&, Symbol*, Lisp_ptr);
 };
 
 extern VM_t VM;
