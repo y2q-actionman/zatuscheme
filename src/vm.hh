@@ -1,19 +1,16 @@
 #ifndef VM_HH
 #define VM_HH
 
+#include <unordered_map>
 #include <vector>
-#include "env.hh"
+
+#include "lisp_ptr.hh"
 #include "symtable.hh"
 
 class Symbol;
 
 class VM_t {
-public:
-  SymTable symtable;
-
-private:
-  std::vector<Env> frames_;
-  std::vector<Lisp_ptr> args_;
+  typedef std::unordered_map<Symbol*, Lisp_ptr> Env;
 
 public:
   VM_t();
@@ -29,6 +26,16 @@ public:
   void arg_push(Lisp_ptr);
   Lisp_ptr arg_get(int) const;
   void arg_clear();
+
+public:
+  SymTable symtable;
+
+private:
+  std::vector<Env> frames_;
+  std::vector<Lisp_ptr> args_;
+
+  static Lisp_ptr env_find(const Env&, Symbol*);
+  static Lisp_ptr env_set(Env&, Symbol*, Lisp_ptr);
 };
 
 extern VM_t VM;

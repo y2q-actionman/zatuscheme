@@ -20,7 +20,7 @@ int VM_t::frame_depth() const{
 
 Lisp_ptr VM_t::find(Symbol* s) const{
   for(auto e = frames_.rbegin(); e != frames_.rend(); ++e){
-    if(auto p = e->find(s)){
+    if(auto p = env_find(*e, s)){
       return p;
     }
   }
@@ -30,16 +30,16 @@ Lisp_ptr VM_t::find(Symbol* s) const{
 
 Lisp_ptr VM_t::local_set(Symbol* s, Lisp_ptr p){
   for(auto e = frames_.rbegin(); e != frames_.rend(); ++e){
-    if(e->find(s)){
-      return e->set(s, p);
+    if(env_find(*e, s)){
+      return env_set(*e, s, p);
     }
   }
 
-  return frames_.back().set(s, p);
+  return env_set(frames_.back(), s, p);
 }
 
 Lisp_ptr VM_t::global_set(Symbol* s, Lisp_ptr p){
-  return frames_.front().set(s, p);
+  return env_set(frames_.front(), s, p);
 }
 
 void VM_t::arg_push(Lisp_ptr p){
@@ -52,4 +52,24 @@ Lisp_ptr VM_t::arg_get(int i) const{
 
 void VM_t::arg_clear(){
   args_.clear();
+}
+
+inline
+Lisp_ptr VM_t::env_find(const Env& e, Symbol* s){
+  auto i = e.find(s);
+  return (i != e.end()) ? i->second : Lisp_ptr{};
+}
+
+inline
+Lisp_ptr VM_t::env_set(Env& e, Symbol* s, Lisp_ptr p){
+  Lisp_ptr ret = {};
+  auto i = e.find(s);
+
+  if(i != e.end()){
+    ret = i->second;
+    e.erase(i);
+  }
+  
+  e.insert({s, p});
+  return ret;
 }

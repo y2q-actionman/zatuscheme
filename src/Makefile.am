@@ -15,9 +15,7 @@ libzs_a_SOURCES = zs.hh\
 		keyword.cc keyword.hh\
 		reader.cc reader.hh\
 		printer.cc printer.hh\
-		env.cc env.hh\
 		eval.cc eval.hh\
-		stack.cc stack.hh\
 		function.cc function.hh function.i.hh\
 		builtin.cc builtin.hh\
 		vm.cc vm.hh
