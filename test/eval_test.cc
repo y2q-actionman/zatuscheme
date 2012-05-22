@@ -2,10 +2,8 @@
 #include <cstring>
 
 #include "eval.hh"
-#include "stack.hh"
-#include "env.hh"
+#include "vm.hh"
 #include "builtin.hh"
-#include "symtable.hh"
 #include "reader.hh"
 #include "test_util.hh"
 
@@ -13,24 +11,18 @@ using namespace std;
 
 static bool result = true;
 
-namespace the {
-  static Env env;
-  static Stack stack;
-  static SymTable symtable;
-}
-
 template<typename Fun>
 void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
-  const auto start_stack_size = the::stack.size();
+  const auto start_stack_size = VM.stack.size();
 
-  auto expr = read_from_string(the::symtable, expr_s);
+  auto expr = read_from_string(expr_s);
   if(!expr){
     printf("reader error occured in expr!: %s\n", expr_s);
     result = false;
     return;
   }
 
-  auto evaled = eval(expr, the::env, the::stack);
+  auto evaled = eval(expr);
   if(!evaled && expect_s){
     printf("eval error occured: %s\n", expr_s);
     result = false;
@@ -43,16 +35,16 @@ void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
     return;
   }
 
-  if(start_stack_size != the::stack.size()){
+  if(start_stack_size != VM.stack.size()){
     printf("stack is not cleaned!!: %d -> %d (evaled: %s)\n",
-           start_stack_size, the::stack.size(), expr_s);
+           start_stack_size, VM.stack.size(), expr_s);
     result = false;
     return;
   }
 }
 
 bool read_eql(Lisp_ptr input, const char* expect_s){
-  auto expect = read_from_string(the::symtable, expect_s);
+  auto expect = read_from_string(expect_s);
   if(!expect){
     printf("reader error occured in expect!: %s\n", expect_s);
     result = false;
@@ -80,7 +72,7 @@ bool test_true(Lisp_ptr p, const char*){
 }
 
 int main(){
-  install_builtin(the::env, the::symtable);
+  install_builtin();
 
   // === self-evaluating ===
 

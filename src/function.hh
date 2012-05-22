@@ -9,7 +9,7 @@ class Stack;
 
 class Function {
 public:
-  typedef Lisp_ptr(*NativeFunc)(Env&, Stack&);
+  typedef Lisp_ptr(*NativeFunc)();
 
   enum class Type {
     interpreted,

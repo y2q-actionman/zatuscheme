@@ -2,9 +2,8 @@
 #define EVAL_HH
 
 #include "lisp_ptr.hh"
-class Env;
-class Stack;
+#include "vm.hh"
 
-Lisp_ptr eval(Lisp_ptr, Env&, Stack&);
+Lisp_ptr eval(Lisp_ptr);
 
 #endif // EVAL_HH

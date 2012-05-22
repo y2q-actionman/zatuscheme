@@ -1,26 +1,22 @@
 #include "builtin.hh"
-#include "env.hh"
-#include "stack.hh"
 #include "number.hh"
 #include "function.hh"
 #include "lisp_ptr.hh"
-#include "symtable.hh"
 
 using namespace std;
 
 namespace {
 
-Lisp_ptr plus_2(Env& e, Stack& s){
+Lisp_ptr plus_2(){
   static const int args = 3;
-  (void)e;
 
-  Lisp_ptr p1 = s.at(-args);
+  Lisp_ptr p1 = VM.stack.at(-args);
   if(p1.tag() != Ptr_tag::number){
     return {};
   }
   Number* n1 = p1.get<Number*>();
 
-  Lisp_ptr p2 = s.at(-args+1);
+  Lisp_ptr p2 = VM.stack.at(-args+1);
   if(p2.tag() != Ptr_tag::number){
     return {};
   }
@@ -44,10 +40,10 @@ static Entry builtin_func[] = {
 
 } // namespace
 
-void install_builtin(Env& env, SymTable& sym_t){
+void install_builtin(){
   for(auto& e : builtin_func){
-    Symbol* s = sym_t.intern(e.name);
-    env.set(s, Lisp_ptr{&e.func});
+    Symbol* s = VM.symtable.intern(e.name);
+    VM.env.set(s, Lisp_ptr{&e.func});
   }
 }
 

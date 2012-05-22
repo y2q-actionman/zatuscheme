@@ -6,8 +6,6 @@
 #include "keyword.hh"
 #include "symbol.hh"
 #include "cons.hh"
-#include "env.hh"
-#include "stack.hh"
 #include "function.hh"
 #include "printer.hh"
 
@@ -15,7 +13,7 @@ using namespace std;
 
 namespace {
 
-Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
+Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   const auto& argi = fun->arg_info();
   Lisp_ptr arg_name = argi.head;
   Lisp_ptr ret = {};
@@ -30,14 +28,14 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
                 if(argc == argi.required_args)
                   return false;
 
-                auto evaled = eval(cell->car(), e, s);
+                auto evaled = eval(cell->car());
                 if(!evaled){
                   fprintf(stderr, "eval error: evaluating func's arg failed!!\n");
                   return false;
                 }
 
                 auto arg_name_cell = arg_name.get<Cons*>();
-                s.push(arg_name_cell->car().get<Symbol*>(), evaled);
+                VM.stack.push(arg_name_cell->car().get<Symbol*>(), evaled);
                 arg_name = arg_name_cell->cdr();
                 ++argc;
 
@@ -53,7 +51,7 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
                 }
 
                 if(argi.variadic){
-                  s.push(arg_name.get<Symbol*>(), dot_cdr);
+                  VM.stack.push(arg_name.get<Symbol*>(), dot_cdr);
                   ++argc;
                   return true;
                 }else{
@@ -74,7 +72,7 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
   case Function::Type::interpreted:
     do_list(fun->get<Lisp_ptr>(),
             [&](Cons* cell) -> bool {
-              ret = eval(cell->car(), e, s);
+              ret = eval(cell->car());
               return true;
             },
             [&](Lisp_ptr last_cdr){
@@ -85,7 +83,7 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
             });
     break;
   case Function::Type::native:
-    ret = (fun->get<Function::NativeFunc>())(e, s);
+    ret = (fun->get<Function::NativeFunc>())();
     break;
   default:
     UNEXP_DEFAULT();
@@ -93,12 +91,12 @@ Lisp_ptr funcall(const Function* fun, Env& e, Stack& s, Lisp_ptr args){
 
   // pop args
  end:
-  s.pop(argc);
+  VM.stack.pop(argc);
   
   return ret;
 }
 
-Lisp_ptr eval_lambda(const Cons* rest, Env& e, Stack& s){
+Lisp_ptr eval_lambda(const Cons* rest){
   auto args = rest->car();
   if(rest->cdr().tag() != Ptr_tag::cons){
     fprintf(stderr, "eval error: lambda has invalid body!\n");
@@ -120,7 +118,7 @@ Lisp_ptr eval_lambda(const Cons* rest, Env& e, Stack& s){
   return Lisp_ptr{new Function(code, arg_info)};
 }
 
-Lisp_ptr eval_if(const Cons* rest, Env& e, Stack& s){
+Lisp_ptr eval_if(const Cons* rest){
   // extracting
   auto test = rest->car();
 
@@ -155,17 +153,17 @@ Lisp_ptr eval_if(const Cons* rest, Env& e, Stack& s){
   }
 
   // evaluating
-  auto test_evaled = eval(test, e, s);
+  auto test_evaled = eval(test);
   if(!test_evaled){
     return {};
   }else if(test_evaled.get<bool>()){
-    return eval(conseq, e, s);
+    return eval(conseq);
   }else{
-    return alt ? eval(alt, e, s) : Lisp_ptr{};
+    return alt ? eval(alt) : Lisp_ptr{};
   }
 }
 
-Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
+Lisp_ptr eval_set(const Cons* rest){
   // extracting
   auto var = rest->car().get<Symbol*>();
   if(!var){
@@ -198,10 +196,10 @@ Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
   auto val = valp->car();
 
   // evaluating
-  if(s.find(var)){
-    s.set(var, eval(val, e, s));
-  }else if(e.find(var)){
-    e.set(var, eval(val, e, s));
+  if(VM.stack.find(var)){
+    VM.stack.set(var, eval(val));
+  }else if(VM.env.find(var)){
+    VM.env.set(var, eval(val));
   }else{
     fprintf(stderr, "eval error: set! value is not defined previously!\n");
   }
@@ -209,7 +207,7 @@ Lisp_ptr eval_set(const Cons* rest, Env& e, Stack& s){
   return val;
 }
 
-Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
+Lisp_ptr eval_define(const Cons* rest){
   static constexpr auto test_varname = [](Symbol* var) -> bool{
     if(!var){
       fprintf(stderr, "eval error: defined variable name is not a symbol!\n");
@@ -249,7 +247,7 @@ Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
       return {};
     }
 
-    value = eval(val_l->car(), e, s);
+    value = eval(val_l->car());
   }
     break;
 
@@ -287,12 +285,12 @@ Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
   }
 
   // assignment
-  if(s.size() == 0){
-    e.set(var, value);
-  }else if(s.find(var)){
-    s.set(var, value);
+  if(VM.stack.size() == 0){
+    VM.env.set(var, value);
+  }else if(VM.stack.find(var)){
+    VM.stack.set(var, value);
   }else{
-    s.push(var, value);
+    VM.stack.push(var, value);
   }
 
   func_value.release();
@@ -301,7 +299,7 @@ Lisp_ptr eval_define(const Cons* rest, Env& e, Stack& s){
 
 } // namespace
 
-Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
+Lisp_ptr eval(Lisp_ptr p){
   if(!p){
     fprintf(stderr, "eval error: undefined value passed!!\n");
     return {};
@@ -324,9 +322,9 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
       return {};
     }
 
-    if(auto rets = s.find(sym)){
+    if(auto rets = VM.stack.find(sym)){
       return rets;
-    }else if(auto rete = e.find(sym)){
+    }else if(auto rete = VM.env.find(sym)){
       return rete;
     }else{
       return Lisp_ptr{};
@@ -356,9 +354,9 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
 
         switch(k){
         case Keyword::quote:  return r->car();
-        case Keyword::lambda: return eval_lambda(r, e, s);
-        case Keyword::if_:    return eval_if(r, e, s);
-        case Keyword::set_:   return eval_set(r, e, s);
+        case Keyword::lambda: return eval_lambda(r);
+        case Keyword::if_:    return eval_if(r);
+        case Keyword::set_:   return eval_set(r);
 
         case Keyword::cond:   return {}; // under development
         case Keyword::case_:  return {}; // under development
@@ -372,7 +370,7 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
         case Keyword::delay:  return {}; // under development
         case Keyword::quasiquote: return {}; // under development
 
-        case Keyword::define: return eval_define(r, e, s);
+        case Keyword::define: return eval_define(r);
 
         case Keyword::else_:
         case Keyword::r_arrow:
@@ -395,13 +393,13 @@ Lisp_ptr eval(Lisp_ptr p, Env& e, Stack& s){
     }
 
     // procedure call?
-    auto proc = eval(first, e, s);
+    auto proc = eval(first);
     if(proc.tag() != Ptr_tag::function){
       fprintf(stderr, "eval error: (# # ...)'s first element is not procedure!!\n");
       return {};
     }
 
-    return funcall(proc.get<Function*>(), e, s, c->cdr());
+    return funcall(proc.get<Function*>(), c->cdr());
   }
     
   default:

@@ -3,9 +3,8 @@
 
 #include <cstdio>
 #include "lisp_ptr.hh"
+#include "vm.hh"
 
-class SymTable;
-
-Lisp_ptr read(SymTable&, FILE*);
+Lisp_ptr read(FILE*);
 
 #endif // READER_HH

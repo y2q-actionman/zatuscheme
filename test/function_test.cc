@@ -4,14 +4,10 @@
 #include "function.hh"
 #include "reader.hh"
 #include "builtin.hh"
-#include "symtable.hh"
+#include "vm.hh"
 #include "test_util.hh"
 
 static bool result = true;
-
-namespace the {
-  static SymTable symtable;
-}
 
 bool operator!=(const Function::ArgInfo& a, const Function::ArgInfo& b){
   // ignores ArgInfo::head..
@@ -20,7 +16,7 @@ bool operator!=(const Function::ArgInfo& a, const Function::ArgInfo& b){
 }
 
 void check(const char* input, const Function::ArgInfo& expect){
-  auto p = read_from_string(the::symtable, input);
+  auto p = read_from_string(input);
   assert(p);
 
   auto argi = parse_func_arg(p);
@@ -37,7 +33,7 @@ void check(const char* input, const Function::ArgInfo& expect){
 }
 
 void check_uninit(const char* input){
-  auto p = read_from_string(the::symtable, input);
+  auto p = read_from_string(input);
   assert(p);
 
   auto argi = parse_func_arg(p);

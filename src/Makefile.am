@@ -19,7 +19,8 @@ libzs_a_SOURCES = zs.hh\
 		eval.cc eval.hh\
 		stack.cc stack.hh\
 		function.cc function.hh function.i.hh\
-		builtin.cc builtin.hh
+		builtin.cc builtin.hh\
+		vm.cc vm.hh
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 
 noinst_PROGRAMS = zs

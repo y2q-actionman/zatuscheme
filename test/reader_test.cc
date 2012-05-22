@@ -11,17 +11,13 @@ using namespace std;
 
 static bool result = true;
 
-namespace the {
-  static SymTable symtable;
-}
-
 void check(const char* input, const char* expect){
   const auto callback = [input, expect](const char* buf){
     fprintf(stdout, "[failed] input:%s, expected: %s\n\treturned: %s\n",
             input, expect, buf);
   };
 
-  Lisp_ptr p = read_from_string(the::symtable, input);
+  Lisp_ptr p = read_from_string(input);
 
   if(!test_on_print(p, expect, callback)){
     result = false;
@@ -29,7 +25,7 @@ void check(const char* input, const char* expect){
 }
 
 void check_undef(const char* input){
-  Lisp_ptr p = read_from_string(the::symtable, input);
+  Lisp_ptr p = read_from_string(input);
 
   if(p){
     fprintf(stdout, "[failed] input:%s, expected: (undefined)\n", input);
