@@ -6,8 +6,8 @@ VM_t::VM_t() : frames_(1), args_() {
   args_.reserve(16); // tekitou!
 }
 
-void VM_t::enter_frame(){
-  frames_.push_back({});
+void VM_t::enter_frame(const Env& e){
+  frames_.push_back(e);
 }  
 
 void VM_t::leave_frame(){

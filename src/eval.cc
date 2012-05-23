@@ -21,7 +21,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   // push args
   int argc = 0;
 
-  VM.enter_frame();
+  VM.enter_frame(fun->get_closure());
 
   if(!do_list(args,
               [&](Cons* cell) -> bool{
@@ -121,7 +121,10 @@ Lisp_ptr eval_lambda(const Cons* rest){
     return {};
   }
 
-  return Lisp_ptr{new Function(code, arg_info)};
+  auto fun = new Function(code, arg_info);
+  enclose(code, fun->get_closure());
+
+  return Lisp_ptr{fun};
 }
 
 Lisp_ptr eval_if(const Cons* rest){
@@ -277,6 +280,7 @@ Lisp_ptr eval_define(const Cons* rest){
     }
 
     func_value = unique_ptr<Function>(new Function(code, arg_info));
+    enclose(code, func_value->get_closure());
     value = Lisp_ptr(func_value.get());
   }
     break;

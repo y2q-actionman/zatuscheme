@@ -58,6 +58,9 @@ public:
   VM_t::Env& get_closure()
   { return env_; }
   
+  const VM_t::Env& get_closure() const
+  { return env_; }
+  
 private:
   const Type type_;
   const ArgInfo argi_;

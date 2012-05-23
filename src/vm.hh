@@ -15,7 +15,7 @@ public:
 
   VM_t();
 
-  void enter_frame();
+  void enter_frame(const Env&);
   void leave_frame();
   int frame_depth() const;
   
