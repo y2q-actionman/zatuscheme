@@ -6,4 +6,6 @@
 
 Lisp_ptr eval(Lisp_ptr);
 
+void enclose(Lisp_ptr, VM_t::Env&);
+
 #endif // EVAL_HH

@@ -335,14 +335,10 @@ Lisp_ptr eval(Lisp_ptr p){
       auto k = to_keyword(sym->name().c_str());
 
       if(k != Keyword::not_keyword){
-        if(c->cdr().tag() != Ptr_tag::cons){
-          fprintf(stderr, "eval error: expresssion (<KEYWORD> . #) is informal!\n");
-          return {};
-        }
-
         Cons* r = c->cdr().get<Cons*>();
         if(!r){
-          fprintf(stderr, "eval error: expresssion (<KEYWORD>) is informal!\n");
+          fprintf(stderr, "eval error: expresssion (<KEYWORD>%s) is informal!\n",
+                  (c->cdr().tag() == Ptr_tag::cons) ? "" : ". #");
           return {};
         }
 
@@ -394,6 +390,127 @@ Lisp_ptr eval(Lisp_ptr p){
     }
 
     return funcall(proc.get<Function*>(), c->cdr());
+  }
+    
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+void enclose(Lisp_ptr p, VM_t::Env& e){
+  if(!p) return;
+
+  switch(p.tag()){
+  case Ptr_tag::boolean:
+  case Ptr_tag::character:
+  case Ptr_tag::function:
+  case Ptr_tag::number:
+  case Ptr_tag::string:
+  case Ptr_tag::port:
+    return;
+
+  case Ptr_tag::symbol: {
+    auto sym = p.get<Symbol*>();
+    if(to_keyword(sym->name().c_str()) == Keyword::not_keyword){
+      auto val = VM.find(sym);
+      if(val) e.insert(make_pair(sym, val));
+    }
+
+    return;
+  }
+    
+  case Ptr_tag::vector: {
+    auto vect = p.get<Vector*>();
+    assert(vect);
+
+    for(auto i : *vect){
+      enclose(i, e);
+    }
+    return;
+  }
+
+  case Ptr_tag::cons: {
+    const auto enclose_list = [&](Lisp_ptr pp){
+      do_list(pp,
+              [&](Cons* c) -> bool {
+                enclose(c->car(), e);
+                return true;
+              },
+              [&](Lisp_ptr last){
+                enclose(last, e);
+              });
+    };
+
+    auto c = p.get<Cons*>();
+    if(!c) return;
+
+    auto first = c->car();
+
+    // special operator has local bind..
+    if(first.tag() == Ptr_tag::symbol){
+      auto sym = first.get<Symbol*>();
+      auto k = to_keyword(sym->name().c_str());
+
+      if(k != Keyword::not_keyword){
+        Cons* r = c->cdr().get<Cons*>();
+        if(!r) return;
+
+        switch(k){
+        case Keyword::quote:
+          return;
+
+        case Keyword::if_:
+        case Keyword::and_:
+        case Keyword::or_:
+        case Keyword::begin:
+        case Keyword::delay:
+        case Keyword::cond:
+        case Keyword::case_:
+        case Keyword::else_:
+          enclose_list(c->cdr());
+          return;
+
+        case Keyword::lambda:
+        case Keyword::set_:
+        case Keyword::define:
+          enclose_list(r->cdr());
+          return;
+
+        case Keyword::let:
+        case Keyword::let_star:
+        case Keyword::letrec:
+        case Keyword::do_:
+          //enclose binding list
+          do_list(r->car(),
+                  [&](Cons* cc) -> bool {
+                    enclose_list(cc->car().get<Cons*>()->cdr());
+                    return true;
+                  },
+                  [](Lisp_ptr){});
+          //enclose body
+          enclose_list(r->cdr());
+          return;
+
+        case Keyword::r_arrow: return; // only ignored?
+
+          // under development..
+        case Keyword::quasiquote:
+        case Keyword::unquote:
+        case Keyword::unquote_splicing:
+          return;
+
+        default:
+          UNEXP_DEFAULT();
+        }
+      }else{
+        // macro call?
+      }
+    }
+
+    // procedure call -- enclose all
+    enclose_list(p);
+
+    return;
   }
     
   default:

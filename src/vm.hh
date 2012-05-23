@@ -10,9 +10,9 @@
 class Symbol;
 
 class VM_t {
+public:
   typedef std::unordered_map<Symbol*, Lisp_ptr> Env;
 
-public:
   VM_t();
 
   void enter_frame();

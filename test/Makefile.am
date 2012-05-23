@@ -13,7 +13,8 @@ check_PROGRAMS = token_test\
 		printer_test\
 		reader_test\
 		eval_test\
-		function_arg_test
+		function_arg_test\
+		enclose_test
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)
