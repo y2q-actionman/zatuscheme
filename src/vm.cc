@@ -28,7 +28,7 @@ Lisp_ptr VM_t::find(Symbol* s) const{
   return {};
 }
 
-Lisp_ptr VM_t::local_set(Symbol* s, Lisp_ptr p){
+Lisp_ptr VM_t::set(Symbol* s, Lisp_ptr p){
   for(auto e = frames_.rbegin(); e != frames_.rend(); ++e){
     auto ei = e->find(s);
     if(ei != e->end()){
@@ -40,20 +40,6 @@ Lisp_ptr VM_t::local_set(Symbol* s, Lisp_ptr p){
   }
 
   frames_.back().insert({s, p});
-  return {};
-}
-
-Lisp_ptr VM_t::global_set(Symbol* s, Lisp_ptr p){
-  auto& ev = frames_.front();
-
-  auto i = ev.find(s);
-  if(i != ev.end()){
-    auto ret = i->second;
-    ev.erase(i);
-    return ret;
-  }
-  
-  ev.insert({s, p});
   return {};
 }
 

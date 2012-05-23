@@ -37,7 +37,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 auto arg_name_cell = arg_name.get<Cons*>();
-                VM.local_set(arg_name_cell->car().get<Symbol*>(), evaled);
+                VM.set(arg_name_cell->car().get<Symbol*>(), evaled);
                 VM.arg_push(evaled);
                 arg_name = arg_name_cell->cdr();
                 ++argc;
@@ -54,7 +54,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 if(argi.variadic){
-                  VM.local_set(arg_name.get<Symbol*>(), dot_cdr);
+                  VM.set(arg_name.get<Symbol*>(), dot_cdr);
                   VM.arg_push(dot_cdr);
                   ++argc;
                   return true;
@@ -205,7 +205,7 @@ Lisp_ptr eval_set(const Cons* rest){
   auto val = eval(valp->car());
 
   // evaluating
-  if(!VM.local_set(var, val)){
+  if(!VM.set(var, val)){
     fprintf(stderr, "eval error: set! value is not defined previously!\n");
   }
       
@@ -291,11 +291,7 @@ Lisp_ptr eval_define(const Cons* rest){
   }
 
   // assignment
-  if(VM.frame_depth() == 1){
-    VM.global_set(var, value);
-  }else{
-    VM.local_set(var, value);
-  }
+  VM.set(var, value);
 
   func_value.release();
   return value;

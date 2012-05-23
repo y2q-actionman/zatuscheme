@@ -43,7 +43,7 @@ static Entry builtin_func[] = {
 void install_builtin(){
   for(auto& e : builtin_func){
     Symbol* s = VM.symtable.intern(e.name);
-    VM.global_set(s, Lisp_ptr{&e.func});
+    VM.set(s, Lisp_ptr{&e.func});
   }
 }
 

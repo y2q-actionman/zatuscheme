@@ -20,8 +20,7 @@ public:
   int frame_depth() const;
   
   Lisp_ptr find(Symbol*) const;
-  Lisp_ptr local_set(Symbol*, Lisp_ptr);
-  Lisp_ptr global_set(Symbol*, Lisp_ptr);
+  Lisp_ptr set(Symbol*, Lisp_ptr);
 
   void arg_push(Lisp_ptr);
   Lisp_ptr arg_get(int) const;
