@@ -22,6 +22,8 @@ const char* stringify(Ptr_tag p){
     return "vector";
   case Ptr_tag::port:
     return "port";
+  case Ptr_tag::env:
+    return "env";
   default:
     return "(unknown PTR type)";
   }
@@ -30,4 +32,3 @@ const char* stringify(Ptr_tag p){
 void describe(FILE* f, Lisp_ptr p){
   fprintf(f, "[%s] %p", stringify(p.tag()), p.get<void*>());
 }
-

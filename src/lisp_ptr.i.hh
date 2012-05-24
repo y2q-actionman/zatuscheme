@@ -38,6 +38,9 @@ Vector* to_type<Ptr_tag::vector>() = delete;
 template<>
 Port* to_type<Ptr_tag::port>() = delete;
 
+template<>
+Env* to_type<Ptr_tag::env>() = delete;
+
 
 template<>
 inline constexpr
@@ -91,6 +94,12 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, Port*>(){
   return Ptr_tag::port;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, Env*>(){
+  return Ptr_tag::env;
 }
 
 

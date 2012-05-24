@@ -21,7 +21,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   // push args
   int argc = 0;
 
-  VM.enter_frame(fun->closure() ? fun->closure() : new VM_t::Env());
+  VM.enter_frame(fun->closure() ? fun->closure() : new Env());
 
   if(!do_list(args,
               [&](Cons* cell) -> bool{
@@ -121,8 +121,8 @@ Lisp_ptr eval_lambda(const Cons* rest){
     return {};
   }
 
-  auto fun = new Function(code, arg_info, new VM_t::Env());
-  enclose(code, *fun->closure());
+  auto fun = new Function(code, arg_info, new Env());
+  enclose(code, fun->closure());
 
   return Lisp_ptr{fun};
 }
@@ -279,8 +279,8 @@ Lisp_ptr eval_define(const Cons* rest){
       return {};
     }
 
-    func_value = unique_ptr<Function>(new Function(code, arg_info, new VM_t::Env()));
-    enclose(code, *func_value->closure());
+    func_value = unique_ptr<Function>(new Function(code, arg_info, new Env()));
+    enclose(code, func_value->closure());
     value = Lisp_ptr(func_value.get());
   }
     break;
@@ -397,7 +397,7 @@ Lisp_ptr eval(Lisp_ptr p){
   }
 }
 
-void enclose(Lisp_ptr p, VM_t::Env& e){
+void enclose(Lisp_ptr p, Env* e){
   if(!p) return;
 
   switch(p.tag()){
@@ -413,7 +413,7 @@ void enclose(Lisp_ptr p, VM_t::Env& e){
     auto sym = p.get<Symbol*>();
     if(to_keyword(sym->name().c_str()) == Keyword::not_keyword){
       auto val = VM.find(sym);
-      if(val) e.insert(make_pair(sym, val));
+      if(val) e->insert(make_pair(sym, val));
     }
 
     return;

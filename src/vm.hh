@@ -1,7 +1,6 @@
 #ifndef VM_HH
 #define VM_HH
 
-#include <unordered_map>
 #include <vector>
 
 #include "lisp_ptr.hh"
@@ -11,8 +10,6 @@ class Symbol;
 
 class VM_t {
 public:
-  typedef std::unordered_map<Symbol*, Lisp_ptr> Env;
-
   VM_t();
 
   void enter_frame(Env*);

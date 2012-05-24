@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <unordered_map>
 
 enum class Ptr_tag {
   undefined = -1,
@@ -15,7 +16,8 @@ enum class Ptr_tag {
     number,
     string,
     vector,
-    port
+    port,
+    env
     };
     
 
@@ -65,6 +67,8 @@ class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
 typedef FILE Port;
+typedef std::unordered_map<Symbol*, Lisp_ptr> Env;
+
 
 const char* stringify(Ptr_tag);
 
