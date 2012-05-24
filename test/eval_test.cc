@@ -13,8 +13,6 @@ static bool result = true;
 
 template<typename Fun>
 void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
-  const auto start_stack_size = VM.frame_depth();
-
   auto expr = read_from_string(expr_s);
   if(!expr){
     printf("reader error occured in expr!: %s\n", expr_s);
@@ -31,13 +29,6 @@ void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
 
   if(!fun(evaled, expect_s)){
     printf("not matched!: %s vs %s\n", expr_s, expect_s);
-    result = false;
-    return;
-  }
-
-  if(start_stack_size != VM.frame_depth()){
-    printf("stack is not cleaned!!: %d -> %d (evaled: %s)\n",
-           start_stack_size, VM.frame_depth(), expr_s);
     result = false;
     return;
   }

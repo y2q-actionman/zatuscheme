@@ -4,7 +4,6 @@
 VM_t VM;
 
 VM_t::VM_t() : frames_(new Cons(Lisp_ptr(new Env()), Cons::NIL)),
-               frame_depth_(1),
                args_() {
   args_.reserve(16); // tekitou!
 }

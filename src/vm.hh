@@ -15,9 +15,6 @@ public:
   void enter_frame(Env*);
   void leave_frame();
 
-  int frame_depth() const
-  { return frame_depth_; }
-
   Lisp_ptr frame_head() const
   { return frames_; }
   
@@ -33,7 +30,6 @@ public:
 
 private:
   Lisp_ptr frames_;
-  int frame_depth_;
   std::vector<Lisp_ptr> args_;
 };
 
