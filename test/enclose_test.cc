@@ -44,6 +44,8 @@ void check(const char* input, const char* expect){
 
 
 int main(){
+  install_builtin();
+
   // testing simple closure
   eval_text("(define x 1)");
   eval_text("(define (hoge) x)");
@@ -66,6 +68,8 @@ int main(){
   check("(fun123)", "123");
   check("(fun256)", "256");
        
+  eval_text("(define (fun2 x) (+ x 1))");
+  check("(fun2 100)", "101");
 
   // testing defined variables
 

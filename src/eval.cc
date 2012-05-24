@@ -15,14 +15,22 @@ namespace {
 
 Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   const auto& argi = fun->arg_info();
+  const auto env = fun->closure();
+
+  const auto set_arg = [&](Symbol* sym, Lisp_ptr p){
+    if(env){
+      VM.local_set(sym, p);
+    }else{
+      VM.arg_push(p);
+    }
+  };
+      
+
   Lisp_ptr arg_name = argi.head;
   Lisp_ptr ret = {};
 
-  
-  if(auto env = fun->closure()){
+  if(env){
     VM.enter_frame(push_frame(env));
-  }else{
-    VM.enter_frame(push_frame(VM.frame()));
   }
 
   // push args
@@ -42,8 +50,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 auto arg_name_cell = arg_name.get<Cons*>();
-                VM.local_set(arg_name_cell->car().get<Symbol*>(), evaled);
-                VM.arg_push(evaled);
+                set_arg(arg_name_cell->car().get<Symbol*>(), evaled);
                 arg_name = arg_name_cell->cdr();
                 ++argc;
 
@@ -59,8 +66,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 if(argi.variadic){
-                  VM.local_set(arg_name.get<Symbol*>(), dot_cdr);
-                  VM.arg_push(dot_cdr);
+                  set_arg(arg_name.get<Symbol*>(), dot_cdr);
                   ++argc;
                   return true;
                 }else{
@@ -101,9 +107,12 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   }
 
  end:
-  VM.arg_clear();
-  VM.leave_frame();
-  
+  if(env){
+    VM.leave_frame();
+  }else{
+    VM.arg_clear();
+  }
+
   return ret;
 }
 
@@ -387,7 +396,8 @@ Lisp_ptr eval(Lisp_ptr p){
     // procedure call?
     auto proc = eval(first);
     if(proc.tag() != Ptr_tag::function){
-      fprintf(stderr, "eval error: (# # ...)'s first element is not procedure!!\n");
+      fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
+              stringify(proc.tag()));
       return {};
     }
 
