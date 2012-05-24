@@ -35,11 +35,10 @@ private:
   std::vector<Lisp_ptr> args_;
 };
 
-inline
-Lisp_ptr push_frame(Lisp_ptr l){
-  return Lisp_ptr(new Cons(Lisp_ptr(new Env), l));
-}
+Lisp_ptr push_frame(Lisp_ptr);
 
 extern VM_t VM;
+
+#include "vm.i.hh"
 
 #endif //VM_HH

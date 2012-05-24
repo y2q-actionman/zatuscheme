@@ -8,16 +8,6 @@ VM_t::VM_t() : frame_(new Cons(Lisp_ptr(new Env()), Cons::NIL)),
   args_.reserve(16); // tekitou!
 }
 
-void VM_t::enter_frame(Lisp_ptr p){
-  frame_history_.push_back(frame_);
-  frame_ = p;
-}  
-
-void VM_t::leave_frame(){
-  frame_ = frame_history_.back();
-  frame_history_.pop_back();
-}  
-
 Lisp_ptr VM_t::find(Symbol* s) const{
   Lisp_ptr ret;
 
@@ -59,14 +49,6 @@ void VM_t::set(Symbol* s, Lisp_ptr p){
   }
 }
 
-void VM_t::arg_push(Lisp_ptr p){
-  args_.push_back(p);
-}
-
-Lisp_ptr VM_t::arg_get(int i) const{
-  return args_.at(i);
-}
-
-void VM_t::arg_clear(){
-  args_.clear();
+Lisp_ptr push_frame(Lisp_ptr l){
+  return Lisp_ptr(new Cons(Lisp_ptr(new Env), l));
 }
