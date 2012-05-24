@@ -14,10 +14,15 @@ public:
 
   void enter_frame(Env*);
   void leave_frame();
-  int frame_depth() const;
+
+  int frame_depth() const
+  { return frame_depth_; }
+
+  Lisp_ptr frame_head() const
+  { return frames_; }
   
   Lisp_ptr find(Symbol*) const;
-  Lisp_ptr set(Symbol*, Lisp_ptr);
+  void set(Symbol*, Lisp_ptr);
 
   void arg_push(Lisp_ptr);
   Lisp_ptr arg_get(int) const;
@@ -27,7 +32,8 @@ public:
   SymTable symtable;
 
 private:
-  std::vector<Env*> frames_;
+  Lisp_ptr frames_;
+  int frame_depth_;
   std::vector<Lisp_ptr> args_;
 };
 

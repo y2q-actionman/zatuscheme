@@ -205,9 +205,8 @@ Lisp_ptr eval_set(const Cons* rest){
   auto val = eval(valp->car());
 
   // evaluating
-  if(!VM.set(var, val)){
-    fprintf(stderr, "eval error: set! value is not defined previously!\n");
-  }
+  //   fprintf(stderr, "eval error: set! value is not defined previously!\n");
+  VM.set(var, val);
       
   return val;
 }
