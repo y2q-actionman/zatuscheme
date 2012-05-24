@@ -15,7 +15,7 @@ public:
 
   VM_t();
 
-  void enter_frame(const Env&);
+  void enter_frame(Env*);
   void leave_frame();
   int frame_depth() const;
   
@@ -30,7 +30,7 @@ public:
   SymTable symtable;
 
 private:
-  std::vector<Env> frames_;
+  std::vector<Env*> frames_;
   std::vector<Lisp_ptr> args_;
 };
 

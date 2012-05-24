@@ -21,7 +21,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   // push args
   int argc = 0;
 
-  VM.enter_frame(fun->closure() ? *fun->closure() : VM_t::Env());
+  VM.enter_frame(fun->closure() ? fun->closure() : new VM_t::Env());
 
   if(!do_list(args,
               [&](Cons* cell) -> bool{

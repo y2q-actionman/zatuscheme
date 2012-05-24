@@ -2,11 +2,12 @@
 
 VM_t VM;
 
-VM_t::VM_t() : frames_(1), args_() {
+VM_t::VM_t() : frames_(), args_() {
+  frames_.push_back(new Env());
   args_.reserve(16); // tekitou!
 }
 
-void VM_t::enter_frame(const Env& e){
+void VM_t::enter_frame(Env* e){
   frames_.push_back(e);
 }  
 
@@ -20,8 +21,8 @@ int VM_t::frame_depth() const{
 
 Lisp_ptr VM_t::find(Symbol* s) const{
   for(auto e = frames_.rbegin(); e != frames_.rend(); ++e){
-    auto ei = e->find(s);
-    if(ei != e->end())
+    auto ei = (*e)->find(s);
+    if(ei != (*e)->end())
       return ei->second;
   }
 
@@ -30,16 +31,16 @@ Lisp_ptr VM_t::find(Symbol* s) const{
 
 Lisp_ptr VM_t::set(Symbol* s, Lisp_ptr p){
   for(auto e = frames_.rbegin(); e != frames_.rend(); ++e){
-    auto ei = e->find(s);
-    if(ei != e->end()){
+    auto ei = (*e)->find(s);
+    if(ei != (*e)->end()){
       auto ret = ei->second;
-      e->erase(ei);
-      e->insert({s, p});
+      (*e)->erase(ei);
+      (*e)->insert({s, p});
       return ret;
     }
   }
 
-  frames_.back().insert({s, p});
+  frames_.back()->insert({s, p});
   return {};
 }
 
