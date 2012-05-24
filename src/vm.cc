@@ -43,10 +43,12 @@ void VM_t::set(Symbol* s, Lisp_ptr p){
           },
           [](Lisp_ptr){});
 
-  if(!found){
-    auto front = frame_.get<Cons*>()->car().get<Env*>();
-    front->insert({s, p});
-  }
+  if(!found) local_set(s, p);
+}
+
+void VM_t::local_set(Symbol* s, Lisp_ptr p){
+  auto front = frame_.get<Cons*>()->car().get<Env*>();
+  front->insert({s, p});
 }
 
 Lisp_ptr push_frame(Lisp_ptr l){

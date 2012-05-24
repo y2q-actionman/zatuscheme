@@ -34,7 +34,7 @@ bool test_on_print(Lisp_ptr input, const char* expect, const Fun& callback){
     }
   }
 
-  if(strncmp(expect, buf, strlen(expect)) != 0){
+  if(strcmp(expect, buf) != 0){
     callback(buf);
     goto end;
   }

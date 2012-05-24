@@ -21,6 +21,7 @@ public:
   
   Lisp_ptr find(Symbol*) const;
   void set(Symbol*, Lisp_ptr);
+  void local_set(Symbol*, Lisp_ptr);
 
   void arg_push(Lisp_ptr);
   Lisp_ptr arg_get(int) const;

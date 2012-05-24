@@ -42,7 +42,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 auto arg_name_cell = arg_name.get<Cons*>();
-                VM.set(arg_name_cell->car().get<Symbol*>(), evaled);
+                VM.local_set(arg_name_cell->car().get<Symbol*>(), evaled);
                 VM.arg_push(evaled);
                 arg_name = arg_name_cell->cdr();
                 ++argc;
@@ -59,7 +59,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 }
 
                 if(argi.variadic){
-                  VM.set(arg_name.get<Symbol*>(), dot_cdr);
+                  VM.local_set(arg_name.get<Symbol*>(), dot_cdr);
                   VM.arg_push(dot_cdr);
                   ++argc;
                   return true;

@@ -134,6 +134,10 @@ int main(){
   check(test_true, "fun");
   check(print_equal, "(fun 2)", "4");
   check(print_equal, "x", "2");
+    
+  check(test_true, "(define (fun2 x) (+ 1 x))");
+  check(print_equal, "(fun2 100)", "101");
+
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
