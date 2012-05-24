@@ -2,7 +2,6 @@
 #define FUNCTION_HH
 
 #include "lisp_ptr.hh"
-#include "vm.hh"
 #include <cstdio>
 
 class Function {
@@ -29,10 +28,10 @@ public:
     }
   };
 
-  explicit Function(Lisp_ptr code, const ArgInfo& a, Env* e)
+  explicit Function(Lisp_ptr code, const ArgInfo& a, Lisp_ptr e)
     : type_(Type::interpreted), argi_(a), code_(code), env_(e){}
   explicit constexpr Function(NativeFunc f, const ArgInfo& a)
-    : type_(Type::native), argi_(a), n_func_(f), env_(nullptr){}
+    : type_(Type::native), argi_(a), n_func_(f), env_(){}
 
   Function(const Function&) = default;
   Function(Function&&) = default;
@@ -52,7 +51,7 @@ public:
   template<typename T>
   T get() const;
 
-  Env* closure() const
+  Lisp_ptr closure() const
   { return env_; }
   
 private:
@@ -62,7 +61,7 @@ private:
     Lisp_ptr code_;
     NativeFunc n_func_;
   };
-  Env* env_;
+  Lisp_ptr env_;
 };
 
 Function::ArgInfo parse_func_arg(Lisp_ptr);
