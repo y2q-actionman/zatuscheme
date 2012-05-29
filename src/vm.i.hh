@@ -7,14 +7,14 @@
 
 inline
 void VM_t::enter_frame(Lisp_ptr p){
-  frame_history_.push_back(frame_);
+  frame_history_.push(frame_);
   frame_ = p;
 }  
 
 inline
 void VM_t::leave_frame(){
-  frame_ = frame_history_.back();
-  frame_history_.pop_back();
+  frame_ = frame_history_.top();
+  frame_history_.pop();
 }  
 
 inline

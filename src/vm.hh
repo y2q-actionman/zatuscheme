@@ -2,6 +2,7 @@
 #define VM_HH
 
 #include <vector>
+#include <stack>
 
 #include "lisp_ptr.hh"
 #include "cons.hh"
@@ -32,7 +33,7 @@ public:
 
 private:
   Lisp_ptr frame_;
-  std::vector<Lisp_ptr> frame_history_;
+  std::stack<Lisp_ptr, std::vector<Lisp_ptr>> frame_history_;
   std::vector<Lisp_ptr> args_;
 };
 
