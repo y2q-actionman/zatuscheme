@@ -325,22 +325,9 @@ Lisp_ptr eval_define(const Cons* rest){
 
 Lisp_ptr eval(){
   auto p = VM.code().top();
-  if(!p){
-    fprintf(stderr, "eval error: undefined value passed!!\n");
-    return {};
-  }
   VM.code().pop();
 
   switch(p.tag()){
-  case Ptr_tag::boolean:
-  case Ptr_tag::character:
-  case Ptr_tag::function:
-  case Ptr_tag::number:
-  case Ptr_tag::string:
-  case Ptr_tag::vector:
-  case Ptr_tag::port:
-    return p; // self-evaluating
-
   case Ptr_tag::symbol: {
     auto sym = p.get<Symbol*>();
     if(to_keyword(sym->name().c_str()) != Keyword::not_keyword){
@@ -428,7 +415,10 @@ Lisp_ptr eval(){
       UNEXP_DEFAULT();
     }
     
-  default:
-    UNEXP_DEFAULT();
+  default: // almost self-evaluating
+    if(!p){
+      fprintf(stderr, "eval error: undefined value passed!!\n");
+    }
+    return p;
   }
 }
