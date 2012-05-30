@@ -32,6 +32,11 @@ template<typename MainFun, typename LastFun>
 auto do_list(Lisp_ptr p, MainFun&&, LastFun&& lf)
   -> decltype(lf(p));
 
+template<typename... Fun>
+void bind_cons_list(Lisp_ptr, Fun&&...);
+
+inline void bind_cons_list(Lisp_ptr);
+
 void free_cons_list(Lisp_ptr);
 
 #include "cons.i.hh"

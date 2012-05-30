@@ -146,8 +146,9 @@ Lisp_ptr eval_lambda(const Cons* rest){
   return Lisp_ptr{fun};
 }
 
-Lisp_ptr eval_if(const Cons* rest){
+Lisp_ptr eval_if(Cons* rest){
   // extracting
+#if 0
   auto test = rest->car();
 
   if(rest->cdr().tag() != Ptr_tag::cons){
@@ -179,6 +180,28 @@ Lisp_ptr eval_if(const Cons* rest){
       return {};
     }
   }
+#endif
+
+  bool flag = true;
+  Lisp_ptr test, conseq, alt;
+
+  bind_cons_list(Lisp_ptr(rest),
+                 [&](Lisp_ptr p){
+                   if(!p) flag = false;
+                   test = p;
+                 },
+                 [&](Lisp_ptr p){
+                   if(!p) flag = false;
+                   conseq = p;
+                 },
+                 [&](Lisp_ptr p){
+                   flag = true;
+                   alt = p;
+                 },
+                 [&](Lisp_ptr){
+                   flag = false;
+                 });
+  if(!flag) return {};
 
   // evaluating
   VM.code().push(test);

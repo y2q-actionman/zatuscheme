@@ -58,5 +58,16 @@ auto do_list(Lisp_ptr lis, MainFun&& m_fun, LastFun&& l_fun)
   return l_fun(p);
 }
 
+template<typename Fun1, typename... FunRest>
+void bind_cons_list(Lisp_ptr p, Fun1&& f, FunRest&&... fr){
+  auto c = p.get<Cons*>();
+
+  f(c->car());
+  
+  if(nullp(c->cdr())) return;
+  return bind_cons_list(c->cdr(), fr...);
+}
+
+inline void bind_cons_list(Lisp_ptr){}
 
 #endif // CONS_I_HH
