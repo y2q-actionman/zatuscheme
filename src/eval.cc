@@ -11,6 +11,10 @@
 
 using namespace std;
 
+enum class VM_op : int{
+  nop = 0
+};
+
 namespace {
 
 Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
@@ -415,6 +419,14 @@ Lisp_ptr eval(){
 
     return funcall(proc.get<Function*>(), c->cdr());
   }
+
+  case Ptr_tag::vm_op:
+    switch(p.get<VM_op>()){
+    case VM_op::nop:
+      break;
+    default:
+      UNEXP_DEFAULT();
+    }
     
   default:
     UNEXP_DEFAULT();

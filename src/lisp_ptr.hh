@@ -17,7 +17,8 @@ enum class Ptr_tag {
     string,
     vector,
     port,
-    env
+    env,
+    vm_op
     };
     
 
@@ -48,10 +49,12 @@ private:
     constexpr lisp_ptr_u(void* p) : ptr_(p){}
     constexpr lisp_ptr_u(bool b) : b_(b){}
     constexpr lisp_ptr_u(char c) : c_(c){}
+    constexpr lisp_ptr_u(int i) : i_(i){}
 
     void* ptr_;
     bool b_;
     char c_;
+    int i_;
   };
 
   Ptr_tag tag_;
@@ -68,6 +71,7 @@ typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
 typedef FILE Port;
 typedef std::unordered_map<Symbol*, Lisp_ptr> Env;
+enum class VM_op;
 
 
 const char* stringify(Ptr_tag);

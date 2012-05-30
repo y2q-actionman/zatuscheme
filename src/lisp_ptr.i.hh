@@ -41,6 +41,9 @@ Port* to_type<Ptr_tag::port>() = delete;
 template<>
 Env* to_type<Ptr_tag::env>() = delete;
 
+template<>
+VM_op to_type<Ptr_tag::vm_op>() = delete;
+
 
 template<>
 inline constexpr
@@ -102,6 +105,12 @@ Ptr_tag to_tag<Ptr_tag, Env*>(){
   return Ptr_tag::env;
 }
 
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, VM_op>(){
+  return Ptr_tag::vm_op;
+}
+
 
 // ptr class definitions
 
@@ -114,6 +123,11 @@ template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<char>(char c)
 : tag_(to_tag<Ptr_tag, char>()), u_(c){}
+
+template<>
+inline constexpr
+Lisp_ptr::Lisp_ptr<VM_op>(VM_op o)
+: tag_(to_tag<Ptr_tag, VM_op>()), u_(static_cast<int>(o)){}
 
 template<>
 inline constexpr
@@ -139,6 +153,14 @@ inline
 char Lisp_ptr::get<char>() const {
   return (tag() == to_tag<Ptr_tag, char>())
     ? u_.c_ : '\0';
+}
+
+template<>
+inline
+VM_op Lisp_ptr::get<VM_op>() const {
+  return static_cast<VM_op>
+    (tag() == to_tag<Ptr_tag, VM_op>()
+     ? u_.i_ : 0);
 }
 
 template<>
