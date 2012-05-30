@@ -17,20 +17,4 @@ void VM_t::leave_frame(){
   frame_history_.pop();
 }  
 
-inline
-void VM_t::arg_push(Lisp_ptr p){
-  args_.push_back(p);
-}
-
-inline
-Lisp_ptr VM_t::arg_get(int i) const{
-  return args_.at(i);
-}
-
-inline
-void VM_t::arg_clear(){
-  args_.clear();
-}
-
-
 #endif // VM_I_HH

@@ -8,16 +8,23 @@ using namespace std;
 namespace {
 
 Lisp_ptr plus_2(){
-  Lisp_ptr p1 = VM.arg_get(0);
+  Lisp_ptr p3 = VM.stack().top();
+  VM.stack().pop();
+  Lisp_ptr p2 = VM.stack().top();
+  VM.stack().pop();
+  Lisp_ptr p1 = VM.stack().top();
+  VM.stack().pop();
+
   if(p1.tag() != Ptr_tag::number){
-    fprintf(stderr, "native func '+': first arg is not number!\n");
+    fprintf(stderr, "native func '+': first arg is not number! %s\n",
+            stringify(p1.tag()));
     return {};
   }
   Number* n1 = p1.get<Number*>();
 
-  Lisp_ptr p2 = VM.arg_get(1);
   if(p2.tag() != Ptr_tag::number){
-    fprintf(stderr, "native func '+': second arg is not number!\n");
+    fprintf(stderr, "native func '+': second arg is not number! %s\n",
+            stringify(p1.tag()));
     return {};
   }
   Number* n2 = p2.get<Number*>();

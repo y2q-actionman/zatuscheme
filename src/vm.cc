@@ -2,11 +2,9 @@
 
 VM_t VM;
 
-VM_t::VM_t() : frame_(new Cons(Lisp_ptr(new Env()), Cons::NIL)),
-               frame_history_(),
-               args_() {
-  args_.reserve(16); // tekitou!
-}
+VM_t::VM_t() : codes_(), stack_(),
+               frame_(new Cons(Lisp_ptr(new Env()), Cons::NIL)),
+               frame_history_(){}
 
 Lisp_ptr VM_t::find(Symbol* s) const{
   Lisp_ptr ret;

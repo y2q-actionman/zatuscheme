@@ -19,6 +19,9 @@ public:
   stack_t& code()
   { return codes_; }
 
+  stack_t& stack()
+  { return stack_; }
+
   void enter_frame(Lisp_ptr);
   void leave_frame();
 
@@ -29,18 +32,14 @@ public:
   void set(Symbol*, Lisp_ptr);
   void local_set(Symbol*, Lisp_ptr);
 
-  void arg_push(Lisp_ptr);
-  Lisp_ptr arg_get(int) const;
-  void arg_clear();
-
 public:
   SymTable symtable;
 
 private:
   stack_t codes_;
+  stack_t stack_;
   Lisp_ptr frame_;
   stack_t frame_history_;
-  std::vector<Lisp_ptr> args_;
 };
 
 Lisp_ptr push_frame(Lisp_ptr);

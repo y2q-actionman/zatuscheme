@@ -25,7 +25,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
     if(env){
       VM.local_set(sym, p);
     }else{
-      VM.arg_push(p);
+      VM.stack().push(p);
     }
   };
       
@@ -116,7 +116,7 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   if(env){
     VM.leave_frame();
   }else{
-    VM.arg_clear();
+    // cleaned by native func
   }
 
   return ret;
