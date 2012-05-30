@@ -20,7 +20,8 @@ void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
     return;
   }
 
-  auto evaled = eval(expr);
+  VM.code().push(expr);
+  auto evaled = eval();
   if(!evaled && expect_s){
     printf("eval error occured: %s\n", expr_s);
     result = false;

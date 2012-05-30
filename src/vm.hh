@@ -11,8 +11,13 @@
 class Symbol;
 
 class VM_t {
+  typedef std::stack<Lisp_ptr, std::vector<Lisp_ptr>> stack_t;
+
 public:
   VM_t();
+
+  stack_t& code()
+  { return codes_; }
 
   void enter_frame(Lisp_ptr);
   void leave_frame();
@@ -32,8 +37,9 @@ public:
   SymTable symtable;
 
 private:
+  stack_t codes_;
   Lisp_ptr frame_;
-  std::stack<Lisp_ptr, std::vector<Lisp_ptr>> frame_history_;
+  stack_t frame_history_;
   std::vector<Lisp_ptr> args_;
 };
 

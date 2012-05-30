@@ -43,7 +43,8 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
                 if(argc == argi.required_args)
                   return false;
 
-                auto evaled = eval(cell->car());
+                VM.code().push(cell->car());
+                auto evaled = eval();
                 if(!evaled){
                   fprintf(stderr, "eval error: evaluating func's arg failed!!\n");
                   return false;
@@ -87,7 +88,8 @@ Lisp_ptr funcall(const Function* fun, Lisp_ptr args){
   case Function::Type::interpreted:
     do_list(fun->get<Lisp_ptr>(),
             [&](Cons* cell) -> bool {
-              ret = eval(cell->car());
+              VM.code().push(cell->car());
+              ret = eval();
               return true;
             },
             [&](Lisp_ptr last_cdr){
@@ -175,13 +177,18 @@ Lisp_ptr eval_if(const Cons* rest){
   }
 
   // evaluating
-  auto test_evaled = eval(test);
+  VM.code().push(test);
+  auto test_evaled = eval();
   if(!test_evaled){
     return {};
   }else if(test_evaled.get<bool>()){
-    return eval(conseq);
+    VM.code().push(conseq);
+    return eval();
+  }else if(alt){
+    VM.code().push(alt);
+    return eval();
   }else{
-    return alt ? eval(alt) : Lisp_ptr{};
+    return {};
   }
 }
 
@@ -215,7 +222,8 @@ Lisp_ptr eval_set(const Cons* rest){
     return {};
   }
 
-  auto val = eval(valp->car());
+  VM.code().push(valp->car());
+  auto val = eval();
 
   // evaluating
   //   fprintf(stderr, "eval error: set! value is not defined previously!\n");
@@ -264,7 +272,8 @@ Lisp_ptr eval_define(const Cons* rest){
       return {};
     }
 
-    value = eval(val_l->car());
+    VM.code().push(val_l->car());
+    value = eval();
   }
     break;
 
@@ -310,11 +319,13 @@ Lisp_ptr eval_define(const Cons* rest){
 
 } // namespace
 
-Lisp_ptr eval(Lisp_ptr p){
+Lisp_ptr eval(){
+  auto p = VM.code().top();
   if(!p){
     fprintf(stderr, "eval error: undefined value passed!!\n");
     return {};
   }
+  VM.code().pop();
 
   switch(p.tag()){
   case Ptr_tag::boolean:
@@ -394,7 +405,8 @@ Lisp_ptr eval(Lisp_ptr p){
     }
 
     // procedure call?
-    auto proc = eval(first);
+    VM.code().push(first);
+    auto proc = eval();
     if(proc.tag() != Ptr_tag::function){
       fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
               stringify(proc.tag()));

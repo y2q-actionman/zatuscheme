@@ -16,7 +16,8 @@ Lisp_ptr eval_text(const char* s){
     return {};
   }
 
-  auto ret = eval(exp);
+  VM.code().push(exp);
+  auto ret = eval();
   if(!ret){
     printf("[failed] eval error on %s\n", s);
     result = false;
