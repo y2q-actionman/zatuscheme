@@ -148,60 +148,30 @@ Lisp_ptr eval_lambda(const Cons* rest){
 
 Lisp_ptr eval_if(Cons* rest){
   // extracting
-#if 0
-  auto test = rest->car();
-
-  if(rest->cdr().tag() != Ptr_tag::cons){
-    fprintf(stderr, "eval error: if has invalid conseq!\n");
-    return {};
-  }
-
-  auto conseq_l = rest->cdr().get<Cons*>();
-  if(!conseq_l){
-    fprintf(stderr, "eval error: if has no conseq!\n");
-    return {};
-  }
-
-  auto conseq = conseq_l->car();
-
-  if(conseq_l->cdr().tag() != Ptr_tag::cons){
-    fprintf(stderr, "eval error: if has invalid alt!\n");
-    return {};
-  }
-
-  auto alt = Lisp_ptr{};
-
-  if(auto alt_l = conseq_l->cdr().get<Cons*>()){
-    alt = alt_l->car();
-
-    if(alt_l->cdr().tag() != Ptr_tag::cons
-       || alt_l->cdr().get<Cons*>()){
-      fprintf(stderr, "eval error: if has extra alts!\n");
-      return {};
-    }
-  }
-#endif
-
-  bool flag = true;
   Lisp_ptr test, conseq, alt;
 
+  int len =
   bind_cons_list(Lisp_ptr(rest),
-                 [&](Lisp_ptr p){
-                   if(!p) flag = false;
-                   test = p;
+                 [&](Cons* c){
+                   test = c->car();
                  },
-                 [&](Lisp_ptr p){
-                   if(!p) flag = false;
-                   conseq = p;
+                 [&](Cons* c){
+                   conseq = c->car();
                  },
-                 [&](Lisp_ptr p){
-                   flag = true;
-                   alt = p;
-                 },
-                 [&](Lisp_ptr){
-                   flag = false;
+                 [&](Cons* c){
+                   alt = c->car();
                  });
-  if(!flag) return {};
+
+  switch(len){
+  case 1:
+    fprintf(stderr, "eval error: informal if expr! (no test expr)\n");
+    return {};
+  case 2: case 3: // successed
+    break;
+  default:
+    fprintf(stderr, "eval error: informal if expr! (more than %d exprs)\n", len);
+    return {};
+  }
 
   // evaluating
   VM.code().push(test);
