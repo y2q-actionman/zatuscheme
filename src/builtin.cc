@@ -1,3 +1,5 @@
+#include <array>
+
 #include "builtin.hh"
 #include "number.hh"
 #include "function.hh"
@@ -7,27 +9,35 @@ using namespace std;
 
 namespace {
 
+template<int i>
+array<Lisp_ptr, i> pick_args(){
+  auto ret = array<Lisp_ptr, i>();
+
+  for(auto it = ret.rbegin(); it != ret.rend(); ++it){
+    *it = VM.stack().top();
+    VM.stack().pop();
+  }
+
+  return ret;
+}
+
+
 Lisp_ptr plus_2(){
-  Lisp_ptr p3 = VM.stack().top();
-  VM.stack().pop();
-  Lisp_ptr p2 = VM.stack().top();
-  VM.stack().pop();
-  Lisp_ptr p1 = VM.stack().top();
-  VM.stack().pop();
+  auto args = pick_args<3>();
 
-  if(p1.tag() != Ptr_tag::number){
+  Number* n1 = args[0].get<Number*>();
+  if(!n1){
     fprintf(stderr, "native func '+': first arg is not number! %s\n",
-            stringify(p1.tag()));
+            stringify(args[0].tag()));
     return {};
   }
-  Number* n1 = p1.get<Number*>();
 
-  if(p2.tag() != Ptr_tag::number){
+  Number* n2 = args[1].get<Number*>();
+  if(!n2){
     fprintf(stderr, "native func '+': second arg is not number! %s\n",
-            stringify(p1.tag()));
+            stringify(args[1].tag()));
     return {};
   }
-  Number* n2 = p2.get<Number*>();
 
   Number* newn = new Number(n1->get<long>() + n2->get<long>());
   return Lisp_ptr(newn);
