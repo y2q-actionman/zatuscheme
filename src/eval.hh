@@ -4,6 +4,6 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 
-Lisp_ptr eval();
+void eval();
 
 #endif // EVAL_HH

@@ -6,7 +6,7 @@
 
 class Function {
 public:
-  typedef Lisp_ptr(*NativeFunc)();
+  typedef void(*NativeFunc)();
 
   enum class Type {
     interpreted,

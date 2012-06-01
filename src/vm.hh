@@ -22,6 +22,9 @@ public:
   stack_t& stack()
   { return stack_; }
 
+  Lisp_ptr& return_value()
+  { return return_value_; }
+
   void enter_frame(Lisp_ptr);
   void leave_frame();
 
@@ -38,6 +41,7 @@ public:
 private:
   stack_t codes_;
   stack_t stack_;
+  Lisp_ptr return_value_;
   Lisp_ptr frame_;
   stack_t frame_history_;
 };

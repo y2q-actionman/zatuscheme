@@ -22,25 +22,26 @@ array<Lisp_ptr, i> pick_args(){
 }
 
 
-Lisp_ptr plus_2(){
+void plus_2(){
   auto args = pick_args<3>();
+  VM.return_value() = {};
 
   Number* n1 = args[0].get<Number*>();
   if(!n1){
     fprintf(stderr, "native func '+': first arg is not number! %s\n",
             stringify(args[0].tag()));
-    return {};
+    return;
   }
 
   Number* n2 = args[1].get<Number*>();
   if(!n2){
     fprintf(stderr, "native func '+': second arg is not number! %s\n",
             stringify(args[1].tag()));
-    return {};
+    return;
   }
 
   Number* newn = new Number(n1->get<long>() + n2->get<long>());
-  return Lisp_ptr(newn);
+  VM.return_value() = Lisp_ptr(newn);
 }
 
 
