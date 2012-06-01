@@ -198,42 +198,45 @@ void eval_if(Cons* rest){
   }
 }
 
-void eval_set(const Cons* rest){
+void eval_set(Cons* rest){
   VM.return_value() = {};
 
   // extracting
-  auto var = rest->car().get<Symbol*>();
+  Symbol* var = nullptr;
+  Lisp_ptr val;
+
+  int len =
+    bind_cons_list(Lisp_ptr(rest),
+                   [&](Cons* c){
+                     var = c->car().get<Symbol*>();
+                   },
+                   [&](Cons* c){
+                     val = c->car();
+                   });
+
   if(!var){
     fprintf(stderr, "eval error: set!'s first element is not symbol!\n");
     return;
   }
+
   if(to_keyword(var->name().c_str()) != Keyword::not_keyword){
     fprintf(stderr, "eval error: set!'s first element is Keyword (%s)!\n",
             var->name().c_str());
     return;
   }
 
-  if(rest->cdr().tag() != Ptr_tag::cons){
-    fprintf(stderr, "eval error: set!'s value form is informal!\n");
+  if(!val){
+    fprintf(stderr, "eval error: no value is supplied for set!\n");
     return;
   }
 
-  auto valp = rest->cdr().get<Cons*>();
-  if(!valp){
-    fprintf(stderr, "eval error: set! has no value!\n");
-    return;
-  }
-
-  if(valp->cdr().tag() != Ptr_tag::cons
-     || valp->cdr().get<Cons*>()){
-    fprintf(stderr, "eval error: set! has extra forms!\n");
+  if(len > 2){
+    fprintf(stderr, "eval error: informal set! expr! (more than %d exprs)\n", len);
     return;
   }
 
   // evaluating
-  //   fprintf(stderr, "eval error: set! value is not defined previously!\n");
-
-  VM.code().push(valp->car());
+  VM.code().push(val);
   eval();
   VM.set(var, VM.return_value());
   return;
