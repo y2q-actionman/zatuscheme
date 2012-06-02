@@ -6,12 +6,9 @@
 #endif
 
 inline
-Symbol::Symbol(const std::string* s)
-  : name_(s){}
-
-inline
 void Symbol::rebind(const std::string* s){
   name_ = s;
+  k_ = (s) ? ::to_keyword(s->c_str()) : Keyword::not_keyword;
 }
 
 #endif // SYMBOL_I_HH

@@ -219,7 +219,7 @@ void eval_set(Cons* rest){
     return;
   }
 
-  if(to_keyword(var->name().c_str()) != Keyword::not_keyword){
+  if(var->to_keyword() != Keyword::not_keyword){
     fprintf(stderr, "eval error: set!'s first element is Keyword (%s)!\n",
             var->name().c_str());
     return;
@@ -249,7 +249,7 @@ void eval_define(const Cons* rest){
       return false;
     }
 
-    if(to_keyword(var->name().c_str()) != Keyword::not_keyword){
+    if(var->to_keyword() != Keyword::not_keyword){
       fprintf(stderr, "eval error: define's first element is Keyword (%s)!\n",
               var->name().c_str());
       return false;
@@ -342,7 +342,7 @@ void eval(){
   switch(p.tag()){
   case Ptr_tag::symbol: {
     auto sym = p.get<Symbol*>();
-    if(to_keyword(sym->name().c_str()) != Keyword::not_keyword){
+    if(sym->to_keyword() != Keyword::not_keyword){
       fprintf(stderr, "eval error: symbol '%s' is keyword!!\n", sym->name().c_str());
       return;
     }
@@ -358,7 +358,7 @@ void eval(){
     // special operator?
     if(first.tag() == Ptr_tag::symbol){
       auto sym = first.get<Symbol*>();
-      auto k = to_keyword(sym->name().c_str());
+      auto k = sym->to_keyword();
 
       if(k != Keyword::not_keyword){
         Cons* r = c->cdr().get<Cons*>();

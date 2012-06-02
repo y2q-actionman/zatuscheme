@@ -52,6 +52,8 @@ const char* stringify(Keyword k){
 }
 
 Keyword to_keyword(const char* s){
+  if(!s) return Keyword::not_keyword;
+
   switch(s[0]){
   case '=':
     if(strcmp(s+1, ">") == 0)
