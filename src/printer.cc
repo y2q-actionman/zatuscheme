@@ -90,6 +90,10 @@ void print(FILE* f, Lisp_ptr p){
     fprintf(f, "<port %p>", static_cast<void*>(p.get<Port*>()));
     break;
 
+  case Ptr_tag::vm_op:
+    fprintf(f, "<VM operation %d>", static_cast<int>(p.get<VM_op>()));
+    break;
+    
   default:
     UNEXP_DEFAULT();
   }

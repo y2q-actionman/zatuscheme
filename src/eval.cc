@@ -12,7 +12,8 @@
 using namespace std;
 
 enum class VM_op : int{
-  nop = 0
+  nop = 0,
+    if_
 };
 
 namespace {
@@ -179,22 +180,24 @@ void eval_if(Cons* rest){
   }
 
   // evaluating
+  VM.code().push(Lisp_ptr(VM_op::if_));
   VM.code().push(test);
-  eval();
-  auto test_evaled = VM.return_value();
-  if(!test_evaled){
-    return;
-  }else if(test_evaled.get<bool>()){
-    VM.code().push(conseq);
-    eval();
-    return;
-  }else if(alt){
-    VM.code().push(alt);
-    eval();
-    return;
+
+  VM.stack().push(alt);
+  VM.stack().push(conseq);
+}
+
+void vm_op_if(){
+  auto test_result = VM.return_value();
+
+  if(test_result.get<bool>()){
+    VM.code().push(VM.stack().top());
+    VM.stack().pop();
+    VM.stack().pop();
   }else{
-    VM.return_value() = {};
-    return;
+    VM.stack().pop();
+    VM.code().push(VM.stack().top());
+    VM.stack().pop();
   }
 }
 
@@ -334,110 +337,116 @@ void eval_define(const Cons* rest){
 } // namespace
 
 void eval(){
-  VM.return_value() = {};
+  while(!VM.code().empty()){
+    auto p = VM.code().top();
+    VM.code().pop();
 
-  auto p = VM.code().top();
-  VM.code().pop();
-
-  switch(p.tag()){
-  case Ptr_tag::symbol: {
-    auto sym = p.get<Symbol*>();
-    if(sym->to_keyword() != Keyword::not_keyword){
-      fprintf(stderr, "eval error: symbol '%s' is keyword!!\n", sym->name().c_str());
-      return;
-    }
-    
-    VM.return_value() = VM.find(sym);
-    return;
-  }
-    
-  case Ptr_tag::cons: {
-    auto c = p.get<Cons*>();
-    auto first = c->car();
-
-    // special operator?
-    if(first.tag() == Ptr_tag::symbol){
-      auto sym = first.get<Symbol*>();
-      auto k = sym->to_keyword();
-
-      if(k != Keyword::not_keyword){
-        Cons* r = c->cdr().get<Cons*>();
-        if(!r){
-          fprintf(stderr, "eval error: expresssion (<KEYWORD>%s) is informal!\n",
-                  (c->cdr().tag() == Ptr_tag::cons) ? "" : ". #");
-          return;
-        }
-
-        switch(k){
-        case Keyword::quote:  VM.return_value() = r->car(); return;
-        case Keyword::lambda: eval_lambda(r); return;
-        case Keyword::if_:    eval_if(r); return;
-        case Keyword::set_:   eval_set(r); return;
-        case Keyword::define: eval_define(r); return;
-
-        case Keyword::cond:
-        case Keyword::case_:
-        case Keyword::and_:
-        case Keyword::or_:
-        case Keyword::let:
-        case Keyword::let_star:
-        case Keyword::letrec:
-        case Keyword::begin:
-        case Keyword::do_:
-        case Keyword::delay:
-        case Keyword::quasiquote:
-          fprintf(stderr, "eval error: '%s' is under development...\n",
-                  sym->name().c_str());
-          return;
-
-        case Keyword::else_:
-        case Keyword::r_arrow:
-        case Keyword::unquote:
-        case Keyword::unquote_splicing:
-          fprintf(stderr, "eval error: '%s' cannot be used as operator!!\n",
-                  sym->name().c_str());
-          return;
-
-        default:
-          UNEXP_DEFAULT();
-        }
-      }else{
-        // macro call?
-        //  try to find macro-function from symbol
-        //    found -> macro expansion
-        //    not found -> goto function calling
-        ;
+    switch(p.tag()){
+    case Ptr_tag::symbol: {
+      auto sym = p.get<Symbol*>();
+      if(sym->to_keyword() != Keyword::not_keyword){
+        fprintf(stderr, "eval error: symbol '%s' is keyword!!\n", sym->name().c_str());
+        VM.return_value() = {};
+        break;
       }
-    }
-
-    // procedure call?
-    VM.code().push(first);
-    eval();
-    auto proc = VM.return_value();
-    if(proc.tag() != Ptr_tag::function){
-      fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
-              stringify(proc.tag()));
-      return;
-    }
-
-    funcall(proc.get<Function*>(), c->cdr());
-    return;
-  }
-
-  case Ptr_tag::vm_op:
-    switch(p.get<VM_op>()){
-    case VM_op::nop:
-      break;
-    default:
-      UNEXP_DEFAULT();
-    }
-    return;
     
-  default: // almost self-evaluating
-    if(!p){
-      fprintf(stderr, "eval error: undefined value passed!!\n");
+      VM.return_value() = VM.find(sym);
+      break;
     }
-    VM.return_value() = p;
-    return;
+    
+    case Ptr_tag::cons: {
+      auto c = p.get<Cons*>();
+      auto first = c->car();
+
+      // special operator?
+      if(first.tag() == Ptr_tag::symbol){
+        auto sym = first.get<Symbol*>();
+        auto k = sym->to_keyword();
+
+        if(k != Keyword::not_keyword){
+          Cons* r = c->cdr().get<Cons*>();
+          if(!r){
+            fprintf(stderr, "eval error: expresssion (<KEYWORD>%s) is informal!\n",
+                    (c->cdr().tag() == Ptr_tag::cons) ? "" : ". #");
+            VM.return_value() = {};
+            break;
+          }
+
+          switch(k){
+          case Keyword::quote:  VM.return_value() = r->car(); break;
+          case Keyword::lambda: eval_lambda(r); break;
+          case Keyword::if_:    eval_if(r); break;
+          case Keyword::set_:   eval_set(r); break;
+          case Keyword::define: eval_define(r); break;
+
+          case Keyword::cond:
+          case Keyword::case_:
+          case Keyword::and_:
+          case Keyword::or_:
+          case Keyword::let:
+          case Keyword::let_star:
+          case Keyword::letrec:
+          case Keyword::begin:
+          case Keyword::do_:
+          case Keyword::delay:
+          case Keyword::quasiquote:
+            fprintf(stderr, "eval error: '%s' is under development...\n",
+                    sym->name().c_str());
+            VM.return_value() = {};
+            break;
+
+          case Keyword::else_:
+          case Keyword::r_arrow:
+          case Keyword::unquote:
+          case Keyword::unquote_splicing:
+            fprintf(stderr, "eval error: '%s' cannot be used as operator!!\n",
+                    sym->name().c_str());
+            VM.return_value() = {};
+            break;
+
+          default:
+            UNEXP_DEFAULT();
+          }
+          break;
+        }else{
+          // macro call?
+          //  try to find macro-function from symbol
+          //    found -> macro expansion
+          //    not found -> goto function calling
+          ;
+        }
+      }
+
+      // procedure call?
+      VM.code().push(first);
+      eval();
+      auto proc = VM.return_value();
+      if(proc.tag() != Ptr_tag::function){
+        fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
+                stringify(proc.tag()));
+        VM.return_value() = {};
+        break;
+      }
+
+      funcall(proc.get<Function*>(), c->cdr());
+      break;
+    }
+
+    case Ptr_tag::vm_op:
+      switch(p.get<VM_op>()){
+      case VM_op::nop:
+        break;
+      case VM_op::if_:
+        vm_op_if();
+        break;
+      default:
+        UNEXP_DEFAULT();
+      }
+      break;
+    
+    default: // almost self-evaluating
+      VM.return_value() = p;
+      break;
+    }
   }
 }
