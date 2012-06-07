@@ -43,6 +43,32 @@ Symbol* to_varname(Lisp_ptr p){
   return var;
 }
 
+void eval_begin(Lisp_ptr p){
+  // set up lambda body code
+  stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
+  
+  if(!do_list(p,
+              [&](Cons* c) -> bool {
+                tmp.push(c->car());
+                return true;
+              },
+              [&](Lisp_ptr last_cdr) -> bool{
+                if(!nullp(last_cdr)){
+                  fprintf(stderr, "eval error: body has dot list!\n");
+                  return false;
+                }
+                return true;
+              })){
+    VM.return_value() = {};
+    return;
+  }
+
+  while(!tmp.empty()){
+    VM.code().push(tmp.top());
+    tmp.pop();
+  }
+}
+
 void vm_op_funcall(){
   auto proc = VM.return_value();
   auto args = VM.stack().top();
@@ -204,36 +230,17 @@ void vm_op_interpreted_call(){
   VM.stack().pop();
   
   // set up lambda body code
-  stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
-  
-  if(!do_list(fun->get<Lisp_ptr>(),
-              [&](Cons* c) -> bool {
-                tmp.push(c->car());
-                return true;
-              },
-              [&](Lisp_ptr last_cdr) -> bool{
-                if(!nullp(last_cdr)){
-                  fprintf(stderr, "eval error: body has dot list!\n");
-                  return false;
-                }
-                return true;
-              })){
-    VM.return_value() = {};
-    return;
-  }
-
-  while(!tmp.empty()){
-    VM.code().push(tmp.top());
-    tmp.pop();
-  }
+  eval_begin(fun->get<Lisp_ptr>());
 }
 
 void vm_op_leave_frame(){
   VM.leave_frame();
 }  
 
-void eval_lambda(const Cons* rest){
+void eval_lambda(Lisp_ptr p){
   VM.return_value() = {};
+
+  Cons* rest = p.get<Cons*>();
 
   auto args = rest->car();
   if(rest->cdr().tag() != Ptr_tag::cons){
@@ -259,14 +266,14 @@ void eval_lambda(const Cons* rest){
   return;
 }
 
-void eval_if(Cons* rest){
+void eval_if(Lisp_ptr p){
   VM.return_value() = {};
 
   // extracting
   Lisp_ptr test, conseq, alt;
 
   int len =
-  bind_cons_list(Lisp_ptr(rest),
+  bind_cons_list(p,
                  [&](Cons* c){
                    test = c->car();
                  },
@@ -310,7 +317,7 @@ void vm_op_if(){
   }
 }
 
-void eval_set(Cons* rest){
+void eval_set(Lisp_ptr p){
   VM.return_value() = {};
 
   // extracting
@@ -318,7 +325,7 @@ void eval_set(Cons* rest){
   Lisp_ptr val;
 
   int len =
-    bind_cons_list(Lisp_ptr(rest),
+    bind_cons_list(p,
                    [&](Cons* c){
                      var = to_varname(c->car());
                    },
@@ -355,8 +362,10 @@ void vm_op_set(){
   VM.set(var, VM.return_value());
 }
 
-void eval_define(const Cons* rest){
+void eval_define(Lisp_ptr p){
   VM.return_value() = {};
+
+  Cons* rest = p.get<Cons*>();
 
   // extracting
   auto first = rest->car();
@@ -447,20 +456,21 @@ void eval(){
         auto k = sym->to_keyword();
 
         if(k != Keyword::not_keyword){
-          Cons* r = c->cdr().get<Cons*>();
-          if(!r){
+          Lisp_ptr r = c->cdr();
+          if(!r.get<Cons*>()){
             fprintf(stderr, "eval error: expresssion (<KEYWORD>%s) is informal!\n",
-                    (c->cdr().tag() == Ptr_tag::cons) ? "" : ". #");
+                    (r.tag() == Ptr_tag::cons) ? "" : ". #");
             VM.return_value() = {};
             break;
           }
 
           switch(k){
-          case Keyword::quote:  VM.return_value() = r->car(); break;
+          case Keyword::quote:  VM.return_value() = r.get<Cons*>()->car(); break;
           case Keyword::lambda: eval_lambda(r); break;
           case Keyword::if_:    eval_if(r); break;
           case Keyword::set_:   eval_set(r); break;
           case Keyword::define: eval_define(r); break;
+          case Keyword::begin:  eval_begin(r); break;
 
           case Keyword::cond:
           case Keyword::case_:
@@ -469,7 +479,6 @@ void eval(){
           case Keyword::let:
           case Keyword::let_star:
           case Keyword::letrec:
-          case Keyword::begin:
           case Keyword::do_:
           case Keyword::delay:
           case Keyword::quasiquote:
