@@ -151,6 +151,7 @@ void vm_op_interpreted_call(){
   Lisp_ptr arg_name = argi.head;
   Lisp_ptr st_top;
 
+  // normal arg push
   while((st_top = VM.stack().top()).get<VM_op>() != VM_op::arg_bottom){
     VM.stack().pop();
     if(VM.stack().empty()){
@@ -160,17 +161,46 @@ void vm_op_interpreted_call(){
     }
 
     auto arg_name_cell = arg_name.get<Cons*>();
-    if(arg_name_cell){
-      VM.local_set(arg_name_cell->car().get<Symbol*>(), st_top);
-      arg_name = arg_name_cell->cdr();
-    }else{
-      fprintf(stderr, "eval internal error: variadic call is under construction!\n");
-      // variadic func's end
+    if(!arg_name_cell){
       break;
     }
+   
+    VM.local_set(arg_name_cell->car().get<Symbol*>(), st_top);
+    arg_name = arg_name_cell->cdr();
   }
 
-  assert(VM.stack().top().get<VM_op>() == VM_op::arg_bottom);
+  // variadic arg push
+  if(argi.variadic){
+    if(!arg_name.get<Symbol*>()){
+      fprintf(stderr, "eval error: no arg name for variadic arg!\n");
+      VM.return_value() = {};
+      return;
+    }
+
+    Cons* head = new Cons;
+    Cons* c = head;
+
+    while(!VM.stack().empty()
+          && (st_top = VM.stack().top()).get<VM_op>() != VM_op::arg_bottom){
+      VM.stack().pop();
+    
+      c->rplaca(st_top);
+      Cons* cc = new Cons;
+      c->rplacd(Lisp_ptr(cc));
+      c = cc;
+    }
+
+    c->rplaca(Cons::NIL);
+    VM.local_set(arg_name.get<Symbol*>(), Lisp_ptr(head));
+  }
+
+  // clean stack
+  if(VM.stack().empty()
+     || VM.stack().top().get<VM_op>() != VM_op::arg_bottom){
+    fprintf(stderr, "eval error: corrupted stack -- no bottom found!\n");
+    VM.return_value() = {};
+    return;
+  }
   VM.stack().pop();
   
   // set up lambda body code
