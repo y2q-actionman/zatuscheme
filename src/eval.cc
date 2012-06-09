@@ -13,7 +13,8 @@ using namespace std;
 
 enum class VM_op : int{
   nop = 0,
-    if_
+    if_,
+    set_
 };
 
 namespace {
@@ -239,10 +240,20 @@ void eval_set(Cons* rest){
   }
 
   // evaluating
+  VM.code().push(Lisp_ptr{VM_op::set_});
   VM.code().push(val);
-  eval();
+  VM.stack().push(Lisp_ptr{var});
+}
+
+void vm_op_set(){
+  auto var = VM.stack().top().get<Symbol*>();
+  VM.stack().pop();
+  if(!var){
+    fprintf(stderr, "eval error: internal error occured (set!'s varname is dismissed)\n");
+    return;
+  }
+
   VM.set(var, VM.return_value());
-  return;
 }
 
 void eval_define(const Cons* rest){
@@ -438,6 +449,9 @@ void eval(){
         break;
       case VM_op::if_:
         vm_op_if();
+        break;
+      case VM_op::set_:
+        vm_op_set();
         break;
       default:
         UNEXP_DEFAULT();
