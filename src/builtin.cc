@@ -18,12 +18,15 @@ array<Lisp_ptr, i> pick_args(){
     VM.stack().pop();
   }
 
+  VM.stack().pop(); // kill arg_bottom
+
   return ret;
 }
 
 
 void plus_2(){
-  auto args = pick_args<3>();
+  auto args = pick_args<2>();
+
   VM.return_value() = {};
 
   Number* n1 = args[0].get<Number*>();

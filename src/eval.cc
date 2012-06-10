@@ -14,7 +14,12 @@ using namespace std;
 enum class VM_op : int{
   nop = 0,
     if_,
-    set_
+    set_,
+    funcall,
+    arg_push,
+    arg_bottom,
+    interpreted_call,
+    native_call,
 };
 
 namespace {
@@ -35,111 +40,153 @@ Symbol* to_varname(Lisp_ptr p){
   }
 
   return var;
-};
+}
 
-void funcall(const Function* fun, Lisp_ptr args){
-  const auto& argi = fun->arg_info();
-  const auto env = fun->closure();
+void vm_op_funcall(){
+  auto proc = VM.return_value();
+  auto args = VM.stack().top();
+  VM.stack().pop();
 
-  const auto set_arg = [&](Symbol* sym, Lisp_ptr p){
-    if(env){
-      VM.local_set(sym, p);
-    }else{
-      VM.stack().push(p);
-    }
-  };
-      
-
-  Lisp_ptr arg_name = argi.head;
-
-  VM.return_value() = {};
-
-  if(env){
-    VM.enter_frame(push_frame(env));
+  if(proc.tag() != Ptr_tag::function){
+    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
+            stringify(proc.tag()));
+    VM.return_value() = {};
+    return;
   }
+  auto fun = proc.get<Function*>();
 
-  // push args
-  int argc = 0;
 
-  if(!do_list(args,
-              [&](Cons* cell) -> bool{
-                assert(argc <= argi.required_args);
+  VM_op call_op = VM_op::nop;
 
-                if(argc == argi.required_args)
-                  return false;
-
-                VM.code().push(cell->car());
-                eval();
-                auto evaled = VM.return_value();
-                if(!evaled){
-                  fprintf(stderr, "eval error: evaluating func's arg failed!!\n");
-                  return false;
-                }
-
-                auto arg_name_cell = arg_name.get<Cons*>();
-                set_arg(arg_name_cell->car().get<Symbol*>(), evaled);
-                arg_name = arg_name_cell->cdr();
-                ++argc;
-
-                return true;
-              },
-              [&](Lisp_ptr dot_cdr) -> bool{
-                assert(argc <= argi.required_args);
-
-                if(argc < argi.required_args){
-                  fprintf(stderr, "eval error: internal argument counter mismatched!! (read %d args)\n",
-                          argc);
-                  return false;
-                }
-
-                if(argi.variadic){
-                  set_arg(arg_name.get<Symbol*>(), dot_cdr);
-                  ++argc;
-                  return true;
-                }else{
-                  if(!nullp(dot_cdr)){
-                    fprintf(stderr, "funcall error: argcount mismatch! (more than required %d)\n",
-                            argi.required_args);
-                    return false;
-                  }
-              
-                  return true;
-                }
-              })){
-    goto end;
-  }
-
-  // real call
   switch(fun->type()){
   case Function::Type::interpreted:
-    do_list(fun->get<Lisp_ptr>(),
-            [&](Cons* cell) -> bool {
-              VM.code().push(cell->car());
-              eval();
-              return true;
-            },
-            [&](Lisp_ptr last_cdr){
-              if(!nullp(last_cdr)){
-                fprintf(stderr, "eval error: body has dot list!\n");
-                VM.return_value() = {};
-              }
-            });
+    call_op = VM_op::interpreted_call;
     break;
   case Function::Type::native:
-    fun->get<Function::NativeFunc>()();
-    if(!VM.return_value())
-      fprintf(stderr, "eval error: native func returned undef!\n");
+    call_op = VM_op::native_call;
     break;
   default:
     UNEXP_DEFAULT();
   }
 
- end:
-  if(env){
-    VM.leave_frame();
-  }else{
-    // cleaned by native func
+  VM.code().push(Lisp_ptr(proc));
+  VM.code().push(Lisp_ptr(call_op));
+
+  const auto& argi = fun->arg_info();
+  int argc = 0;
+
+  if(!do_list(args,
+              [&](Cons* cell) -> bool{
+                VM.code().push(Lisp_ptr(VM_op::arg_push));
+                VM.code().push(cell->car());
+                ++argc;
+
+                return true;
+              },
+              [&](Lisp_ptr dot_cdr) -> bool{
+                if(!nullp(dot_cdr)){
+                  fprintf(stderr, "funcall error: arg-list is dot-list!\n");
+                  return false;
+                }
+              
+                if((argc < argi.required_args)
+                   || (argi.variadic && argc > argi.required_args)){
+                  fprintf(stderr, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
+                          argi.required_args,
+                          (argi.variadic) ? "variadic" : "not variadic",
+                          argc);
+                  return false;
+                }
+
+                return true;
+              })){
+    for(int i = 0; i < argc*2 + 2; ++i){
+      VM.code().pop();
+    }
+    VM.stack().pop();
+    VM.return_value() = {};
+    return;
   }
+  
+  VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
+}
+
+void vm_op_arg_push(){
+  VM.stack().push(VM.return_value());
+}
+
+void vm_op_native_call(){
+  auto proc = VM.code().top();
+  VM.code().pop();
+  auto fun = proc.get<Function*>();
+
+  if(fun->type() != Function::Type::native){
+    fprintf(stderr, "eval internal error: native call routine called for not native func\n");
+    VM.return_value() = {};
+    return;
+  }
+
+  fun->get<Function::NativeFunc>()();
+  if(!VM.return_value())
+    fprintf(stderr, "eval error: native func returned undef!\n");
+}
+
+void vm_op_interpreted_call(){
+  auto proc = VM.code().top();
+  VM.code().pop();
+  auto fun = proc.get<Function*>();
+
+  if(fun->type() != Function::Type::interpreted){
+    fprintf(stderr, "eval internal error: interpreted call routine called for not interpreted func\n");
+    VM.return_value() = {};
+    return;
+  }
+
+  assert(!VM.stack().empty());
+
+  const auto& argi = fun->arg_info();
+
+  VM.enter_frame(push_frame(fun->closure()));
+
+  Lisp_ptr arg_name = argi.head;
+  Lisp_ptr st_top;
+
+  while((st_top = VM.stack().top()).get<VM_op>() != VM_op::arg_bottom){
+    VM.stack().pop();
+    if(VM.stack().empty()){
+      fprintf(stderr, "eval internal error: no args and no managed funcall!\n");
+      VM.return_value() = {};
+      return;
+    }
+
+    auto arg_name_cell = arg_name.get<Cons*>();
+    if(arg_name_cell){
+      VM.local_set(arg_name_cell->car().get<Symbol*>(), st_top);
+      arg_name = arg_name_cell->cdr();
+    }else{
+      // variadic func's end
+      break;
+    }
+  }
+
+  assert(VM.stack().top().get<VM_op>() == VM_op::arg_bottom);
+  VM.stack().pop();
+  
+  // real call
+  do_list(fun->get<Lisp_ptr>(),
+          [&](Cons* cell) -> bool {
+            VM.code().push(cell->car());
+            eval();
+            return true;
+          },
+          [&](Lisp_ptr last_cdr){
+            if(!nullp(last_cdr)){
+              fprintf(stderr, "eval error: body has dot list!\n");
+              VM.return_value() = {};
+            }
+          });
+
+  VM.leave_frame();
 }
 
 void eval_lambda(const Cons* rest){
@@ -287,11 +334,11 @@ void eval_define(const Cons* rest){
       return;
     }
 
-    //VM.code().push(Lisp_ptr{VM_op::set_});
+    VM.code().push(Lisp_ptr{VM_op::set_});
     VM.code().push(val_l->car());
     VM.stack().push(Lisp_ptr(var));
-    eval();
-    vm_op_set();
+    // eval();
+    // vm_op_set();
     return;
   }
 
@@ -413,17 +460,9 @@ void eval(){
       }
 
       // procedure call?
+      VM.code().push(Lisp_ptr(VM_op::funcall));
       VM.code().push(first);
-      eval();
-      auto proc = VM.return_value();
-      if(proc.tag() != Ptr_tag::function){
-        fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
-                stringify(proc.tag()));
-        VM.return_value() = {};
-        break;
-      }
-
-      funcall(proc.get<Function*>(), c->cdr());
+      VM.stack().push(c->cdr());
       break;
     }
 
@@ -436,6 +475,18 @@ void eval(){
         break;
       case VM_op::set_:
         vm_op_set();
+        break;
+      case VM_op::funcall:
+        vm_op_funcall();
+        break;
+      case VM_op::arg_push:
+        vm_op_arg_push();
+        break;
+      case VM_op::interpreted_call:
+        vm_op_interpreted_call();
+        break;
+      case VM_op::native_call:
+        vm_op_native_call();
         break;
       default:
         UNEXP_DEFAULT();
