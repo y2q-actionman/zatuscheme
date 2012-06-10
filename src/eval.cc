@@ -287,13 +287,11 @@ void eval_define(const Cons* rest){
       return;
     }
 
+    //VM.code().push(Lisp_ptr{VM_op::set_});
     VM.code().push(val_l->car());
+    VM.stack().push(Lisp_ptr(var));
     eval();
-    auto value = VM.return_value();
-
-    VM.set(var, value);
-
-    VM.return_value() = value;
+    vm_op_set();
     return;
   }
 
