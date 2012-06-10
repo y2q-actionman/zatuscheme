@@ -19,6 +19,24 @@ enum class VM_op : int{
 
 namespace {
 
+inline
+Symbol* to_varname(Lisp_ptr p){
+  Symbol* var = p.get<Symbol*>();
+
+  if(!var){
+    fprintf(stderr, "eval error: variable's name is not a symbol!\n");
+    return nullptr;
+  }
+
+  if(var->to_keyword() != Keyword::not_keyword){
+    fprintf(stderr, "eval error: variable's name is Keyword (%s)!\n",
+            var->name().c_str());
+    return nullptr;
+  }
+
+  return var;
+};
+
 void funcall(const Function* fun, Lisp_ptr args){
   const auto& argi = fun->arg_info();
   const auto env = fun->closure();
@@ -212,22 +230,13 @@ void eval_set(Cons* rest){
   int len =
     bind_cons_list(Lisp_ptr(rest),
                    [&](Cons* c){
-                     var = c->car().get<Symbol*>();
+                     var = to_varname(c->car());
                    },
                    [&](Cons* c){
                      val = c->car();
                    });
 
-  if(!var){
-    fprintf(stderr, "eval error: set!'s first element is not symbol!\n");
-    return;
-  }
-
-  if(var->to_keyword() != Keyword::not_keyword){
-    fprintf(stderr, "eval error: set!'s first element is Keyword (%s)!\n",
-            var->name().c_str());
-    return;
-  }
+  if(!var) return;
 
   if(!val){
     fprintf(stderr, "eval error: no value is supplied for set!\n");
@@ -257,25 +266,6 @@ void vm_op_set(){
 }
 
 void eval_define(const Cons* rest){
-  static constexpr auto test_varname = [](Symbol* var) -> bool{
-    if(!var){
-      fprintf(stderr, "eval error: defined variable name is not a symbol!\n");
-      return false;
-    }
-
-    if(var->to_keyword() != Keyword::not_keyword){
-      fprintf(stderr, "eval error: define's first element is Keyword (%s)!\n",
-              var->name().c_str());
-      return false;
-    }
-
-    return true;
-  };
-
-  Symbol* var = nullptr;
-  Lisp_ptr value;
-  unique_ptr<Function> func_value;
-
   VM.return_value() = {};
 
   // extracting
@@ -283,9 +273,8 @@ void eval_define(const Cons* rest){
 
   switch(first.tag()){
   case Ptr_tag::symbol: {
-    var = first.get<Symbol*>();
-    if(!test_varname(var))
-      return;
+    auto var = to_varname(first);
+    if(!var) return;
 
     auto val_l = rest->cdr().get<Cons*>();
     if(!val_l){
@@ -300,8 +289,12 @@ void eval_define(const Cons* rest){
 
     VM.code().push(val_l->car());
     eval();
-    value = VM.return_value();
-    break;
+    auto value = VM.return_value();
+
+    VM.set(var, value);
+
+    VM.return_value() = value;
+    return;
   }
 
   case Ptr_tag::cons: {
@@ -311,9 +304,8 @@ void eval_define(const Cons* rest){
       return;
     }
 
-    var = lis->car().get<Symbol*>();
-    if(!test_varname(var))
-      return;
+    auto var = to_varname(lis->car());
+    if(!var) return;
 
     const auto& arg_info = parse_func_arg(lis->cdr());
     if(!arg_info){
@@ -327,22 +319,17 @@ void eval_define(const Cons* rest){
       return;
     }
 
-    func_value = unique_ptr<Function>(new Function(code, arg_info, VM.frame()));
-    value = Lisp_ptr(func_value.get());
-    break;
+    auto value = Lisp_ptr(new Function(code, arg_info, VM.frame()));
+    VM.set(var, value);
+
+    VM.return_value() = value;
+    return;
   }
 
   default:
     fprintf(stderr, "eval error: informal define syntax!\n");
     return;
   }
-
-  // assignment
-  VM.set(var, value);
-  func_value.release();
-
-  VM.return_value() = value;
-  return;
 }
 
 } // namespace
@@ -354,9 +341,8 @@ void eval(){
 
     switch(p.tag()){
     case Ptr_tag::symbol: {
-      auto sym = p.get<Symbol*>();
-      if(sym->to_keyword() != Keyword::not_keyword){
-        fprintf(stderr, "eval error: symbol '%s' is keyword!!\n", sym->name().c_str());
+      auto sym = to_varname(p);
+      if(!sym){
         VM.return_value() = {};
         break;
       }
