@@ -20,6 +20,7 @@ enum class VM_op : int{
     arg_bottom,
     interpreted_call,
     native_call,
+    leave_frame
 };
 
 namespace {
@@ -147,6 +148,7 @@ void vm_op_interpreted_call(){
   const auto& argi = fun->arg_info();
 
   VM.enter_frame(push_frame(fun->closure()));
+  VM.code().push(Lisp_ptr(VM_op::leave_frame));
 
   Lisp_ptr arg_name = argi.head;
   Lisp_ptr st_top;
@@ -172,22 +174,34 @@ void vm_op_interpreted_call(){
   assert(VM.stack().top().get<VM_op>() == VM_op::arg_bottom);
   VM.stack().pop();
   
-  // real call
-  do_list(fun->get<Lisp_ptr>(),
-          [&](Cons* cell) -> bool {
-            VM.code().push(cell->car());
-            eval();
-            return true;
-          },
-          [&](Lisp_ptr last_cdr){
-            if(!nullp(last_cdr)){
-              fprintf(stderr, "eval error: body has dot list!\n");
-              VM.return_value() = {};
-            }
-          });
+  // set up lambda body code
+  stack<Lisp_ptr> tmp;
+  
+  if(!do_list(fun->get<Lisp_ptr>(),
+              [&](Cons* c) -> bool {
+                tmp.push(c->car());
+                return true;
+              },
+              [&](Lisp_ptr last_cdr) -> bool{
+                if(!nullp(last_cdr)){
+                  fprintf(stderr, "eval error: body has dot list!\n");
+                  return false;
+                }
+                return true;
+              })){
+    VM.return_value() = {};
+    return;
+  }
 
-  VM.leave_frame();
+  while(!tmp.empty()){
+    VM.code().push(tmp.top());
+    tmp.pop();
+  }
 }
+
+void vm_op_leave_frame(){
+  VM.leave_frame();
+}  
 
 void eval_lambda(const Cons* rest){
   VM.return_value() = {};
@@ -337,8 +351,6 @@ void eval_define(const Cons* rest){
     VM.code().push(Lisp_ptr{VM_op::set_});
     VM.code().push(val_l->car());
     VM.stack().push(Lisp_ptr(var));
-    // eval();
-    // vm_op_set();
     return;
   }
 
@@ -487,6 +499,9 @@ void eval(){
         break;
       case VM_op::native_call:
         vm_op_native_call();
+        break;
+      case VM_op::leave_frame:
+        vm_op_leave_frame();
         break;
       default:
         UNEXP_DEFAULT();
