@@ -174,7 +174,7 @@ void vm_op_interpreted_call(){
   VM.stack().pop();
   
   // set up lambda body code
-  stack<Lisp_ptr> tmp;
+  stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
   
   if(!do_list(fun->get<Lisp_ptr>(),
               [&](Cons* c) -> bool {
