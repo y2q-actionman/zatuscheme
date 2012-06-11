@@ -54,10 +54,10 @@ void vm_op_funcall(){
     VM.return_value() = {};
     return;
   }
+
   auto fun = proc.get<Function*>();
 
-
-  VM_op call_op = VM_op::nop;
+  VM_op call_op;
 
   switch(fun->type()){
   case Function::Type::interpreted:
@@ -121,15 +121,11 @@ void vm_op_native_call(){
   VM.code().pop();
   auto fun = proc.get<Function*>();
 
-  if(fun->type() != Function::Type::native){
-    fprintf(stderr, "eval internal error: native call routine called for not native func\n");
-    VM.return_value() = {};
-    return;
-  }
+  assert(fun->type() == Function::Type::native);
 
   fun->get<Function::NativeFunc>()();
   if(!VM.return_value())
-    fprintf(stderr, "eval error: native func returned undef!\n");
+    fprintf(stderr, "eval warning: native func returned undef!\n");
 }
 
 void vm_op_interpreted_call(){
@@ -137,15 +133,17 @@ void vm_op_interpreted_call(){
   VM.code().pop();
   auto fun = proc.get<Function*>();
 
-  if(fun->type() != Function::Type::interpreted){
-    fprintf(stderr, "eval internal error: interpreted call routine called for not interpreted func\n");
-    VM.return_value() = {};
-    return;
-  }
-
+  assert(fun->type() == Function::Type::interpreted);
   assert(!VM.stack().empty());
 
   const auto& argi = fun->arg_info();
+
+  // tail call check
+  if(!VM.code().empty()
+     && VM.code().top().get<VM_op>() == VM_op::leave_frame){
+    VM.code().pop();
+    VM.leave_frame();
+  }
 
   VM.enter_frame(push_frame(fun->closure()));
   VM.code().push(Lisp_ptr(VM_op::leave_frame));
@@ -166,6 +164,7 @@ void vm_op_interpreted_call(){
       VM.local_set(arg_name_cell->car().get<Symbol*>(), st_top);
       arg_name = arg_name_cell->cdr();
     }else{
+      fprintf(stderr, "eval internal error: variadic call is under construction!\n");
       // variadic func's end
       break;
     }
