@@ -23,8 +23,8 @@ array<Lisp_ptr, i> pick_args(){
   return ret;
 }
 
+} // namespace
 
-// func definitions
 
 void plus_2(){
   auto args = pick_args<2>();
@@ -76,37 +76,6 @@ void type_check_pred(){
   auto args = pick_args<1>();
   VM.return_value() = Lisp_ptr((args[0].tag() == p));
 }  
-  
-
-// func table
-
-struct Entry {
-  const char* name;
-  Function func;
-};
-
-static Entry builtin_func[] = {
-  {"+", Function{plus_2, {{}, 2, true}}},
-  {"zs-list", Function{zs_list, {{}, 2, true}}},
-  {"boolean?", Function{type_check_pred<Ptr_tag::boolean>, {{}, 1, false}}},
-  {"symbol?", Function{type_check_pred<Ptr_tag::symbol>, {{}, 1, false}}},
-  {"char?", Function{type_check_pred<Ptr_tag::character>, {{}, 1, false}}},
-  {"vector?", Function{type_check_pred<Ptr_tag::vector>, {{}, 1, false}}},
-  {"procedure?", Function{type_check_pred<Ptr_tag::function>, {{}, 1, false}}},
-  // {"pair?", Function{type_check_pred<Ptr_tag::cons>, {{}, 1, false}}}, // this evaluates nil is #t!
-  {"number?", Function{type_check_pred<Ptr_tag::number>, {{}, 1, false}}},
-  {"string?", Function{type_check_pred<Ptr_tag::string>, {{}, 1, false}}},
-  {"port?", Function{type_check_pred<Ptr_tag::port>, {{}, 1, false}}}
-};
-
-} // namespace
-
-void install_builtin(){
-  for(auto& e : builtin_func){
-    Symbol* s = VM.symtable.intern(e.name);
-    VM.set(s, Lisp_ptr{&e.func});
-  }
-}
 
 bool eq(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
@@ -130,3 +99,30 @@ bool eql(Lisp_ptr a, Lisp_ptr b){
 
   return false;
 }
+
+
+static struct Entry {
+  const char* name;
+  Function func;
+} 
+builtin_func[] = {
+  {"+", Function{plus_2, {{}, 2, true}}},
+  {"zs-list", Function{zs_list, {{}, 2, true}}},
+  {"boolean?", Function{type_check_pred<Ptr_tag::boolean>, {{}, 1, false}}},
+  {"symbol?", Function{type_check_pred<Ptr_tag::symbol>, {{}, 1, false}}},
+  {"char?", Function{type_check_pred<Ptr_tag::character>, {{}, 1, false}}},
+  {"vector?", Function{type_check_pred<Ptr_tag::vector>, {{}, 1, false}}},
+  {"procedure?", Function{type_check_pred<Ptr_tag::function>, {{}, 1, false}}},
+  // {"pair?", Function{type_check_pred<Ptr_tag::cons>, {{}, 1, false}}}, // this evaluates nil is #t!
+  {"number?", Function{type_check_pred<Ptr_tag::number>, {{}, 1, false}}},
+  {"string?", Function{type_check_pred<Ptr_tag::string>, {{}, 1, false}}},
+  {"port?", Function{type_check_pred<Ptr_tag::port>, {{}, 1, false}}}
+};
+
+void install_builtin(){
+  for(auto& e : builtin_func){
+    Symbol* s = VM.symtable.intern(e.name);
+    VM.set(s, Lisp_ptr{&e.func});
+  }
+}
+
