@@ -24,6 +24,8 @@ array<Lisp_ptr, i> pick_args(){
 }
 
 
+  // func definitions
+
 void plus_2(){
   auto args = pick_args<2>();
 
@@ -47,8 +49,14 @@ void plus_2(){
   VM.return_value() = Lisp_ptr(newn);
 }
 
+template <Ptr_tag p>
+void type_check_pred(){
+  auto args = pick_args<1>();
+  VM.return_value() = Lisp_ptr((args[0].tag() == p));
+}  
+  
 
-
+  // func table
 
 struct Entry {
   const char* name;
@@ -56,7 +64,16 @@ struct Entry {
 };
 
 static Entry builtin_func[] = {
-  {"+", Function{plus_2, {Lisp_ptr{}, 2, true}}}
+  {"+", Function{plus_2, {{}, 2, true}}},
+  {"boolean?", Function{type_check_pred<Ptr_tag::boolean>, {{}, 1, false}}},
+  {"symbol?", Function{type_check_pred<Ptr_tag::symbol>, {{}, 1, false}}},
+  {"char?", Function{type_check_pred<Ptr_tag::character>, {{}, 1, false}}},
+  {"vector?", Function{type_check_pred<Ptr_tag::vector>, {{}, 1, false}}},
+  {"procedure?", Function{type_check_pred<Ptr_tag::function>, {{}, 1, false}}},
+  // {"pair?", Function{type_check_pred<Ptr_tag::cons>, {{}, 1, false}}}, // this evaluates nil is #t!
+  {"number?", Function{type_check_pred<Ptr_tag::number>, {{}, 1, false}}},
+  {"string?", Function{type_check_pred<Ptr_tag::string>, {{}, 1, false}}},
+  {"port?", Function{type_check_pred<Ptr_tag::port>, {{}, 1, false}}}
 };
 
 } // namespace
