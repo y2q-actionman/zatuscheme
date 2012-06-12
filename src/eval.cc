@@ -59,21 +59,17 @@ void eval_begin(Lisp_ptr p){
   // set up lambda body code
   stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
   
-  if(!do_list(p,
-              [&](Cons* c) -> bool {
-                tmp.push(c->car());
-                return true;
-              },
-              [&](Lisp_ptr last_cdr) -> bool{
-                if(!nullp(last_cdr)){
-                  fprintf(stderr, "eval error: body has dot list!\n");
-                  return false;
-                }
-                return true;
-              })){
-    VM.return_value() = {};
-    return;
-  }
+  do_list(p,
+          [&](Cons* c) -> bool {
+            tmp.push(c->car());
+            return true;
+          },
+          [&](Lisp_ptr last_cdr){
+            if(!nullp(last_cdr)){
+              fprintf(stderr, "eval warning: body has dot list!\n");
+              tmp.push(last_cdr);
+            }
+          });
 
   while(!tmp.empty()){
     VM.code().push(tmp.top());
