@@ -48,8 +48,11 @@ void check(const char* input, const char* expect){
 int main(){
   install_builtin();
 
-  check("(zs-list 1 2)", "(1 . 2)");
-  check("(zs-list 1 2 3)", "(1 2 . 3)");
+  check("(list 1)", "(1)");
+  check("(list 1 2)", "(1 2)");
+  check("(list 1 2 3)", "(1 2 3)");
+  check("(list* 1 2)", "(1 . 2)");
+  check("(list* 1 2 3)", "(1 2 . 3)");
   
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

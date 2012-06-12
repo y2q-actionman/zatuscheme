@@ -49,26 +49,41 @@ void plus_2(){
   VM.return_value() = Lisp_ptr(newn);
 }
 
-void zs_list(){
+void stack_to_list(bool dot_list){
   Cons* ret = new Cons;
-  Cons* c = ret;
+  Cons *c = ret, *prev_c = ret;
 
-  // first 2 args
-  ret->rplaca(VM.stack().top());
-  VM.stack().pop();
-  ret->rplacd(VM.stack().top());
-  VM.stack().pop();
-
-  // rest args
-  while(VM.stack().top().tag() != Ptr_tag::vm_op){
-    Cons* cc = new Cons(c->cdr(), VM.stack().top());
+  while(1){
+    c->rplaca(VM.stack().top());
     VM.stack().pop();
 
-    c->rplacd(Lisp_ptr(cc));
-    c = cc;
+    if(VM.stack().top().tag() == Ptr_tag::vm_op){
+      VM.stack().pop();
+      break;
+    }
+
+    Cons* newc = new Cons;
+    c->rplacd(Lisp_ptr(newc));
+    prev_c = c;
+    c = newc;
+  }
+
+  if(dot_list){
+    prev_c->rplacd(c->car());
+    delete c;
+  }else{
+    c->rplacd(Cons::NIL);
   }
 
   VM.return_value() = Lisp_ptr{ret};
+}
+
+void list(){
+  stack_to_list(false);
+}
+
+void list_star(){
+  stack_to_list(true);
 }
 
 template <Ptr_tag p>
@@ -120,7 +135,8 @@ static struct Entry {
 } 
 builtin_func[] = {
   {"+", Function{plus_2, {{}, 2, true}}},
-  {"zs-list", Function{zs_list, {{}, 2, true}}},
+  {"list", Function{list, {{}, 1, true}}},
+  {"list*", Function{list_star, {{}, 2, true}}},
   {"boolean?", Function{type_check_pred<Ptr_tag::boolean>, {{}, 1, false}}},
   {"symbol?", Function{type_check_pred<Ptr_tag::symbol>, {{}, 1, false}}},
   {"char?", Function{type_check_pred<Ptr_tag::character>, {{}, 1, false}}},

@@ -8,6 +8,7 @@
 #include "cons.hh"
 #include "function.hh"
 #include "printer.hh"
+#include "builtin.hh"
 
 using namespace std;
 
@@ -230,39 +231,25 @@ void vm_op_interpreted_call(){
     arg_name = arg_name_cell->cdr();
   }
 
-  // variadic arg push
-  if(argi.variadic){
+  if(argi.variadic){   // variadic arg push
     if(!arg_name.get<Symbol*>()){
       fprintf(stderr, "eval error: no arg name for variadic arg!\n");
       VM.return_value() = {};
       return;
     }
 
-    Cons* head = new Cons;
-    Cons* c = head;
+    stack_to_list(false);
 
-    while(!VM.stack().empty()
-          && (st_top = VM.stack().top()).get<VM_op>() != VM_op::arg_bottom){
-      VM.stack().pop();
-    
-      c->rplaca(st_top);
-      Cons* cc = new Cons;
-      c->rplacd(Lisp_ptr(cc));
-      c = cc;
+    VM.local_set(arg_name.get<Symbol*>(), VM.return_value());
+  }else{  // clean stack
+    if(VM.stack().empty()
+       || VM.stack().top().get<VM_op>() != VM_op::arg_bottom){
+      fprintf(stderr, "eval error: corrupted stack -- no bottom found!\n");
+      VM.return_value() = {};
+      return;
     }
-
-    c->rplaca(Cons::NIL);
-    VM.local_set(arg_name.get<Symbol*>(), Lisp_ptr(head));
+    VM.stack().pop();
   }
-
-  // clean stack
-  if(VM.stack().empty()
-     || VM.stack().top().get<VM_op>() != VM_op::arg_bottom){
-    fprintf(stderr, "eval error: corrupted stack -- no bottom found!\n");
-    VM.return_value() = {};
-    return;
-  }
-  VM.stack().pop();
   
   // set up lambda body code
   eval_begin(fun->get<Lisp_ptr>());
