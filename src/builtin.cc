@@ -68,36 +68,49 @@ void zs_list(){
     c = cc;
   }
 
-  VM.return_value() = Lisp_ptr(ret);
+  VM.return_value() = Lisp_ptr{ret};
 }
 
 template <Ptr_tag p>
 void type_check_pred(){
   auto args = pick_args<1>();
-  VM.return_value() = Lisp_ptr((args[0].tag() == p));
+  VM.return_value() = {args[0].tag() == p};
 }  
 
-bool eq(Lisp_ptr a, Lisp_ptr b){
+static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
   switch(a.tag()){
-  case Ptr_tag::boolean:
+   case Ptr_tag::boolean:
     return a.get<bool>() == b.get<bool>();
-  case Ptr_tag::character:
+   case Ptr_tag::character:
     return a.get<char>() == b.get<char>();
-  default:
+   default:
     return a.get<void*>() == b.get<void*>();
-  }
+   }
+ }
+ 
+void eq(){
+  auto args = pick_args<2>();
+  
+  VM.return_value() = {eq_internal(args[0], args[1])};
 }
 
-bool eql(Lisp_ptr a, Lisp_ptr b){
-  if(eq(a, b)) return true;
+void eql(){
+  auto args = pick_args<2>();
 
-  if(a.tag() == Ptr_tag::number && b.tag() == Ptr_tag::number){
-    return eql(*a.get<Number*>(), *b.get<Number*>());
+  if(eq_internal(args[0], args[1])){
+    VM.return_value() = {true};
+    return;
+  }
+    
+  if(args[0].tag() == Ptr_tag::number && args[1].tag() == Ptr_tag::number){
+    VM.return_value() = {eql(*args[0].get<Number*>(), *args[1].get<Number*>())};
+    return;
   }
 
-  return false;
+  VM.return_value() = {false};
+  return;
 }
 
 
@@ -116,7 +129,9 @@ builtin_func[] = {
   // {"pair?", Function{type_check_pred<Ptr_tag::cons>, {{}, 1, false}}}, // this evaluates nil is #t!
   {"number?", Function{type_check_pred<Ptr_tag::number>, {{}, 1, false}}},
   {"string?", Function{type_check_pred<Ptr_tag::string>, {{}, 1, false}}},
-  {"port?", Function{type_check_pred<Ptr_tag::port>, {{}, 1, false}}}
+  {"port?", Function{type_check_pred<Ptr_tag::port>, {{}, 1, false}}},
+  {"eql", Function{eql, {{}, 2, false}}},
+  {"eq", Function{eq, {{}, 2, false}}}
 };
 
 void install_builtin(){
@@ -125,4 +140,3 @@ void install_builtin(){
     VM.set(s, Lisp_ptr{&e.func});
   }
 }
-

@@ -11,6 +11,8 @@ bool test_on_print(Lisp_ptr, const char*, const Fun&);
 
 Lisp_ptr read_from_string(const char*);
 
+bool eql(Lisp_ptr, Lisp_ptr);
+
 #include "test_util.i.hh"
 
 #endif // TEST_UTIL_HH

@@ -1,5 +1,7 @@
 #include "test_util.hh"
 #include "reader.hh"
+#include "eval.hh"
+#include "builtin.hh"
 
 Lisp_ptr read_from_string(const char* s){
   FILE* f = fmemopen((void*)s, strlen(s), "r");
@@ -17,4 +19,11 @@ Lisp_ptr read_from_string(const char* s){
   return p;
 }
 
-
+bool eql(Lisp_ptr a, Lisp_ptr b){
+  VM.stack().push({VM_op::arg_bottom});
+  VM.stack().push(a);
+  VM.stack().push(b);
+  eql();
+  return VM.return_value().get<bool>();
+}
+  
