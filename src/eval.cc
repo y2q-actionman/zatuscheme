@@ -43,6 +43,10 @@ Symbol* to_varname(Lisp_ptr p){
   return var;
 }
 
+/*
+  ----
+  code = (body1, body2, ...)
+*/
 void eval_begin(Lisp_ptr p){
   // set up lambda body code
   stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
@@ -69,6 +73,13 @@ void eval_begin(Lisp_ptr p){
   }
 }
 
+/*
+  ret = proc.
+  stack[0] = args
+  ----
+  code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
+  stack = (arg-bottom)
+*/
 void vm_op_funcall(){
   auto proc = VM.return_value();
   auto args = VM.stack().top();
@@ -117,7 +128,7 @@ void vm_op_funcall(){
                 }
               
                 if((argc < argi.required_args)
-                   || (argi.variadic && argc > argi.required_args)){
+                   || (!argi.variadic && argc > argi.required_args)){
                   fprintf(stderr, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
                           argi.required_args,
                           (argi.variadic) ? "variadic" : "not variadic",
@@ -130,7 +141,6 @@ void vm_op_funcall(){
     for(int i = 0; i < argc*2 + 2; ++i){
       VM.code().pop();
     }
-    VM.stack().pop();
     VM.return_value() = {};
     return;
   }
@@ -138,10 +148,23 @@ void vm_op_funcall(){
   VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
 }
 
+/*
+  ret = some value
+  ----
+  stack[0] = some value
+*/
 void vm_op_arg_push(){
   VM.stack().push(VM.return_value());
 }
 
+/*
+  code = (proc)
+  stack = (arg1, arg2, ..., arg-bottom)
+  ----
+  ret = returned value
+  code = ()
+  stack = ()
+*/
 void vm_op_native_call(){
   auto proc = VM.code().top();
   VM.code().pop();
@@ -154,6 +177,14 @@ void vm_op_native_call(){
     fprintf(stderr, "eval warning: native func returned undef!\n");
 }
 
+/*
+  code = (proc)
+  stack = (arg1, arg2, ..., arg-bottom)
+  ----
+  In new frame, args are bound.
+  code = (body1, body2, ..., leave_frame)
+  stack = ()
+*/
 void vm_op_interpreted_call(){
   auto proc = VM.code().top();
   VM.code().pop();
@@ -233,10 +264,18 @@ void vm_op_interpreted_call(){
   eval_begin(fun->get<Lisp_ptr>());
 }
 
+/*
+  leaves frame.
+  no stack operations.
+*/
 void vm_op_leave_frame(){
   VM.leave_frame();
 }  
 
+/*
+  ret = proc.
+  no stack operations.
+*/
 void eval_lambda(Lisp_ptr p){
   VM.return_value() = {};
 
@@ -266,6 +305,11 @@ void eval_lambda(Lisp_ptr p){
   return;
 }
 
+/*
+  ----
+  code = (test, VM::if)
+  stack = (consequent, alternative)
+*/
 void eval_if(Lisp_ptr p){
   VM.return_value() = {};
 
@@ -303,6 +347,12 @@ void eval_if(Lisp_ptr p){
   VM.stack().push(conseq);
 }
 
+/*
+  stack = (consequent, alternative)
+  ----
+  stack = ()
+  code = (consequent or alternative)
+*/
 void vm_op_if(){
   auto test_result = VM.return_value();
 
@@ -317,6 +367,11 @@ void vm_op_if(){
   }
 }
 
+/*
+  ----
+  code = (value, VM::if)
+  stack = (variable name)
+*/
 void eval_set(Lisp_ptr p){
   VM.return_value() = {};
 
@@ -351,6 +406,11 @@ void eval_set(Lisp_ptr p){
   VM.stack().push(Lisp_ptr{var});
 }
 
+/*
+  stack = (variable name)
+  ----
+  stack = ()
+*/
 void vm_op_set(){
   auto var = VM.stack().top().get<Symbol*>();
   VM.stack().pop();
@@ -362,6 +422,13 @@ void vm_op_set(){
   VM.set(var, VM.return_value());
 }
 
+/*
+  in variable set:
+    same as "set!"
+
+  in function definition:
+    immediately the function is set to the variable.
+*/
 void eval_define(Lisp_ptr p){
   VM.return_value() = {};
 
