@@ -6,6 +6,7 @@
 
 enum class VM_op{
   nop = 0,
+    quote,
     if_,
     set_,
     funcall,

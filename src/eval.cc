@@ -33,6 +33,26 @@ Symbol* to_varname(Lisp_ptr p){
 
 /*
   ----
+  code = (quote op, value)
+*/
+void eval_quote(Lisp_ptr p){
+  VM.code().push(p.get<Cons*>()->car());
+  VM.code().push(Lisp_ptr(VM_op::quote));
+}
+
+/*
+  code[0] = value
+  ----
+  code = ()
+  ret = value
+*/
+void vm_op_quote(){
+  VM.return_value() = VM.code().top();
+  VM.code().pop();
+}
+
+/*
+  ----
   code = (body1, body2, ...)
 */
 void eval_begin(Lisp_ptr p){
@@ -520,7 +540,7 @@ void eval(){
           }
 
           switch(k){
-          case Keyword::quote:  VM.return_value() = r.get<Cons*>()->car(); break;
+          case Keyword::quote:  eval_quote(r); break;
           case Keyword::lambda: eval_lambda(r); break;
           case Keyword::if_:    eval_if(r); break;
           case Keyword::set_:   eval_set(r); break;
@@ -573,29 +593,15 @@ void eval(){
 
     case Ptr_tag::vm_op:
       switch(p.get<VM_op>()){
-      case VM_op::nop:
-        break;
-      case VM_op::if_:
-        vm_op_if();
-        break;
-      case VM_op::set_:
-        vm_op_set();
-        break;
-      case VM_op::funcall:
-        vm_op_funcall();
-        break;
-      case VM_op::arg_push:
-        vm_op_arg_push();
-        break;
-      case VM_op::interpreted_call:
-        vm_op_interpreted_call();
-        break;
-      case VM_op::native_call:
-        vm_op_native_call();
-        break;
-      case VM_op::leave_frame:
-        vm_op_leave_frame();
-        break;
+      case VM_op::nop:      break;
+      case VM_op::quote:    vm_op_quote(); break;
+      case VM_op::if_:      vm_op_if(); break;
+      case VM_op::set_:     vm_op_set(); break;
+      case VM_op::funcall:  vm_op_funcall(); break;
+      case VM_op::arg_push: vm_op_arg_push(); break;
+      case VM_op::interpreted_call: vm_op_interpreted_call(); break;
+      case VM_op::native_call:      vm_op_native_call(); break;
+      case VM_op::leave_frame:      vm_op_leave_frame(); break;
       default:
         UNEXP_DEFAULT();
       }
