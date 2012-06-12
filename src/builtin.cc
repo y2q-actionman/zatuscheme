@@ -50,8 +50,9 @@ void plus_2(){
 }
 
 void stack_to_list(bool dot_list){
-  Cons* ret = new Cons;
-  Cons *c = ret, *prev_c = ret;
+  Cons* c = new Cons;
+  Cons* prev_c = c;
+  Lisp_ptr ret = Lisp_ptr{c};
 
   while(1){
     c->rplaca(VM.stack().top());
@@ -69,7 +70,11 @@ void stack_to_list(bool dot_list){
   }
 
   if(dot_list){
-    prev_c->rplacd(c->car());
+    if(c != prev_c){
+      prev_c->rplacd(c->car());
+    }else{
+      ret = c->car();
+    }
     delete c;
   }else{
     c->rplacd(Cons::NIL);
@@ -136,7 +141,7 @@ static struct Entry {
 builtin_func[] = {
   {"+", Function{plus_2, {{}, 2, true}}},
   {"list", Function{list, {{}, 1, true}}},
-  {"list*", Function{list_star, {{}, 2, true}}},
+  {"list*", Function{list_star, {{}, 1, true}}},
   {"boolean?", Function{type_check_pred<Ptr_tag::boolean>, {{}, 1, false}}},
   {"symbol?", Function{type_check_pred<Ptr_tag::symbol>, {{}, 1, false}}},
   {"char?", Function{type_check_pred<Ptr_tag::character>, {{}, 1, false}}},
