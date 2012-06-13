@@ -394,7 +394,7 @@ void vm_op_if(){
   code = (value, VM::if)
   stack = (variable name)
 */
-void eval_set(Lisp_ptr p){
+void eval_set(const char* opname, Lisp_ptr p){
   VM.return_value() = {};
 
   // extracting
@@ -413,12 +413,12 @@ void eval_set(Lisp_ptr p){
   if(!var) return;
 
   if(!val){
-    fprintf(stderr, "eval error: no value is supplied for set!\n");
+    fprintf(stderr, "eval error: no value is supplied for %s\n", opname);
     return;
   }
 
   if(len > 2){
-    fprintf(stderr, "eval error: informal set! expr! (more than %d exprs)\n", len);
+    fprintf(stderr, "eval error: informal %s expr! (more than %d exprs)\n", opname, len);
     return;
   }
 
@@ -460,26 +460,9 @@ void eval_define(Lisp_ptr p){
   auto first = rest->car();
 
   switch(first.tag()){
-  case Ptr_tag::symbol: {
-    if(!to_varname(first)) return;
-
-    Lisp_ptr val;
-
-    auto len = bind_cons_list(rest->cdr(),
-                              [&](Cons* c){
-                                val = c->car();
-                              });
-
-    if(len != 1){
-      fprintf(stderr, "eval error: informal define syntax! (%d exprs in setting)\n", len);
-      return;
-    }
-
-    VM.code().push(Lisp_ptr{VM_op::set_});
-    VM.code().push(val);
-    VM.stack().push(first);
+  case Ptr_tag::symbol:
+    eval_set("define(value set)", p);
     return;
-  }
 
   case Ptr_tag::cons: {
     Symbol* var = nullptr;
@@ -668,7 +651,7 @@ void eval(){
             break;
           case Keyword::lambda: eval_lambda(r); break;
           case Keyword::if_:    eval_if(r); break;
-          case Keyword::set_:   eval_set(r); break;
+          case Keyword::set_:   eval_set("set!", r); break;
           case Keyword::define: eval_define(r); break;
           case Keyword::begin:  eval_begin(r); break;
           case Keyword::quasiquote: 
