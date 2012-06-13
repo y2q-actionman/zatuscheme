@@ -353,13 +353,10 @@ void eval_if(Lisp_ptr p){
                    alt = c->car();
                  });
 
-  switch(len){
-  case 1:
-    fprintf(stderr, "eval error: informal if expr! (no test expr)\n");
+  if(len < 2){
+    fprintf(stderr, "eval error: informal if expr! (only %d exprs)\n", len);
     return;
-  case 2: case 3: // successed
-    break;
-  default:
+  }else if(len > 3){
     fprintf(stderr, "eval error: informal if expr! (more than %d exprs)\n", len);
     return;
   }
