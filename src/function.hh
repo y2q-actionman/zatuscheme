@@ -16,9 +16,9 @@ public:
   };
 
   struct ArgInfo {
-    const Lisp_ptr head;
-    const int required_args;
-    const bool variadic;
+    Lisp_ptr head;
+    int required_args;
+    bool variadic;
 
     constexpr ArgInfo()
       : head({}), required_args(-1), variadic(false){}

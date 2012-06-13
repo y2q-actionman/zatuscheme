@@ -306,32 +306,28 @@ void vm_op_macro_call(){
   no stack operations.
 */
 void eval_lambda(Lisp_ptr p){
-  VM.return_value() = {};
+  Function::ArgInfo arg_info;
+  Lisp_ptr code;
 
-  Cons* rest = p.get<Cons*>();
+  bind_cons_list(p,
+                 [&](Cons* c){
+                   arg_info = parse_func_arg(c->car());
+                   code = c->cdr();
+                 });
 
-  auto args = rest->car();
-  if(rest->cdr().tag() != Ptr_tag::cons){
-    fprintf(stderr, "eval error: lambda has invalid body!\n");
-    return;
-  }
-
-  auto arg_info = parse_func_arg(args);
   if(!arg_info){
     fprintf(stderr, "eval error: lambda has invalid args!\n");
+    VM.return_value() = {};
+    return;
+  }
+  if(!code){
+    fprintf(stderr, "eval error: lambda has invalid body!\n");
+    VM.return_value() = {};
     return;
   }
 
-  auto code = rest->cdr();
-  if(!code.get<Cons*>()){
-    fprintf(stderr, "eval error: lambda has no body!\n");
-    return;
-  }
-
-  auto fun = new Function(code, Function::Type::interpreted, arg_info, VM.frame());
-
-  VM.return_value() = Lisp_ptr{fun};
-  return;
+  VM.return_value() = 
+    Lisp_ptr{new Function(code, Function::Type::interpreted, arg_info, VM.frame())};
 }
 
 /*
