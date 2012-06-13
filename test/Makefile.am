@@ -15,7 +15,8 @@ check_PROGRAMS = token_test\
 		eval_test\
 		function_arg_test\
 		enclose_test\
-		builtin_test
+		builtin_test\
+		quasiquote_test
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)

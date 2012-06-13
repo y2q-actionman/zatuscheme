@@ -34,26 +34,6 @@ Symbol* to_varname(Lisp_ptr p){
 
 /*
   ----
-  code = (quote op, value)
-*/
-void eval_quote(Lisp_ptr p){
-  VM.code().push(p.get<Cons*>()->car());
-  VM.code().push(Lisp_ptr(VM_op::quote));
-}
-
-/*
-  code[0] = value
-  ----
-  code = ()
-  ret = value
-*/
-void vm_op_quote(){
-  VM.return_value() = VM.code().top();
-  VM.code().pop();
-}
-
-/*
-  ----
   code = (body1, body2, ...)
 */
 void eval_begin(Lisp_ptr p){
@@ -160,6 +140,33 @@ void vm_op_funcall(){
 */
 void vm_op_arg_push(){
   VM.stack().push(VM.return_value());
+}
+
+/*
+  ret = list
+  ----
+  stack = (list[0], list[1], ...)
+*/
+void vm_op_arg_push_list(){
+  stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
+  auto l = VM.return_value();
+
+  do_list(l,
+          [&](Cons* c) -> bool {
+            tmp.push(c->car());
+            return true;
+          },
+          [&](Lisp_ptr last){
+            if(!nullp(last)){
+              fprintf(stderr, "eval warning: pushing args from dot-list!\n");
+              tmp.push(last);
+            }
+          });
+
+  while(!tmp.empty()){
+    VM.stack().push(tmp.top());
+    tmp.pop();
+  }
 }
 
 /*
@@ -485,6 +492,106 @@ void eval_define(Lisp_ptr p){
   }
 }
 
+/*
+  code[0] = template
+  ----
+  * vector
+      code = (quasiquote, template[0], arg_push, ..., stack_to_vector)
+  * list
+  * default
+      return = template
+*/
+void vm_op_quasiquote(){
+  static const auto qq_elem = [](Lisp_ptr p){
+    if(auto l = p.get<Cons*>()){
+      if(auto l_first_sym = l->car().get<Symbol*>()){
+        switch(l_first_sym->to_keyword()){
+        case Keyword::unquote:
+          VM.code().push(Lisp_ptr(VM_op::arg_push));
+          VM.code().push(l->cdr().get<Cons*>()->car());
+          return;
+        case Keyword::unquote_splicing:
+          VM.code().push(Lisp_ptr(VM_op::arg_push_list));
+          VM.code().push(l->cdr().get<Cons*>()->car());
+          return;
+        default:
+          break;
+        }
+      }
+    }
+
+    VM.code().push(Lisp_ptr(VM_op::arg_push));
+    VM.code().push(p);
+    VM.code().push(Lisp_ptr(VM_op::quasiquote));
+  };
+
+  auto p = VM.code().top();
+  VM.code().pop();
+
+  switch(p.tag()){
+  case Ptr_tag::cons: {
+    if(nullp(p)){
+      VM.return_value() = Cons::NIL;
+      return;
+    }
+
+    // check unquote -- like `,x
+    if(auto first_sym = p.get<Cons*>()->car().get<Symbol*>()){
+      switch(first_sym->to_keyword()){
+      case Keyword::unquote: {
+        auto rest = p.get<Cons*>()->cdr().get<Cons*>()->car();
+        VM.code().push(rest);
+        return;
+      }
+      case Keyword::unquote_splicing:
+        fprintf(stderr, "eval error: unquote-splicing is not supported out of list");
+        VM.return_value() = {};
+        return;
+      default:
+        break;
+      }
+    }
+
+    // generic lists
+    VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
+    VM.code().push(Lisp_ptr(VM_op::quasiquote_list));
+
+    do_list(p,
+            [](Cons* c) -> bool {
+              qq_elem(c->car());
+              return true;
+            },
+            [](Lisp_ptr last){
+              qq_elem(last);
+            });
+
+    return;
+  }
+  case Ptr_tag::vector: {
+    VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
+    VM.code().push(Lisp_ptr(VM_op::quasiquote_vector));
+
+    auto v = p.get<Vector*>();
+    for(auto i = begin(*v); i != end(*v); ++i){
+      qq_elem(*i);
+    }
+
+    return;
+  }
+  default:
+    VM.return_value() = p;
+    return;
+  }
+}
+
+void vm_op_quasiquote_list(){
+  stack_to_list(true);
+}
+
+void vm_op_quasiquote_vector(){
+  stack_to_vector();
+}
+
 } // namespace
 
 void eval(){
@@ -506,11 +613,15 @@ void eval(){
     
     case Ptr_tag::cons: {
       auto c = p.get<Cons*>();
+      if(!c){
+        VM.return_value() = Cons::NIL;
+        break;
+      }
+
       auto first = c->car();
 
       // special operator?
-      if(first.tag() == Ptr_tag::symbol){
-        auto sym = first.get<Symbol*>();
+      if(auto sym = first.get<Symbol*>()){
         auto k = sym->to_keyword();
 
         if(k != Keyword::not_keyword){
@@ -523,12 +634,18 @@ void eval(){
           }
 
           switch(k){
-          case Keyword::quote:  eval_quote(r); break;
+          case Keyword::quote:  
+            VM.return_value() = r.get<Cons*>()->car();
+            break;
           case Keyword::lambda: eval_lambda(r); break;
           case Keyword::if_:    eval_if(r); break;
           case Keyword::set_:   eval_set(r); break;
           case Keyword::define: eval_define(r); break;
           case Keyword::begin:  eval_begin(r); break;
+          case Keyword::quasiquote: 
+            VM.code().push(r.get<Cons*>()->car());
+            VM.code().push(Lisp_ptr(VM_op::quasiquote));
+            break;
 
           case Keyword::cond:
           case Keyword::case_:
@@ -539,16 +656,18 @@ void eval(){
           case Keyword::letrec:
           case Keyword::do_:
           case Keyword::delay:
-          case Keyword::quasiquote:
             fprintf(stderr, "eval error: '%s' is under development...\n",
                     sym->name().c_str());
             VM.return_value() = {};
             break;
 
-          case Keyword::else_:
-          case Keyword::r_arrow:
           case Keyword::unquote:
           case Keyword::unquote_splicing:
+            VM.return_value() = p;
+            break;
+
+          case Keyword::else_:
+          case Keyword::r_arrow:
             fprintf(stderr, "eval error: '%s' cannot be used as operator!!\n",
                     sym->name().c_str());
             VM.return_value() = {};
@@ -577,14 +696,17 @@ void eval(){
     case Ptr_tag::vm_op:
       switch(p.get<VM_op>()){
       case VM_op::nop:      break;
-      case VM_op::quote:    vm_op_quote(); break;
       case VM_op::if_:      vm_op_if(); break;
       case VM_op::set_:     vm_op_set(); break;
       case VM_op::funcall:  vm_op_funcall(); break;
       case VM_op::arg_push: vm_op_arg_push(); break;
+      case VM_op::arg_push_list: vm_op_arg_push_list(); break;
       case VM_op::interpreted_call: vm_op_interpreted_call(); break;
       case VM_op::native_call:      vm_op_native_call(); break;
       case VM_op::leave_frame:      vm_op_leave_frame(); break;
+      case VM_op::quasiquote:        vm_op_quasiquote(); break;
+      case VM_op::quasiquote_list:    vm_op_quasiquote_list(); break;
+      case VM_op::quasiquote_vector:  vm_op_quasiquote_vector(); break;
       default:
         UNEXP_DEFAULT();
       }

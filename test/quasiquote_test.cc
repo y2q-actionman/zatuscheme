@@ -48,18 +48,13 @@ void check(const char* input, const char* expect){
 int main(){
   install_builtin();
 
-  check("(list 1)", "(1)");
-  check("(list 1 2)", "(1 2)");
-  check("(list 1 2 3)", "(1 2 3)");
-
-  check("(list* 1)", "1");
-  check("(list* 1 2)", "(1 . 2)");
-  check("(list* 1 2 3)", "(1 2 . 3)");
-
-  check("(vector 1)", "#(1)");
-  check("(vector 1 2)", "#(1 2)");
-  check("(vector 1 2 3)", "#(1 2 3)");
-
+  check("`1", "1");
+  check("`,1", "1");
+  check("`#(1)", "#(1)");
+  check("`()", "()");
+  check("`(1)", "(1)");
+  check("`(,1)", "(1)");
+  
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

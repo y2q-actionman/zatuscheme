@@ -85,6 +85,8 @@ int main(){
   check(print_equal, "#(1 2 3)", "#(1 2 3)");
   check(print_equal, "#(1 #(11 12 13) 3)", "#(1 #(11 12 13) 3)");
 
+  check(read_eql, "()", "()");
+
   // function, port ??
 
 

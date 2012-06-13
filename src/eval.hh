@@ -6,15 +6,18 @@
 
 enum class VM_op{
   nop = 0,
-    quote,
     if_,
     set_,
     funcall,
     arg_push,
+    arg_push_list,
     arg_bottom,
     interpreted_call,
     native_call,
-    leave_frame
+    leave_frame,
+    quasiquote,
+    quasiquote_list,
+    quasiquote_vector
 };
 
 void eval();
