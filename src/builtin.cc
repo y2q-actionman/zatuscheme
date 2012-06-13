@@ -83,12 +83,20 @@ void stack_to_list(bool dot_list){
   VM.return_value() = Lisp_ptr{ret};
 }
 
-void list(){
-  stack_to_list(false);
-}
+void stack_to_vector(){
+  auto v = new Vector;
 
-void list_star(){
-  stack_to_list(true);
+  while(1){
+    v->push_back(VM.stack().top());
+    VM.stack().pop();
+
+    if(VM.stack().top().tag() == Ptr_tag::vm_op){
+      VM.stack().pop();
+      break;
+    }
+  }
+
+  VM.return_value() = Lisp_ptr{v};
 }
 
 template <Ptr_tag p>
@@ -139,9 +147,14 @@ static struct Entry {
   Function func;
 } 
 builtin_func[] = {
-  {"+", Function{plus_2, {{}, 2, true}}},
-  {"list", Function{list, {{}, 1, true}}},
-  {"list*", Function{list_star, {{}, 1, true}}},
+  {"+", Function{plus_2,{{}, 2, true}}},
+  {"list", Function{
+      [](){stack_to_list(false);}, 
+      {{}, 1, true}}},
+  {"list*", Function{
+      [](){stack_to_list(true);}, 
+      {{}, 1, true}}},
+  {"vector", Function{stack_to_vector, {{}, 1, true}}},
   {"boolean?", Function{type_check_pred<Ptr_tag::boolean>, {{}, 1, false}}},
   {"symbol?", Function{type_check_pred<Ptr_tag::symbol>, {{}, 1, false}}},
   {"char?", Function{type_check_pred<Ptr_tag::character>, {{}, 1, false}}},

@@ -6,6 +6,7 @@
 
 void plus_2();
 void stack_to_list(bool dot_list);
+void stack_to_vector();
 template <Ptr_tag p> void type_check_pred();
 void eq();
 void eql();
