@@ -470,11 +470,8 @@ void eval_define(Lisp_ptr p){
                                 val = c->car();
                               });
 
-    if(len < 1){
-      fprintf(stderr, "eval error: definition has empty expr!\n");
-      return;
-    }else if(len > 1){
-      fprintf(stderr, "eval error: definition has extra expr!\n");
+    if(len != 1){
+      fprintf(stderr, "eval error: informal define syntax! (%d exprs in setting)\n", len);
       return;
     }
 
@@ -485,21 +482,22 @@ void eval_define(Lisp_ptr p){
   }
 
   case Ptr_tag::cons: {
-    auto lis = first.get<Cons*>();
-    if(!lis){
-      fprintf(stderr, "eval error: defined variable is not found!\n");
-      return;
-    }
+    Symbol* var = nullptr;
+    Function::ArgInfo arg_info;
 
-    auto var = to_varname(lis->car());
+    bind_cons_list(first,
+                   [&](Cons* c){
+                     var = to_varname(c->car());
+                     arg_info = parse_func_arg(c->cdr());
+                   });
+
     if(!var) return;
 
-    const auto& arg_info = parse_func_arg(lis->cdr());
     if(!arg_info){
       fprintf(stderr, "eval error: defined function argument is informal!\n");
       return;
     }
-    
+
     auto code = rest->cdr();
     if(!code.get<Cons*>()){
       fprintf(stderr, "eval error: definition has empty body!\n");
@@ -508,7 +506,6 @@ void eval_define(Lisp_ptr p){
 
     auto value = Lisp_ptr(new Function(code, Function::Type::interpreted, arg_info, VM.frame()));
     VM.set(var, value);
-
     VM.return_value() = value;
     return;
   }
