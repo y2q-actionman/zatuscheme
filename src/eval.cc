@@ -461,23 +461,26 @@ void eval_define(Lisp_ptr p){
 
   switch(first.tag()){
   case Ptr_tag::symbol: {
-    auto var = to_varname(first);
-    if(!var) return;
+    if(!to_varname(first)) return;
 
-    auto val_l = rest->cdr().get<Cons*>();
-    if(!val_l){
+    Lisp_ptr val;
+
+    auto len = bind_cons_list(rest->cdr(),
+                              [&](Cons* c){
+                                val = c->car();
+                              });
+
+    if(len < 1){
       fprintf(stderr, "eval error: definition has empty expr!\n");
       return;
-    }
-    if(val_l->cdr().tag() != Ptr_tag::cons
-       || val_l->cdr().get<Cons*>()){
+    }else if(len > 1){
       fprintf(stderr, "eval error: definition has extra expr!\n");
       return;
     }
 
     VM.code().push(Lisp_ptr{VM_op::set_});
-    VM.code().push(val_l->car());
-    VM.stack().push(Lisp_ptr(var));
+    VM.code().push(val);
+    VM.stack().push(first);
     return;
   }
 
