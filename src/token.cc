@@ -285,18 +285,30 @@ Token tokenize_string(FILE* f){
 }
 
 Token tokenize_number(FILE* f, char c1, char c2 = 0){
+  static const auto is_n_char = [](char c) -> bool {
+    switch(c){
+    case '+': case '-': case '.': case '@': case 'i':
+    case 'e': case 's': case 'f': case 'd': case 'l':
+    case '#': case 'b': case 'o': case 'x':
+      return true;
+    default:
+      return isxdigit(c);
+    }
+  };
+
   decltype(fgetc(f)) c;
   stringstream s;
 
   s.put(c1);
   if(c2) s.put(c2);
 
-  while(!is_delimiter(c = fgetc(f))){
+  while(is_n_char(c = fgetc(f))){
     s.put(c);
   }
   ungetc(c, f);
 
   if(auto n = parse_number(s)){
+    // TODO: push back unused chars.
     return Token{n};
   }else{
     return Token{};

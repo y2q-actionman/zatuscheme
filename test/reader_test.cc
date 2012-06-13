@@ -85,5 +85,24 @@ int main(){
   check_undef("#(a . b . c)");
   check("#((#((#(())))))", "#((#((#(())))))");
 
+  // reader macros
+  check("'1", "(quote 1)");
+  check("'()", "(quote ())");
+  check("''1", "(quote (quote 1))");
+  check("'('1)", "(quote ((quote 1)))");
+
+  check("`1", "(quasiquote 1)");
+  check("`()", "(quasiquote ())");
+  check("'`1", "(quote (quasiquote 1))");
+  check("`('1)", "(quasiquote ((quote 1)))");
+
+  check("`,1", "(quasiquote (unquote 1))");
+  check("`,()", "(quasiquote (unquote ()))");
+  check("'`1", "(quote (quasiquote 1))");
+  check("`(,'1)", "(quasiquote ((unquote (quote 1))))");
+
+  check("`(0,(+ 1 2))", "(quasiquote (0 (unquote (+ 1 2))))");
+  check("`(0,@(+ 1 2))", "(quasiquote (0 (unquote-splicing (+ 1 2))))");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
