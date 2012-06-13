@@ -64,43 +64,19 @@ void eval_begin(Lisp_ptr p){
 }
 
 /*
-  ret = proc.
   stack[0] = args
   ----
   code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
   stack = (arg-bottom)
 */
-void vm_op_funcall(){
-  auto proc = VM.return_value();
+void proc_call(Function* proc, VM_op call_op){
   auto args = VM.stack().top();
   VM.stack().pop();
-
-  if(proc.tag() != Ptr_tag::function){
-    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
-            stringify(proc.tag()));
-    VM.return_value() = {};
-    return;
-  }
-
-  auto fun = proc.get<Function*>();
-
-  VM_op call_op;
-
-  switch(fun->type()){
-  case Function::Type::interpreted:
-    call_op = VM_op::interpreted_call;
-    break;
-  case Function::Type::native:
-    call_op = VM_op::native_call;
-    break;
-  default:
-    UNEXP_DEFAULT();
-  }
 
   VM.code().push(Lisp_ptr(proc));
   VM.code().push(Lisp_ptr(call_op));
 
-  const auto& argi = fun->arg_info();
+  const auto& argi = proc->arg_info();
   int argc = 0;
 
   if(!do_list(args,
@@ -139,6 +115,60 @@ void vm_op_funcall(){
 }
 
 /*
+  stack[0] = args
+  ----
+  code = (call kind, proc, macro call)
+  stack = (arg1, arg2, ..., arg-bottom)
+*/
+void macro_call(Function* proc, VM_op call_op){
+  auto args = VM.stack().top();
+  VM.stack().pop();
+
+  VM.code().push(Lisp_ptr(VM_op::macro_call));
+  VM.code().push(Lisp_ptr(proc));
+  VM.code().push(Lisp_ptr(call_op));
+
+  VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
+  list_to_stack("macro-call", args, VM.stack());
+}
+
+
+/*
+  ret = proc
+  stack[0] = args
+  ---
+  goto proc_call or macro_call
+ */
+void vm_op_call(){
+  auto proc = VM.return_value();
+  if(proc.tag() != Ptr_tag::function){
+    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
+            stringify(proc.tag()));
+    VM.return_value() = {};
+    return;
+  }
+
+  auto fun = proc.get<Function*>();
+
+  switch(fun->type()){
+  case Function::Type::interpreted:
+    proc_call(fun, VM_op::interpreted_call);
+    return;
+  case Function::Type::interpreted_macro:
+    macro_call(fun, VM_op::interpreted_call);
+    return;
+  case Function::Type::native:
+    proc_call(fun, VM_op::native_call);
+    return;
+  case Function::Type::native_macro:
+    macro_call(fun, VM_op::native_call);
+    return;
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+/*
   ret = some value
   ----
   stack[0] = some value
@@ -169,9 +199,13 @@ void vm_op_native_call(){
   VM.code().pop();
   auto fun = proc.get<Function*>();
 
-  assert(fun->type() == Function::Type::native);
+  assert(fun->type() == Function::Type::native
+         || fun->type() == Function::Type::native_macro);
 
-  fun->get<Function::NativeFunc>()();
+  auto native_func = fun->get<Function::NativeFunc>();
+  assert(native_func);
+
+  native_func();
   if(!VM.return_value())
     fprintf(stderr, "eval warning: native func returned undef!\n");
 }
@@ -189,7 +223,8 @@ void vm_op_interpreted_call(){
   VM.code().pop();
   auto fun = proc.get<Function*>();
 
-  assert(fun->type() == Function::Type::interpreted);
+  assert(fun->type() == Function::Type::interpreted
+         || fun->type() == Function::Type::interpreted_macro);
   assert(!VM.stack().empty());
 
   const auto& argi = fun->arg_info();
@@ -255,6 +290,15 @@ void vm_op_interpreted_call(){
 */
 void vm_op_leave_frame(){
   VM.leave_frame();
+}  
+
+/*
+  ret = expanded proc
+  ----
+  code = proc
+*/
+void vm_op_macro_call(){
+  VM.code().push(VM.return_value());
 }  
 
 /*
@@ -669,17 +713,11 @@ void eval(){
             UNEXP_DEFAULT();
           }
           break;
-        }else{
-          // macro call?
-          //  try to find macro-function from symbol
-          //    found -> macro expansion
-          //    not found -> goto function calling
-          ;
         }
       }
 
-      // procedure call?
-      VM.code().push(Lisp_ptr(VM_op::funcall));
+      // procedure/macro call?
+      VM.code().push(Lisp_ptr(VM_op::call));
       VM.code().push(first);
       VM.stack().push(c->cdr());
       break;
@@ -690,12 +728,13 @@ void eval(){
       case VM_op::nop:      break;
       case VM_op::if_:      vm_op_if(); break;
       case VM_op::set_:     vm_op_set(); break;
-      case VM_op::funcall:  vm_op_funcall(); break;
+      case VM_op::call:     vm_op_call(); break;
       case VM_op::arg_push: vm_op_arg_push(); break;
       case VM_op::arg_push_list: vm_op_arg_push_list(); break;
       case VM_op::interpreted_call: vm_op_interpreted_call(); break;
       case VM_op::native_call:      vm_op_native_call(); break;
       case VM_op::leave_frame:      vm_op_leave_frame(); break;
+      case VM_op::macro_call:       vm_op_macro_call(); break;
       case VM_op::quasiquote:        vm_op_quasiquote(); break;
       case VM_op::quasiquote_list:    vm_op_quasiquote_list(); break;
       case VM_op::quasiquote_vector:  vm_op_quasiquote_vector(); break;
