@@ -32,30 +32,35 @@ Symbol* to_varname(Lisp_ptr p){
   return var;
 }
 
-/*
-  ----
-  code = (body1, body2, ...)
-*/
-void eval_begin(Lisp_ptr p){
-  // set up lambda body code
+template<typename StackT>
+void list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
   stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
   
-  do_list(p,
+  do_list(l,
           [&](Cons* c) -> bool {
             tmp.push(c->car());
             return true;
           },
           [&](Lisp_ptr last_cdr){
             if(!nullp(last_cdr)){
-              fprintf(stderr, "eval warning: body has dot list!\n");
+              fprintf(stderr, "eval warning: dot list has read as proper list. (in %s)\n",
+                      opname);
               tmp.push(last_cdr);
             }
           });
 
   while(!tmp.empty()){
-    VM.code().push(tmp.top());
+    st.push(tmp.top());
     tmp.pop();
   }
+}  
+
+/*
+  ----
+  code = (body1, body2, ...)
+*/
+void eval_begin(Lisp_ptr p){
+  list_to_stack("begin", p, VM.code());
 }
 
 /*
@@ -148,25 +153,7 @@ void vm_op_arg_push(){
   stack = (list[0], list[1], ...)
 */
 void vm_op_arg_push_list(){
-  stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
-  auto l = VM.return_value();
-
-  do_list(l,
-          [&](Cons* c) -> bool {
-            tmp.push(c->car());
-            return true;
-          },
-          [&](Lisp_ptr last){
-            if(!nullp(last)){
-              fprintf(stderr, "eval warning: pushing args from dot-list!\n");
-              tmp.push(last);
-            }
-          });
-
-  while(!tmp.empty()){
-    VM.stack().push(tmp.top());
-    tmp.pop();
-  }
+  list_to_stack("unquote-splicing", VM.return_value(), VM.stack());
 }
 
 /*
@@ -495,9 +482,14 @@ void eval_define(Lisp_ptr p){
 /*
   code[0] = template
   ----
-  * vector
-      code = (quasiquote, template[0], arg_push, ..., stack_to_vector)
-  * list
+  * vector, list
+      code = (quasiquote, template[0], arg_push, # normal
+              template[1], arg_push,             # unquote
+              template[2], arg_push_list,        # unquote-splicing
+              ...,
+              stack_to_{list or vector}
+              )
+      stack[0] = arg_bottom
   * default
       return = template
 */
