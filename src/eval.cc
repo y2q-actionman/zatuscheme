@@ -284,7 +284,7 @@ void eval_lambda(Lisp_ptr p){
     return;
   }
 
-  auto fun = new Function(code, arg_info, VM.frame());
+  auto fun = new Function(code, Function::Type::interpreted, arg_info, VM.frame());
 
   VM.return_value() = Lisp_ptr{fun};
   return;
@@ -466,7 +466,7 @@ void eval_define(Lisp_ptr p){
       return;
     }
 
-    auto value = Lisp_ptr(new Function(code, arg_info, VM.frame()));
+    auto value = Lisp_ptr(new Function(code, Function::Type::interpreted, arg_info, VM.frame()));
     VM.set(var, value);
 
     VM.return_value() = value;

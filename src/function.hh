@@ -10,7 +10,9 @@ public:
 
   enum class Type {
     interpreted,
-    native
+    native,
+    interpreted_macro,
+    native_macro
   };
 
   struct ArgInfo {
@@ -28,10 +30,10 @@ public:
     }
   };
 
-  explicit Function(Lisp_ptr code, const ArgInfo& a, Lisp_ptr e)
-    : type_(Type::interpreted), argi_(a), code_(code), env_(e){}
-  explicit constexpr Function(NativeFunc f, const ArgInfo& a)
-    : type_(Type::native), argi_(a), n_func_(f), env_(){}
+  constexpr Function(Lisp_ptr code, Type t, const ArgInfo& a, Lisp_ptr e)
+    : type_(t), argi_(a), code_(code), env_(e){}
+  constexpr Function(NativeFunc f, Type t, const ArgInfo& a)
+    : type_(t), argi_(a), n_func_(f), env_(){}
 
   Function(const Function&) = default;
   Function(Function&&) = default;

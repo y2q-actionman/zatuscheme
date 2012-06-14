@@ -25,8 +25,7 @@ array<Lisp_ptr, i> pick_args(){
 
 } // namespace
 
-
-void plus_2(){
+static void plus_2(){
   auto args = pick_args<2>();
 
   VM.return_value() = {};
@@ -100,10 +99,11 @@ void stack_to_vector(){
 }
 
 template <Ptr_tag p>
+static
 void type_check_pred(){
   auto args = pick_args<1>();
   VM.return_value() = {args[0].tag() == p};
-}  
+}
 
 static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
@@ -147,25 +147,54 @@ static struct Entry {
   Function func;
 } 
 builtin_func[] = {
-  {"+", Function{plus_2,{{}, 2, true}}},
+  {"+", Function{
+      plus_2,
+      Function::Type::native, {{}, 2, true}}},
   {"list", Function{
       [](){stack_to_list(false);}, 
-      {{}, 1, true}}},
+      Function::Type::native, {{}, 1, true}}},
   {"list*", Function{
       [](){stack_to_list(true);}, 
-      {{}, 1, true}}},
-  {"vector", Function{stack_to_vector, {{}, 1, true}}},
-  {"boolean?", Function{type_check_pred<Ptr_tag::boolean>, {{}, 1, false}}},
-  {"symbol?", Function{type_check_pred<Ptr_tag::symbol>, {{}, 1, false}}},
-  {"char?", Function{type_check_pred<Ptr_tag::character>, {{}, 1, false}}},
-  {"vector?", Function{type_check_pred<Ptr_tag::vector>, {{}, 1, false}}},
-  {"procedure?", Function{type_check_pred<Ptr_tag::function>, {{}, 1, false}}},
-  // {"pair?", Function{type_check_pred<Ptr_tag::cons>, {{}, 1, false}}}, // this evaluates nil is #t!
-  {"number?", Function{type_check_pred<Ptr_tag::number>, {{}, 1, false}}},
-  {"string?", Function{type_check_pred<Ptr_tag::string>, {{}, 1, false}}},
-  {"port?", Function{type_check_pred<Ptr_tag::port>, {{}, 1, false}}},
-  {"eql", Function{eql, {{}, 2, false}}},
-  {"eq", Function{eq, {{}, 2, false}}}
+      Function::Type::native, {{}, 1, true}}},
+  {"vector", Function{
+      stack_to_vector, 
+      Function::Type::native, {{}, 1, true}}},
+  {"boolean?", Function{
+      type_check_pred<Ptr_tag::boolean>, 
+      Function::Type::native, {{}, 1, false}}},
+  {"symbol?", Function{
+      type_check_pred<Ptr_tag::symbol>,
+      Function::Type::native, {{}, 1, false}}},
+  {"char?", Function{
+      type_check_pred<Ptr_tag::character>,
+      Function::Type::native, {{}, 1, false}}},
+  {"vector?", Function{
+      type_check_pred<Ptr_tag::vector>,
+      Function::Type::native, {{}, 1, false}}},
+  {"procedure?", Function{
+      type_check_pred<Ptr_tag::function>,
+      Function::Type::native, {{}, 1, false}}},
+  {"pair?", Function{
+      [](){
+        auto args = pick_args<1>();
+        VM.return_value() = {(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
+      },
+      Function::Type::native, {{}, 1, false}}},
+  {"number?", Function{
+      type_check_pred<Ptr_tag::number>,
+      Function::Type::native, {{}, 1, false}}},
+  {"string?", Function{
+      type_check_pred<Ptr_tag::string>,
+      Function::Type::native, {{}, 1, false}}},
+  {"port?", Function{
+      type_check_pred<Ptr_tag::port>,
+      Function::Type::native, {{}, 1, false}}},
+  {"eql", Function{
+      eql,
+      Function::Type::native, {{}, 2, false}}},
+  {"eq", Function{
+      eq,
+      Function::Type::native, {{}, 2, false}}}
 };
 
 void install_builtin(){
