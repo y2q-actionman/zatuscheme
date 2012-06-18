@@ -20,7 +20,7 @@ Lisp_ptr read_from_string(const char* s){
 }
 
 bool eql(Lisp_ptr a, Lisp_ptr b){
-  VM.stack().push({VM_op::arg_bottom});
+  VM.stack().push(Lisp_ptr(static_cast<VM_op>(nullptr)));
   VM.stack().push(a);
   VM.stack().push(b);
   eql();

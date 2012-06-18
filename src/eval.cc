@@ -14,7 +14,8 @@ using namespace std;
 
 namespace {
 
-inline
+static constexpr VM_op vm_op_arg_bottom = nullptr;
+
 Symbol* to_varname(Lisp_ptr p){
   Symbol* var = p.get<Symbol*>();
 
@@ -64,6 +65,15 @@ void eval_begin(Lisp_ptr p){
 }
 
 /*
+  ret = some value
+  ----
+  stack[0] = some value
+*/
+void vm_op_arg_push(){
+  VM.stack().push(VM.return_value());
+}
+
+/*
   stack[0] = args
   ----
   code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
@@ -81,7 +91,7 @@ void proc_call(Function* proc, VM_op call_op){
 
   if(!do_list(args,
               [&](Cons* cell) -> bool{
-                VM.code().push(Lisp_ptr(VM_op::arg_push));
+                VM.code().push(Lisp_ptr(vm_op_arg_push));
                 VM.code().push(cell->car());
                 ++argc;
 
@@ -111,8 +121,17 @@ void proc_call(Function* proc, VM_op call_op){
     return;
   }
   
-  VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
+  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
 }
+
+/*
+  ret = expanded proc
+  ----
+  code = proc
+*/
+void vm_op_macro_call(){
+  VM.code().push(VM.return_value());
+}  
 
 /*
   stack[0] = args
@@ -124,67 +143,21 @@ void macro_call(Function* proc, VM_op call_op){
   auto args = VM.stack().top();
   VM.stack().pop();
 
-  VM.code().push(Lisp_ptr(VM_op::macro_call));
+  VM.code().push(Lisp_ptr(vm_op_macro_call));
   VM.code().push(Lisp_ptr(proc));
   VM.code().push(Lisp_ptr(call_op));
 
-  VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
+  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
   list_to_stack("macro-call", args, VM.stack());
 }
 
-
 /*
-  ret = proc
-  stack[0] = args
-  ---
-  goto proc_call or macro_call
- */
-void vm_op_call(){
-  auto proc = VM.return_value();
-  if(proc.tag() != Ptr_tag::function){
-    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
-            stringify(proc.tag()));
-    VM.return_value() = {};
-    return;
-  }
-
-  auto fun = proc.get<Function*>();
-
-  switch(fun->type()){
-  case Function::Type::interpreted:
-    proc_call(fun, VM_op::interpreted_call);
-    return;
-  case Function::Type::interpreted_macro:
-    macro_call(fun, VM_op::interpreted_call);
-    return;
-  case Function::Type::native:
-    proc_call(fun, VM_op::native_call);
-    return;
-  case Function::Type::native_macro:
-    macro_call(fun, VM_op::native_call);
-    return;
-  default:
-    UNEXP_DEFAULT();
-  }
-}
-
-/*
-  ret = some value
-  ----
-  stack[0] = some value
+  leaves frame.
+  no stack operations.
 */
-void vm_op_arg_push(){
-  VM.stack().push(VM.return_value());
-}
-
-/*
-  ret = list
-  ----
-  stack = (list[0], list[1], ...)
-*/
-void vm_op_arg_push_list(){
-  list_to_stack("unquote-splicing", VM.return_value(), VM.stack());
-}
+void vm_op_leave_frame(){
+  VM.leave_frame();
+}  
 
 /*
   code = (proc)
@@ -231,19 +204,19 @@ void vm_op_interpreted_call(){
 
   // tail call check
   if(!VM.code().empty()
-     && VM.code().top().get<VM_op>() == VM_op::leave_frame){
+     && VM.code().top().get<VM_op>() == vm_op_leave_frame){
     VM.code().pop();
     VM.leave_frame();
   }
 
   VM.enter_frame(push_frame(fun->closure()));
-  VM.code().push(Lisp_ptr(VM_op::leave_frame));
+  VM.code().push(Lisp_ptr(vm_op_leave_frame));
 
   Lisp_ptr arg_name = argi.head;
   Lisp_ptr st_top;
 
   // normal arg push
-  while((st_top = VM.stack().top()).get<VM_op>() != VM_op::arg_bottom){
+  while((st_top = VM.stack().top()).tag() != Ptr_tag::vm_op){
     VM.stack().pop();
     if(VM.stack().empty()){
       fprintf(stderr, "eval internal error: no args and no managed funcall!\n");
@@ -272,7 +245,7 @@ void vm_op_interpreted_call(){
     VM.local_set(arg_name.get<Symbol*>(), VM.return_value());
   }else{  // clean stack
     if(VM.stack().empty()
-       || VM.stack().top().get<VM_op>() != VM_op::arg_bottom){
+       || VM.stack().top().tag() != Ptr_tag::vm_op){
       fprintf(stderr, "eval error: corrupted stack -- no bottom found!\n");
       VM.return_value() = {};
       return;
@@ -285,22 +258,40 @@ void vm_op_interpreted_call(){
 }
 
 /*
-  leaves frame.
-  no stack operations.
+  ret = proc
+  stack[0] = args
+  ---
+  goto proc_call or macro_call
 */
-void vm_op_leave_frame(){
-  VM.leave_frame();
-}  
+void vm_op_call(){
+  auto proc = VM.return_value();
+  if(proc.tag() != Ptr_tag::function){
+    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
+            stringify(proc.tag()));
+    VM.return_value() = {};
+    return;
+  }
+ 
+  auto fun = proc.get<Function*>();
 
-/*
-  ret = expanded proc
-  ----
-  code = proc
-*/
-void vm_op_macro_call(){
-  VM.code().push(VM.return_value());
-}  
-
+  switch(fun->type()){
+  case Function::Type::interpreted:
+    proc_call(fun, vm_op_interpreted_call);
+    return;
+  case Function::Type::interpreted_macro:
+    macro_call(fun, vm_op_interpreted_call);
+    return;
+  case Function::Type::native:
+    proc_call(fun, vm_op_native_call);
+    return;
+  case Function::Type::native_macro:
+    macro_call(fun, vm_op_native_call);
+    return;
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+ 
 /*
   ret = proc.
   no stack operations.
@@ -328,6 +319,26 @@ void eval_lambda(Lisp_ptr p){
 
   VM.return_value() = 
     Lisp_ptr{new Function(code, Function::Type::interpreted, arg_info, VM.frame())};
+}
+
+/*
+  stack = (consequent, alternative)
+  ----
+  stack = ()
+  code = (consequent or alternative)
+*/
+void vm_op_if(){
+  auto test_result = VM.return_value();
+
+  if(test_result.get<bool>()){
+    VM.code().push(VM.stack().top());
+    VM.stack().pop();
+    VM.stack().pop();
+  }else{
+    VM.stack().pop();
+    VM.code().push(VM.stack().top());
+    VM.stack().pop();
+  }
 }
 
 /*
@@ -362,7 +373,7 @@ void eval_if(Lisp_ptr p){
   }
 
   // evaluating
-  VM.code().push(Lisp_ptr(VM_op::if_));
+  VM.code().push(Lisp_ptr(vm_op_if));
   VM.code().push(test);
 
   VM.stack().push(alt);
@@ -370,23 +381,19 @@ void eval_if(Lisp_ptr p){
 }
 
 /*
-  stack = (consequent, alternative)
+  stack = (variable name)
   ----
   stack = ()
-  code = (consequent or alternative)
 */
-void vm_op_if(){
-  auto test_result = VM.return_value();
-
-  if(test_result.get<bool>()){
-    VM.code().push(VM.stack().top());
-    VM.stack().pop();
-    VM.stack().pop();
-  }else{
-    VM.stack().pop();
-    VM.code().push(VM.stack().top());
-    VM.stack().pop();
+void vm_op_set(){
+  auto var = VM.stack().top().get<Symbol*>();
+  VM.stack().pop();
+  if(!var){
+    fprintf(stderr, "eval error: internal error occured (set!'s varname is dismissed)\n");
+    return;
   }
+
+  VM.set(var, VM.return_value());
 }
 
 /*
@@ -423,25 +430,9 @@ void eval_set(const char* opname, Lisp_ptr p){
   }
 
   // evaluating
-  VM.code().push(Lisp_ptr{VM_op::set_});
+  VM.code().push(Lisp_ptr{vm_op_set});
   VM.code().push(val);
   VM.stack().push(Lisp_ptr{var});
-}
-
-/*
-  stack = (variable name)
-  ----
-  stack = ()
-*/
-void vm_op_set(){
-  auto var = VM.stack().top().get<Symbol*>();
-  VM.stack().pop();
-  if(!var){
-    fprintf(stderr, "eval error: internal error occured (set!'s varname is dismissed)\n");
-    return;
-  }
-
-  VM.set(var, VM.return_value());
 }
 
 /*
@@ -500,6 +491,23 @@ void eval_define(Lisp_ptr p){
 }
 
 /*
+  ret = list
+  ----
+  stack = (list[0], list[1], ...)
+*/
+void vm_op_arg_push_list(){
+  list_to_stack("unquote-splicing", VM.return_value(), VM.stack());
+}
+
+void vm_op_quasiquote_list(){
+  stack_to_list(true);
+}
+
+void vm_op_quasiquote_vector(){
+  stack_to_vector();
+}
+
+/*
   code[0] = template
   ----
   * vector, list
@@ -519,11 +527,11 @@ void vm_op_quasiquote(){
       if(auto l_first_sym = l->car().get<Symbol*>()){
         switch(l_first_sym->to_keyword()){
         case Keyword::unquote:
-          VM.code().push(Lisp_ptr(VM_op::arg_push));
+          VM.code().push(Lisp_ptr(vm_op_arg_push));
           VM.code().push(l->cdr().get<Cons*>()->car());
           return;
         case Keyword::unquote_splicing:
-          VM.code().push(Lisp_ptr(VM_op::arg_push_list));
+          VM.code().push(Lisp_ptr(vm_op_arg_push_list));
           VM.code().push(l->cdr().get<Cons*>()->car());
           return;
         default:
@@ -532,9 +540,9 @@ void vm_op_quasiquote(){
       }
     }
 
-    VM.code().push(Lisp_ptr(VM_op::arg_push));
+    VM.code().push(Lisp_ptr(vm_op_arg_push));
     VM.code().push(p);
-    VM.code().push(Lisp_ptr(VM_op::quasiquote));
+    VM.code().push(Lisp_ptr(vm_op_quasiquote));
   };
 
   auto p = VM.code().top();
@@ -565,8 +573,8 @@ void vm_op_quasiquote(){
     }
 
     // generic lists
-    VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
-    VM.code().push(Lisp_ptr(VM_op::quasiquote_list));
+    VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
+    VM.code().push(Lisp_ptr(vm_op_quasiquote_list));
 
     do_list(p,
             [](Cons* c) -> bool {
@@ -580,8 +588,8 @@ void vm_op_quasiquote(){
     return;
   }
   case Ptr_tag::vector: {
-    VM.stack().push(Lisp_ptr(VM_op::arg_bottom));
-    VM.code().push(Lisp_ptr(VM_op::quasiquote_vector));
+    VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
+    VM.code().push(Lisp_ptr(vm_op_quasiquote_vector));
 
     auto v = p.get<Vector*>();
     for(auto i = begin(*v); i != end(*v); ++i){
@@ -594,14 +602,6 @@ void vm_op_quasiquote(){
     VM.return_value() = p;
     return;
   }
-}
-
-void vm_op_quasiquote_list(){
-  stack_to_list(true);
-}
-
-void vm_op_quasiquote_vector(){
-  stack_to_vector();
 }
 
 } // namespace
@@ -656,7 +656,7 @@ void eval(){
           case Keyword::begin:  eval_begin(r); break;
           case Keyword::quasiquote: 
             VM.code().push(r.get<Cons*>()->car());
-            VM.code().push(Lisp_ptr(VM_op::quasiquote));
+            VM.code().push(Lisp_ptr(vm_op_quasiquote));
             break;
 
           case Keyword::cond:
@@ -693,29 +693,18 @@ void eval(){
       }
 
       // procedure/macro call?
-      VM.code().push(Lisp_ptr(VM_op::call));
+      VM.code().push(Lisp_ptr(vm_op_call));
       VM.code().push(first);
       VM.stack().push(c->cdr());
       break;
     }
 
     case Ptr_tag::vm_op:
-      switch(p.get<VM_op>()){
-      case VM_op::nop:      break;
-      case VM_op::if_:      vm_op_if(); break;
-      case VM_op::set_:     vm_op_set(); break;
-      case VM_op::call:     vm_op_call(); break;
-      case VM_op::arg_push: vm_op_arg_push(); break;
-      case VM_op::arg_push_list: vm_op_arg_push_list(); break;
-      case VM_op::interpreted_call: vm_op_interpreted_call(); break;
-      case VM_op::native_call:      vm_op_native_call(); break;
-      case VM_op::leave_frame:      vm_op_leave_frame(); break;
-      case VM_op::macro_call:       vm_op_macro_call(); break;
-      case VM_op::quasiquote:        vm_op_quasiquote(); break;
-      case VM_op::quasiquote_list:    vm_op_quasiquote_list(); break;
-      case VM_op::quasiquote_vector:  vm_op_quasiquote_vector(); break;
-      default:
-        UNEXP_DEFAULT();
+      if(auto op = p.get<VM_op>()){
+        op();
+      }else{
+        fprintf(stderr, "eval internal error: null VM operation was found.\n");
+        VM.return_value() = {};
       }
       break;
     

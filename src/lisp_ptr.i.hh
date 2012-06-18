@@ -127,12 +127,12 @@ Lisp_ptr::Lisp_ptr<char>(char c)
 template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<VM_op>(VM_op o)
-: tag_(to_tag<Ptr_tag, VM_op>()), u_(static_cast<int>(o)){}
+: tag_(to_tag<Ptr_tag, VM_op>()), u_(o){}
 
 template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<Ptr_tag>(Ptr_tag p)
-: tag_(p), u_(nullptr){}
+: tag_(p), u_(static_cast<void*>(nullptr)){}
 
 template<typename T>
 inline constexpr
@@ -158,9 +158,8 @@ char Lisp_ptr::get<char>() const {
 template<>
 inline
 VM_op Lisp_ptr::get<VM_op>() const {
-  return static_cast<VM_op>
-    (tag() == to_tag<Ptr_tag, VM_op>()
-     ? u_.i_ : 0);
+  return (tag() == to_tag<Ptr_tag, VM_op>()
+     ? u_.f_ : nullptr);
 }
 
 template<>

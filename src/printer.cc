@@ -91,7 +91,7 @@ void print(FILE* f, Lisp_ptr p){
     break;
 
   case Ptr_tag::vm_op:
-    fprintf(f, "<VM operation %d>", static_cast<int>(p.get<VM_op>()));
+    fprintf(f, "<VM operation %p>", p.get<void*>());
     break;
     
   default:
