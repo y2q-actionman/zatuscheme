@@ -397,11 +397,27 @@ void vm_op_set(){
 }
 
 /*
+  stack = (variable name)
+  ----
+  stack = ()
+*/
+void vm_op_local_set(){
+  auto var = VM.stack().top().get<Symbol*>();
+  VM.stack().pop();
+  if(!var){
+    fprintf(stderr, "eval error: internal error occured (set!'s varname is dismissed)\n");
+    return;
+  }
+
+  VM.local_set(var, VM.return_value());
+}
+
+/*
   ----
   code = (value, VM::if)
   stack = (variable name)
 */
-void eval_set(const char* opname, Lisp_ptr p){
+void eval_set(const char* opname, Lisp_ptr p, VM_op set_op){
   VM.return_value() = {};
 
   // extracting
@@ -430,7 +446,7 @@ void eval_set(const char* opname, Lisp_ptr p){
   }
 
   // evaluating
-  VM.code().push(Lisp_ptr{vm_op_set});
+  VM.code().push(Lisp_ptr{set_op});
   VM.code().push(val);
   VM.stack().push(Lisp_ptr{var});
 }
@@ -451,7 +467,7 @@ void eval_define(Lisp_ptr p){
   auto first = rest->car();
 
   if(first.tag() == Ptr_tag::symbol){
-    eval_set("define(value set)", p);
+    eval_set("define(value set)", p, vm_op_local_set);
     return;
   }else if(first.tag() == Ptr_tag::cons){
     Symbol* var = nullptr;
@@ -477,7 +493,7 @@ void eval_define(Lisp_ptr p){
     }
 
     auto value = Lisp_ptr(new Function(code, Function::Type::interpreted, arg_info, VM.frame()));
-    VM.set(var, value);
+    VM.local_set(var, value);
     VM.return_value() = value;
     return;
   }else{
@@ -640,7 +656,7 @@ void eval(){
             break;
           case Keyword::lambda: eval_lambda(r); break;
           case Keyword::if_:    eval_if(r); break;
-          case Keyword::set_:   eval_set("set!", r); break;
+          case Keyword::set_:   eval_set("set!", r, vm_op_set); break;
           case Keyword::define: eval_define(r); break;
           case Keyword::begin:  eval_begin(r); break;
           case Keyword::quasiquote: 
