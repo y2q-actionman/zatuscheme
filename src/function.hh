@@ -10,9 +10,13 @@ public:
 
   enum class Type {
     interpreted,
-    native,
-    interpreted_macro,
-    native_macro
+    native
+  };
+
+  enum class Calling {
+    function,
+    macro,
+    whole_macro
   };
 
   struct ArgInfo {
@@ -30,10 +34,10 @@ public:
     }
   };
 
-  constexpr Function(Lisp_ptr code, Type t, const ArgInfo& a, Lisp_ptr e)
-    : type_(t), argi_(a), code_(code), env_(e){}
-  constexpr Function(NativeFunc f, Type t, const ArgInfo& a)
-    : type_(t), argi_(a), n_func_(f), env_(){}
+  constexpr Function(Lisp_ptr code, Calling c, const ArgInfo& a, Lisp_ptr e)
+    : type_(Type::interpreted), calling_(c), argi_(a), code_(code), env_(e){}
+  constexpr Function(NativeFunc f, Calling c, const ArgInfo& a)
+    : type_(Type::native), calling_(c), argi_(a), n_func_(f), env_(){}
 
   Function(const Function&) = default;
   Function(Function&&) = default;
@@ -44,8 +48,11 @@ public:
   Function& operator=(Function&&) = default;
 
 
-  const Type& type() const
+  Type type() const
   { return type_; }
+
+  Calling calling() const
+  { return calling_; }
 
   const ArgInfo& arg_info() const
   { return argi_; }
@@ -58,6 +65,7 @@ public:
   
 private:
   const Type type_;
+  const Calling calling_;
   const ArgInfo argi_;
   union{
     Lisp_ptr code_;

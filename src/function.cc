@@ -32,12 +32,21 @@ const char* stringify(Function::Type t){
     return "interpreted";
   case Function::Type::native:
     return "native";
-  case Function::Type::interpreted_macro:
-    return "interpreted macro";
-  case Function::Type::native_macro:
-    return "native macro";
   default:
     return "(unknown function type)";
+  }
+}
+
+const char* stringify(Function::Calling c){
+  switch(c){
+  case Function::Calling::function:
+    return "function";
+  case Function::Calling::macro:
+    return "macro";
+  case Function::Calling::whole_macro:
+    return "whole_macro";
+  default:
+    return "(unknown calling type)";
   }
 }
 

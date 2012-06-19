@@ -16,25 +16,27 @@ template<>
 Lisp_ptr to_type<Function::Type::interpreted>() = delete;
 
 template<>
-Lisp_ptr to_type<Function::Type::interpreted_macro>() = delete;
-
-template<>
 Function::NativeFunc to_type<Function::Type::native>() = delete;
 
 template<>
-Function::NativeFunc to_type<Function::Type::native_macro>() = delete;
+inline constexpr
+Function::Type to_tag<Function::Type, Lisp_ptr>(){
+  return Function::Type::interpreted;
+}
 
-// type -> tag is ambiguous..
+template<>
+inline constexpr
+Function::Type to_tag<Function::Type, Function::NativeFunc>(){
+  return Function::Type::native;
+}
 
 
 template<> inline
 Lisp_ptr Function::get() const{
   switch(type_){
   case Function::Type::interpreted:
-  case Function::Type::interpreted_macro:
     return code_;
   case Function::Type::native:
-  case Function::Type::native_macro:
     return {};
   default:
     UNEXP_DEFAULT();
@@ -45,10 +47,8 @@ template<> inline
 Function::NativeFunc Function::get() const{
   switch(type_){
   case Function::Type::interpreted:
-  case Function::Type::interpreted_macro:
     return nullptr;
   case Function::Type::native:
-  case Function::Type::native_macro:
     return n_func_;
   default:
     UNEXP_DEFAULT();

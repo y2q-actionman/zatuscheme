@@ -172,8 +172,7 @@ void vm_op_native_call(){
   VM.code().pop();
   auto fun = proc.get<Function*>();
 
-  assert(fun->type() == Function::Type::native
-         || fun->type() == Function::Type::native_macro);
+  assert(fun->type() == Function::Type::native);
 
   auto native_func = fun->get<Function::NativeFunc>();
   assert(native_func);
@@ -196,8 +195,7 @@ void vm_op_interpreted_call(){
   VM.code().pop();
   auto fun = proc.get<Function*>();
 
-  assert(fun->type() == Function::Type::interpreted
-         || fun->type() == Function::Type::interpreted_macro);
+  assert(fun->type() == Function::Type::interpreted);
   assert(!VM.stack().empty());
 
   const auto& argi = fun->arg_info();
@@ -274,19 +272,21 @@ void vm_op_call(){
  
   auto fun = proc.get<Function*>();
 
+  VM_op op;
   switch(fun->type()){
   case Function::Type::interpreted:
-    proc_call(fun, vm_op_interpreted_call);
-    return;
-  case Function::Type::interpreted_macro:
-    macro_call(fun, vm_op_interpreted_call);
-    return;
+    op = vm_op_interpreted_call; break;
   case Function::Type::native:
-    proc_call(fun, vm_op_native_call);
-    return;
-  case Function::Type::native_macro:
-    macro_call(fun, vm_op_native_call);
-    return;
+    op = vm_op_native_call; break;
+  default:
+    UNEXP_DEFAULT();
+  }
+
+  switch(fun->calling()){
+  case Function::Calling::function:
+    proc_call(fun, op); return;
+  case Function::Calling::macro:
+    macro_call(fun, op); return;
   default:
     UNEXP_DEFAULT();
   }
@@ -318,7 +318,7 @@ void eval_lambda(Lisp_ptr p){
   }
 
   VM.return_value() = 
-    Lisp_ptr{new Function(code, Function::Type::interpreted, arg_info, VM.frame())};
+    Lisp_ptr{new Function(code, Function::Calling::function, arg_info, VM.frame())};
 }
 
 /*
@@ -492,7 +492,7 @@ void eval_define(Lisp_ptr p){
       return;
     }
 
-    auto value = Lisp_ptr(new Function(code, Function::Type::interpreted, arg_info, VM.frame()));
+    auto value = Lisp_ptr(new Function(code, Function::Calling::function, arg_info, VM.frame()));
     VM.local_set(var, value);
     VM.return_value() = value;
     return;
