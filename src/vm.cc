@@ -6,42 +6,26 @@ VM_t::VM_t() : codes_(), stack_(),
                frame_(new Cons(Lisp_ptr(new Env()), Cons::NIL)),
                frame_history_(){}
 
-Lisp_ptr VM_t::find(Symbol* s) const{
-  Lisp_ptr ret;
+Lisp_ptr VM_t::traverse(Symbol* s, Lisp_ptr p){
+  Lisp_ptr old = {};
 
   do_list(frame_,
           [&](Cons* c) -> bool {
             auto e = c->car().get<Env*>();
             auto ei = e->find(s);
             if(ei != e->end()){
-              ret = ei->second;
+              old = ei->second;
+              if(p){
+                e->erase(ei);
+                e->insert({s, p});
+              }
               return false;
             }
             return true;
           },
           [](Lisp_ptr){});
 
-  return ret;
-}
-
-void VM_t::set(Symbol* s, Lisp_ptr p){
-  bool found = false;
-
-  do_list(frame_,
-          [&](Cons* c) -> bool {
-            auto e = c->car().get<Env*>();
-            auto ei = e->find(s);
-            if(ei != e->end()){
-              found = true;
-              e->erase(ei);
-              e->insert({s, p});
-              return false;
-            }
-            return true;
-          },
-          [](Lisp_ptr){});
-
-  if(!found) local_set(s, p);
+  return old;
 }
 
 void VM_t::local_set(Symbol* s, Lisp_ptr p){

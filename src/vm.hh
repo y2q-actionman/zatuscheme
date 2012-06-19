@@ -31,7 +31,7 @@ public:
   Lisp_ptr frame() const
   { return frame_; }
   
-  Lisp_ptr find(Symbol*) const;
+  Lisp_ptr find(Symbol*);
   void set(Symbol*, Lisp_ptr);
   void local_set(Symbol*, Lisp_ptr);
 
@@ -44,6 +44,8 @@ private:
   Lisp_ptr return_value_;
   Lisp_ptr frame_;
   stack_t frame_history_;
+
+  Lisp_ptr traverse(Symbol*, Lisp_ptr);
 };
 
 Lisp_ptr push_frame(Lisp_ptr);
