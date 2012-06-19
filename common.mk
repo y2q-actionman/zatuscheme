@@ -1,6 +1,7 @@
 warning_flags = -Wall -Wextra -Wformat=2 -Winit-self -Wshadow\
 		-Wpointer-arith -Wcast-qual -Wcast-align\
 		-Wlogical-op -Wredundant-decls\
+		-Wswitch-enum\
 		-pedantic\
 		-fno-nonansi-builtins
 #		-Wzero-as-null-pointer-constant

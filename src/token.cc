@@ -98,12 +98,9 @@ Token& Token::assign_from_other(T other){
     
   case Type::identifier:
   case Type::string:
-    switch(other.type()){
-    case Type::identifier:
-    case Type::string:
+    if(other.type() == Type::identifier || other.type() == Type::string){
       this->str_ = move(other.str_);
-      break;
-    default:
+    }else{
       str_.~string();
       new (this) Token(move(other));
     }

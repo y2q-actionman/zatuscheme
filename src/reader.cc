@@ -19,13 +19,11 @@ Lisp_ptr read_list(FILE* f){
   if(!t){
     return Lisp_ptr{};
   }else if(t.type() == Token::Type::notation){
-    switch(t.get<Token::Notation>()){
-    case Token::Notation::r_paren: // empty list
+    auto n = t.get<Token::Notation>();
+    if(n == Token::Notation::r_paren){ // empty list
       return Cons::NIL;
-    case Token::Notation::dot:     // error: dotted list has no car.
-      return Lisp_ptr{};
-    default:
-      break;
+    }else if(n == Token::Notation::dot){ // error: dotted list has no car.
+      return {};
     }
   }
 
@@ -48,11 +46,11 @@ Lisp_ptr read_list(FILE* f){
       free_cons_list(head);
       return Lisp_ptr{};
     }else if(t.type() == Token::Type::notation){
-      switch(t.get<Token::Notation>()){
-      case Token::Notation::r_paren: // proper list
+      auto n = t.get<Token::Notation>();
+      if(n == Token::Notation::r_paren){ // proper list
         c->rplacd(Cons::NIL);
         goto end;
-      case Token::Notation::dot:     // dotted list
+      }else if(n == Token::Notation::dot){ // dotted list
         c->rplacd(read(f));
         t = tokenize(f);
         if(t.type() != Token::Type::notation
@@ -60,8 +58,6 @@ Lisp_ptr read_list(FILE* f){
           return Lisp_ptr{}; // error: dotted list has two or more cdrs.
         }
         goto end;
-      default:
-        break;
       }
     }
     

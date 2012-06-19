@@ -69,6 +69,7 @@ Number::complex_type Number::get() const{
     return complex_type{f_};
   case Type::integer:
     return complex_type{static_cast<real_type>(i_)};
+  case Type::uninitialized:
   default:
     UNEXP_CONVERSION("(unknown)", "complex");
   }
@@ -83,6 +84,7 @@ Number::real_type Number::get() const{
   case Type::integer:
     return static_cast<real_type>(i_);
   case Type::complex:
+  case Type::uninitialized:
   default:
     UNEXP_CONVERSION("(number has imag)", "real");
   }
@@ -96,6 +98,7 @@ Number::integer_type Number::get() const{
     return i_;
   case Type::complex:
   case Type::real:
+  case Type::uninitialized:
   default:
     UNEXP_CONVERSION("(inexact)", "integer");
   }

@@ -91,13 +91,10 @@ Token::~Token(){
 template<>
 inline
 std::string Token::get() const{
-  switch(type_){
-  case Type::identifier:
-  case Type::string:
+  if(type_ == Type::identifier || type_ == Type::string)
     return str_;
-  default:
+  else
     UNEXP_CONVERSION("(no string token)", "string");
-  }
 }
 
 template<>
