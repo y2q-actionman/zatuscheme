@@ -450,12 +450,10 @@ void eval_define(Lisp_ptr p){
   // extracting
   auto first = rest->car();
 
-  switch(first.tag()){
-  case Ptr_tag::symbol:
+  if(first.tag() == Ptr_tag::symbol){
     eval_set("define(value set)", p);
     return;
-
-  case Ptr_tag::cons: {
+  }else if(first.tag() == Ptr_tag::cons){
     Symbol* var = nullptr;
     Function::ArgInfo arg_info;
 
@@ -482,9 +480,7 @@ void eval_define(Lisp_ptr p){
     VM.set(var, value);
     VM.return_value() = value;
     return;
-  }
-
-  default:
+  }else{
     fprintf(stderr, "eval error: informal define syntax!\n");
     return;
   }
@@ -525,17 +521,15 @@ void vm_op_quasiquote(){
   static const auto qq_elem = [](Lisp_ptr p){
     if(auto l = p.get<Cons*>()){
       if(auto l_first_sym = l->car().get<Symbol*>()){
-        switch(l_first_sym->to_keyword()){
-        case Keyword::unquote:
+        auto k = l_first_sym->to_keyword();
+        if(k == Keyword::unquote){
           VM.code().push(Lisp_ptr(vm_op_arg_push));
           VM.code().push(l->cdr().get<Cons*>()->car());
           return;
-        case Keyword::unquote_splicing:
+        }else if(k == Keyword::unquote_splicing){
           VM.code().push(Lisp_ptr(vm_op_arg_push_list));
           VM.code().push(l->cdr().get<Cons*>()->car());
           return;
-        default:
-          break;
         }
       }
     }
@@ -548,8 +542,7 @@ void vm_op_quasiquote(){
   auto p = VM.code().top();
   VM.code().pop();
 
-  switch(p.tag()){
-  case Ptr_tag::cons: {
+  if(p.tag() == Ptr_tag::cons){
     if(nullp(p)){
       VM.return_value() = Cons::NIL;
       return;
@@ -557,18 +550,15 @@ void vm_op_quasiquote(){
 
     // check unquote -- like `,x
     if(auto first_sym = p.get<Cons*>()->car().get<Symbol*>()){
-      switch(first_sym->to_keyword()){
-      case Keyword::unquote: {
+      auto k = first_sym->to_keyword();
+      if(k == Keyword::unquote){
         auto rest = p.get<Cons*>()->cdr().get<Cons*>()->car();
         VM.code().push(rest);
         return;
-      }
-      case Keyword::unquote_splicing:
+      }else if(k == Keyword::unquote_splicing){
         fprintf(stderr, "eval error: unquote-splicing is not supported out of list");
         VM.return_value() = {};
         return;
-      default:
-        break;
       }
     }
 
@@ -584,10 +574,7 @@ void vm_op_quasiquote(){
             [](Lisp_ptr last){
               qq_elem(last);
             });
-
-    return;
-  }
-  case Ptr_tag::vector: {
+  }else if(p.tag() == Ptr_tag::vector){
     VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
     VM.code().push(Lisp_ptr(vm_op_quasiquote_vector));
 
@@ -595,12 +582,8 @@ void vm_op_quasiquote(){
     for(auto i = begin(*v); i != end(*v); ++i){
       qq_elem(*i);
     }
-
-    return;
-  }
-  default:
+  }else{
     VM.return_value() = p;
-    return;
   }
 }
 
@@ -612,6 +595,11 @@ void eval(){
     VM.code().pop();
 
     switch(p.tag()){
+    case Ptr_tag::undefined:
+      fprintf(stderr, "eval error: undefined is passed!\n");
+      VM.return_value() = {};
+      break;
+
     case Ptr_tag::symbol: {
       auto sym = to_varname(p);
       if(!sym){
@@ -646,6 +634,7 @@ void eval(){
           }
 
           switch(k){
+          case Keyword::not_keyword: break;
           case Keyword::quote:  
             VM.return_value() = r.get<Cons*>()->car();
             break;
@@ -691,7 +680,6 @@ void eval(){
           break;
         }
       }
-
       // procedure/macro call?
       VM.code().push(Lisp_ptr(vm_op_call));
       VM.code().push(first);
@@ -707,8 +695,12 @@ void eval(){
         VM.return_value() = {};
       }
       break;
-    
-    default: // almost self-evaluating
+
+    case Ptr_tag::boolean: case Ptr_tag::character:
+    case Ptr_tag::function: case Ptr_tag::number:
+    case Ptr_tag::string: case Ptr_tag::vector:
+    case Ptr_tag::port: case Ptr_tag::env:
+    default:
       VM.return_value() = p;
       break;
     }

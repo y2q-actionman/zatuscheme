@@ -108,15 +108,14 @@ void type_check_pred(){
 static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
-  switch(a.tag()){
-   case Ptr_tag::boolean:
+  if(a.tag() == Ptr_tag::boolean){
     return a.get<bool>() == b.get<bool>();
-   case Ptr_tag::character:
+  }else if(a.tag() == Ptr_tag::character){
     return a.get<char>() == b.get<char>();
-   default:
+  }else{
     return a.get<void*>() == b.get<void*>();
-   }
- }
+  }
+}
  
 void eq(){
   auto args = pick_args<2>();

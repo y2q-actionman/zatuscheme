@@ -10,9 +10,7 @@ enum class Keyword{
   // expression
     quote, lambda, if_, set_, begin,
     cond, and_, or_, case_, let,
-    let_star, letrec, do_, delay, quasiquote,
-
-    MAX
+    let_star, letrec, do_, delay, quasiquote
     };
 
 const char* stringify(Keyword);

@@ -90,6 +90,10 @@ void print(FILE* f, Lisp_ptr p){
     fprintf(f, "<port %p>", static_cast<void*>(p.get<Port*>()));
     break;
 
+  case Ptr_tag::env:
+    fprintf(f, "<environ %p>", p.get<void*>());
+    break;
+    
   case Ptr_tag::vm_op:
     fprintf(f, "<VM operation %p>", p.get<void*>());
     break;

@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "reader.hh"
 #include "lisp_ptr.hh"
 #include "token.hh"
@@ -150,11 +151,32 @@ Lisp_ptr read_la(FILE* f, const Token& looked_tok){
     case Token::Notation::comma_at:
       return read_abbrev(Keyword::unquote_splicing, f);
       
+    case Token::Notation::l_bracket:
+    case Token::Notation::l_brace:
+      fprintf(stderr, "reader error: not supported nptation! (type=%d)\n",
+              static_cast<int>(tok.get<Token::Notation>()));
+      return Lisp_ptr{};
+
+    case Token::Notation::r_paren:
+    case Token::Notation::r_bracket:
+    case Token::Notation::r_brace:
+      fprintf(stderr, "reader error: closing notation appeared alone! (type=%d)\n",
+              static_cast<int>(tok.get<Token::Notation>()));
+      return Lisp_ptr{};
+
+    case Token::Notation::unknown:
+    case Token::Notation::dot:
+    case Token::Notation::bar:
     default:
+      fprintf(stderr, "reader error: unexpected notation was passed! (type=%d)\n",
+              static_cast<int>(tok.get<Token::Notation>()));
       return Lisp_ptr{};
     }
 
+  case Token::Type::uninitialized:
   default:
+    fprintf(stderr, "reader error: unknown token was passed! (type=%d)\n",
+            static_cast<int>(tok.type()));
     return Lisp_ptr{};
   }
 }

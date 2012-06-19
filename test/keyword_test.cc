@@ -64,7 +64,6 @@ int main(){
   check(Keyword::quasiquote, "quasiquote");
 
   stringify(Keyword::not_keyword);
-  stringify(Keyword::MAX);
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -32,6 +32,10 @@ const char* stringify(Function::Type t){
     return "interpreted";
   case Function::Type::native:
     return "native";
+  case Function::Type::interpreted_macro:
+    return "interpreted macro";
+  case Function::Type::native_macro:
+    return "native macro";
   default:
     return "(unknown function type)";
   }

@@ -24,6 +24,8 @@ const char* stringify(Ptr_tag p){
     return "port";
   case Ptr_tag::env:
     return "env";
+  case Ptr_tag::vm_op:
+    return "VM-op";
   default:
     return "(unknown PTR type)";
   }

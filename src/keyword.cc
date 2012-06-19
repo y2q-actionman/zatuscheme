@@ -6,6 +6,8 @@ using namespace std;
 
 const char* stringify(Keyword k){
   switch(k){
+  case Keyword::not_keyword:
+    return "(not keyword)";
   case Keyword::else_:
     return "else";
   case Keyword::r_arrow:
