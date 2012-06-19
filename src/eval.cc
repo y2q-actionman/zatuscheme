@@ -152,6 +152,18 @@ void macro_call(Function* proc, VM_op call_op){
 }
 
 /*
+  stack[0] = args
+  ----
+  code = (call kind, proc, macro call)
+  stack[0] = args -- not processed
+*/
+void whole_macro_call(Function* proc, VM_op call_op){
+  VM.code().push(Lisp_ptr(vm_op_macro_call));
+  VM.code().push(Lisp_ptr(proc));
+  VM.code().push(Lisp_ptr(call_op));
+}
+
+/*
   leaves frame.
   no stack operations.
 */
@@ -287,6 +299,8 @@ void vm_op_call(){
     proc_call(fun, op); return;
   case Function::Calling::macro:
     macro_call(fun, op); return;
+  case Function::Calling::whole_macro:
+    whole_macro_call(fun, op); return;
   default:
     UNEXP_DEFAULT();
   }
