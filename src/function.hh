@@ -16,14 +16,14 @@ public:
   };
 
   struct ArgInfo {
-    Lisp_ptr head;
     int required_args;
     bool variadic;
+    Lisp_ptr head;
 
     constexpr ArgInfo()
-      : head({}), required_args(-1), variadic(false){}
-    constexpr ArgInfo(Lisp_ptr h, int rargs, bool v)
-      : head(h), required_args(rargs), variadic(v){}
+      : required_args(-1), variadic(false), head(){}
+    constexpr ArgInfo(int rargs, bool v, Lisp_ptr h = Lisp_ptr())
+      : required_args(rargs), variadic(v), head(h){}
 
     explicit operator bool() const{
       return (head) && (required_args >= 0);

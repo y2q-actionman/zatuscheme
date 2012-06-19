@@ -148,52 +148,52 @@ static struct Entry {
 builtin_func[] = {
   {"+", Function{
       plus_2,
-      Function::Type::native, {{}, 2, true}}},
+      Function::Type::native, {2, true}}},
   {"list", Function{
       [](){stack_to_list(false);}, 
-      Function::Type::native, {{}, 1, true}}},
+      Function::Type::native, {1, true}}},
   {"list*", Function{
       [](){stack_to_list(true);}, 
-      Function::Type::native, {{}, 1, true}}},
+      Function::Type::native, {1, true}}},
   {"vector", Function{
       stack_to_vector, 
-      Function::Type::native, {{}, 1, true}}},
+      Function::Type::native, {1, true}}},
   {"boolean?", Function{
       type_check_pred<Ptr_tag::boolean>, 
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"symbol?", Function{
       type_check_pred<Ptr_tag::symbol>,
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"char?", Function{
       type_check_pred<Ptr_tag::character>,
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"vector?", Function{
       type_check_pred<Ptr_tag::vector>,
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"procedure?", Function{
       type_check_pred<Ptr_tag::function>,
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"pair?", Function{
       [](){
         auto args = pick_args<1>();
         VM.return_value() = Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
       },
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"number?", Function{
       type_check_pred<Ptr_tag::number>,
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"string?", Function{
       type_check_pred<Ptr_tag::string>,
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"port?", Function{
       type_check_pred<Ptr_tag::port>,
-      Function::Type::native, {{}, 1, false}}},
+      Function::Type::native, {1, false}}},
   {"eql", Function{
       eql,
-      Function::Type::native, {{}, 2, false}}},
+      Function::Type::native, {2, false}}},
   {"eq", Function{
       eq,
-      Function::Type::native, {{}, 2, false}}}
+      Function::Type::native, {2, false}}}
 };
 
 void install_builtin(){

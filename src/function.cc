@@ -15,13 +15,13 @@ Function::ArgInfo parse_func_arg(Lisp_ptr args){
           },
           [&](Lisp_ptr last) -> Function::ArgInfo {
             if(nullp(last)){
-              return {args, argc, false};
+              return {argc, false, args};
             }else{
               if(last.tag() != Ptr_tag::symbol){
                 fprintf(stderr, "eval error: informal lambda list! (including non-symbol)\n");
                 return {};
               }
-              return {args, argc, true};
+              return {argc, true, args};
             }
           });
 }
