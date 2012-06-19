@@ -116,21 +116,6 @@ Ptr_tag to_tag<Ptr_tag, VM_op>(){
 
 template<>
 inline constexpr
-Lisp_ptr::Lisp_ptr<bool>(bool b)
-: tag_(to_tag<Ptr_tag, bool>()), u_(b){}
-
-template<>
-inline constexpr
-Lisp_ptr::Lisp_ptr<char>(char c)
-: tag_(to_tag<Ptr_tag, char>()), u_(c){}
-
-template<>
-inline constexpr
-Lisp_ptr::Lisp_ptr<VM_op>(VM_op o)
-: tag_(to_tag<Ptr_tag, VM_op>()), u_(o){}
-
-template<>
-inline constexpr
 Lisp_ptr::Lisp_ptr<Ptr_tag>(Ptr_tag p)
 : tag_(p), u_(static_cast<void*>(nullptr)){}
 
@@ -176,4 +161,3 @@ T Lisp_ptr::get() const {
 }
 
 #endif // LISP_PTR_I_HH
-

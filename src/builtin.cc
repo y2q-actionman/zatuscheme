@@ -102,7 +102,7 @@ template <Ptr_tag p>
 static
 void type_check_pred(){
   auto args = pick_args<1>();
-  VM.return_value() = {args[0].tag() == p};
+  VM.return_value() = Lisp_ptr{args[0].tag() == p};
 }
 
 static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
@@ -121,23 +121,23 @@ static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
 void eq(){
   auto args = pick_args<2>();
   
-  VM.return_value() = {eq_internal(args[0], args[1])};
+  VM.return_value() = Lisp_ptr{eq_internal(args[0], args[1])};
 }
 
 void eql(){
   auto args = pick_args<2>();
 
   if(eq_internal(args[0], args[1])){
-    VM.return_value() = {true};
+    VM.return_value() = Lisp_ptr{true};
     return;
   }
     
   if(args[0].tag() == Ptr_tag::number && args[1].tag() == Ptr_tag::number){
-    VM.return_value() = {eql(*args[0].get<Number*>(), *args[1].get<Number*>())};
+    VM.return_value() = Lisp_ptr{eql(*args[0].get<Number*>(), *args[1].get<Number*>())};
     return;
   }
 
-  VM.return_value() = {false};
+  VM.return_value() = Lisp_ptr{false};
   return;
 }
 
@@ -177,7 +177,7 @@ builtin_func[] = {
   {"pair?", Function{
       [](){
         auto args = pick_args<1>();
-        VM.return_value() = {(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
+        VM.return_value() = Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
       },
       Function::Type::native, {{}, 1, false}}},
   {"number?", Function{
