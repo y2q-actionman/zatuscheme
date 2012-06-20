@@ -79,7 +79,7 @@ void vm_op_arg_push(){
 }
 
 /*
-  stack[0] = args
+  stack[0] = whole args
   ----
   code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
   stack = (arg-bottom)
@@ -94,7 +94,7 @@ void function_call(Function* proc, VM_op call_op){
   const auto& argi = proc->arg_info();
   int argc = 0;
 
-  if(!do_list(args,
+  if(!do_list(args.get<Cons*>()->cdr(),
               [&](Cons* cell) -> bool{
                 VM.code().push(Lisp_ptr(vm_op_arg_push));
                 VM.code().push(cell->car());
@@ -139,7 +139,7 @@ void vm_op_macro_call(){
 }  
 
 /*
-  stack[0] = args
+  stack[0] = whole args
   ----
   code = (call kind, proc, macro call)
   stack = (arg1, arg2, ..., arg-bottom)
@@ -151,7 +151,7 @@ void macro_call(Function* proc, VM_op call_op){
   VM.stack().pop();
 
   VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
-  auto argc = list_to_stack("macro-call", args, VM.stack());
+  auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack());
   if(argc < argi.required_args
      || (!argi.variadic && argc > argi.required_args)){
     fprintf(stderr, "macro-call error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
@@ -172,10 +172,10 @@ void macro_call(Function* proc, VM_op call_op){
 }
 
 /*
-  stack[0] = args
+  stack[0] = whole args
   ----
   code = (call kind, proc)
-  stack = (args, arg-bottom)
+  stack = (whole args, arg-bottom)
 */
 void whole_function_call(Function* proc, VM_op call_op){
   VM.code().push(Lisp_ptr(proc));
@@ -188,10 +188,10 @@ void whole_function_call(Function* proc, VM_op call_op){
 }
 
 /*
-  stack[0] = args
+  stack[0] = whole args
   ----
   code = (call kind, proc, macro call)
-  stack = (args, arg-bottom)
+  stack = (whole args, arg-bottom)
 */
 void whole_macro_call(Function* proc, VM_op call_op){
   VM.code().push(Lisp_ptr(vm_op_macro_call));
@@ -662,7 +662,7 @@ void vm_op_quasiquote(){
   ret = arg[0]
 */
 void vm_op_quote(){
-  auto args = VM.stack().top();
+  auto wargs = VM.stack().top();
   VM.stack().pop();
 
   if(VM.stack().top().tag() != Ptr_tag::vm_op){
@@ -671,7 +671,7 @@ void vm_op_quote(){
     return;
   }
 
-  auto c = args.get<Cons*>();
+  auto c = wargs.get<Cons*>()->cdr().get<Cons*>();
 
   VM.return_value() = c->car();
 
@@ -773,7 +773,7 @@ void eval(){
       // procedure/macro call?
       VM.code().push(Lisp_ptr(vm_op_call));
       VM.code().push(first);
-      VM.stack().push(c->cdr());
+      VM.stack().push(p);
       break;
     }
 
