@@ -34,7 +34,7 @@ Symbol* to_varname(Lisp_ptr p){
 }
 
 template<typename StackT>
-void list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
+int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
   stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
   
   do_list(l,
@@ -50,10 +50,15 @@ void list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
             }
           });
 
+  int ret = 0;
+
   while(!tmp.empty()){
     st.push(tmp.top());
     tmp.pop();
+    ++ret;
   }
+
+  return ret;
 }  
 
 /*
@@ -140,15 +145,30 @@ void vm_op_macro_call(){
   stack = (arg1, arg2, ..., arg-bottom)
 */
 void macro_call(Function* proc, VM_op call_op){
+  auto& argi = proc->arg_info();
+
   auto args = VM.stack().top();
   VM.stack().pop();
+
+  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
+  auto argc = list_to_stack("macro-call", args, VM.stack());
+  if(argc < argi.required_args
+     || (!argi.variadic && argc > argi.required_args)){
+    fprintf(stderr, "macro-call error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
+            argi.required_args,
+            (argi.variadic) ? "variadic" : "not variadic",
+            argc);
+    for(int i = 0; i < argc; ++i){
+      VM.stack().pop();
+    }
+    VM.stack().pop();
+    VM.return_value() = {};
+    return;
+  }    
 
   VM.code().push(Lisp_ptr(vm_op_macro_call));
   VM.code().push(Lisp_ptr(proc));
   VM.code().push(Lisp_ptr(call_op));
-
-  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
-  list_to_stack("macro-call", args, VM.stack());
 }
 
 /*
