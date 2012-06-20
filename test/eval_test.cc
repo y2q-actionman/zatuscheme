@@ -120,7 +120,7 @@ int main(){
   check(read_eql, "(define x 1)", "1");
   check(read_eql, "x", "1");
   check(read_eql, "(+ x x)", "2");
-  check(test_undef, "(define else 1)");
+  //check(test_undef, "(define else 1)");
   check(read_eql, "(define else_ 1)", "1");
   check(read_eql, "else_", "1");
 

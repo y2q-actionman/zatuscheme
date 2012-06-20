@@ -24,11 +24,11 @@ Symbol* to_varname(Lisp_ptr p){
     return nullptr;
   }
 
-  if(var->to_keyword() != Keyword::not_keyword){
-    fprintf(stderr, "eval error: variable's name is Keyword (%s)!\n",
-            var->name().c_str());
-    return nullptr;
-  }
+  // if(var->to_keyword() != Keyword::not_keyword){
+  //   fprintf(stderr, "eval error: variable's name is Keyword (%s)!\n",
+  //           var->name().c_str());
+  //   return nullptr;
+  // }
 
   return var;
 }
@@ -656,6 +656,30 @@ void vm_op_quasiquote(){
 
 } // namespace
 
+/*
+  stack = (args, arg_bottom)
+  ----
+  ret = arg[0]
+*/
+void vm_op_quote(){
+  auto args = VM.stack().top();
+  VM.stack().pop();
+
+  if(VM.stack().top().tag() != Ptr_tag::vm_op){
+    fprintf(stderr, "eval error: stack corrupted -- no bottom found!\n");
+    VM.return_value() = {};
+    return;
+  }
+
+  auto c = args.get<Cons*>();
+
+  VM.return_value() = c->car();
+
+  if(c->cdr()){
+    fprintf(stderr, "eval warning: quote has two or more args. ignored.\n");
+  }
+}
+
 void eval(){
   while(!VM.code().empty()){
     auto p = VM.code().top();
@@ -702,9 +726,7 @@ void eval(){
 
           switch(k){
           case Keyword::not_keyword: break;
-          case Keyword::quote:  
-            VM.return_value() = r.get<Cons*>()->car();
-            break;
+          case Keyword::quote:  goto call;
           case Keyword::lambda: eval_lambda(r); break;
           case Keyword::if_:    eval_if(r); break;
           case Keyword::set_:   eval_set("set!", r, vm_op_set); break;
@@ -747,6 +769,7 @@ void eval(){
           break;
         }
       }
+      call:
       // procedure/macro call?
       VM.code().push(Lisp_ptr(vm_op_call));
       VM.code().push(first);

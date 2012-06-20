@@ -4,6 +4,7 @@
 #include "number.hh"
 #include "function.hh"
 #include "lisp_ptr.hh"
+#include "eval.hh"
 
 using namespace std;
 
@@ -146,6 +147,10 @@ static struct Entry {
   Function func;
 } 
 builtin_func[] = {
+  {"quote", Function{
+      vm_op_quote,
+      Function::Calling::whole_function, {1, false}}},
+
   {"+", Function{
       plus_2,
       Function::Calling::function, {2, true}}},

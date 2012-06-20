@@ -4,6 +4,8 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 
+void vm_op_quote();
+
 void eval();
 
 #endif // EVAL_HH
