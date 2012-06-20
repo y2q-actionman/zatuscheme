@@ -24,7 +24,7 @@ enum class Ptr_tag {
 
 class Lisp_ptr {
 public:
-  constexpr Lisp_ptr() : tag_(Ptr_tag::undefined), u_(static_cast<void*>(nullptr)){}
+  constexpr Lisp_ptr() : tag_(Ptr_tag::undefined), u_(){}
   template<typename T>
   explicit constexpr Lisp_ptr(T);
   Lisp_ptr(const Lisp_ptr&) = default;
@@ -46,7 +46,7 @@ public:
 
 private:
   union lisp_ptr_u{
-    constexpr lisp_ptr_u(void* p) : ptr_(p){}
+    constexpr lisp_ptr_u(void* p = nullptr) : ptr_(p){}
     constexpr lisp_ptr_u(bool b) : b_(b){}
     constexpr lisp_ptr_u(char c) : c_(c){}
     constexpr lisp_ptr_u(int i) : i_(i){}

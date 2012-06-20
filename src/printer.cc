@@ -91,7 +91,7 @@ void print(FILE* f, Lisp_ptr p){
     break;
 
   case Ptr_tag::env:
-    fprintf(f, "<environ %p>", p.get<void*>());
+    fprintf(f, "<environ %p>", static_cast<void*>(p.get<Env*>()));
     break;
     
   case Ptr_tag::vm_op:
