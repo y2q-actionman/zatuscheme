@@ -675,7 +675,7 @@ void vm_op_quote(){
 
   VM.return_value() = c->car();
 
-  if(c->cdr()){
+  if(!nullp(c->cdr())){
     fprintf(stderr, "eval warning: quote has two or more args. ignored.\n");
   }
 }
