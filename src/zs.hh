@@ -1,4 +1,20 @@
 #ifndef ZS_HH
 #define ZS_HH
 
+#include "builtin.hh"
+#include "cons.hh"
+#include "decl.hh"
+#include "eval.hh"
+#include "function.hh"
+#include "keyword.hh"
+#include "lisp_ptr.hh"
+#include "number.hh"
+#include "printer.hh"
+#include "reader.hh"
+#include "symbol.hh"
+#include "symtable.hh"
+#include "token.hh"
+#include "util.hh"
+#include "vm.hh"
+
 #endif //ZS_HH
