@@ -16,6 +16,7 @@ public:
   enum class Calling {
     function,
     macro,
+    whole_function,
     whole_macro
   };
 

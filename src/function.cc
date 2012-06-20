@@ -43,6 +43,8 @@ const char* stringify(Function::Calling c){
     return "function";
   case Function::Calling::macro:
     return "macro";
+  case Function::Calling::whole_function:
+    return "whole_function";
   case Function::Calling::whole_macro:
     return "whole_macro";
   default:

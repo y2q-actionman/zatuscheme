@@ -79,7 +79,7 @@ void vm_op_arg_push(){
   code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
   stack = (arg-bottom)
 */
-void proc_call(Function* proc, VM_op call_op){
+void function_call(Function* proc, VM_op call_op){
   auto args = VM.stack().top();
   VM.stack().pop();
 
@@ -154,13 +154,28 @@ void macro_call(Function* proc, VM_op call_op){
 /*
   stack[0] = args
   ----
+  code = (call kind, proc)
+  stack = (args, arg-bottom)
+*/
+void whole_function_call(Function* proc, VM_op call_op){
+  VM.code().push(Lisp_ptr(proc));
+  VM.code().push(Lisp_ptr(call_op));
+
+  auto args = VM.stack().top();
+  VM.stack().pop();
+  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
+  VM.stack().push(args);
+}
+
+/*
+  stack[0] = args
+  ----
   code = (call kind, proc, macro call)
-  stack[0] = args -- not processed
+  stack = (args, arg-bottom)
 */
 void whole_macro_call(Function* proc, VM_op call_op){
   VM.code().push(Lisp_ptr(vm_op_macro_call));
-  VM.code().push(Lisp_ptr(proc));
-  VM.code().push(Lisp_ptr(call_op));
+  whole_function_call(proc, call_op);
 }
 
 /*
@@ -296,9 +311,11 @@ void vm_op_call(){
 
   switch(fun->calling()){
   case Function::Calling::function:
-    proc_call(fun, op); return;
+    function_call(fun, op); return;
   case Function::Calling::macro:
     macro_call(fun, op); return;
+  case Function::Calling::whole_function:
+    whole_function_call(fun, op); return;
   case Function::Calling::whole_macro:
     whole_macro_call(fun, op); return;
   default:
