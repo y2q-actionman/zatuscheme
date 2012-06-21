@@ -680,6 +680,15 @@ void vm_op_error(){
 /*
   stack = (args, arg_bottom)
   ----
+  ret = args
+*/
+void vm_op_pass_through(){
+  VM.return_value() = pick_whole_arg();
+}
+
+/*
+  stack = (args, arg_bottom)
+  ----
   ret = arg[0]
 */
 void vm_op_quote(){
@@ -787,8 +796,7 @@ void eval(){
 
           case Keyword::unquote:
           case Keyword::unquote_splicing:
-            VM.return_value() = p;
-            break;
+            goto call;
 
           case Keyword::else_:
           case Keyword::r_arrow:

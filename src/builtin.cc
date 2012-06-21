@@ -153,7 +153,12 @@ builtin_func[] = {
   {"begin", Function{
       vm_op_begin,
       Function::Calling::whole_function, {1, true}}},
-
+  {"unquote", Function{
+      vm_op_pass_through,
+      Function::Calling::whole_function, {0, true}}},
+  {"unquote-splicing", Function{
+      vm_op_pass_through,
+      Function::Calling::whole_function, {0, true}}},
   {"eval", Function{
       vm_op_error,
       Function::Calling::whole_function, {0, false}}},

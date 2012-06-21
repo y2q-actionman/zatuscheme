@@ -5,6 +5,7 @@
 #include "vm.hh"
 
 void vm_op_error();
+void vm_op_pass_through();
 void vm_op_quote();
 void vm_op_begin();
 
