@@ -5,7 +5,6 @@
 #error "Please include via parent file"
 #endif
 
-#include <utility>
 #include "decl.hh"
 #include "util.hh"
 
@@ -63,38 +62,13 @@ Token::Type to_tag<Token::Type, Token::Notation>(){
 
 
 // Token definitions
-inline
-Token::~Token(){
-  using namespace std;
-
-  switch(type_){
-  case Type::identifier:
-  case Type::string:
-    str_.~string();
-    break;
-
-  case Type::number:
-    num_.~Number();
-    break;
-
-  case Type::uninitialized:
-  case Type::boolean:
-  case Type::character:
-  case Type::notation:
-  default:
-    break;
-  }
-
-  type_ = Type::uninitialized;
-}
-
 template<>
 inline
 std::string Token::get() const{
   if(type_ == Type::identifier || type_ == Type::string)
     return str_;
   else
-    UNEXP_CONVERSION("(no string token)", "string");
+    UNEXP_CONVERSION("(?)", "string");
 }
 
 template<>
@@ -103,7 +77,7 @@ Number Token::get() const{
   if(type_ == Type::number)
     return num_;
   else
-    UNEXP_CONVERSION("(no number token)", "number");
+    UNEXP_CONVERSION("(?)", "number");
 }
 
 template<>
@@ -112,7 +86,7 @@ bool Token::get() const{
   if(type_ == Type::boolean)
     return b_;
   else
-    UNEXP_CONVERSION("(no boolean token)", "boolean");
+    UNEXP_CONVERSION("(?)", "boolean");
 }
 
 template<>
@@ -121,7 +95,7 @@ char Token::get() const{
   if(type_ == Type::character)
     return c_;
   else
-    UNEXP_CONVERSION("(no char token)", "char");
+    UNEXP_CONVERSION("(?)", "char");
 }
 
 template<>
@@ -130,7 +104,7 @@ Token::Notation Token::get() const{
   if(type_ == Type::notation)
     return not_;
   else
-    UNEXP_CONVERSION("(no notation token)", "notation");
+    UNEXP_CONVERSION("(?)", "notation");
 }
 
 #endif // TOKEN_I_HH

@@ -154,6 +154,28 @@ Token& Token::operator=(Token&& other){
   return assign_from_other<Token&&>(forward<Token>(other));
 }
 
+Token::~Token(){
+  switch(type_){
+  case Type::identifier:
+  case Type::string:
+    str_.~string();
+    break;
+
+  case Type::number:
+    num_.~Number();
+    break;
+
+  case Type::uninitialized:
+  case Type::boolean:
+  case Type::character:
+  case Type::notation:
+  default:
+    break;
+  }
+
+  type_ = Type::uninitialized;
+}
+
 //
 // tokenizer funcs
 //
