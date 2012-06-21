@@ -336,35 +336,6 @@ void vm_op_call(){
 }
  
 /*
-  ret = proc.
-  no stack operations.
-*/
-void eval_lambda(Lisp_ptr p){
-  Function::ArgInfo arg_info;
-  Lisp_ptr code;
-
-  bind_cons_list(p,
-                 [&](Cons* c){
-                   arg_info = parse_func_arg(c->car());
-                   code = c->cdr();
-                 });
-
-  if(!arg_info){
-    fprintf(stderr, "eval error: lambda has invalid args!\n");
-    VM.return_value() = {};
-    return;
-  }
-  if(!code){
-    fprintf(stderr, "eval error: lambda has invalid body!\n");
-    VM.return_value() = {};
-    return;
-  }
-
-  VM.return_value() = 
-    Lisp_ptr{new Function(code, Function::Calling::function, arg_info, VM.frame())};
-}
-
-/*
   stack = (consequent, alternative)
   ----
   stack = ()
@@ -655,6 +626,7 @@ Lisp_ptr pick_whole_arg(){
     VM.return_value() = {};
     return {};
   }
+  VM.stack().pop();
 
   return ret;
 }
@@ -718,6 +690,39 @@ void whole_function_quote(){
   if(!nullp(c->cdr())){
     fprintf(stderr, "eval warning: quote has two or more args. ignored.\n");
   }
+}
+
+
+/*
+  ret = proc.
+  no stack operations.
+*/
+void whole_function_lambda(){
+  auto wargs = pick_whole_arg();
+  if(!wargs) return;
+
+  Function::ArgInfo arg_info;
+  Lisp_ptr code;
+
+  bind_cons_list(wargs.get<Cons*>()->cdr(),
+                 [&](Cons* c){
+                   arg_info = parse_func_arg(c->car());
+                   code = c->cdr();
+                 });
+
+  if(!arg_info){
+    fprintf(stderr, "eval error: lambda has invalid args!\n");
+    VM.return_value() = {};
+    return;
+  }
+  if(!code){
+    fprintf(stderr, "eval error: lambda has invalid body!\n");
+    VM.return_value() = {};
+    return;
+  }
+
+  VM.return_value() = 
+    Lisp_ptr{new Function(code, Function::Calling::function, arg_info, VM.frame())};
 }
 
 /*
@@ -799,7 +804,7 @@ void eval(){
           switch(k){
           case Keyword::not_keyword: break;
           case Keyword::quote:  goto call;
-          case Keyword::lambda: eval_lambda(r); break;
+          case Keyword::lambda: goto call;
           case Keyword::if_:    eval_if(r); break;
           case Keyword::set_:   goto call;
           case Keyword::define: eval_define(r); break;
@@ -860,4 +865,12 @@ void eval(){
       break;
     }
   }
+
+  if(!VM.stack().empty()){
+    fprintf(stderr, "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n");
+    do{
+      VM.stack().pop();
+    }while(!VM.stack().empty());
+  }
+
 }
