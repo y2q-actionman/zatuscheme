@@ -356,45 +356,6 @@ void vm_op_if(){
 }
 
 /*
-  ----
-  code = (test, VM::if)
-  stack = (consequent, alternative)
-*/
-void eval_if(Lisp_ptr p){
-  VM.return_value() = {};
-
-  // extracting
-  Lisp_ptr test, conseq, alt;
-
-  int len =
-  bind_cons_list(p,
-                 [&](Cons* c){
-                   test = c->car();
-                 },
-                 [&](Cons* c){
-                   conseq = c->car();
-                 },
-                 [&](Cons* c){
-                   alt = c->car();
-                 });
-
-  if(len < 2){
-    fprintf(stderr, "eval error: informal if expr! (only %d exprs)\n", len);
-    return;
-  }else if(len > 3){
-    fprintf(stderr, "eval error: informal if expr! (more than %d exprs)\n", len);
-    return;
-  }
-
-  // evaluating
-  VM.code().push(Lisp_ptr(vm_op_if));
-  VM.code().push(test);
-
-  VM.stack().push(alt);
-  VM.stack().push(conseq);
-}
-
-/*
   stack = (variable name)
   ----
   stack = ()
@@ -694,8 +655,9 @@ void whole_function_quote(){
 
 
 /*
+  stack = (args, arg_bottom)
+  ----
   ret = proc.
-  no stack operations.
 */
 void whole_function_lambda(){
   auto wargs = pick_whole_arg();
@@ -704,7 +666,8 @@ void whole_function_lambda(){
   Function::ArgInfo arg_info;
   Lisp_ptr code;
 
-  bind_cons_list(wargs.get<Cons*>()->cdr(),
+  bind_cons_list(wargs,
+                 [](Cons*){},
                  [&](Cons* c){
                    arg_info = parse_func_arg(c->car());
                    code = c->cdr();
@@ -723,6 +686,50 @@ void whole_function_lambda(){
 
   VM.return_value() = 
     Lisp_ptr{new Function(code, Function::Calling::function, arg_info, VM.frame())};
+}
+
+/*
+  stack = (args, arg_bottom)
+  ----
+  code = (test, VM::if)
+  stack = (consequent, alternative)
+*/
+void whole_function_if(){
+  auto wargs = pick_whole_arg();
+  if(!wargs) return;
+
+  VM.return_value() = {};
+
+  // extracting
+  Lisp_ptr test, conseq, alt;
+
+  int len =
+  bind_cons_list(wargs,
+                 [](Cons*){},
+                 [&](Cons* c){
+                   test = c->car();
+                 },
+                 [&](Cons* c){
+                   conseq = c->car();
+                 },
+                 [&](Cons* c){
+                   alt = c->car();
+                 });
+
+  if(len < 3){
+    fprintf(stderr, "eval error: informal if expr! (only %d exprs)\n", len);
+    return;
+  }else if(len > 4){
+    fprintf(stderr, "eval error: informal if expr! (more than %d exprs)\n", len);
+    return;
+  }
+
+  // evaluating
+  VM.code().push(Lisp_ptr(vm_op_if));
+  VM.code().push(test);
+
+  VM.stack().push(alt);
+  VM.stack().push(conseq);
 }
 
 /*
@@ -805,7 +812,7 @@ void eval(){
           case Keyword::not_keyword: break;
           case Keyword::quote:  goto call;
           case Keyword::lambda: goto call;
-          case Keyword::if_:    eval_if(r); break;
+          case Keyword::if_:    goto call;
           case Keyword::set_:   goto call;
           case Keyword::define: eval_define(r); break;
           case Keyword::begin:  goto call;

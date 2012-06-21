@@ -154,6 +154,9 @@ builtin_func[] = {
   {"lambda", Function{
       whole_function_lambda,
       Function::Calling::whole_function, {1, true}}},
+  {"if", Function{
+      whole_function_if,
+      Function::Calling::whole_function, {3, false}}},
   {"set!", Function{
       whole_function_set,
       Function::Calling::whole_function, {2, false}}},
