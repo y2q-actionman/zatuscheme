@@ -134,8 +134,16 @@ int main(){
   check(read_eql, "(begin 1 2)", "2");
   check(read_eql, "(begin 1 2 3)", "3");
 
+  // informal syntaxes
+  //check(test_undef, "else");
+  check(test_undef, "(else)");
+  check(test_undef, "(else 1)");
+  //check(test_undef, "=>");
+  check(test_undef, "(=>)");
+  check(test_undef, "(=> 1)");
+
+
   // macro call
-  
 
 
   // function test (basic syntax only)

@@ -154,6 +154,13 @@ builtin_func[] = {
       vm_op_begin,
       Function::Calling::whole_function, {1, true}}},
 
+  {"eval", Function{
+      vm_op_error,
+      Function::Calling::whole_function, {0, false}}},
+  {"=>", Function{
+      vm_op_error,
+      Function::Calling::whole_function, {0, false}}},
+
   {"+", Function{
       plus_2,
       Function::Calling::function, {2, true}}},

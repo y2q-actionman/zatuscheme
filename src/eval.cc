@@ -664,6 +664,22 @@ Lisp_ptr pick_whole_arg(){
 /*
   stack = (args, arg_bottom)
   ----
+  ret = undef
+*/
+void vm_op_error(){
+  auto wargs = pick_whole_arg();
+  auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
+
+  assert(sym);
+
+  fprintf(stderr, "eval error: '%s' cannot be used as operator!!\n",
+          sym->name().c_str());
+  VM.return_value() = {};
+}
+
+/*
+  stack = (args, arg_bottom)
+  ----
   ret = arg[0]
 */
 void vm_op_quote(){
@@ -776,10 +792,7 @@ void eval(){
 
           case Keyword::else_:
           case Keyword::r_arrow:
-            fprintf(stderr, "eval error: '%s' cannot be used as operator!!\n",
-                    sym->name().c_str());
-            VM.return_value() = {};
-            break;
+            goto call;
 
           default:
             UNEXP_DEFAULT();
