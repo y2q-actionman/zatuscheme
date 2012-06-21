@@ -68,7 +68,7 @@ std::string Token::get() const{
   if(type_ == Type::identifier || type_ == Type::string)
     return str_;
   else
-    UNEXP_CONVERSION("(?)", "string");
+    UNEXP_CONVERSION("string");
 }
 
 template<>
@@ -77,7 +77,7 @@ Number Token::get() const{
   if(type_ == Type::number)
     return num_;
   else
-    UNEXP_CONVERSION("(?)", "number");
+    UNEXP_CONVERSION("number");
 }
 
 template<>
@@ -86,7 +86,7 @@ bool Token::get() const{
   if(type_ == Type::boolean)
     return b_;
   else
-    UNEXP_CONVERSION("(?)", "boolean");
+    UNEXP_CONVERSION("boolean");
 }
 
 template<>
@@ -95,7 +95,7 @@ char Token::get() const{
   if(type_ == Type::character)
     return c_;
   else
-    UNEXP_CONVERSION("(?)", "char");
+    UNEXP_CONVERSION("character");
 }
 
 template<>
@@ -104,7 +104,7 @@ Token::Notation Token::get() const{
   if(type_ == Type::notation)
     return not_;
   else
-    UNEXP_CONVERSION("(?)", "notation");
+    UNEXP_CONVERSION("notation");
 }
 
 #endif // TOKEN_I_HH

@@ -12,8 +12,8 @@ unexp_default(const char* f, int l){
 }
 
 void
-unexp_conversion(const char* f, int l, const char* from, const char* to){
-  fprintf(stderr, "unexpected conversion! %s -> %s (file=%s, line=%d)\n",
-          from, to, f, l);
+unexp_conversion(const char* f, int l, const char* to){
+  fprintf(stderr, "unexpected conversion to %s! (file=%s, line=%d)\n",
+          to, f, l);
   abort();
 }

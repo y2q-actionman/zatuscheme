@@ -10,8 +10,8 @@ unexp_default(const char*, int);
 
 void
 __attribute__((noreturn))// [[noreturn]]
-unexp_conversion(const char*, int, const char*, const char*);
+unexp_conversion(const char*, int, const char*);
 
-#define UNEXP_CONVERSION(from, to) unexp_conversion(__FILE__, __LINE__, (from), (to))
+#define UNEXP_CONVERSION(to) unexp_conversion(__FILE__, __LINE__, (to))
 
 #endif // UTIL_HH
