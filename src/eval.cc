@@ -460,7 +460,7 @@ void vm_op_local_set(){
   code = (value, VM::if)
   stack = (variable name)
 */
-void eval_set(const char* opname, Lisp_ptr p, VM_op set_op){
+void set_internal(const char* opname, Lisp_ptr p, VM_op set_op){
   VM.return_value() = {};
 
   // extracting
@@ -510,7 +510,7 @@ void eval_define(Lisp_ptr p){
   auto first = rest->car();
 
   if(first.tag() == Ptr_tag::symbol){
-    eval_set("define(value set)", p, vm_op_local_set);
+    set_internal("define(value set)", p, vm_op_local_set);
     return;
   }else if(first.tag() == Ptr_tag::cons){
     Symbol* var = nullptr;
@@ -666,7 +666,7 @@ Lisp_ptr pick_whole_arg(){
   ----
   ret = undef
 */
-void vm_op_error(){
+void whole_function_error(){
   auto wargs = pick_whole_arg();
   auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
 
@@ -682,7 +682,7 @@ void vm_op_error(){
   ----
   ret = undef
 */
-void vm_op_unimplemented(){
+void whole_function_unimplemented(){
   auto wargs = pick_whole_arg();
   auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
 
@@ -698,7 +698,7 @@ void vm_op_unimplemented(){
   ----
   ret = args
 */
-void vm_op_pass_through(){
+void whole_function_pass_through(){
   VM.return_value() = pick_whole_arg();
 }
 
@@ -707,7 +707,7 @@ void vm_op_pass_through(){
   ----
   ret = arg[0]
 */
-void vm_op_quote(){
+void whole_function_quote(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
 
@@ -723,9 +723,22 @@ void vm_op_quote(){
 /*
   stack = (args, arg_bottom)
   ----
+  set is done.
+  ret = undef
+*/
+void whole_function_set(){
+  auto wargs = pick_whole_arg();
+  if(!wargs) return;
+
+  set_internal("set!", wargs.get<Cons*>()->cdr(), vm_op_set);
+}
+
+/*
+  stack = (args, arg_bottom)
+  ----
   ret = arg[0]
 */
-void vm_op_begin(){
+void whole_function_begin(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
 
@@ -788,7 +801,7 @@ void eval(){
           case Keyword::quote:  goto call;
           case Keyword::lambda: eval_lambda(r); break;
           case Keyword::if_:    eval_if(r); break;
-          case Keyword::set_:   eval_set("set!", r, vm_op_set); break;
+          case Keyword::set_:   goto call;
           case Keyword::define: eval_define(r); break;
           case Keyword::begin:  goto call;
           case Keyword::quasiquote: 

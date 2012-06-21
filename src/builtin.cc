@@ -149,51 +149,54 @@ static struct Entry {
 builtin_func[] = {
   // syntaxes
   {"quote", Function{
-      vm_op_quote,
+      whole_function_quote,
       Function::Calling::whole_function, {1, false}}},
+  {"set!", Function{
+      whole_function_set,
+      Function::Calling::whole_function, {2, false}}},
   {"begin", Function{
-      vm_op_begin,
+      whole_function_begin,
       Function::Calling::whole_function, {1, true}}},
 
   {"cond", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
   {"case", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
   {"and", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
   {"or", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
   {"let", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
   {"let*", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
   {"letrec", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
   {"do", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
   {"delay", Function{
-      vm_op_unimplemented,
+      whole_function_unimplemented,
       Function::Calling::whole_function, {0, true}}},
 
   {"unquote", Function{
-      vm_op_pass_through,
+      whole_function_pass_through,
       Function::Calling::whole_function, {0, true}}},
   {"unquote-splicing", Function{
-      vm_op_pass_through,
+      whole_function_pass_through,
       Function::Calling::whole_function, {0, true}}},
   {"eval", Function{
-      vm_op_error,
+      whole_function_error,
       Function::Calling::whole_function, {0, false}}},
   {"=>", Function{
-      vm_op_error,
+      whole_function_error,
       Function::Calling::whole_function, {0, false}}},
 
   // functions

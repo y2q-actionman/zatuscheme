@@ -4,11 +4,12 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 
-void vm_op_error();
-void vm_op_unimplemented();
-void vm_op_pass_through();
-void vm_op_quote();
-void vm_op_begin();
+void whole_function_error();
+void whole_function_unimplemented();
+void whole_function_pass_through();
+void whole_function_quote();
+void whole_function_set();
+void whole_function_begin();
 
 void eval();
 
