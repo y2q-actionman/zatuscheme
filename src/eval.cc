@@ -593,13 +593,24 @@ void whole_function_quote(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
 
-  auto c = wargs.get<Cons*>()->cdr().get<Cons*>();
+  Lisp_ptr val;
 
-  VM.return_value() = c->car();
+  bind_cons_list(wargs,
+                 [](Cons*){},
+                 [&](Cons* c){
+                   val = c->car();
+                 },
+                 [](Cons*){
+                   fprintf(stderr, "eval warning: quote has two or more args. ignored.\n");
+                 });
 
-  if(!nullp(c->cdr())){
-    fprintf(stderr, "eval warning: quote has two or more args. ignored.\n");
+  if(!val){
+    fprintf(stderr, "eval error: quote has no args.\n");
+    VM.return_value() = {};
+    return;
   }
+    
+  VM.return_value() = val;
 }
 
 
@@ -813,61 +824,8 @@ void eval(){
         break;
       }
 
-      auto first = c->car();
-
-      // special operator?
-      if(auto sym = first.get<Symbol*>()){
-        auto k = sym->to_keyword();
-
-        if(k != Keyword::not_keyword){
-          Lisp_ptr r = c->cdr();
-          if(!r.get<Cons*>()){
-            fprintf(stderr, "eval error: expresssion (<KEYWORD>%s) is informal!\n",
-                    (r.tag() == Ptr_tag::cons) ? "" : ". #");
-            VM.return_value() = {};
-            break;
-          }
-
-          switch(k){
-          case Keyword::not_keyword: break;
-          case Keyword::quote:  goto call;
-          case Keyword::lambda: goto call;
-          case Keyword::if_:    goto call;
-          case Keyword::set_:   goto call;
-          case Keyword::define: goto call;
-          case Keyword::begin:  goto call;
-          case Keyword::quasiquote: 
-            goto call;
-
-          case Keyword::cond:
-          case Keyword::case_:
-          case Keyword::and_:
-          case Keyword::or_:
-          case Keyword::let:
-          case Keyword::let_star:
-          case Keyword::letrec:
-          case Keyword::do_:
-          case Keyword::delay:
-            goto call;
-
-          case Keyword::unquote:
-          case Keyword::unquote_splicing:
-            goto call;
-
-          case Keyword::else_:
-          case Keyword::r_arrow:
-            goto call;
-
-          default:
-            UNEXP_DEFAULT();
-          }
-          break;
-        }
-      }
-      call:
-      // procedure/macro call?
       VM.code().push(Lisp_ptr(vm_op_call));
-      VM.code().push(first);
+      VM.code().push(c->car());
       VM.stack().push(p);
       break;
     }
