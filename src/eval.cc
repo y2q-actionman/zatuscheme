@@ -427,57 +427,6 @@ void set_internal(const char* opname, Lisp_ptr p, VM_op set_op){
 }
 
 /*
-  in variable set:
-    same as "set!"
-
-  in function definition:
-    immediately the function is set to the variable.
-*/
-void eval_define(Lisp_ptr p){
-  VM.return_value() = {};
-
-  Cons* rest = p.get<Cons*>();
-
-  // extracting
-  auto first = rest->car();
-
-  if(first.tag() == Ptr_tag::symbol){
-    set_internal("define(value set)", p, vm_op_local_set);
-    return;
-  }else if(first.tag() == Ptr_tag::cons){
-    Symbol* var = nullptr;
-    Function::ArgInfo arg_info;
-
-    bind_cons_list(first,
-                   [&](Cons* c){
-                     var = to_varname(c->car());
-                     arg_info = parse_func_arg(c->cdr());
-                   });
-
-    if(!var) return;
-
-    if(!arg_info){
-      fprintf(stderr, "eval error: defined function argument is informal!\n");
-      return;
-    }
-
-    auto code = rest->cdr();
-    if(!code.get<Cons*>()){
-      fprintf(stderr, "eval error: definition has empty body!\n");
-      return;
-    }
-
-    auto value = Lisp_ptr(new Function(code, Function::Calling::function, arg_info, VM.frame()));
-    VM.local_set(var, value);
-    VM.return_value() = value;
-    return;
-  }else{
-    fprintf(stderr, "eval error: informal define syntax!\n");
-    return;
-  }
-}
-
-/*
   ret = list
   ----
   stack = (list[0], list[1], ...)
@@ -748,6 +697,60 @@ void whole_function_set(){
 /*
   stack = (args, arg_bottom)
   ----
+  in variable set:
+    same as "set!"
+
+  in function definition:
+    immediately the function is set to the variable.
+*/
+void whole_function_define(){
+  auto wargs = pick_whole_arg();
+  if(!wargs) return;
+
+  VM.return_value() = {};
+
+  auto p = wargs.get<Cons*>()->cdr();
+  Cons* rest = p.get<Cons*>();
+
+  // extracting
+  auto first = rest->car();
+
+  if(first.tag() == Ptr_tag::symbol){
+    set_internal("define(value set)", p, vm_op_local_set);
+  }else if(first.tag() == Ptr_tag::cons){
+    Symbol* var = nullptr;
+    Function::ArgInfo arg_info;
+
+    bind_cons_list(first,
+                   [&](Cons* c){
+                     var = to_varname(c->car());
+                     arg_info = parse_func_arg(c->cdr());
+                   });
+
+    if(!var) return;
+
+    if(!arg_info){
+      fprintf(stderr, "eval error: defined function argument is informal!\n");
+      return;
+    }
+
+    auto code = rest->cdr();
+    if(!code.get<Cons*>()){
+      fprintf(stderr, "eval error: definition has empty body!\n");
+      return;
+    }
+
+    auto value = Lisp_ptr(new Function(code, Function::Calling::function, arg_info, VM.frame()));
+    VM.local_set(var, value);
+    VM.return_value() = value;
+  }else{
+    fprintf(stderr, "eval error: informal define syntax!\n");
+  }
+}
+
+/*
+  stack = (args, arg_bottom)
+  ----
   ret = arg[0]
 */
 void whole_function_begin(){
@@ -814,7 +817,7 @@ void eval(){
           case Keyword::lambda: goto call;
           case Keyword::if_:    goto call;
           case Keyword::set_:   goto call;
-          case Keyword::define: eval_define(r); break;
+          case Keyword::define: goto call;
           case Keyword::begin:  goto call;
           case Keyword::quasiquote: 
             VM.code().push(r.get<Cons*>()->car());
