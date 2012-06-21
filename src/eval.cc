@@ -62,14 +62,6 @@ int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
 }  
 
 /*
-  ----
-  code = (body1, body2, ...)
-*/
-void eval_begin(Lisp_ptr p){
-  list_to_stack("begin", p, VM.code());
-}
-
-/*
   ret = some value
   ----
   stack[0] = some value
@@ -299,7 +291,7 @@ void vm_op_interpreted_call(){
   }
   
   // set up lambda body code
-  eval_begin(fun->get<Lisp_ptr>());
+  list_to_stack("funcall", fun->get<Lisp_ptr>(), VM.code());
 }
 
 /*
@@ -654,6 +646,19 @@ void vm_op_quasiquote(){
   }
 }
 
+Lisp_ptr pick_whole_arg(){
+  auto ret = VM.stack().top();
+  VM.stack().pop();
+
+  if(VM.stack().top().tag() != Ptr_tag::vm_op){
+    fprintf(stderr, "eval error: stack corrupted -- no bottom found!\n");
+    VM.return_value() = {};
+    return {};
+  }
+
+  return ret;
+}
+
 } // namespace
 
 /*
@@ -662,14 +667,8 @@ void vm_op_quasiquote(){
   ret = arg[0]
 */
 void vm_op_quote(){
-  auto wargs = VM.stack().top();
-  VM.stack().pop();
-
-  if(VM.stack().top().tag() != Ptr_tag::vm_op){
-    fprintf(stderr, "eval error: stack corrupted -- no bottom found!\n");
-    VM.return_value() = {};
-    return;
-  }
+  auto wargs = pick_whole_arg();
+  if(!wargs) return;
 
   auto c = wargs.get<Cons*>()->cdr().get<Cons*>();
 
@@ -678,6 +677,25 @@ void vm_op_quote(){
   if(!nullp(c->cdr())){
     fprintf(stderr, "eval warning: quote has two or more args. ignored.\n");
   }
+}
+
+/*
+  stack = (args, arg_bottom)
+  ----
+  ret = arg[0]
+*/
+void vm_op_begin(){
+  auto wargs = pick_whole_arg();
+  if(!wargs) return;
+
+  auto exprs = wargs.get<Cons*>()->cdr();
+  if(!exprs || nullp(exprs)){
+    fprintf(stderr, "eval error: begin has no exprs.\n");
+    VM.return_value() = {};
+    return;
+  }
+
+  list_to_stack("begin", exprs, VM.code());
 }
 
 void eval(){
@@ -731,7 +749,7 @@ void eval(){
           case Keyword::if_:    eval_if(r); break;
           case Keyword::set_:   eval_set("set!", r, vm_op_set); break;
           case Keyword::define: eval_define(r); break;
-          case Keyword::begin:  eval_begin(r); break;
+          case Keyword::begin:  goto call;
           case Keyword::quasiquote: 
             VM.code().push(r.get<Cons*>()->car());
             VM.code().push(Lisp_ptr(vm_op_quasiquote));

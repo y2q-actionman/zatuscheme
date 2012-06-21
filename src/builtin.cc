@@ -150,6 +150,9 @@ builtin_func[] = {
   {"quote", Function{
       vm_op_quote,
       Function::Calling::whole_function, {1, false}}},
+  {"begin", Function{
+      vm_op_begin,
+      Function::Calling::whole_function, {1, true}}},
 
   {"+", Function{
       plus_2,

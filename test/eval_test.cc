@@ -128,6 +128,11 @@ int main(){
   check(read_eql, "(set! x 100)", "100");
   check(read_eql, "x", "100");
 
+  // syntax: begin
+  check(test_undef, "(begin)");
+  check(read_eql, "(begin 1)", "1");
+  check(read_eql, "(begin 1 2)", "2");
+  check(read_eql, "(begin 1 2 3)", "3");
 
   // macro call
   

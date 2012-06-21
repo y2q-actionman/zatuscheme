@@ -5,6 +5,7 @@
 #include "vm.hh"
 
 void vm_op_quote();
+void vm_op_begin();
 
 void eval();
 
