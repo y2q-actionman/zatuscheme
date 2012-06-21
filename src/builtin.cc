@@ -163,6 +163,9 @@ builtin_func[] = {
   {"define", Function{
       whole_function_define,
       Function::Calling::whole_function, {2, true}}},
+  {"quasiquote", Function{
+      whole_function_quasiquote,
+      Function::Calling::whole_function, {1, false}}},
   {"begin", Function{
       whole_function_begin,
       Function::Calling::whole_function, {1, true}}},

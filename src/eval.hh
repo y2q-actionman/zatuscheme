@@ -12,6 +12,7 @@ void whole_function_if();
 void whole_function_lambda();
 void whole_function_set();
 void whole_function_define();
+void whole_function_quasiquote();
 void whole_function_begin();
 
 void eval();

@@ -767,6 +767,23 @@ void whole_function_begin(){
   list_to_stack("begin", exprs, VM.code());
 }
 
+/*
+  stack = (args, arg_bottom)
+  ----
+  ret = arg[0]
+*/
+void whole_function_quasiquote(){
+  auto wargs = pick_whole_arg();
+  if(!wargs) return;
+
+  bind_cons_list(wargs,
+                 [](Cons*){},
+                 [](Cons* c){
+                   VM.code().push(c->car());
+                 });
+  VM.code().push(Lisp_ptr(vm_op_quasiquote));
+}
+
 void eval(){
   while(!VM.code().empty()){
     auto p = VM.code().top();
@@ -820,9 +837,7 @@ void eval(){
           case Keyword::define: goto call;
           case Keyword::begin:  goto call;
           case Keyword::quasiquote: 
-            VM.code().push(r.get<Cons*>()->car());
-            VM.code().push(Lisp_ptr(vm_op_quasiquote));
-            break;
+            goto call;
 
           case Keyword::cond:
           case Keyword::case_:
