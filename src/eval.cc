@@ -680,6 +680,22 @@ void vm_op_error(){
 /*
   stack = (args, arg_bottom)
   ----
+  ret = undef
+*/
+void vm_op_unimplemented(){
+  auto wargs = pick_whole_arg();
+  auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
+
+  assert(sym);
+
+  fprintf(stderr, "eval error: '%s' is under development...\n",
+          sym->name().c_str());
+  VM.return_value() = {};
+}
+
+/*
+  stack = (args, arg_bottom)
+  ----
   ret = args
 */
 void vm_op_pass_through(){
@@ -789,10 +805,7 @@ void eval(){
           case Keyword::letrec:
           case Keyword::do_:
           case Keyword::delay:
-            fprintf(stderr, "eval error: '%s' is under development...\n",
-                    sym->name().c_str());
-            VM.return_value() = {};
-            break;
+            goto call;
 
           case Keyword::unquote:
           case Keyword::unquote_splicing:

@@ -147,12 +147,42 @@ static struct Entry {
   Function func;
 } 
 builtin_func[] = {
+  // syntaxes
   {"quote", Function{
       vm_op_quote,
       Function::Calling::whole_function, {1, false}}},
   {"begin", Function{
       vm_op_begin,
       Function::Calling::whole_function, {1, true}}},
+
+  {"cond", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+  {"case", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+  {"and", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+  {"or", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+  {"let", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+  {"let*", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+  {"letrec", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+  {"do", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+  {"delay", Function{
+      vm_op_unimplemented,
+      Function::Calling::whole_function, {0, true}}},
+
   {"unquote", Function{
       vm_op_pass_through,
       Function::Calling::whole_function, {0, true}}},
@@ -166,6 +196,7 @@ builtin_func[] = {
       vm_op_error,
       Function::Calling::whole_function, {0, false}}},
 
+  // functions
   {"+", Function{
       plus_2,
       Function::Calling::function, {2, true}}},
