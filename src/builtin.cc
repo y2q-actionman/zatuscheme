@@ -204,7 +204,7 @@ builtin_func[] = {
   {"unquote-splicing", Function{
       whole_function_pass_through,
       Function::Calling::whole_function, {0, true}}},
-  {"eval", Function{
+  {"else", Function{
       whole_function_error,
       Function::Calling::whole_function, {0, false}}},
   {"=>", Function{

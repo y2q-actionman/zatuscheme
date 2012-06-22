@@ -210,8 +210,8 @@ void vm_op_native_call(){
   assert(native_func);
 
   native_func();
-  if(!VM.return_value())
-    fprintf(stderr, "eval warning: native func returned undef!\n");
+  // if(!VM.return_value())
+  //   fprintf(stderr, "eval warning: native func returned undef!\n");
 }
 
 /*
@@ -296,9 +296,12 @@ void vm_op_interpreted_call(){
 void vm_op_call(){
   auto proc = VM.return_value();
   if(proc.tag() != Ptr_tag::function){
-    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (%s)\n",
+    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
             stringify(proc.tag()));
+    fprintf(stderr, "      expr: "); print(stderr, VM.stack().top()); fputc('\n', stderr);
+    
     VM.return_value() = {};
+    VM.stack().pop();
     return;
   }
  
@@ -849,5 +852,4 @@ void eval(){
       VM.stack().pop();
     }while(!VM.stack().empty());
   }
-
 }
