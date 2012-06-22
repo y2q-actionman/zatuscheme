@@ -238,7 +238,7 @@ builtin_func[] = {
       type_check_pred<Ptr_tag::vector>,
       Calling::function, {1, false}}},
   {"procedure?", Function{
-      type_check_pred<Ptr_tag::function>,
+      type_check_pred<Ptr_tag::i_procedure>,
       Calling::function, {1, false}}},
   {"pair?", Function{
       [](){

@@ -839,7 +839,8 @@ void eval(){
       break;
 
     case Ptr_tag::boolean: case Ptr_tag::character:
-    case Ptr_tag::function: case Ptr_tag::number:
+    case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
+    case Ptr_tag::number:
     case Ptr_tag::string: case Ptr_tag::vector:
     case Ptr_tag::port: case Ptr_tag::env:
     default:

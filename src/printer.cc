@@ -82,7 +82,7 @@ void print(FILE* f, Lisp_ptr p){
     print_vector(f, p.get<Vector*>());
     break;
 
-  case Ptr_tag::function:
+  case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
   case Ptr_tag::port:
   case Ptr_tag::env:
   case Ptr_tag::vm_op:

@@ -12,8 +12,10 @@ const char* stringify(Ptr_tag p){
     return "cons";
   case Ptr_tag::symbol:
     return "symbol";
-  case Ptr_tag::function:
-    return "function";
+  case Ptr_tag::i_procedure:
+    return "interpreted procedure";
+  case Ptr_tag::n_procedure:
+    return "native procedure";
   case Ptr_tag::number:
     return "number";
   case Ptr_tag::string:
