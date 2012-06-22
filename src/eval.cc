@@ -70,14 +70,13 @@ void vm_op_arg_push(){
   code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
   stack = (arg-bottom)
 */
-void function_call(Function* proc, VM_op call_op){
+void function_call(Lisp_ptr proc, VM_op call_op, const ArgInfo& argi){
   auto args = VM.stack().top();
   VM.stack().pop();
 
-  VM.code().push(Lisp_ptr(proc));
+  VM.code().push(proc);
   VM.code().push(Lisp_ptr(call_op));
 
-  const auto& argi = proc->arg_info();
   int argc = 0;
 
   if(!do_list(args.get<Cons*>()->cdr(),
@@ -130,9 +129,7 @@ void vm_op_macro_call(){
   code = (call kind, proc, macro call)
   stack = (arg1, arg2, ..., arg-bottom)
 */
-void macro_call(Function* proc, VM_op call_op){
-  auto& argi = proc->arg_info();
-
+void macro_call(Lisp_ptr proc, VM_op call_op, const ArgInfo& argi){
   auto args = VM.stack().top();
   VM.stack().pop();
 
@@ -153,7 +150,7 @@ void macro_call(Function* proc, VM_op call_op){
   }    
 
   VM.code().push(Lisp_ptr(vm_op_macro_call));
-  VM.code().push(Lisp_ptr(proc));
+  VM.code().push(proc);
   VM.code().push(Lisp_ptr(call_op));
 }
 
@@ -163,8 +160,8 @@ void macro_call(Function* proc, VM_op call_op){
   code = (call kind, proc)
   stack = (whole args, arg-bottom)
 */
-void whole_function_call(Function* proc, VM_op call_op){
-  VM.code().push(Lisp_ptr(proc));
+void whole_function_call(Lisp_ptr proc, VM_op call_op){
+  VM.code().push(proc);
   VM.code().push(Lisp_ptr(call_op));
 
   auto args = VM.stack().top();
@@ -179,7 +176,7 @@ void whole_function_call(Function* proc, VM_op call_op){
   code = (call kind, proc, macro call)
   stack = (whole args, arg-bottom)
 */
-void whole_macro_call(Function* proc, VM_op call_op){
+void whole_macro_call(Lisp_ptr proc, VM_op call_op){
   VM.code().push(Lisp_ptr(vm_op_macro_call));
   whole_function_call(proc, call_op);
 }
@@ -203,9 +200,9 @@ void vm_op_leave_frame(){
 void vm_op_native_call(){
   auto proc = VM.code().top();
   VM.code().pop();
-  auto fun = proc.get<Function*>();
 
-  assert(fun->type() == Type::native);
+  auto fun = proc.get<Function*>();
+  assert(fun && fun->type() == Type::native);
 
   auto native_func = fun->get<NativeFunc>();
   assert(native_func);
@@ -226,9 +223,9 @@ void vm_op_native_call(){
 void vm_op_interpreted_call(){
   auto proc = VM.code().top();
   VM.code().pop();
-  auto fun = proc.get<Function*>();
 
-  assert(fun->type() == Type::interpreted);
+  auto fun = proc.get<Function*>();
+  assert(fun && fun->type() == Type::interpreted);
   assert(!VM.stack().empty());
 
   const auto& argi = fun->arg_info();
@@ -296,7 +293,23 @@ void vm_op_interpreted_call(){
 */
 void vm_op_call(){
   auto proc = VM.return_value();
-  if(proc.tag() != Ptr_tag::function){
+ 
+  VM_op op;
+  Calling c;
+  ArgInfo argi;
+
+  if(auto fun = proc.get<Function*>()){
+    switch(fun->type()){
+    case Type::interpreted:
+      op = vm_op_interpreted_call; break;
+    case Type::native:
+      op = vm_op_native_call; break;
+    default:
+      UNEXP_DEFAULT();
+    }
+    c = fun->calling();
+    argi = fun->arg_info();
+  }else{
     fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
             stringify(proc.tag()));
     fprintf(stderr, "      expr: "); print(stderr, VM.stack().top()); fputc('\n', stderr);
@@ -305,28 +318,16 @@ void vm_op_call(){
     VM.stack().pop();
     return;
   }
- 
-  auto fun = proc.get<Function*>();
 
-  VM_op op;
-  switch(fun->type()){
-  case Type::interpreted:
-    op = vm_op_interpreted_call; break;
-  case Type::native:
-    op = vm_op_native_call; break;
-  default:
-    UNEXP_DEFAULT();
-  }
-
-  switch(fun->calling()){
+  switch(c){
   case Calling::function:
-    function_call(fun, op); return;
+    function_call(proc, op, argi); return;
   case Calling::macro:
-    macro_call(fun, op); return;
+    macro_call(proc, op, argi); return;
   case Calling::whole_function:
-    whole_function_call(fun, op); return;
+    whole_function_call(proc, op); return;
   case Calling::whole_macro:
-    whole_macro_call(fun, op); return;
+    whole_macro_call(proc, op); return;
   default:
     UNEXP_DEFAULT();
   }
