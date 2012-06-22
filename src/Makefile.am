@@ -18,11 +18,11 @@ libzs_a_SOURCES = zs.hh\
 		function.cc function.hh function.i.hh\
 		builtin.cc builtin.hh\
 		vm.cc vm.hh vm.i.hh
-
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 
 noinst_PROGRAMS = zs
 zs_SOURCES = zs.hh main.cc
+zs_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 zs_LDADD = libzs.a
 
 check_LIBRARIES = libzs_test.a
