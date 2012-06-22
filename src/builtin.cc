@@ -107,6 +107,19 @@ void type_check_pred(){
   VM.return_value() = Lisp_ptr{args[0].tag() == p};
 }
 
+static
+void type_check_pair(){
+  auto args = pick_args<1>();
+  VM.return_value() = Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
+}
+
+static
+void type_check_procedure(){
+  auto args = pick_args<1>();
+  VM.return_value() = Lisp_ptr{(args[0].tag() == Ptr_tag::i_procedure)
+                               || (args[0].tag() == Ptr_tag::i_procedure)};
+}
+
 static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
@@ -145,7 +158,7 @@ void eql(){
 
 static struct Entry {
   const char* name;
-  Function func;
+  const Function func;
 } 
 builtin_func[] = {
   // syntaxes
@@ -238,13 +251,10 @@ builtin_func[] = {
       type_check_pred<Ptr_tag::vector>,
       Calling::function, {1, false}}},
   {"procedure?", Function{
-      type_check_pred<Ptr_tag::i_procedure>,
+      type_check_procedure,
       Calling::function, {1, false}}},
   {"pair?", Function{
-      [](){
-        auto args = pick_args<1>();
-        VM.return_value() = Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
-      },
+      type_check_pair,
       Calling::function, {1, false}}},
   {"number?", Function{
       type_check_pred<Ptr_tag::number>,
@@ -265,7 +275,6 @@ builtin_func[] = {
 
 void install_builtin(){
   for(auto& e : builtin_func){
-    Symbol* s = VM.symtable.intern(e.name);
-    VM.set(s, Lisp_ptr{&e.func});
+    VM.set(VM.symtable.intern(e.name), Lisp_ptr{&e.func});
   }
 }

@@ -27,6 +27,9 @@ template<>
 Procedure::Function* to_type<Ptr_tag::i_procedure>() = delete;
 
 template<>
+const Procedure::Function* to_type<Ptr_tag::n_procedure>() = delete;
+
+template<>
 Number* to_type<Ptr_tag::number>() = delete;
 
 template<>
@@ -77,6 +80,12 @@ Ptr_tag to_tag<Ptr_tag, Procedure::Function*>(){
 
 template<>
 inline constexpr
+Ptr_tag to_tag<Ptr_tag, const Procedure::Function*>(){
+  return Ptr_tag::n_procedure;
+}
+
+template<>
+inline constexpr
 Ptr_tag to_tag<Ptr_tag, Number*>(){
   return Ptr_tag::number;
 }
@@ -117,7 +126,7 @@ Ptr_tag to_tag<Ptr_tag, VM_op>(){
 template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<Ptr_tag>(Ptr_tag p)
-: tag_(p), u_(){}
+: tag_(p), u_(static_cast<void*>(nullptr)){}
 
 template<typename T>
 inline constexpr

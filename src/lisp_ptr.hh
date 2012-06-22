@@ -47,13 +47,16 @@ public:
 
 private:
   union lisp_ptr_u{
-    constexpr lisp_ptr_u(void* p = nullptr) : ptr_(p){}
+    constexpr lisp_ptr_u(){}
+    constexpr lisp_ptr_u(void* p) : ptr_(p){}
+    constexpr lisp_ptr_u(const void* p) : cptr_(p){}
     constexpr lisp_ptr_u(bool b) : b_(b){}
     constexpr lisp_ptr_u(char c) : c_(c){}
     constexpr lisp_ptr_u(int i) : i_(i){}
     constexpr lisp_ptr_u(void(*f)()) : f_(f){}
 
     void* ptr_;
+    const void* cptr_;
     bool b_;
     char c_;
     int i_;

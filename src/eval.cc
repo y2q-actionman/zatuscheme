@@ -201,7 +201,7 @@ void vm_op_native_call(){
   auto proc = VM.code().top();
   VM.code().pop();
 
-  auto fun = proc.get<Function*>();
+  auto fun = proc.get<const Function*>();
   assert(fun && fun->type() == Type::native);
 
   auto native_func = fun->get<NativeFunc>();
@@ -293,22 +293,19 @@ void vm_op_interpreted_call(){
 */
 void vm_op_call(){
   auto proc = VM.return_value();
- 
+
   VM_op op;
   Calling c;
   ArgInfo argi;
 
-  if(auto fun = proc.get<Function*>()){
-    switch(fun->type()){
-    case Type::interpreted:
-      op = vm_op_interpreted_call; break;
-    case Type::native:
-      op = vm_op_native_call; break;
-    default:
-      UNEXP_DEFAULT();
-    }
-    c = fun->calling();
-    argi = fun->arg_info();
+  if(auto ifun = proc.get<Function*>()){
+    op = vm_op_interpreted_call;
+    c = ifun->calling();
+    argi = ifun->arg_info(); 
+  }else if(auto nfun = proc.get<const Function*>()){
+    op = vm_op_native_call;
+    c = nfun->calling();
+    argi = nfun->arg_info();
   }else{
     fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
             stringify(proc.tag()));
