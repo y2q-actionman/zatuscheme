@@ -1,10 +1,7 @@
 #include <cstring>
 #include <string>
 
-#include "decl.hh"
-#include "printer.hh"
-#include "reader.hh"
-#include "symtable.hh"
+#include "zs.hh"
 #include "test_util.hh"
 
 using namespace std;

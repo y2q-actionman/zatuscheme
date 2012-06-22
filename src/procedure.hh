@@ -1,5 +1,5 @@
-#ifndef FUNCTION_HH
-#define FUNCTION_HH
+#ifndef PROCEDURE_HH
+#define PROCEDURE_HH
 
 #include "lisp_ptr.hh"
 #include <cstdio>
@@ -81,6 +81,6 @@ const char* stringify(Function::Type);
 
 void describe(FILE*, const Function::ArgInfo&);
 
-#include "function.i.hh"
+#include "procedure.i.hh"
 
-#endif //FUNCTION_HH
+#endif //PROCEDURE_HH

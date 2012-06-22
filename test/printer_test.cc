@@ -1,12 +1,7 @@
 #include <cstring>
 #include <string>
 
-#include "decl.hh"
-#include "printer.hh"
-#include "number.hh"
-#include "symtable.hh"
-#include "symbol.hh"
-#include "cons.hh"
+#include "zs.hh"
 #include "test_util.hh"
 
 using namespace std;

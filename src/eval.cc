@@ -5,7 +5,7 @@
 #include "util.hh"
 #include "symbol.hh"
 #include "cons.hh"
-#include "function.hh"
+#include "procedure.hh"
 #include "printer.hh"
 #include "builtin.hh"
 

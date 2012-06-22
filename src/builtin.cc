@@ -2,7 +2,7 @@
 
 #include "builtin.hh"
 #include "number.hh"
-#include "function.hh"
+#include "procedure.hh"
 #include "lisp_ptr.hh"
 #include "eval.hh"
 

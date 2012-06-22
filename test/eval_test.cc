@@ -1,10 +1,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "eval.hh"
-#include "vm.hh"
-#include "builtin.hh"
-#include "reader.hh"
+#include "zs.hh"
 #include "test_util.hh"
 
 using namespace std;

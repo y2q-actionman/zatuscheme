@@ -1,10 +1,7 @@
 #include <cstdlib>
 #include <cassert>
 
-#include "function.hh"
-#include "reader.hh"
-#include "builtin.hh"
-#include "vm.hh"
+#include "zs.hh"
 #include "test_util.hh"
 
 static bool result = true;

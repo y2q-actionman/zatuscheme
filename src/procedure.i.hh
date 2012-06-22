@@ -1,7 +1,7 @@
-#ifndef FUNCTION_I_HH
-#define FUNCTION_I_HH
+#ifndef PROCEDURE_I_HH
+#define PROCEDURE_I_HH
 
-#ifndef FUNCTION_HH
+#ifndef PROCEDURE_HH
 #error "Please include via parent file"
 #endif
 
@@ -55,4 +55,4 @@ Function::NativeFunc Function::get() const{
   }
 }
 
-#endif // FUNCTION_I_HH
+#endif // PROCEDURE_I_HH

@@ -1,4 +1,4 @@
-#include "function.hh"
+#include "procedure.hh"
 #include "cons.hh"
 
 Function::ArgInfo parse_func_arg(Lisp_ptr args){
