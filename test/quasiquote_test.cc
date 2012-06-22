@@ -8,40 +8,11 @@
 
 static bool result = true;
 
-Lisp_ptr eval_text(const char* s){
-  auto exp = read_from_string(s);
-  if(!exp){
-    printf("[failed] read error on %s\n", s);
-    result = false;
-    return {};
-  }
-
-  VM.code().push(exp);
-  eval();
-  auto ret = VM.return_value();
-  if(!ret){
-    printf("[failed] eval error on %s\n", s);
-    result = false;
-    return {};
-  }
-
-  return ret;
-}
-
 void check(const char* input, const char* expect){
-  auto e = eval_text(input);
-  if(!e){
-    result = false;
-    return;
-  }
-
-  if(!test_on_print(e, expect,
-                    [expect](const char* s){
-                      printf("[failed] expected %s, but got %s\n", expect, s);
-                    })){
-    result = false;
-    return;
-  }
+  result = read_eval_print_test(input, expect,
+                                [expect](const char* s){
+                                  printf("[failed] expected %s, but got %s\n", expect, s);
+                                });
 }
 
 

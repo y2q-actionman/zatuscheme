@@ -19,6 +19,24 @@ Lisp_ptr read_from_string(const char* s){
   return p;
 }
 
+Lisp_ptr eval_text(const char* s){
+  auto exp = read_from_string(s);
+  if(!exp){
+    printf("[failed] read error on %s\n", s);
+    return {};
+  }
+
+  VM.code().push(exp);
+  eval();
+  auto ret = VM.return_value();
+  if(!ret){
+    printf("[failed] eval error on %s\n", s);
+    return {};
+  }
+
+  return ret;
+}
+
 bool eql(Lisp_ptr a, Lisp_ptr b){
   VM.stack().push(Lisp_ptr(static_cast<VM_op>(nullptr)));
   VM.stack().push(a);

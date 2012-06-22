@@ -13,19 +13,9 @@ static bool result = true;
 
 template<typename Fun>
 void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
-  auto expr = read_from_string(expr_s);
-  if(!expr){
-    printf("reader error occured in expr!: %s\n", expr_s);
-    result = false;
-    return;
-  }
-
-  VM.code().push(expr);
-  eval();
-  auto evaled = VM.return_value();
-  if(!evaled && expect_s){
-    printf("eval error occured: %s\n", expr_s);
-    result = false;
+  auto evaled = eval_text(expr_s);
+  if(!evaled){
+    if(expect_s) result = false;
     return;
   }
 

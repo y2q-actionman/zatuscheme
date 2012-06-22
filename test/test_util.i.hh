@@ -14,7 +14,7 @@
 
 
 template<typename Fun>
-bool test_on_print(Lisp_ptr input, const char* expect, const Fun& callback){
+bool test_on_print(Lisp_ptr input, const char* expect, Fun&& callback){
   bool ret = false;
   char* buf = NULL;
   size_t buf_size = 0;
@@ -44,6 +44,14 @@ bool test_on_print(Lisp_ptr input, const char* expect, const Fun& callback){
  end:
   free(buf);
   return ret;
+}
+
+template<typename Fun>
+bool read_eval_print_test(const char* input, const char* expect, Fun&& f){
+  auto e = eval_text(input);
+  if(!e) return false;
+
+  return test_on_print(e, expect, f);
 }
 
 #endif // TEST_UTIL_I_HH
