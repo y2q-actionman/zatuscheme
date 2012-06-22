@@ -7,6 +7,7 @@
 #include "eval.hh"
 
 using namespace std;
+using namespace Procedure;
 
 namespace {
 
@@ -150,116 +151,116 @@ builtin_func[] = {
   // syntaxes
   {"quote", Function{
       whole_function_quote,
-      Function::Calling::whole_function, {1, false}}},
+      Calling::whole_function, {1, false}}},
   {"lambda", Function{
       whole_function_lambda,
-      Function::Calling::whole_function, {1, true}}},
+      Calling::whole_function, {1, true}}},
   {"if", Function{
       whole_function_if,
-      Function::Calling::whole_function, {3, false}}},
+      Calling::whole_function, {3, false}}},
   {"set!", Function{
       whole_function_set,
-      Function::Calling::whole_function, {2, false}}},
+      Calling::whole_function, {2, false}}},
   {"define", Function{
       whole_function_define,
-      Function::Calling::whole_function, {2, true}}},
+      Calling::whole_function, {2, true}}},
   {"quasiquote", Function{
       whole_function_quasiquote,
-      Function::Calling::whole_function, {1, false}}},
+      Calling::whole_function, {1, false}}},
   {"begin", Function{
       whole_function_begin,
-      Function::Calling::whole_function, {1, true}}},
+      Calling::whole_function, {1, true}}},
 
   {"cond", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"case", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"and", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"or", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"let", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"let*", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"letrec", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"do", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"delay", Function{
       whole_function_unimplemented,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
 
   {"unquote", Function{
       whole_function_pass_through,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"unquote-splicing", Function{
       whole_function_pass_through,
-      Function::Calling::whole_function, {0, true}}},
+      Calling::whole_function, {0, true}}},
   {"else", Function{
       whole_function_error,
-      Function::Calling::whole_function, {0, false}}},
+      Calling::whole_function, {0, false}}},
   {"=>", Function{
       whole_function_error,
-      Function::Calling::whole_function, {0, false}}},
+      Calling::whole_function, {0, false}}},
 
   // functions
   {"+", Function{
       plus_2,
-      Function::Calling::function, {2, true}}},
+      Calling::function, {2, true}}},
   {"list", Function{
       [](){stack_to_list(false);}, 
-      Function::Calling::function, {1, true}}},
+      Calling::function, {1, true}}},
   {"list*", Function{
       [](){stack_to_list(true);}, 
-      Function::Calling::function, {1, true}}},
+      Calling::function, {1, true}}},
   {"vector", Function{
       stack_to_vector, 
-      Function::Calling::function, {1, true}}},
+      Calling::function, {1, true}}},
   {"boolean?", Function{
       type_check_pred<Ptr_tag::boolean>, 
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"symbol?", Function{
       type_check_pred<Ptr_tag::symbol>,
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"char?", Function{
       type_check_pred<Ptr_tag::character>,
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"vector?", Function{
       type_check_pred<Ptr_tag::vector>,
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"procedure?", Function{
       type_check_pred<Ptr_tag::function>,
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"pair?", Function{
       [](){
         auto args = pick_args<1>();
         VM.return_value() = Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
       },
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"number?", Function{
       type_check_pred<Ptr_tag::number>,
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"string?", Function{
       type_check_pred<Ptr_tag::string>,
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"port?", Function{
       type_check_pred<Ptr_tag::port>,
-      Function::Calling::function, {1, false}}},
+      Calling::function, {1, false}}},
   {"eql", Function{
       eql,
-      Function::Calling::function, {2, false}}},
+      Calling::function, {2, false}}},
   {"eq", Function{
       eq,
-      Function::Calling::function, {2, false}}}
+      Calling::function, {2, false}}}
 };
 
 void install_builtin(){

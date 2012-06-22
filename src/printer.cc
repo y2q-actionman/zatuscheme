@@ -70,10 +70,6 @@ void print(FILE* f, Lisp_ptr p){
     fprintf(f, "%s", p.get<Symbol*>()->name().c_str());
     break;
 
-  case Ptr_tag::function:
-    fprintf(f, "<function %p>", static_cast<void*>(p.get<Function*>()));
-    break;
-
   case Ptr_tag::number:
     print(f, *p.get<Number*>());
     break;
@@ -86,18 +82,13 @@ void print(FILE* f, Lisp_ptr p){
     print_vector(f, p.get<Vector*>());
     break;
 
+  case Ptr_tag::function:
   case Ptr_tag::port:
-    fprintf(f, "<port %p>", static_cast<void*>(p.get<Port*>()));
+  case Ptr_tag::env:
+  case Ptr_tag::vm_op:
+    fprintf(f, "<%s %p>", stringify(p.tag()), p.get<void*>());
     break;
 
-  case Ptr_tag::env:
-    fprintf(f, "<environ %p>", static_cast<void*>(p.get<Env*>()));
-    break;
-    
-  case Ptr_tag::vm_op:
-    fprintf(f, "<VM operation %p>", p.get<void*>());
-    break;
-    
   default:
     UNEXP_DEFAULT();
   }

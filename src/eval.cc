@@ -10,6 +10,7 @@
 #include "builtin.hh"
 
 using namespace std;
+using namespace Procedure;
 
 namespace {
 
@@ -204,9 +205,9 @@ void vm_op_native_call(){
   VM.code().pop();
   auto fun = proc.get<Function*>();
 
-  assert(fun->type() == Function::Type::native);
+  assert(fun->type() == Type::native);
 
-  auto native_func = fun->get<Function::NativeFunc>();
+  auto native_func = fun->get<NativeFunc>();
   assert(native_func);
 
   native_func();
@@ -227,7 +228,7 @@ void vm_op_interpreted_call(){
   VM.code().pop();
   auto fun = proc.get<Function*>();
 
-  assert(fun->type() == Function::Type::interpreted);
+  assert(fun->type() == Type::interpreted);
   assert(!VM.stack().empty());
 
   const auto& argi = fun->arg_info();
@@ -309,22 +310,22 @@ void vm_op_call(){
 
   VM_op op;
   switch(fun->type()){
-  case Function::Type::interpreted:
+  case Type::interpreted:
     op = vm_op_interpreted_call; break;
-  case Function::Type::native:
+  case Type::native:
     op = vm_op_native_call; break;
   default:
     UNEXP_DEFAULT();
   }
 
   switch(fun->calling()){
-  case Function::Calling::function:
+  case Calling::function:
     function_call(fun, op); return;
-  case Function::Calling::macro:
+  case Calling::macro:
     macro_call(fun, op); return;
-  case Function::Calling::whole_function:
+  case Calling::whole_function:
     whole_function_call(fun, op); return;
-  case Function::Calling::whole_macro:
+  case Calling::whole_macro:
     whole_macro_call(fun, op); return;
   default:
     UNEXP_DEFAULT();
@@ -620,7 +621,7 @@ void whole_function_lambda(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
 
-  Function::ArgInfo arg_info;
+  ArgInfo arg_info;
   Lisp_ptr code;
 
   bind_cons_list(wargs,
@@ -642,7 +643,7 @@ void whole_function_lambda(){
   }
 
   VM.return_value() = 
-    Lisp_ptr{new Function(code, Function::Calling::function, arg_info, VM.frame())};
+    Lisp_ptr{new Function(code, Calling::function, arg_info, VM.frame())};
 }
 
 /*
@@ -727,7 +728,7 @@ void whole_function_define(){
     set_internal("define(value set)", p, vm_op_local_set);
   }else if(first.tag() == Ptr_tag::cons){
     Symbol* var = nullptr;
-    Function::ArgInfo arg_info;
+    ArgInfo arg_info;
 
     bind_cons_list(first,
                    [&](Cons* c){
@@ -748,7 +749,7 @@ void whole_function_define(){
       return;
     }
 
-    auto value = Lisp_ptr(new Function(code, Function::Calling::function, arg_info, VM.frame()));
+    auto value = Lisp_ptr(new Function(code, Calling::function, arg_info, VM.frame()));
     VM.local_set(var, value);
     VM.return_value() = value;
   }else{

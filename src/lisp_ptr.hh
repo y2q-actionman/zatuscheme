@@ -67,7 +67,9 @@ private:
 // typedefs & declarations
 class Cons;
 class Symbol;
-class Function;
+namespace Procedure{
+  class Function;
+}
 class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;

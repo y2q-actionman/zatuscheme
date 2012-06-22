@@ -24,7 +24,7 @@ template<>
 Symbol* to_type<Ptr_tag::symbol>() = delete;
 
 template<>
-Function* to_type<Ptr_tag::function>() = delete;
+Procedure::Function* to_type<Ptr_tag::function>() = delete;
 
 template<>
 Number* to_type<Ptr_tag::number>() = delete;
@@ -71,7 +71,7 @@ Ptr_tag to_tag<Ptr_tag, Symbol*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Function*>(){
+Ptr_tag to_tag<Ptr_tag, Procedure::Function*>(){
   return Ptr_tag::function;
 }
 

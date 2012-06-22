@@ -4,8 +4,7 @@
 #include "lisp_ptr.hh"
 #include <cstdio>
 
-class Function {
-public:
+namespace Procedure {
   typedef void(*NativeFunc)();
 
   enum class Type {
@@ -35,6 +34,8 @@ public:
     }
   };
 
+class Function {
+public:
   constexpr Function(Lisp_ptr code, Calling c, const ArgInfo& a, Lisp_ptr e)
     : type_(Type::interpreted), calling_(c), argi_(a), code_(code), env_(e){}
   constexpr Function(NativeFunc f, Calling c, const ArgInfo& a)
@@ -74,12 +75,14 @@ private:
   };
   Lisp_ptr env_;
 };
+}
 
-Function::ArgInfo parse_func_arg(Lisp_ptr);
+Procedure::ArgInfo parse_func_arg(Lisp_ptr);
 
-const char* stringify(Function::Type);
+const char* stringify(Procedure::Type);
+const char* stringify(Procedure::Calling);
 
-void describe(FILE*, const Function::ArgInfo&);
+void describe(FILE*, const Procedure::ArgInfo&);
 
 #include "procedure.i.hh"
 

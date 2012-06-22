@@ -4,15 +4,17 @@
 #include "zs.hh"
 #include "test_util.hh"
 
+using namespace Procedure;
+
 static bool result = true;
 
-bool operator!=(const Function::ArgInfo& a, const Function::ArgInfo& b){
+bool operator!=(const ArgInfo& a, const ArgInfo& b){
   // ignores ArgInfo::head..
   return (a.required_args != b.required_args)
     || (a.variadic != b.variadic);
 }
 
-void check(const char* input, const Function::ArgInfo& expect){
+void check(const char* input, const ArgInfo& expect){
   auto p = read_from_string(input);
   assert(p);
 
