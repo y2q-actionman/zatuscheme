@@ -131,6 +131,16 @@ static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
     return a.get<void*>() == b.get<void*>();
   }
 }
+
+static
+void list(){
+  stack_to_list(false);
+}
+
+static
+void list_star(){
+  stack_to_list(true);
+}
  
 void eq(){
   auto args = pick_args<2>();
@@ -155,120 +165,121 @@ void eql(){
   return;
 }
 
-
-static struct Entry {
+static constexpr struct Entry {
   const char* name;
   const NProcedure func;
-} 
-builtin_func[] = {
+
+  constexpr Entry(const char* n, const NProcedure& f)
+    : name(n), func(f){}
+} builtin_func[] = {
   // syntaxes
-  {"quote", NProcedure{
+  {"quote", {
       whole_function_quote,
       Calling::whole_function, {1, false}}},
-  {"lambda", NProcedure{
+  {"lambda", {
       whole_function_lambda,
       Calling::whole_function, {1, true}}},
-  {"if", NProcedure{
+  {"if", {
       whole_function_if,
       Calling::whole_function, {3, false}}},
-  {"set!", NProcedure{
+  {"set!", {
       whole_function_set,
       Calling::whole_function, {2, false}}},
-  {"define", NProcedure{
+  {"define", {
       whole_function_define,
       Calling::whole_function, {2, true}}},
-  {"quasiquote", NProcedure{
+  {"quasiquote", {
       whole_function_quasiquote,
       Calling::whole_function, {1, false}}},
-  {"begin", NProcedure{
+  {"begin", {
       whole_function_begin,
       Calling::whole_function, {1, true}}},
 
-  {"cond", NProcedure{
+  {"cond", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
-  {"case", NProcedure{
+  {"case", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
-  {"and", NProcedure{
+  {"and", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
-  {"or", NProcedure{
+  {"or", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
-  {"let", NProcedure{
+  {"let", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
-  {"let*", NProcedure{
+  {"let*", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
-  {"letrec", NProcedure{
+  {"letrec", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
-  {"do", NProcedure{
+  {"do", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
-  {"delay", NProcedure{
+  {"delay", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
 
-  {"unquote", NProcedure{
+  {"unquote", {
       whole_function_pass_through,
       Calling::whole_function, {0, true}}},
-  {"unquote-splicing", NProcedure{
+  {"unquote-splicing", {
       whole_function_pass_through,
       Calling::whole_function, {0, true}}},
-  {"else", NProcedure{
+  {"else", {
       whole_function_error,
       Calling::whole_function, {0, false}}},
-  {"=>", NProcedure{
+  {"=>", {
       whole_function_error,
       Calling::whole_function, {0, false}}},
 
   // functions
-  {"+", NProcedure{
+  {"+", {
       plus_2,
       Calling::function, {2, true}}},
-  {"list", NProcedure{
-      [](){stack_to_list(false);}, 
+  {"list", {
+      list,
       Calling::function, {1, true}}},
-  {"list*", NProcedure{
-      [](){stack_to_list(true);}, 
+  {"list*", {
+      list_star,
       Calling::function, {1, true}}},
-  {"vector", NProcedure{
+  {"vector", {
       stack_to_vector, 
       Calling::function, {1, true}}},
-  {"boolean?", NProcedure{
+  {"boolean?", {
       type_check_pred<Ptr_tag::boolean>, 
       Calling::function, {1, false}}},
-  {"symbol?", NProcedure{
+  {"symbol?", {
       type_check_pred<Ptr_tag::symbol>,
       Calling::function, {1, false}}},
-  {"char?", NProcedure{
+  {"char?", {
       type_check_pred<Ptr_tag::character>,
       Calling::function, {1, false}}},
-  {"vector?", NProcedure{
+  {"vector?", {
       type_check_pred<Ptr_tag::vector>,
       Calling::function, {1, false}}},
-  {"procedure?", NProcedure{
+  {"procedure?", {
       type_check_procedure,
       Calling::function, {1, false}}},
-  {"pair?", NProcedure{
+  {"pair?", {
       type_check_pair,
       Calling::function, {1, false}}},
-  {"number?", NProcedure{
+  {"number?", {
       type_check_pred<Ptr_tag::number>,
       Calling::function, {1, false}}},
-  {"string?", NProcedure{
+  {"string?", {
       type_check_pred<Ptr_tag::string>,
       Calling::function, {1, false}}},
-  {"port?", NProcedure{
+  {"port?", {
       type_check_pred<Ptr_tag::port>,
       Calling::function, {1, false}}},
-  {"eql", NProcedure{
+  {"eql", {
       eql,
       Calling::function, {2, false}}},
-  {"eq", NProcedure{
+  {"eq", {
       eq,
       Calling::function, {2, false}}}
 };
