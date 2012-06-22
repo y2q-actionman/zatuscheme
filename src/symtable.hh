@@ -6,8 +6,6 @@
 
 #include "symbol.hh"
 
-enum class Keyword;
-
 class SymTable {
 public:
   SymTable() = default;

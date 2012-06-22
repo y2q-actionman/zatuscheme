@@ -2,7 +2,6 @@
 #define SYMBOL_HH
 
 #include <string>
-#include "keyword.hh"
 
 class Symbol{
 public:
@@ -16,11 +15,8 @@ public:
   const std::string& name() const
   { return *name_ ; }
 
-  Keyword to_keyword() const
-  { return k_; }
-
 private:
-  constexpr Symbol() : name_(nullptr), k_(Keyword::not_keyword){}
+  constexpr Symbol() : name_(nullptr){}
 
   Symbol& operator=(const Symbol&) = delete;
   Symbol& operator=(Symbol&&) = delete;
@@ -29,7 +25,6 @@ private:
 
 private:
   const std::string* name_;
-  Keyword k_;
   // add pointer to symbol table?
 };
 

@@ -8,7 +8,6 @@ AM_DEFAULT_SOURCE_EXT = .cc
 LDADD = test_util.o\
 	../src/libzs_test.a
 check_PROGRAMS = token_test\
-		keyword_test\
 		parse_number_test\
 		printer_test\
 		reader_test\

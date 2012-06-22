@@ -12,7 +12,6 @@ libzs_a_SOURCES = zs.hh\
 		cons.cc cons.hh cons.i.hh\
 		symbol.cc symbol.hh symbol.i.hh\
 		symtable.cc symtable.hh\
-		keyword.cc keyword.hh\
 		reader.cc reader.hh\
 		printer.cc printer.hh\
 		eval.cc eval.hh\

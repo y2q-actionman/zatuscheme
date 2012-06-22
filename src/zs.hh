@@ -6,7 +6,6 @@
 #include "decl.hh"
 #include "eval.hh"
 #include "function.hh"
-#include "keyword.hh"
 #include "lisp_ptr.hh"
 #include "number.hh"
 #include "printer.hh"

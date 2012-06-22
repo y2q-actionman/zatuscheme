@@ -5,7 +5,6 @@
 #include "number.hh"
 #include "cons.hh"
 #include "symbol.hh"
-#include "keyword.hh"
 
 using namespace std;
 
@@ -101,8 +100,8 @@ Lisp_ptr read_vector(FILE* f){
   return Lisp_ptr{v};
 }
 
-Lisp_ptr read_abbrev(Keyword k, FILE* f){
-  Lisp_ptr first{VM.symtable.intern(stringify(k))};
+Lisp_ptr read_abbrev(const char* name, FILE* f){
+  Lisp_ptr first{VM.symtable.intern(name)};
   Lisp_ptr second{read(f)};
 
   return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second, Cons::NIL}}}};
@@ -140,16 +139,16 @@ Lisp_ptr read_la(FILE* f, const Token& looked_tok){
 
       // abbrev prefix
     case Token::Notation::quote:
-      return read_abbrev(Keyword::quote, f);
+      return read_abbrev("quote", f);
 
     case Token::Notation::quasiquote:
-      return read_abbrev(Keyword::quasiquote, f);
+      return read_abbrev("quasiquote", f);
 
     case Token::Notation::comma:
-      return read_abbrev(Keyword::unquote, f);
+      return read_abbrev("unquote", f);
 
     case Token::Notation::comma_at:
-      return read_abbrev(Keyword::unquote_splicing, f);
+      return read_abbrev("unquote-splicing", f);
       
     case Token::Notation::l_bracket:
     case Token::Notation::l_brace:

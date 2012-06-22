@@ -3,7 +3,6 @@
 
 #include "eval.hh"
 #include "util.hh"
-#include "keyword.hh"
 #include "symbol.hh"
 #include "cons.hh"
 #include "function.hh"
@@ -23,12 +22,6 @@ Symbol* to_varname(Lisp_ptr p){
     fprintf(stderr, "eval error: variable's name is not a symbol!\n");
     return nullptr;
   }
-
-  // if(var->to_keyword() != Keyword::not_keyword){
-  //   fprintf(stderr, "eval error: variable's name is Keyword (%s)!\n",
-  //           var->name().c_str());
-  //   return nullptr;
-  // }
 
   return var;
 }
@@ -458,15 +451,17 @@ void vm_op_quasiquote_vector(){
       return = template
 */
 void vm_op_quasiquote(){
-  static const auto qq_elem = [](Lisp_ptr p){
+  const auto unquote_sym = VM.symtable.intern("unquote");
+  const auto unquote_splicing_sym = VM.symtable.intern("unquote-splicing");
+
+  const auto qq_elem = [&](Lisp_ptr p){
     if(auto l = p.get<Cons*>()){
       if(auto l_first_sym = l->car().get<Symbol*>()){
-        auto k = l_first_sym->to_keyword();
-        if(k == Keyword::unquote){
+        if(l_first_sym == unquote_sym){
           VM.code().push(Lisp_ptr(vm_op_arg_push));
           VM.code().push(l->cdr().get<Cons*>()->car());
           return;
-        }else if(k == Keyword::unquote_splicing){
+        }else if(l_first_sym  == unquote_splicing_sym){
           VM.code().push(Lisp_ptr(vm_op_arg_push_list));
           VM.code().push(l->cdr().get<Cons*>()->car());
           return;
@@ -490,12 +485,11 @@ void vm_op_quasiquote(){
 
     // check unquote -- like `,x
     if(auto first_sym = p.get<Cons*>()->car().get<Symbol*>()){
-      auto k = first_sym->to_keyword();
-      if(k == Keyword::unquote){
+      if(first_sym == unquote_sym){
         auto rest = p.get<Cons*>()->cdr().get<Cons*>()->car();
         VM.code().push(rest);
         return;
-      }else if(k == Keyword::unquote_splicing){
+      }else if(first_sym == unquote_splicing_sym){
         fprintf(stderr, "eval error: unquote-splicing is not supported out of list");
         VM.return_value() = {};
         return;
@@ -507,11 +501,11 @@ void vm_op_quasiquote(){
     VM.code().push(Lisp_ptr(vm_op_quasiquote_list));
 
     do_list(p,
-            [](Cons* c) -> bool {
+            [&](Cons* c) -> bool {
               qq_elem(c->car());
               return true;
             },
-            [](Lisp_ptr last){
+            [&](Lisp_ptr last){
               qq_elem(last);
             });
   }else if(p.tag() == Ptr_tag::vector){
