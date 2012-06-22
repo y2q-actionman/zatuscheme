@@ -72,7 +72,8 @@ private:
 class Cons;
 class Symbol;
 namespace Procedure{
-  class Function;
+  class IProcedure;
+  class NProcedure;
 }
 class Number;
 typedef std::string String;

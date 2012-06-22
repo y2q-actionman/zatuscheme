@@ -201,10 +201,10 @@ void vm_op_native_call(){
   auto proc = VM.code().top();
   VM.code().pop();
 
-  auto fun = proc.get<const Function*>();
-  assert(fun && fun->type() == Type::native);
+  auto fun = proc.get<const NProcedure*>();
+  assert(fun);
 
-  auto native_func = fun->get<NativeFunc>();
+  auto native_func = fun->get();
   assert(native_func);
 
   native_func();
@@ -224,8 +224,8 @@ void vm_op_interpreted_call(){
   auto proc = VM.code().top();
   VM.code().pop();
 
-  auto fun = proc.get<Function*>();
-  assert(fun && fun->type() == Type::interpreted);
+  auto fun = proc.get<IProcedure*>();
+  assert(fun);
   assert(!VM.stack().empty());
 
   const auto& argi = fun->arg_info();
@@ -282,7 +282,7 @@ void vm_op_interpreted_call(){
   }
   
   // set up lambda body code
-  list_to_stack("funcall", fun->get<Lisp_ptr>(), VM.code());
+  list_to_stack("funcall", fun->get(), VM.code());
 }
 
 /*
@@ -298,11 +298,11 @@ void vm_op_call(){
   Calling c;
   ArgInfo argi;
 
-  if(auto ifun = proc.get<Function*>()){
+  if(auto ifun = proc.get<IProcedure*>()){
     op = vm_op_interpreted_call;
     c = ifun->calling();
     argi = ifun->arg_info(); 
-  }else if(auto nfun = proc.get<const Function*>()){
+  }else if(auto nfun = proc.get<const NProcedure*>()){
     op = vm_op_native_call;
     c = nfun->calling();
     argi = nfun->arg_info();
@@ -641,7 +641,7 @@ void whole_function_lambda(){
   }
 
   VM.return_value() = 
-    Lisp_ptr{new Function(code, Calling::function, arg_info, VM.frame())};
+    Lisp_ptr{new IProcedure(code, Calling::function, arg_info, VM.frame())};
 }
 
 /*
@@ -747,7 +747,7 @@ void whole_function_define(){
       return;
     }
 
-    auto value = Lisp_ptr(new Function(code, Calling::function, arg_info, VM.frame()));
+    auto value = Lisp_ptr(new IProcedure(code, Calling::function, arg_info, VM.frame()));
     VM.local_set(var, value);
     VM.return_value() = value;
   }else{

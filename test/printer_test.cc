@@ -69,7 +69,8 @@ int main(){
   check(stab.intern("a b c "), "a b c ");
 
   // function (should be added in future)
-  check_noprint(static_cast<Function*>(nullptr));
+  check_noprint(static_cast<IProcedure*>(nullptr));
+  check_noprint(static_cast<const NProcedure*>(nullptr));
 
   // number
   check(Number(100l), "100");

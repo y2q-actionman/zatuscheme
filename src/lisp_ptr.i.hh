@@ -24,10 +24,10 @@ template<>
 Symbol* to_type<Ptr_tag::symbol>() = delete;
 
 template<>
-Procedure::Function* to_type<Ptr_tag::i_procedure>() = delete;
+Procedure::IProcedure* to_type<Ptr_tag::i_procedure>() = delete;
 
 template<>
-const Procedure::Function* to_type<Ptr_tag::n_procedure>() = delete;
+const Procedure::NProcedure* to_type<Ptr_tag::n_procedure>() = delete;
 
 template<>
 Number* to_type<Ptr_tag::number>() = delete;
@@ -74,13 +74,13 @@ Ptr_tag to_tag<Ptr_tag, Symbol*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Procedure::Function*>(){
+Ptr_tag to_tag<Ptr_tag, Procedure::IProcedure*>(){
   return Ptr_tag::i_procedure;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, const Procedure::Function*>(){
+Ptr_tag to_tag<Ptr_tag, const Procedure::NProcedure*>(){
   return Ptr_tag::n_procedure;
 }
 

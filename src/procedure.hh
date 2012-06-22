@@ -34,47 +34,66 @@ namespace Procedure {
     }
   };
 
-class Function {
-public:
-  constexpr Function(Lisp_ptr code, Calling c, const ArgInfo& a, Lisp_ptr e)
-    : type_(Type::interpreted), calling_(c), argi_(a), code_(code), env_(e){}
-  constexpr Function(NativeFunc f, Calling c, const ArgInfo& a)
-    : type_(Type::native), calling_(c), argi_(a), n_func_(f), env_(){}
+  class IProcedure {
+  public:
+    IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Lisp_ptr e)
+      : calling_(c), argi_(a), code_(code), env_(e){}
 
-  Function(const Function&) = default;
-  Function(Function&&) = default;
+    IProcedure(const IProcedure&) = default;
+    IProcedure(IProcedure&&) = default;
 
-  ~Function() = default;
+    ~IProcedure() = default;
   
-  Function& operator=(const Function&) = default;
-  Function& operator=(Function&&) = default;
+    IProcedure& operator=(const IProcedure&) = default;
+    IProcedure& operator=(IProcedure&&) = default;
 
+    Calling calling() const
+    { return calling_; }
 
-  Type type() const
-  { return type_; }
+    const ArgInfo& arg_info() const
+    { return argi_; }
 
-  Calling calling() const
-  { return calling_; }
+    Lisp_ptr get() const
+    { return code_; }
 
-  const ArgInfo& arg_info() const
-  { return argi_; }
-
-  template<typename T>
-  T get() const;
-
-  Lisp_ptr closure() const
-  { return env_; }
+    Lisp_ptr closure() const
+    { return env_; }
   
-private:
-  const Type type_;
-  const Calling calling_;
-  const ArgInfo argi_;
-  union{
+  private:
+    Calling calling_;
+    ArgInfo argi_;
     Lisp_ptr code_;
-    NativeFunc n_func_;
+    Lisp_ptr env_;
   };
-  Lisp_ptr env_;
-};
+
+  class NProcedure {
+  public:
+    constexpr NProcedure(NativeFunc f, Calling c, const ArgInfo& a)
+      : calling_(c), argi_(a), n_func_(f){}
+
+    NProcedure(const NProcedure&) = default;
+    NProcedure(NProcedure&&) = default;
+
+    ~NProcedure() = default;
+  
+    NProcedure& operator=(const NProcedure&) = default;
+    NProcedure& operator=(NProcedure&&) = default;
+
+
+    Calling calling() const
+    { return calling_; }
+
+    const ArgInfo& arg_info() const
+    { return argi_; }
+
+    NativeFunc get() const
+    { return n_func_; }
+
+  private:
+    const Calling calling_;
+    const ArgInfo argi_;
+    const NativeFunc n_func_;
+  };
 }
 
 Procedure::ArgInfo parse_func_arg(Lisp_ptr);

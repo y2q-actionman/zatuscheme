@@ -30,32 +30,4 @@ Procedure::Type to_tag<Procedure::Type, Procedure::NativeFunc>(){
   return Procedure::Type::native;
 }
 
-namespace Procedure {
-
-template<> inline
-Lisp_ptr Function::get() const{
-  switch(type_){
-  case Type::interpreted:
-    return code_;
-  case Type::native:
-    return {};
-  default:
-    UNEXP_DEFAULT();
-  }
-}
-
-template<> inline
-NativeFunc Function::get() const{
-  switch(type_){
-  case Type::interpreted:
-    return nullptr;
-  case Type::native:
-    return n_func_;
-  default:
-    UNEXP_DEFAULT();
-  }
-}
-
-}
-
 #endif // PROCEDURE_I_HH
