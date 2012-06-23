@@ -5,6 +5,7 @@
 #error "Please include via parent file"
 #endif
 
+#include <type_traits>
 #include "decl.hh"
 
 // Type mapping
@@ -135,7 +136,7 @@ Lisp_ptr::Lisp_ptr(T p)
 
 
 template<>
-inline
+inline constexpr
 bool Lisp_ptr::get<bool>() const {
   return (tag() == to_tag<Ptr_tag, bool>())
     ? u_.b_
@@ -143,30 +144,53 @@ bool Lisp_ptr::get<bool>() const {
 }
 
 template<>
-inline
+inline constexpr
 char Lisp_ptr::get<char>() const {
   return (tag() == to_tag<Ptr_tag, char>())
     ? u_.c_ : '\0';
 }
 
 template<>
-inline
+inline constexpr
 VM_op Lisp_ptr::get<VM_op>() const {
   return (tag() == to_tag<Ptr_tag, VM_op>()
      ? u_.f_ : nullptr);
 }
 
 template<>
-inline
+inline constexpr
 void* Lisp_ptr::get<void*>() const{
   return u_.ptr_;
 }
 
+namespace lisp_ptr_detail {
+
 template<typename T>
-inline
+inline constexpr
+T lisp_ptr_cast(void* p, const void*,
+                typename std::enable_if<
+                  !std::is_const<typename std::remove_pointer<T>::type>::value
+                  >::type* = nullptr){
+  return static_cast<T>(p);
+}
+
+template<typename T>
+inline constexpr
+T lisp_ptr_cast(void*, const void* cp,
+                typename std::enable_if<
+                  std::is_const<typename std::remove_pointer<T>::type>::value
+                  >::type* = nullptr){
+  return static_cast<T>(cp);
+}
+
+}
+
+template<typename T>
+inline constexpr
 T Lisp_ptr::get() const {
   return (tag() == to_tag<Ptr_tag, T>())
-    ? static_cast<T>(u_.ptr_) : nullptr;
+    ? lisp_ptr_detail::lisp_ptr_cast<T>(u_.ptr_, u_.cptr_)
+    : nullptr;
 }
 
 #endif // LISP_PTR_I_HH

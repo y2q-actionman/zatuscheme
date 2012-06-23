@@ -36,10 +36,12 @@ public:
   Lisp_ptr& operator=(const Lisp_ptr&) = default;
   Lisp_ptr& operator=(Lisp_ptr&&) = default;
 
+  constexpr
   Ptr_tag tag() const
   { return tag_; }
 
   template<typename T>
+  constexpr
   T get() const;
 
   explicit constexpr operator bool() const
