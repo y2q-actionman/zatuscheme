@@ -55,6 +55,8 @@ int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
   return ret;
 }  
 
+void vm_op_proc_enter();
+
 /*
   ret = some value
   ----
@@ -70,12 +72,12 @@ void vm_op_arg_push(){
   code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
   stack = (arg-bottom)
 */
-void function_call(Lisp_ptr proc, VM_op call_op, const ArgInfo& argi){
+void function_call(Lisp_ptr proc, const ArgInfo* argi){
   auto args = VM.stack().top();
   VM.stack().pop();
 
   VM.code().push(proc);
-  VM.code().push(Lisp_ptr(call_op));
+  VM.code().push(Lisp_ptr(vm_op_proc_enter));
 
   int argc = 0;
 
@@ -93,11 +95,11 @@ void function_call(Lisp_ptr proc, VM_op call_op, const ArgInfo& argi){
                   return false;
                 }
               
-                if((argc < argi.required_args)
-                   || (!argi.variadic && argc > argi.required_args)){
+                if((argc < argi->required_args)
+                   || (!argi->variadic && argc > argi->required_args)){
                   fprintf(stderr, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
-                          argi.required_args,
-                          (argi.variadic) ? "variadic" : "not variadic",
+                          argi->required_args,
+                          (argi->variadic) ? "variadic" : "not variadic",
                           argc);
                   return false;
                 }
@@ -129,17 +131,17 @@ void vm_op_macro_call(){
   code = (call kind, proc, macro call)
   stack = (arg1, arg2, ..., arg-bottom)
 */
-void macro_call(Lisp_ptr proc, VM_op call_op, const ArgInfo& argi){
+void macro_call(Lisp_ptr proc, const ArgInfo* argi){
   auto args = VM.stack().top();
   VM.stack().pop();
 
   VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack());
-  if(argc < argi.required_args
-     || (!argi.variadic && argc > argi.required_args)){
+  if(argc < argi->required_args
+     || (!argi->variadic && argc > argi->required_args)){
     fprintf(stderr, "macro-call error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
-            argi.required_args,
-            (argi.variadic) ? "variadic" : "not variadic",
+            argi->required_args,
+            (argi->variadic) ? "variadic" : "not variadic",
             argc);
     for(int i = 0; i < argc; ++i){
       VM.stack().pop();
@@ -151,7 +153,7 @@ void macro_call(Lisp_ptr proc, VM_op call_op, const ArgInfo& argi){
 
   VM.code().push(Lisp_ptr(vm_op_macro_call));
   VM.code().push(proc);
-  VM.code().push(Lisp_ptr(call_op));
+  VM.code().push(Lisp_ptr(vm_op_proc_enter));
 }
 
 /*
@@ -160,9 +162,9 @@ void macro_call(Lisp_ptr proc, VM_op call_op, const ArgInfo& argi){
   code = (call kind, proc)
   stack = (whole args, arg-bottom)
 */
-void whole_function_call(Lisp_ptr proc, VM_op call_op){
+void whole_function_call(Lisp_ptr proc){
   VM.code().push(proc);
-  VM.code().push(Lisp_ptr(call_op));
+  VM.code().push(Lisp_ptr(vm_op_proc_enter));
 
   auto args = VM.stack().top();
   VM.stack().pop();
@@ -176,34 +178,69 @@ void whole_function_call(Lisp_ptr proc, VM_op call_op){
   code = (call kind, proc, macro call)
   stack = (whole args, arg-bottom)
 */
-void whole_macro_call(Lisp_ptr proc, VM_op call_op){
+void whole_macro_call(Lisp_ptr proc){
   VM.code().push(Lisp_ptr(vm_op_macro_call));
-  whole_function_call(proc, call_op);
+  whole_function_call(proc);
 }
 
+/*
+  ret = proc
+  stack[0] = args
+  ---
+  goto proc_call or macro_call
+*/
+void vm_op_call(){
+  auto proc = VM.return_value();
+
+  Calling c;
+  const ArgInfo* argi;
+
+  if(auto ifun = proc.get<IProcedure*>()){
+    c = ifun->calling();
+    argi = &ifun->arg_info(); 
+  }else if(auto nfun = proc.get<const NProcedure*>()){
+    c = nfun->calling();
+    argi = &nfun->arg_info();
+  }else{
+    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
+            stringify(proc.tag()));
+    fprintf(stderr, "      expr: "); print(stderr, VM.stack().top()); fputc('\n', stderr);
+    
+    VM.return_value() = {};
+    VM.stack().pop();
+    return;
+  }
+
+  switch(c){
+  case Calling::function:
+    function_call(proc, argi); return;
+  case Calling::macro:
+    macro_call(proc, argi); return;
+  case Calling::whole_function:
+    whole_function_call(proc); return;
+  case Calling::whole_macro:
+    whole_macro_call(proc); return;
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+ 
 /*
   leaves frame.
   no stack operations.
 */
-void vm_op_leave_frame(){
+void vm_op_proc_leave(){
   VM.leave_frame();
 }  
 
 /*
-  code = (proc)
   stack = (arg1, arg2, ..., arg-bottom)
   ----
   ret = returned value
   code = ()
   stack = ()
 */
-void vm_op_native_call(){
-  auto proc = VM.code().top();
-  VM.code().pop();
-
-  auto fun = proc.get<const NProcedure*>();
-  assert(fun);
-
+void proc_enter_native(const NProcedure* fun){
   auto native_func = fun->get();
   assert(native_func);
 
@@ -213,32 +250,24 @@ void vm_op_native_call(){
 }
 
 /*
-  code = (proc)
   stack = (arg1, arg2, ..., arg-bottom)
   ----
   In new frame, args are bound.
   code = (body1, body2, ..., leave_frame)
   stack = ()
 */
-void vm_op_interpreted_call(){
-  auto proc = VM.code().top();
-  VM.code().pop();
-
-  auto fun = proc.get<IProcedure*>();
-  assert(fun);
-  assert(!VM.stack().empty());
-
+void proc_enter_interpreted(IProcedure* fun){
   const auto& argi = fun->arg_info();
 
   // tail call check
   if(!VM.code().empty()
-     && VM.code().top().get<VM_op>() == vm_op_leave_frame){
+     && VM.code().top().get<VM_op>() == vm_op_proc_leave){
     VM.code().pop();
     VM.leave_frame();
   }
 
   VM.enter_frame(push_frame(fun->closure()));
-  VM.code().push(Lisp_ptr(vm_op_leave_frame));
+  VM.code().push(Lisp_ptr(vm_op_proc_leave));
 
   Lisp_ptr arg_name = argi.head;
   Lisp_ptr st_top;
@@ -286,47 +315,25 @@ void vm_op_interpreted_call(){
 }
 
 /*
-  ret = proc
-  stack[0] = args
-  ---
-  goto proc_call or macro_call
+  code = (proc)
+  ----
+  code = ()
+   and goto handler.
 */
-void vm_op_call(){
-  auto proc = VM.return_value();
+void vm_op_proc_enter(){
+  auto proc = VM.code().top();
+  VM.code().pop();
 
-  VM_op op;
-  Calling c;
-  ArgInfo argi;
+  assert(!VM.stack().empty());
 
   if(auto ifun = proc.get<IProcedure*>()){
-    op = vm_op_interpreted_call;
-    c = ifun->calling();
-    argi = ifun->arg_info(); 
+    proc_enter_interpreted(ifun);
   }else if(auto nfun = proc.get<const NProcedure*>()){
-    op = vm_op_native_call;
-    c = nfun->calling();
-    argi = nfun->arg_info();
+    proc_enter_native(nfun);
   }else{
-    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
-            stringify(proc.tag()));
-    fprintf(stderr, "      expr: "); print(stderr, VM.stack().top()); fputc('\n', stderr);
-    
+    fprintf(stderr, "eval internal error: corrupted code stack -- no proc found in entering!\n");
     VM.return_value() = {};
-    VM.stack().pop();
     return;
-  }
-
-  switch(c){
-  case Calling::function:
-    function_call(proc, op, argi); return;
-  case Calling::macro:
-    macro_call(proc, op, argi); return;
-  case Calling::whole_function:
-    whole_function_call(proc, op); return;
-  case Calling::whole_macro:
-    whole_macro_call(proc, op); return;
-  default:
-    UNEXP_DEFAULT();
   }
 }
  
