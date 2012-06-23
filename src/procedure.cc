@@ -28,17 +28,6 @@ ArgInfo parse_func_arg(Lisp_ptr args){
           });
 }
 
-const char* stringify(Type t){
-  switch(t){
-  case Type::interpreted:
-    return "interpreted";
-  case Type::native:
-    return "native";
-  default:
-    return "(unknown function type)";
-  }
-}
-
 const char* stringify(Calling c){
   switch(c){
   case Calling::function:

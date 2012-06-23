@@ -7,11 +7,6 @@
 namespace Procedure {
   typedef void(*NativeFunc)();
 
-  enum class Type {
-    interpreted,
-    native
-  };
-
   enum class Calling {
     function,
     macro,
@@ -98,7 +93,6 @@ namespace Procedure {
 
 Procedure::ArgInfo parse_func_arg(Lisp_ptr);
 
-const char* stringify(Procedure::Type);
 const char* stringify(Procedure::Calling);
 
 void describe(FILE*, const Procedure::ArgInfo&);
