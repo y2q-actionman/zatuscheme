@@ -29,10 +29,26 @@ namespace Procedure {
     }
   };
 
-  class IProcedure {
+  class ProcedureBase {
+  protected:
+    constexpr ProcedureBase(Calling c, const ArgInfo& a)
+      : calling_(c), argi_(a){}
+
+    Calling calling() const
+    { return calling_; }
+
+    const ArgInfo& arg_info() const
+    { return argi_; }
+
+  private:
+    Calling calling_;
+    ArgInfo argi_;
+  };
+
+  class IProcedure : protected ProcedureBase {
   public:
     IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Lisp_ptr e)
-      : calling_(c), argi_(a), code_(code), env_(e){}
+      : ProcedureBase(c, a), code_(code), env_(e){}
 
     IProcedure(const IProcedure&) = default;
     IProcedure(IProcedure&&) = default;
@@ -42,11 +58,8 @@ namespace Procedure {
     IProcedure& operator=(const IProcedure&) = default;
     IProcedure& operator=(IProcedure&&) = default;
 
-    Calling calling() const
-    { return calling_; }
-
-    const ArgInfo& arg_info() const
-    { return argi_; }
+    using ProcedureBase::calling;
+    using ProcedureBase::arg_info;
 
     Lisp_ptr get() const
     { return code_; }
@@ -55,16 +68,14 @@ namespace Procedure {
     { return env_; }
   
   private:
-    Calling calling_;
-    ArgInfo argi_;
     Lisp_ptr code_;
     Lisp_ptr env_;
   };
 
-  class NProcedure {
+  class NProcedure : protected ProcedureBase {
   public:
     constexpr NProcedure(NativeFunc f, Calling c, const ArgInfo& a)
-      : calling_(c), argi_(a), n_func_(f){}
+      : ProcedureBase(c, a), n_func_(f){}
 
     NProcedure(const NProcedure&) = default;
     NProcedure(NProcedure&&) = default;
@@ -74,19 +85,13 @@ namespace Procedure {
     NProcedure& operator=(const NProcedure&) = default;
     NProcedure& operator=(NProcedure&&) = default;
 
-
-    Calling calling() const
-    { return calling_; }
-
-    const ArgInfo& arg_info() const
-    { return argi_; }
+    using ProcedureBase::calling;
+    using ProcedureBase::arg_info;
 
     NativeFunc get() const
     { return n_func_; }
 
   private:
-    const Calling calling_;
-    const ArgInfo argi_;
     const NativeFunc n_func_;
   };
 }
