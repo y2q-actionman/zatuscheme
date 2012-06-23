@@ -395,8 +395,6 @@ void vm_op_local_set(){
   stack = (variable name)
 */
 void set_internal(const char* opname, Lisp_ptr p, VM_op set_op){
-  VM.return_value() = {};
-
   // extracting
   Symbol* var = nullptr;
   Lisp_ptr val;
@@ -414,11 +412,13 @@ void set_internal(const char* opname, Lisp_ptr p, VM_op set_op){
 
   if(!val){
     fprintf(stderr, "eval error: no value is supplied for %s\n", opname);
+    VM.return_value() = {};
     return;
   }
 
   if(len > 2){
     fprintf(stderr, "eval error: informal %s expr! (more than %d exprs)\n", opname, len);
+    VM.return_value() = {};
     return;
   }
 
@@ -661,8 +661,6 @@ void whole_function_if(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
 
-  VM.return_value() = {};
-
   // extracting
   Lisp_ptr test, conseq, alt;
 
@@ -681,9 +679,11 @@ void whole_function_if(){
 
   if(len < 3){
     fprintf(stderr, "eval error: informal if expr! (only %d exprs)\n", len);
+    VM.return_value() = {};
     return;
   }else if(len > 4){
     fprintf(stderr, "eval error: informal if expr! (more than %d exprs)\n", len);
+    VM.return_value() = {};
     return;
   }
 
@@ -721,8 +721,6 @@ void whole_function_define(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
 
-  VM.return_value() = {};
-
   auto p = wargs.get<Cons*>()->cdr();
   Cons* rest = p.get<Cons*>();
 
@@ -745,12 +743,14 @@ void whole_function_define(){
 
     if(!arg_info){
       fprintf(stderr, "eval error: defined function argument is informal!\n");
+      VM.return_value() = {};
       return;
     }
 
     auto code = rest->cdr();
     if(!code.get<Cons*>()){
       fprintf(stderr, "eval error: definition has empty body!\n");
+      VM.return_value() = {};
       return;
     }
 
