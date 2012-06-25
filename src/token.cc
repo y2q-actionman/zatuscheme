@@ -91,56 +91,41 @@ Token::Token(Token&& other)
 template<typename T>
 inline
 Token& Token::assign_from_other(T other){
-  switch(this->type_){
-  case Type::uninitialized:
-    new (this) Token(move(other));
-    break;
+  if(this->type_ == other.type_
+     || (this->type_ == Type::identifier && other.type_ == Type::string)
+     || (this->type_ == Type::string && other.type_ == Type::identifier)){
+    switch(this->type_){
+    case Type::uninitialized:
+      break;
     
-  case Type::identifier:
-  case Type::string:
-    if(other.type() == Type::identifier || other.type() == Type::string){
+    case Type::identifier:
+    case Type::string:
+      this->type_ = other.type_;
       this->str_ = move(other.str_);
-    }else{
-      str_.~string();
-      new (this) Token(move(other));
-    }
-    break;
+      break;
 
-  case Type::boolean:
-    if(other.type() == this->type()){
-      b_ = other.b_;
-    }else{
-      new (this) Token(move(other));
-    }
-    break;
+    case Type::boolean:
+      this->b_ = other.b_;
+      break;
 
-  case Type::number:
-    if(other.type() == this->type()){
+    case Type::number:
       this->num_ = move(other.num_);
-    }else{
-      num_.~Number();
-      new (this) Token(move(other));
-    }
-    break;
-
-  case Type::character:
-    if(other.type() == this->type()){
+      break;
+      
+    case Type::character:
       this->c_ = other.c_;
-    }else{
-      new (this) Token(move(other));
-    }
-    break;
+      break;
 
-  case Type::notation:
-    if(other.type() == this->type()){
+    case Type::notation:
       this->not_ = move(other.not_);
-    }else{
-      new (this) Token(move(other));
-    }
-    break;
+      break;
 
-  default:
-    UNEXP_DEFAULT();
+    default:
+      UNEXP_DEFAULT();
+    }
+  }else{
+    this->~Token();
+    new (this) Token(move(other));
   }
 
   return *this;
@@ -169,7 +154,10 @@ Token::~Token(){
   case Type::boolean:
   case Type::character:
   case Type::notation:
+    break;
+
   default:
+    //UNEXP_DEFAULT();
     break;
   }
 
