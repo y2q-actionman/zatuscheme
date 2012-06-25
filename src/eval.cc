@@ -617,6 +617,21 @@ void whole_function_quote(){
 }
 
 
+static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
+  auto arg_info = parse_func_arg(args);
+
+  if(!arg_info){
+    fprintf(stderr, "eval error: lambda has invalid args!\n");
+    return {};
+  }
+  if(!code){
+    fprintf(stderr, "eval error: lambda has invalid body!\n");
+    return {};
+  }
+  
+  return Lisp_ptr{new IProcedure(code, Calling::function, arg_info, VM.frame())};
+}
+
 /*
   stack = (args, arg_bottom)
   ----
@@ -626,29 +641,16 @@ void whole_function_lambda(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
 
-  ArgInfo arg_info;
-  Lisp_ptr code;
+  Lisp_ptr args, code;
 
   bind_cons_list(wargs,
                  [](Cons*){},
                  [&](Cons* c){
-                   arg_info = parse_func_arg(c->car());
+                   args = c->car();
                    code = c->cdr();
                  });
 
-  if(!arg_info){
-    fprintf(stderr, "eval error: lambda has invalid args!\n");
-    VM.return_value() = {};
-    return;
-  }
-  if(!code){
-    fprintf(stderr, "eval error: lambda has invalid body!\n");
-    VM.return_value() = {};
-    return;
-  }
-
-  VM.return_value() = 
-    Lisp_ptr{new IProcedure(code, Calling::function, arg_info, VM.frame())};
+  VM.return_value() = lambda_internal(args, code);
 }
 
 /*
@@ -731,30 +733,19 @@ void whole_function_define(){
     set_internal("define(value set)", p, vm_op_local_set);
   }else if(first.tag() == Ptr_tag::cons){
     Symbol* var = nullptr;
-    ArgInfo arg_info;
+    Lisp_ptr args, code;
 
     bind_cons_list(first,
                    [&](Cons* c){
                      var = to_varname(c->car());
-                     arg_info = parse_func_arg(c->cdr());
+                     args = (c->cdr());
                    });
 
     if(!var) return;
 
-    if(!arg_info){
-      fprintf(stderr, "eval error: defined function argument is informal!\n");
-      VM.return_value() = {};
-      return;
-    }
+    code = rest->cdr();
 
-    auto code = rest->cdr();
-    if(!code.get<Cons*>()){
-      fprintf(stderr, "eval error: definition has empty body!\n");
-      VM.return_value() = {};
-      return;
-    }
-
-    auto value = Lisp_ptr(new IProcedure(code, Calling::function, arg_info, VM.frame()));
+    auto value = lambda_internal(args, code);
     VM.local_set(var, value);
     VM.return_value() = value;
   }else{
