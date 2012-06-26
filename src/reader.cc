@@ -163,7 +163,6 @@ Lisp_ptr read_la(FILE* f, const Token& looked_tok){
               static_cast<int>(tok.get<Token::Notation>()));
       return Lisp_ptr{};
 
-    case Token::Notation::unknown:
     case Token::Notation::dot:
     case Token::Notation::bar:
     default:

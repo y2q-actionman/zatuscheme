@@ -423,8 +423,6 @@ Token tokenize(FILE* f){
 
 const char* stringify(Token::Notation n){
   switch(n){
-  case Token::Notation::unknown:
-    return "unknown";
   case Token::Notation::l_paren:
     return "left parensis";
   case Token::Notation::r_paren:
