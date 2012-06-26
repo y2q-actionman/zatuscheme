@@ -14,8 +14,6 @@ using namespace Procedure;
 
 namespace {
 
-static constexpr VMop vm_op_arg_bottom = nullptr;
-
 Symbol* to_varname(Lisp_ptr p){
   Symbol* var = p.get<Symbol*>();
 
@@ -800,16 +798,9 @@ void eval(){
       VM.return_value() = {};
       break;
 
-    case Ptr_tag::symbol: {
-      auto sym = to_varname(p);
-      if(!sym){
-        VM.return_value() = {};
-        break;
-      }
-    
-      VM.return_value() = VM.find(sym);
+    case Ptr_tag::symbol:
+      VM.return_value() = VM.find(p.get<Symbol*>());
       break;
-    }
     
     case Ptr_tag::cons: {
       auto c = p.get<Cons*>();

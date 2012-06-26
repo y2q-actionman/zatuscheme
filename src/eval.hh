@@ -4,6 +4,8 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 
+constexpr VMop vm_op_arg_bottom = nullptr;
+
 void whole_function_error();
 void whole_function_unimplemented();
 void whole_function_pass_through();
