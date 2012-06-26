@@ -5,9 +5,9 @@
 
 class Cons {
 public:
-  static constexpr Lisp_ptr NIL = Lisp_ptr{Ptr_tag::cons};
+  static constexpr Lisp_ptr NIL = Lisp_ptr{static_cast<Cons*>(nullptr)};
 
-  Cons(Lisp_ptr = Lisp_ptr(), Lisp_ptr = Lisp_ptr());
+  constexpr Cons(Lisp_ptr = Lisp_ptr(), Lisp_ptr = Lisp_ptr());
   Cons(const Cons&) = default;
   Cons(Cons&&) = default;
 

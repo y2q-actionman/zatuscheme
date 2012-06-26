@@ -5,7 +5,9 @@
 #error "Please include via parent file"
 #endif
 
-inline
+#include <cassert>
+
+constexpr inline
 Cons::Cons(Lisp_ptr x, Lisp_ptr y)
   : car_(x), cdr_(y){}
 
@@ -21,14 +23,14 @@ Lisp_ptr Cons::cdr() const {
 
 inline
 void Cons::rplaca(Lisp_ptr p){
-  if(this)
-    car_ = p;
+  assert(this);
+  car_ = p;
 }
 
 inline
 void Cons::rplacd(Lisp_ptr p){
-  if(this)
-    cdr_ = p;
+  assert(this);
+  cdr_ = p;
 }
 
 inline
