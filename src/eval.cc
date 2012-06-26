@@ -542,54 +542,31 @@ Lisp_ptr pick_whole_arg(){
   return ret;
 }
 
+void error_whole_function(const char* msg){
+  auto wargs = pick_whole_arg();
+  auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
+
+  assert(sym);
+
+  fprintf(stderr, "eval error: '%s' -- %s\n",
+          sym->name().c_str(), msg);
+  VM.return_value() = {};
+}
+
 } // namespace
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  ret = undef
-*/
 void whole_function_error(){
-  auto wargs = pick_whole_arg();
-  auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
-
-  assert(sym);
-
-  fprintf(stderr, "eval error: '%s' cannot be used as operator!!\n",
-          sym->name().c_str());
-  VM.return_value() = {};
+  error_whole_function("cannot be used as operator!!");
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  ret = undef
-*/
 void whole_function_unimplemented(){
-  auto wargs = pick_whole_arg();
-  auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
-
-  assert(sym);
-
-  fprintf(stderr, "eval error: '%s' is under development...\n",
-          sym->name().c_str());
-  VM.return_value() = {};
+  error_whole_function("under development...");
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  ret = args
-*/
 void whole_function_pass_through(){
   VM.return_value() = pick_whole_arg();
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  ret = arg[0]
-*/
 void whole_function_quote(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
@@ -630,11 +607,6 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   return Lisp_ptr{new IProcedure(code, Calling::function, arg_info, VM.frame())};
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  ret = proc.
-*/
 void whole_function_lambda(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
@@ -651,12 +623,6 @@ void whole_function_lambda(){
   VM.return_value() = lambda_internal(args, code);
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  code = (test, VM::if)
-  stack = (consequent, alternative)
-*/
 void whole_function_if(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
@@ -695,12 +661,6 @@ void whole_function_if(){
   VM.stack().push(conseq);
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  set is done.
-  ret = undef
-*/
 void whole_function_set(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
@@ -708,15 +668,6 @@ void whole_function_set(){
   set_internal("set!", wargs.get<Cons*>()->cdr(), vm_op_set);
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  in variable set:
-    same as "set!"
-
-  in function definition:
-    immediately the function is set to the variable.
-*/
 void whole_function_define(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
@@ -751,11 +702,6 @@ void whole_function_define(){
   }
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  ret = arg[0]
-*/
 void whole_function_begin(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
@@ -770,11 +716,6 @@ void whole_function_begin(){
   list_to_stack("begin", exprs, VM.code());
 }
 
-/*
-  stack = (args, arg_bottom)
-  ----
-  ret = arg[0]
-*/
 void whole_function_quasiquote(){
   auto wargs = pick_whole_arg();
   if(!wargs) return;
