@@ -14,7 +14,7 @@ using namespace Procedure;
 
 namespace {
 
-static constexpr VM_op vm_op_arg_bottom = nullptr;
+static constexpr VMop vm_op_arg_bottom = nullptr;
 
 Symbol* to_varname(Lisp_ptr p){
   Symbol* var = p.get<Symbol*>();
@@ -261,7 +261,7 @@ void proc_enter_interpreted(IProcedure* fun){
 
   // tail call check
   if(!VM.code().empty()
-     && VM.code().top().get<VM_op>() == vm_op_proc_leave){
+     && VM.code().top().get<VMop>() == vm_op_proc_leave){
     VM.code().pop();
     VM.leave_frame();
   }
@@ -394,7 +394,7 @@ void vm_op_local_set(){
   code = (value, VM::if)
   stack = (variable name)
 */
-void set_internal(const char* opname, Lisp_ptr p, VM_op set_op){
+void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   // extracting
   Symbol* var = nullptr;
   Lisp_ptr val;
@@ -825,7 +825,7 @@ void eval(){
     }
 
     case Ptr_tag::vm_op:
-      if(auto op = p.get<VM_op>()){
+      if(auto op = p.get<VMop>()){
         op();
       }else{
         fprintf(stderr, "eval internal error: null VM operation was found.\n");

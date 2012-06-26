@@ -46,7 +46,7 @@ template<>
 Env* to_type<Ptr_tag::env>() = delete;
 
 template<>
-VM_op to_type<Ptr_tag::vm_op>() = delete;
+VMop to_type<Ptr_tag::vm_op>() = delete;
 
 
 template<>
@@ -117,7 +117,7 @@ Ptr_tag to_tag<Ptr_tag, Env*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, VM_op>(){
+Ptr_tag to_tag<Ptr_tag, VMop>(){
   return Ptr_tag::vm_op;
 }
 
@@ -152,8 +152,8 @@ char Lisp_ptr::get<char>() const {
 
 template<>
 inline constexpr
-VM_op Lisp_ptr::get<VM_op>() const {
-  return (tag() == to_tag<Ptr_tag, VM_op>()
+VMop Lisp_ptr::get<VMop>() const {
+  return (tag() == to_tag<Ptr_tag, VMop>()
      ? u_.f_ : nullptr);
 }
 

@@ -82,7 +82,7 @@ typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
 typedef FILE Port;
 typedef std::unordered_map<Symbol*, Lisp_ptr> Env;
-typedef void(*VM_op)();
+typedef void(*VMop)();
 
 
 const char* stringify(Ptr_tag);
