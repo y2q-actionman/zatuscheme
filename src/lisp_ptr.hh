@@ -7,8 +7,8 @@
 #include <unordered_map>
 
 enum class Ptr_tag {
-  undefined = -1,
-  boolean = 0,
+  undefined = 0,
+    boolean,
     character,
     cons,
     symbol,
