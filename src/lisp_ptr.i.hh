@@ -140,7 +140,7 @@ inline constexpr
 bool Lisp_ptr::get<bool>() const {
   return (tag() == to_tag<Ptr_tag, bool>())
     ? u_.b_
-    : true; // anything is #t, except #f and null
+    : bool(*this); // anything is #t, except #f and null
 }
 
 template<>

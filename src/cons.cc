@@ -6,6 +6,9 @@ static_assert(sizeof(Cons) == sizeof(Lisp_ptr) * 2,
 // for non-constexpr context
 constexpr Lisp_ptr Cons::NIL;
 
+static_assert(Cons::NIL.get<void*>() == nullptr,
+              "expressiong NIL failed.");
+
 void free_cons_list(Lisp_ptr p){
   // TODO: erase elements!
 
