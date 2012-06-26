@@ -5,27 +5,10 @@
 #include "procedure.hh"
 #include "lisp_ptr.hh"
 #include "eval.hh"
+#include "builtin_util.hh"
 
 using namespace std;
 using namespace Procedure;
-
-namespace {
-
-template<int i>
-array<Lisp_ptr, i> pick_args(){
-  auto ret = array<Lisp_ptr, i>();
-
-  for(auto it = ret.rbegin(); it != ret.rend(); ++it){
-    *it = VM.stack().top();
-    VM.stack().pop();
-  }
-
-  VM.stack().pop(); // kill arg_bottom
-
-  return ret;
-}
-
-} // namespace
 
 static void plus_2(){
   auto args = pick_args<2>();
@@ -48,56 +31,6 @@ static void plus_2(){
 
   Number* newn = new Number(n1->get<long>() + n2->get<long>());
   VM.return_value() = Lisp_ptr(newn);
-}
-
-void stack_to_list(bool dot_list){
-  Cons* c = new Cons;
-  Cons* prev_c = c;
-  Lisp_ptr ret = Lisp_ptr{c};
-
-  while(1){
-    c->rplaca(VM.stack().top());
-    VM.stack().pop();
-
-    if(VM.stack().top().tag() == Ptr_tag::vm_op){
-      VM.stack().pop();
-      break;
-    }
-
-    Cons* newc = new Cons;
-    c->rplacd(Lisp_ptr(newc));
-    prev_c = c;
-    c = newc;
-  }
-
-  if(dot_list){
-    if(c != prev_c){
-      prev_c->rplacd(c->car());
-    }else{
-      ret = c->car();
-    }
-    delete c;
-  }else{
-    c->rplacd(Cons::NIL);
-  }
-
-  VM.return_value() = Lisp_ptr{ret};
-}
-
-void stack_to_vector(){
-  auto v = new Vector;
-
-  while(1){
-    v->push_back(VM.stack().top());
-    VM.stack().pop();
-
-    if(VM.stack().top().tag() == Ptr_tag::vm_op){
-      VM.stack().pop();
-      break;
-    }
-  }
-
-  VM.return_value() = Lisp_ptr{v};
 }
 
 template <Ptr_tag p>
@@ -132,16 +65,20 @@ static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   }
 }
 
-static
 void list(){
-  stack_to_list(false);
+  VM.return_value() = stack_to_list(VM.stack(), false);
 }
 
-static
 void list_star(){
-  stack_to_list(true);
+  VM.return_value() = stack_to_list(VM.stack(), true);
 }
  
+void make_vector(){
+  auto v = new Vector;
+  stack_to_vector(VM.stack(), *v);
+  VM.return_value() = Lisp_ptr{v};
+}
+
 void eq(){
   auto args = pick_args<2>();
   
@@ -247,7 +184,7 @@ static constexpr struct Entry {
       list_star,
       Calling::function, {1, true}}},
   {"vector", {
-      stack_to_vector, 
+      make_vector, 
       Calling::function, {1, true}}},
   {"boolean?", {
       type_check_pred<Ptr_tag::boolean>, 

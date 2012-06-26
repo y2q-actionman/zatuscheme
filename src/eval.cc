@@ -8,6 +8,7 @@
 #include "procedure.hh"
 #include "printer.hh"
 #include "builtin.hh"
+#include "builtin_util.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -24,34 +25,6 @@ Symbol* to_varname(Lisp_ptr p){
 
   return var;
 }
-
-template<typename StackT>
-int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
-  stack<Lisp_ptr, vector<Lisp_ptr>> tmp;
-  
-  do_list(l,
-          [&](Cons* c) -> bool {
-            tmp.push(c->car());
-            return true;
-          },
-          [&](Lisp_ptr last_cdr){
-            if(!nullp(last_cdr)){
-              fprintf(stderr, "eval warning: dot list has read as proper list. (in %s)\n",
-                      opname);
-              tmp.push(last_cdr);
-            }
-          });
-
-  int ret = 0;
-
-  while(!tmp.empty()){
-    st.push(tmp.top());
-    tmp.pop();
-    ++ret;
-  }
-
-  return ret;
-}  
 
 void vm_op_proc_enter();
 
@@ -295,9 +268,8 @@ void proc_enter_interpreted(IProcedure* fun){
       return;
     }
 
-    stack_to_list(false);
 
-    VM.local_set(arg_name.get<Symbol*>(), VM.return_value());
+    VM.local_set(arg_name.get<Symbol*>(), stack_to_list(VM.stack(), false));
   }else{  // clean stack
     if(VM.stack().empty()
        || VM.stack().top().tag() != Ptr_tag::vm_op){
@@ -435,13 +407,9 @@ void vm_op_arg_push_list(){
   list_to_stack("unquote-splicing", VM.return_value(), VM.stack());
 }
 
-void vm_op_quasiquote_list(){
-  stack_to_list(true);
-}
+static const VMop vm_op_quasiquote_list = list_star;
 
-void vm_op_quasiquote_vector(){
-  stack_to_vector();
-}
+static const VMop vm_op_quasiquote_vector = make_vector;
 
 /*
   code[0] = template
@@ -529,17 +497,7 @@ void vm_op_quasiquote(){
 }
 
 Lisp_ptr pick_whole_arg(){
-  auto ret = VM.stack().top();
-  VM.stack().pop();
-
-  if(VM.stack().top().tag() != Ptr_tag::vm_op){
-    fprintf(stderr, "eval error: stack corrupted -- no bottom found!\n");
-    VM.return_value() = {};
-    return {};
-  }
-  VM.stack().pop();
-
-  return ret;
+  return pick_args<1>()[0];
 }
 
 void error_whole_function(const char* msg){

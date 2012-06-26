@@ -4,8 +4,9 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 
-void stack_to_list(bool dot_list);
-void stack_to_vector();
+// for internal usage
+void list_star();
+void make_vector();
 void eq();
 void eql();
 
