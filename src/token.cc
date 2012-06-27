@@ -9,27 +9,19 @@ using namespace std;
 
 inline
 Token::Token(const std::string& s, Type t)
-  : type_(t){
-  new (&this->str_) std::string(s);
-}
+  : type_(t), str_(s){}
 
 inline
 Token::Token(std::string&& s, Type t)
-  : type_(t){
-  new (&this->str_) std::string{std::forward<std::string>(s)};
-}
+  : type_(t), str_(move(s)){}
 
 inline
 Token::Token(const Number& n)
-  : type_(Type::number){
-  new (&this->num_) Number(n);
-}
+  : type_(Type::number), num_(n){}
 
 inline
 Token::Token(Number&& n)
-  : type_(Type::number){
-  new (&this->num_) Number{std::forward<Number>(n)};
-}
+  : type_(Type::number), num_(move(n)){}
 
 inline constexpr
 Token::Token(bool b)
@@ -46,6 +38,8 @@ Token::Token(Notation n)
 template<typename T>
 inline
 void Token::init_from_other(T other){
+  type_ = other.type_;
+
   switch(other.type_){
   case Type::uninitialized:
     break;
@@ -76,15 +70,11 @@ void Token::init_from_other(T other){
   }
 }
 
-Token::Token(const Token& other)
-  : type_(other.type_)
-{
+Token::Token(const Token& other){
   init_from_other<const Token&>(forward<const Token>(other));
 }
   
-Token::Token(Token&& other)
-  : type_(other.type_)
-{
+Token::Token(Token&& other){
   init_from_other<Token&&>(forward<Token>(other));
 }
 
