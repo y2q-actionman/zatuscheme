@@ -64,33 +64,28 @@ inline
 bool is_number_char(int radix, char c){
   switch(radix){
   case 16:
-  switch(c){
-  case 'a': case 'A': case 'b': case 'B':
-  case 'c': case 'C': case 'd': case 'D':
-  case 'e': case 'E': case 'f': case 'F':
-    return true;
-  }    
+    return isxdigit(c);
 
   case 10:
-  switch(c){
-  case '8': case '9':
-    return true;
-  }
+    return isdigit(c);
 
   case 8:
-  switch(c){
-  case '2': case '3': case '4':
-  case '5': case '6': case '7':
-    return true;
-  }
+    switch(c){
+    case '0': case '1':
+    case '2': case '3': case '4':
+    case '5': case '6': case '7':
+      return true;
+    default:
+      return false;
+    }
 
   case 2:
     switch(c){
     case '0': case '1':
       return true;
+    default:
+      return false;
     }
-
-    return false;
     
   default:
     UNEXP_DEFAULT();
