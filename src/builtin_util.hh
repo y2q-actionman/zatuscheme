@@ -4,6 +4,7 @@
 #include <stack>
 #include <vector>
 #include <array>
+#include <cstdio>
 
 #include "lisp_ptr.hh"
 #include "cons.hh"
@@ -89,12 +90,21 @@ std::array<Lisp_ptr, i> pick_args(){
   auto ret = std::array<Lisp_ptr, i>();
 
   for(auto it = ret.rbegin(); it != ret.rend(); ++it){
+    if(VM.stack().empty()) goto error;
+
     *it = VM.stack().top();
     VM.stack().pop();
   }
 
+  if(VM.stack().empty()) goto error;
+
   VM.stack().pop(); // kill arg_bottom
 
+  return ret;
+
+ error:
+  fprintf(stderr, "eval error: stack corruption.\n");
+  ret.fill({});
   return ret;
 }
 
