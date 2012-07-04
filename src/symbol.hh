@@ -2,10 +2,11 @@
 #define SYMBOL_HH
 
 #include <string>
+#include "symtable.hh"
 
 class Symbol{
 public:
-  friend class SymTable;
+  friend Symbol* intern(SymTable&, const std::string&);
 
   Symbol(const Symbol&) = default;
   Symbol(Symbol&&) = default;

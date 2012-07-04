@@ -223,6 +223,6 @@ static constexpr struct Entry {
 
 void install_builtin(){
   for(auto& e : builtin_func){
-    VM.set(VM.symtable.intern(e.name), Lisp_ptr{&e.func});
+    VM.set(intern(VM.symtable, e.name), Lisp_ptr{&e.func});
   }
 }

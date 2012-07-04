@@ -426,8 +426,8 @@ static const VMop vm_op_quasiquote_vector = make_vector;
       return = template
 */
 void vm_op_quasiquote(){
-  const auto unquote_sym = VM.symtable.intern("unquote");
-  const auto unquote_splicing_sym = VM.symtable.intern("unquote-splicing");
+  const auto unquote_sym = intern(VM.symtable, "unquote");
+  const auto unquote_splicing_sym = intern(VM.symtable, "unquote-splicing");
 
   const auto qq_elem = [&](Lisp_ptr p){
     if(auto l = p.get<Cons*>()){

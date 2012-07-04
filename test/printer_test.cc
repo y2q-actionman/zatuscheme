@@ -65,8 +65,8 @@ int main(){
   check('\\', "#\\\\");
 
   // symbol
-  check(stab.intern("hoge"), "hoge");
-  check(stab.intern("a b c "), "a b c ");
+  check(intern(stab, "hoge"), "hoge");
+  check(intern(stab, "a b c "), "a b c ");
 
   // function (should be added in future)
   check_noprint(static_cast<IProcedure*>(nullptr));
