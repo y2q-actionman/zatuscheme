@@ -5,6 +5,7 @@
 #error "Please include via parent file"
 #endif
 
+#include <cassert>
 #include "decl.hh"
 #include "util.hh"
 
@@ -65,46 +66,36 @@ Token::Type to_tag<Token::Type, Token::Notation>(){
 template<>
 inline
 std::string Token::get() const{
-  if(type_ == Type::identifier || type_ == Type::string)
-    return str_;
-  else
-    UNEXP_CONVERSION("string");
+  assert(type_ == Type::identifier || type_ == Type::string);
+  return str_;
 }
 
 template<>
 inline
 Number Token::get() const{
-  if(type_ == Type::number)
-    return num_;
-  else
-    UNEXP_CONVERSION("number");
+  assert(type_ == Type::number);
+  return num_;
 }
 
 template<>
 inline
 bool Token::get() const{
-  if(type_ == Type::boolean)
-    return b_;
-  else
-    UNEXP_CONVERSION("boolean");
+  assert(type_ == Type::boolean);
+  return b_;
 }
 
 template<>
 inline
 char Token::get() const{
-  if(type_ == Type::character)
-    return c_;
-  else
-    UNEXP_CONVERSION("character");
+  assert(type_ == Type::character);
+  return c_;
 }
 
 template<>
 inline
 Token::Notation Token::get() const{
-  if(type_ == Type::notation)
-    return not_;
-  else
-    UNEXP_CONVERSION("notation");
+  assert(type_ == Type::notation);
+  return not_;
 }
 
 #endif // TOKEN_I_HH
