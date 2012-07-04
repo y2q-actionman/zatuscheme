@@ -407,9 +407,8 @@ void vm_op_arg_push_list(){
   list_to_stack("unquote-splicing", VM.return_value(), VM.stack());
 }
 
-static const VMop vm_op_quasiquote_list = list_star;
-
-static const VMop vm_op_quasiquote_vector = make_vector;
+static const VMop vm_op_quasiquote_list = procedure_list_star;
+static const VMop vm_op_quasiquote_vector = procedure_vector;
 
 /*
   code[0] = template

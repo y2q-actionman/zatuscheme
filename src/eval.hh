@@ -82,6 +82,7 @@ void whole_function_begin();
 */
 void whole_function_quasiquote();
 
+// main loop
 void eval();
 
 #endif // EVAL_HH

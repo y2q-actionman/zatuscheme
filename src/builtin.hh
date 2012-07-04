@@ -5,8 +5,6 @@
 #include "vm.hh"
 
 // for internal usage
-void list_star();
-void make_vector();
 void eq();
 void eql();
 

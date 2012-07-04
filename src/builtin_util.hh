@@ -8,6 +8,7 @@
 
 #include "lisp_ptr.hh"
 #include "cons.hh"
+#include "vm.hh"
 
 template<typename StackT>
 Lisp_ptr stack_to_list(StackT& st, bool dot_list){
@@ -107,5 +108,11 @@ std::array<Lisp_ptr, i> pick_args(){
   ret.fill({});
   return ret;
 }
+
+
+// some builtin functions
+void procedure_list();
+void procedure_list_star();
+void procedure_vector();
 
 #endif //BUILTIN_UTIL_HH

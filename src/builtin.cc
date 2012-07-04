@@ -65,20 +65,6 @@ static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   }
 }
 
-void list(){
-  VM.return_value() = stack_to_list(VM.stack(), false);
-}
-
-void list_star(){
-  VM.return_value() = stack_to_list(VM.stack(), true);
-}
- 
-void make_vector(){
-  auto v = new Vector;
-  stack_to_vector(VM.stack(), *v);
-  VM.return_value() = Lisp_ptr{v};
-}
-
 void eq(){
   auto args = pick_args<2>();
   
@@ -178,13 +164,13 @@ static constexpr struct Entry {
       plus_2,
       Calling::function, {2, true}}},
   {"list", {
-      list,
+      procedure_list,
       Calling::function, {1, true}}},
   {"list*", {
-      list_star,
+      procedure_list_star,
       Calling::function, {1, true}}},
   {"vector", {
-      make_vector, 
+      procedure_vector, 
       Calling::function, {1, true}}},
   {"boolean?", {
       type_check_pred<Ptr_tag::boolean>, 
