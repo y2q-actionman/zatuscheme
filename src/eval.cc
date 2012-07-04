@@ -716,9 +716,6 @@ void eval(){
     case Ptr_tag::vm_op:
       if(auto op = p.get<VMop>()){
         op();
-      }else{
-        fprintf(stderr, "eval internal error: null VM operation was found.\n");
-        VM.return_value() = {};
       }
       break;
 

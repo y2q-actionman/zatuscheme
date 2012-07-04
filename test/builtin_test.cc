@@ -29,6 +29,12 @@ int main(){
   check("(vector 1 2)", "#(1 2)");
   check("(vector 1 2 3)", "#(1 2 3)");
 
+  check("(and 1)", "1");
+  check("(and 1 2)", "1");
+  check("(and #f 2)", "2");
+  check("(and #f #f 3)", "3");
+  check("(and #t #f 3)", "#t");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

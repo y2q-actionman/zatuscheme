@@ -4,6 +4,7 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 
+constexpr VMop vm_op_nop = nullptr;
 constexpr VMop vm_op_arg_bottom = nullptr;
 
 /*

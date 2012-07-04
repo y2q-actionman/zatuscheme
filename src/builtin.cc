@@ -53,6 +53,42 @@ void type_check_procedure(){
                                || (args[0].tag() == Ptr_tag::i_procedure)};
 }
 
+static
+Lisp_ptr whole_macro_and_expand(Cons* c){
+  if(!c->cdr() || nullp(c->cdr())){
+    return c->car();
+  }
+
+  const auto if_sym = intern(VM.symtable, "if");
+  auto else_clause = whole_macro_and_expand(c->cdr().get<Cons*>());
+
+  return Lisp_ptr(new Cons(Lisp_ptr(if_sym),
+         Lisp_ptr(new Cons(c->car(),
+         Lisp_ptr(new Cons(Lisp_ptr(vm_op_nop),
+         Lisp_ptr(new Cons(else_clause, Cons::NIL))))))));
+}
+
+static
+void whole_macro_and(){
+  auto args = pick_args<1>();
+  if(!args[0]) return;
+
+  Cons* head;
+
+  int len = bind_cons_list(args[0],
+                           [](Cons*){},
+                           [&](Cons* c){
+                             head = c;
+                           });
+  if(len < 2){
+    fprintf(stderr, "eval error: informal and syntax!\n");
+    VM.return_value() = {};
+    return;
+  }
+
+  VM.return_value() = whole_macro_and_expand(head);
+}
+                 
 static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
@@ -125,8 +161,8 @@ static constexpr struct Entry {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
   {"and", {
-      whole_function_unimplemented,
-      Calling::whole_function, {0, true}}},
+      whole_macro_and,
+      Calling::whole_macro, {1, true}}},
   {"or", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
