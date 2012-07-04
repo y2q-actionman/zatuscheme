@@ -39,8 +39,9 @@ public:
   Type type() const
   { return type_; };
 
-  template <typename T>
-  T get() const;
+  template <typename T> T get() const;
+
+  template <typename T> T coerce() const;
 
   explicit operator bool() const
   { return type_ != Type::uninitialized; }

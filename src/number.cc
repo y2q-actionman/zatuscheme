@@ -7,6 +7,51 @@
 
 using namespace std;
 
+// number class definitions.
+template <>
+Number::complex_type Number::coerce() const{
+  switch(type_){
+  case Type::complex:
+    return z_;
+  case Type::real:
+    return complex_type{f_};
+  case Type::integer:
+    return complex_type{static_cast<real_type>(i_)};
+  case Type::uninitialized:
+  default:
+    UNEXP_CONVERSION("complex");
+  }
+}
+
+template <>
+Number::real_type Number::coerce() const{
+  switch(type_){
+  case Type::real:
+    return f_;
+  case Type::integer:
+    return static_cast<real_type>(i_);
+  case Type::complex:
+  case Type::uninitialized:
+  default:
+    UNEXP_CONVERSION("real");
+  }
+}
+
+template <>
+Number::integer_type Number::coerce() const{
+  switch(type_){
+  case Type::integer:
+    return i_;
+  case Type::complex:
+  case Type::real:
+  case Type::uninitialized:
+  default:
+    UNEXP_CONVERSION("integer");
+  }
+}
+
+
+// number parsers
 namespace {
 
 enum class Exactness{
@@ -240,7 +285,7 @@ ParserRet parse_real_number(int radix, std::istream& i){
       auto n = parse_decimal(i, s);
 
       if(get<0>(n).type() == Number::Type::real){
-        return {Number{get<0>(n).get<double>() * sign},
+        return {Number{get<0>(n).coerce<double>() * sign},
             Exactness::inexact};
       }
     }
@@ -249,14 +294,14 @@ ParserRet parse_real_number(int radix, std::istream& i){
 
   if(i.peek() != '/'){ // integer?
     // FIXME: inexact or super-big integer can be fall into float.
-    return {Number(sign * get<0>(u1).get<long>()), get<1>(u1)};
+    return {Number(sign * get<0>(u1).coerce<long>()), get<1>(u1)};
   }else{
     // rational
     stringstream s2;
     auto u2 = parse_unsigned(radix, i, s2);
     if(!get<0>(u2))
       goto error;
-    return {Number(sign * get<0>(u1).get<double>() / get<0>(u2).get<double>()),
+    return {Number(sign * get<0>(u1).coerce<double>() / get<0>(u2).coerce<double>()),
         Exactness::inexact};
   }
 
@@ -280,7 +325,7 @@ ParserRet parse_complex(int radix, std::istream& i){
     if(!get<0>(deg))
       goto error;
         
-    return {Number{polar(get<0>(real).get<double>(), get<0>(deg).get<double>())},
+    return {Number{polar(get<0>(real).coerce<double>(), get<0>(deg).coerce<double>())},
         Exactness::inexact};
   }
   case '+': case '-': {
@@ -289,7 +334,7 @@ ParserRet parse_complex(int radix, std::istream& i){
 
     if(i.peek() == 'i'){
       i.ignore(1);
-      return {Number{get<0>(real).get<double>(), static_cast<double>(sign)},
+      return {Number{get<0>(real).coerce<double>(), static_cast<double>(sign)},
           Exactness::inexact};
     }
     
@@ -297,13 +342,13 @@ ParserRet parse_complex(int radix, std::istream& i){
     if(!get<0>(imag) || i.get() != 'i')
       goto error;
 
-    return {Number{get<0>(real).get<double>(), get<0>(imag).get<double>() * sign},
+    return {Number{get<0>(real).coerce<double>(), get<0>(imag).coerce<double>() * sign},
         Exactness::inexact};
   }
   case 'i':
     i.ignore(1);
     if(first_char == '+' || first_char == '-'){
-      return {Number{0, get<0>(real).get<double>()},
+      return {Number{0, get<0>(real).coerce<double>()},
           Exactness::inexact};
     }else{
       goto error;
@@ -440,25 +485,7 @@ void describe(FILE* f, const Number& n){
   const auto t = n.type();
 
   fprintf(f, "Number: %s(", stringify(t));
-
-  switch(t){
-  case Number::Type::uninitialized:
-    break;
-  case Number::Type::complex: {
-    const auto& z = n.get<Number::complex_type>();
-    fprintf(f, "%g+%gi", z.real(), z.imag());
-  }
-    break;
-  case Number::Type::real:
-    fprintf(f, "%g", n.get<Number::real_type>());
-    break;
-  case Number::Type::integer:
-    fprintf(f, "%ld", n.get<Number::integer_type>());
-    break;
-  default:
-    break;
-  }
-
+  print(f, n);
   fputc(')', f);
 }
 

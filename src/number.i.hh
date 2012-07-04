@@ -7,6 +7,7 @@
 
 #include "decl.hh"
 #include "util.hh"
+#include <cassert>
 
 // Type mapping
 template<Number::Type t, typename T>
@@ -62,46 +63,26 @@ Number::Number(integer_type i) :
 template <>
 inline
 Number::complex_type Number::get() const{
-  switch(type_){
-  case Type::complex:
-    return z_;
-  case Type::real:
-    return complex_type{f_};
-  case Type::integer:
-    return complex_type{static_cast<real_type>(i_)};
-  case Type::uninitialized:
-  default:
-    UNEXP_CONVERSION("complex");
-  }
+  assert(type_ == Type::complex);
+  return z_;
 }
 
 template <>
 inline
 Number::real_type Number::get() const{
-  switch(type_){
-  case Type::real:
-    return f_;
-  case Type::integer:
-    return static_cast<real_type>(i_);
-  case Type::complex:
-  case Type::uninitialized:
-  default:
-    UNEXP_CONVERSION("real");
-  }
+  assert(type_ == Type::real);
+  return f_;
 }
 
 template <>
 inline
 Number::integer_type Number::get() const{
-  switch(type_){
-  case Type::integer:
-    return i_;
-  case Type::complex:
-  case Type::real:
-  case Type::uninitialized:
-  default:
-    UNEXP_CONVERSION("integer");
-  }
+  assert(type_ == Type::integer);
+  return i_;
 }
+
+template <> Number::complex_type Number::coerce() const;
+template <> Number::real_type Number::coerce() const;
+template <> Number::integer_type Number::coerce() const;
 
 #endif //NUMBER_I_HH
