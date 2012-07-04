@@ -2,6 +2,7 @@
 #define ZS_HH
 
 #include "builtin.hh"
+#include "builtin_util.hh"
 #include "cons.hh"
 #include "decl.hh"
 #include "eval.hh"
