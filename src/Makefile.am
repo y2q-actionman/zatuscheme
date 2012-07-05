@@ -17,7 +17,7 @@ libzs_a_SOURCES = zs.hh\
 		eval.cc eval.hh\
 		procedure.cc procedure.hh procedure.i.hh\
 		builtin_util.cc builtin_util.hh\
-		builtin.cc builtin.hh\
+		builtin.cc builtin.hh builtin.i.hh\
 		vm.cc vm.hh vm.i.hh
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 
