@@ -69,26 +69,6 @@ Lisp_ptr whole_macro_or_expand(Cons* c){
 }
 
 static
-void whole_macro_or(){
-  auto arg = pick_args_1();
-  if(!arg) return;
-
-  Cons* head;
-
-  int len = bind_cons_list(arg,
-                           [](Cons*){},
-                           [&](Cons* c){
-                             head = c;
-                           });
-  if(len < 2){
-    VM.return_value() = Lisp_ptr(false);
-    return;
-  }
-
-  VM.return_value() = whole_macro_or_expand(head);
-}
-                 
-static
 Lisp_ptr whole_macro_and_expand(Cons* c){
   if(!c->cdr() || nullp(c->cdr())){
     return c->car();
@@ -103,8 +83,9 @@ Lisp_ptr whole_macro_and_expand(Cons* c){
          Lisp_ptr(new Cons(Lisp_ptr(vm_op_nop), Cons::NIL))))))));
 }
 
-static
-void whole_macro_and(){
+template<bool default_value, typename Expander>
+static inline
+void whole_macro_andor(Expander e){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -116,11 +97,21 @@ void whole_macro_and(){
                              head = c;
                            });
   if(len < 2){
-    VM.return_value() = Lisp_ptr(true);
+    VM.return_value() = Lisp_ptr(default_value);
     return;
   }
 
-  VM.return_value() = whole_macro_and_expand(head);
+  VM.return_value() = e(head);
+}
+
+static
+void whole_macro_and(){
+  whole_macro_andor<true>(whole_macro_and_expand);
+}
+                 
+static
+void whole_macro_or(){
+  whole_macro_andor<false>(whole_macro_or_expand);
 }
                  
 static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
