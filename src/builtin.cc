@@ -36,21 +36,21 @@ static void plus_2(){
 template <Ptr_tag p>
 static
 void type_check_pred(){
-  auto args = pick_args<1>();
-  VM.return_value() = Lisp_ptr{args[0].tag() == p};
+  auto arg = pick_args_1();
+  VM.return_value() = Lisp_ptr{arg.tag() == p};
 }
 
 static
 void type_check_pair(){
-  auto args = pick_args<1>();
-  VM.return_value() = Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
+  auto arg = pick_args_1();
+  VM.return_value() = Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
 }
 
 static
 void type_check_procedure(){
-  auto args = pick_args<1>();
-  VM.return_value() = Lisp_ptr{(args[0].tag() == Ptr_tag::i_procedure)
-                               || (args[0].tag() == Ptr_tag::i_procedure)};
+  auto arg = pick_args_1();
+  VM.return_value() = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
+                               || (arg.tag() == Ptr_tag::i_procedure)};
 }
 
 static
@@ -70,12 +70,12 @@ Lisp_ptr whole_macro_and_expand(Cons* c){
 
 static
 void whole_macro_and(){
-  auto args = pick_args<1>();
-  if(!args[0]) return;
+  auto arg = pick_args_1();
+  if(!arg) return;
 
   Cons* head;
 
-  int len = bind_cons_list(args[0],
+  int len = bind_cons_list(arg,
                            [](Cons*){},
                            [&](Cons* c){
                              head = c;

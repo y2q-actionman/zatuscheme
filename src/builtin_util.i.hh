@@ -90,27 +90,47 @@ int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
   return ret;
 }  
 
-template<int i>
-std::array<Lisp_ptr, i> pick_args(){
-  auto ret = std::array<Lisp_ptr, i>();
+namespace pick_args_detail {
 
-  for(auto it = ret.rbegin(); it != ret.rend(); ++it){
-    if(VM.stack().empty()) goto error;
+inline
+int fail(){
+  fprintf(stderr, "eval error: stack corruption.\n");
+  return -1;
+}
 
-    *it = VM.stack().top();
+}
+
+template<typename Iter>
+int pick_args(Iter b, Iter e){
+  int ret = 0;
+
+  for(Iter i = b; i != e; ++i){
+    if(VM.stack().empty())
+      return pick_args_detail::fail();
+    *i = VM.stack().top();
     VM.stack().pop();
+    ++ret;
   }
 
   if(VM.stack().empty()
      || VM.stack().top().tag() != Ptr_tag::vm_op)
-    goto error;
-  VM.stack().pop(); // kill arg_bottom
+    return pick_args_detail::fail();
+
+  VM.stack().pop();
 
   return ret;
+}
 
- error:
-  fprintf(stderr, "eval error: stack corruption.\n");
-  ret.fill({});
+
+template<int i>
+std::array<Lisp_ptr, i> pick_args(){
+  auto ret = std::array<Lisp_ptr, i>();
+
+  auto fillcnt = pick_args(ret.rbegin(), ret.rend());
+  if(fillcnt < 0){
+    ret.fill({});
+  }
+    
   return ret;
 }
 

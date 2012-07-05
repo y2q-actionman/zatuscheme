@@ -495,12 +495,8 @@ void vm_op_quasiquote(){
   }
 }
 
-Lisp_ptr pick_whole_arg(){
-  return pick_args<1>()[0];
-}
-
 void error_whole_function(const char* msg){
-  auto wargs = pick_whole_arg();
+  auto wargs = pick_args_1();
   auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
 
   assert(sym);
@@ -521,11 +517,11 @@ void whole_function_unimplemented(){
 }
 
 void whole_function_pass_through(){
-  VM.return_value() = pick_whole_arg();
+  VM.return_value() = pick_args_1();
 }
 
 void whole_function_quote(){
-  auto wargs = pick_whole_arg();
+  auto wargs = pick_args_1();
   if(!wargs) return;
 
   Lisp_ptr val;
@@ -565,7 +561,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
 }
 
 void whole_function_lambda(){
-  auto wargs = pick_whole_arg();
+  auto wargs = pick_args_1();
   if(!wargs) return;
 
   Lisp_ptr args, code;
@@ -581,7 +577,7 @@ void whole_function_lambda(){
 }
 
 void whole_function_if(){
-  auto wargs = pick_whole_arg();
+  auto wargs = pick_args_1();
   if(!wargs) return;
 
   // extracting
@@ -619,14 +615,14 @@ void whole_function_if(){
 }
 
 void whole_function_set(){
-  auto wargs = pick_whole_arg();
+  auto wargs = pick_args_1();
   if(!wargs) return;
 
   set_internal("set!", wargs.get<Cons*>()->cdr(), vm_op_set);
 }
 
 void whole_function_define(){
-  auto wargs = pick_whole_arg();
+  auto wargs = pick_args_1();
   if(!wargs) return;
 
   auto p = wargs.get<Cons*>()->cdr();
@@ -660,7 +656,7 @@ void whole_function_define(){
 }
 
 void whole_function_begin(){
-  auto wargs = pick_whole_arg();
+  auto wargs = pick_args_1();
   if(!wargs) return;
 
   auto exprs = wargs.get<Cons*>()->cdr();
@@ -674,7 +670,7 @@ void whole_function_begin(){
 }
 
 void whole_function_quasiquote(){
-  auto wargs = pick_whole_arg();
+  auto wargs = pick_args_1();
   if(!wargs) return;
 
   bind_cons_list(wargs,
