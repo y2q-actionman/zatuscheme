@@ -54,18 +54,53 @@ void type_check_procedure(){
 }
 
 static
+Lisp_ptr whole_macro_or_expand(Cons* c){
+  if(!c->cdr() || nullp(c->cdr())){
+    return c->car();
+  }
+
+  const auto if_sym = intern(VM.symtable, "if");
+  auto else_clause = whole_macro_or_expand(c->cdr().get<Cons*>());
+
+  return Lisp_ptr(new Cons(Lisp_ptr(if_sym),
+         Lisp_ptr(new Cons(c->car(),
+         Lisp_ptr(new Cons(Lisp_ptr(vm_op_nop),
+         Lisp_ptr(new Cons(else_clause, Cons::NIL))))))));
+}
+
+static
+void whole_macro_or(){
+  auto arg = pick_args_1();
+  if(!arg) return;
+
+  Cons* head;
+
+  int len = bind_cons_list(arg,
+                           [](Cons*){},
+                           [&](Cons* c){
+                             head = c;
+                           });
+  if(len < 2){
+    VM.return_value() = Lisp_ptr(false);
+    return;
+  }
+
+  VM.return_value() = whole_macro_or_expand(head);
+}
+                 
+static
 Lisp_ptr whole_macro_and_expand(Cons* c){
   if(!c->cdr() || nullp(c->cdr())){
     return c->car();
   }
 
   const auto if_sym = intern(VM.symtable, "if");
-  auto else_clause = whole_macro_and_expand(c->cdr().get<Cons*>());
+  auto then_clause = whole_macro_and_expand(c->cdr().get<Cons*>());
 
   return Lisp_ptr(new Cons(Lisp_ptr(if_sym),
          Lisp_ptr(new Cons(c->car(),
-         Lisp_ptr(new Cons(Lisp_ptr(vm_op_nop),
-         Lisp_ptr(new Cons(else_clause, Cons::NIL))))))));
+         Lisp_ptr(new Cons(then_clause,
+         Lisp_ptr(new Cons(Lisp_ptr(vm_op_nop), Cons::NIL))))))));
 }
 
 static
@@ -81,8 +116,7 @@ void whole_macro_and(){
                              head = c;
                            });
   if(len < 2){
-    fprintf(stderr, "eval error: informal and syntax!\n");
-    VM.return_value() = {};
+    VM.return_value() = Lisp_ptr(true);
     return;
   }
 
@@ -162,10 +196,10 @@ static constexpr struct Entry {
       Calling::whole_function, {0, true}}},
   {"and", {
       whole_macro_and,
-      Calling::whole_macro, {1, true}}},
+      Calling::whole_macro, {0, true}}},
   {"or", {
-      whole_function_unimplemented,
-      Calling::whole_function, {0, true}}},
+      whole_macro_or,
+      Calling::whole_macro, {0, true}}},
   {"let", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},

@@ -29,11 +29,19 @@ int main(){
   check("(vector 1 2)", "#(1 2)");
   check("(vector 1 2 3)", "#(1 2 3)");
 
+  check("(and)", "#t");
   check("(and 1)", "1");
-  check("(and 1 2)", "1");
-  check("(and #f 2)", "2");
-  check("(and #f #f 3)", "3");
-  check("(and #t #f 3)", "#t");
+  check("(and 1 2)", "2");
+  check("(and #f 2)", "#f");
+  check("(and 1 #f 3)", "#f");
+  check("(and #t #t 3)", "3");
+
+  check("(or)", "#f");
+  check("(or 1)", "1");
+  check("(or #f 2)", "2");
+  check("(or #f #f 3)", "3");
+  check("(or 1 #f 3)", "1");
+  check("(or #f 2 #f 4)", "2");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
