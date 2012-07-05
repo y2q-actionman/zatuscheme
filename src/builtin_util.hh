@@ -97,8 +97,9 @@ std::array<Lisp_ptr, i> pick_args(){
     VM.stack().pop();
   }
 
-  if(VM.stack().empty()) goto error;
-
+  if(VM.stack().empty()
+     || VM.stack().top().tag() != Ptr_tag::vm_op)
+    goto error;
   VM.stack().pop(); // kill arg_bottom
 
   return ret;
