@@ -4,11 +4,11 @@
 #include <iterator>
 
 void procedure_list(){
-  VM.return_value() = stack_to_list(VM.stack(), false);
+  VM.return_value() = stack_to_list<false>(VM.stack());
 }
 
 void procedure_list_star(){
-  VM.return_value() = stack_to_list(VM.stack(), true);
+  VM.return_value() = stack_to_list<true>(VM.stack());
 }
 
 void procedure_vector(){

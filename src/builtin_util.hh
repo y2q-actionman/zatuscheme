@@ -4,8 +4,8 @@
 #include <array>
 #include "lisp_ptr.hh"
 
-template<typename StackT>
-Lisp_ptr stack_to_list(StackT&, bool);
+template<bool dot_list, typename StackT>
+Lisp_ptr stack_to_list(StackT&);
 
 template<typename StackT, typename VectorT>
 void stack_to_vector(StackT&, VectorT&);

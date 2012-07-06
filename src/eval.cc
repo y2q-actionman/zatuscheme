@@ -268,8 +268,8 @@ void proc_enter_interpreted(IProcedure* fun){
       return;
     }
 
-
-    VM.local_set(arg_name.get<Symbol*>(), stack_to_list(VM.stack(), false));
+    // TODO: share code below with procedure_list()
+    VM.local_set(arg_name.get<Symbol*>(), stack_to_list<false>(VM.stack()));
   }else{  // clean stack
     if(VM.stack().empty()
        || VM.stack().top().tag() != Ptr_tag::vm_op){

@@ -14,8 +14,8 @@
 #include "cons.hh"
 #include "vm.hh"
 
-template<typename StackT>
-Lisp_ptr stack_to_list(StackT& st, bool dot_list){
+template<bool dot_list, typename StackT>
+Lisp_ptr stack_to_list(StackT& st){
   Cons* c = new Cons;
   Cons* prev_c = c;
   Lisp_ptr ret = Lisp_ptr{c};
