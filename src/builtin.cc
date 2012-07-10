@@ -130,18 +130,11 @@ void eq(){
 void eql(){
   auto args = pick_args<2>();
 
-  if(eq_internal(args[0], args[1])){
-    VM.return_value() = Lisp_ptr{true};
-    return;
-  }
-    
   if(args[0].tag() == Ptr_tag::number && args[1].tag() == Ptr_tag::number){
     VM.return_value() = Lisp_ptr{eql(*args[0].get<Number*>(), *args[1].get<Number*>())};
-    return;
+  }else{
+    VM.return_value() = Lisp_ptr{eq_internal(args[0], args[1])};
   }
-
-  VM.return_value() = Lisp_ptr{false};
-  return;
 }
 
 constexpr struct Entry {
