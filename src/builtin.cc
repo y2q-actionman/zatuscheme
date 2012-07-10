@@ -10,7 +10,9 @@
 using namespace std;
 using namespace Procedure;
 
-static void plus_2(){
+namespace {
+
+void plus_2(){
   auto args = pick_args<2>();
 
   VM.return_value() = {};
@@ -34,26 +36,22 @@ static void plus_2(){
 }
 
 template <Ptr_tag p>
-static
 void type_check_pred(){
   auto arg = pick_args_1();
   VM.return_value() = Lisp_ptr{arg.tag() == p};
 }
 
-static
 void type_check_pair(){
   auto arg = pick_args_1();
   VM.return_value() = Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
 }
 
-static
 void type_check_procedure(){
   auto arg = pick_args_1();
   VM.return_value() = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
                                || (arg.tag() == Ptr_tag::i_procedure)};
 }
 
-static
 Lisp_ptr whole_macro_or_expand(Cons* c){
   if(!c->cdr() || nullp(c->cdr())){
     return c->car();
@@ -68,7 +66,6 @@ Lisp_ptr whole_macro_or_expand(Cons* c){
          Lisp_ptr(new Cons(else_clause, Cons::NIL))))))));
 }
 
-static
 Lisp_ptr whole_macro_and_expand(Cons* c){
   if(!c->cdr() || nullp(c->cdr())){
     return c->car();
@@ -84,7 +81,7 @@ Lisp_ptr whole_macro_and_expand(Cons* c){
 }
 
 template<bool default_value, typename Expander>
-static inline
+inline
 void whole_macro_andor(Expander e){
   auto arg = pick_args_1();
   if(!arg) return;
@@ -104,17 +101,15 @@ void whole_macro_andor(Expander e){
   VM.return_value() = e(head);
 }
 
-static
 void whole_macro_and(){
   whole_macro_andor<true>(whole_macro_and_expand);
 }
                  
-static
 void whole_macro_or(){
   whole_macro_andor<false>(whole_macro_or_expand);
 }
                  
-static bool eq_internal(Lisp_ptr a, Lisp_ptr b){
+bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
   if(a.tag() == Ptr_tag::boolean){
@@ -149,7 +144,7 @@ void eql(){
   return;
 }
 
-static constexpr struct Entry {
+constexpr struct Entry {
   const char* name;
   const NProcedure func;
 
@@ -267,6 +262,8 @@ static constexpr struct Entry {
       eq,
       Calling::function, {2, false}}}
 };
+
+} //namespace
 
 void install_builtin(){
   for(auto& e : builtin_func){

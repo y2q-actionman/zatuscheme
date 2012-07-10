@@ -38,10 +38,13 @@ Lisp_ptr eval_text(const char* s){
 }
 
 bool eql(Lisp_ptr a, Lisp_ptr b){
-  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
-  VM.stack().push(a);
-  VM.stack().push(b);
-  eql();
+  Cons tmp3(b, Cons::NIL);
+  Cons tmp2(a, Lisp_ptr(&tmp3));
+  Cons tmp1(Lisp_ptr(intern(VM.symtable, "eql")), Lisp_ptr(&tmp2));
+
+  VM.code().push(Lisp_ptr(&tmp1));
+  eval();
+
   return VM.return_value().get<bool>();
 }
   
