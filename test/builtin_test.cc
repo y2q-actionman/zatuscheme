@@ -43,6 +43,15 @@ int main(){
   check("(or 1 #f 3)", "1");
   check("(or #f 2 #f 4)", "2");
 
+  check("(let () 100)", "100");
+  check("(let (x) x)", "()");
+  check("(let ((x 1) (y 2) (z 3)) x)", "1");
+  check("(let ((x 1) (y 2) (z 3)) y)", "2");
+  check("(let ((x 1) (y 2) (z 3)) z)", "3");
+  check("(let ((x 1)) (let ((x 2)) x))", "2");
+  check("(let ((x 1)) (let ((x 2)) x) x)", "1");
+
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

@@ -8,6 +8,14 @@ constexpr VMop vm_op_nop = nullptr;
 constexpr VMop vm_op_arg_bottom = nullptr;
 
 /*
+  ret = proc
+  stack[0] = args
+  ---
+  goto proc_call or macro_call
+*/
+void vm_op_call();
+
+/*
   stack = (args, arg_bottom)
   ----
   ret = undef

@@ -6,6 +6,7 @@
 #include "lisp_ptr.hh"
 #include "eval.hh"
 #include "builtin_util.hh"
+#include "printer.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -108,6 +109,67 @@ void whole_macro_and(){
 void whole_macro_or(){
   whole_macro_andor<false>(whole_macro_or_expand);
 }
+
+void whole_function_let(){
+  auto arg = pick_args_1();
+  if(!arg) return;
+
+  Lisp_ptr binds, body;
+  bind_cons_list(arg,
+                 [](Cons*){},
+                 [&](Cons* c){
+                   binds = c->car();
+                   body = c->cdr();
+                 });
+
+  int len = 0;
+  Lisp_ptr syms = Cons::NIL, vals = Cons::NIL;
+
+  const auto push_binds = [&](Lisp_ptr sym, Lisp_ptr val){
+    ++len;
+    syms = Lisp_ptr(new Cons(sym, syms));
+    vals = Lisp_ptr(new Cons(val, vals));
+  };
+
+  bool bind_success = true;
+  do_list(binds,
+          [&](Cons* cell) -> bool{
+            auto bind = cell->car();
+            if(bind.tag() == Ptr_tag::symbol){
+              push_binds(bind, Cons::NIL);
+              return true;
+            }else if(bind.tag() == Ptr_tag::cons){
+              if(auto c = bind.get<Cons*>()){
+                push_binds(c->car(), c->cdr().get<Cons*>()->car());
+              }else{
+                fprintf(stderr, "eval warning: null found in let form. ignored.\n");
+              }
+              return true;
+            }else{
+              fprintf(stderr, "eval error: informal object found in let form (%s)\n",
+                      stringify(bind.tag()));
+              bind_success = false;
+              return false;
+            }
+          },
+          [&](Lisp_ptr dot_cdr){
+            if(!dot_cdr){
+              fprintf(stderr, "eval error: let binding list is dot-list!\n");
+              bind_success = false;
+            }
+          });
+  if(!bind_success){
+    free_cons_list(syms);
+    free_cons_list(vals);
+    return;
+  }
+
+  VM.code().push(Lisp_ptr(vm_op_call));
+  VM.code().push(Lisp_ptr(new IProcedure(body, Calling::function,
+                                         {len, false, syms}, VM.frame())));
+  VM.stack().push(Lisp_ptr(new Cons({}, vals)));
+  VM.return_value() = {};
+}
                  
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
@@ -180,8 +242,8 @@ constexpr struct Entry {
       whole_macro_or,
       Calling::whole_macro, {0, true}}},
   {"let", {
-      whole_function_unimplemented,
-      Calling::whole_function, {0, true}}},
+      whole_function_let,
+      Calling::whole_function, {1, true}}},
   {"let*", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},

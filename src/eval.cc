@@ -154,6 +154,8 @@ void whole_macro_call(Lisp_ptr proc){
   whole_function_call(proc);
 }
 
+}
+
 /*
   ret = proc
   stack[0] = args
@@ -195,6 +197,8 @@ void vm_op_call(){
     UNEXP_DEFAULT();
   }
 }
+
+namespace {
  
 /*
   leaves frame.
