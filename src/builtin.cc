@@ -110,64 +110,6 @@ void whole_macro_or(){
   whole_macro_andor<false>(whole_macro_or_expand);
 }
 
-void whole_function_let(){
-  auto arg = pick_args_1();
-  if(!arg) return;
-
-  Lisp_ptr binds, body;
-  bind_cons_list(arg,
-                 [](Cons*){},
-                 [&](Cons* c){
-                   binds = c->car();
-                   body = c->cdr();
-                 });
-
-  if(body.tag() != Ptr_tag::cons || nullp(body)){
-    fprintf(stderr, "eval error: informal syntax for LET's body!.\n");
-    VM.return_value() = {};
-    return;
-  }
-
-  int len = 0;
-  Lisp_ptr syms = Cons::NIL, vals = Cons::NIL;
-
-  if(!do_list(binds,
-              [&](Cons* cell) -> bool{
-                auto bind = cell->car();
-                if(bind.tag() != Ptr_tag::cons){
-                  fprintf(stderr, "eval error: informal object (%s) found in let binding.\n",
-                          stringify(bind.tag()));
-                  return false;
-                }
-
-                auto c = bind.get<Cons*>();
-                if(!c){
-                  fprintf(stderr, "eval error: null found in let binding.\n");
-                  return false;
-                }
-                 
-                ++len;
-                syms = Lisp_ptr(new Cons(c->car(), syms));
-                vals = Lisp_ptr(new Cons(c->cdr().get<Cons*>()->car(), vals));
-                return true;
-              },
-              [&](Lisp_ptr dot_cdr){
-                return nullp(dot_cdr);
-              })){
-    fprintf(stderr, "eval error: let binding was failed!\n");
-    free_cons_list(syms);
-    free_cons_list(vals);
-    VM.return_value() = {};
-    return;
-  }
-
-  VM.code().push(Lisp_ptr(vm_op_call));
-  VM.code().push(Lisp_ptr(new IProcedure(body, Calling::function,
-                                         {len, false, syms}, VM.frame())));
-  VM.stack().push(Lisp_ptr(new Cons({}, vals)));
-  VM.return_value() = {};
-}
-                 
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
