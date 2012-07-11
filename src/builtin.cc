@@ -122,45 +122,42 @@ void whole_function_let(){
                    body = c->cdr();
                  });
 
+  if(body.tag() != Ptr_tag::cons || nullp(body)){
+    fprintf(stderr, "eval error: informal syntax for LET's body!.\n");
+    VM.return_value() = {};
+    return;
+  }
+
   int len = 0;
   Lisp_ptr syms = Cons::NIL, vals = Cons::NIL;
 
-  const auto push_binds = [&](Lisp_ptr sym, Lisp_ptr val){
-    ++len;
-    syms = Lisp_ptr(new Cons(sym, syms));
-    vals = Lisp_ptr(new Cons(val, vals));
-  };
+  if(!do_list(binds,
+              [&](Cons* cell) -> bool{
+                auto bind = cell->car();
+                if(bind.tag() != Ptr_tag::cons){
+                  fprintf(stderr, "eval error: informal object (%s) found in let binding.\n",
+                          stringify(bind.tag()));
+                  return false;
+                }
 
-  bool bind_success = true;
-  do_list(binds,
-          [&](Cons* cell) -> bool{
-            auto bind = cell->car();
-            if(bind.tag() == Ptr_tag::symbol){
-              push_binds(bind, Cons::NIL);
-              return true;
-            }else if(bind.tag() == Ptr_tag::cons){
-              if(auto c = bind.get<Cons*>()){
-                push_binds(c->car(), c->cdr().get<Cons*>()->car());
-              }else{
-                fprintf(stderr, "eval warning: null found in let form. ignored.\n");
-              }
-              return true;
-            }else{
-              fprintf(stderr, "eval error: informal object found in let form (%s)\n",
-                      stringify(bind.tag()));
-              bind_success = false;
-              return false;
-            }
-          },
-          [&](Lisp_ptr dot_cdr){
-            if(!dot_cdr){
-              fprintf(stderr, "eval error: let binding list is dot-list!\n");
-              bind_success = false;
-            }
-          });
-  if(!bind_success){
+                auto c = bind.get<Cons*>();
+                if(!c){
+                  fprintf(stderr, "eval error: null found in let binding.\n");
+                  return false;
+                }
+                 
+                ++len;
+                syms = Lisp_ptr(new Cons(c->car(), syms));
+                vals = Lisp_ptr(new Cons(c->cdr().get<Cons*>()->car(), vals));
+                return true;
+              },
+              [&](Lisp_ptr dot_cdr){
+                return nullp(dot_cdr);
+              })){
+    fprintf(stderr, "eval error: let binding was failed!\n");
     free_cons_list(syms);
     free_cons_list(vals);
+    VM.return_value() = {};
     return;
   }
 
