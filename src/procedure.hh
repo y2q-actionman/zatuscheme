@@ -15,14 +15,20 @@ namespace Procedure {
   };
 
   struct ArgInfo {
+    Lisp_ptr head;
     int required_args;
     bool variadic;
-    Lisp_ptr head;
+    bool sequencial;
+    bool early_bind;
 
     constexpr ArgInfo()
-      : required_args(-1), variadic(false), head(){}
-    constexpr ArgInfo(int rargs, bool v, Lisp_ptr h = Lisp_ptr())
-      : required_args(rargs), variadic(v), head(h){}
+      : head(), required_args(-1),
+        variadic(false), sequencial(false), early_bind(false){}
+
+    constexpr ArgInfo(int rargs, bool v, Lisp_ptr h = Lisp_ptr(),
+                      bool s = false, bool e = false)
+      : head(h), required_args(rargs),
+        variadic(v), sequencial(s), early_bind(e){}
 
     explicit operator bool() const{
       return (head) && (required_args >= 0);

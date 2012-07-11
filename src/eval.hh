@@ -85,6 +85,10 @@ void whole_function_quasiquote();
 
 void whole_function_let();
 
+void whole_function_let_star();
+
+void whole_function_letrec();
+
 // main loop
 void eval();
 

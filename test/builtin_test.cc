@@ -51,6 +51,17 @@ int main(){
   check("(let ((x 1)) (let ((x 2)) x))", "2");
   check("(let ((x 1)) (let ((x 2)) x) x)", "1");
 
+  check("(let* ((x 1)) x)", "1");
+  check("(let* ((x 1) (y x)) y)", "1");
+  check("(let* ((x 1) (y x) (z y)) z)", "1");
+  check("(let* ((x 1)) (let ((x 2)) x))", "2");
+  check("(let* ((x 1)) (let ((x 2)) x) x)", "1");
+
+  check("(letrec ((x 1)) x)", "1");
+  check("(letrec ((x 1) (y 2)) y)", "2");
+  check("(letrec ((x 1) (y 2) (z 3)) z)", "3");
+  check("(letrec ((x 1)) (let ((x 2)) x))", "2");
+  check("(letrec ((x 1)) (let ((x 2)) x) x)", "1");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

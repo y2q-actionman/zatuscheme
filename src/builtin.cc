@@ -184,11 +184,11 @@ constexpr struct Entry {
       whole_function_let,
       Calling::whole_function, {1, true}}},
   {"let*", {
-      whole_function_unimplemented,
-      Calling::whole_function, {0, true}}},
+      whole_function_let_star,
+      Calling::whole_function, {1, true}}},
   {"letrec", {
-      whole_function_unimplemented,
-      Calling::whole_function, {0, true}}},
+      whole_function_letrec,
+      Calling::whole_function, {1, true}}},
   {"do", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},

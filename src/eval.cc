@@ -38,23 +38,66 @@ void vm_op_arg_push(){
 }
 
 /*
+  ret = some value
+  code[0] = symbol
+  ----
+  stack[0] = some value
+  value is set to symbol
+*/
+void vm_op_arg_push_and_set(){
+  auto symp = VM.code().top();
+  VM.code().pop();
+
+  assert(symp.tag() == Ptr_tag::symbol);
+  VM.local_set(symp.get<Symbol*>(), VM.return_value());
+
+  vm_op_arg_push();
+}
+
+/*
   stack[0] = whole args
   ----
-  code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
-  stack = (arg-bottom)
+  * normal call
+    code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
+    stack = (arg-bottom)
+
+  * sequencial call (let*)
+    code = (argN, arg-set-move, symN, argN-1, arg-set-move, symN-1, ..., call kind, proc)
+    stack = (arg-bottom)
 */
 void function_call(Lisp_ptr proc, const ArgInfo* argi){
   auto args = VM.stack().top();
   VM.stack().pop();
 
+  if(argi->early_bind){
+    auto iproc = proc.get<IProcedure*>();
+    assert(iproc);
+    VM.enter_frame(push_frame(iproc->closure()));
+  }
+
   VM.code().push(proc);
   VM.code().push(Lisp_ptr(vm_op_proc_enter));
 
   int argc = 0;
+  const auto sequencial = argi->sequencial;
+  Lisp_ptr bind_list = argi->head;
 
   if(!do_list(args.get<Cons*>()->cdr(),
               [&](Cons* cell) -> bool{
-                VM.code().push(Lisp_ptr(vm_op_arg_push));
+                if(sequencial){
+                  auto c = bind_list.get<Cons*>();
+                  if(!c){
+                    fprintf(stderr, "funcall internal error: sequencial calling cannot be variadic in this implementasion.\n");
+                    return false;
+                  }
+
+                  VM.code().push(c->car());
+                  VM.code().push(Lisp_ptr(vm_op_arg_push_and_set));
+                  bind_list = c->cdr();
+                }else{
+                  VM.code().push(Lisp_ptr(vm_op_arg_push));
+                }
+
                 VM.code().push(cell->car());
                 ++argc;
 
@@ -62,7 +105,7 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
               },
               [&](Lisp_ptr dot_cdr) -> bool{
                 if(!nullp(dot_cdr)){
-                  fprintf(stderr, "funcall error: arg-list is dot-list!\n");
+                  fprintf(stderr, "funcall error: argument binding failed.\n");
                   return false;
                 }
               
@@ -237,7 +280,10 @@ void proc_enter_interpreted(IProcedure* fun){
     VM.leave_frame();
   }
 
-  VM.enter_frame(push_frame(fun->closure()));
+  if(!fun->arg_info().early_bind){
+    VM.enter_frame(push_frame(fun->closure()));
+  }
+
   VM.code().push(Lisp_ptr(vm_op_proc_leave));
 
   Lisp_ptr arg_name = argi.head;
@@ -331,6 +377,7 @@ void vm_op_if(){
   stack = (variable name)
   ----
   stack = ()
+  return-value is setted.
 */
 void vm_op_set(){
   auto var = VM.stack().top().get<Symbol*>();
@@ -347,6 +394,7 @@ void vm_op_set(){
   stack = (variable name)
   ----
   stack = ()
+  return-value is setted.
 */
 void vm_op_local_set(){
   auto var = VM.stack().top().get<Symbol*>();
@@ -681,7 +729,7 @@ void whole_function_quasiquote(){
   VM.code().push(Lisp_ptr(vm_op_quasiquote));
 }
 
-void whole_function_let(){
+static void let_internal(bool sequencial, bool early_bind){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -734,10 +782,24 @@ void whole_function_let(){
 
   VM.code().push(Lisp_ptr(vm_op_call));
   VM.code().push(Lisp_ptr(new IProcedure(body, Calling::function,
-                                         {len, false, syms}, VM.frame())));
+                                         {len, false, syms, sequencial, early_bind},
+                                         VM.frame())));
   VM.stack().push(Lisp_ptr(new Cons({}, vals)));
   VM.return_value() = {};
 }
+
+void whole_function_let(){
+  let_internal(false, false);
+}
+
+void whole_function_let_star(){
+  let_internal(true, true);
+}
+
+void whole_function_letrec(){
+  let_internal(false, true);
+}
+
                  
 void eval(){
   while(!VM.code().empty()){
