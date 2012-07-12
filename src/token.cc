@@ -191,7 +191,8 @@ void skip_intertoken_space(FILE* f){
       do{
         c = fgetc(f);
       }while(c != EOF && c != '\n');
-      ungetc(c, f);
+      assert(c == EOF || c == '\n');
+      //ungetc(c, f); // it is meaningless..
     }else{
       ungetc(c, f);
       return;
