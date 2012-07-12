@@ -281,7 +281,7 @@ Token tokenize_string(FILE* f){
   return {};
 }
 
-Token tokenize_number(FILE* f, char c1, char c2 = 0){
+Token tokenize_number(FILE* f, char read_c = 0){
   static const auto is_n_char = [](char c) -> bool {
     switch(c){
     case '+': case '-': case '.': case '@': case 'i':
@@ -296,8 +296,7 @@ Token tokenize_number(FILE* f, char c1, char c2 = 0){
   decltype(fgetc(f)) c;
   stringstream s;
 
-  s.put(c1);
-  if(c2) s.put(c2);
+  if(read_c) s.put(read_c);
 
   while(is_n_char(c = fgetc(f))){
     s.put(c);
@@ -375,7 +374,8 @@ Token tokenize(FILE* f){
     if(is_delimiter(c2)){
       return Token{string(1, c), Token::Type::identifier};
     }else{
-      return tokenize_number(f, c, c2);
+      ungetc(c2, f);
+      return tokenize_number(f, c);
     }
   }
 
@@ -392,7 +392,8 @@ Token tokenize(FILE* f){
     case 'i': case 'e':
     case 'b': case 'o':
     case 'd': case 'x':
-      return tokenize_number(f, '#', sharp_c);
+      ungetc(sharp_c, f);
+      return tokenize_number(f, '#');
     default:
       goto error;
     }
@@ -401,7 +402,8 @@ Token tokenize(FILE* f){
     if(isalpha(c) || is_special_initial(c)){
       return tokenize_identifier(f, c);
     }else if(isdigit(c)){
-      return tokenize_number(f, c);
+      ungetc(c, f);
+      return tokenize_number(f);
     }else{
       goto error;
     }
