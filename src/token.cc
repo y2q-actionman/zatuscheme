@@ -201,9 +201,9 @@ void skip_intertoken_space(FILE* f){
 
 
 Token tokenize_identifier(FILE* f, char first_char){
-  ostringstream s;
+  string s;
 
-  s.put(first_char);
+  s.push_back(first_char);
 
   // subsequent
   auto c = fgetc(f);
@@ -212,12 +212,12 @@ Token tokenize_identifier(FILE* f, char first_char){
         || isalpha(c) || is_special_initial(c) 
         || isdigit(c) || c == '+' || c == '-'
         || c == '.' || c == '@'){
-    s.put(c);
+    s.push_back(c);
     c = fgetc(f);
   }
   ungetc(c, f);
 
-  return Token{s.str(), Token::Type::identifier};
+  return Token{s, Token::Type::identifier};
 }
 
 Token tokenize_character(FILE* f){
@@ -256,24 +256,24 @@ Token tokenize_character(FILE* f){
 
 Token tokenize_string(FILE* f){
   decltype(fgetc(f)) c;
-  ostringstream s;
+  string s;
 
   while((c = fgetc(f)) != EOF){
     switch(c){
     case '"':
-      return Token{s.str(), Token::Type::string};
+      return Token{s, Token::Type::string};
     case '\\':
       c = fgetc(f);
       switch(c){
       case '"': case '\\':
-        s.put(c);
+        s.push_back(c);
         break;
       default:
         goto error;
       }
       break;
     default:
-      s.put(c);
+      s.push_back(c);
     }
   }
 
