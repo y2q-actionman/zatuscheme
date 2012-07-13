@@ -282,17 +282,12 @@ ParserRet parse_real_number(int radix, std::istream& i){
   string s;
 
   auto u1 = parse_unsigned(radix, i, s);
-  if(!get<0>(u1)){
-    if(i.peek() == '.'){
-      goto decimal_float_check;
-    }else{
-      return PARSE_ERROR_VALUE;
-    }
-  }
+  auto c = i.get();
 
-  if(check_decimal_suffix(i.peek()) || i.peek() == '.'){
-  decimal_float_check:
+  if((c == '.') || (get<0>(u1) && check_decimal_suffix(c))){
+    // decimal float
     if(radix == 10){
+      i.unget();
       auto n = parse_decimal(i, s);
 
       if(get<0>(n).type() == Number::Type::real){
@@ -301,13 +296,9 @@ ParserRet parse_real_number(int radix, std::istream& i){
       }
     }
     return PARSE_ERROR_VALUE;
-  }
-
-  if(i.get() != '/'){ // integer?
-    i.unget();
-    // FIXME: inexact or super-big integer can be fall into float.
-    return {Number(sign * get<0>(u1).coerce<long>()), get<1>(u1)};
-  }else{
+  }else if(!get<0>(u1)){
+    return PARSE_ERROR_VALUE;
+  }else if(c == '/'){
     // rational
     string s2;
     auto u2 = parse_unsigned(radix, i, s2);
@@ -316,6 +307,11 @@ ParserRet parse_real_number(int radix, std::istream& i){
 
     return {Number(sign * get<0>(u1).coerce<double>() / get<0>(u2).coerce<double>()),
         Exactness::inexact};
+  }else{
+    // integer?
+    i.unget();
+    // FIXME: inexact or super-big integer can be fall into float.
+    return {Number(sign * get<0>(u1).coerce<long>()), get<1>(u1)};
   }
 }
 
