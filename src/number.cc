@@ -58,6 +58,8 @@ enum class Exactness{
   exact, inexact, unspecified
     };
 
+#define PREFIX_ERROR_VALUE {0, Exactness::unspecified}
+
 pair<int, Exactness> parse_number_prefix(std::istream& i){
   static const auto to_radix = [](char c){
     return (c == 'b') ? 2
@@ -78,30 +80,28 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
   bool r_appeared = false, e_appeared = false;
 
   for(int loop = 0; loop < 2; ++loop){
-    if(i.peek() != '#')
+    if(i.get() != '#'){
+      i.unget();
       return {r, e};
-    i.ignore(1);
+    }
 
     switch(auto c = i.get()){
     case 'i': case 'e':
-      if(e_appeared) goto error;
+      if(e_appeared) return PREFIX_ERROR_VALUE;
       e = to_exactness(c);
       e_appeared = true;
       break;
     case 'b': case 'o': case 'd': case 'x':
-      if(r_appeared) goto error;
+      if(r_appeared) return PREFIX_ERROR_VALUE;
       r = to_radix(c);
       r_appeared = true;
       break;
     default:
-      goto error;
+      return PREFIX_ERROR_VALUE;
     }
   }  
   
   return {r, e};
-
- error:
-  return {-1, Exactness::unspecified};
 }
 
 
@@ -140,11 +140,11 @@ bool is_number_char(int radix, char c){
 int eat_sharp(istream& i, string& o){
   int sharps = 0;
 
-  while(i.peek() == '#'){
-    i.ignore(1);
+  while(i.get() == '#'){
     o.push_back('0');
     ++sharps;
   }
+  i.unget();
 
   return sharps;
 }
@@ -155,29 +155,29 @@ typedef pair<Number, Exactness> ParserRet;
 #define PARSE_ERROR_VALUE (ParserRet{{}, Exactness::unspecified})
 
 ParserRet parse_unsigned(int radix, std::istream& i, string& s){
-  while(is_number_char(radix, i.peek()))
-    s.push_back(i.get());
+  char c;
+
+  while(is_number_char(radix, c = i.get()))
+    s.push_back(c);
+  i.unget();
 
   if(s.empty()){
-    goto error;
+    return PARSE_ERROR_VALUE;
+  }
+   
+  Exactness e;
+
+  if(eat_sharp(i, s) > 0){
+    e = Exactness::inexact;
   }else{
-    Exactness e;
-
-    if(eat_sharp(i, s) > 0){
-      e = Exactness::inexact;
-    }else{
-      e = Exactness::exact;
-    }
-
-    errno = 0;
-    long l = strtol(s.c_str(), nullptr, radix);
-    if(errno) goto error;
-
-    return {Number{l}, e};
+    e = Exactness::exact;
   }
 
- error:
-  return PARSE_ERROR_VALUE;
+  errno = 0;
+  long l = strtol(s.c_str(), nullptr, radix);
+  if(errno) return PARSE_ERROR_VALUE;
+
+  return {Number{l}, e};
 }
 
 inline
@@ -195,74 +195,87 @@ ParserRet parse_decimal(std::istream& i, string& s){
   int sharps_before_dot = 0;
 
   if(s.empty()){
-    if(i.peek() == '.'){
+    if(i.get() == '.'){
+      i.unget();
       dot_start = true;
     }else{
-      goto error;
+      return PARSE_ERROR_VALUE;
     }
   }else{
     sharps_before_dot = eat_sharp(i, s);
   }
 
-  if(i.peek() != '.'){
+  if(i.get() != '.'){
     goto end; // 1. no frac part
   }
-  s.push_back(i.get());
+  s.push_back('.');
     
   if(sharps_before_dot > 0){
     eat_sharp(i, s);
     goto end; // 4. only sharps after dot
   }
 
-  if(dot_start && !is_number_char(10, i.peek()))
-    goto error; // 2. dot start should have digits
+  {
+    bool digits_after_dot = false;
+    char c;
 
-  while(is_number_char(10, i.peek())){
-    s.push_back(i.get());
+    while(is_number_char(10, c = i.get())){
+      digits_after_dot = true;
+      s.push_back(c);
+    }
+    i.unget();
+
+    if(dot_start && !digits_after_dot)
+      return PARSE_ERROR_VALUE; // 2. dot start should have digits
+
+    eat_sharp(i, s);
   }
-
-  eat_sharp(i, s);
   
  end:
-  if(check_decimal_suffix(i.peek())){
-    i.ignore(1);
+  if(check_decimal_suffix(i.get())){
     s.push_back('e');
 
-    switch(i.peek()){
+    switch(char c = i.get()){
     case '+': case '-':
-      s.push_back(i.get());
+      s.push_back(c); break;
+    default:
+      i.unget(); break;
     }
 
-    if(!is_number_char(10, i.peek())){
-      goto error; // no number on exp. part
-    }
+    {
+      bool exp_digits = false;
+      char c;
 
-    while(is_number_char(10, i.peek())){
-      s.push_back(i.get());
+      while(is_number_char(10, c = i.get())){
+        exp_digits = true;
+        s.push_back(c);
+      }
+      i.unget();
+
+      if(!exp_digits)
+        return PARSE_ERROR_VALUE; // no number on exp. part
     }
+  }else{
+    i.unget();
   }
 
   return {Number{strtod(s.c_str(), nullptr)},
       Exactness::inexact};
-
- error:
-  return PARSE_ERROR_VALUE;
 }
 
 ParserRet parse_real_number(int radix, std::istream& i){
   int sign = 1;
 
-  switch(i.peek()){
+  switch(i.get()){
   case '+':
     sign = 1;
-    i.ignore(1);
     break;
   case '-':
     sign = -1;
-    i.ignore(1);
     break;
   default:
     sign = 1;
+    i.unget();
     break;
   }
 
@@ -273,7 +286,7 @@ ParserRet parse_real_number(int radix, std::istream& i){
     if(i.peek() == '.'){
       goto decimal_float_check;
     }else{
-      goto error;
+      return PARSE_ERROR_VALUE;
     }
   }
 
@@ -287,10 +300,11 @@ ParserRet parse_real_number(int radix, std::istream& i){
             Exactness::inexact};
       }
     }
-    goto error;
+    return PARSE_ERROR_VALUE;
   }
 
-  if(i.peek() != '/'){ // integer?
+  if(i.get() != '/'){ // integer?
+    i.unget();
     // FIXME: inexact or super-big integer can be fall into float.
     return {Number(sign * get<0>(u1).coerce<long>()), get<1>(u1)};
   }else{
@@ -298,13 +312,11 @@ ParserRet parse_real_number(int radix, std::istream& i){
     string s2;
     auto u2 = parse_unsigned(radix, i, s2);
     if(!get<0>(u2))
-      goto error;
+      return PARSE_ERROR_VALUE;
+
     return {Number(sign * get<0>(u1).coerce<double>() / get<0>(u2).coerce<double>()),
         Exactness::inexact};
   }
-
- error:
-  return PARSE_ERROR_VALUE;
 }
 
 ParserRet parse_complex(int radix, std::istream& i){
@@ -313,50 +325,45 @@ ParserRet parse_complex(int radix, std::istream& i){
   // has real part
   auto real = parse_real_number(radix, i);
   if(!get<0>(real))
-    goto error;
+    return PARSE_ERROR_VALUE;
 
-  switch(auto c = i.peek()){
+  switch(auto c = i.get()){
   case '@': {// polar literal
-    i.ignore(1);
     auto deg = parse_real_number(radix, i);
 
     if(!get<0>(deg))
-      goto error;
+      return PARSE_ERROR_VALUE;
         
     return {Number{polar(get<0>(real).coerce<double>(), get<0>(deg).coerce<double>())},
         Exactness::inexact};
   }
   case '+': case '-': {
-    i.ignore(1);
     const int sign = (c == '+') ? 1 : -1;
 
-    if(i.peek() == 'i'){
-      i.ignore(1);
+    if(i.get() == 'i'){
       return {Number{get<0>(real).coerce<double>(), static_cast<double>(sign)},
           Exactness::inexact};
     }
+    i.unget();
     
     auto imag = parse_real_number(radix, i);
     if(!get<0>(imag) || i.get() != 'i')
-      goto error;
+      return PARSE_ERROR_VALUE;
 
     return {Number{get<0>(real).coerce<double>(), get<0>(imag).coerce<double>() * sign},
         Exactness::inexact};
   }
   case 'i':
-    i.ignore(1);
     if(first_char == '+' || first_char == '-'){
       return {Number{0, get<0>(real).coerce<double>()},
           Exactness::inexact};
     }else{
-      goto error;
+      return PARSE_ERROR_VALUE;
     }
   default:
+    i.unget();
     return real;
   }
-
- error:
-  return PARSE_ERROR_VALUE;
 }
 
 } // namespace
@@ -371,10 +378,10 @@ Number parse_number(std::istream& i){
     r = parse_complex(radix, i);
     break;
   default:
-    goto error;
+    return {};
   }
 
-  if(!get<0>(r)) goto error;
+  if(!get<0>(r)) return {};
 
   // TODO: check inexact integer, and warn.
 
@@ -386,11 +393,8 @@ Number parse_number(std::istream& i){
   case Exactness::unspecified:
     return get<0>(r);
   default:
-    goto error;
+    return {};
   }
-
- error:
-  return {};
 }
 
 bool eql(const Number& n, const Number& m){
