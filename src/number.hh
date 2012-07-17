@@ -5,6 +5,8 @@
 #include <iosfwd>
 #include <cstdio>
 
+#include "util.hh"
+
 class Number{
 public:
   typedef std::complex<double> complex_type;
@@ -39,7 +41,8 @@ public:
   Type type() const
   { return type_; };
 
-  template <typename T> T get() const;
+  template <typename T> 
+  typename zs::call_traits<T>::type get() const;
 
   template <typename T> T coerce() const;
 

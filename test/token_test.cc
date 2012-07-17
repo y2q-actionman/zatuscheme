@@ -17,7 +17,7 @@ static bool result;
 // for debugging..
 template<>
 inline
-const Token::Type& Token::get() const{
+Token::Type Token::get<Token::Type>() const{
   return type_;
 }
 

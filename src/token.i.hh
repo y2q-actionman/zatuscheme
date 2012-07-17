@@ -65,35 +65,35 @@ Token::Type to_tag<Token::Type, Token::Notation>(){
 // Token definitions
 template<>
 inline
-const std::string& Token::get() const{
+const std::string& Token::get<std::string>() const{
   assert(type_ == Type::identifier || type_ == Type::string);
   return str_;
 }
 
 template<>
 inline
-const Number& Token::get() const{
+const Number& Token::get<Number>() const{
   assert(type_ == Type::number);
   return num_;
 }
 
 template<>
 inline
-const bool& Token::get() const{
+bool Token::get<bool>() const{
   assert(type_ == Type::boolean);
   return b_;
 }
 
 template<>
 inline
-const char& Token::get() const{
+char Token::get<char>() const{
   assert(type_ == Type::character);
   return c_;
 }
 
 template<>
 inline
-const Token::Notation& Token::get() const{
+Token::Notation Token::get<Token::Notation>() const{
   assert(type_ == Type::notation);
   return not_;
 }

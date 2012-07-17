@@ -5,6 +5,7 @@
 #include <cstdio>
 
 #include "number.hh"
+#include "util.hh"
 
 class Token {
 public:
@@ -48,7 +49,7 @@ public:
   { return type_; }
 
   template <typename T>
-  const T& get() const;
+  typename zs::call_traits<T>::type get() const;
 
   explicit operator bool() const
   { return type() != Type::uninitialized; }

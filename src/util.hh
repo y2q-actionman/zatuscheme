@@ -14,4 +14,10 @@ unexp_conversion(const char*, int, const char*);
 
 #define UNEXP_CONVERSION(to) unexp_conversion(__FILE__, __LINE__, (to))
 
+namespace zs {
+  template<typename T> struct call_traits;
+}
+
+#include "util.i.hh"
+
 #endif // UTIL_HH

@@ -62,21 +62,21 @@ Number::Number(integer_type i) :
 
 template <>
 inline
-Number::complex_type Number::get() const{
+const Number::complex_type& Number::get<Number::complex_type>() const{
   assert(type_ == Type::complex);
   return z_;
 }
 
 template <>
 inline
-Number::real_type Number::get() const{
+Number::real_type Number::get<Number::real_type>() const{
   assert(type_ == Type::real);
   return f_;
 }
 
 template <>
 inline
-Number::integer_type Number::get() const{
+Number::integer_type Number::get<Number::integer_type>() const{
   assert(type_ == Type::integer);
   return i_;
 }
