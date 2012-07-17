@@ -382,16 +382,13 @@ Number parse_number(std::istream& i){
   if(!r) return {};
 
   // TODO: check inexact integer, and warn.
-
-  switch(prefix_info.ex){
-  case Exactness::exact:
-    return (r.ex == prefix_info.ex) ? r.number : to_exact(r.number);
-  case Exactness::inexact:
-    return (r.ex == prefix_info.ex) ? r.number : to_inexact(r.number);
-  case Exactness::unspecified:
+  if(prefix_info.ex == Exactness::unspecified
+     || prefix_info.ex == r.ex){
     return r.number;
-  default:
-    return {};
+  }else if(prefix_info.ex == Exactness::exact){
+    return to_exact(r.number);
+  }else{
+    return to_inexact(r.number);
   }
 }
 
