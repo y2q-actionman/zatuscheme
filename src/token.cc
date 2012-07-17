@@ -198,22 +198,20 @@ void skip_intertoken_space(FILE* f){
 
 
 Token tokenize_identifier(FILE* f, char first_char){
-  string s;
-
-  s.push_back(first_char);
+  string s(1, first_char);
 
   // subsequent
   decltype(fgetc(f)) c;
 
-  while((c = fgetc(f)) != EOF
-        && (!is_delimiter(c) 
-            || isalpha(c) || is_special_initial(c) 
+  while(!is_delimiter(c = fgetc(f))
+        && (isalpha(c) || is_special_initial(c) 
             || isdigit(c) || c == '+' || c == '-'
             || c == '.' || c == '@')){
     s.push_back(c);
   }
   ungetc(c, f);
 
+  assert(!s.empty());
   return Token{s, Token::Type::identifier};
 }
 
