@@ -184,20 +184,16 @@ bool is_special_initial(charT c){
 void skip_intertoken_space(FILE* f){
   decltype(fgetc(f)) c;
     
-  while((c = fgetc(f)) != EOF){
-    if(isspace(c)){
-      continue;
-    }else if(c == ';'){
+  while((c = fgetc(f)) != EOF
+        && (isspace(c) || c == ';')){
+    if(c == ';'){
+      decltype(fgetc(f)) c2;
       do{
-        c = fgetc(f);
-      }while(c != EOF && c != '\n');
-      assert(c == EOF || c == '\n');
-      //ungetc(c, f); // it is meaningless..
-    }else{
-      ungetc(c, f);
-      return;
+        c2 = fgetc(f);
+      }while(c2 != EOF && c2 != '\n');
     }
   }
+  ungetc(c, f);
 }
 
 
@@ -207,14 +203,14 @@ Token tokenize_identifier(FILE* f, char first_char){
   s.push_back(first_char);
 
   // subsequent
-  auto c = fgetc(f);
+  decltype(fgetc(f)) c;
 
-  while(!is_delimiter(c) 
-        || isalpha(c) || is_special_initial(c) 
-        || isdigit(c) || c == '+' || c == '-'
-        || c == '.' || c == '@'){
+  while((c = fgetc(f)) != EOF
+        && (!is_delimiter(c) 
+            || isalpha(c) || is_special_initial(c) 
+            || isdigit(c) || c == '+' || c == '-'
+            || c == '.' || c == '@')){
     s.push_back(c);
-    c = fgetc(f);
   }
   ungetc(c, f);
 
