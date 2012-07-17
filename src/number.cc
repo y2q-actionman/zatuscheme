@@ -67,23 +67,13 @@ struct PrefixValue {
 
   constexpr PrefixValue(int r, Exactness e)
     : radix(r), ex(e){}
+
+  explicit operator bool() const {
+    return (radix != 0);
+  }
 };
 
 PrefixValue parse_number_prefix(std::istream& i){
-  static const auto to_radix = [](char c){
-    return (c == 'b') ? 2
-    : (c == 'o') ? 8
-    : (c == 'd') ? 10
-    : (c == 'x') ? 16
-    : -1;
-  };
-
-  static const auto to_exactness = [](char c){
-    return (c == 'i') ? Exactness::inexact
-    : (c == 'e') ? Exactness::exact
-    : Exactness::unspecified;
-  };
-
   int r = 10;
   Exactness e = Exactness::unspecified;
   bool r_appeared = false, e_appeared = false;
@@ -97,13 +87,17 @@ PrefixValue parse_number_prefix(std::istream& i){
     switch(auto c = i.get()){
     case 'i': case 'e':
       if(e_appeared) return {};
-      e = to_exactness(c);
       e_appeared = true;
+      e = (c == 'i') ? Exactness::inexact 
+        : Exactness::exact;
       break;
     case 'b': case 'o': case 'd': case 'x':
       if(r_appeared) return {};
-      r = to_radix(c);
       r_appeared = true;
+      r = (c == 'b') ? 2
+        : (c == 'o') ? 8
+        : (c == 'd') ? 10
+        : 16;
       break;
     default:
       return {};
@@ -375,17 +369,9 @@ ParserRet parse_complex(int radix, std::istream& i){
 
 Number parse_number(std::istream& i){
   const auto prefix_info = parse_number_prefix(i);
+  if(!prefix_info) return {};
 
-  ParserRet r;
-
-  switch(prefix_info.radix){
-  case 2: case 8: case 10: case 16:
-    r = parse_complex(prefix_info.radix, i);
-    break;
-  default:
-    return {};
-  }
-
+  const auto r = parse_complex(prefix_info.radix, i);
   if(!get<0>(r)) return {};
 
   // TODO: check inexact integer, and warn.
