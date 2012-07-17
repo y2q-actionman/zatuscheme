@@ -153,9 +153,20 @@ int eat_sharp(istream& i, string& o){
 }
 
 
-typedef pair<Number, Exactness> ParserRet;
+struct ParserRet {
+  const Number number;
+  const Exactness ex;
 
-#define PARSE_ERROR_VALUE (ParserRet{{}, Exactness::unspecified})
+  constexpr ParserRet() // error value
+    : number(), ex(Exactness::unspecified){}
+
+  constexpr ParserRet(const Number& n, Exactness e)
+    : number(n), ex(e){}
+
+  explicit operator bool() const {
+    return static_cast<bool>(number);
+  }
+};
 
 ParserRet parse_unsigned(int radix, std::istream& i, string& s){
   char c;
@@ -165,7 +176,7 @@ ParserRet parse_unsigned(int radix, std::istream& i, string& s){
   i.unget();
 
   if(s.empty()){
-    return PARSE_ERROR_VALUE;
+    return {};
   }
    
   Exactness e;
@@ -178,7 +189,7 @@ ParserRet parse_unsigned(int radix, std::istream& i, string& s){
 
   errno = 0;
   long l = strtol(s.c_str(), nullptr, radix);
-  if(errno) return PARSE_ERROR_VALUE;
+  if(errno) return {};
 
   return {Number{l}, e};
 }
@@ -202,7 +213,7 @@ ParserRet parse_decimal(std::istream& i, string& s){
       i.unget();
       dot_start = true;
     }else{
-      return PARSE_ERROR_VALUE;
+      return {};
     }
   }else{
     sharps_before_dot = eat_sharp(i, s);
@@ -229,7 +240,7 @@ ParserRet parse_decimal(std::istream& i, string& s){
     i.unget();
 
     if(dot_start && !digits_after_dot)
-      return PARSE_ERROR_VALUE; // 2. dot start should have digits
+      return {}; // 2. dot start should have digits
 
     eat_sharp(i, s);
   }
@@ -256,7 +267,7 @@ ParserRet parse_decimal(std::istream& i, string& s){
       i.unget();
 
       if(!exp_digits)
-        return PARSE_ERROR_VALUE; // no number on exp. part
+        return {}; // no number on exp. part
     }
   }else{
     i.unget();
@@ -287,34 +298,33 @@ ParserRet parse_real_number(int radix, std::istream& i){
   auto u1 = parse_unsigned(radix, i, s);
   auto c = i.get();
 
-  if((c == '.') || (get<0>(u1) && check_decimal_suffix(c))){
+  if((c == '.') || (u1 && check_decimal_suffix(c))){
     // decimal float
     if(radix == 10){
       i.unget();
       auto n = parse_decimal(i, s);
 
-      if(get<0>(n).type() == Number::Type::real){
-        return {Number{get<0>(n).coerce<double>() * sign},
+      if(n.number.type() == Number::Type::real){
+        return {Number{n.number.coerce<double>() * sign},
             Exactness::inexact};
       }
     }
-    return PARSE_ERROR_VALUE;
-  }else if(!get<0>(u1)){
-    return PARSE_ERROR_VALUE;
+    return {};
+  }else if(!u1){
+    return {};
   }else if(c == '/'){
     // rational
     string s2;
     auto u2 = parse_unsigned(radix, i, s2);
-    if(!get<0>(u2))
-      return PARSE_ERROR_VALUE;
+    if(!u2) return {};
 
-    return {Number(sign * get<0>(u1).coerce<double>() / get<0>(u2).coerce<double>()),
+    return {Number(sign * u1.number.coerce<double>() / u2.number.coerce<double>()),
         Exactness::inexact};
   }else{
     // integer?
     i.unget();
     // FIXME: inexact or super-big integer can be fall into float.
-    return {Number(sign * get<0>(u1).coerce<long>()), get<1>(u1)};
+    return {Number(sign * u1.number.coerce<long>()), u1.ex};
   }
 }
 
@@ -323,41 +333,38 @@ ParserRet parse_complex(int radix, std::istream& i){
 
   // has real part
   auto real = parse_real_number(radix, i);
-  if(!get<0>(real))
-    return PARSE_ERROR_VALUE;
+  if(!real) return {};
 
   switch(auto c = i.get()){
   case '@': {// polar literal
     auto deg = parse_real_number(radix, i);
-
-    if(!get<0>(deg))
-      return PARSE_ERROR_VALUE;
+    if(!deg) return {};
         
-    return {Number{polar(get<0>(real).coerce<double>(), get<0>(deg).coerce<double>())},
+    return {Number{polar(real.number.coerce<double>(), deg.number.coerce<double>())},
         Exactness::inexact};
   }
   case '+': case '-': {
     const int sign = (c == '+') ? 1 : -1;
 
     if(i.get() == 'i'){
-      return {Number{get<0>(real).coerce<double>(), static_cast<double>(sign)},
+      return {Number{real.number.coerce<double>(), static_cast<double>(sign)},
           Exactness::inexact};
     }
     i.unget();
     
     auto imag = parse_real_number(radix, i);
-    if(!get<0>(imag) || i.get() != 'i')
-      return PARSE_ERROR_VALUE;
+    if(!imag || i.get() != 'i')
+      return {};
 
-    return {Number{get<0>(real).coerce<double>(), get<0>(imag).coerce<double>() * sign},
+    return {Number{real.number.coerce<double>(), imag.number.coerce<double>() * sign},
         Exactness::inexact};
   }
   case 'i':
     if(first_char == '+' || first_char == '-'){
-      return {Number{0, get<0>(real).coerce<double>()},
+      return {Number{0, real.number.coerce<double>()},
           Exactness::inexact};
     }else{
-      return PARSE_ERROR_VALUE;
+      return {};
     }
   default:
     i.unget();
@@ -372,17 +379,17 @@ Number parse_number(std::istream& i){
   if(!prefix_info) return {};
 
   const auto r = parse_complex(prefix_info.radix, i);
-  if(!get<0>(r)) return {};
+  if(!r) return {};
 
   // TODO: check inexact integer, and warn.
 
   switch(prefix_info.ex){
   case Exactness::exact:
-    return (get<1>(r) == prefix_info.ex) ? get<0>(r) : to_exact(get<0>(r));
+    return (r.ex == prefix_info.ex) ? r.number : to_exact(r.number);
   case Exactness::inexact:
-    return (get<1>(r) == prefix_info.ex) ? get<0>(r) : to_inexact(get<0>(r));
+    return (r.ex == prefix_info.ex) ? r.number : to_inexact(r.number);
   case Exactness::unspecified:
-    return get<0>(r);
+    return r.number;
   default:
     return {};
   }
