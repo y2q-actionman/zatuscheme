@@ -2,7 +2,6 @@
 #define NUMBER_HH
 
 #include <complex>
-#include <iosfwd>
 #include <cstdio>
 
 #include "util.hh"
@@ -59,7 +58,7 @@ private:
   };
 };
 
-Number parse_number(std::istream&);
+Number parse_number(FILE*);
 
 Number to_exact(const Number&);
 Number to_inexact(const Number&);

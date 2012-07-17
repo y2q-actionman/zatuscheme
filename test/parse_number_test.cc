@@ -1,5 +1,4 @@
 #include <string>
-#include <sstream>
 #include <utility>
 #include <cstdlib>
 #include <memory>
@@ -14,14 +13,19 @@ using namespace std;
 static bool result;
 
 template<typename Fun>
-void fail_message(Number::Type t, istream& i, 
+void fail_message(Number::Type t, FILE* i, 
                   const Number& n, const Fun& callback){
+  result = false;
+
   // extract input from stream
   char buf[PRINT_BUFSIZE];
 
-  i.clear(); // clear eof
-  i.seekg(0, ios_base::beg);
-  i.get(buf, sizeof(buf));
+  clearerr(i); // clear eof
+  rewind(i);
+  if(!fgets(buf, sizeof(buf), i)){
+    fprintf(stdout, "I/O error occcured. skipping..\n");
+    return;
+  }
 
   fprintf(stdout, "[failed] input='%s', expect type='%s'",
           buf, stringify(t));
@@ -31,12 +35,10 @@ void fail_message(Number::Type t, istream& i,
   fputs("\n\tgotten: ", stdout);
   describe(stdout, n);
   fputc('\n', stdout);
-
-  result = false;
 }
 
 template<Number::Type type, typename Fun>
-void check_generic(istream& i, const Fun& f){
+void check_generic(FILE* i, const Fun& f){
   const Number n = parse_number(i);
 
   if(n.type() != type){
@@ -47,7 +49,7 @@ void check_generic(istream& i, const Fun& f){
 
 template<Number::Type type, typename Fun, 
          typename ex_type = decltype(to_type<type>())>
-void check_generic(istream& i,
+void check_generic(FILE* i,
                    const ex_type& expect,
                    const Fun& f){
   const Number n = parse_number(i);
@@ -59,17 +61,18 @@ void check_generic(istream& i,
 }
 
 
-void check(istream& i){
+void check(FILE* i){
   check_generic<Number::Type::uninitialized>
     (i, [](){});
 }
 
 void check(const string& input){
-  stringstream is(input);
-  return check(is);
+  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  check(f);
+  fclose(f);
 }
 
-void check(istream& i, long expect){
+void check(FILE* i, long expect){
   check_generic<Number::Type::integer>
     (i, expect,
      [=](){
@@ -77,7 +80,7 @@ void check(istream& i, long expect){
     });
 }
 
-void check(istream& i, double expect){
+void check(FILE* i, double expect){
   check_generic<Number::Type::real>
     (i, expect,
      [=](){
@@ -85,7 +88,7 @@ void check(istream& i, double expect){
     });
 }
 
-void check(istream& i, const Number::complex_type& z){
+void check(FILE* i, const Number::complex_type& z){
   check_generic<Number::Type::complex>
     (i, z,
      [=](){
@@ -96,8 +99,9 @@ void check(istream& i, const Number::complex_type& z){
 
 template<typename T>
 void check(const string& input, T&& t){
-  stringstream is(input);
-  return check(is, t);
+  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  check(f, t);
+  fclose(f);
 }
 
 

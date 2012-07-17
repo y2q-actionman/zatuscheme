@@ -1,6 +1,4 @@
-#include <istream>
 #include <utility>
-#include <sstream>
 #include <cstdlib>
 
 #include "number.hh"
@@ -73,18 +71,20 @@ struct PrefixValue {
   }
 };
 
-PrefixValue parse_number_prefix(std::istream& i){
+PrefixValue parse_number_prefix(FILE* f){
   int r = 10;
   Exactness e = Exactness::unspecified;
   bool r_appeared = false, e_appeared = false;
 
   for(int loop = 0; loop < 2; ++loop){
-    if(i.get() != '#'){
-      i.unget();
+    decltype(fgetc(f)) c = fgetc(f);
+
+    if(c != '#'){
+      ungetc(c, f);
       return {r, e};
     }
 
-    switch(auto c = i.get()){
+    switch(c = fgetc(f)){
     case 'i': case 'e':
       if(e_appeared) return {};
       e_appeared = true;
@@ -100,6 +100,7 @@ PrefixValue parse_number_prefix(std::istream& i){
         : 16;
       break;
     default:
+      fprintf(stderr, "reader error: unknown number prefix '%c' appeared!\n", c);
       return {};
     }
   }  
@@ -140,14 +141,15 @@ bool is_number_char(int radix, char c){
   }
 }
 
-int eat_sharp(istream& i, string& o){
+int eat_sharp(FILE* f, string& o){
+  decltype(fgetc(f)) c;
   int sharps = 0;
 
-  while(i.get() == '#'){
+  while((c = fgetc(f)) == '#'){
     o.push_back('0');
     ++sharps;
   }
-  i.unget();
+  ungetc(c, f);
 
   return sharps;
 }
@@ -168,12 +170,12 @@ struct ParserRet {
   }
 };
 
-ParserRet parse_unsigned(int radix, std::istream& i, string& s){
-  char c;
+ParserRet parse_unsigned(int radix, FILE* f, string& s){
+  decltype(fgetc(f)) c;
 
-  while(is_number_char(radix, c = i.get()))
+  while(is_number_char(radix, c = fgetc(f)))
     s.push_back(c);
-  i.unget();
+  ungetc(c, f);
 
   if(s.empty()){
     return {};
@@ -181,7 +183,7 @@ ParserRet parse_unsigned(int radix, std::istream& i, string& s){
    
   Exactness e;
 
-  if(eat_sharp(i, s) > 0){
+  if(eat_sharp(f, s) > 0){
     e = Exactness::inexact;
   }else{
     e = Exactness::exact;
@@ -204,83 +206,83 @@ bool check_decimal_suffix(char c){
   }
 }
 
-ParserRet parse_decimal(std::istream& i, string& s){
+ParserRet parse_decimal(FILE* f, string& s){
+  decltype(fgetc(f)) c;
   bool dot_start = false;
   int sharps_before_dot = 0;
 
   if(s.empty()){
-    if(i.get() == '.'){
-      i.unget();
+    if((c = fgetc(f)) == '.'){
+      ungetc(c, f);
       dot_start = true;
     }else{
       return {};
     }
   }else{
-    sharps_before_dot = eat_sharp(i, s);
+    sharps_before_dot = eat_sharp(f, s);
   }
 
-  if(i.get() != '.'){
+  if((c = fgetc(f)) != '.'){
     goto end; // 1. no frac part
   }
   s.push_back('.');
     
   if(sharps_before_dot > 0){
-    eat_sharp(i, s);
+    eat_sharp(f, s);
     goto end; // 4. only sharps after dot
   }
 
   {
     bool digits_after_dot = false;
-    char c;
 
-    while(is_number_char(10, c = i.get())){
+    while(is_number_char(10, c = fgetc(f))){
       digits_after_dot = true;
       s.push_back(c);
     }
-    i.unget();
+    ungetc(c, f);
 
     if(dot_start && !digits_after_dot)
       return {}; // 2. dot start should have digits
 
-    eat_sharp(i, s);
+    eat_sharp(f, s);
   }
   
  end:
-  if(check_decimal_suffix(i.get())){
+  if(check_decimal_suffix(c = fgetc(f))){
     s.push_back('e');
 
-    switch(char c = i.get()){
+    switch(c = fgetc(f)){
     case '+': case '-':
       s.push_back(c); break;
     default:
-      i.unget(); break;
+      ungetc(c, f); break;
     }
 
     {
       bool exp_digits = false;
-      char c;
 
-      while(is_number_char(10, c = i.get())){
+      while(is_number_char(10, c = fgetc(f))){
         exp_digits = true;
         s.push_back(c);
       }
-      i.unget();
+      ungetc(c, f);
 
       if(!exp_digits)
         return {}; // no number on exp. part
     }
   }else{
-    i.unget();
+    ungetc(c, f);
   }
 
   return {Number{strtod(s.c_str(), nullptr)},
       Exactness::inexact};
 }
 
-ParserRet parse_real_number(int radix, std::istream& i){
+ParserRet parse_real_number(int radix, FILE* f){
+  decltype(fgetc(f)) c;
   int sign = 1;
 
-  switch(i.get()){
+  switch(c = fgetc(f)){
   case '+':
     sign = 1;
     break;
@@ -289,20 +291,20 @@ ParserRet parse_real_number(int radix, std::istream& i){
     break;
   default:
     sign = 1;
-    i.unget();
+    ungetc(c, f);
     break;
   }
 
   string s;
 
-  auto u1 = parse_unsigned(radix, i, s);
-  auto c = i.get();
+  auto u1 = parse_unsigned(radix, f, s);
+  c = fgetc(f);
 
   if((c == '.') || (u1 && check_decimal_suffix(c))){
     // decimal float
     if(radix == 10){
-      i.unget();
-      auto n = parse_decimal(i, s);
+      ungetc(c, f);
+      auto n = parse_decimal(f, s);
 
       if(n.number.type() == Number::Type::real){
         return {Number{n.number.coerce<double>() * sign},
@@ -315,29 +317,30 @@ ParserRet parse_real_number(int radix, std::istream& i){
   }else if(c == '/'){
     // rational
     string s2;
-    auto u2 = parse_unsigned(radix, i, s2);
+    auto u2 = parse_unsigned(radix, f, s2);
     if(!u2) return {};
 
     return {Number(sign * u1.number.coerce<double>() / u2.number.coerce<double>()),
         Exactness::inexact};
   }else{
     // integer?
-    i.unget();
+    ungetc(c, f);
     // FIXME: inexact or super-big integer can be fall into float.
     return {Number(sign * u1.number.coerce<long>()), u1.ex};
   }
 }
 
-ParserRet parse_complex(int radix, std::istream& i){
-  const auto first_char = i.peek();
+ParserRet parse_complex(int radix, FILE* f){
+  const auto first_char = fgetc(f);
+  ungetc(first_char, f);
 
   // has real part
-  auto real = parse_real_number(radix, i);
+  auto real = parse_real_number(radix, f);
   if(!real) return {};
 
-  switch(auto c = i.get()){
+  switch(auto c = fgetc(f)){
   case '@': {// polar literal
-    auto deg = parse_real_number(radix, i);
+    auto deg = parse_real_number(radix, f);
     if(!deg) return {};
         
     return {Number{polar(real.number.coerce<double>(), deg.number.coerce<double>())},
@@ -346,14 +349,14 @@ ParserRet parse_complex(int radix, std::istream& i){
   case '+': case '-': {
     const int sign = (c == '+') ? 1 : -1;
 
-    if(i.get() == 'i'){
+    if((c = fgetc(f)) == 'i'){
       return {Number{real.number.coerce<double>(), static_cast<double>(sign)},
           Exactness::inexact};
     }
-    i.unget();
+    ungetc(c, f);
     
-    auto imag = parse_real_number(radix, i);
-    if(!imag || i.get() != 'i')
+    auto imag = parse_real_number(radix, f);
+    if(!imag || fgetc(f) != 'i')
       return {};
 
     return {Number{real.number.coerce<double>(), imag.number.coerce<double>() * sign},
@@ -367,21 +370,20 @@ ParserRet parse_complex(int radix, std::istream& i){
       return {};
     }
   default:
-    i.unget();
+    ungetc(c, f);
     return real;
   }
 }
 
 } // namespace
 
-Number parse_number(std::istream& i){
-  const auto prefix_info = parse_number_prefix(i);
+Number parse_number(FILE* f){
+  const auto prefix_info = parse_number_prefix(f);
   if(!prefix_info) return {};
 
-  const auto r = parse_complex(prefix_info.radix, i);
+  const auto r = parse_complex(prefix_info.radix, f);
   if(!r) return {};
 
-  // TODO: check inexact integer, and warn.
   if(prefix_info.ex == Exactness::unspecified
      || prefix_info.ex == r.ex){
     return r.number;

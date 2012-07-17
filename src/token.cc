@@ -1,5 +1,3 @@
-#include <istream>
-#include <sstream>
 #include <utility>
 
 #include "token.hh"
@@ -277,28 +275,14 @@ Token tokenize_string(FILE* f){
 }
 
 Token tokenize_number(FILE* f, char read_c = 0){
-  static const auto is_n_char = [](char c) -> bool {
-    switch(c){
-    case '+': case '-': case '.': case '@': case 'i':
-    case 'e': case 's': case 'f': case 'd': case 'l':
-    case '#': case 'b': case 'o': case 'x':
-      return true;
-    default:
-      return isxdigit(c);
+  if(read_c){
+    if(ungetc(read_c, f) == EOF){
+      fprintf(stderr, "reader internal error: fatal I/O error occured. (reached unreading limit)\n");
+      return {};
     }
-  };
-
-  decltype(fgetc(f)) c;
-  stringstream s;
-
-  if(read_c) s.put(read_c);
-
-  while(is_n_char(c = fgetc(f))){
-    s.put(c);
   }
-  ungetc(c, f);
 
-  if(auto n = parse_number(s)){
+  if(auto n = parse_number(f)){
     // TODO: push back unused chars.
     return Token{n};
   }else{
