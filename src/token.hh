@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cstdio>
+
 #include "number.hh"
 
 class Token {
@@ -47,7 +48,7 @@ public:
   { return type_; }
 
   template <typename T>
-  T get() const;
+  const T& get() const;
 
   explicit operator bool() const
   { return type() != Type::uninitialized; }

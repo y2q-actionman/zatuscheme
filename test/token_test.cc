@@ -17,8 +17,8 @@ static bool result;
 // for debugging..
 template<>
 inline
-void* Token::get<void*>() const{
-  return reinterpret_cast<void*>(type_);
+const Token::Type& Token::get() const{
+  return type_;
 }
 
 template<typename T>
@@ -97,7 +97,7 @@ void check_generic(FILE* f, const Fun& fun){
     return;
   }
   
-  check_copy_move<void*>(tok);
+  check_copy_move<Token::Type>(tok);
 }
 
 template<Token::Type type, typename Fun, 
