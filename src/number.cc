@@ -58,9 +58,18 @@ enum class Exactness{
   exact, inexact, unspecified
     };
 
-#define PREFIX_ERROR_VALUE {0, Exactness::unspecified}
+struct PrefixValue {
+  const int radix;
+  const Exactness ex;
 
-pair<int, Exactness> parse_number_prefix(std::istream& i){
+  constexpr PrefixValue() // error value
+    : radix(0), ex(Exactness::unspecified){}
+
+  constexpr PrefixValue(int r, Exactness e)
+    : radix(r), ex(e){}
+};
+
+PrefixValue parse_number_prefix(std::istream& i){
   static const auto to_radix = [](char c){
     return (c == 'b') ? 2
     : (c == 'o') ? 8
@@ -87,17 +96,17 @@ pair<int, Exactness> parse_number_prefix(std::istream& i){
 
     switch(auto c = i.get()){
     case 'i': case 'e':
-      if(e_appeared) return PREFIX_ERROR_VALUE;
+      if(e_appeared) return {};
       e = to_exactness(c);
       e_appeared = true;
       break;
     case 'b': case 'o': case 'd': case 'x':
-      if(r_appeared) return PREFIX_ERROR_VALUE;
+      if(r_appeared) return {};
       r = to_radix(c);
       r_appeared = true;
       break;
     default:
-      return PREFIX_ERROR_VALUE;
+      return {};
     }
   }  
   
@@ -369,9 +378,9 @@ Number parse_number(std::istream& i){
 
   ParserRet r;
 
-  switch(auto radix = get<0>(prefix_info)){
+  switch(prefix_info.radix){
   case 2: case 8: case 10: case 16:
-    r = parse_complex(radix, i);
+    r = parse_complex(prefix_info.radix, i);
     break;
   default:
     return {};
@@ -381,11 +390,11 @@ Number parse_number(std::istream& i){
 
   // TODO: check inexact integer, and warn.
 
-  switch(auto e = get<1>(prefix_info)){
+  switch(prefix_info.ex){
   case Exactness::exact:
-    return (get<1>(r) == e) ? get<0>(r) : to_exact(get<0>(r));
+    return (get<1>(r) == prefix_info.ex) ? get<0>(r) : to_exact(get<0>(r));
   case Exactness::inexact:
-    return (get<1>(r) == e) ? get<0>(r) : to_inexact(get<0>(r));
+    return (get<1>(r) == prefix_info.ex) ? get<0>(r) : to_inexact(get<0>(r));
   case Exactness::unspecified:
     return get<0>(r);
   default:
