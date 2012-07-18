@@ -44,10 +44,7 @@ auto do_list(Lisp_ptr lis, MainFun&& m_fun, LastFun&& l_fun)
   -> decltype(l_fun(lis)){
   Lisp_ptr p = lis;
 
-  while(1){
-    if(p.tag() != Ptr_tag::cons)
-      break; // null or dot list end.
-
+  while(p.tag() == Ptr_tag::cons){
     auto c = p.get<Cons*>();
     if(!c) break; // reached nil
 
