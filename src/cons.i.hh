@@ -65,14 +65,14 @@ int bind_cons_list_i(int len, Lisp_ptr p, Fun1&& f, FunRest&&... fr){
   len += 1;
   f(c);
 
-  if(nullp(c->cdr())) return len;
+  // if(nullp(c->cdr())) return len; // this test is included in the first test.
 
   return bind_cons_list_i(len, c->cdr(), fr...);
 }
 
 inline
-int bind_cons_list_i(int len, Lisp_ptr){
-  return len+1;
+int bind_cons_list_i(int len, Lisp_ptr p){
+  return (nullp(p)) ? len : len+1;
 }
 
 template<typename... Fun>
