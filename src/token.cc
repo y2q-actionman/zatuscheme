@@ -185,10 +185,9 @@ void skip_intertoken_space(FILE* f){
   while((c = fgetc(f)) != EOF
         && (isspace(c) || c == ';')){
     if(c == ';'){
-      decltype(fgetc(f)) c2;
       do{
-        c2 = fgetc(f);
-      }while(c2 != EOF && c2 != '\n');
+        c = fgetc(f);
+      }while(c != EOF && c != '\n');
     }
   }
   ungetc(c, f);
@@ -231,15 +230,16 @@ Token tokenize_character(FILE* f){
   // check character name
   switch(ret_char){
   case EOF:
+    fprintf(stderr, "reader error: not ended char name!\n");
     return {};
   case 's':
     if(check_name("pace")){
-      ret_char = ' ';
+      return Token{' '};
     }
     break;
   case 'n':
     if(check_name("ewline")){
-      ret_char = '\n';
+      return Token{'\n'};
     }
     break;
   }
@@ -256,13 +256,13 @@ Token tokenize_string(FILE* f){
     case '"':
       return Token{s, Token::Type::string};
     case '\\':
-      c = fgetc(f);
-      switch(c){
+      switch(c = fgetc(f)){
       case '"': case '\\':
         s.push_back(c);
         break;
       default:
-        goto error;
+        fprintf(stderr, "reader error: unknown string escape '%c' appeared.\n", c);
+        return {};
       }
       break;
     default:
@@ -270,7 +270,7 @@ Token tokenize_string(FILE* f){
     }
   }
 
- error:
+  fprintf(stderr, "reader error: not ended string!\n");
   return {};
 }
 
@@ -283,7 +283,6 @@ Token tokenize_number(FILE* f, char read_c = 0){
   }
 
   if(auto n = parse_number(f)){
-    // TODO: push back unused chars.
     return Token{n};
   }else{
     return Token{};
@@ -339,7 +338,8 @@ Token tokenize(FILE* f){
     case 3:
       return Token{"...", Token::Type::identifier};
     default:
-      goto error;
+      fprintf(stderr, "reader error: %d dots appeared.\n", dots);
+      return {};
     }
   }
 
@@ -373,7 +373,8 @@ Token tokenize(FILE* f){
       ungetc(sharp_c, f);
       return tokenize_number(f, '#');
     default:
-      goto error;
+      fprintf(stderr, "reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
+      return {};
     }
 
   default:
@@ -383,12 +384,10 @@ Token tokenize(FILE* f){
       ungetc(c, f);
       return tokenize_number(f);
     }else{
-      goto error;
+      fprintf(stderr, "reader error: invalid char '%c' appeared.\n", c);
+      return {};
     }
   }
-
- error:
-  return {};
 }
 
 const char* stringify(Token::Notation n){
