@@ -129,7 +129,7 @@ Lisp_ptr read_la(FILE* f, const Token& looked_tok){
 
     // compound datum
   case Token::Type::notation:
-    switch(tok.get<Token::Notation>()){
+    switch(auto n = tok.get<Token::Notation>()){
 
     case Token::Notation::l_paren: // list
       return read_list(f);
@@ -152,29 +152,29 @@ Lisp_ptr read_la(FILE* f, const Token& looked_tok){
       
     case Token::Notation::l_bracket:
     case Token::Notation::l_brace:
-      fprintf(stderr, "reader error: not supported nptation! (type=%d)\n",
-              static_cast<int>(tok.get<Token::Notation>()));
+      fprintf(stderr, "reader error: not supported notation! (type=%s)\n",
+              stringify(n));
       return Lisp_ptr{};
 
     case Token::Notation::r_paren:
     case Token::Notation::r_bracket:
     case Token::Notation::r_brace:
-      fprintf(stderr, "reader error: closing notation appeared alone! (type=%d)\n",
-              static_cast<int>(tok.get<Token::Notation>()));
+      fprintf(stderr, "reader error: closing notation appeared alone! (type=%s)\n",
+              stringify(n));
       return Lisp_ptr{};
 
     case Token::Notation::dot:
     case Token::Notation::bar:
     default:
-      fprintf(stderr, "reader error: unexpected notation was passed! (type=%d)\n",
-              static_cast<int>(tok.get<Token::Notation>()));
+      fprintf(stderr, "reader error: unexpected notation was passed! (type=%s)\n",
+              stringify(n));
       return Lisp_ptr{};
     }
 
   case Token::Type::uninitialized:
   default:
-    fprintf(stderr, "reader error: unknown token was passed! (type=%d)\n",
-            static_cast<int>(tok.type()));
+    fprintf(stderr, "reader error: unknown token was passed! (type=%s)\n",
+            stringify(tok.type()));
     return Lisp_ptr{};
   }
 }
