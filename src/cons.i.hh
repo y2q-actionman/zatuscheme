@@ -57,28 +57,27 @@ auto do_list(Lisp_ptr lis, MainFun&& m_fun, LastFun&& l_fun)
   return l_fun(p);
 }
 
-template<typename Fun1, typename... FunRest>
-int bind_cons_list_i(int len, Lisp_ptr p, Fun1&& f, FunRest&&... fr){
+template<int len, typename Fun1, typename... FunRest>
+inline
+int bind_cons_list_i(Lisp_ptr p, Fun1&& f, FunRest&&... fr){
   auto c = p.get<Cons*>();
   if(!c) return len;
 
-  len += 1;
   f(c);
 
-  // if(nullp(c->cdr())) return len; // this test is included in the first test.
-
-  return bind_cons_list_i(len, c->cdr(), fr...);
+  return bind_cons_list_i<len + 1>(c->cdr(), fr...);
 }
 
+template<int len>
 inline
-int bind_cons_list_i(int len, Lisp_ptr p){
+int bind_cons_list_i(Lisp_ptr p){
   return (nullp(p)) ? len : len+1;
 }
 
 template<typename... Fun>
 inline
 int bind_cons_list(Lisp_ptr p, Fun&&... f){
-  return bind_cons_list_i(0, p, f...);
+  return bind_cons_list_i<0>(p, f...);
 }
 
 #endif // CONS_I_HH
