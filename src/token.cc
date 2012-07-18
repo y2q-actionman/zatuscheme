@@ -326,11 +326,10 @@ Token tokenize(FILE* f){
 
   case '.': {
     int dots = 1;
-    auto c2 = fgetc(f);
+    decltype(fgetc(f)) c2;
 
-    while(c2 == '.'){
+    while((c2 = fgetc(f)) == '.'){
       ++dots;
-      c2 = fgetc(f);
     }
     ungetc(c2, f);
 
@@ -349,11 +348,11 @@ Token tokenize(FILE* f){
 
   case '+': case '-': {
     auto c2 = fgetc(f);
+    ungetc(c2, f);
 
     if(is_delimiter(c2)){
       return Token{string(1, c), Token::Type::identifier};
     }else{
-      ungetc(c2, f);
       return tokenize_number(f, c);
     }
   }
