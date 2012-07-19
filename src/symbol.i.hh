@@ -5,9 +5,4 @@
 #error "Please include via parent file"
 #endif
 
-inline
-void Symbol::rebind(const std::string* s){
-  name_ = s;
-}
-
 #endif // SYMBOL_I_HH

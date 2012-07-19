@@ -1,9 +1,18 @@
 #ifndef SYMBOL_HH
 #define SYMBOL_HH
 
+#include <unordered_map>
 #include <string>
-#include "symtable.hh"
 
+class Symbol;
+
+// SymTable declarations.
+typedef std::unordered_map<std::string, Symbol> SymTable;
+
+Symbol* intern(SymTable&, const std::string&);
+void unintern(SymTable&, Symbol*);
+
+// Symbol declarations.
 class Symbol{
 public:
   friend Symbol* intern(SymTable&, const std::string&);

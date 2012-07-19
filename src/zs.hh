@@ -12,7 +12,6 @@
 #include "printer.hh"
 #include "reader.hh"
 #include "symbol.hh"
-#include "symtable.hh"
 #include "token.hh"
 #include "util.hh"
 #include "vm.hh"

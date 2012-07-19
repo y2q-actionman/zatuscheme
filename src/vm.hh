@@ -7,7 +7,6 @@
 #include "lisp_ptr.hh"
 #include "cons.hh"
 #include "symbol.hh"
-#include "symtable.hh"
 
 class VM_t {
   typedef std::stack<Lisp_ptr, std::vector<Lisp_ptr>> stack_t;

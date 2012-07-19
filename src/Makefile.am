@@ -11,7 +11,6 @@ libzs_a_SOURCES = zs.hh\
 		lisp_ptr.cc lisp_ptr.hh lisp_ptr.i.hh\
 		cons.cc cons.hh cons.i.hh\
 		symbol.cc symbol.hh symbol.i.hh\
-		symtable.cc symtable.hh\
 		reader.cc reader.hh\
 		printer.cc printer.hh\
 		eval.cc eval.hh\
