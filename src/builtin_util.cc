@@ -4,17 +4,17 @@
 #include <iterator>
 
 void procedure_list(){
-  VM.return_value() = stack_to_list<false>(VM.stack());
+  VM.return_value = stack_to_list<false>(VM.stack);
 }
 
 void procedure_list_star(){
-  VM.return_value() = stack_to_list<true>(VM.stack());
+  VM.return_value = stack_to_list<true>(VM.stack);
 }
 
 void procedure_vector(){
   auto v = new Vector;
-  stack_to_vector(VM.stack(), *v);
-  VM.return_value() = Lisp_ptr{v};
+  stack_to_vector(VM.stack, *v);
+  VM.return_value = Lisp_ptr{v};
 }
 
 Lisp_ptr pick_args_1(){

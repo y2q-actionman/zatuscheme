@@ -34,7 +34,7 @@ void vm_op_proc_enter();
   stack[0] = some value
 */
 void vm_op_arg_push(){
-  VM.stack().push(VM.return_value());
+  VM.stack.push(VM.return_value);
 }
 
 /*
@@ -45,11 +45,11 @@ void vm_op_arg_push(){
   value is set to symbol
 */
 void vm_op_arg_push_and_set(){
-  auto symp = VM.code().top();
-  VM.code().pop();
+  auto symp = VM.code.top();
+  VM.code.pop();
 
   assert(symp.tag() == Ptr_tag::symbol);
-  VM.local_set(symp.get<Symbol*>(), VM.return_value());
+  VM.local_set(symp.get<Symbol*>(), VM.return_value);
 
   vm_op_arg_push();
 }
@@ -66,8 +66,8 @@ void vm_op_arg_push_and_set(){
     stack = (arg-bottom)
 */
 void function_call(Lisp_ptr proc, const ArgInfo* argi){
-  auto args = VM.stack().top();
-  VM.stack().pop();
+  auto args = VM.stack.top();
+  VM.stack.pop();
 
   if(argi->early_bind){
     auto iproc = proc.get<IProcedure*>();
@@ -75,8 +75,8 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
     VM.enter_frame(push_frame(iproc->closure()));
   }
 
-  VM.code().push(proc);
-  VM.code().push(Lisp_ptr(vm_op_proc_enter));
+  VM.code.push(proc);
+  VM.code.push(Lisp_ptr(vm_op_proc_enter));
 
   int argc = 0;
   const auto sequencial = argi->sequencial;
@@ -91,14 +91,14 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
                     return false;
                   }
 
-                  VM.code().push(c->car());
-                  VM.code().push(Lisp_ptr(vm_op_arg_push_and_set));
+                  VM.code.push(c->car());
+                  VM.code.push(Lisp_ptr(vm_op_arg_push_and_set));
                   bind_list = c->cdr();
                 }else{
-                  VM.code().push(Lisp_ptr(vm_op_arg_push));
+                  VM.code.push(Lisp_ptr(vm_op_arg_push));
                 }
 
-                VM.code().push(cell->car());
+                VM.code.push(cell->car());
                 ++argc;
 
                 return true;
@@ -121,13 +121,13 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
                 return true;
               })){
     for(int i = 0; i < argc*2 + 2; ++i){
-      VM.code().pop();
+      VM.code.pop();
     }
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
   
-  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
+  VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
 }
 
 /*
@@ -136,7 +136,7 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
   code = proc
 */
 void vm_op_macro_call(){
-  VM.code().push(VM.return_value());
+  VM.code.push(VM.return_value);
 }  
 
 /*
@@ -146,11 +146,11 @@ void vm_op_macro_call(){
   stack = (arg1, arg2, ..., arg-bottom)
 */
 void macro_call(Lisp_ptr proc, const ArgInfo* argi){
-  auto args = VM.stack().top();
-  VM.stack().pop();
+  auto args = VM.stack.top();
+  VM.stack.pop();
 
-  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
-  auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack());
+  VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
+  auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack);
   if(argc < argi->required_args
      || (!argi->variadic && argc > argi->required_args)){
     fprintf(stderr, "macro-call error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
@@ -158,16 +158,16 @@ void macro_call(Lisp_ptr proc, const ArgInfo* argi){
             (argi->variadic) ? "variadic" : "not variadic",
             argc);
     for(int i = 0; i < argc; ++i){
-      VM.stack().pop();
+      VM.stack.pop();
     }
-    VM.stack().pop();
-    VM.return_value() = {};
+    VM.stack.pop();
+    VM.return_value = {};
     return;
   }    
 
-  VM.code().push(Lisp_ptr(vm_op_macro_call));
-  VM.code().push(proc);
-  VM.code().push(Lisp_ptr(vm_op_proc_enter));
+  VM.code.push(Lisp_ptr(vm_op_macro_call));
+  VM.code.push(proc);
+  VM.code.push(Lisp_ptr(vm_op_proc_enter));
 }
 
 /*
@@ -177,13 +177,13 @@ void macro_call(Lisp_ptr proc, const ArgInfo* argi){
   stack = (whole args, arg-bottom)
 */
 void whole_function_call(Lisp_ptr proc){
-  VM.code().push(proc);
-  VM.code().push(Lisp_ptr(vm_op_proc_enter));
+  VM.code.push(proc);
+  VM.code.push(Lisp_ptr(vm_op_proc_enter));
 
-  auto args = VM.stack().top();
-  VM.stack().pop();
-  VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
-  VM.stack().push(args);
+  auto args = VM.stack.top();
+  VM.stack.pop();
+  VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
+  VM.stack.push(args);
 }
 
 /*
@@ -193,7 +193,7 @@ void whole_function_call(Lisp_ptr proc){
   stack = (whole args, arg-bottom)
 */
 void whole_macro_call(Lisp_ptr proc){
-  VM.code().push(Lisp_ptr(vm_op_macro_call));
+  VM.code.push(Lisp_ptr(vm_op_macro_call));
   whole_function_call(proc);
 }
 
@@ -204,7 +204,7 @@ void whole_macro_call(Lisp_ptr proc){
   goto proc_call or macro_call
 */
 void vm_op_call(){
-  auto proc = VM.return_value();
+  auto proc = VM.return_value;
 
   Calling c;
   const ArgInfo* argi;
@@ -218,10 +218,10 @@ void vm_op_call(){
   }else{
     fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
             stringify(proc.tag()));
-    fprintf(stderr, "      expr: "); print(stderr, VM.stack().top()); fputc('\n', stderr);
+    fprintf(stderr, "      expr: "); print(stderr, VM.stack.top()); fputc('\n', stderr);
     
-    VM.return_value() = {};
-    VM.stack().pop();
+    VM.return_value = {};
+    VM.stack.pop();
     return;
   }
 
@@ -274,9 +274,9 @@ void proc_enter_interpreted(IProcedure* fun){
   const auto& argi = fun->arg_info();
 
   // tail call check
-  if(!VM.code().empty()
-     && VM.code().top().get<VMop>() == vm_op_proc_leave){
-    VM.code().pop();
+  if(!VM.code.empty()
+     && VM.code.top().get<VMop>() == vm_op_proc_leave){
+    VM.code.pop();
     VM.leave_frame();
   }
 
@@ -284,17 +284,17 @@ void proc_enter_interpreted(IProcedure* fun){
     VM.enter_frame(push_frame(fun->closure()));
   }
 
-  VM.code().push(Lisp_ptr(vm_op_proc_leave));
+  VM.code.push(Lisp_ptr(vm_op_proc_leave));
 
   Lisp_ptr arg_name = argi.head;
   Lisp_ptr st_top;
 
   // normal arg push
-  while((st_top = VM.stack().top()).tag() != Ptr_tag::vm_op){
-    VM.stack().pop();
-    if(VM.stack().empty()){
+  while((st_top = VM.stack.top()).tag() != Ptr_tag::vm_op){
+    VM.stack.pop();
+    if(VM.stack.empty()){
       fprintf(stderr, "eval internal error: no args and no managed funcall!\n");
-      VM.return_value() = {};
+      VM.return_value = {};
       return;
     }
 
@@ -310,24 +310,24 @@ void proc_enter_interpreted(IProcedure* fun){
   if(argi.variadic){   // variadic arg push
     if(!arg_name.get<Symbol*>()){
       fprintf(stderr, "eval error: no arg name for variadic arg!\n");
-      VM.return_value() = {};
+      VM.return_value = {};
       return;
     }
 
     // TODO: share code below with procedure_list()
-    VM.local_set(arg_name.get<Symbol*>(), stack_to_list<false>(VM.stack()));
+    VM.local_set(arg_name.get<Symbol*>(), stack_to_list<false>(VM.stack));
   }else{  // clean stack
-    if(VM.stack().empty()
-       || VM.stack().top().tag() != Ptr_tag::vm_op){
+    if(VM.stack.empty()
+       || VM.stack.top().tag() != Ptr_tag::vm_op){
       fprintf(stderr, "eval error: corrupted stack -- no bottom found!\n");
-      VM.return_value() = {};
+      VM.return_value = {};
       return;
     }
-    VM.stack().pop();
+    VM.stack.pop();
   }
   
   // set up lambda body code
-  list_to_stack("funcall", fun->get(), VM.code());
+  list_to_stack("funcall", fun->get(), VM.code);
 }
 
 /*
@@ -337,10 +337,10 @@ void proc_enter_interpreted(IProcedure* fun){
    and goto handler.
 */
 void vm_op_proc_enter(){
-  auto proc = VM.code().top();
-  VM.code().pop();
+  auto proc = VM.code.top();
+  VM.code.pop();
 
-  assert(!VM.stack().empty());
+  assert(!VM.stack.empty());
 
   if(auto ifun = proc.get<IProcedure*>()){
     proc_enter_interpreted(ifun);
@@ -348,7 +348,7 @@ void vm_op_proc_enter(){
     proc_enter_native(nfun);
   }else{
     fprintf(stderr, "eval internal error: corrupted code stack -- no proc found in entering!\n");
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
 }
@@ -360,16 +360,16 @@ void vm_op_proc_enter(){
   code = (consequent or alternative)
 */
 void vm_op_if(){
-  auto test_result = VM.return_value();
+  auto test_result = VM.return_value;
 
   if(test_result.get<bool>()){
-    VM.code().push(VM.stack().top());
-    VM.stack().pop();
-    VM.stack().pop();
+    VM.code.push(VM.stack.top());
+    VM.stack.pop();
+    VM.stack.pop();
   }else{
-    VM.stack().pop();
-    VM.code().push(VM.stack().top());
-    VM.stack().pop();
+    VM.stack.pop();
+    VM.code.push(VM.stack.top());
+    VM.stack.pop();
   }
 }
 
@@ -380,14 +380,14 @@ void vm_op_if(){
   return-value is setted.
 */
 void vm_op_set(){
-  auto var = VM.stack().top().get<Symbol*>();
-  VM.stack().pop();
+  auto var = VM.stack.top().get<Symbol*>();
+  VM.stack.pop();
   if(!var){
     fprintf(stderr, "eval error: internal error occured (set!'s varname is dismissed)\n");
     return;
   }
 
-  VM.set(var, VM.return_value());
+  VM.set(var, VM.return_value);
 }
 
 /*
@@ -397,14 +397,14 @@ void vm_op_set(){
   return-value is setted.
 */
 void vm_op_local_set(){
-  auto var = VM.stack().top().get<Symbol*>();
-  VM.stack().pop();
+  auto var = VM.stack.top().get<Symbol*>();
+  VM.stack.pop();
   if(!var){
     fprintf(stderr, "eval error: internal error occured (set!'s varname is dismissed)\n");
     return;
   }
 
-  VM.local_set(var, VM.return_value());
+  VM.local_set(var, VM.return_value);
 }
 
 /*
@@ -430,20 +430,20 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
 
   if(!val){
     fprintf(stderr, "eval error: no value is supplied for %s\n", opname);
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
 
   if(len > 2){
     fprintf(stderr, "eval error: informal %s expr! (more than %d exprs)\n", opname, len);
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
 
   // evaluating
-  VM.code().push(Lisp_ptr{set_op});
-  VM.code().push(val);
-  VM.stack().push(Lisp_ptr{var});
+  VM.code.push(Lisp_ptr{set_op});
+  VM.code.push(val);
+  VM.stack.push(Lisp_ptr{var});
 }
 
 /*
@@ -452,7 +452,7 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   stack = (list[0], list[1], ...)
 */
 void vm_op_arg_push_list(){
-  list_to_stack("unquote-splicing", VM.return_value(), VM.stack());
+  list_to_stack("unquote-splicing", VM.return_value, VM.stack);
 }
 
 static const VMop vm_op_quasiquote_list = procedure_list_star;
@@ -480,28 +480,28 @@ void vm_op_quasiquote(){
     if(auto l = p.get<Cons*>()){
       if(auto l_first_sym = l->car().get<Symbol*>()){
         if(l_first_sym == unquote_sym){
-          VM.code().push(Lisp_ptr(vm_op_arg_push));
-          VM.code().push(l->cdr().get<Cons*>()->car());
+          VM.code.push(Lisp_ptr(vm_op_arg_push));
+          VM.code.push(l->cdr().get<Cons*>()->car());
           return;
         }else if(l_first_sym  == unquote_splicing_sym){
-          VM.code().push(Lisp_ptr(vm_op_arg_push_list));
-          VM.code().push(l->cdr().get<Cons*>()->car());
+          VM.code.push(Lisp_ptr(vm_op_arg_push_list));
+          VM.code.push(l->cdr().get<Cons*>()->car());
           return;
         }
       }
     }
 
-    VM.code().push(Lisp_ptr(vm_op_arg_push));
-    VM.code().push(p);
-    VM.code().push(Lisp_ptr(vm_op_quasiquote));
+    VM.code.push(Lisp_ptr(vm_op_arg_push));
+    VM.code.push(p);
+    VM.code.push(Lisp_ptr(vm_op_quasiquote));
   };
 
-  auto p = VM.code().top();
-  VM.code().pop();
+  auto p = VM.code.top();
+  VM.code.pop();
 
   if(p.tag() == Ptr_tag::cons){
     if(nullp(p)){
-      VM.return_value() = Cons::NIL;
+      VM.return_value = Cons::NIL;
       return;
     }
 
@@ -509,18 +509,18 @@ void vm_op_quasiquote(){
     if(auto first_sym = p.get<Cons*>()->car().get<Symbol*>()){
       if(first_sym == unquote_sym){
         auto rest = p.get<Cons*>()->cdr().get<Cons*>()->car();
-        VM.code().push(rest);
+        VM.code.push(rest);
         return;
       }else if(first_sym == unquote_splicing_sym){
         fprintf(stderr, "eval error: unquote-splicing is not supported out of list");
-        VM.return_value() = {};
+        VM.return_value = {};
         return;
       }
     }
 
     // generic lists
-    VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
-    VM.code().push(Lisp_ptr(vm_op_quasiquote_list));
+    VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
+    VM.code.push(Lisp_ptr(vm_op_quasiquote_list));
 
     do_list(p,
             [&](Cons* c) -> bool {
@@ -531,15 +531,15 @@ void vm_op_quasiquote(){
               qq_elem(last);
             });
   }else if(p.tag() == Ptr_tag::vector){
-    VM.stack().push(Lisp_ptr(vm_op_arg_bottom));
-    VM.code().push(Lisp_ptr(vm_op_quasiquote_vector));
+    VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
+    VM.code.push(Lisp_ptr(vm_op_quasiquote_vector));
 
     auto v = p.get<Vector*>();
     for(auto i = begin(*v); i != end(*v); ++i){
       qq_elem(*i);
     }
   }else{
-    VM.return_value() = p;
+    VM.return_value = p;
   }
 }
 
@@ -551,7 +551,7 @@ void error_whole_function(const char* msg){
 
   fprintf(stderr, "eval error: '%s' -- %s\n",
           sym->name().c_str(), msg);
-  VM.return_value() = {};
+  VM.return_value = {};
 }
 
 } // namespace
@@ -565,7 +565,7 @@ void whole_function_unimplemented(){
 }
 
 void whole_function_pass_through(){
-  VM.return_value() = pick_args_1();
+  VM.return_value = pick_args_1();
 }
 
 void whole_function_quote(){
@@ -585,11 +585,11 @@ void whole_function_quote(){
 
   if(!val){
     fprintf(stderr, "eval error: quote has no args.\n");
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
     
-  VM.return_value() = val;
+  VM.return_value = val;
 }
 
 
@@ -605,7 +605,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
     return {};
   }
   
-  return Lisp_ptr{new IProcedure(code, Calling::function, arg_info, VM.frame())};
+  return Lisp_ptr{new IProcedure(code, Calling::function, arg_info, VM.frame)};
 }
 
 void whole_function_lambda(){
@@ -621,7 +621,7 @@ void whole_function_lambda(){
                    code = c->cdr();
                  });
 
-  VM.return_value() = lambda_internal(args, code);
+  VM.return_value = lambda_internal(args, code);
 }
 
 void whole_function_if(){
@@ -646,20 +646,20 @@ void whole_function_if(){
 
   if(len < 3){
     fprintf(stderr, "eval error: informal if expr! (only %d exprs)\n", len);
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }else if(len > 4){
     fprintf(stderr, "eval error: informal if expr! (more than %d exprs)\n", len);
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
 
   // evaluating
-  VM.code().push(Lisp_ptr(vm_op_if));
-  VM.code().push(test);
+  VM.code.push(Lisp_ptr(vm_op_if));
+  VM.code.push(test);
 
-  VM.stack().push(alt);
-  VM.stack().push(conseq);
+  VM.stack.push(alt);
+  VM.stack.push(conseq);
 }
 
 void whole_function_set(){
@@ -697,7 +697,7 @@ void whole_function_define(){
 
     auto value = lambda_internal(args, code);
     VM.local_set(var, value);
-    VM.return_value() = value;
+    VM.return_value = value;
   }else{
     fprintf(stderr, "eval error: informal define syntax!\n");
   }
@@ -710,11 +710,11 @@ void whole_function_begin(){
   auto exprs = wargs.get<Cons*>()->cdr();
   if(!exprs || nullp(exprs)){
     fprintf(stderr, "eval error: begin has no exprs.\n");
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
 
-  list_to_stack("begin", exprs, VM.code());
+  list_to_stack("begin", exprs, VM.code);
 }
 
 void whole_function_quasiquote(){
@@ -724,9 +724,9 @@ void whole_function_quasiquote(){
   bind_cons_list(wargs,
                  [](Cons*){},
                  [](Cons* c){
-                   VM.code().push(c->car());
+                   VM.code.push(c->car());
                  });
-  VM.code().push(Lisp_ptr(vm_op_quasiquote));
+  VM.code.push(Lisp_ptr(vm_op_quasiquote));
 }
 
 static void let_internal(bool sequencial, bool early_bind){
@@ -743,7 +743,7 @@ static void let_internal(bool sequencial, bool early_bind){
 
   if(body.tag() != Ptr_tag::cons || nullp(body)){
     fprintf(stderr, "eval error: informal syntax for LET's body!.\n");
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
 
@@ -776,16 +776,16 @@ static void let_internal(bool sequencial, bool early_bind){
     fprintf(stderr, "eval error: let binding was failed!\n");
     free_cons_list(syms);
     free_cons_list(vals);
-    VM.return_value() = {};
+    VM.return_value = {};
     return;
   }
 
-  VM.code().push(Lisp_ptr(vm_op_call));
-  VM.code().push(Lisp_ptr(new IProcedure(body, Calling::function,
+  VM.code.push(Lisp_ptr(vm_op_call));
+  VM.code.push(Lisp_ptr(new IProcedure(body, Calling::function,
                                          {len, false, syms, sequencial, early_bind},
-                                         VM.frame())));
-  VM.stack().push(Lisp_ptr(new Cons({}, vals)));
-  VM.return_value() = {};
+                                         VM.frame)));
+  VM.stack.push(Lisp_ptr(new Cons({}, vals)));
+  VM.return_value = {};
 }
 
 void whole_function_let(){
@@ -802,30 +802,30 @@ void whole_function_letrec(){
 
                  
 void eval(){
-  while(!VM.code().empty()){
-    auto p = VM.code().top();
-    VM.code().pop();
+  while(!VM.code.empty()){
+    auto p = VM.code.top();
+    VM.code.pop();
 
     switch(p.tag()){
     case Ptr_tag::undefined:
       fprintf(stderr, "eval error: undefined is passed!\n");
-      VM.return_value() = {};
+      VM.return_value = {};
       break;
 
     case Ptr_tag::symbol:
-      VM.return_value() = VM.find(p.get<Symbol*>());
+      VM.return_value = VM.find(p.get<Symbol*>());
       break;
     
     case Ptr_tag::cons: {
       auto c = p.get<Cons*>();
       if(!c){
-        VM.return_value() = Cons::NIL;
+        VM.return_value = Cons::NIL;
         break;
       }
 
-      VM.code().push(Lisp_ptr(vm_op_call));
-      VM.code().push(c->car());
-      VM.stack().push(p);
+      VM.code.push(Lisp_ptr(vm_op_call));
+      VM.code.push(c->car());
+      VM.stack.push(p);
       break;
     }
 
@@ -841,15 +841,15 @@ void eval(){
     case Ptr_tag::string: case Ptr_tag::vector:
     case Ptr_tag::port: case Ptr_tag::env:
     default:
-      VM.return_value() = p;
+      VM.return_value = p;
       break;
     }
   }
 
-  if(!VM.stack().empty()){
+  if(!VM.stack.empty()){
     fprintf(stderr, "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n");
     do{
-      VM.stack().pop();
-    }while(!VM.stack().empty());
+      VM.stack.pop();
+    }while(!VM.stack.empty());
   }
 }

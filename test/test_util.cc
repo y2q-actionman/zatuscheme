@@ -26,9 +26,9 @@ Lisp_ptr eval_text(const char* s){
     return {};
   }
 
-  VM.code().push(exp);
+  VM.code.push(exp);
   eval();
-  auto ret = VM.return_value();
+  auto ret = VM.return_value;
   if(!ret){
     printf("[failed] eval error on %s\n", s);
     return {};
@@ -42,9 +42,9 @@ bool eql(Lisp_ptr a, Lisp_ptr b){
   Cons tmp2(a, Lisp_ptr(&tmp3));
   Cons tmp1(Lisp_ptr(intern(VM.symtable, "eql")), Lisp_ptr(&tmp2));
 
-  VM.code().push(Lisp_ptr(&tmp1));
+  VM.code.push(Lisp_ptr(&tmp1));
   eval();
 
-  return VM.return_value().get<bool>();
+  return VM.return_value.get<bool>();
 }
   

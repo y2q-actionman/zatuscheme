@@ -105,18 +105,18 @@ int pick_args(Iter b, Iter e){
   int ret = 0;
 
   for(Iter i = b; i != e; ++i){
-    if(VM.stack().empty())
+    if(VM.stack.empty())
       return pick_args_detail::fail();
-    *i = VM.stack().top();
-    VM.stack().pop();
+    *i = VM.stack.top();
+    VM.stack.pop();
     ++ret;
   }
 
-  if(VM.stack().empty()
-     || VM.stack().top().tag() != Ptr_tag::vm_op)
+  if(VM.stack.empty()
+     || VM.stack.top().tag() != Ptr_tag::vm_op)
     return pick_args_detail::fail();
 
-  VM.stack().pop();
+  VM.stack.pop();
 
   return ret;
 }

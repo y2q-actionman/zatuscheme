@@ -16,7 +16,7 @@ namespace {
 void plus_2(){
   auto args = pick_args<2>();
 
-  VM.return_value() = {};
+  VM.return_value = {};
 
   Number* n1 = args[0].get<Number*>();
   if(!n1){
@@ -33,24 +33,24 @@ void plus_2(){
   }
 
   Number* newn = new Number(n1->get<long>() + n2->get<long>());
-  VM.return_value() = Lisp_ptr(newn);
+  VM.return_value = Lisp_ptr(newn);
 }
 
 template <Ptr_tag p>
 void type_check_pred(){
   auto arg = pick_args_1();
-  VM.return_value() = Lisp_ptr{arg.tag() == p};
+  VM.return_value = Lisp_ptr{arg.tag() == p};
 }
 
 void type_check_pair(){
   auto arg = pick_args_1();
-  VM.return_value() = Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
+  VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
 }
 
 void type_check_procedure(){
   auto arg = pick_args_1();
-  VM.return_value() = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
-                               || (arg.tag() == Ptr_tag::i_procedure)};
+  VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
+                             || (arg.tag() == Ptr_tag::i_procedure)};
 }
 
 Lisp_ptr whole_macro_or_expand(Cons* c){
@@ -95,11 +95,11 @@ void whole_macro_andor(Expander e){
                              head = c;
                            });
   if(len < 2){
-    VM.return_value() = Lisp_ptr(default_value);
+    VM.return_value = Lisp_ptr(default_value);
     return;
   }
 
-  VM.return_value() = e(head);
+  VM.return_value = e(head);
 }
 
 void whole_macro_and(){
@@ -125,16 +125,16 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
 void eq(){
   auto args = pick_args<2>();
   
-  VM.return_value() = Lisp_ptr{eq_internal(args[0], args[1])};
+  VM.return_value = Lisp_ptr{eq_internal(args[0], args[1])};
 }
 
 void eql(){
   auto args = pick_args<2>();
 
   if(args[0].tag() == Ptr_tag::number && args[1].tag() == Ptr_tag::number){
-    VM.return_value() = Lisp_ptr{eql(*args[0].get<Number*>(), *args[1].get<Number*>())};
+    VM.return_value = Lisp_ptr{eql(*args[0].get<Number*>(), *args[1].get<Number*>())};
   }else{
-    VM.return_value() = Lisp_ptr{eq_internal(args[0], args[1])};
+    VM.return_value = Lisp_ptr{eq_internal(args[0], args[1])};
   }
 }
 

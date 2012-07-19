@@ -8,9 +8,9 @@ int main(){
 
   while(1){
     printf(REPL_PROMPT);
-    VM.code().push(read(stdin));
+    VM.code.push(read(stdin));
     eval();
-    print(stdout, VM.return_value());
+    print(stdout, VM.return_value);
     putchar('\n');
   }
 

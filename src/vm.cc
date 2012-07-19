@@ -2,14 +2,14 @@
 
 VM_t VM;
 
-VM_t::VM_t() : codes_(), stack_(),
-               frame_(new Cons(Lisp_ptr(new Env()), Cons::NIL)),
+VM_t::VM_t() : symtable(), code(), stack(),
+               frame(new Cons(Lisp_ptr(new Env()), Cons::NIL)),
                frame_history_(){}
 
 Lisp_ptr VM_t::traverse(Symbol* s, Lisp_ptr p){
   Lisp_ptr old = {};
 
-  do_list(frame_,
+  do_list(frame,
           [&](Cons* c) -> bool {
             auto e = c->car().get<Env*>();
             auto ei = e->find(s);
@@ -29,7 +29,7 @@ Lisp_ptr VM_t::traverse(Symbol* s, Lisp_ptr p){
 }
 
 void VM_t::local_set(Symbol* s, Lisp_ptr p){
-  auto front = frame_.get<Cons*>()->car().get<Env*>();
+  auto front = frame.get<Cons*>()->car().get<Env*>();
 
   auto it = front->find(s);
   if(it != front->end()) front->erase(it);
