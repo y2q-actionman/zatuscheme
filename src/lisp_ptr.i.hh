@@ -124,11 +124,6 @@ Ptr_tag to_tag<Ptr_tag, VMop>(){
 
 // ptr class definitions
 
-// template<>
-// inline constexpr
-// Lisp_ptr::Lisp_ptr<Ptr_tag>(Ptr_tag p)
-// : tag_(p), u_(static_cast<void*>(nullptr)){}
-
 template<typename T>
 inline constexpr
 Lisp_ptr::Lisp_ptr(T p)

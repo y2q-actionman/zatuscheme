@@ -16,10 +16,10 @@ public:
   Cons& operator=(const Cons&) = default;
   Cons& operator=(Cons&&) = default;
 
-  Lisp_ptr car() const;
-  Lisp_ptr cdr() const;
-  void rplaca(Lisp_ptr);
-  void rplacd(Lisp_ptr);
+  inline Lisp_ptr car() const;
+  inline Lisp_ptr cdr() const;
+  inline void rplaca(Lisp_ptr);
+  inline void rplacd(Lisp_ptr);
 
 private:
   Lisp_ptr car_;
