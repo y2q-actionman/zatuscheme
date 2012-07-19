@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <utility>
 #include "reader.hh"
 #include "lisp_ptr.hh"
 #include "token.hh"
@@ -10,7 +11,7 @@ using namespace std;
 
 namespace {
 
-Lisp_ptr read_la(FILE*, const Token&);
+Lisp_ptr read_la(FILE*, Token&&);
 
 Lisp_ptr read_list(FILE* f){
   Token t = tokenize(f);
@@ -32,7 +33,7 @@ Lisp_ptr read_list(FILE* f){
   const Lisp_ptr head{c};
 
   while(1){
-    Lisp_ptr datum{read_la(f, t)};
+    Lisp_ptr datum{read_la(f, move(t))};
     if(!datum){
       return Lisp_ptr{};
     }
@@ -87,7 +88,7 @@ Lisp_ptr read_vector(FILE* f){
                  == Token::Notation::r_paren)){
       goto end;
     }else{
-      Lisp_ptr datum{read_la(f, t)};
+      Lisp_ptr datum{read_la(f, move(t))};
       if(!datum){
         return Lisp_ptr{};
       }
@@ -107,29 +108,27 @@ Lisp_ptr read_abbrev(const char* name, FILE* f){
   return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second, Cons::NIL}}}};
 }
 
-Lisp_ptr read_la(FILE* f, const Token& looked_tok){
-  auto& tok = (looked_tok) ? looked_tok : tokenize(f);
-
+Lisp_ptr read_la(FILE* f, Token&& tok){
   switch(tok.type()){
     // simple datum
   case Token::Type::boolean:
-    return Lisp_ptr(tok.get<bool>());
+    return Lisp_ptr(tok.move<bool>());
 
   case Token::Type::number:
-    return Lisp_ptr(new Number(tok.get<Number>()));
+    return Lisp_ptr(new Number(tok.move<Number>()));
 
   case Token::Type::character:
-    return Lisp_ptr(tok.get<char>());
+    return Lisp_ptr(tok.move<char>());
 
   case Token::Type::string:
-    return Lisp_ptr(new String(tok.get<string>()));
+    return Lisp_ptr(new String(tok.move<string>()));
 
   case Token::Type::identifier:
-    return Lisp_ptr{intern(VM.symtable, tok.get<string>())};
+    return Lisp_ptr{intern(VM.symtable, tok.move<string>())};
 
     // compound datum
   case Token::Type::notation:
-    switch(auto n = tok.get<Token::Notation>()){
+    switch(auto n = tok.move<Token::Notation>()){
 
     case Token::Notation::l_paren: // list
       return read_list(f);
@@ -182,5 +181,5 @@ Lisp_ptr read_la(FILE* f, const Token& looked_tok){
 } // namespace
 
 Lisp_ptr read(FILE* f){
-  return read_la(f, Token{});
+  return read_la(f, tokenize(f));
 }

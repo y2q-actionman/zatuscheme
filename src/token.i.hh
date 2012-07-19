@@ -6,6 +6,7 @@
 #endif
 
 #include <cassert>
+#include <utility>
 #include "decl.hh"
 #include "util.hh"
 
@@ -94,6 +95,42 @@ char Token::get<char>() const{
 template<>
 inline
 Token::Notation Token::get<Token::Notation>() const{
+  assert(type_ == Type::notation);
+  return not_;
+}
+
+
+template<>
+inline
+std::string&& Token::move<std::string>(){
+  assert(type_ == Type::identifier || type_ == Type::string);
+  return std::move(str_);
+}
+
+template<>
+inline
+Number&& Token::move<Number>(){
+  assert(type_ == Type::number);
+  return std::move(num_);
+}
+
+template<>
+inline
+bool Token::move<bool>(){
+  assert(type_ == Type::boolean);
+  return b_;
+}
+
+template<>
+inline
+char Token::move<char>(){
+  assert(type_ == Type::character);
+  return c_;
+}
+
+template<>
+inline
+Token::Notation Token::move<Token::Notation>(){
   assert(type_ == Type::notation);
   return not_;
 }

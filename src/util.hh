@@ -16,6 +16,7 @@ unexp_conversion(const char*, int, const char*);
 
 namespace zs {
   template<typename T> struct call_traits;
+  template<typename T> struct call_traits_r;
 }
 
 #include "util.i.hh"

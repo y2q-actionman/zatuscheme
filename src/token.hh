@@ -51,6 +51,9 @@ public:
   template <typename T>
   typename zs::call_traits<T>::type get() const;
 
+  template <typename T>
+  typename zs::call_traits_r<T>::type move();
+
   explicit operator bool() const
   { return type() != Type::uninitialized; }
 

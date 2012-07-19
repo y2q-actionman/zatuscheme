@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "token.hh"
 #include "util.hh"
 
@@ -11,7 +9,7 @@ Token::Token(const std::string& s, Type t)
 
 inline
 Token::Token(std::string&& s, Type t)
-  : type_(t), str_(move(s)){}
+  : type_(t), str_(std::move(s)){}
 
 inline
 Token::Token(const Number& n)
@@ -19,7 +17,7 @@ Token::Token(const Number& n)
 
 inline
 Token::Token(Number&& n)
-  : type_(Type::number), num_(move(n)){}
+  : type_(Type::number), num_(std::move(n)){}
 
 inline constexpr
 Token::Token(bool b)
@@ -44,7 +42,7 @@ void Token::init_from_other(T other){
 
   case Type::identifier:
   case Type::string:
-    new (&this->str_) string(move(other.str_));
+    new (&this->str_) string(std::move(other.str_));
     break;
 
   case Type::boolean:
@@ -52,7 +50,7 @@ void Token::init_from_other(T other){
     break;
 
   case Type::number:
-    new (&this->num_) Number(move(other.num_));
+    new (&this->num_) Number(std::move(other.num_));
     break;
 
   case Type::character:
@@ -89,7 +87,7 @@ Token& Token::assign_from_other(T other){
     case Type::identifier:
     case Type::string:
       this->type_ = other.type_;
-      this->str_ = move(other.str_);
+      this->str_ = std::move(other.str_);
       break;
 
     case Type::boolean:
@@ -97,7 +95,7 @@ Token& Token::assign_from_other(T other){
       break;
 
     case Type::number:
-      this->num_ = move(other.num_);
+      this->num_ = std::move(other.num_);
       break;
       
     case Type::character:
@@ -105,7 +103,7 @@ Token& Token::assign_from_other(T other){
       break;
 
     case Type::notation:
-      this->not_ = move(other.not_);
+      this->not_ = std::move(other.not_);
       break;
 
     default:
@@ -113,7 +111,7 @@ Token& Token::assign_from_other(T other){
     }
   }else{
     this->~Token();
-    new (this) Token(move(other));
+    new (this) Token(std::move(other));
   }
 
   return *this;

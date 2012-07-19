@@ -14,20 +14,27 @@ namespace zs {
 
     template<typename T>
     struct call_traits_i<T, true>{
-      typedef T type;
+      typedef T l_type;
+      typedef T r_type;
     };
 
     template<typename T>
     struct call_traits_i<T, false>{
       typedef typename std::add_lvalue_reference<
         typename std::add_const<T>::type
-        >::type type;
+        >::type l_type;
+      typedef typename std::add_rvalue_reference<T>::type r_type;
     };
   }
 
   template<typename T>
   struct call_traits{
-    typedef typename call_traits_detail::call_traits_i<T>::type type;
+    typedef typename call_traits_detail::call_traits_i<T>::l_type type;
+  };
+
+  template<typename T>
+  struct call_traits_r{
+    typedef typename call_traits_detail::call_traits_i<T>::r_type type;
   };
 }
 
