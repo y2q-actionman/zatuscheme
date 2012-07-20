@@ -50,7 +50,7 @@ void type_check_pair(){
 void type_check_procedure(){
   auto arg = pick_args_1();
   VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
-                             || (arg.tag() == Ptr_tag::i_procedure)};
+                             || (arg.tag() == Ptr_tag::n_procedure)};
 }
 
 Lisp_ptr whole_macro_or_expand(Cons* c){
