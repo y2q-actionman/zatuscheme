@@ -5,6 +5,10 @@
 
 using namespace std;
 
+constexpr inline
+Symbol::Symbol()
+  : name_(){} // assumes this is immediately set by rebind()
+
 inline
 void Symbol::rebind(const std::string* s){
   name_ = s;

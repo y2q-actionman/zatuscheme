@@ -26,12 +26,12 @@ public:
   { return *name_ ; }
 
 private:
-  constexpr Symbol() : name_(nullptr){}
+  constexpr Symbol();
 
   Symbol& operator=(const Symbol&) = delete;
   Symbol& operator=(Symbol&&) = delete;
 
-  void rebind(const std::string*);
+  inline void rebind(const std::string*);
 
 private:
   const std::string* name_;
