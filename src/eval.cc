@@ -15,17 +15,6 @@ using namespace Procedure;
 
 namespace {
 
-Symbol* to_varname(Lisp_ptr p){
-  Symbol* var = p.get<Symbol*>();
-
-  if(!var){
-    fprintf(stderr, "eval error: variable's name is not a symbol!\n");
-    return nullptr;
-  }
-
-  return var;
-}
-
 void vm_op_proc_enter();
 
 /*
@@ -420,13 +409,17 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   int len =
     bind_cons_list(p,
                    [&](Cons* c){
-                     var = to_varname(c->car());
+                     var = c->car().get<Symbol*>();
                    },
                    [&](Cons* c){
                      val = c->car();
                    });
 
-  if(!var) return;
+  if(!var){
+    fprintf(stderr, "eval error: variable's name is not a symbol!\n");
+    VM.return_value = {};
+    return;
+  }
 
   if(!val){
     fprintf(stderr, "eval error: no value is supplied for %s\n", opname);
@@ -687,11 +680,15 @@ void whole_function_define(){
 
     bind_cons_list(first,
                    [&](Cons* c){
-                     var = to_varname(c->car());
-                     args = (c->cdr());
+                     var = c->car().get<Symbol*>();
+                     args = c->cdr();
                    });
 
-    if(!var) return;
+    if(!var){
+      fprintf(stderr, "eval error: function's name is not a symbol!\n");
+      VM.return_value = {};
+      return;
+    }
 
     code = rest->cdr();
 
