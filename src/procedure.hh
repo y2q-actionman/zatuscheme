@@ -31,7 +31,7 @@ namespace Procedure {
         variadic(v), sequencial(s), early_bind(e){}
 
     explicit operator bool() const{
-      return (head) && (required_args >= 0);
+      return (required_args >= 0);
     }
   };
 

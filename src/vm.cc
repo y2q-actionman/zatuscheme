@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "vm.hh"
 
 VM_t VM;
@@ -12,6 +14,8 @@ Lisp_ptr VM_t::traverse(Symbol* s, Lisp_ptr p){
   do_list(frame,
           [&](Cons* c) -> bool {
             auto e = c->car().get<Env*>();
+            assert(e);
+
             auto ei = e->find(s);
             if(ei != e->end()){
               old = ei->second;
@@ -30,6 +34,7 @@ Lisp_ptr VM_t::traverse(Symbol* s, Lisp_ptr p){
 
 void VM_t::local_set(Symbol* s, Lisp_ptr p){
   auto front = frame.get<Cons*>()->car().get<Env*>();
+  assert(front);
 
   auto it = front->find(s);
   if(it != front->end()) front->erase(it);
