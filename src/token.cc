@@ -77,43 +77,38 @@ Token::Token(Token&& other){
 template<typename T>
 inline
 Token& Token::assign_from_other(T other){
-  if(this->type_ == other.type_
-     || (this->type_ == Type::identifier && other.type_ == Type::string)
-     || (this->type_ == Type::string && other.type_ == Type::identifier)){
-    switch(this->type_){
-    case Type::uninitialized:
-      break;
-    
-    case Type::identifier:
-    case Type::string:
+  switch(this->type_){
+  case Type::identifier:
+  case Type::string:
+    if(other.type_ == Type::string || other.type_ == Type::identifier){
       this->type_ = other.type_;
       this->str_ = std::move(other.str_);
+      return *this;
+    }else{
+      str_.~string();
       break;
-
-    case Type::boolean:
-      this->b_ = other.b_;
-      break;
-
-    case Type::number:
-      this->num_ = std::move(other.num_);
-      break;
-      
-    case Type::character:
-      this->c_ = other.c_;
-      break;
-
-    case Type::notation:
-      this->not_ = std::move(other.not_);
-      break;
-
-    default:
-      UNEXP_DEFAULT();
     }
-  }else{
-    this->~Token();
-    new (this) Token(std::move(other));
+
+  case Type::number:
+    if(other.type_ == Type::number){
+      this->num_ = std::move(other.num_);
+      return *this;
+    }else{
+      num_.~Number();
+      break;
+    }
+
+  case Type::uninitialized:
+  case Type::boolean:
+  case Type::character:
+  case Type::notation:
+    break;
+
+  default:
+    UNEXP_DEFAULT();
   }
 
+  new (this) Token(std::move(other));
   return *this;
 }
 
