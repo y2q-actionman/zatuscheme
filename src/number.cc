@@ -235,7 +235,7 @@ ParserRet parse_decimal(FILE* f, string& s){
   {
     bool digits_after_dot = false;
 
-    while(is_number_char(10, c = fgetc(f))){
+    while(isdigit(c = fgetc(f))){
       digits_after_dot = true;
       s.push_back(c);
     }
@@ -261,7 +261,7 @@ ParserRet parse_decimal(FILE* f, string& s){
     {
       bool exp_digits = false;
 
-      while(is_number_char(10, c = fgetc(f))){
+      while(isdigit(c = fgetc(f))){
         exp_digits = true;
         s.push_back(c);
       }
