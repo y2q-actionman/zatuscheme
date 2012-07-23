@@ -213,7 +213,7 @@ ParserRet parse_decimal(FILE* f, string& s){
 
   if(s.empty()){
     if((c = fgetc(f)) == '.'){
-      ungetc(c, f);
+      ungetc('.', f);
       dot_start = true;
     }else{
       return {};
@@ -223,6 +223,7 @@ ParserRet parse_decimal(FILE* f, string& s){
   }
 
   if((c = fgetc(f)) != '.'){
+    ungetc(c, f);
     goto end; // 1. no frac part
   }
   s.push_back('.');
