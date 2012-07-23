@@ -86,7 +86,7 @@ Lisp_ptr read_vector(FILE* f){
     }else if((t.type() == Token::Type::notation)
              && (t.get<Token::Notation>()
                  == Token::Notation::r_paren)){
-      goto end;
+      return Lisp_ptr{v};
     }else{
       Lisp_ptr datum{read_la(f, move(t))};
       if(!datum){
@@ -96,9 +96,6 @@ Lisp_ptr read_vector(FILE* f){
       v->emplace_back(datum);
     }
   }
-
- end:
-  return Lisp_ptr{v};
 }
 
 Lisp_ptr read_abbrev(const char* name, FILE* f){
