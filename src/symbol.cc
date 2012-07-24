@@ -35,4 +35,5 @@ Symbol* intern(SymTable& table, const string& s){
 
 void unintern(SymTable& table, Symbol* s){
   table.erase(s->name());
+  s->name_ = nullptr;
 }

@@ -9,13 +9,11 @@ class Symbol;
 // SymTable declarations.
 typedef std::unordered_map<std::string, Symbol> SymTable;
 
-Symbol* intern(SymTable&, const std::string&);
-void unintern(SymTable&, Symbol*);
-
 // Symbol declarations.
 class Symbol{
 public:
   friend Symbol* intern(SymTable&, const std::string&);
+  friend void unintern(SymTable&, Symbol*);
 
   Symbol(const Symbol&) = default;
   Symbol(Symbol&&) = default;
