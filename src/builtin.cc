@@ -81,9 +81,58 @@ Lisp_ptr whole_macro_and_expand(Cons* c){
          Lisp_ptr(new Cons(Lisp_ptr(vm_op_nop), Cons::NIL))))))));
 }
 
-template<bool default_value, typename Expander>
+Lisp_ptr whole_macro_cond_expand(Cons* head){
+  if(!head) return {}; // unspecified in R5RS.
+
+  auto clause = head->car();
+  if(!clause.get<Cons*>()){
+    fprintf(stderr, "macro cond: informal clause syntax! '");
+    print(stderr, head->car());
+    fprintf(stderr, "'\n");
+    return {};
+  }
+
+  Lisp_ptr test_form;
+  Lisp_ptr then_form;
+
+  int ret = bind_cons_list(clause,
+                           [&](Cons* c){
+                             test_form = c->car();
+                             if(nullp(c->cdr())){
+                               then_form = Lisp_ptr(vm_op_nop);
+                             }
+                           },
+                           [&](Cons* c){
+                             if(auto sym = c->car().get<Symbol*>()){
+                               if(sym->name() == "=>"){
+                                 fprintf(stderr, "macto cond: sorry, cond's => syntax is not implemented..\n");
+                                 then_form = {};
+                                 return;
+                               }
+                             }
+                             then_form = Lisp_ptr(new Cons(Lisp_ptr(intern(VM.symtable, "begin")), Lisp_ptr(c)));
+                           });
+  assert(ret >= 1); // should be handled by previous tests.
+  (void)ret;
+
+  if(auto sym = test_form.get<Symbol*>()){
+    if(sym->name() == "else"){
+      return then_form;
+    }
+  }
+
+  const auto if_sym = intern(VM.symtable, "if");
+  auto else_form = whole_macro_cond_expand(head->cdr().get<Cons*>());
+
+  return Lisp_ptr(new Cons(Lisp_ptr(if_sym),
+         Lisp_ptr(new Cons(test_form,
+         Lisp_ptr(new Cons(then_form,
+         Lisp_ptr(new Cons(else_form, Cons::NIL))))))));
+}
+
+template<typename T, typename Expander>
 inline
-void whole_macro_andor(Expander e){
+void whole_macro_conditional(T default_value, Expander e){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -103,11 +152,15 @@ void whole_macro_andor(Expander e){
 }
 
 void whole_macro_and(){
-  whole_macro_andor<true>(whole_macro_and_expand);
+  whole_macro_conditional(true, whole_macro_and_expand);
 }
                  
 void whole_macro_or(){
-  whole_macro_andor<false>(whole_macro_or_expand);
+  whole_macro_conditional(false, whole_macro_or_expand);
+}
+
+void whole_macro_cond(){
+  whole_macro_conditional(Lisp_ptr{}, whole_macro_cond_expand);
 }
 
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
@@ -169,8 +222,8 @@ constexpr struct Entry {
       Calling::whole_function, {1, true}}},
 
   {"cond", {
-      whole_function_unimplemented,
-      Calling::whole_function, {0, true}}},
+      whole_macro_cond,
+      Calling::whole_macro, {1, true}}},
   {"case", {
       whole_function_unimplemented,
       Calling::whole_function, {0, true}}},
