@@ -63,10 +63,10 @@ int main(){
   check("(letrec ((x 1)) (let ((x 2)) x))", "2");
   check("(letrec ((x 1)) (let ((x 2)) x) x)", "1");
 
-  check("(cond ((eql 1 1) 1))", "1");
-  check("(cond ((eql 1 2) xxx) ((eql 2 3) yyy) ((eql 3 3) 3))", "3");
-  check("(cond ((eql 1 2) xxx) ((eql 2 3) yyy) (else 3))", "3");
-  check("(cond ((eql 1 2)) ((eql 2 3) fuga) ((+ 5 7)))", "12");
+  check("(cond ((eqv? 1 1) 1))", "1");
+  check("(cond ((eqv? 1 2) xxx) ((eqv? 2 3) yyy) ((eqv? 3 3) 3))", "3");
+  check("(cond ((eqv? 1 2) xxx) ((eqv? 2 3) yyy) (else 3))", "3");
+  check("(cond ((eqv? 1 2)) ((eqv? 2 3) fuga) ((+ 5 7)))", "12");
 
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

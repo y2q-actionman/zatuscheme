@@ -63,7 +63,7 @@ Number parse_number(FILE*);
 Number to_exact(const Number&);
 Number to_inexact(const Number&);
 
-bool eql(const Number&, const Number&);
+bool eqv(const Number&, const Number&);
 
 void print(FILE*, const Number&);
 

@@ -37,10 +37,10 @@ Lisp_ptr eval_text(const char* s){
   return ret;
 }
 
-bool eql(Lisp_ptr a, Lisp_ptr b){
+bool eqv(Lisp_ptr a, Lisp_ptr b){
   Cons tmp3(b, Cons::NIL);
   Cons tmp2(a, Lisp_ptr(&tmp3));
-  Cons tmp1(Lisp_ptr(intern(VM.symtable, "eql")), Lisp_ptr(&tmp2));
+  Cons tmp1(Lisp_ptr(intern(VM.symtable, "eqv?")), Lisp_ptr(&tmp2));
 
   VM.code.push(Lisp_ptr(&tmp1));
   eval();

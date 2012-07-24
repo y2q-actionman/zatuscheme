@@ -147,12 +147,12 @@ void check(const string& input, const string& expect){
 
 inline
 bool operator==(const Number& n1, const Number& n2){
-  return eql(n1, n2);
+  return eqv(n1, n2);
 }
 
 inline
 bool operator!=(const Number& n1, const Number& n2){
-  return !eql(n1, n2);
+  return !eqv(n1, n2);
 }
 
 void check(FILE* f, const Number& n){

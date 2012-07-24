@@ -16,7 +16,7 @@ template<typename Fun>
 bool read_eval_print_test(const char* in, const char* expect, Fun&&);
 
 
-bool eql(Lisp_ptr, Lisp_ptr);
+bool eqv(Lisp_ptr, Lisp_ptr);
 
 #include "test_util.i.hh"
 

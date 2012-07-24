@@ -395,7 +395,7 @@ Number parse_number(FILE* f){
   }
 }
 
-bool eql(const Number& n, const Number& m){
+bool eqv(const Number& n, const Number& m){
   if(n.type() != m.type()) return false;
 
   switch(n.type()){

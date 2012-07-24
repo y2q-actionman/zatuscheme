@@ -169,6 +169,7 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() == Ptr_tag::boolean){
     return a.get<bool>() == b.get<bool>();
   }else if(a.tag() == Ptr_tag::character){
+     // this can be moved into eqv? in R5RS, but char is contained in Lisp_ptr.
     return a.get<char>() == b.get<char>();
   }else{
     return a.get<void*>() == b.get<void*>();
@@ -181,11 +182,11 @@ void eq(){
   VM.return_value = Lisp_ptr{eq_internal(args[0], args[1])};
 }
 
-void eql(){
+void eqv(){
   auto args = pick_args<2>();
 
   if(args[0].tag() == Ptr_tag::number && args[1].tag() == Ptr_tag::number){
-    VM.return_value = Lisp_ptr{eql(*args[0].get<Number*>(), *args[1].get<Number*>())};
+    VM.return_value = Lisp_ptr{eqv(*args[0].get<Number*>(), *args[1].get<Number*>())};
   }else{
     VM.return_value = Lisp_ptr{eq_internal(args[0], args[1])};
   }
@@ -302,10 +303,10 @@ constexpr struct Entry {
   {"port?", {
       type_check_pred<Ptr_tag::port>,
       Calling::function, {1, false}}},
-  {"eql", {
-      eql,
+  {"eqv?", {
+      eqv,
       Calling::function, {2, false}}},
-  {"eq", {
+  {"eq?", {
       eq,
       Calling::function, {2, false}}}
 };

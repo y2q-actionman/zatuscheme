@@ -23,7 +23,7 @@ void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
   }
 }
 
-bool read_eql(Lisp_ptr input, const char* expect_s){
+bool read_eqv(Lisp_ptr input, const char* expect_s){
   auto expect = read_from_string(expect_s);
   if(!expect){
     printf("reader error occured in expect!: %s\n", expect_s);
@@ -31,7 +31,7 @@ bool read_eql(Lisp_ptr input, const char* expect_s){
     return false;
   }
 
-  return eql(input, expect);
+  return eqv(input, expect);
 }
 
 bool print_equal(Lisp_ptr input, const char* expect_s){
@@ -56,15 +56,15 @@ int main(){
 
   // === self-evaluating ===
 
-  check(read_eql, "#t", "#t");
-  check(read_eql, "#f", "#f");
+  check(read_eqv, "#t", "#t");
+  check(read_eqv, "#f", "#f");
 
-  check(read_eql, "2", "2");
-  check(read_eql, "1.01", "1.01");
-  check(read_eql, "1.0-3.1i", "1.0-3.1i");
+  check(read_eqv, "2", "2");
+  check(read_eqv, "1.01", "1.01");
+  check(read_eqv, "1.0-3.1i", "1.0-3.1i");
 
-  check(read_eql, "#\\R", "#\\R");
-  check(read_eql, "#\\Newline", "#\\Newline");
+  check(read_eqv, "#\\R", "#\\R");
+  check(read_eqv, "#\\Newline", "#\\Newline");
 
   check(print_equal, "\"sss\"", "\"sss\"");
   check(print_equal, "\"\"", "\"\"");
@@ -72,7 +72,7 @@ int main(){
   check(print_equal, "#(1 2 3)", "#(1 2 3)");
   check(print_equal, "#(1 #(11 12 13) 3)", "#(1 #(11 12 13) 3)");
 
-  check(read_eql, "()", "()");
+  check(read_eqv, "()", "()");
 
   // function, port ??
 
@@ -82,13 +82,13 @@ int main(){
 
 
   // === function call ===
-  check(read_eql, "(+ 1 1)", "2");
+  check(read_eqv, "(+ 1 1)", "2");
 
 
   // === Special Operator ===
   // syntax: quote
   check(test_undef, "(quote)");
-  check(read_eql, "(quote 1)", "1");
+  check(read_eqv, "(quote 1)", "1");
   check(print_equal, "(quote (1 . 2))", "(1 . 2)");
   check(print_equal, "'(1 2 3)", "(1 2 3)");
 
@@ -97,29 +97,29 @@ int main(){
   // syntax: if
   check(test_undef, "(if)");
   check(test_undef, "(if 1)");
-  check(read_eql, "(if #t 1)", "1");
+  check(read_eqv, "(if #t 1)", "1");
   check(test_undef, "(if #f 1)");
-  check(read_eql, "(if #t 1 2)", "1");
-  check(read_eql, "(if #f 1 2)", "2");
+  check(read_eqv, "(if #t 1 2)", "1");
+  check(read_eqv, "(if #f 1 2)", "2");
   check(test_undef, "(if #f 1 2 3)");
 
   // syntax: define
-  check(read_eql, "(define x 1)", "1");
-  check(read_eql, "x", "1");
-  check(read_eql, "(+ x x)", "2");
+  check(read_eqv, "(define x 1)", "1");
+  check(read_eqv, "x", "1");
+  check(read_eqv, "(+ x x)", "2");
   //check(test_undef, "(define else 1)");
-  check(read_eql, "(define else_ 1)", "1");
-  check(read_eql, "else_", "1");
+  check(read_eqv, "(define else_ 1)", "1");
+  check(read_eqv, "else_", "1");
 
   // syntax: set!
-  check(read_eql, "(set! x 100)", "100");
-  check(read_eql, "x", "100");
+  check(read_eqv, "(set! x 100)", "100");
+  check(read_eqv, "x", "100");
 
   // syntax: begin
   check(test_undef, "(begin)");
-  check(read_eql, "(begin 1)", "1");
-  check(read_eql, "(begin 1 2)", "2");
-  check(read_eql, "(begin 1 2 3)", "3");
+  check(read_eqv, "(begin 1)", "1");
+  check(read_eqv, "(begin 1 2)", "2");
+  check(read_eqv, "(begin 1 2 3)", "3");
 
   // informal syntaxes
   //check(test_undef, "else");
