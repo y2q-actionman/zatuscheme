@@ -176,20 +176,22 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   }
 }
 
+bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
+  if(a.tag() == Ptr_tag::number && b.tag() == Ptr_tag::number){
+    return eqv(*a.get<Number*>(), *b.get<Number*>());
+  }else{
+    return eq_internal(a, b);
+  }
+}
+
 void eq(){
   auto args = pick_args<2>();
-  
   VM.return_value = Lisp_ptr{eq_internal(args[0], args[1])};
 }
 
 void eqv(){
   auto args = pick_args<2>();
-
-  if(args[0].tag() == Ptr_tag::number && args[1].tag() == Ptr_tag::number){
-    VM.return_value = Lisp_ptr{eqv(*args[0].get<Number*>(), *args[1].get<Number*>())};
-  }else{
-    VM.return_value = Lisp_ptr{eq_internal(args[0], args[1])};
-  }
+  VM.return_value = Lisp_ptr{eqv_internal(args[0], args[1])};
 }
 
 constexpr struct Entry {
