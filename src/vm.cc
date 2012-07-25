@@ -5,7 +5,7 @@
 VM_t VM;
 
 VM_t::VM_t() : symtable(), code(), stack(),
-               frame(new Cons(Lisp_ptr(new Env()), Cons::NIL)),
+               frame(make_cons_list({Lisp_ptr(new Env())})),
                frame_history_(){}
 
 Lisp_ptr VM_t::traverse(Symbol* s, Lisp_ptr p){

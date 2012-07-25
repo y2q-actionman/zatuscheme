@@ -102,7 +102,7 @@ Lisp_ptr read_abbrev(const char* name, FILE* f){
   Lisp_ptr first{intern(VM.symtable, name)};
   Lisp_ptr second{read(f)};
 
-  return Lisp_ptr{new Cons{first, Lisp_ptr{new Cons{second, Cons::NIL}}}};
+  return make_cons_list({first, second});
 }
 
 Lisp_ptr read_la(FILE* f, Token&& tok){
