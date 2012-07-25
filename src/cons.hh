@@ -1,6 +1,8 @@
 #ifndef CONS_HH
 #define CONS_HH
 
+#include <initializer_list>
+
 #include "lisp_ptr.hh"
 
 class Cons {
@@ -36,6 +38,8 @@ template<typename... Fun>
 int bind_cons_list(Lisp_ptr, Fun&&...);
 
 void free_cons_list(Lisp_ptr);
+
+Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr>);
 
 #include "cons.i.hh"
 

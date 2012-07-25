@@ -191,16 +191,12 @@ void whole_macro_case(){
   // TODO: collect this by garbage collector!
   auto key_sym = new Symbol(new string("case_key_symbol"));
 
-  auto binding = 
-    Lisp_ptr(new Cons(Lisp_ptr(key_sym),
-    Lisp_ptr(new Cons(key,
-                      Cons::NIL))));
-
   VM.return_value = 
-    Lisp_ptr(new Cons(Lisp_ptr(intern(VM.symtable, "let")),
-    Lisp_ptr(new Cons(Lisp_ptr(new Cons(binding, Cons::NIL)),
-    Lisp_ptr(new Cons(whole_macro_case_expand(key_sym, clauses),
-                      Cons::NIL))))));
+    make_cons_list({Lisp_ptr(intern(VM.symtable, "let")),
+          make_cons_list({
+              make_cons_list({Lisp_ptr(key_sym),key})
+                }),
+          whole_macro_case_expand(key_sym, clauses)});        
 
   print(stderr, VM.return_value);
 }
