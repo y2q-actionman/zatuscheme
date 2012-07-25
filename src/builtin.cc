@@ -163,6 +163,50 @@ void whole_macro_cond(){
   whole_macro_conditional(Lisp_ptr{}, whole_macro_cond_expand);
 }
 
+Lisp_ptr whole_macro_case_expand(Symbol*, Cons*){
+  return {};
+}
+
+void whole_macro_case(){
+  auto arg = pick_args_1();
+  if(!arg) return;
+
+  Lisp_ptr key;
+  Cons* clauses;
+
+  int len = bind_cons_list(arg,
+                           [](Cons*){},
+                           [&](Cons* c){
+                             key = c->car();
+                           },
+                           [&](Cons* c){
+                             clauses = c;
+                           });
+  if(len < 3){
+    fprintf(stderr, "macro case: invalid syntax! (no key found)\n");
+    VM.return_value = Lisp_ptr();
+    return;
+  }
+
+  // TODO: collect this by garbage collector!
+  auto key_sym = new Symbol(new string("case_key_symbol"));
+
+  auto binding = 
+    Lisp_ptr(new Cons(Lisp_ptr(key_sym),
+    Lisp_ptr(new Cons(key,
+                      Cons::NIL))));
+
+  VM.return_value = 
+    Lisp_ptr(new Cons(Lisp_ptr(intern(VM.symtable, "let")),
+    Lisp_ptr(new Cons(Lisp_ptr(new Cons(binding, Cons::NIL)),
+    Lisp_ptr(new Cons(whole_macro_case_expand(key_sym, clauses),
+                      Cons::NIL))))));
+
+  print(stderr, VM.return_value);
+}
+  
+
+
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
@@ -228,8 +272,8 @@ constexpr struct Entry {
       whole_macro_cond,
       Calling::whole_macro, {1, true}}},
   {"case", {
-      whole_function_unimplemented,
-      Calling::whole_function, {0, true}}},
+      whole_macro_case,
+      Calling::whole_macro, {2, true}}},
   {"and", {
       whole_macro_and,
       Calling::whole_macro, {0, true}}},

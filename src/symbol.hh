@@ -12,8 +12,7 @@ typedef std::unordered_map<std::string, Symbol> SymTable;
 // Symbol declarations.
 class Symbol{
 public:
-  friend Symbol* intern(SymTable&, const std::string&);
-  friend void unintern(SymTable&, Symbol*);
+  constexpr Symbol(const std::string* s) : name_(s){}
 
   Symbol(const Symbol&) = default;
   Symbol(Symbol&&) = default;
@@ -22,6 +21,9 @@ public:
 
   const std::string& name() const
   { return *name_ ; }
+
+  friend Symbol* intern(SymTable&, const std::string&);
+  friend void unintern(SymTable&, Symbol*);
 
 private:
   constexpr Symbol();
