@@ -61,10 +61,10 @@ Lisp_ptr whole_macro_or_expand(Cons* c){
   const auto if_sym = intern(VM.symtable, "if");
   auto else_clause = whole_macro_or_expand(c->cdr().get<Cons*>());
 
-  return Lisp_ptr(new Cons(Lisp_ptr(if_sym),
-         Lisp_ptr(new Cons(c->car(),
-         Lisp_ptr(new Cons(Lisp_ptr(vm_op_nop),
-         Lisp_ptr(new Cons(else_clause, Cons::NIL))))))));
+  return make_cons_list({Lisp_ptr(if_sym),
+        c->car(),
+        Lisp_ptr(vm_op_nop),
+        else_clause});
 }
 
 Lisp_ptr whole_macro_and_expand(Cons* c){
@@ -75,10 +75,10 @@ Lisp_ptr whole_macro_and_expand(Cons* c){
   const auto if_sym = intern(VM.symtable, "if");
   auto then_clause = whole_macro_and_expand(c->cdr().get<Cons*>());
 
-  return Lisp_ptr(new Cons(Lisp_ptr(if_sym),
-         Lisp_ptr(new Cons(c->car(),
-         Lisp_ptr(new Cons(then_clause,
-         Lisp_ptr(new Cons(Lisp_ptr(vm_op_nop), Cons::NIL))))))));
+  return make_cons_list({Lisp_ptr(if_sym),
+        c->car(),
+        then_clause,
+        Lisp_ptr(vm_op_nop)});
 }
 
 Lisp_ptr whole_macro_cond_expand(Cons* head){
@@ -124,10 +124,10 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
   const auto if_sym = intern(VM.symtable, "if");
   auto else_form = whole_macro_cond_expand(head->cdr().get<Cons*>());
 
-  return Lisp_ptr(new Cons(Lisp_ptr(if_sym),
-         Lisp_ptr(new Cons(test_form,
-         Lisp_ptr(new Cons(then_form,
-         Lisp_ptr(new Cons(else_form, Cons::NIL))))))));
+  return make_cons_list({Lisp_ptr(if_sym),
+        test_form,
+        then_form,
+        else_form});
 }
 
 template<typename T, typename Expander>
