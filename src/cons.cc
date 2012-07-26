@@ -49,3 +49,7 @@ Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
   c->rplacd(Cons::NIL);
   return Lisp_ptr(head);
 }
+
+Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
+  return Lisp_ptr(new Cons(p, q));
+}

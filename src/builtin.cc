@@ -110,7 +110,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
                                  return;
                                }
                              }
-                             then_form = Lisp_ptr(new Cons(Lisp_ptr(intern(VM.symtable, "begin")), Lisp_ptr(c)));
+                             then_form = push_cons_list(Lisp_ptr(intern(VM.symtable, "begin")), Lisp_ptr(c));
                            });
   assert(ret >= 1); // should be handled by previous tests.
   (void)ret;

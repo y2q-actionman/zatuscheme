@@ -763,8 +763,8 @@ static void let_internal(bool sequencial, bool early_bind){
                 }
                  
                 ++len;
-                syms = Lisp_ptr(new Cons(c->car(), syms));
-                vals = Lisp_ptr(new Cons(c->cdr().get<Cons*>()->car(), vals));
+                syms = push_cons_list(c->car(), syms);
+                vals = push_cons_list(c->cdr().get<Cons*>()->car(), vals);
                 return true;
               },
               [&](Lisp_ptr dot_cdr){
@@ -781,7 +781,7 @@ static void let_internal(bool sequencial, bool early_bind){
   VM.code.push(Lisp_ptr(new IProcedure(body, Calling::function,
                                          {len, false, syms, sequencial, early_bind},
                                          VM.frame)));
-  VM.stack.push(Lisp_ptr(new Cons({}, vals)));
+  VM.stack.push(push_cons_list({}, vals));
   VM.return_value = {};
 }
 

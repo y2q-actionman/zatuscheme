@@ -43,5 +43,5 @@ void VM_t::local_set(Symbol* s, Lisp_ptr p){
 }
 
 Lisp_ptr push_frame(Lisp_ptr l){
-  return Lisp_ptr(new Cons(Lisp_ptr(new Env), l));
+  return push_cons_list(Lisp_ptr(new Env), l);
 }
