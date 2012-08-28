@@ -2,6 +2,8 @@
 #define TEST_UTIL_HH
 
 #include <cstdio>
+#include <initializer_list>
+
 #include "lisp_ptr.hh"
 #include "vm.hh"
 
@@ -15,8 +17,9 @@ Lisp_ptr eval_text(const char*);
 template<typename Fun>
 bool read_eval_print_test(const char* in, const char* expect, Fun&&);
 
-
 bool eqv(Lisp_ptr, Lisp_ptr);
+
+Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args);
 
 #include "test_util.i.hh"
 

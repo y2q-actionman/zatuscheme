@@ -126,7 +126,7 @@ template<int i>
 std::array<Lisp_ptr, i> pick_args(){
   auto ret = std::array<Lisp_ptr, i>();
 
-  auto fillcnt = pick_args(ret.rbegin(), ret.rend());
+  auto fillcnt = pick_args(ret.begin(), ret.end());
   if(fillcnt < 0){
     ret.fill({});
   }

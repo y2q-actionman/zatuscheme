@@ -1,7 +1,10 @@
+#include <vector>
 #include "test_util.hh"
 #include "reader.hh"
 #include "eval.hh"
 #include "builtin.hh"
+
+using namespace std;
 
 Lisp_ptr read_from_string(const char* s){
   FILE* f = fmemopen((void*)s, strlen(s), "r");
@@ -38,13 +41,31 @@ Lisp_ptr eval_text(const char* s){
 }
 
 bool eqv(Lisp_ptr a, Lisp_ptr b){
-  Cons tmp3(b, Cons::NIL);
-  Cons tmp2(a, Lisp_ptr(&tmp3));
-  Cons tmp1(Lisp_ptr(intern(VM.symtable, "eqv?")), Lisp_ptr(&tmp2));
-
-  VM.code.push(Lisp_ptr(&tmp1));
-  eval();
-
-  return VM.return_value.get<bool>();
+  return zs_call("eqv?", {a, b}).get<bool>();
 }
   
+Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args){
+  vector<Cons> conses(args.size() + 1);
+
+  conses[0].rplaca(Lisp_ptr(intern(VM.symtable, funcname)));
+  conses[0].rplacd(Lisp_ptr(&conses[1]));
+
+  auto i = next(begin(conses)), e = end(conses);
+  auto args_i = begin(args), args_e = end(args);
+
+  for(; i != e && args_i != args_e; ++i, ++args_i){
+    i->rplaca(*args_i);
+
+    auto n = next(i);
+    if(n >= e){
+      i->rplacd(Cons::NIL);
+    }else{
+      i->rplacd(Lisp_ptr(&*next(i)));
+    }
+  }
+  assert(i == e && args_i == args_e);
+
+  VM.code.push(Lisp_ptr(conses.data()));
+  eval();
+  return VM.return_value;
+}

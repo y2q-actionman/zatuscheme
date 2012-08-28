@@ -234,6 +234,13 @@ void eqv(){
   VM.return_value = Lisp_ptr{eqv_internal(args[0], args[1])};
 }
 
+void eval_func(){
+  auto args = pick_args<2>();
+  
+  // TODO: uses arg2 as Env struct.
+  VM.code.push(args[0]);
+}
+
 constexpr struct Entry {
   const char* name;
   const NProcedure func;
@@ -350,6 +357,9 @@ constexpr struct Entry {
       Calling::function, {2, false}}},
   {"eq?", {
       eq,
+      Calling::function, {2, false}}},
+  {"eval", {
+      eval_func,
       Calling::function, {2, false}}}
 };
 
