@@ -71,6 +71,9 @@ int main(){
   //check("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
 
   check("(eval 1 ())", "1");
+  check("(eval (+ 1 3) ())", "4");
+  check("(eval '(+ 1 3) ())", "4");
+  check("(eval '(if (eqv? 1 2) \"same\" \"different\") ())", "\"different\"");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
