@@ -12,14 +12,8 @@
 
 using namespace std;
 
+static FILE* NULL_STREAM;
 static bool result;
-
-// for debugging..
-template<>
-inline
-Token::Type Token::get<Token::Type>() const{
-  return type_;
-}
 
 template<typename T>
 void check_copy_move(const Token& tok){
@@ -85,21 +79,39 @@ void fail_message(Token::Type t, FILE* f, const fpos_t* b_pos,
   result = false;
 }
 
-template<Token::Type type, typename Fun>
-void check_generic(FILE* f, const Fun& fun){
+
+// for error case
+template<>
+inline
+Token::Type Token::get<Token::Type>() const{
+  return type_;
+}
+
+void check(FILE* f){
+  static const auto type = Token::Type::uninitialized;
   fpos_t init_pos;
   fgetpos(f, &init_pos);
 
+  zs::err = NULL_STREAM;
   const Token tok = tokenize(f);
+  zs::err = stderr;
 
   if(tok.type() != type){
-    fail_message(type, f, &init_pos, tok, fun);
+    fail_message(type, f, &init_pos, tok, [](){});
     return;
   }
   
   check_copy_move<Token::Type>(tok);
 }
 
+void check(const string& input){
+  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  check(f);
+  fclose(f);
+}
+
+
+// for normal cases
 template<Token::Type type, typename Fun, 
          typename ex_type = decltype(to_type<type>())>
 void check_generic(FILE* f, const ex_type& expect,
@@ -117,18 +129,6 @@ void check_generic(FILE* f, const ex_type& expect,
   check_copy_move<ex_type>(tok);
 }
 
-
-void check(FILE* f){
-  check_generic<Token::Type::uninitialized>
-    (f, [](){});
-}
-
-void check(const string& input){
-  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
-  check(f);
-  fclose(f);
-}
-
 template<Token::Type T>
 void check(FILE* f, const string& expect){
   check_generic<T>
@@ -144,6 +144,9 @@ void check(const string& input, const string& expect){
   check<T>(f, expect);
   fclose(f);
 }
+
+#define check_ident check<Token::Type::identifier>
+#define check_string check<Token::Type::string>
 
 inline
 bool operator==(const Number& n1, const Number& n2){
@@ -198,12 +201,12 @@ void check(const string& input, T&& expect){
 }
 
 
-#define check_ident check<Token::Type::identifier>
-#define check_string check<Token::Type::string>
 #define N Token::Notation
 
 int main(){
   result = true;
+  NULL_STREAM = fopen("/dev/null", "w+b");
+  if(!NULL_STREAM) NULL_STREAM = tmpfile();
 
   // identifier
   check_ident("lambda", "lambda");
