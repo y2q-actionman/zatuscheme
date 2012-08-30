@@ -223,7 +223,7 @@ Token tokenize_character(FILE* f){
   // check character name
   switch(ret_char){
   case EOF:
-    fprintf(stderr, "reader error: not ended char name!\n");
+    fprintf(zs::err, "reader error: not ended char name!\n");
     return {};
   case 's':
     if(check_name("pace")){
@@ -254,7 +254,7 @@ Token tokenize_string(FILE* f){
         s.push_back(c);
         break;
       default:
-        fprintf(stderr, "reader error: unknown string escape '%c' appeared.\n", c);
+        fprintf(zs::err, "reader error: unknown string escape '%c' appeared.\n", c);
         return {};
       }
       break;
@@ -263,14 +263,14 @@ Token tokenize_string(FILE* f){
     }
   }
 
-  fprintf(stderr, "reader error: not ended string!\n");
+  fprintf(zs::err, "reader error: not ended string!\n");
   return {};
 }
 
 Token tokenize_number(FILE* f, char read_c = 0){
   if(read_c){
     if(ungetc(read_c, f) == EOF){
-      fprintf(stderr, "reader internal error: fatal I/O error occured. (reached unreading limit)\n");
+      fprintf(zs::err, "reader internal error: fatal I/O error occured. (reached unreading limit)\n");
       return {};
     }
   }
@@ -331,7 +331,7 @@ Token tokenize(FILE* f){
     case 3:
       return Token{"...", Token::Type::identifier};
     default:
-      fprintf(stderr, "reader error: %d dots appeared.\n", dots);
+      fprintf(zs::err, "reader error: %d dots appeared.\n", dots);
       return {};
     }
   }
@@ -366,7 +366,7 @@ Token tokenize(FILE* f){
       ungetc(sharp_c, f);
       return tokenize_number(f, '#');
     default:
-      fprintf(stderr, "reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
+      fprintf(zs::err, "reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
       return {};
     }
 
@@ -377,7 +377,7 @@ Token tokenize(FILE* f){
       ungetc(c, f);
       return tokenize_number(f);
     }else{
-      fprintf(stderr, "reader error: invalid char '%c' appeared.\n", c);
+      fprintf(zs::err, "reader error: invalid char '%c' appeared.\n", c);
       return {};
     }
   }

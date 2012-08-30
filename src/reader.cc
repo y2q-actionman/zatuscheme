@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <utility>
+
 #include "reader.hh"
+#include "util.hh"
 #include "lisp_ptr.hh"
 #include "token.hh"
 #include "number.hh"
@@ -23,7 +25,8 @@ Lisp_ptr read_list(FILE* f){
     auto n = t.get<Token::Notation>();
     if(n == Token::Notation::r_paren){ // empty list
       return Cons::NIL;
-    }else if(n == Token::Notation::dot){ // error: dotted list has no car.
+    }else if(n == Token::Notation::dot){
+      fprintf(zs::err, "reader error: dotted list has no car.\n");
       return {};
     }
   }
@@ -56,7 +59,8 @@ Lisp_ptr read_list(FILE* f){
         t = tokenize(f);
         if(t.type() != Token::Type::notation
            || t.get<Token::Notation>() != Token::Notation::r_paren){
-          return Lisp_ptr{}; // error: dotted list has two or more cdrs.
+          fprintf(zs::err, "reader error: dotted list has two or more cdrs.\n");
+          return Lisp_ptr{};
         }
         goto end;
       }
@@ -148,28 +152,28 @@ Lisp_ptr read_la(FILE* f, Token&& tok){
       
     case Token::Notation::l_bracket:
     case Token::Notation::l_brace:
-      fprintf(stderr, "reader error: not supported notation! (type=%s)\n",
+      fprintf(zs::err, "reader error: not supported notation! (type=%s)\n",
               stringify(n));
       return Lisp_ptr{};
 
     case Token::Notation::r_paren:
     case Token::Notation::r_bracket:
     case Token::Notation::r_brace:
-      fprintf(stderr, "reader error: closing notation appeared alone! (type=%s)\n",
+      fprintf(zs::err, "reader error: closing notation appeared alone! (type=%s)\n",
               stringify(n));
       return Lisp_ptr{};
 
     case Token::Notation::dot:
     case Token::Notation::bar:
     default:
-      fprintf(stderr, "reader error: unexpected notation was passed! (type=%s)\n",
+      fprintf(zs::err, "reader error: unexpected notation was passed! (type=%s)\n",
               stringify(n));
       return Lisp_ptr{};
     }
 
   case Token::Type::uninitialized:
   default:
-    fprintf(stderr, "reader error: unknown token was passed! (type=%s)\n",
+    fprintf(zs::err, "reader error: unknown token was passed! (type=%s)\n",
             stringify(tok.type()));
     return Lisp_ptr{};
   }

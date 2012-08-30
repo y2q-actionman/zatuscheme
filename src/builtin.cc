@@ -1,6 +1,7 @@
 #include <array>
 
 #include "builtin.hh"
+#include "util.hh"
 #include "number.hh"
 #include "procedure.hh"
 #include "lisp_ptr.hh"
@@ -20,14 +21,14 @@ void plus_2(){
 
   Number* n1 = args[0].get<Number*>();
   if(!n1){
-    fprintf(stderr, "native func '+': first arg is not number! %s\n",
+    fprintf(zs::err, "native func '+': first arg is not number! %s\n",
             stringify(args[0].tag()));
     return;
   }
 
   Number* n2 = args[1].get<Number*>();
   if(!n2){
-    fprintf(stderr, "native func '+': second arg is not number! %s\n",
+    fprintf(zs::err, "native func '+': second arg is not number! %s\n",
             stringify(args[1].tag()));
     return;
   }
@@ -86,9 +87,9 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
 
   auto clause = head->car();
   if(!clause.get<Cons*>()){
-    fprintf(stderr, "macro cond: informal clause syntax! '");
-    print(stderr, head->car());
-    fprintf(stderr, "'\n");
+    fprintf(zs::err, "macro cond: informal clause syntax! '");
+    print(zs::err, head->car());
+    fprintf(zs::err, "'\n");
     return {};
   }
 
@@ -105,7 +106,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
                            [&](Cons* c){
                              if(auto sym = c->car().get<Symbol*>()){
                                if(sym->name() == "=>"){
-                                 fprintf(stderr, "macto cond: sorry, cond's => syntax is not implemented..\n");
+                                 fprintf(zs::err, "macto cond: sorry, cond's => syntax is not implemented..\n");
                                  then_form = {};
                                  return;
                                }
@@ -183,7 +184,7 @@ void whole_macro_case(){
                              clauses = c;
                            });
   if(len < 3){
-    fprintf(stderr, "macro case: invalid syntax! (no key found)\n");
+    fprintf(zs::err, "macro case: invalid syntax! (no key found)\n");
     VM.return_value = Lisp_ptr();
     return;
   }

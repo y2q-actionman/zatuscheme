@@ -10,6 +10,7 @@
 #include <array>
 #include <cstdio>
 
+#include "util.hh"
 #include "lisp_ptr.hh"
 #include "cons.hh"
 #include "vm.hh"
@@ -73,7 +74,7 @@ int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
           },
           [&](Lisp_ptr last_cdr){
             if(!nullp(last_cdr)){
-              fprintf(stderr, "eval warning: dot list has read as proper list. (in %s)\n",
+              fprintf(zs::err, "eval warning: dot list has read as proper list. (in %s)\n",
                       opname);
               tmp.push(last_cdr);
             }
@@ -94,7 +95,7 @@ namespace pick_args_detail {
 
 inline
 int fail(){
-  fprintf(stderr, "eval error: stack corruption.\n");
+  fprintf(zs::err, "eval error: stack corruption.\n");
   return -1;
 }
 

@@ -76,7 +76,7 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
                 if(sequencial){
                   auto c = bind_list.get<Cons*>();
                   if(!c){
-                    fprintf(stderr, "funcall internal error: sequencial calling cannot be variadic in this implementasion.\n");
+                    fprintf(zs::err, "funcall internal error: sequencial calling cannot be variadic in this implementasion.\n");
                     return false;
                   }
 
@@ -94,13 +94,13 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
               },
               [&](Lisp_ptr dot_cdr) -> bool{
                 if(!nullp(dot_cdr)){
-                  fprintf(stderr, "funcall error: argument binding failed.\n");
+                  fprintf(zs::err, "funcall error: argument binding failed.\n");
                   return false;
                 }
               
                 if((argc < argi->required_args)
                    || (!argi->variadic && argc > argi->required_args)){
-                  fprintf(stderr, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
+                  fprintf(zs::err, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
                           argi->required_args,
                           (argi->variadic) ? "variadic" : "not variadic",
                           argc);
@@ -142,7 +142,7 @@ void macro_call(Lisp_ptr proc, const ArgInfo* argi){
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack);
   if(argc < argi->required_args
      || (!argi->variadic && argc > argi->required_args)){
-    fprintf(stderr, "macro-call error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
+    fprintf(zs::err, "macro-call error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
             argi->required_args,
             (argi->variadic) ? "variadic" : "not variadic",
             argc);
@@ -205,9 +205,9 @@ void vm_op_call(){
     c = nfun->calling();
     argi = &nfun->arg_info();
   }else{
-    fprintf(stderr, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
+    fprintf(zs::err, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
             stringify(proc.tag()));
-    fprintf(stderr, "      expr: "); print(stderr, VM.stack.top()); fputc('\n', stderr);
+    fprintf(zs::err, "      expr: "); print(zs::err, VM.stack.top()); fputc('\n', zs::err);
     
     VM.return_value = {};
     VM.stack.pop();
@@ -249,7 +249,7 @@ void proc_enter_native(const NProcedure* fun){
 
   native_func();
   // if(!VM.return_value())
-  //   fprintf(stderr, "eval warning: native func returned undef!\n");
+  //   fprintf(zs::err, "eval warning: native func returned undef!\n");
 }
 
 /*
@@ -282,7 +282,7 @@ void proc_enter_interpreted(IProcedure* fun){
   while((st_top = VM.stack.top()).tag() != Ptr_tag::vm_op){
     VM.stack.pop();
     if(VM.stack.empty()){
-      fprintf(stderr, "eval internal error: no args and no managed funcall!\n");
+      fprintf(zs::err, "eval internal error: no args and no managed funcall!\n");
       VM.return_value = {};
       return;
     }
@@ -298,7 +298,7 @@ void proc_enter_interpreted(IProcedure* fun){
 
   if(argi.variadic){   // variadic arg push
     if(!arg_name.get<Symbol*>()){
-      fprintf(stderr, "eval error: no arg name for variadic arg!\n");
+      fprintf(zs::err, "eval error: no arg name for variadic arg!\n");
       VM.return_value = {};
       return;
     }
@@ -308,7 +308,7 @@ void proc_enter_interpreted(IProcedure* fun){
   }else{  // clean stack
     if(VM.stack.empty()
        || VM.stack.top().tag() != Ptr_tag::vm_op){
-      fprintf(stderr, "eval error: corrupted stack -- no bottom found!\n");
+      fprintf(zs::err, "eval error: corrupted stack -- no bottom found!\n");
       VM.return_value = {};
       return;
     }
@@ -336,7 +336,7 @@ void vm_op_proc_enter(){
   }else if(auto nfun = proc.get<const NProcedure*>()){
     proc_enter_native(nfun);
   }else{
-    fprintf(stderr, "eval internal error: corrupted code stack -- no proc found in entering!\n");
+    fprintf(zs::err, "eval internal error: corrupted code stack -- no proc found in entering!\n");
     VM.return_value = {};
     return;
   }
@@ -372,7 +372,7 @@ void vm_op_set(){
   auto var = VM.stack.top().get<Symbol*>();
   VM.stack.pop();
   if(!var){
-    fprintf(stderr, "eval error: internal error occured (set!'s varname is dismissed)\n");
+    fprintf(zs::err, "eval error: internal error occured (set!'s varname is dismissed)\n");
     return;
   }
 
@@ -389,7 +389,7 @@ void vm_op_local_set(){
   auto var = VM.stack.top().get<Symbol*>();
   VM.stack.pop();
   if(!var){
-    fprintf(stderr, "eval error: internal error occured (set!'s varname is dismissed)\n");
+    fprintf(zs::err, "eval error: internal error occured (set!'s varname is dismissed)\n");
     return;
   }
 
@@ -416,19 +416,19 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
                    });
 
   if(!var){
-    fprintf(stderr, "eval error: variable's name is not a symbol!\n");
+    fprintf(zs::err, "eval error: variable's name is not a symbol!\n");
     VM.return_value = {};
     return;
   }
 
   if(!val){
-    fprintf(stderr, "eval error: no value is supplied for %s\n", opname);
+    fprintf(zs::err, "eval error: no value is supplied for %s\n", opname);
     VM.return_value = {};
     return;
   }
 
   if(len > 2){
-    fprintf(stderr, "eval error: informal %s expr! (more than %d exprs)\n", opname, len);
+    fprintf(zs::err, "eval error: informal %s expr! (more than %d exprs)\n", opname, len);
     VM.return_value = {};
     return;
   }
@@ -505,7 +505,7 @@ void vm_op_quasiquote(){
         VM.code.push(rest);
         return;
       }else if(first_sym == unquote_splicing_sym){
-        fprintf(stderr, "eval error: unquote-splicing is not supported out of list");
+        fprintf(zs::err, "eval error: unquote-splicing is not supported out of list");
         VM.return_value = {};
         return;
       }
@@ -542,7 +542,7 @@ void error_whole_function(const char* msg){
 
   assert(sym);
 
-  fprintf(stderr, "eval error: '%s' -- %s\n",
+  fprintf(zs::err, "eval error: '%s' -- %s\n",
           sym->name().c_str(), msg);
   VM.return_value = {};
 }
@@ -573,11 +573,11 @@ void whole_function_quote(){
                    val = c->car();
                  },
                  [](Cons*){
-                   fprintf(stderr, "eval warning: quote has two or more args. ignored.\n");
+                   fprintf(zs::err, "eval warning: quote has two or more args. ignored.\n");
                  });
 
   if(!val){
-    fprintf(stderr, "eval error: quote has no args.\n");
+    fprintf(zs::err, "eval error: quote has no args.\n");
     VM.return_value = {};
     return;
   }
@@ -590,11 +590,11 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   auto arg_info = parse_func_arg(args);
 
   if(!arg_info){
-    fprintf(stderr, "eval error: lambda has invalid args!\n");
+    fprintf(zs::err, "eval error: lambda has invalid args!\n");
     return {};
   }
   if(!code){
-    fprintf(stderr, "eval error: lambda has invalid body!\n");
+    fprintf(zs::err, "eval error: lambda has invalid body!\n");
     return {};
   }
   
@@ -638,11 +638,11 @@ void whole_function_if(){
                  });
 
   if(len < 3){
-    fprintf(stderr, "eval error: informal if expr! (only %d exprs)\n", len);
+    fprintf(zs::err, "eval error: informal if expr! (only %d exprs)\n", len);
     VM.return_value = {};
     return;
   }else if(len > 4){
-    fprintf(stderr, "eval error: informal if expr! (more than %d exprs)\n", len);
+    fprintf(zs::err, "eval error: informal if expr! (more than %d exprs)\n", len);
     VM.return_value = {};
     return;
   }
@@ -685,7 +685,7 @@ void whole_function_define(){
                    });
 
     if(!var){
-      fprintf(stderr, "eval error: function's name is not a symbol!\n");
+      fprintf(zs::err, "eval error: function's name is not a symbol!\n");
       VM.return_value = {};
       return;
     }
@@ -696,7 +696,7 @@ void whole_function_define(){
     VM.local_set(var, value);
     VM.return_value = value;
   }else{
-    fprintf(stderr, "eval error: informal define syntax!\n");
+    fprintf(zs::err, "eval error: informal define syntax!\n");
   }
 }
 
@@ -706,7 +706,7 @@ void whole_function_begin(){
 
   auto exprs = wargs.get<Cons*>()->cdr();
   if(!exprs || nullp(exprs)){
-    fprintf(stderr, "eval error: begin has no exprs.\n");
+    fprintf(zs::err, "eval error: begin has no exprs.\n");
     VM.return_value = {};
     return;
   }
@@ -739,7 +739,7 @@ static void let_internal(bool sequencial, bool early_bind){
                  });
 
   if(body.tag() != Ptr_tag::cons || nullp(body)){
-    fprintf(stderr, "eval error: informal syntax for LET's body!.\n");
+    fprintf(zs::err, "eval error: informal syntax for LET's body!.\n");
     VM.return_value = {};
     return;
   }
@@ -751,14 +751,14 @@ static void let_internal(bool sequencial, bool early_bind){
               [&](Cons* cell) -> bool{
                 auto bind = cell->car();
                 if(bind.tag() != Ptr_tag::cons){
-                  fprintf(stderr, "eval error: informal object (%s) found in let binding.\n",
+                  fprintf(zs::err, "eval error: informal object (%s) found in let binding.\n",
                           stringify(bind.tag()));
                   return false;
                 }
 
                 auto c = bind.get<Cons*>();
                 if(!c){
-                  fprintf(stderr, "eval error: null found in let binding.\n");
+                  fprintf(zs::err, "eval error: null found in let binding.\n");
                   return false;
                 }
                  
@@ -770,7 +770,7 @@ static void let_internal(bool sequencial, bool early_bind){
               [&](Lisp_ptr dot_cdr){
                 return nullp(dot_cdr);
               })){
-    fprintf(stderr, "eval error: let binding was failed!\n");
+    fprintf(zs::err, "eval error: let binding was failed!\n");
     free_cons_list(syms);
     free_cons_list(vals);
     VM.return_value = {};
@@ -805,7 +805,7 @@ void eval(){
 
     switch(p.tag()){
     case Ptr_tag::undefined:
-      fprintf(stderr, "eval error: undefined is passed!\n");
+      fprintf(zs::err, "eval error: undefined is passed!\n");
       VM.return_value = {};
       break;
 
@@ -844,7 +844,7 @@ void eval(){
   }
 
   if(!VM.stack.empty()){
-    fprintf(stderr, "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n");
+    fprintf(zs::err, "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n");
     do{
       VM.stack.pop();
     }while(!VM.stack.empty());

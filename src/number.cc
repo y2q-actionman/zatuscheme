@@ -2,6 +2,7 @@
 #include <cstdlib>
 
 #include "number.hh"
+#include "util.hh"
 
 using namespace std;
 
@@ -100,7 +101,7 @@ PrefixValue parse_number_prefix(FILE* f){
         : 16;
       break;
     default:
-      fprintf(stderr, "reader error: unknown number prefix '%c' appeared!\n", c);
+      fprintf(zs::err, "reader error: unknown number prefix '%c' appeared!\n", c);
       return {};
     }
   }  

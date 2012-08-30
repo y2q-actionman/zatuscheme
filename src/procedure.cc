@@ -1,5 +1,6 @@
 #include "procedure.hh"
 #include "cons.hh"
+#include "util.hh"
 
 using namespace Procedure;
 
@@ -20,7 +21,7 @@ ArgInfo parse_func_arg(Lisp_ptr args){
               return {argc, false, args};
             }else{
               if(last.tag() != Ptr_tag::symbol){
-                fprintf(stderr, "eval error: informal lambda list! (including non-symbol)\n");
+                fprintf(zs::err, "eval error: informal lambda list! (including non-symbol)\n");
                 return {};
               }
               return {argc, true, args};
