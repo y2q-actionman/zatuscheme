@@ -68,7 +68,8 @@ int main(){
   check("(cond ((eqv? 1 2) xxx) ((eqv? 2 3) yyy) (else 3))", "3");
   check("(cond ((eqv? 1 2)) ((eqv? 2 3) fuga) ((+ 5 7)))", "12");
 
-  //check("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
+  check("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
+  check("(case a ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
 
   check("(eval 1 ())", "1");
   check("(eval (+ 1 3) ())", "4");

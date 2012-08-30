@@ -164,24 +164,76 @@ void whole_macro_cond(){
   whole_macro_conditional(Lisp_ptr{}, whole_macro_cond_expand);
 }
 
-Lisp_ptr whole_macro_case_expand(Symbol*, Cons*){
-  return {};
+Lisp_ptr whole_macro_case_keys_expand(Symbol* sym, Cons* keys){
+  const auto eqv_sym = intern(VM.symtable, "eqv?");
+  auto eqv_expr = make_cons_list({Lisp_ptr(eqv_sym), Lisp_ptr(sym), keys->car()});
+
+  if(!keys->cdr() || nullp(keys->cdr())){
+    return eqv_expr;
+  }
+
+  const auto if_sym = intern(VM.symtable, "if");
+  auto else_clause = whole_macro_case_keys_expand(sym, keys->cdr().get<Cons*>());
+
+  return make_cons_list({Lisp_ptr(if_sym),
+        eqv_expr,
+        Lisp_ptr(true),
+        else_clause});
+}
+
+Lisp_ptr whole_macro_case_expand(Symbol* sym, Lisp_ptr cases_ptr){
+  if(cases_ptr.tag() != Ptr_tag::cons){
+    fprintf(zs::err, "macro case: informal case syntax (dot-list?): ");
+    print(zs::err, cases_ptr);
+    fputc('\n', zs::err);
+    return {};
+  }
+
+  auto cases = cases_ptr.get<Cons*>();
+  if(!cases)
+    return Cons::NIL;
+
+  auto clause = cases->car().get<Cons*>();
+  if(!clause){
+    fprintf(zs::err, "macro case: informal clause contained: ");
+    print(zs::err, cases->car());
+    fputc('\n', zs::err);
+    return {};
+  }
+
+  auto keys_ptr = clause->car();
+  Symbol* keys_sym;
+  Lisp_ptr new_keys;
+
+  if(auto keys_lst = keys_ptr.get<Cons*>()){
+    new_keys = whole_macro_case_keys_expand(sym, keys_lst);
+  }else if((keys_sym = keys_ptr.get<Symbol*>())
+           && keys_sym->name() == "else"){
+    new_keys = keys_ptr;
+  }else{
+    fprintf(zs::err, "macro case: informal clause key: ");
+    print(zs::err, keys_ptr);
+    fputc('\n', zs::err);
+    return {};
+  }
+
+  auto new_clause = new Cons(new_keys, clause->cdr());
+
+  return Lisp_ptr(new Cons(Lisp_ptr(new_clause),
+                           whole_macro_case_expand(sym, cases->cdr())));
 }
 
 void whole_macro_case(){
   auto arg = pick_args_1();
   if(!arg) return;
 
-  Lisp_ptr key;
-  Cons* clauses;
+  Lisp_ptr key, clauses;
 
   int len = bind_cons_list(arg,
                            [](Cons*){},
                            [&](Cons* c){
                              key = c->car();
-                           },
-                           [&](Cons* c){
-                             clauses = c;
+                             clauses = c->cdr();
                            });
   if(len < 3){
     fprintf(zs::err, "macro case: invalid syntax! (no key found)\n");
@@ -197,9 +249,9 @@ void whole_macro_case(){
           make_cons_list({
               make_cons_list({Lisp_ptr(key_sym),key})
                 }),
-          whole_macro_case_expand(key_sym, clauses)});        
-
-  print(stderr, VM.return_value);
+          Lisp_ptr(new Cons(Lisp_ptr(intern(VM.symtable, "cond")),
+                            whole_macro_case_expand(key_sym, clauses)))
+          });
 }
   
 
