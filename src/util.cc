@@ -5,6 +5,12 @@
 
 using namespace std;
 
+namespace zs{
+  FILE* in = stdin;
+  FILE* out = stdout;
+  FILE* err = stderr;
+}
+
 void
 unexp_default(const char* f, int l){
   fprintf(stderr, "unexpected default case! (file=%s, line=%d)\n", f, l);
