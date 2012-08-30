@@ -477,16 +477,3 @@ const char* stringify(Number::Type t){
     return "(unknown number type)";
   }
 }
-
-void describe(FILE* f, Number::Type t){
-  fputs(stringify(t), f);
-}
-
-void describe(FILE* f, const Number& n){
-  const auto t = n.type();
-
-  fprintf(f, "Number: %s(", stringify(t));
-  print(f, n);
-  fputc(')', f);
-}
-

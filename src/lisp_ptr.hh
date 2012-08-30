@@ -85,8 +85,6 @@ typedef void(*VMop)();
 
 const char* stringify(Ptr_tag);
 
-void describe(FILE*, Lisp_ptr);
-
 #include "lisp_ptr.i.hh"
 
 #endif // LISP_PTR_HH

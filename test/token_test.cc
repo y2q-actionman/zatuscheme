@@ -7,6 +7,7 @@
 #include <cstring>
 
 #include "token.hh"
+#include "describe.hh"
 
 #define PRINT_BUFSIZE 100
 

@@ -43,10 +43,3 @@ const char* stringify(Calling c){
     return "(unknown calling type)";
   }
 }
-
-void describe(FILE* f, const ArgInfo& argi){
-  fprintf(f, "[code=");
-  describe(f, argi.head);
-  fprintf(f, ", required_args=%d, variadic=%d]",
-          argi.required_args, argi.variadic);
-}

@@ -3,6 +3,7 @@
 
 #include "zs.hh"
 #include "test_util.hh"
+#include "describe.hh"
 
 using namespace Procedure;
 

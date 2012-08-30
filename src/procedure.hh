@@ -106,8 +106,6 @@ Procedure::ArgInfo parse_func_arg(Lisp_ptr);
 
 const char* stringify(Procedure::Calling);
 
-void describe(FILE*, const Procedure::ArgInfo&);
-
 #include "procedure.i.hh"
 
 #endif //PROCEDURE_HH

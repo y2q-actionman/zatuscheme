@@ -32,7 +32,3 @@ const char* stringify(Ptr_tag p){
     return "(unknown PTR type)";
   }
 }
-
-void describe(FILE* f, Lisp_ptr p){
-  fprintf(f, "[%s] %p", stringify(p.tag()), p.get<void*>());
-}

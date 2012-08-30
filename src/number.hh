@@ -69,9 +69,6 @@ void print(FILE*, const Number&);
 
 const char* stringify(Number::Type);
 
-void describe(FILE*, Number::Type);
-void describe(FILE*, const Number&);
-
 #include "number.i.hh"
 
 #endif //NUMBER_HH

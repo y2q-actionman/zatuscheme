@@ -17,10 +17,6 @@ enum_type to_tag();
 
 
 // provided by overload
-//   template<typename T>
-//   void describe(FILE*, T);
-
-// provided by overload
 //   template<typename Enum_type>
 //   const char* stringify(Ennum_type);
 
