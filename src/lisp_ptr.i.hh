@@ -124,10 +124,21 @@ Ptr_tag to_tag<Ptr_tag, VMop>(){
 
 // ptr class definitions
 
+inline constexpr
+Lisp_ptr::Lisp_ptr(bool b)
+  : tag_(to_tag<Ptr_tag, bool>()), u_(b){}
+
+inline constexpr
+Lisp_ptr::Lisp_ptr(char c)
+  : tag_(to_tag<Ptr_tag, char>()), u_(c){}
+
 template<typename T>
 inline constexpr
 Lisp_ptr::Lisp_ptr(T p)
-  : tag_(to_tag<Ptr_tag, T>()), u_(p){}
+  : tag_(to_tag<Ptr_tag, T>()), u_(p){
+  static_assert(!std::is_fundamental<T>::value,
+                "Lisp_ptr cannot accept the specified type.");
+}
 
 
 template<>

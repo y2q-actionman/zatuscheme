@@ -26,8 +26,10 @@ enum class Ptr_tag {
 class Lisp_ptr {
 public:
   constexpr Lisp_ptr() : tag_(Ptr_tag::undefined), u_(){}
-  template<typename T>
-  explicit constexpr Lisp_ptr(T);
+  explicit constexpr Lisp_ptr(bool); // fundamental types are 'explicit'
+  explicit constexpr Lisp_ptr(char);
+  template<typename T> constexpr Lisp_ptr(T); // non-fundamental type
+
   Lisp_ptr(const Lisp_ptr&) = default;
   Lisp_ptr(Lisp_ptr&&) = default;
 
