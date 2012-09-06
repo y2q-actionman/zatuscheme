@@ -34,7 +34,7 @@ void plus_2(){
   }
 
   Number* newn = new Number(n1->get<long>() + n2->get<long>());
-  VM.return_value = Lisp_ptr(newn);
+  VM.return_value = newn;
 }
 
 template <Ptr_tag p>
@@ -62,9 +62,9 @@ Lisp_ptr whole_macro_or_expand(Cons* c){
   const auto if_sym = intern(VM.symtable, "if");
   auto else_clause = whole_macro_or_expand(c->cdr().get<Cons*>());
 
-  return make_cons_list({Lisp_ptr(if_sym),
+  return make_cons_list({if_sym,
         c->car(),
-        Lisp_ptr(vm_op_nop),
+        vm_op_nop,
         else_clause});
 }
 
@@ -76,10 +76,10 @@ Lisp_ptr whole_macro_and_expand(Cons* c){
   const auto if_sym = intern(VM.symtable, "if");
   auto then_clause = whole_macro_and_expand(c->cdr().get<Cons*>());
 
-  return make_cons_list({Lisp_ptr(if_sym),
+  return make_cons_list({if_sym,
         c->car(),
         then_clause,
-        Lisp_ptr(vm_op_nop)});
+        vm_op_nop});
 }
 
 Lisp_ptr whole_macro_cond_expand(Cons* head){
@@ -100,7 +100,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
                            [&](Cons* c){
                              test_form = c->car();
                              if(nullp(c->cdr())){
-                               then_form = Lisp_ptr(vm_op_nop);
+                               then_form = vm_op_nop;
                              }
                            },
                            [&](Cons* c){
@@ -111,7 +111,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
                                  return;
                                }
                              }
-                             then_form = push_cons_list(Lisp_ptr(intern(VM.symtable, "begin")), Lisp_ptr(c));
+                             then_form = push_cons_list(intern(VM.symtable, "begin"), c);
                            });
   assert(ret >= 1); // should be handled by previous tests.
   (void)ret;
@@ -125,7 +125,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
   const auto if_sym = intern(VM.symtable, "if");
   auto else_form = whole_macro_cond_expand(head->cdr().get<Cons*>());
 
-  return make_cons_list({Lisp_ptr(if_sym),
+  return make_cons_list({if_sym,
         test_form,
         then_form,
         else_form});
@@ -166,7 +166,7 @@ void whole_macro_cond(){
 
 Lisp_ptr whole_macro_case_keys_expand(Symbol* sym, Cons* keys){
   const auto eqv_sym = intern(VM.symtable, "eqv?");
-  auto eqv_expr = make_cons_list({Lisp_ptr(eqv_sym), Lisp_ptr(sym), keys->car()});
+  auto eqv_expr = make_cons_list({eqv_sym, sym, keys->car()});
 
   if(!keys->cdr() || nullp(keys->cdr())){
     return eqv_expr;
@@ -175,7 +175,7 @@ Lisp_ptr whole_macro_case_keys_expand(Symbol* sym, Cons* keys){
   const auto if_sym = intern(VM.symtable, "if");
   auto else_clause = whole_macro_case_keys_expand(sym, keys->cdr().get<Cons*>());
 
-  return make_cons_list({Lisp_ptr(if_sym),
+  return make_cons_list({if_sym,
         eqv_expr,
         Lisp_ptr(true),
         else_clause});
@@ -219,8 +219,8 @@ Lisp_ptr whole_macro_case_expand(Symbol* sym, Lisp_ptr cases_ptr){
 
   auto new_clause = new Cons(new_keys, clause->cdr());
 
-  return Lisp_ptr(new Cons(Lisp_ptr(new_clause),
-                           whole_macro_case_expand(sym, cases->cdr())));
+  return {new Cons(new_clause,
+                   whole_macro_case_expand(sym, cases->cdr()))};
 }
 
 void whole_macro_case(){
@@ -245,12 +245,12 @@ void whole_macro_case(){
   auto key_sym = new Symbol(new string("case_key_symbol"));
 
   VM.return_value = 
-    make_cons_list({Lisp_ptr(intern(VM.symtable, "let")),
+    make_cons_list({intern(VM.symtable, "let"),
           make_cons_list({
-              make_cons_list({Lisp_ptr(key_sym),key})
+              make_cons_list({key_sym, key})
                 }),
-          Lisp_ptr(new Cons(Lisp_ptr(intern(VM.symtable, "cond")),
-                            whole_macro_case_expand(key_sym, clauses)))
+          new Cons(intern(VM.symtable, "cond"),
+                   whole_macro_case_expand(key_sym, clauses))
           });
 }
   
@@ -420,6 +420,6 @@ constexpr struct Entry {
 
 void install_builtin(){
   for(auto& e : builtin_func){
-    VM.set(intern(VM.symtable, e.name), Lisp_ptr{&e.func});
+    VM.set(intern(VM.symtable, e.name), {&e.func});
   }
 }
