@@ -14,7 +14,7 @@ void procedure_list_star(){
 void procedure_vector(){
   auto v = new Vector;
   stack_to_vector(VM.stack, *v);
-  VM.return_value = Lisp_ptr{v};
+  VM.return_value = v;
 }
 
 Lisp_ptr pick_args_1(){

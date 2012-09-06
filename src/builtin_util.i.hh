@@ -19,7 +19,7 @@ template<bool dot_list, typename StackT>
 Lisp_ptr stack_to_list(StackT& st){
   Cons* c = new Cons;
   Cons* prev_c = c;
-  Lisp_ptr ret = Lisp_ptr{c};
+  Lisp_ptr ret = c;
 
   while(1){
     c->rplaca(st.top());
@@ -31,7 +31,7 @@ Lisp_ptr stack_to_list(StackT& st){
     }
 
     Cons* newc = new Cons;
-    c->rplacd(Lisp_ptr(newc));
+    c->rplacd(newc);
     prev_c = c;
     c = newc;
   }

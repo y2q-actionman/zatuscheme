@@ -65,7 +65,7 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
   }
 
   VM.code.push(proc);
-  VM.code.push(Lisp_ptr(vm_op_proc_enter));
+  VM.code.push(vm_op_proc_enter);
 
   int argc = 0;
   const auto sequencial = argi->sequencial;
@@ -81,10 +81,10 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
                   }
 
                   VM.code.push(c->car());
-                  VM.code.push(Lisp_ptr(vm_op_arg_push_and_set));
+                  VM.code.push(vm_op_arg_push_and_set);
                   bind_list = c->cdr();
                 }else{
-                  VM.code.push(Lisp_ptr(vm_op_arg_push));
+                  VM.code.push(vm_op_arg_push);
                 }
 
                 VM.code.push(cell->car());
@@ -116,7 +116,7 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
     return;
   }
   
-  VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
+  VM.stack.push(vm_op_arg_bottom);
 }
 
 /*
@@ -138,7 +138,7 @@ void macro_call(Lisp_ptr proc, const ArgInfo* argi){
   auto args = VM.stack.top();
   VM.stack.pop();
 
-  VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
+  VM.stack.push(vm_op_arg_bottom);
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack);
   if(argc < argi->required_args
      || (!argi->variadic && argc > argi->required_args)){
@@ -154,9 +154,9 @@ void macro_call(Lisp_ptr proc, const ArgInfo* argi){
     return;
   }    
 
-  VM.code.push(Lisp_ptr(vm_op_macro_call));
+  VM.code.push(vm_op_macro_call);
   VM.code.push(proc);
-  VM.code.push(Lisp_ptr(vm_op_proc_enter));
+  VM.code.push(vm_op_proc_enter);
 }
 
 /*
@@ -167,11 +167,11 @@ void macro_call(Lisp_ptr proc, const ArgInfo* argi){
 */
 void whole_function_call(Lisp_ptr proc){
   VM.code.push(proc);
-  VM.code.push(Lisp_ptr(vm_op_proc_enter));
+  VM.code.push(vm_op_proc_enter);
 
   auto args = VM.stack.top();
   VM.stack.pop();
-  VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
+  VM.stack.push(vm_op_arg_bottom);
   VM.stack.push(args);
 }
 
@@ -182,7 +182,7 @@ void whole_function_call(Lisp_ptr proc){
   stack = (whole args, arg-bottom)
 */
 void whole_macro_call(Lisp_ptr proc){
-  VM.code.push(Lisp_ptr(vm_op_macro_call));
+  VM.code.push(vm_op_macro_call);
   whole_function_call(proc);
 }
 
@@ -273,7 +273,7 @@ void proc_enter_interpreted(IProcedure* fun){
     VM.enter_frame(push_frame(fun->closure()));
   }
 
-  VM.code.push(Lisp_ptr(vm_op_proc_leave));
+  VM.code.push(vm_op_proc_leave);
 
   Lisp_ptr arg_name = argi.head;
   Lisp_ptr st_top;
@@ -434,9 +434,9 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   }
 
   // evaluating
-  VM.code.push(Lisp_ptr{set_op});
+  VM.code.push(set_op);
   VM.code.push(val);
-  VM.stack.push(Lisp_ptr{var});
+  VM.stack.push(var);
 }
 
 /*
@@ -473,20 +473,20 @@ void vm_op_quasiquote(){
     if(auto l = p.get<Cons*>()){
       if(auto l_first_sym = l->car().get<Symbol*>()){
         if(l_first_sym == unquote_sym){
-          VM.code.push(Lisp_ptr(vm_op_arg_push));
+          VM.code.push(vm_op_arg_push);
           VM.code.push(l->cdr().get<Cons*>()->car());
           return;
         }else if(l_first_sym  == unquote_splicing_sym){
-          VM.code.push(Lisp_ptr(vm_op_arg_push_list));
+          VM.code.push(vm_op_arg_push_list);
           VM.code.push(l->cdr().get<Cons*>()->car());
           return;
         }
       }
     }
 
-    VM.code.push(Lisp_ptr(vm_op_arg_push));
+    VM.code.push(vm_op_arg_push);
     VM.code.push(p);
-    VM.code.push(Lisp_ptr(vm_op_quasiquote));
+    VM.code.push(vm_op_quasiquote);
   };
 
   auto p = VM.code.top();
@@ -512,8 +512,8 @@ void vm_op_quasiquote(){
     }
 
     // generic lists
-    VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
-    VM.code.push(Lisp_ptr(vm_op_quasiquote_list));
+    VM.stack.push(vm_op_arg_bottom);
+    VM.code.push(vm_op_quasiquote_list);
 
     do_list(p,
             [&](Cons* c) -> bool {
@@ -524,8 +524,8 @@ void vm_op_quasiquote(){
               qq_elem(last);
             });
   }else if(p.tag() == Ptr_tag::vector){
-    VM.stack.push(Lisp_ptr(vm_op_arg_bottom));
-    VM.code.push(Lisp_ptr(vm_op_quasiquote_vector));
+    VM.stack.push(vm_op_arg_bottom);
+    VM.code.push(vm_op_quasiquote_vector);
 
     auto v = p.get<Vector*>();
     for(auto i = begin(*v); i != end(*v); ++i){
@@ -598,7 +598,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
     return {};
   }
   
-  return Lisp_ptr{new IProcedure(code, Calling::function, arg_info, VM.frame)};
+  return new IProcedure(code, Calling::function, arg_info, VM.frame);
 }
 
 void whole_function_lambda(){
@@ -648,7 +648,7 @@ void whole_function_if(){
   }
 
   // evaluating
-  VM.code.push(Lisp_ptr(vm_op_if));
+  VM.code.push(vm_op_if);
   VM.code.push(test);
 
   VM.stack.push(alt);
@@ -723,7 +723,7 @@ void whole_function_quasiquote(){
                  [](Cons* c){
                    VM.code.push(c->car());
                  });
-  VM.code.push(Lisp_ptr(vm_op_quasiquote));
+  VM.code.push(vm_op_quasiquote);
 }
 
 static void let_internal(bool sequencial, bool early_bind){
@@ -777,10 +777,10 @@ static void let_internal(bool sequencial, bool early_bind){
     return;
   }
 
-  VM.code.push(Lisp_ptr(vm_op_call));
-  VM.code.push(Lisp_ptr(new IProcedure(body, Calling::function,
-                                         {len, false, syms, sequencial, early_bind},
-                                         VM.frame)));
+  VM.code.push(vm_op_call);
+  VM.code.push(new IProcedure(body, Calling::function,
+                              {len, false, syms, sequencial, early_bind},
+                              VM.frame));
   VM.stack.push(push_cons_list({}, vals));
   VM.return_value = {};
 }
@@ -820,7 +820,7 @@ void eval(){
         break;
       }
 
-      VM.code.push(Lisp_ptr(vm_op_call));
+      VM.code.push(vm_op_call);
       VM.code.push(c->car());
       VM.stack.push(p);
       break;
