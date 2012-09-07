@@ -294,6 +294,21 @@ void eval_func(){
   VM.code.push(args[0]);
 }
 
+void to_macro_procedure(){
+  auto arg1 = pick_args_1();
+
+  if(arg1.tag() != Ptr_tag::i_procedure){
+    fprintf(zs::err, "to-macro-procedure: error: should be called with interpreted proc\n");
+    VM.return_value = {};
+    return;
+  }
+
+  auto proc = arg1.get<IProcedure*>();
+
+  VM.return_value = new IProcedure(proc->get(), Calling::macro,
+                                   proc->arg_info(), proc->closure());
+}
+
 constexpr struct Entry {
   const char* name;
   const NProcedure func;
@@ -411,9 +426,13 @@ constexpr struct Entry {
   {"eq?", {
       eq,
       Calling::function, {2, false}}},
+
   {"eval", {
       eval_func,
-      Calling::function, {2, false}}}
+      Calling::function, {2, false}}},
+  {"to-macro-procedure", {
+      to_macro_procedure,
+      Calling::function, {1, false}}}
 };
 
 } //namespace

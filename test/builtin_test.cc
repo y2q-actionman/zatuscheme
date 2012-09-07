@@ -76,6 +76,12 @@ int main(){
   check("(eval '(+ 1 3) ())", "4");
   check("(eval '(if (eqv? 1 2) \"same\" \"different\") ())", "\"different\"");
 
+  check("(begin (set! tmp-func (lambda (x) `(set! ,x ',x))) #t)", "#t");
+  check("(tmp-func 'a)", "(set! a (quote a))");
+  check("(begin (set! tmp-macro (to-macro-procedure tmp-func)) #t)", "#t");
+  check("(begin (tmp-macro a) #t)", "#t");
+  check("a", "a");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
