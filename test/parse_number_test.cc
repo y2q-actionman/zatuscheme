@@ -28,7 +28,7 @@ void fail_message(Number::Type t, FILE* i,
     return;
   }
 
-  fprintf(stdout, "[failed] input='%s', expect type='%s'",
+  fprintf(zs::err, "[failed] input='%s', expect type='%s'",
           buf, stringify(t));
 
   callback();

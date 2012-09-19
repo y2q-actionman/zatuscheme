@@ -9,7 +9,7 @@ static bool result = true;
 void check(const char* input, const char* expect){
   result = read_eval_print_test(input, expect,
                                 [expect](const char* s){
-                                  printf("[failed] expected %s, but got %s\n", expect, s);
+                                  fprintf(zs::err, "[failed] expected %s, but got %s\n", expect, s);
                                 });
 }
 

@@ -21,6 +21,14 @@ bool eqv(Lisp_ptr, Lisp_ptr);
 
 Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args);
 
+
+extern FILE* NULL_STREAM;
+
+FILE* open_null_stream();
+
+struct with_null_stream;
+
+
 #include "test_util.i.hh"
 
 #endif // TEST_UTIL_HH

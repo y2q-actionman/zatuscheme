@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include "util.hh"
 #include "lisp_ptr.hh"
 #include "printer.hh"
 
@@ -53,5 +54,25 @@ bool read_eval_print_test(const char* input, const char* expect, Fun&& f){
 
   return test_on_print(e, expect, f);
 }
+
+struct with_null_stream{
+  FILE* in;
+  FILE* out;
+  FILE* err;
+
+  with_null_stream()
+    : in(zs::in), out(zs::out), err(zs::err){
+    if(!NULL_STREAM) open_null_stream();
+    zs::in = NULL_STREAM;
+    zs::out = NULL_STREAM;
+    zs::err = NULL_STREAM;
+  }
+
+  ~with_null_stream(){
+    zs::in = this->in;
+    zs::out = this->out;
+    zs::err = this->err;
+  }
+};
 
 #endif // TEST_UTIL_I_HH

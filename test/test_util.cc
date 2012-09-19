@@ -25,7 +25,7 @@ Lisp_ptr read_from_string(const char* s){
 Lisp_ptr eval_text(const char* s){
   auto exp = read_from_string(s);
   if(!exp){
-    printf("[failed] read error on %s\n", s);
+    fprintf(zs::err, "[failed] read error on %s\n", s);
     return {};
   }
 
@@ -33,7 +33,7 @@ Lisp_ptr eval_text(const char* s){
   eval();
   auto ret = VM.return_value;
   if(!ret){
-    printf("[failed] eval error on %s\n", s);
+    fprintf(zs::err, "[failed] eval error on %s\n", s);
     return {};
   }
 
@@ -68,4 +68,15 @@ Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args){
   VM.code.push(Lisp_ptr(conses.data()));
   eval();
   return VM.return_value;
+}
+
+
+FILE* NULL_STREAM = NULL;
+
+FILE* open_null_stream(){
+  auto s = fopen("/dev/null", "w+b");
+  if(!s) s = tmpfile();
+
+  NULL_STREAM = s;
+  return s;
 }

@@ -10,7 +10,7 @@ static bool result = true;
 
 void check(const char* input, const char* expect){
   const auto callback = [input, expect](const char* buf){
-    fprintf(stdout, "[failed] input:%s, expected: %s\n\treturned: %s\n",
+    fprintf(zs::err, "[failed] input:%s, expected: %s\n\treturned: %s\n",
             input, expect, buf);
   };
 
@@ -25,7 +25,7 @@ void check_undef(const char* input){
   Lisp_ptr p = read_from_string(input);
 
   if(p){
-    fprintf(stdout, "[failed] input:%s, expected: (undefined)\n", input);
+    fprintf(zs::err, "[failed] input:%s, expected: (undefined)\n", input);
     result = false;
   }
 }
@@ -55,7 +55,10 @@ int main(){
   check("\"\"", "\"\"");
   check("\"aaa aaa\"", "\"aaa aaa\"");
   check("\"aa\\\\a a\\\"aa\"", "\"aa\\a a\"aa\"");
-  check_undef("\" \\ \"");
+  { 
+    with_null_stream wns;
+    check_undef("\" \\ \"");
+  }
 
   // cons, list
   check("()", "()");
@@ -66,20 +69,26 @@ int main(){
   check("(a (b . c) d e)", "(a (b . c) d e)");
   check("(a (b . ()) d e)", "(a (b) d e)");
   check("((((((((((a))))))))))", "((((((((((a))))))))))");
-  check_undef("(a . b c)");
-  check_undef("(. a)");
-  check_undef("((a)");
-  check_undef("(");
-  check_undef(")");
-  check_undef("#(a . b . c)");
+  { 
+    with_null_stream wns;
+    check_undef("(a . b c)");
+    check_undef("(. a)");
+    check_undef("((a)");
+    check_undef("(");
+    check_undef(")");
+    check_undef("#(a . b . c)");
+  }
 
   // vector
   check("#()", "#()");
   check("#(a b)", "#(a b)");
   check("#(a (b c d) e)", "#(a (b c d) e)");
   check("#(a (b #(c) d) e)", "#(a (b #(c) d) e)");
-  check_undef("#(a . b)");
-  check_undef("#(a . b . c)");
+  { 
+    with_null_stream wns;
+    check_undef("#(a . b)");
+    check_undef("#(a . b . c)");
+  }
   check("#((#((#(())))))", "#((#((#(())))))");
 
   // reader macros

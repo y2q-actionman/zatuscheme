@@ -7,13 +7,13 @@
 #include <cstring>
 
 #include "token.hh"
+#include "test_util.hh"
 #include "describe.hh"
 
 #define PRINT_BUFSIZE 100
 
 using namespace std;
 
-static FILE* NULL_STREAM;
 static bool result;
 
 template<typename T>
@@ -22,12 +22,12 @@ void check_copy_move(const Token& tok){
   {
     Token tok_c_con(tok);
     if(tok.type() != tok_c_con.type() || tok.get<T>() != tok_c_con.get<T>()){
-      fputs("[failed] on copy construct: ", stdout);
+      fputs("[failed] on copy construct: ", zs::err);
       goto error;
     }else{
       Token tok_m_con{move(tok_c_con)};
       if(tok.type() != tok_m_con.type() || tok.get<T>() != tok_m_con.get<T>()){
-        fputs("[failed] on move construct ", stdout);
+        fputs("[failed] on move construct ", zs::err);
         goto error;
       }
     }
@@ -37,12 +37,12 @@ void check_copy_move(const Token& tok){
   {
     Token tok_c_op = tok;
     if(tok.type() != tok_c_op.type() || tok.get<T>() != tok_c_op.get<T>()){
-      fputs("[failed] on copy operator= ", stdout);
+      fputs("[failed] on copy operator= ", zs::err);
       goto error;
     }else{
       Token tok_m_op = move(tok_c_op);
       if(tok.type() != tok_m_op.type() || tok.get<T>() != tok_m_op.get<T>()){
-        fputs("[failed] on move operator= ", stdout);
+        fputs("[failed] on move operator= ", zs::err);
         goto error;
       }
     }
@@ -52,8 +52,8 @@ void check_copy_move(const Token& tok){
 
  error:
   result = false;
-  describe(stdout, tok);
-  fputc('\n', stdout);
+  describe(zs::err, tok);
+  fputc('\n', zs::err);
   return;
 }
 
@@ -68,14 +68,14 @@ void fail_message(Token::Type t, FILE* f, const fpos_t* b_pos,
     strcpy(buf, "(read error)");
   }
 
-  fprintf(stdout, "[failed] input='%s', expect type='%s'",
+  fprintf(zs::err, "[failed] input='%s', expect type='%s'",
           buf, stringify(t));
 
   callback();
 
-  fputs("\n\tgotten token: ", stdout);
-  describe(stdout, tok);
-  fputc('\n', stdout);
+  fputs("\n\tgotten token: ", zs::err);
+  describe(zs::err, tok);
+  fputc('\n', zs::err);
 
   result = false;
 }
@@ -93,9 +93,11 @@ void check(FILE* f){
   fpos_t init_pos;
   fgetpos(f, &init_pos);
 
-  zs::err = NULL_STREAM;
-  const Token tok = tokenize(f);
-  zs::err = stderr;
+  Token tok;
+  { 
+    with_null_stream wns;
+    tok = tokenize(f);
+  }
 
   if(tok.type() != type){
     fail_message(type, f, &init_pos, tok, [](){});
@@ -135,7 +137,7 @@ void check(FILE* f, const string& expect){
   check_generic<T>
     (f, expect,
      [&](){
-      fprintf(stdout, ", expected str='%s'", expect.c_str());
+      fprintf(zs::err, ", expected str='%s'", expect.c_str());
     });
 }
 
@@ -163,8 +165,8 @@ void check(FILE* f, const Number& n){
   check_generic<Token::Type::number>
     (f, n, 
      [=](){
-      fprintf(stdout, ", expected num='");
-      describe(stdout, n);
+      fprintf(zs::err, ", expected num='");
+      describe(zs::err, n);
     });
 }
 
@@ -172,7 +174,7 @@ void check(FILE* f, bool expect){
   check_generic<Token::Type::boolean>
     (f, expect, 
      [=](){
-      fprintf(stdout, ", expected bool='%s'", expect ? "true" : "false");
+      fprintf(zs::err, ", expected bool='%s'", expect ? "true" : "false");
     });
 }
 
@@ -180,7 +182,7 @@ void check(FILE* f, char expect){
   check_generic<Token::Type::character>
     (f, expect, 
      [=](){
-      fprintf(stdout, ", expected char='%c'", expect);
+      fprintf(zs::err, ", expected char='%c'", expect);
     });
 }
 
@@ -188,9 +190,9 @@ void check(FILE* f, Token::Notation n){
   check_generic<Token::Type::notation>
     (f, n,
      [=](){
-      fputs(", expected notation='", stdout);
-      describe(stdout, n);
-      fputc('\'', stdout);
+      fputs(", expected notation='", zs::err);
+      describe(zs::err, n);
+      fputc('\'', zs::err);
     });
 }
 
@@ -206,8 +208,7 @@ void check(const string& input, T&& expect){
 
 int main(){
   result = true;
-  NULL_STREAM = fopen("/dev/null", "w+b");
-  if(!NULL_STREAM) NULL_STREAM = tmpfile();
+  open_null_stream();
 
   // identifier
   check_ident("lambda", "lambda");

@@ -21,12 +21,12 @@ void check(const char* input, const ArgInfo& expect){
 
   auto argi = parse_func_arg(p);
   if(!argi || argi != expect){
-    printf("[failed] unexpected failure: input='%s', expected=",
-           input);
-    describe(stdout, expect);
-    printf(" got=");
-    describe(stdout, argi);
-    putchar('\n');
+    fprintf(zs::err, "[failed] unexpected failure: input='%s', expected=",
+            input);
+    describe(zs::err, expect);
+    fprintf(zs::err, " got=");
+    describe(zs::err, argi);
+    fputc('\n', zs::err);
 
     result = false;
   }
@@ -38,10 +38,10 @@ void check_uninit(const char* input){
 
   auto argi = parse_func_arg(p);
   if(argi){
-    printf("[failed] unexpected succeed: input='%s', arginfo=",
+    fprintf(zs::err, "[failed] unexpected succeed: input='%s', arginfo=",
            input);
-    describe(stdout, argi);
-    putchar('\n');
+    describe(zs::err, argi);
+    fputc('\n', zs::err);
 
     result = false;
   }
@@ -51,11 +51,14 @@ void check_uninit(const char* input){
 
 int main(){
   // arginfo test
-  check_uninit("#t");
-  check_uninit("#\\h");
-  check_uninit("100");
-  check_uninit("1.01");
-  check_uninit("#()");
+  {
+    with_null_stream wns;
+    check_uninit("#t");
+    check_uninit("#\\h");
+    check_uninit("100");
+    check_uninit("1.01");
+    check_uninit("#()");
+  }
 
   check("()", {0, false, {}});
   check("(a)", {1, false, {}});
@@ -66,10 +69,12 @@ int main(){
   check("(a b . c)", {2, true, {}});
   check("(a b c . d)", {3, true, {}});
 
-  check_uninit("(a 1 b)");
-  check_uninit("(a 1 . b)");
-  check_uninit("(a b . 1)");
-
+  {
+    with_null_stream wns;
+    check_uninit("(a 1 b)");
+    check_uninit("(a 1 . b)");
+    check_uninit("(a b . 1)");
+  }
   
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

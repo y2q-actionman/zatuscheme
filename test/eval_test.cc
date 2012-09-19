@@ -36,7 +36,7 @@ bool read_eqv(Lisp_ptr input, const char* expect_s){
 
 bool print_equal(Lisp_ptr input, const char* expect_s){
   const auto callback = [expect_s](const char* str){
-    fprintf(stdout, "[failed] expected: %s\n\tevaled: %s\n",
+    fprintf(zs::err, "[failed] expected: %s\n\tevaled: %s\n",
             expect_s, str);
   };
 
@@ -78,7 +78,10 @@ int main(){
 
 
   // === symbol-value ===
-  check(test_undef, "tabun-tukattenai-namae");
+  {
+    with_null_stream wns;
+    check(test_undef, "tabun-tukattenai-namae");
+  }
 
 
   // === function call ===
@@ -87,7 +90,10 @@ int main(){
 
   // === Special Operator ===
   // syntax: quote
-  check(test_undef, "(quote)");
+  {
+    with_null_stream wns;
+    check(test_undef, "(quote)");
+  }
   check(read_eqv, "(quote 1)", "1");
   check(print_equal, "(quote (1 . 2))", "(1 . 2)");
   check(print_equal, "'(1 2 3)", "(1 2 3)");
@@ -95,13 +101,22 @@ int main(){
   // syntax: lambda
 
   // syntax: if
-  check(test_undef, "(if)");
-  check(test_undef, "(if 1)");
+  {
+    with_null_stream wns;
+    check(test_undef, "(if)");
+    check(test_undef, "(if 1)");
+  }
   check(read_eqv, "(if #t 1)", "1");
-  check(test_undef, "(if #f 1)");
+  {
+    with_null_stream wns;
+    check(test_undef, "(if #f 1)");
+  }
   check(read_eqv, "(if #t 1 2)", "1");
   check(read_eqv, "(if #f 1 2)", "2");
-  check(test_undef, "(if #f 1 2 3)");
+  {
+    with_null_stream wns;
+    check(test_undef, "(if #f 1 2 3)");
+  }
 
   // syntax: define
   check(read_eqv, "(define x 1)", "1");
@@ -116,18 +131,24 @@ int main(){
   check(read_eqv, "x", "100");
 
   // syntax: begin
-  check(test_undef, "(begin)");
+  {
+    with_null_stream wns;
+    check(test_undef, "(begin)");
+  }
   check(read_eqv, "(begin 1)", "1");
   check(read_eqv, "(begin 1 2)", "2");
   check(read_eqv, "(begin 1 2 3)", "3");
 
   // informal syntaxes
-  //check(test_undef, "else");
-  check(test_undef, "(else)");
-  check(test_undef, "(else 1)");
-  //check(test_undef, "=>");
-  check(test_undef, "(=>)");
-  check(test_undef, "(=> 1)");
+  {
+    with_null_stream wns;
+    //check(test_undef, "else");
+    check(test_undef, "(else)");
+    check(test_undef, "(else 1)");
+    //check(test_undef, "=>");
+    check(test_undef, "(=>)");
+    check(test_undef, "(=> 1)");
+  }
 
 
   // macro call
