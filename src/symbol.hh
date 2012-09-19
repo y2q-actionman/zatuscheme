@@ -31,7 +31,7 @@ private:
   Symbol& operator=(const Symbol&) = delete;
   Symbol& operator=(Symbol&&) = delete;
 
-  inline void rebind(const std::string*);
+  void rebind(const std::string*);
 
 private:
   const std::string* name_;
