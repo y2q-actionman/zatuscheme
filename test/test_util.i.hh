@@ -47,14 +47,6 @@ bool test_on_print(Lisp_ptr input, const char* expect, Fun&& callback){
   return ret;
 }
 
-template<typename Fun>
-bool read_eval_print_test(const char* input, const char* expect, Fun&& f){
-  auto e = eval_text(input);
-  if(!e) return false;
-
-  return test_on_print(e, expect, f);
-}
-
 struct with_null_stream{
   FILE* in;
   FILE* out;

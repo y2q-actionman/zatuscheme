@@ -40,6 +40,17 @@ Lisp_ptr eval_text(const char* s){
   return ret;
 }
 
+bool read_eval_print_test(const char* input, const char* expect){
+  auto e = eval_text(input);
+  if(!e) return false;
+
+  const auto fun = [expect](const char* s){
+    fprintf(zs::err, "[failed] expected %s, but got %s\n", expect, s);
+  };
+
+  return test_on_print(e, expect, fun);
+}
+
 bool eqv(Lisp_ptr a, Lisp_ptr b){
   return zs_call("eqv?", {a, b}).get<bool>();
 }
