@@ -730,13 +730,39 @@ static void let_internal(bool sequencial, bool early_bind){
   auto arg = pick_args_1();
   if(!arg) return;
 
-  Lisp_ptr binds, body;
-  bind_cons_list(arg,
-                 [](Cons*){},
-                 [&](Cons* c){
-                   binds = c->car();
-                   body = c->cdr();
-                 });
+  // skips first 'let' symbol
+  auto arg_c = arg.get<Cons*>();
+  assert(arg_c);
+
+  auto arg2 = arg_c->cdr();
+  if(arg2.tag() != Ptr_tag::cons || nullp(arg2)){
+    fprintf(zs::err, "eval error: informal LET syntax -- (LET . <%s>).\n",
+            (nullp(arg2)) ? "nil" : stringify(arg2.tag()));
+    VM.return_value = {};
+    return;
+  }
+  arg_c = arg2.get<Cons*>();
+
+  // checks named let
+  Lisp_ptr name = {};
+
+  if(arg_c->car().tag() == Ptr_tag::symbol){
+    name = arg_c->car();
+
+    auto arg3 = arg_c->cdr();
+    if(arg3.tag() != Ptr_tag::cons || nullp(arg3)){
+      fprintf(zs::err, "eval error: informal LET syntax -- (LET <name> . <%s>).\n",
+              (nullp(arg3)) ? "nil" : stringify(arg3.tag()));
+      VM.return_value = {};
+      return;
+    }
+    
+    arg_c = arg3.get<Cons*>();
+  }
+    
+  // picks elements
+  auto binds = arg_c->car();
+  auto body = arg_c->cdr();
 
   if(body.tag() != Ptr_tag::cons || nullp(body)){
     fprintf(zs::err, "eval error: informal syntax for LET's body!.\n");
@@ -744,6 +770,7 @@ static void let_internal(bool sequencial, bool early_bind){
     return;
   }
 
+  // parses binding list
   int len = 0;
   Lisp_ptr syms = Cons::NIL, vals = Cons::NIL;
 
@@ -777,10 +804,12 @@ static void let_internal(bool sequencial, bool early_bind){
     return;
   }
 
+  auto proc = new IProcedure(body, Calling::function,
+                             {len, false, syms, sequencial, early_bind},
+                             VM.frame);
+
   VM.code.push(vm_op_call);
-  VM.code.push(new IProcedure(body, Calling::function,
-                              {len, false, syms, sequencial, early_bind},
-                              VM.frame));
+  VM.code.push(proc);
   VM.stack.push(push_cons_list({}, vals));
   VM.return_value = {};
 }
