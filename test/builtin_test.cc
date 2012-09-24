@@ -48,6 +48,11 @@ int main(){
   check("(let ((x 1)) (let ((x 2)) x))", "2");
   check("(let ((x 1)) (let ((x 2)) x) x)", "1");
 
+  // TODO: add more named-let patterns
+  // check("(let 100 ((x 0)) x)", "<undef>");
+  check("(let loop ((x #f)) (if x x (loop #t)))", "#t");
+  // check("(let loop ((x #f)) (if x x (loop #f)))", "#t"); // infinite loop!
+
   check("(let* ((x 1)) x)", "1");
   check("(let* ((x 1) (y x)) y)", "1");
   check("(let* ((x 1) (y x) (z y)) z)", "1");

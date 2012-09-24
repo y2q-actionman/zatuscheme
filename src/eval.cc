@@ -804,9 +804,18 @@ static void let_internal(bool sequencial, bool early_bind){
     return;
   }
 
+  if(name){
+    VM.enter_frame(push_frame(VM.frame));
+  }
+
   auto proc = new IProcedure(body, Calling::function,
                              {len, false, syms, sequencial, early_bind},
                              VM.frame);
+
+  if(name){
+    VM.local_set(name.get<Symbol*>(), proc);
+    VM.code.push(vm_op_proc_leave);
+  }
 
   VM.code.push(vm_op_call);
   VM.code.push(proc);
