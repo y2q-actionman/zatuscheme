@@ -44,8 +44,9 @@ bool read_eval_print_test(const char* input, const char* expect){
   auto e = eval_text(input);
   if(!e) return false;
 
-  const auto fun = [expect](const char* s){
-    fprintf(zs::err, "[failed] expected %s, but got %s\n", expect, s);
+  const auto fun = [input, expect](const char* s){
+    fprintf(zs::err, "[failed] expected %s, but got %s (from: %s)\n",
+            expect, s, input);
   };
 
   return test_on_print(e, expect, fun);

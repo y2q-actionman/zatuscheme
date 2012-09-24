@@ -14,29 +14,6 @@ using namespace Procedure;
 
 namespace {
 
-void plus_2(){
-  auto args = pick_args<2>();
-
-  VM.return_value = {};
-
-  Number* n1 = args[0].get<Number*>();
-  if(!n1){
-    fprintf(zs::err, "native func '+': first arg is not number! %s\n",
-            stringify(args[0].tag()));
-    return;
-  }
-
-  Number* n2 = args[1].get<Number*>();
-  if(!n2){
-    fprintf(zs::err, "native func '+': second arg is not number! %s\n",
-            stringify(args[1].tag()));
-    return;
-  }
-
-  Number* newn = new Number(n1->get<long>() + n2->get<long>());
-  VM.return_value = newn;
-}
-
 template <Ptr_tag p>
 void type_check_pred(){
   auto arg = pick_args_1();
@@ -381,9 +358,6 @@ constexpr struct Entry {
       Calling::whole_function, {0, false}}},
 
   // functions
-  {"+", {
-      plus_2,
-      Calling::function, {2, true}}},
   {"list", {
       procedure_list,
       Calling::function, {1, true}}},

@@ -4,6 +4,7 @@
 
 int main(){
   install_builtin();
+  install_builtin_numeric();
 
   while(1){
     printf(REPL_PROMPT);

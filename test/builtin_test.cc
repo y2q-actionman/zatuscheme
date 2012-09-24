@@ -13,6 +13,7 @@ void check(const char* input, const char* expect){
 
 int main(){
   install_builtin();
+  install_builtin_numeric();
 
   check("(list 1)", "(1)");
   check("(list 1 2)", "(1 2)");
