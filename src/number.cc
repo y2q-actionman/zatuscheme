@@ -350,7 +350,7 @@ ParserRet parse_real_number(int radix, FILE* f){
     return {Number{n.number.coerce<double>() * sign},
         Exactness::inexact};
   }else if(!u1){
-    fprintf(zs::err, "reader error: failed at reading a number's linteger part\n");
+    fprintf(zs::err, "reader error: failed at reading a number's integer part\n");
     return {};
   }else if(c == '/'){
     // rational

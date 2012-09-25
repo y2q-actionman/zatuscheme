@@ -6,6 +6,7 @@
 
 #include "number.hh"
 #include "describe.hh"
+#include "test_util.hh"
 
 #define PRINT_BUFSIZE 100
 
@@ -63,6 +64,7 @@ void check_generic(FILE* i,
 
 
 void check(FILE* i){
+  with_null_stream wns;
   check_generic<Number::Type::uninitialized>
     (i, [](){});
 }
@@ -149,7 +151,7 @@ int main(){
   // prefix
   check("#e1", 1l);
   check("#i1", 1.0);
-  check("#e1.0");
+  check("#e1.0", 1l);
   check("#i1.0", 1.0);
   check("#e1.0i");
   check("#i-1.0i", Number::complex_type(0, -1.0));
