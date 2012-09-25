@@ -14,8 +14,7 @@ using namespace Procedure;
 
 namespace {
 
-template<Number::Type nt>
-void number_type_check(){
+void complexp(){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
@@ -23,13 +22,52 @@ void number_type_check(){
     return;
   }
 
-  VM.return_value = Lisp_ptr{num->type() == nt};
+  auto t = num->type();
+
+  VM.return_value = Lisp_ptr{t == Number::Type::complex
+                             || t == Number::Type::real
+                             || t == Number::Type::integer};
 }
 
-void number_type_check_rational(){
-  pick_args_1();
-  VM.return_value = Lisp_ptr{false};
-}  
+void realp(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  auto t = num->type();
+
+  VM.return_value = Lisp_ptr{t == Number::Type::real
+                             || t == Number::Type::integer};
+}
+
+void rationalp(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  auto t = num->type();
+
+  VM.return_value = Lisp_ptr{t == Number::Type::integer};
+}
+
+void integerp(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  auto t = num->type();
+
+  VM.return_value = Lisp_ptr{t == Number::Type::integer};
+}
 
 void plus_2(){
   auto args = pick_args<2>();
@@ -63,16 +101,16 @@ constexpr struct Entry {
     : name(n), func(f){}
 } builtin_numeric[] = {
   {"complex?", {
-      number_type_check<Number::Type::complex>,
+      complexp,
       Calling::function, {1, false}}},
   {"real?", {
-      number_type_check<Number::Type::real>,
-      Calling::function, {1, false}}},
-  {"integer?", {
-      number_type_check<Number::Type::integer>,
+      realp,
       Calling::function, {1, false}}},
   {"rational?", {
-      number_type_check_rational,
+      rationalp,
+      Calling::function, {1, false}}},
+  {"integer?", {
+      integerp,
       Calling::function, {1, false}}},
 
   {"+", {

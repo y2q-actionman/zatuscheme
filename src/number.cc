@@ -40,10 +40,11 @@ Number::real_type Number::coerce() const{
 template <>
 Number::integer_type Number::coerce() const{
   switch(type_){
+  case Type::real:
+    return static_cast<integer_type>(f_);
   case Type::integer:
     return i_;
   case Type::complex:
-  case Type::real:
   case Type::uninitialized:
   default:
     UNEXP_CONVERSION("integer");
@@ -490,9 +491,10 @@ void print(FILE* f, const Number& n){
 Number to_exact(const Number& n){
   switch(n.type()){
   case Number::Type::complex:
+    fprintf(zs::err, "number error: conversion from complex to exact number is not supprted.\n");
     return {}; // not supported
   case Number::Type::real:
-    return {}; // not supported
+    return Number{n.coerce<Number::integer_type>()};
   case Number::Type::integer:
     return n;
   case Number::Type::uninitialized:
@@ -508,8 +510,7 @@ Number to_inexact(const Number& n){
   case Number::Type::real:
     return n;
   case Number::Type::integer:
-    return Number{static_cast<Number::real_type>
-        (n.get<Number::integer_type>())};
+    return Number{n.coerce<Number::real_type>()};
   case Number::Type::uninitialized:
   default:
     return {};
