@@ -23,7 +23,6 @@ void complexp(){
   }
 
   auto t = num->type();
-
   VM.return_value = Lisp_ptr{t == Number::Type::complex
                              || t == Number::Type::real
                              || t == Number::Type::integer};
@@ -38,7 +37,6 @@ void realp(){
   }
 
   auto t = num->type();
-
   VM.return_value = Lisp_ptr{t == Number::Type::real
                              || t == Number::Type::integer};
 }
@@ -52,7 +50,6 @@ void rationalp(){
   }
 
   auto t = num->type();
-
   VM.return_value = Lisp_ptr{t == Number::Type::integer};
 }
 
@@ -65,8 +62,32 @@ void integerp(){
   }
 
   auto t = num->type();
-
   VM.return_value = Lisp_ptr{t == Number::Type::integer};
+}
+
+void exactp(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  auto t = num->type();
+  VM.return_value = Lisp_ptr{t == Number::Type::integer};
+}
+
+void inexactp(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  auto t = num->type();
+  VM.return_value = Lisp_ptr{t == Number::Type::complex
+                             || t == Number::Type::real};
 }
 
 void plus_2(){
@@ -111,6 +132,13 @@ constexpr struct Entry {
       Calling::function, {1, false}}},
   {"integer?", {
       integerp,
+      Calling::function, {1, false}}},
+
+  {"exact?", {
+      exactp,
+      Calling::function, {1, false}}},
+  {"inexact?", {
+      inexactp,
       Calling::function, {1, false}}},
 
   {"+", {
