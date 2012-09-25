@@ -397,7 +397,7 @@ ParserRet parse_complex(int radix, FILE* f){
     const int sign = (c == '+') ? 1 : -1;
 
     if((c = fgetc(f)) == 'i'){
-      return {Number{real.number.coerce<double>(), static_cast<double>(sign)},
+      return {Number{Number::complex_type(real.number.coerce<double>(), sign)},
           Exactness::inexact};
     }
     ungetc(c, f);
@@ -408,12 +408,12 @@ ParserRet parse_complex(int radix, FILE* f){
       return {};
     }
 
-    return {Number{real.number.coerce<double>(), imag.number.coerce<double>() * sign},
+    return {Number{Number::complex_type(real.number.coerce<double>(), imag.number.coerce<double>() * sign)},
         Exactness::inexact};
   }
   case 'i':
     if(first_char == '+' || first_char == '-'){
-      return {Number{0, real.number.coerce<double>()},
+      return {Number{Number::complex_type(0, real.number.coerce<double>())},
           Exactness::inexact};
     }else{
       fprintf(zs::err, "reader error: failed at reading a complex number. ('i' appeared alone.)\n");
