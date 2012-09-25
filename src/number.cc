@@ -1,5 +1,6 @@
 #include <utility>
 #include <cstdlib>
+#include <cstring>
 
 #include "number.hh"
 #include "util.hh"
@@ -87,13 +88,19 @@ PrefixValue parse_number_prefix(FILE* f){
 
     switch(c = fgetc(f)){
     case 'i': case 'e':
-      if(e_appeared) return {};
+      if(e_appeared){
+        fprintf(zs::err, "reader error: duplicated number prefix appeared (%c)\n", c);
+        return {};
+      }
       e_appeared = true;
       e = (c == 'i') ? Exactness::inexact 
         : Exactness::exact;
       break;
     case 'b': case 'o': case 'd': case 'x':
-      if(r_appeared) return {};
+      if(r_appeared){
+        fprintf(zs::err, "reader error: duplicated number prefix appeared (%c)\n", c);
+        return {};
+      }
       r_appeared = true;
       r = (c == 'b') ? 2
         : (c == 'o') ? 8
@@ -179,7 +186,7 @@ ParserRet parse_unsigned(int radix, FILE* f, string& s){
   ungetc(c, f);
 
   if(s.empty()){
-    return {};
+    return {}; // no digit char. starting with dot ?
   }
    
   Exactness e;
@@ -191,8 +198,15 @@ ParserRet parse_unsigned(int radix, FILE* f, string& s){
   }
 
   errno = 0;
-  long l = strtol(s.c_str(), nullptr, radix);
-  if(errno) return {};
+  auto l = strtol(s.c_str(), nullptr, radix);
+  if(errno){
+    auto eno = errno;
+    char estr[128];
+    strerror_r(eno, estr, sizeof(estr));
+
+    fprintf(zs::err, "reader error: reading integer failed: %s\n", estr);
+    return {};
+  }
 
   return {Number{l}, e};
 }
@@ -217,6 +231,7 @@ ParserRet parse_decimal(FILE* f, string& s){
       ungetc('.', f);
       dot_start = true;
     }else{
+      fprintf(zs::err, "reader error: no chars found for floating point number.\n");
       return {};
     }
   }else{
@@ -243,8 +258,10 @@ ParserRet parse_decimal(FILE* f, string& s){
     }
     ungetc(c, f);
 
-    if(dot_start && !digits_after_dot)
-      return {}; // 2. dot start should have digits
+    if(dot_start && !digits_after_dot){
+      fprintf(zs::err, "reader error: a number starting with dot should have digits after it.\n");
+      return {};
+    }
 
     eat_sharp(f, s);
   }
@@ -269,15 +286,27 @@ ParserRet parse_decimal(FILE* f, string& s){
       }
       ungetc(c, f);
 
-      if(!exp_digits)
-        return {}; // no number on exp. part
+      if(!exp_digits){
+        fprintf(zs::err, "reader error: no number on exporational part\n");
+        return {};
+      }
     }
   }else{
     ungetc(c, f);
   }
 
-  return {Number{strtod(s.c_str(), nullptr)},
-      Exactness::inexact};
+  errno = 0;
+  auto d = strtod(s.c_str(), nullptr);
+  if(errno){
+    auto eno = errno;
+    char estr[128];
+    strerror_r(eno, estr, sizeof(estr));
+
+    fprintf(zs::err, "reader error: reading floating point number failed: %s\n", estr);
+    return {};
+  }
+
+  return {Number{d}, Exactness::inexact};
 }
 
 ParserRet parse_real_number(int radix, FILE* f){
@@ -303,24 +332,33 @@ ParserRet parse_real_number(int radix, FILE* f){
   c = fgetc(f);
 
   if((c == '.') || (u1 && check_decimal_suffix(c))){
-    // decimal float
-    if(radix == 10){
-      ungetc(c, f);
-      auto n = parse_decimal(f, s);
-
-      if(n.number.type() == Number::Type::real){
-        return {Number{n.number.coerce<double>() * sign},
-            Exactness::inexact};
-      }
+    if(radix != 10){
+      fprintf(zs::err, "reader error: non-decimal float is not supported. (radix %d)\n", radix);
+      return {};
     }
-    return {};
+
+    // decimal float
+    ungetc(c, f);
+    auto n = parse_decimal(f, s);
+
+    if(!n){
+      fprintf(zs::err, "reader error: failed at reading a decimal float\n");
+      return {};
+    }
+      
+    return {Number{n.number.coerce<double>() * sign},
+        Exactness::inexact};
   }else if(!u1){
+    fprintf(zs::err, "reader error: failed at reading a number's linteger part\n");
     return {};
   }else if(c == '/'){
     // rational
     string s2;
     auto u2 = parse_unsigned(radix, f, s2);
-    if(!u2) return {};
+    if(!u2){
+      fprintf(zs::err, "reader error: failed at reading a rational number's denominator\n");
+      return {};
+    }
 
     return {Number(sign * u1.number.coerce<double>() / u2.number.coerce<double>()),
         Exactness::inexact};
@@ -338,12 +376,18 @@ ParserRet parse_complex(int radix, FILE* f){
 
   // has real part
   auto real = parse_real_number(radix, f);
-  if(!real) return {};
+  if(!real){
+    fprintf(zs::err, "reader error: failed at reading a real number\n");
+    return {};
+  }
 
   switch(auto c = fgetc(f)){
   case '@': {// polar literal
     auto deg = parse_real_number(radix, f);
-    if(!deg) return {};
+    if(!deg){
+      fprintf(zs::err, "reader error: failed at reading a complex number's polar part.\n");
+      return {};
+    }
         
     return {Number{polar(real.number.coerce<double>(), deg.number.coerce<double>())},
         Exactness::inexact};
@@ -358,8 +402,10 @@ ParserRet parse_complex(int radix, FILE* f){
     ungetc(c, f);
     
     auto imag = parse_real_number(radix, f);
-    if(!imag || fgetc(f) != 'i')
+    if(!imag || fgetc(f) != 'i'){
+      fprintf(zs::err, "reader error: failed at reading a complex number's imaginary part.\n");
       return {};
+    }
 
     return {Number{real.number.coerce<double>(), imag.number.coerce<double>() * sign},
         Exactness::inexact};
@@ -369,6 +415,7 @@ ParserRet parse_complex(int radix, FILE* f){
       return {Number{0, real.number.coerce<double>()},
           Exactness::inexact};
     }else{
+      fprintf(zs::err, "reader error: failed at reading a complex number. ('i' appeared alone.)\n");
       return {};
     }
   default:
@@ -381,10 +428,16 @@ ParserRet parse_complex(int radix, FILE* f){
 
 Number parse_number(FILE* f){
   const auto prefix_info = parse_number_prefix(f);
-  if(!prefix_info) return {};
+  if(!prefix_info){
+    fprintf(zs::err, "reader error: failed at reading a number's prefix\n");
+    return {};
+  }
 
   const auto r = parse_complex(prefix_info.radix, f);
-  if(!r) return {};
+  if(!r){
+    fprintf(zs::err, "reader error: failed at reading a number\n");
+    return {};
+  }
 
   if(prefix_info.ex == Exactness::unspecified
      || prefix_info.ex == r.ex){
