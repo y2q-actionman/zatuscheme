@@ -169,8 +169,10 @@ bool number_comparable_check(Number* n){
   }
 }
 
-template<typename Fun>
-void number_compare(const char* name, const Fun& fun){
+template<template <typename> class Fun>
+void number_compare(const char* name){
+  static constexpr Fun<Number::real_type> fun;
+
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
@@ -212,21 +214,122 @@ void number_compare(const char* name, const Fun& fun){
 }
 
 void number_less(){
-  number_compare("<", std::less<Number::real_type>());
+  number_compare<std::less>("<");
 }
   
 void number_greater(){
-  number_compare(">", std::greater<Number::real_type>());
+  number_compare<std::greater>(">");
 }
   
 void number_less_eq(){
-  number_compare("<=", std::less_equal<Number::real_type>());
+  number_compare<std::less_equal>("<=");
 }
   
 void number_greater_eq(){
-  number_compare(">=", std::greater_equal<Number::real_type>());
+  number_compare<std::greater_equal>(">=");
 }
   
+
+void zerop(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  switch(num->type()){
+  case Number::Type::complex: {
+    auto c = num->get<Number::complex_type>();
+    VM.return_value = Lisp_ptr{c.real() == 0 && c.imag() == 0};
+    return;
+  }
+  case Number::Type::real:
+    VM.return_value = Lisp_ptr{num->get<Number::real_type>() == 0};
+    return;
+  case Number::Type::integer:
+    VM.return_value = Lisp_ptr{num->get<Number::integer_type>() == 0};
+    return;
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+
+template<template <typename> class Fun>
+void number_positive_negative(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  switch(num->type()){
+  case Number::Type::complex:
+    VM.return_value = Lisp_ptr{false};
+    return;
+  case Number::Type::real: {
+    auto n = num->get<Number::real_type>();
+    auto fun = Fun<decltype(n)>();
+    VM.return_value = Lisp_ptr{fun(n, 0)};
+    return;
+  }
+  case Number::Type::integer: {
+    auto n = num->get<Number::integer_type>();
+    auto fun = Fun<decltype(n)>();
+    VM.return_value = Lisp_ptr{fun(n, 0)};
+    return;
+  }
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+void positivep(){
+  number_positive_negative<std::greater>();
+}
+
+void negativep(){
+  number_positive_negative<std::less>();
+}
+
+
+template<template <typename> class Fun>
+void number_odd_even(){
+  static constexpr Fun<Number::integer_type> fun;
+
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  switch(num->type()){
+  case Number::Type::complex:
+  case Number::Type::real:
+    VM.return_value = Lisp_ptr{false};
+    return;
+  case Number::Type::integer:
+    VM.return_value = Lisp_ptr{fun(num->get<Number::integer_type>() % 2, 0)};
+    return;
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+void oddp(){
+  number_odd_even<std::not_equal_to>();
+}
+
+void evenp(){
+  number_odd_even<std::equal_to>();
+}
+
 
 void plus_2(){
   auto args = pick_args<2>();
@@ -251,7 +354,7 @@ void plus_2(){
   VM.return_value = newn;
 }
 
-
+nn
 constexpr struct Entry {
   const char* name;
   const NProcedure func;
@@ -294,6 +397,22 @@ constexpr struct Entry {
   {">=", {
       number_greater_eq,
       Calling::function, {2, true}}},
+
+  {"zero?", {
+      zerop,
+      Calling::function, {1, false}}},
+  {"positive?", {
+      positivep,
+      Calling::function, {1, false}}},
+  {"negative?", {
+      negativep,
+      Calling::function, {1, false}}},
+  {"odd?", {
+      oddp,
+      Calling::function, {1, false}}},
+  {"even?", {
+      evenp,
+      Calling::function, {1, false}}},
 
   {"+", {
       plus_2,

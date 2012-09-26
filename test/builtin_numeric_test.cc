@@ -90,6 +90,49 @@ int main(){
   check("(<= -1 1 1 2.0)", "#t");
   check("(<= 1 2 -1 6.7)", "#f");
 
+
+  check("(zero? 0+0i)", "#t");
+  check("(zero? -1i)", "#f");
+  check("(zero? 1.0)", "#f");
+  check("(zero? 0.0)", "#t");
+  check("(zero? -1.0)", "#f");
+  check("(zero? 1)", "#f");
+  check("(zero? 0)", "#t");
+  check("(zero? -1)", "#f");
+
+  check("(positive? 0+0i)", "#f");
+  check("(positive? -1i)", "#f");
+  check("(positive? 1.0)", "#t");
+  check("(positive? 0.0)", "#f");
+  check("(positive? -1.0)", "#f");
+  check("(positive? 1)", "#t");
+  check("(positive? 0)", "#f");
+  check("(positive? -1)", "#f");
+
+  check("(negative? 0+0i)", "#f");
+  check("(negative? -1i)", "#f");
+  check("(negative? 1.0)", "#f");
+  check("(negative? 0.0)", "#f");
+  check("(negative? -1.0)", "#t");
+  check("(negative? 1)", "#f");
+  check("(negative? 0)", "#f");
+  check("(negative? -1)", "#t");
+
+  check("(even? 0+0i)", "#f");
+  check("(even? 0.0)", "#f");
+  check("(even? 2)", "#t");
+  check("(even? 1)", "#f");
+  check("(even? 0)", "#t");
+  check("(even? -1)", "#f");
+
+  check("(odd? 1+0i)", "#f");
+  check("(odd? 1.0)", "#f");
+  check("(odd? 2)", "#f");
+  check("(odd? 1)", "#t");
+  check("(odd? 0)", "#f");
+  check("(odd? -1)", "#t");
+
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
