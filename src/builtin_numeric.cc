@@ -18,7 +18,7 @@ using namespace Procedure;
 namespace {
 
 template<typename Fun>
-inline void number_typep(const Fun& fun){
+inline void number_pred(Fun&& fun){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
@@ -26,46 +26,46 @@ inline void number_typep(const Fun& fun){
     return;
   }
 
-  VM.return_value = Lisp_ptr{fun(num->type())};
+  VM.return_value = Lisp_ptr{fun(num)};
 }
 
 void complexp(){
-  number_typep([](Number::Type t){
-      return t == Number::Type::complex
-        || t == Number::Type::real
-        || t == Number::Type::integer;
+  number_pred([](Number* n){
+      return n->type() == Number::Type::complex
+        || n->type() == Number::Type::real
+        || n->type() == Number::Type::integer;
     });
 }
 
 void realp(){
-  number_typep([](Number::Type t){
-      return t == Number::Type::real
-        || t == Number::Type::integer;
+  number_pred([](Number* n){
+      return n->type() == Number::Type::real
+        || n->type() == Number::Type::integer;
     });
 }
 
 void rationalp(){
-  number_typep([](Number::Type t){
-      return t == Number::Type::integer;
+  number_pred([](Number* n){
+      return n->type() == Number::Type::integer;
     });
 }
 
 void integerp(){
-  number_typep([](Number::Type t){
-      return t == Number::Type::integer;
+  number_pred([](Number* n){
+      return n->type() == Number::Type::integer;
     });
 }
 
 void exactp(){
-  number_typep([](Number::Type t){
-      return t == Number::Type::integer;
+  number_pred([](Number* n){
+      return n->type() == Number::Type::integer;
     });
 }
 
 void inexactp(){
-  number_typep([](Number::Type t){
-      return t == Number::Type::complex
-        || t == Number::Type::real;
+  number_pred([](Number* n){
+      return n->type() == Number::Type::complex
+        || n->type() == Number::Type::real;
     });
 }
 
@@ -207,103 +207,74 @@ void number_greater_eq(){
   
 
 void zerop(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    VM.return_value = Lisp_ptr{false};
-    return;
-  }
-
-  switch(num->type()){
-  case Number::Type::complex: {
-    auto c = num->get<Number::complex_type>();
-    VM.return_value = Lisp_ptr{c.real() == 0 && c.imag() == 0};
-    return;
-  }
-  case Number::Type::real:
-    VM.return_value = Lisp_ptr{num->get<Number::real_type>() == 0};
-    return;
-  case Number::Type::integer:
-    VM.return_value = Lisp_ptr{num->get<Number::integer_type>() == 0};
-    return;
-  case Number::Type::uninitialized:
-  default:
-    UNEXP_DEFAULT();
-  }
+  number_pred([](Number* num) -> bool {
+      switch(num->type()){
+      case Number::Type::complex: {
+        auto c = num->get<Number::complex_type>();
+        return (c.real() == 0 && c.imag() == 0);
+      }
+      case Number::Type::real:
+        return num->get<Number::real_type>() == 0;
+      case Number::Type::integer:
+        return num->get<Number::integer_type>() == 0;
+      case Number::Type::uninitialized:
+      default:
+        UNEXP_DEFAULT();
+      }
+    });
 }
-
 
 template<template <typename> class Fun>
-void number_positive_negative(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    VM.return_value = Lisp_ptr{false};
-    return;
-  }
+struct pos_neg_pred{
+  inline bool operator()(Number* num){
+    static constexpr Fun<Number::integer_type> fun;
 
-  switch(num->type()){
-  case Number::Type::complex:
-    VM.return_value = Lisp_ptr{false};
-    return;
-  case Number::Type::real: {
-    auto n = num->get<Number::real_type>();
-    auto fun = Fun<decltype(n)>();
-    VM.return_value = Lisp_ptr{fun(n, 0)};
-    return;
+    switch(num->type()){
+    case Number::Type::complex:
+      return false;
+    case Number::Type::real:
+      return fun(num->get<Number::real_type>(), 0);
+    case Number::Type::integer:
+      return fun(num->get<Number::integer_type>(), 0);
+    case Number::Type::uninitialized:
+    default:
+      UNEXP_DEFAULT();
+    }
   }
-  case Number::Type::integer: {
-    auto n = num->get<Number::integer_type>();
-    auto fun = Fun<decltype(n)>();
-    VM.return_value = Lisp_ptr{fun(n, 0)};
-    return;
-  }
-  case Number::Type::uninitialized:
-  default:
-    UNEXP_DEFAULT();
-  }
-}
+};
 
 void positivep(){
-  number_positive_negative<std::greater>();
+  number_pred(pos_neg_pred<std::greater>());
 }
 
 void negativep(){
-  number_positive_negative<std::less>();
+  number_pred(pos_neg_pred<std::less>());
 }
-
 
 template<template <typename> class Fun>
-void number_odd_even(){
-  static constexpr Fun<Number::integer_type> fun;
+struct even_odd_pred{
+  inline bool operator()(Number* num){
+    static constexpr Fun<Number::integer_type> fun;
 
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    VM.return_value = Lisp_ptr{false};
-    return;
+    switch(num->type()){
+    case Number::Type::complex:
+    case Number::Type::real:
+      return false;
+    case Number::Type::integer:
+      return fun(num->get<Number::integer_type>() % 2, 0);
+    case Number::Type::uninitialized:
+    default:
+      UNEXP_DEFAULT();
+    }
   }
-
-  switch(num->type()){
-  case Number::Type::complex:
-  case Number::Type::real:
-    VM.return_value = Lisp_ptr{false};
-    return;
-  case Number::Type::integer:
-    VM.return_value = Lisp_ptr{fun(num->get<Number::integer_type>() % 2, 0)};
-    return;
-  case Number::Type::uninitialized:
-  default:
-    UNEXP_DEFAULT();
-  }
-}
+};
 
 void oddp(){
-  number_odd_even<std::not_equal_to>();
+  number_pred(even_odd_pred<std::not_equal_to>());
 }
 
 void evenp(){
-  number_odd_even<std::equal_to>();
+  number_pred(even_odd_pred<std::equal_to>());
 }
 
 
