@@ -1,6 +1,7 @@
 #include <array>
 #include <iterator>
 #include <vector>
+#include <functional>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -92,15 +93,20 @@ void inexactp(){
                              || t == Number::Type::real};
 }
 
+
+void number_type_check_failed(const char* func_name, Lisp_ptr p){
+  fprintf(zs::err, "native func: %s: arg is not number! (%s)\n",
+          func_name, stringify(p.tag()));
+  VM.return_value = {};
+}
+
 void number_equal(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
   auto n1 = args.front().get<Number*>();
   if(!n1){
-    fprintf(zs::err, "native func '=': arg is not number! (%s)\n",
-            stringify(args.front().tag()));
-    VM.return_value = {};
+    number_type_check_failed("=", args.front());
     return;
   }
 
@@ -110,9 +116,7 @@ void number_equal(){
       i != e; ++i){
     auto n2 = i->get<Number*>();
     if(!n2){
-      fprintf(zs::err, "native func '=': arg is not number! (%s)\n",
-              stringify(i->tag()));
-      VM.return_value = {};
+      number_type_check_failed("=", *i);
       return;
     }
 
@@ -148,6 +152,81 @@ void number_equal(){
 
   VM.return_value = Lisp_ptr{true};
 }
+
+
+bool number_comparable_check(Number* n){
+  switch(n->type()){
+  case Number::Type::complex:
+    fprintf(zs::err, "native func: number compare: complex cannot be ordinated\n");
+    VM.return_value = {};
+    return false;
+  case Number::Type::real:
+  case Number::Type::integer:
+    return true;
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+template<typename Fun>
+void number_compare(const char* name, const Fun& fun){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(VM.stack, args);
+
+  auto n_obj = args.front().get<Number*>();
+  if(!n_obj){
+    number_type_check_failed(name, args.front());
+    return;
+  }
+
+  if(!number_comparable_check(n_obj)){
+    return;
+  }
+
+  auto n1 = n_obj->coerce<Number::real_type>();  
+
+  for(auto i = next(begin(args)), e = end(args);
+      i != e; ++i){
+    n_obj = i->get<Number*>();
+    if(!n_obj){
+      number_type_check_failed(name, *i);
+      return;
+    }
+
+    if(!number_comparable_check(n_obj)){
+      return;
+    }
+
+    auto n2 = n_obj->coerce<Number::real_type>();
+
+    if(!fun(n1, n2)){
+      VM.return_value = Lisp_ptr{false};
+      return;
+    }
+
+    n1 = n2;
+  }
+
+  VM.return_value = Lisp_ptr{true};
+}
+
+void number_less(){
+  number_compare("<", std::less<Number::real_type>());
+}
+  
+void number_greater(){
+  number_compare(">", std::greater<Number::real_type>());
+}
+  
+void number_less_eq(){
+  number_compare("<=", std::less_equal<Number::real_type>());
+}
+  
+void number_greater_eq(){
+  number_compare(">=", std::greater_equal<Number::real_type>());
+}
+  
 
 void plus_2(){
   auto args = pick_args<2>();
@@ -202,6 +281,18 @@ constexpr struct Entry {
 
   {"=", {
       number_equal,
+      Calling::function, {2, true}}},
+  {"<", {
+      number_less,
+      Calling::function, {2, true}}},
+  {">", {
+      number_greater,
+      Calling::function, {2, true}}},
+  {"<=", {
+      number_less_eq,
+      Calling::function, {2, true}}},
+  {">=", {
+      number_greater_eq,
       Calling::function, {2, true}}},
 
   {"+", {
