@@ -354,7 +354,7 @@ void plus_2(){
   VM.return_value = newn;
 }
 
-nn
+
 constexpr struct Entry {
   const char* name;
   const NProcedure func;
