@@ -331,6 +331,58 @@ void evenp(){
 }
 
 
+template<template <typename> class Fun>
+void number_minmax(const char* name){
+  static constexpr Fun<Number::real_type> fun;
+
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(VM.stack, args);
+
+  auto n_obj = args.front().get<Number*>();
+  if(!n_obj){
+    number_type_check_failed(name, args.front());
+    return;
+  }
+
+  if(!number_comparable_check(n_obj)){
+    return;
+  }
+
+  auto minmax_n_obj = n_obj;
+  auto minmax_n = n_obj->coerce<Number::real_type>();  
+
+  for(auto i = next(begin(args)), e = end(args);
+      i != e; ++i){
+    n_obj = i->get<Number*>();
+    if(!n_obj){
+      number_type_check_failed(name, *i);
+      return;
+    }
+
+    if(!number_comparable_check(n_obj)){
+      return;
+    }
+
+    auto n2 = n_obj->coerce<Number::real_type>();
+
+    if(fun(n2, minmax_n)){
+      minmax_n_obj = n_obj;
+      minmax_n = n2;
+    }
+  }
+
+  VM.return_value = Lisp_ptr{minmax_n_obj};
+}
+
+void number_max(){
+  number_minmax<std::greater>("max");
+}
+
+void number_min(){
+  number_minmax<std::less>("min");
+}
+
+
 void plus_2(){
   auto args = pick_args<2>();
 
@@ -413,6 +465,13 @@ constexpr struct Entry {
   {"even?", {
       evenp,
       Calling::function, {1, false}}},
+
+  {"max", {
+      number_max,
+      Calling::function, {2, true}}},
+  {"min", {
+      number_min,
+      Calling::function, {2, true}}},
 
   {"+", {
       plus_2,
