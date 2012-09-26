@@ -65,6 +65,10 @@ int main(){
   check("(exact? 3)", "#t");
   check("(inexact? 3)", "#f");
 
+  check("(= 1 1)", "#t");
+  check("(= 1 1.0)", "#f");
+  check("(= 1 1 1 1 1 1)", "#t");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

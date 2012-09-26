@@ -1,4 +1,6 @@
 #include <array>
+#include <iterator>
+#include <vector>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -90,6 +92,63 @@ void inexactp(){
                              || t == Number::Type::real};
 }
 
+void number_equal(){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(VM.stack, args);
+
+  auto n1 = args.front().get<Number*>();
+  if(!n1){
+    fprintf(zs::err, "native func '=': arg is not number! (%s)\n",
+            stringify(args.front().tag()));
+    VM.return_value = {};
+    return;
+  }
+
+  const auto n_type = n1->type();
+
+  for(auto i = next(begin(args)), e = end(args);
+      i != e; ++i){
+    auto n2 = i->get<Number*>();
+    if(!n2){
+      fprintf(zs::err, "native func '=': arg is not number! (%s)\n",
+              stringify(i->tag()));
+      VM.return_value = {};
+      return;
+    }
+
+    if(n2->type() != n_type){
+      VM.return_value = Lisp_ptr{false};
+      return;
+    }
+
+    switch(n_type){
+    case Number::Type::complex:
+      if(n1->get<Number::complex_type>() != n2->get<Number::complex_type>()){
+        VM.return_value = Lisp_ptr{false};
+        return;
+      }
+      break;
+    case Number::Type::real:
+      if(n1->get<Number::real_type>() != n2->get<Number::real_type>()){
+        VM.return_value = Lisp_ptr{false};
+        return;
+      }
+      break;
+    case Number::Type::integer:
+      if(n1->get<Number::integer_type>() != n2->get<Number::integer_type>()){
+        VM.return_value = Lisp_ptr{false};
+        return;
+      }
+      break;
+    case Number::Type::uninitialized:
+    default:
+      UNEXP_DEFAULT();
+    }
+  }
+
+  VM.return_value = Lisp_ptr{true};
+}
+
 void plus_2(){
   auto args = pick_args<2>();
 
@@ -140,6 +199,10 @@ constexpr struct Entry {
   {"inexact?", {
       inexactp,
       Calling::function, {1, false}}},
+
+  {"=", {
+      number_equal,
+      Calling::function, {2, true}}},
 
   {"+", {
       plus_2,
