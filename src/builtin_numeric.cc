@@ -17,7 +17,8 @@ using namespace Procedure;
 
 namespace {
 
-void complexp(){
+template<typename Fun>
+inline void number_typep(const Fun& fun){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
@@ -25,72 +26,47 @@ void complexp(){
     return;
   }
 
-  auto t = num->type();
-  VM.return_value = Lisp_ptr{t == Number::Type::complex
-                             || t == Number::Type::real
-                             || t == Number::Type::integer};
+  VM.return_value = Lisp_ptr{fun(num->type())};
+}
+
+void complexp(){
+  number_typep([](Number::Type t){
+      return t == Number::Type::complex
+        || t == Number::Type::real
+        || t == Number::Type::integer;
+    });
 }
 
 void realp(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    VM.return_value = Lisp_ptr{false};
-    return;
-  }
-
-  auto t = num->type();
-  VM.return_value = Lisp_ptr{t == Number::Type::real
-                             || t == Number::Type::integer};
+  number_typep([](Number::Type t){
+      return t == Number::Type::real
+        || t == Number::Type::integer;
+    });
 }
 
 void rationalp(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    VM.return_value = Lisp_ptr{false};
-    return;
-  }
-
-  auto t = num->type();
-  VM.return_value = Lisp_ptr{t == Number::Type::integer};
+  number_typep([](Number::Type t){
+      return t == Number::Type::integer;
+    });
 }
 
 void integerp(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    VM.return_value = Lisp_ptr{false};
-    return;
-  }
-
-  auto t = num->type();
-  VM.return_value = Lisp_ptr{t == Number::Type::integer};
+  number_typep([](Number::Type t){
+      return t == Number::Type::integer;
+    });
 }
 
 void exactp(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    VM.return_value = Lisp_ptr{false};
-    return;
-  }
-
-  auto t = num->type();
-  VM.return_value = Lisp_ptr{t == Number::Type::integer};
+  number_typep([](Number::Type t){
+      return t == Number::Type::integer;
+    });
 }
 
 void inexactp(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    VM.return_value = Lisp_ptr{false};
-    return;
-  }
-
-  auto t = num->type();
-  VM.return_value = Lisp_ptr{t == Number::Type::complex
-                             || t == Number::Type::real};
+  number_typep([](Number::Type t){
+      return t == Number::Type::complex
+        || t == Number::Type::real;
+    });
 }
 
 
