@@ -210,7 +210,7 @@ Token tokenize_character(FILE* f){
   const auto check_name = [&](const char* str) -> bool {
     for(const char* c = str; *c; ++c){
       auto get_c = fgetc(f);
-      if(get_c != *c || is_delimiter(get_c)){
+      if(get_c != tolower(*c) || is_delimiter(get_c)){
         ungetc(get_c, f);
         return false;
       }
@@ -219,25 +219,34 @@ Token tokenize_character(FILE* f){
   };
 
   auto ret_char = fgetc(f);
-
-  // check character name
-  switch(ret_char){
-  case EOF:
-    fprintf(zs::err, "reader error: not ended char name!\n");
+  if(ret_char == EOF){
+    fprintf(zs::err, "reader error: no char found after '#\\'!\n");
     return {};
-  case 's':
-    if(check_name("pace")){
-      return Token{' '};
-    }
-    break;
-  case 'n':
-    if(check_name("ewline")){
-      return Token{'\n'};
-    }
-    break;
   }
 
-  return Token{static_cast<char>(ret_char)};
+  auto next = fgetc(f);
+  if(is_delimiter(next)){
+    return Token{static_cast<char>(ret_char)};
+  }else{
+    ungetc(next, f);
+
+    // check character name
+    switch(tolower(ret_char)){
+    case 's':
+      if(check_name("pace")){
+        return Token{' '};
+      }
+      break;
+    case 'n':
+      if(check_name("ewline")){
+        return Token{'\n'};
+      }
+      break;
+    }
+
+    fprintf(zs::err, "reader error: not supprted char name!\n");
+    return {};
+  }
 }
 
 Token tokenize_string(FILE* f){
