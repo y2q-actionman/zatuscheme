@@ -31,22 +31,21 @@ inline void number_pred(Fun&& fun){
 
 void complexp(){
   number_pred([](Number* n){
-      return n->type() == Number::Type::complex
-        || n->type() == Number::Type::real
-        || n->type() == Number::Type::integer;
+      return n->type() >= Number::Type::integer;
     });
 }
 
 void realp(){
   number_pred([](Number* n){
-      return n->type() == Number::Type::real
-        || n->type() == Number::Type::integer;
+      return n->type() >= Number::Type::integer
+        && n->type() <= Number::Type::real;
     });
 }
 
 void rationalp(){
   number_pred([](Number* n){
-      return n->type() == Number::Type::integer;
+      return n->type() >= Number::Type::integer
+        && n->type() < Number::Type::real;
     });
 }
 

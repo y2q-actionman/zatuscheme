@@ -14,9 +14,9 @@ public:
 
   enum class Type {
     uninitialized = 0,
-      complex,
+      integer,
       real,
-      integer
+      complex
   };
 
 
