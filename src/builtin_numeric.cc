@@ -2,6 +2,8 @@
 #include <iterator>
 #include <vector>
 #include <functional>
+#include <algorithm>
+#include <numeric>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -79,53 +81,40 @@ void number_equal(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
-  auto n1 = args.front().get<Number*>();
-  if(!n1){
-    number_type_check_failed("=", args.front());
+  Lisp_ptr non_number_found = {};
+
+  auto ret = std::is_sorted(begin(args), end(args),
+                            [&](const Lisp_ptr& p1, const Lisp_ptr& p2) -> bool {
+                              auto n1 = p1.get<Number*>();
+                              if(!n1 || n1->type() < Number::Type::integer){
+                                non_number_found = p1;
+                                return true;
+                              }
+                              
+                              auto n2 = p2.get<Number*>();
+                              if(!n2 || n2->type() < Number::Type::integer){
+                                non_number_found = p2;
+                                return true;
+                              }
+
+                              if(n1->type() == Number::Type::integer && n2->type() == Number::Type::integer){
+                                return (n1->get<Number::integer_type>()
+                                        == n2->get<Number::integer_type>()) ? false : true;
+                              }else if(n1->type() <= Number::Type::real && n2->type() <= Number::Type::real){
+                                return (n1->coerce<Number::real_type>()
+                                        == n2->coerce<Number::real_type>()) ? false : true;
+                              }else{
+                                return (n1->coerce<Number::complex_type>()
+                                        == n2->coerce<Number::complex_type>()) ? false : true;
+                              }
+                            });
+
+  if(non_number_found){
+    number_type_check_failed("=", non_number_found);
     return;
   }
 
-  const auto n_type = n1->type();
-
-  for(auto i = next(begin(args)), e = end(args);
-      i != e; ++i){
-    auto n2 = i->get<Number*>();
-    if(!n2){
-      number_type_check_failed("=", *i);
-      return;
-    }
-
-    if(n2->type() != n_type){
-      VM.return_value = Lisp_ptr{false};
-      return;
-    }
-
-    switch(n_type){
-    case Number::Type::complex:
-      if(n1->get<Number::complex_type>() != n2->get<Number::complex_type>()){
-        VM.return_value = Lisp_ptr{false};
-        return;
-      }
-      break;
-    case Number::Type::real:
-      if(n1->get<Number::real_type>() != n2->get<Number::real_type>()){
-        VM.return_value = Lisp_ptr{false};
-        return;
-      }
-      break;
-    case Number::Type::integer:
-      if(n1->get<Number::integer_type>() != n2->get<Number::integer_type>()){
-        VM.return_value = Lisp_ptr{false};
-        return;
-      }
-      break;
-    case Number::Type::uninitialized:
-    default:
-      UNEXP_DEFAULT();
-    }
-  }
-
-  VM.return_value = Lisp_ptr{true};
+  VM.return_value = Lisp_ptr{ret};
 }
 
 

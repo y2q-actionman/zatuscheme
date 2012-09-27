@@ -10,7 +10,6 @@ void check(const char* input, const char* expect){
   result = read_eval_print_test(input, expect);
 }
 
-
 int main(){
   install_builtin();
   install_builtin_numeric();
@@ -67,7 +66,7 @@ int main(){
 
 
   check("(= 1 1)", "#t");
-  check("(= 1 1.0)", "#f");
+  check("(= 1 1.0)", "#t");
   check("(= 1 1 1 1 1 1)", "#t");
 
   check("(> 2 1)", "#t");
