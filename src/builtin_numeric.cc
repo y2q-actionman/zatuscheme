@@ -85,10 +85,10 @@ struct complex_found{
 
 template<template <typename> class Fun,
          class ComplexComparator = complex_found>
-struct number_equal_pred {
+struct number_comparator {
   Lisp_ptr non_number_found;
 
-  number_equal_pred() : non_number_found(){}
+  number_comparator() : non_number_found(){}
 
   inline bool operator()(const Lisp_ptr& p1, const Lisp_ptr& p2){
     auto n1 = p1.get<Number*>();
@@ -105,20 +105,26 @@ struct number_equal_pred {
 
     if(n1->type() == Number::Type::integer && n2->type() == Number::Type::integer){
       static const Fun<Number::integer_type> fun;
-      return !fun(n2->get<Number::integer_type>(), n1->get<Number::integer_type>());
+      return fun(n1->get<Number::integer_type>(), n2->get<Number::integer_type>());
     }else if(n1->type() <= Number::Type::real && n2->type() <= Number::Type::real){
       static const Fun<Number::real_type> fun;
-      return !fun(n2->coerce<Number::real_type>(), n1->coerce<Number::real_type>());
+      return fun(n1->coerce<Number::real_type>(), n2->coerce<Number::real_type>());
     }else{
       static const ComplexComparator fun;
-      return !fun(n2->coerce<Number::complex_type>(), n1->coerce<Number::complex_type>());
+      return fun(n1->coerce<Number::complex_type>(), n2->coerce<Number::complex_type>());
     }
   }
+
+  struct for_is_sorted : public number_comparator {
+    inline bool operator()(const Lisp_ptr& p1, const Lisp_ptr& p2){
+      return !number_comparator::operator()(p2, p1);
+    }
+  };
 };
 
 
 template<typename Fun>
-void number_compare(const char* name, Fun&& fun){
+inline void number_compare(const char* name, Fun&& fun){
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
@@ -132,24 +138,29 @@ void number_compare(const char* name, Fun&& fun){
 }
 
 void number_equal(){
-  number_compare("=", number_equal_pred<std::equal_to, 
-                                        std::equal_to<Number::complex_type> >());
+  number_compare("=", 
+                 number_comparator<std::equal_to,
+                                   std::equal_to<Number::complex_type> >::for_is_sorted());
 }
 
 void number_less(){
-  number_compare("<", number_equal_pred<std::less>()); 
+  number_compare("<",
+                 number_comparator<std::less>::for_is_sorted()); 
 }
 
 void number_greater(){
-  number_compare(">", number_equal_pred<std::greater>());
+  number_compare(">",
+                 number_comparator<std::greater>::for_is_sorted());
 }
   
 void number_less_eq(){
-  number_compare("<=", number_equal_pred<std::less_equal>());
+  number_compare("<=",
+                 number_comparator<std::less_equal>::for_is_sorted());
 }
   
 void number_greater_eq(){
-  number_compare(">=", number_equal_pred<std::greater_equal>());
+  number_compare(">=",
+                 number_comparator<std::greater_equal>::for_is_sorted());
 }
 
 
