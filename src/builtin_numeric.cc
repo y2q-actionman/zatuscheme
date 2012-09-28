@@ -77,40 +77,48 @@ void number_type_check_failed(const char* func_name, Lisp_ptr p){
   VM.return_value = {};
 }
 
+struct number_equal_pred {
+  Lisp_ptr non_number_found;
+
+  number_equal_pred() : non_number_found(){}
+
+  inline bool operator()(const Lisp_ptr& p1, const Lisp_ptr& p2){
+    auto n1 = p1.get<Number*>();
+    if(!n1 || n1->type() < Number::Type::integer){
+      non_number_found = p1;
+      return true;
+    }
+                              
+    auto n2 = p2.get<Number*>();
+    if(!n2 || n2->type() < Number::Type::integer){
+      non_number_found = p2;
+      return true;
+    }
+
+    if(n1->type() == Number::Type::integer && n2->type() == Number::Type::integer){
+      return (n1->get<Number::integer_type>()
+              == n2->get<Number::integer_type>()) ? false : true;
+    }else if(n1->type() <= Number::Type::real && n2->type() <= Number::Type::real){
+      return (n1->coerce<Number::real_type>()
+              == n2->coerce<Number::real_type>()) ? false : true;
+    }else{
+      return (n1->coerce<Number::complex_type>()
+              == n2->coerce<Number::complex_type>()) ? false : true;
+    }
+  }
+};
+
+  
+
 void number_equal(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
-  Lisp_ptr non_number_found = {};
-
-  auto ret = std::is_sorted(begin(args), end(args),
-                            [&](const Lisp_ptr& p1, const Lisp_ptr& p2) -> bool {
-                              auto n1 = p1.get<Number*>();
-                              if(!n1 || n1->type() < Number::Type::integer){
-                                non_number_found = p1;
-                                return true;
-                              }
-                              
-                              auto n2 = p2.get<Number*>();
-                              if(!n2 || n2->type() < Number::Type::integer){
-                                non_number_found = p2;
-                                return true;
-                              }
-
-                              if(n1->type() == Number::Type::integer && n2->type() == Number::Type::integer){
-                                return (n1->get<Number::integer_type>()
-                                        == n2->get<Number::integer_type>()) ? false : true;
-                              }else if(n1->type() <= Number::Type::real && n2->type() <= Number::Type::real){
-                                return (n1->coerce<Number::real_type>()
-                                        == n2->coerce<Number::real_type>()) ? false : true;
-                              }else{
-                                return (n1->coerce<Number::complex_type>()
-                                        == n2->coerce<Number::complex_type>()) ? false : true;
-                              }
-                            });
-
-  if(non_number_found){
-    number_type_check_failed("=", non_number_found);
+  number_equal_pred fun;
+  
+  auto ret = std::is_sorted(begin(args), end(args), fun);
+  if(fun.non_number_found){
+    number_type_check_failed("=", fun.non_number_found);
     return;
   }
 
