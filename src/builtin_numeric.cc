@@ -79,7 +79,7 @@ void number_type_check_failed(const char* func_name, Lisp_ptr p){
 struct complex_found{
   bool operator()(const Number::complex_type&, const Number::complex_type&) const{
     fprintf(zs::err, "native func: number compare: complex cannot be ordinated\n");
-    return true;
+    return false;
   }
 };
 
