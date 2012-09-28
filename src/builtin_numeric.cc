@@ -77,8 +77,9 @@ void number_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 struct complex_found{
+  static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
   bool operator()(const Number::complex_type&, const Number::complex_type&) const{
-    fprintf(zs::err, "native func: number compare: complex cannot be ordinated\n");
+    fprintf(zs::err, msg);
     return false;
   }
 };
@@ -164,21 +165,6 @@ void number_greater_eq(){
 }
 
 
-bool number_comparable_check(Number* n){
-  switch(n->type()){
-  case Number::Type::complex:
-    fprintf(zs::err, "native func: number compare: complex cannot be ordinated\n");
-    VM.return_value = {};
-    return false;
-  case Number::Type::real:
-  case Number::Type::integer:
-    return true;
-  case Number::Type::uninitialized:
-  default:
-    UNEXP_DEFAULT();
-  }
-}
-
 void zerop(){
   number_pred([](Number* num) -> bool {
       switch(num->type()){
@@ -251,55 +237,85 @@ void evenp(){
 }
 
 
-template<template <typename> class Fun>
-void number_minmax(const char* name){
-  static constexpr Fun<Number::real_type> fun;
-
+template<class Fun>
+inline
+void number_accumulate(const char* name, Number&& init, Fun&& fun){
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
-  auto n_obj = args.front().get<Number*>();
-  if(!n_obj){
-    number_type_check_failed(name, args.front());
-    return;
-  }
-
-  if(!number_comparable_check(n_obj)){
-    return;
-  }
-
-  auto minmax_n_obj = n_obj;
-  auto minmax_n = n_obj->coerce<Number::real_type>();  
-
-  for(auto i = next(begin(args)), e = end(args);
+  for(auto i = begin(args), e = end(args);
       i != e; ++i){
-    n_obj = i->get<Number*>();
-    if(!n_obj){
+    auto n = i->get<Number*>();
+    if(!n){
       number_type_check_failed(name, *i);
       return;
     }
 
-    if(!number_comparable_check(n_obj)){
+    if(!fun(init, *n)){
+      VM.return_value = {};
       return;
-    }
-
-    auto n2 = n_obj->coerce<Number::real_type>();
-
-    if(fun(n2, minmax_n)){
-      minmax_n_obj = n_obj;
-      minmax_n = n2;
     }
   }
 
-  VM.return_value = Lisp_ptr{minmax_n_obj};
+  VM.return_value = {new Number(init)};
 }
 
 void number_max(){
-  number_minmax<std::greater>("max");
+  number_accumulate("max", Number(),
+                    [](Number& n1, const Number& n2) -> bool {
+                      if(n1.type() == Number::Type::uninitialized){
+                        n1 = n2;
+                        return true;
+                      }
+
+                      if(n2.type() == Number::Type::uninitialized){
+                        return true;
+                      }
+
+                      if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
+                        if(n2.get<Number::integer_type>() > n1.get<Number::integer_type>())
+                          n1 = n2;
+                        return true;
+                      }
+
+                      if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
+                        if(n2.get<Number::real_type>() > n1.get<Number::real_type>())
+                          n1 = n2;
+                        return true;
+                      }
+
+                      fprintf(zs::err, complex_found::msg);
+                      return false;
+                    });
 }
 
 void number_min(){
-  number_minmax<std::less>("min");
+  number_accumulate("min", Number(),
+                    [](Number& n1, const Number& n2) -> bool {
+                      if(n1.type() == Number::Type::uninitialized){
+                        n1 = n2;
+                        return true;
+                      }
+
+                      if(n2.type() == Number::Type::uninitialized){
+                        return true;
+                      }
+
+                      if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
+                        if(n2.get<Number::integer_type>() < n1.get<Number::integer_type>())
+                          n1 = n2;
+                        return true;
+                      }
+
+                      if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
+                        if(n2.get<Number::real_type>() < n1.get<Number::real_type>())
+                          n1 = n2;
+                        return true;
+                      }
+
+                      fprintf(zs::err, complex_found::msg);
+                      return false;
+                    });
 }
 
 
