@@ -39,8 +39,8 @@ public:
   Type type() const
   { return type_; };
 
-  template <typename T> 
-  typename zs::call_traits<T>::type get() const;
+  template <typename T> typename zs::call_traits<T>::type get() const;
+  template <typename T> T& get();
 
   template <typename T> T coerce() const;
 

@@ -58,6 +58,27 @@ Number::Number(integer_type i) :
 
 template <>
 inline
+Number::complex_type& Number::get<Number::complex_type>(){
+  assert(type_ == Type::complex);
+  return z_;
+}
+
+template <>
+inline
+Number::real_type& Number::get<Number::real_type>(){
+  assert(type_ == Type::real);
+  return f_;
+}
+
+template <>
+inline
+Number::integer_type& Number::get<Number::integer_type>(){
+  assert(type_ == Type::integer);
+  return i_;
+}
+
+template <>
+inline
 const Number::complex_type& Number::get<Number::complex_type>() const{
   assert(type_ == Type::complex);
   return z_;

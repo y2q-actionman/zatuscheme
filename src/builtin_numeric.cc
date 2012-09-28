@@ -273,14 +273,16 @@ void number_max(){
                       }
 
                       if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-                        if(n2.get<Number::integer_type>() > n1.get<Number::integer_type>())
+                        if(n1.get<Number::integer_type>() < n2.get<Number::integer_type>())
                           n1 = n2;
                         return true;
                       }
 
                       if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
-                        if(n2.get<Number::real_type>() > n1.get<Number::real_type>())
-                          n1 = n2;
+                        if(n1.coerce<Number::real_type>() < n2.coerce<Number::real_type>())
+                          n1 = Number{n2.coerce<Number::real_type>()};
+                        if(n1.type() != Number::Type::real)
+                          n1 = Number{n1.coerce<Number::real_type>()};
                         return true;
                       }
 
@@ -302,14 +304,16 @@ void number_min(){
                       }
 
                       if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-                        if(n2.get<Number::integer_type>() < n1.get<Number::integer_type>())
+                        if(n1.get<Number::integer_type>() > n2.get<Number::integer_type>())
                           n1 = n2;
                         return true;
                       }
 
                       if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
-                        if(n2.get<Number::real_type>() < n1.get<Number::real_type>())
-                          n1 = n2;
+                        if(n1.coerce<Number::real_type>() > n2.coerce<Number::real_type>())
+                          n1 = Number{n2.coerce<Number::real_type>()};
+                        if(n1.type() != Number::Type::real)
+                          n1 = Number{n1.coerce<Number::real_type>()};
                         return true;
                       }
 
@@ -318,28 +322,49 @@ void number_min(){
                     });
 }
 
+void number_plus(){
+  number_accumulate("+", Number(0l),
+                    [](Number& n1, const Number& n2) -> bool {
+                      if(n1.type() == Number::Type::uninitialized){
+                        n1 = n2;
+                        return true;
+                      }
 
-void plus_2(){
-  auto args = pick_args<2>();
+                      if(n2.type() == Number::Type::uninitialized){
+                        return true;
+                      }
 
-  VM.return_value = {};
+                      // n1 type <= n2 type
+                      if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
+                        n1.get<Number::integer_type>() += n2.get<Number::integer_type>();
+                        return true;
+                      }
 
-  Number* n1 = args[0].get<Number*>();
-  if(!n1){
-    fprintf(zs::err, "native func '+': first arg is not number! %s\n",
-            stringify(args[0].tag()));
-    return;
-  }
+                      if(n1.type() == Number::Type::real && n2.type() <= Number::Type::real){
+                        n1.get<Number::real_type>() += n2.coerce<Number::real_type>();
+                        return true;
+                      }
 
-  Number* n2 = args[1].get<Number*>();
-  if(!n2){
-    fprintf(zs::err, "native func '+': second arg is not number! %s\n",
-            stringify(args[1].tag()));
-    return;
-  }
+                      if(n1.type() == Number::Type::complex && n2.type() <= Number::Type::complex){
+                        n1.get<Number::complex_type>() += n2.coerce<Number::complex_type>();
+                        return true;
+                      }
 
-  Number* newn = new Number(n1->get<long>() + n2->get<long>());
-  VM.return_value = newn;
+                      // n1 type > n2 type
+                      if(n1.type() < Number::Type::real && n2.type() == Number::Type::real){
+                        n1 = Number{n1.coerce<Number::real_type>() + n2.get<Number::real_type>()};
+                        return true;
+                      }
+
+                      if(n1.type() < Number::Type::complex && n2.type() == Number::Type::complex){
+                        n1 = Number{n1.coerce<Number::complex_type>() + n2.get<Number::complex_type>()};
+                        return true;
+                      }
+
+                      // ???
+                      fprintf(zs::err, "native func: +: failed at numeric conversion!\n");
+                      return false;
+                    });
 }
 
 
@@ -410,8 +435,8 @@ constexpr struct Entry {
       Calling::function, {2, true}}},
 
   {"+", {
-      plus_2,
-      Calling::function, {2, true}}}
+      number_plus,
+      Calling::function, {0, true}}}
 };
 
 } //namespace
