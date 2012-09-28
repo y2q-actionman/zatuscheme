@@ -70,13 +70,21 @@ void inexactp(){
     });
 }
 
-
 void number_type_check_failed(const char* func_name, Lisp_ptr p){
   fprintf(zs::err, "native func: %s: arg is not number! (%s)\n",
           func_name, stringify(p.tag()));
   VM.return_value = {};
 }
 
+struct complex_found{
+  bool operator()(const Number::complex_type&, const Number::complex_type&) const{
+    fprintf(zs::err, "native func: number compare: complex cannot be ordinated\n");
+    return true;
+  }
+};
+
+template<template <typename> class Fun,
+         class ComplexComparator = complex_found>
 struct number_equal_pred {
   Lisp_ptr non_number_found;
 
@@ -96,33 +104,52 @@ struct number_equal_pred {
     }
 
     if(n1->type() == Number::Type::integer && n2->type() == Number::Type::integer){
-      return (n1->get<Number::integer_type>()
-              == n2->get<Number::integer_type>()) ? false : true;
+      static const Fun<Number::integer_type> fun;
+      return !fun(n2->get<Number::integer_type>(), n1->get<Number::integer_type>());
     }else if(n1->type() <= Number::Type::real && n2->type() <= Number::Type::real){
-      return (n1->coerce<Number::real_type>()
-              == n2->coerce<Number::real_type>()) ? false : true;
+      static const Fun<Number::real_type> fun;
+      return !fun(n2->coerce<Number::real_type>(), n1->coerce<Number::real_type>());
     }else{
-      return (n1->coerce<Number::complex_type>()
-              == n2->coerce<Number::complex_type>()) ? false : true;
+      static const ComplexComparator fun;
+      return !fun(n2->coerce<Number::complex_type>(), n1->coerce<Number::complex_type>());
     }
   }
 };
 
-  
 
-void number_equal(){
+template<typename Fun>
+void number_compare(const char* name, Fun&& fun){
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
-  number_equal_pred fun;
-  
   auto ret = std::is_sorted(begin(args), end(args), fun);
   if(fun.non_number_found){
-    number_type_check_failed("=", fun.non_number_found);
+    number_type_check_failed(name, fun.non_number_found);
     return;
   }
 
   VM.return_value = Lisp_ptr{ret};
+}
+
+void number_equal(){
+  number_compare("=", number_equal_pred<std::equal_to, 
+                                        std::equal_to<Number::complex_type> >());
+}
+
+void number_less(){
+  number_compare("<", number_equal_pred<std::less>()); 
+}
+
+void number_greater(){
+  number_compare(">", number_equal_pred<std::greater>());
+}
+  
+void number_less_eq(){
+  number_compare("<=", number_equal_pred<std::less_equal>());
+}
+  
+void number_greater_eq(){
+  number_compare(">=", number_equal_pred<std::greater_equal>());
 }
 
 
@@ -140,67 +167,6 @@ bool number_comparable_check(Number* n){
     UNEXP_DEFAULT();
   }
 }
-
-template<template <typename> class Fun>
-void number_compare(const char* name){
-  static constexpr Fun<Number::real_type> fun;
-
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(VM.stack, args);
-
-  auto n_obj = args.front().get<Number*>();
-  if(!n_obj){
-    number_type_check_failed(name, args.front());
-    return;
-  }
-
-  if(!number_comparable_check(n_obj)){
-    return;
-  }
-
-  auto n1 = n_obj->coerce<Number::real_type>();  
-
-  for(auto i = next(begin(args)), e = end(args);
-      i != e; ++i){
-    n_obj = i->get<Number*>();
-    if(!n_obj){
-      number_type_check_failed(name, *i);
-      return;
-    }
-
-    if(!number_comparable_check(n_obj)){
-      return;
-    }
-
-    auto n2 = n_obj->coerce<Number::real_type>();
-
-    if(!fun(n1, n2)){
-      VM.return_value = Lisp_ptr{false};
-      return;
-    }
-
-    n1 = n2;
-  }
-
-  VM.return_value = Lisp_ptr{true};
-}
-
-void number_less(){
-  number_compare<std::less>("<");
-}
-  
-void number_greater(){
-  number_compare<std::greater>(">");
-}
-  
-void number_less_eq(){
-  number_compare<std::less_equal>("<=");
-}
-  
-void number_greater_eq(){
-  number_compare<std::greater_equal>(">=");
-}
-  
 
 void zerop(){
   number_pred([](Number* num) -> bool {
