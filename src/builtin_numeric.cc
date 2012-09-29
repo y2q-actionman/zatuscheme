@@ -380,9 +380,6 @@ void number_minus(){
     VM.stack.pop();
 
     switch(n->type()){
-    case Number::Type::uninitialized:
-      VM.return_value = {};
-      return;
     case Number::Type::integer:
       VM.return_value = {new Number(-n->get<Number::integer_type>())};
       return;
@@ -394,6 +391,7 @@ void number_minus(){
       VM.return_value = {new Number(Number::complex_type(-c.real(), -c.imag()))};
       return;
     }
+    case Number::Type::uninitialized:
     default:
       UNEXP_DEFAULT();
     }
@@ -416,9 +414,6 @@ void number_divide(){
     VM.stack.pop();
 
     switch(n->type()){
-    case Number::Type::uninitialized:
-      VM.return_value = {};
-      return;
     case Number::Type::integer:
       VM.return_value = {new Number(1.0 / n->get<Number::integer_type>())};
       return;
@@ -430,6 +425,7 @@ void number_divide(){
       VM.return_value = {new Number(1.0 / c)};
       return;
     }
+    case Number::Type::uninitialized:
     default:
       UNEXP_DEFAULT();
     }
@@ -451,9 +447,6 @@ void number_abs(){
   }
 
   switch(n->type()){
-  case Number::Type::uninitialized:
-    VM.return_value = {};
-    return;
   case Number::Type::integer: {
     auto i = n->get<Number::integer_type>();
     VM.return_value = {(i >= 0) ? n : new Number(-i)};
@@ -469,6 +462,7 @@ void number_abs(){
     VM.return_value = {};
     return;
   }
+  case Number::Type::uninitialized:
   default:
     UNEXP_DEFAULT();
   }
@@ -605,6 +599,7 @@ void number_denominator(){
   VM.return_value = {};
 }
 
+
 template<typename Fun>
 inline
 void number_rounding(const char* name, Fun&& fun){
@@ -617,23 +612,17 @@ void number_rounding(const char* name, Fun&& fun){
   }
 
   switch(n->type()){
-  case Number::Type::uninitialized:
-    VM.return_value = {};
-    return;
-  case Number::Type::integer: {
+  case Number::Type::integer:
     VM.return_value = {n};
     return;
-  }
-  case Number::Type::real: {
-    auto d = n->get<Number::real_type>();
-    VM.return_value = {new Number(fun(d))};
+  case Number::Type::real:
+    VM.return_value = {new Number(fun(n->get<Number::real_type>()))};
     return;
-  }
-  case Number::Type::complex: {
+  case Number::Type::complex:
     fprintf(zs::err, complex_found::msg);
     VM.return_value = {};
     return;
-  }
+  case Number::Type::uninitialized:
   default:
     UNEXP_DEFAULT();
   }
@@ -655,6 +644,7 @@ void number_round(){
   number_rounding("round", [](Number::real_type d){ return std::round(d); });
 }
 
+
 void number_rationalize(){
   auto args = pick_args<2>();
 
@@ -672,6 +662,314 @@ void number_rationalize(){
 
   fprintf(zs::err, "native func: 'rationalize' is not implemented.\n");
   VM.return_value = {};
+}
+
+
+template<typename Fun>
+inline
+void number_unary_op(const char* name, Fun&& fun){
+  auto arg1 = pick_args_1();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    number_type_check_failed(name, arg1);
+    return;
+  }
+
+  switch(n->type()){
+  case Number::Type::integer:
+  case Number::Type::real:
+    VM.return_value = {new Number(fun(n->coerce<Number::real_type>()))};
+    return;
+  case Number::Type::complex:
+    VM.return_value = {new Number(fun(n->get<Number::complex_type>()))};
+    return;
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+struct exp_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::exp(t1);
+  }
+};
+
+void number_exp(){
+  number_unary_op("exp", exp_fun());
+}
+
+struct log_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::log(t1);
+  }
+};
+
+void number_log(){
+  number_unary_op("log", log_fun());
+}
+
+struct sin_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::sin(t1);
+  }
+};
+
+void number_sin(){
+  number_unary_op("sin", sin_fun());
+}
+
+struct cos_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::cos(t1);
+  }
+};
+
+void number_cos(){
+  number_unary_op("cos", cos_fun());
+}
+
+struct tan_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::tan(t1);
+  }
+};
+
+void number_tan(){
+  number_unary_op("tan", tan_fun());
+}
+
+struct asin_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::asin(t1);
+  }
+};
+
+void number_asin(){
+  number_unary_op("asin", asin_fun());
+}
+
+struct acos_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::acos(t1);
+  }
+};
+
+void number_acos(){
+  number_unary_op("acos", acos_fun());
+}
+
+void number_atan(){
+  auto arg1 = VM.stack.top();
+  VM.stack.pop();
+
+  auto n1 = arg1.get<Number*>();
+  if(!n1){
+    number_type_check_failed("atan", arg1);
+    return;
+  }
+
+  // std::atan()
+  if(VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+
+    switch(n1->type()){
+    case Number::Type::integer:
+    case Number::Type::real:
+      VM.return_value = {new Number(std::atan(n1->coerce<Number::real_type>()))};
+      return;
+    case Number::Type::complex: {
+      VM.return_value = {new Number(std::atan(n1->get<Number::complex_type>()))};
+      return;
+    }
+    case Number::Type::uninitialized:
+    default:
+      UNEXP_DEFAULT();
+    }
+  }
+
+  // std::atan2()
+  auto arg2 = pick_args_1();
+  auto n2 = arg2.get<Number*>();
+  if(!n2){
+    number_type_check_failed("atan", arg2);
+    return;
+  }
+
+  switch(n2->type()){
+  case Number::Type::integer:
+  case Number::Type::real:
+    VM.return_value = {new Number(std::atan2(n1->coerce<Number::real_type>(),
+                                             n2->coerce<Number::real_type>()))};
+    return;
+  case Number::Type::complex:
+    fprintf(zs::err, "native func: (atan <complex> <complex>) is not implemented.\n");
+    VM.return_value = {};
+    return;
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+struct sqrt_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::sqrt(t1);
+  }
+};
+
+void number_sqrt(){
+  number_unary_op("sqrt", sqrt_fun());
+}
+
+template<typename RFun, typename CFun>
+void number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
+  auto args = pick_args<2>();
+
+  auto n1 = args[0].get<Number*>();
+  if(!n1){
+    number_type_check_failed(name, args[0]);
+    return;
+  }
+  
+  auto n2 = args[1].get<Number*>();
+  if(!n2){
+    number_type_check_failed(name, args[1]);
+    return;
+  }
+
+  if(n1->type() == Number::Type::uninitialized
+     || n2->type() == Number::Type::uninitialized){
+    UNEXP_DEFAULT();
+  }
+
+  if(n1->type() <= Number::Type::real
+     || n2->type() <= Number::Type::real){
+    VM.return_value = {new Number(rfun(n1->coerce<Number::real_type>(),
+                                       n2->coerce<Number::real_type>()))};
+    return;
+  }
+
+  if(n1->type() <= Number::Type::complex
+     || n2->type() <= Number::Type::complex){
+    VM.return_value = cfun(n1->coerce<Number::complex_type>(),
+                           n2->coerce<Number::complex_type>());
+    return;
+  }
+
+  UNEXP_DEFAULT();
+}
+
+void number_expt(){
+  number_binary_op("expt",
+                   [](Number::real_type n1, Number::real_type n2){
+                     return std::pow(n1, n2);
+                   },
+                   [](const Number::complex_type& n1, const Number::complex_type& n2){
+                     return Lisp_ptr{new Number(std::pow(n1, n2))};
+                   });
+}
+
+void number_rect(){
+  number_binary_op("make-rectangular",
+                   [](Number::real_type n1, Number::real_type n2){
+                     return Number::complex_type(n1, n2);
+                   },
+                   [](const Number::complex_type&, const Number::complex_type&){
+                     return Lisp_ptr{};
+                   });
+}
+
+void number_polar(){
+  number_binary_op("make-polar",
+                   [](Number::real_type n1, Number::real_type n2){
+                     return polar(n1, n2);
+                   },
+                   [](const Number::complex_type&, const Number::complex_type&){
+                     return Lisp_ptr{};
+                   });
+}
+
+
+template<typename Fun>
+inline
+void number_unary_op_complex(const char* name, Fun&& fun){
+  auto arg1 = pick_args_1();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    number_type_check_failed(name, arg1);
+    return;
+  }
+
+  switch(n->type()){
+  case Number::Type::integer:
+  case Number::Type::real:
+  case Number::Type::complex:
+    VM.return_value = {new Number(fun(n->coerce<Number::complex_type>()))};
+    return;
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+void number_real(){
+  number_unary_op_complex("real-part",
+                          [](const Number::complex_type& z){
+                            return z.real();
+                          });
+}
+
+void number_imag(){
+  number_unary_op_complex("imag-part",
+                          [](const Number::complex_type& z){
+                            return z.imag();
+                          });
+}
+
+void number_mag(){
+  number_unary_op_complex("magnitude",
+                          [](const Number::complex_type& z){
+                            return std::abs(z);
+                          });
+}
+
+void number_angle(){
+  number_unary_op_complex("angle",
+                          [](const Number::complex_type& z){
+                            return arg(z);
+                          });
+}
+
+template<typename Fun>
+void number_i_e(const char* name, Fun&& fun){
+  auto arg1 = pick_args_1();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    number_type_check_failed(name, arg1);
+    return;
+  }
+
+  VM.return_value = {new Number(fun(*n))};
+}
+
+void number_i_to_e(){
+  number_i_e("inexact->exact", to_exact);
+}
+
+void number_e_to_i(){
+  number_i_e("exact->inexact", to_inexact);
 }
 
 
@@ -797,7 +1095,65 @@ constexpr struct Entry {
 
   {"rationalize", {
       number_rationalize,
-      Calling::function, {1, false}}}
+      Calling::function, {1, false}}},
+
+  {"exp", {
+      number_exp,
+      Calling::function, {1, false}}},
+  {"log", {
+      number_log,
+      Calling::function, {1, false}}},
+  {"sin", {
+      number_sin,
+      Calling::function, {1, false}}},
+  {"cos", {
+      number_cos,
+      Calling::function, {1, false}}},
+  {"tan", {
+      number_tan,
+      Calling::function, {1, false}}},
+  {"asin", {
+      number_asin,
+      Calling::function, {1, false}}},
+  {"acos", {
+      number_acos,
+      Calling::function, {1, false}}},
+  {"atan", {
+      number_atan,
+      Calling::function, {1, true}}},
+
+  {"sqrt", {
+      number_sqrt,
+      Calling::function, {1, false}}},
+  {"expt", {
+      number_expt,
+      Calling::function, {2, false}}},
+
+  {"make-rectangular", {
+      number_rect,
+      Calling::function, {2, false}}},
+  {"make-polar", {
+      number_polar,
+      Calling::function, {2, false}}},
+  {"real-part", {
+      number_real,
+      Calling::function, {1, false}}},
+  {"imag-part", {
+      number_imag,
+      Calling::function, {1, false}}},
+  {"magnitude", {
+      number_mag,
+      Calling::function, {1, false}}},
+  {"angle", {
+      number_angle,
+      Calling::function, {1, false}}},
+
+  {"inexact->exact", {
+      number_i_to_e,
+      Calling::function, {1, false}}},
+  {"exact->inexact", {
+      number_e_to_i,
+      Calling::function, {1, false}}},
 };
 
 } //namespace
