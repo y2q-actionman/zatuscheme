@@ -185,6 +185,14 @@ int main(){
   check("(modulo -13 -4)", "-1");
   check("(remainder -13 -4)", "-1");
 
+
+  check("(gcd 32 -36)", "4");
+  check("(gcd)", "0");
+  check("(lcm 32 -36)", "288");
+  check("(lcm)", "1");
+
+
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

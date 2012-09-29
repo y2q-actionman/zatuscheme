@@ -4,6 +4,7 @@
 #include <functional>
 #include <algorithm>
 #include <numeric>
+#include <cstdlib>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -530,7 +531,54 @@ void number_mod(){
                });
 }
 
+template<typename T>
+T gcd(T m, T n){
+  if(m < 0) m = -m;
+  if(n < 0) n = -n;
 
+  if(m < n)
+    std::swap(m, n);
+
+  while(n > 0){
+    auto mod = m % n;
+    m = n;
+    n = mod;
+  }
+
+  return m;
+}
+
+void number_gcd(){
+  number_accumulate("gcd", Number(0l),
+                    [](Number& n1, const Number& n2) -> bool {
+                      if(n1.type() != Number::Type::integer || n2.type() != Number::Type::integer){
+                        fprintf(zs::err, "native func: gcd: not integer passed.\n");
+                        return false;
+                      }
+
+                      auto i1 = n1.get<Number::integer_type>();
+                      auto i2 = n2.get<Number::integer_type>();
+
+                      n1 = Number{gcd(i1, i2)};
+                      return true;
+                    });
+}
+
+void number_lcm(){
+  number_accumulate("lcm", Number(1l),
+                    [](Number& n1, const Number& n2) -> bool {
+                      if(n1.type() != Number::Type::integer || n2.type() != Number::Type::integer){
+                        fprintf(zs::err, "native func: gcd: not integer passed.\n");
+                        return false;
+                      }
+
+                      auto i1 = n1.get<Number::integer_type>();
+                      auto i2 = n2.get<Number::integer_type>();
+
+                      n1 = Number{abs(i1 * i2 / gcd(i1, i2))};
+                      return true;
+                    });
+}
 
 constexpr struct Entry {
   const char* name;
@@ -623,7 +671,14 @@ constexpr struct Entry {
       Calling::function, {2, false}}},
   {"modulo", {
       number_mod,
-      Calling::function, {2, false}}}
+      Calling::function, {2, false}}},
+
+  {"gcd", {
+      number_gcd,
+      Calling::function, {0, true}}},
+  {"lcm", {
+      number_lcm,
+      Calling::function, {0, true}}}
 };
 
 } //namespace
