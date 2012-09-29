@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <numeric>
 #include <cstdlib>
+#include <cmath>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -484,8 +485,8 @@ void number_divop(const char* name, Fun&& fun){
     return;
   }
   if(n1->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: quotient: not integer type (%s)",
-            stringify(n1->type()));
+    fprintf(zs::err, "native func: %s: not integer type (%s)",
+            name, stringify(n1->type()));
     VM.return_value = {};
     return;
   }
@@ -496,8 +497,8 @@ void number_divop(const char* name, Fun&& fun){
     return;
   }
   if(n2->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: quotient: not integer type (%s)",
-            stringify(n2->type()));
+    fprintf(zs::err, "native func: %s: not integer type (%s)",
+            name, stringify(n2->type()));
     VM.return_value = {};
     return;
   }
@@ -584,7 +585,7 @@ void number_numerator(){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
-    number_type_check_failed(name, args[0]);
+    number_type_check_failed("numerator", arg);
     return;
   }
 
@@ -596,7 +597,7 @@ void number_denominator(){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
-    number_type_check_failed(name, args[0]);
+    number_type_check_failed("denominator", arg);
     return;
   }
 
@@ -604,17 +605,75 @@ void number_denominator(){
   VM.return_value = {};
 }
 
+template<typename Fun>
+inline
+void number_rounding(const char* name, Fun&& fun){
+  auto arg1 = pick_args_1();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    number_type_check_failed(name, arg1);
+    return;
+  }
+
+  switch(n->type()){
+  case Number::Type::uninitialized:
+    VM.return_value = {};
+    return;
+  case Number::Type::integer: {
+    VM.return_value = {n};
+    return;
+  }
+  case Number::Type::real: {
+    auto d = n->get<Number::real_type>();
+    VM.return_value = {new Number(fun(d))};
+    return;
+  }
+  case Number::Type::complex: {
+    fprintf(zs::err, complex_found::msg);
+    VM.return_value = {};
+    return;
+  }
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+void number_floor(){
+  number_rounding("floor", [](Number::real_type d){ return std::floor(d); });
+}
+
+void number_ceil(){
+  number_rounding("ceiling", [](Number::real_type d){ return std::ceil(d); });
+}
+
+void number_trunc(){
+  number_rounding("truncate", [](Number::real_type d){ return std::trunc(d); });
+}
+
+void number_round(){
+  number_rounding("round", [](Number::real_type d){ return std::round(d); });
+}
+
 void number_rationalize(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
-  if(!num){
-    number_type_check_failed(name, args[0]);
+  auto args = pick_args<2>();
+
+  auto n1 = args[0].get<Number*>();
+  if(!n1){
+    number_type_check_failed("rationalize", args[0]);
+    return;
+  }
+  
+  auto n2 = args[1].get<Number*>();
+  if(!n2){
+    number_type_check_failed("rationalize", args[1]);
     return;
   }
 
   fprintf(zs::err, "native func: 'rationalize' is not implemented.\n");
   VM.return_value = {};
 }
+
 
 constexpr struct Entry {
   const char* name;
@@ -721,6 +780,19 @@ constexpr struct Entry {
       Calling::function, {1, false}}},
   {"denominator", {
       number_denominator,
+      Calling::function, {1, false}}},
+
+  {"floor", {
+      number_floor,
+      Calling::function, {1, false}}},
+  {"ceiling", {
+      number_ceil,
+      Calling::function, {1, false}}},
+  {"truncate", {
+      number_trunc,
+      Calling::function, {1, false}}},
+  {"round", {
+      number_round,
       Calling::function, {1, false}}},
 
   {"rationalize", {

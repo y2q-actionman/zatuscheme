@@ -151,6 +151,7 @@ int main(){
   check("(min -1 2.1 3 4)", "-1");
   check("(integer? (min -1 2.1 3 4))", "#f");
 
+
   check("(+)", "0");
   check("(+ 1 )", "1");
   check("(+ 1 2)", "3");
@@ -175,23 +176,29 @@ int main(){
 
   check("(modulo 13 4)", "1");
   check("(remainder 13 4)", "1");
-
   check("(modulo -13 4)", "3");
   check("(remainder -13 4)", "-1");
-
   check("(modulo 13 -4)", "-3");
   check("(remainder 13 -4)", "1");
-
   check("(modulo -13 -4)", "-1");
   check("(remainder -13 -4)", "-1");
-
 
   check("(gcd 32 -36)", "4");
   check("(gcd)", "0");
   check("(lcm 32 -36)", "288");
   check("(lcm)", "1");
 
-
+  // inexact
+  check("(floor -4.3)", "-5");
+  check("(ceiling -4.3)", "-4");
+  check("(truncate -4.3)", "-4");
+  check("(round -4.3)", "-4");
+  check("(floor 3.5)", "3");
+  check("(ceiling 3.5)", "4");
+  check("(truncate 3.5)", "3");
+  check("(round 3.5)", "4");
+  // exact
+  check("(round 7)", "7");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
