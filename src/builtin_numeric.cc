@@ -256,68 +256,50 @@ void number_accumulate(const char* name, Number&& init, Fun&& fun){
   VM.return_value = {new Number(init)};
 }
 
+
+template<template <typename> class Cmp>
+struct minmax_accum{
+  inline bool operator()(Number& n1, const Number& n2){
+    if(n1.type() == Number::Type::uninitialized){
+      n1 = n2;
+      return true;
+    }
+
+    if(n2.type() == Number::Type::uninitialized){
+      return true;
+    }
+
+    if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
+      static constexpr Cmp<Number::integer_type> cmp;
+
+      if(cmp(n2.get<Number::integer_type>(), n1.get<Number::integer_type>()))
+        n1 = n2;
+      return true;
+    }
+
+    if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
+      static constexpr Cmp<Number::real_type> cmp;
+
+      if(cmp(n2.coerce<Number::real_type>(), n1.coerce<Number::real_type>())){
+        n1 = Number{n2.coerce<Number::real_type>()};
+      }else if(n1.type() != Number::Type::real){
+        n1 = Number{n1.coerce<Number::real_type>()};
+      }
+      return true;
+    }
+
+    fprintf(zs::err, complex_found::msg);
+    return false;
+  }
+};    
+
+
 void number_max(){
-  number_accumulate("max", Number(),
-                    [](Number& n1, const Number& n2) -> bool {
-                      if(n1.type() == Number::Type::uninitialized){
-                        n1 = n2;
-                        return true;
-                      }
-
-                      if(n2.type() == Number::Type::uninitialized){
-                        return true;
-                      }
-
-                      if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-                        if(n1.get<Number::integer_type>() < n2.get<Number::integer_type>())
-                          n1 = n2;
-                        return true;
-                      }
-
-                      if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
-                        if(n1.coerce<Number::real_type>() < n2.coerce<Number::real_type>()){
-                          n1 = Number{n2.coerce<Number::real_type>()};
-                        }else if(n1.type() != Number::Type::real){
-                          n1 = Number{n1.coerce<Number::real_type>()};
-                        }
-                        return true;
-                      }
-
-                      fprintf(zs::err, complex_found::msg);
-                      return false;
-                    });
+  number_accumulate("max", Number(), minmax_accum<std::greater>());
 }
 
 void number_min(){
-  number_accumulate("min", Number(),
-                    [](Number& n1, const Number& n2) -> bool {
-                      if(n1.type() == Number::Type::uninitialized){
-                        n1 = n2;
-                        return true;
-                      }
-
-                      if(n2.type() == Number::Type::uninitialized){
-                        return true;
-                      }
-
-                      if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-                        if(n1.get<Number::integer_type>() > n2.get<Number::integer_type>())
-                          n1 = n2;
-                        return true;
-                      }
-
-                      if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
-                        if(n1.coerce<Number::real_type>() > n2.coerce<Number::real_type>()){
-                          n1 = Number{n2.coerce<Number::real_type>()};
-                        }else if(n1.type() != Number::Type::real){
-                          n1 = Number{n1.coerce<Number::real_type>()};
-                        }
-                        return true;
-                      }
-
-                      fprintf(zs::err, complex_found::msg);
-                      return false;
-                    });
+  number_accumulate("min", Number(), minmax_accum<std::less>());
 }
 
 void number_plus(){
@@ -361,6 +343,84 @@ void number_plus(){
 
                       // ???
                       fprintf(zs::err, "native func: +: failed at numeric conversion!\n");
+                      return false;
+                    });
+}
+
+void number_minus(){
+  auto arg1 = VM.stack.top();
+  VM.stack.pop();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    number_type_check_failed("-", arg1);
+    return;
+  }
+
+  if(VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+
+    switch(n->type()){
+    case Number::Type::uninitialized:
+      VM.return_value = {};
+      return;
+    case Number::Type::integer:
+      
+      VM.return_value = {new Number(-n->get<Number::integer_type>())};
+      return;
+    case Number::Type::real:
+      VM.return_value = {new Number(-n->get<Number::real_type>())};
+      return;
+    case Number::Type::complex: {
+      auto c = n->get<Number::complex_type>();
+      VM.return_value = {new Number(Number::complex_type(-c.real(), -c.imag()))};
+      return;
+    }
+    default:
+      UNEXP_DEFAULT();
+    }
+  }
+   
+  number_accumulate("-", Number(*n),
+                    [](Number& n1, const Number& n2) -> bool {
+                      if(n1.type() == Number::Type::uninitialized){
+                        n1 = n2;
+                        return true;
+                      }
+
+                      if(n2.type() == Number::Type::uninitialized){
+                        return true;
+                      }
+
+                      // n1 type <= n2 type
+                      if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
+                        n1.get<Number::integer_type>() -= n2.get<Number::integer_type>();
+                        return true;
+                      }
+
+                      if(n1.type() == Number::Type::real && n2.type() <= Number::Type::real){
+                        n1.get<Number::real_type>() -= n2.coerce<Number::real_type>();
+                        return true;
+                      }
+
+                      if(n1.type() == Number::Type::complex && n2.type() <= Number::Type::complex){
+                        n1.get<Number::complex_type>() -= n2.coerce<Number::complex_type>();
+                        return true;
+                      }
+
+                      // n1 type > n2 type
+                      if(n1.type() < Number::Type::real && n2.type() == Number::Type::real){
+                        n1 = Number{n1.coerce<Number::real_type>() - n2.get<Number::real_type>()};
+                        return true;
+                      }
+
+                      if(n1.type() < Number::Type::complex && n2.type() == Number::Type::complex){
+                        n1 = Number{n1.coerce<Number::complex_type>() - n2.get<Number::complex_type>()};
+                        return true;
+                      }
+
+                      // ???
+                      fprintf(zs::err, "native func: -: failed at numeric conversion!\n");
                       return false;
                     });
 }
@@ -434,7 +494,10 @@ constexpr struct Entry {
 
   {"+", {
       number_plus,
-      Calling::function, {0, true}}}
+      Calling::function, {0, true}}},
+  {"-", {
+      number_minus,
+      Calling::function, {1, true}}}
 };
 
 } //namespace

@@ -21,6 +21,11 @@ Lisp_ptr stack_to_list(StackT& st){
   Cons* prev_c = c;
   Lisp_ptr ret = c;
 
+  if(st.top().tag() == Ptr_tag::vm_op){
+    st.pop();
+    return Cons::NIL;
+  }
+
   while(1){
     c->rplaca(st.top());
     st.pop();
@@ -52,6 +57,11 @@ Lisp_ptr stack_to_list(StackT& st){
 
 template<typename StackT, typename VectorT>
 void stack_to_vector(StackT& st, VectorT& v){
+  if(st.top().tag() == Ptr_tag::vm_op){
+    st.pop();
+    return;
+  }
+
   while(1){
     v.push_back(st.top());
     st.pop();
