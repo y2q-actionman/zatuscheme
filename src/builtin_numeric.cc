@@ -302,49 +302,66 @@ void number_min(){
   number_accumulate("min", Number(), minmax_accum<std::less>());
 }
 
+template<template <typename> class Op>
+struct binary_accum{
+  inline bool operator()(Number& n1, const Number& n2){
+    if(n1.type() == Number::Type::uninitialized){
+      n1 = n2;
+      return true;
+    }
+
+    if(n2.type() == Number::Type::uninitialized){
+      return true;
+    }
+
+    // n1 type <= n2 type
+    if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
+      static constexpr Op<Number::integer_type> op;
+      n1.get<Number::integer_type>() = 
+        op(n1.get<Number::integer_type>(), n2.get<Number::integer_type>());
+      return true;
+    }
+
+    if(n1.type() == Number::Type::real && n2.type() <= Number::Type::real){
+      static constexpr Op<Number::real_type> op;
+      n1.get<Number::real_type>() = 
+        op(n1.get<Number::real_type>(), n2.get<Number::real_type>());
+      return true;
+    }
+
+    if(n1.type() == Number::Type::complex && n2.type() <= Number::Type::complex){
+      static constexpr Op<Number::complex_type> op;
+      n1.get<Number::complex_type>() = 
+        op(n1.get<Number::complex_type>(), n2.get<Number::complex_type>());
+      return true;
+    }
+
+    // n1 type > n2 type
+    if(n1.type() < Number::Type::real && n2.type() == Number::Type::real){
+      static constexpr Op<Number::real_type> op;
+      n1 = Number{op(n1.coerce<Number::real_type>(), n2.get<Number::real_type>())};
+      return true;
+    }
+
+    if(n1.type() < Number::Type::complex && n2.type() == Number::Type::complex){
+      static constexpr Op<Number::complex_type> op;
+      n1 = Number{op(n1.coerce<Number::complex_type>(), n2.get<Number::complex_type>())};
+      return true;
+    }
+
+    // ???
+    fprintf(zs::err, "native func: +: failed at numeric conversion!\n");
+    return false;
+  }
+};
+
+
 void number_plus(){
-  number_accumulate("+", Number(0l),
-                    [](Number& n1, const Number& n2) -> bool {
-                      if(n1.type() == Number::Type::uninitialized){
-                        n1 = n2;
-                        return true;
-                      }
+  number_accumulate("+", Number(0l), binary_accum<std::plus>());
+}
 
-                      if(n2.type() == Number::Type::uninitialized){
-                        return true;
-                      }
-
-                      // n1 type <= n2 type
-                      if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-                        n1.get<Number::integer_type>() += n2.get<Number::integer_type>();
-                        return true;
-                      }
-
-                      if(n1.type() == Number::Type::real && n2.type() <= Number::Type::real){
-                        n1.get<Number::real_type>() += n2.coerce<Number::real_type>();
-                        return true;
-                      }
-
-                      if(n1.type() == Number::Type::complex && n2.type() <= Number::Type::complex){
-                        n1.get<Number::complex_type>() += n2.coerce<Number::complex_type>();
-                        return true;
-                      }
-
-                      // n1 type > n2 type
-                      if(n1.type() < Number::Type::real && n2.type() == Number::Type::real){
-                        n1 = Number{n1.coerce<Number::real_type>() + n2.get<Number::real_type>()};
-                        return true;
-                      }
-
-                      if(n1.type() < Number::Type::complex && n2.type() == Number::Type::complex){
-                        n1 = Number{n1.coerce<Number::complex_type>() + n2.get<Number::complex_type>()};
-                        return true;
-                      }
-
-                      // ???
-                      fprintf(zs::err, "native func: +: failed at numeric conversion!\n");
-                      return false;
-                    });
+void number_multiple(){
+  number_accumulate("*", Number(1l), binary_accum<std::multiplies>());
 }
 
 void number_minus(){
@@ -365,7 +382,6 @@ void number_minus(){
       VM.return_value = {};
       return;
     case Number::Type::integer:
-      
       VM.return_value = {new Number(-n->get<Number::integer_type>())};
       return;
     case Number::Type::real:
@@ -381,48 +397,7 @@ void number_minus(){
     }
   }
    
-  number_accumulate("-", Number(*n),
-                    [](Number& n1, const Number& n2) -> bool {
-                      if(n1.type() == Number::Type::uninitialized){
-                        n1 = n2;
-                        return true;
-                      }
-
-                      if(n2.type() == Number::Type::uninitialized){
-                        return true;
-                      }
-
-                      // n1 type <= n2 type
-                      if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-                        n1.get<Number::integer_type>() -= n2.get<Number::integer_type>();
-                        return true;
-                      }
-
-                      if(n1.type() == Number::Type::real && n2.type() <= Number::Type::real){
-                        n1.get<Number::real_type>() -= n2.coerce<Number::real_type>();
-                        return true;
-                      }
-
-                      if(n1.type() == Number::Type::complex && n2.type() <= Number::Type::complex){
-                        n1.get<Number::complex_type>() -= n2.coerce<Number::complex_type>();
-                        return true;
-                      }
-
-                      // n1 type > n2 type
-                      if(n1.type() < Number::Type::real && n2.type() == Number::Type::real){
-                        n1 = Number{n1.coerce<Number::real_type>() - n2.get<Number::real_type>()};
-                        return true;
-                      }
-
-                      if(n1.type() < Number::Type::complex && n2.type() == Number::Type::complex){
-                        n1 = Number{n1.coerce<Number::complex_type>() - n2.get<Number::complex_type>()};
-                        return true;
-                      }
-
-                      // ???
-                      fprintf(zs::err, "native func: -: failed at numeric conversion!\n");
-                      return false;
-                    });
+  number_accumulate("-", Number(*n), binary_accum<std::minus>());
 }
 
 
@@ -494,6 +469,9 @@ constexpr struct Entry {
 
   {"+", {
       number_plus,
+      Calling::function, {0, true}}},
+  {"*", {
+      number_multiple,
       Calling::function, {0, true}}},
   {"-", {
       number_minus,
