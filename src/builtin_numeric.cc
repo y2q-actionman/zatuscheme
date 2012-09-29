@@ -580,6 +580,42 @@ void number_lcm(){
                     });
 }
 
+void number_numerator(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    number_type_check_failed(name, args[0]);
+    return;
+  }
+
+  fprintf(zs::err, "native func: 'numerator' is not implemented.\n");
+  VM.return_value = {};
+}
+
+void number_denominator(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    number_type_check_failed(name, args[0]);
+    return;
+  }
+
+  fprintf(zs::err, "native func: 'denominator' is not implemented.\n");
+  VM.return_value = {};
+}
+
+void number_rationalize(){
+  auto arg = pick_args_1();
+  auto num = arg.get<Number*>();
+  if(!num){
+    number_type_check_failed(name, args[0]);
+    return;
+  }
+
+  fprintf(zs::err, "native func: 'rationalize' is not implemented.\n");
+  VM.return_value = {};
+}
+
 constexpr struct Entry {
   const char* name;
   const NProcedure func;
@@ -678,7 +714,18 @@ constexpr struct Entry {
       Calling::function, {0, true}}},
   {"lcm", {
       number_lcm,
-      Calling::function, {0, true}}}
+      Calling::function, {0, true}}},
+
+  {"numerator", {
+      number_numerator,
+      Calling::function, {1, false}}},
+  {"denominator", {
+      number_denominator,
+      Calling::function, {1, false}}},
+
+  {"rationalize", {
+      number_rationalize,
+      Calling::function, {1, false}}}
 };
 
 } //namespace
