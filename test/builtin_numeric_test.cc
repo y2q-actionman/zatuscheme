@@ -169,6 +169,22 @@ int main(){
   check("(/ 1 2)", "0.5");
   check("(/ 1 2 2)", "0.25");
 
+
+  check("(abs 1)", "1");
+  check("(abs -7)", "7");
+
+  check("(modulo 13 4)", "1");
+  check("(remainder 13 4)", "1");
+
+  check("(modulo -13 4)", "3");
+  check("(remainder -13 4)", "-1");
+
+  check("(modulo 13 -4)", "-3");
+  check("(remainder 13 -4)", "1");
+
+  check("(modulo -13 -4)", "-1");
+  check("(remainder -13 -4)", "-1");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

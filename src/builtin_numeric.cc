@@ -350,7 +350,7 @@ struct binary_accum{
     }
 
     // ???
-    fprintf(zs::err, "native func: +: failed at numeric conversion!\n");
+    fprintf(zs::err, "native func: +-*/: failed at numeric conversion!\n");
     return false;
   }
 };
@@ -439,6 +439,98 @@ void number_divide(){
                     binary_accum<std::divides>());
 }
 
+void number_abs(){
+  auto arg1 = pick_args_1();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    number_type_check_failed("abs", arg1);
+    return;
+  }
+
+  switch(n->type()){
+  case Number::Type::uninitialized:
+    VM.return_value = {};
+    return;
+  case Number::Type::integer: {
+    auto i = n->get<Number::integer_type>();
+    VM.return_value = {(i >= 0) ? n : new Number(-i)};
+    return;
+  }
+  case Number::Type::real: {
+    auto d = n->get<Number::real_type>();
+    VM.return_value = {(d >= 0) ? n : new Number(-d)};
+    return;
+  }
+  case Number::Type::complex: {
+    fprintf(zs::err, complex_found::msg);
+    VM.return_value = {};
+    return;
+  }
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+template<typename Fun>
+inline
+void number_divop(const char* name, Fun&& fun){
+  auto args = pick_args<2>();
+
+  auto n1 = args[0].get<Number*>();
+  if(!n1){
+    number_type_check_failed(name, args[0]);
+    return;
+  }
+  if(n1->type() != Number::Type::integer){
+    fprintf(zs::err, "native func: quotient: not integer type (%s)",
+            stringify(n1->type()));
+    VM.return_value = {};
+    return;
+  }
+  
+  auto n2 = args[1].get<Number*>();
+  if(!n2){
+    number_type_check_failed(name, args[1]);
+    return;
+  }
+  if(n2->type() != Number::Type::integer){
+    fprintf(zs::err, "native func: quotient: not integer type (%s)",
+            stringify(n2->type()));
+    VM.return_value = {};
+    return;
+  }
+
+  VM.return_value = {new Number{fun(n1->get<Number::integer_type>(),
+                                    n2->get<Number::integer_type>())}};
+}
+
+void number_quot(){
+  number_divop("quotient", std::divides<Number::integer_type>());
+}
+
+void number_rem(){
+  number_divop("remainder",
+               [](Number::integer_type i1, Number::integer_type i2) -> Number::integer_type{
+                 auto q = i1 / i2;
+                 return i1 - (q * i2);
+               });
+}
+
+void number_mod(){
+  number_divop("modulo", 
+               [](Number::integer_type i1, Number::integer_type i2) -> Number::integer_type{
+                 auto m = i1 % i2;
+
+                 if((m < 0 && i2 > 0) || (m > 0 && i2 < 0)){
+                   return m + i2;
+                 }else{
+                   return m;
+                 }
+               });
+}
+
+
 
 constexpr struct Entry {
   const char* name;
@@ -517,7 +609,21 @@ constexpr struct Entry {
       Calling::function, {1, true}}},
   {"/", {
       number_divide,
-      Calling::function, {1, true}}}
+      Calling::function, {1, true}}},
+
+  {"abs", {
+      number_abs,
+      Calling::function, {1, false}}},
+
+  {"quotient", {
+      number_quot,
+      Calling::function, {2, false}}},
+  {"remainder", {
+      number_rem,
+      Calling::function, {2, false}}},
+  {"modulo", {
+      number_mod,
+      Calling::function, {2, false}}}
 };
 
 } //namespace
