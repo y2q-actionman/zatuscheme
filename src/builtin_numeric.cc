@@ -325,14 +325,14 @@ struct binary_accum{
     if(n1.type() == Number::Type::real && n2.type() <= Number::Type::real){
       static constexpr Op<Number::real_type> op;
       n1.get<Number::real_type>() = 
-        op(n1.get<Number::real_type>(), n2.get<Number::real_type>());
+        op(n1.get<Number::real_type>(), n2.coerce<Number::real_type>());
       return true;
     }
 
     if(n1.type() == Number::Type::complex && n2.type() <= Number::Type::complex){
       static constexpr Op<Number::complex_type> op;
       n1.get<Number::complex_type>() = 
-        op(n1.get<Number::complex_type>(), n2.get<Number::complex_type>());
+        op(n1.get<Number::complex_type>(), n2.coerce<Number::complex_type>());
       return true;
     }
 
@@ -398,6 +398,45 @@ void number_minus(){
   }
    
   number_accumulate("-", Number(*n), binary_accum<std::minus>());
+}
+
+void number_divide(){
+  auto arg1 = VM.stack.top();
+  VM.stack.pop();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    number_type_check_failed("/", arg1);
+    return;
+  }
+
+  if(VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+
+    switch(n->type()){
+    case Number::Type::uninitialized:
+      VM.return_value = {};
+      return;
+    case Number::Type::integer:
+      VM.return_value = {new Number(1.0 / n->get<Number::integer_type>())};
+      return;
+    case Number::Type::real:
+      VM.return_value = {new Number(1.0 / n->get<Number::real_type>())};
+      return;
+    case Number::Type::complex: {
+      auto c = n->get<Number::complex_type>();
+      VM.return_value = {new Number(1.0 / c)};
+      return;
+    }
+    default:
+      UNEXP_DEFAULT();
+    }
+  }
+
+  number_accumulate("/", 
+                    n->type() == Number::Type::integer
+                    ? Number(n->coerce<Number::real_type>()) : Number(*n),                    
+                    binary_accum<std::divides>());
 }
 
 
@@ -475,6 +514,9 @@ constexpr struct Entry {
       Calling::function, {0, true}}},
   {"-", {
       number_minus,
+      Calling::function, {1, true}}},
+  {"/", {
+      number_divide,
       Calling::function, {1, true}}}
 };
 

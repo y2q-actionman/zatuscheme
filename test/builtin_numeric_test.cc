@@ -165,6 +165,10 @@ int main(){
   check("(- 1 2)", "-1");
   check("(- 1 2 3)", "-4");
 
+  check("(/ 1)", "1");
+  check("(/ 1 2)", "0.5");
+  check("(/ 1 2 2)", "0.25");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
