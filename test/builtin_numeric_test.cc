@@ -144,9 +144,11 @@ int main(){
 
 
   check("(max 1 2 3 4)", "4");
-  check("(max -1 2.0 3 4)", "4.0");
+  check("(max -1 2.1 3 4)", "4");
+  check("(integer? (max -1 2.1 3 4))", "#f");
   check("(min 1 2 3 4)", "1");
-  check("(min -1 2.0 3 4)", "-1.0");
+  check("(min -1 2.1 3 4)", "-1");
+  check("(integer? (min -1 2.1 3 4))", "#f");
 
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

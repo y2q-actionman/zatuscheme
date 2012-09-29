@@ -275,10 +275,11 @@ void number_max(){
                       }
 
                       if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
-                        if(n1.coerce<Number::real_type>() < n2.coerce<Number::real_type>())
+                        if(n1.coerce<Number::real_type>() < n2.coerce<Number::real_type>()){
                           n1 = Number{n2.coerce<Number::real_type>()};
-                        if(n1.type() != Number::Type::real)
+                        }else if(n1.type() != Number::Type::real){
                           n1 = Number{n1.coerce<Number::real_type>()};
+                        }
                         return true;
                       }
 
@@ -306,10 +307,11 @@ void number_min(){
                       }
 
                       if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
-                        if(n1.coerce<Number::real_type>() > n2.coerce<Number::real_type>())
+                        if(n1.coerce<Number::real_type>() > n2.coerce<Number::real_type>()){
                           n1 = Number{n2.coerce<Number::real_type>()};
-                        if(n1.type() != Number::Type::real)
+                        }else if(n1.type() != Number::Type::real){
                           n1 = Number{n1.coerce<Number::real_type>()};
+                        }
                         return true;
                       }
 
