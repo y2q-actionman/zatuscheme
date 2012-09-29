@@ -87,23 +87,7 @@ struct complex_found{
 template<template <typename> class Fun,
          class ComplexComparator = complex_found>
 struct number_comparator {
-  Lisp_ptr non_number_found;
-
-  number_comparator() : non_number_found(){}
-
-  inline bool operator()(const Lisp_ptr& p1, const Lisp_ptr& p2){
-    auto n1 = p1.get<Number*>();
-    if(!n1 || n1->type() < Number::Type::integer){
-      non_number_found = p1;
-      return true;
-    }
-                              
-    auto n2 = p2.get<Number*>();
-    if(!n2 || n2->type() < Number::Type::integer){
-      non_number_found = p2;
-      return true;
-    }
-
+  inline bool operator()(const Number* n1, const Number* n2){
     if(n1->type() == Number::Type::integer && n2->type() == Number::Type::integer){
       static const Fun<Number::integer_type> fun;
       return fun(n1->get<Number::integer_type>(), n2->get<Number::integer_type>());
@@ -115,12 +99,6 @@ struct number_comparator {
       return fun(n1->coerce<Number::complex_type>(), n2->coerce<Number::complex_type>());
     }
   }
-
-  struct for_is_sorted : public number_comparator {
-    inline bool operator()(const Lisp_ptr& p1, const Lisp_ptr& p2){
-      return !number_comparator::operator()(p2, p1);
-    }
-  };
 };
 
 
@@ -129,39 +107,57 @@ inline void number_compare(const char* name, Fun&& fun){
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
-  auto ret = std::is_sorted(begin(args), end(args), fun);
-  if(fun.non_number_found){
-    number_type_check_failed(name, fun.non_number_found);
+  auto i1 = begin(args);
+  const auto e = end(args);
+
+  auto n1 = i1->get<Number*>();
+  if(!n1 || n1->type() < Number::Type::integer){
+    number_type_check_failed(name, *i1);
     return;
   }
+                              
+  for(auto i2 = next(i1); i2 != e; i1 = i2, ++i2){
+    auto n2 = i2->get<Number*>();
+    if(!n2 || n2->type() < Number::Type::integer){
+      number_type_check_failed(name, *i2);
+      return;
+    }
 
-  VM.return_value = Lisp_ptr{ret};
+    if(!fun(n1, n2)){
+      VM.return_value = Lisp_ptr{false};
+      return;
+    }
+
+    n1 = n2;
+  }
+
+  VM.return_value = Lisp_ptr{true};
 }
 
 void number_equal(){
   number_compare("=", 
                  number_comparator<std::equal_to,
-                                   std::equal_to<Number::complex_type> >::for_is_sorted());
+                                   std::equal_to<Number::complex_type> >());
 }
 
 void number_less(){
   number_compare("<",
-                 number_comparator<std::less>::for_is_sorted()); 
+                 number_comparator<std::less>()); 
 }
 
 void number_greater(){
   number_compare(">",
-                 number_comparator<std::greater>::for_is_sorted());
+                 number_comparator<std::greater>());
 }
   
 void number_less_eq(){
   number_compare("<=",
-                 number_comparator<std::less_equal>::for_is_sorted());
+                 number_comparator<std::less_equal>());
 }
   
 void number_greater_eq(){
   number_compare(">=",
-                 number_comparator<std::greater_equal>::for_is_sorted());
+                 number_comparator<std::greater_equal>());
 }
 
 
