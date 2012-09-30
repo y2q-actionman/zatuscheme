@@ -1,8 +1,11 @@
+#include <unordered_set>
+
 #include "builtin_cons.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "builtin_util.hh"
 #include "procedure.hh"
+#include "cons.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -40,7 +43,7 @@ void cons_carcdr(const char* name, Fun&& fun){
     cons_type_check_failed(name, arg);
     return;
   }
-  
+
   auto c = arg.get<Cons*>();
   if(!c){
     nil_check_failed(name);
@@ -95,6 +98,37 @@ void cons_set_cdr(){
 }
 
 
+void cons_nullp(){
+  auto arg = pick_args_1();
+  VM.return_value = Lisp_ptr{nullp(arg)};
+}
+
+void cons_listp(){
+  auto arg = pick_args_1();
+  if(arg.tag() != Ptr_tag::cons){
+    cons_type_check_failed("list?", arg);
+    return;
+  }
+
+  auto found_cons = unordered_set<Cons*>();
+  
+  auto ret = do_list(arg,
+                     [&](Cons* c) -> bool{
+                       auto founded = found_cons.find(c);
+                       if(founded != found_cons.end())
+                         return false; //circular list
+                       
+                       found_cons.insert(c);
+                       return true;
+                     },
+                     [](Lisp_ptr p){
+                       return nullp(p);
+                     });
+
+  VM.return_value = Lisp_ptr{ret};
+}
+
+
 constexpr BuiltinFunc
 builtin_func[] = {
   {"pair?", {
@@ -118,6 +152,14 @@ builtin_func[] = {
   {"set-cdr!", {
       cons_set_cdr,
       Calling::function, {2, false}}},
+
+  {"null?", {
+      cons_nullp,
+      Calling::function, {1, false}}},
+  {"list?", {
+      cons_listp,
+      Calling::function, {1, false}}},
+
 };
 
 } // namespace

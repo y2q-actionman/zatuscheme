@@ -49,6 +49,11 @@ int main(){
   check("tmp", "(1 . 2)");
 
   
+  check("(list? '(a b c))", "#t");
+  check("(list? '())", "#t");
+  check("(list? '(a . b))", "#f");
+  check("(let ((x (list 'a))) (set-cdr! x x) (list? x))", "#f");
+
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
