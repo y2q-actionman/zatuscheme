@@ -108,7 +108,7 @@ void check(FILE* f){
 }
 
 void check(const string& input){
-  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  auto f = make_string_input_stream(input.c_str(), input.size());
   check(f);
   fclose(f);
 }
@@ -143,7 +143,7 @@ void check(FILE* f, const string& expect){
 
 template<Token::Type T>
 void check(const string& input, const string& expect){
-  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  auto f = make_string_input_stream(input.c_str(), input.size());
   check<T>(f, expect);
   fclose(f);
 }
@@ -198,7 +198,7 @@ void check(FILE* f, Token::Notation n){
 
 template<typename T>
 void check(const string& input, T&& expect){
-  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  auto f = make_string_input_stream(input.c_str(), input.size());
   check(f, expect);
   fclose(f);
 }
@@ -266,7 +266,7 @@ int main(){
   // consecutive access
   {
     char teststr[] = "(a . b)#(c 'd) e ...;comment\nf +11 `(,x ,@y \"ho()ge\")";
-    FILE* ss = fmemopen(teststr, sizeof(teststr), "r");
+    auto ss = make_string_input_stream(teststr, sizeof(teststr));
 
     check(ss, N::l_paren);
     check_ident(ss, "a");

@@ -10,6 +10,7 @@
 #include "procedure.hh"
 #include "lisp_ptr.hh"
 #include "number.hh"
+#include "port.hh"
 #include "printer.hh"
 #include "reader.hh"
 #include "symbol.hh"

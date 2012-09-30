@@ -70,7 +70,7 @@ void check(FILE* i){
 }
 
 void check(const string& input){
-  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  auto f = make_string_input_stream(input.c_str(), input.size());
   check(f);
   fclose(f);
 }
@@ -102,7 +102,7 @@ void check(FILE* i, const Number::complex_type& z){
 
 template<typename T>
 void check(const string& input, T&& t){
-  FILE* f = fmemopen((void*)input.c_str(), input.size(), "r");
+  auto f = make_string_input_stream(input.c_str(), input.size());
   check(f, t);
   fclose(f);
 }

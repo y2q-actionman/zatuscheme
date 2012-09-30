@@ -57,14 +57,14 @@ private:
   };
 };
 
-Number parse_number(FILE*);
+Number parse_number(FILE*, int radix = 0);
 
 Number to_exact(const Number&);
 Number to_inexact(const Number&);
 
 bool eqv(const Number&, const Number&);
 
-void print(FILE*, const Number&);
+void print(FILE*, const Number&, int radix = 10);
 
 const char* stringify(Number::Type);
 

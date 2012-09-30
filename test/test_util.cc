@@ -3,15 +3,12 @@
 #include "reader.hh"
 #include "eval.hh"
 #include "builtin.hh"
+#include "port.hh"
 
 using namespace std;
 
 Lisp_ptr read_from_string(const char* s){
-  FILE* f = fmemopen((void*)s, strlen(s), "r");
-  if(!f){
-    perror(__func__);
-    return {};
-  }
+  auto f = make_string_input_stream(s, strlen(s));
 
   Lisp_ptr p{read(f)};
 

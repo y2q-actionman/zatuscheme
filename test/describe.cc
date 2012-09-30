@@ -1,4 +1,5 @@
 #include "describe.hh"
+#include "number.hh"
 
 using namespace std;
 

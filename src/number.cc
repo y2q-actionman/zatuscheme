@@ -427,14 +427,18 @@ ParserRet parse_complex(int radix, FILE* f){
 
 } // namespace
 
-Number parse_number(FILE* f){
+Number parse_number(FILE* f, int radix){
   const auto prefix_info = parse_number_prefix(f);
   if(!prefix_info){
     fprintf(zs::err, "reader error: failed at reading a number's prefix\n");
     return {};
   }
 
-  const auto r = parse_complex(prefix_info.radix, f);
+  if(!radix){
+    radix = prefix_info.radix;
+  }
+
+  const auto r = parse_complex(radix, f);
   if(!r){
     fprintf(zs::err, "reader error: failed at reading a number\n");
     return {};
@@ -467,7 +471,7 @@ bool eqv(const Number& n, const Number& m){
   }
 }
 
-void print(FILE* f, const Number& n){
+void print(FILE* f, const Number& n, int radix){
   switch(n.type()){
   case Number::Type::uninitialized:
     fprintf(f, "(uninitialied number)");
