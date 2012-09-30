@@ -59,6 +59,42 @@ void cons_cdr(){
 }
 
 
+template<typename Fun>
+inline
+void cons_set_carcdr(const char* name, Fun&& fun){
+  auto args = pick_args<2>();
+  if(args[0].tag() != Ptr_tag::cons){
+    cons_type_check_failed(name, args[0]);
+    return;
+  }
+  
+  auto c = args[0].get<Cons*>();
+  if(!c){
+    nil_check_failed(name);
+    return;
+  }
+
+  
+  VM.return_value = fun(c, args[1]);
+}
+
+void cons_set_car(){
+  cons_set_carcdr("set-car!",
+                  [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
+                    c->rplaca(p);
+                    return p;
+                  });
+}
+
+void cons_set_cdr(){
+  cons_set_carcdr("set-cdr!",
+                  [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
+                    c->rplacd(p);
+                    return p;
+                  });
+}
+
+
 constexpr BuiltinFunc
 builtin_func[] = {
   {"pair?", {
@@ -75,6 +111,13 @@ builtin_func[] = {
   {"cdr", {
       cons_cdr,
       Calling::function, {1, false}}},
+
+  {"set-car!", {
+      cons_set_car,
+      Calling::function, {2, false}}},
+  {"set-cdr!", {
+      cons_set_cdr,
+      Calling::function, {2, false}}},
 };
 
 } // namespace

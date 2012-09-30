@@ -41,5 +41,14 @@ int main(){
     check_undef("(cdr '())");
   }
 
+  eval_text("(define tmp (cons 'a 'b))");
+  check("tmp", "(a . b)");
+  eval_text("(set-car! tmp 1)");
+  check("tmp", "(1 . b)");
+  eval_text("(set-cdr! tmp 2)");
+  check("tmp", "(1 . 2)");
+
+  
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
