@@ -22,3 +22,19 @@ Lisp_ptr pick_args_1(){
   return tmp[0];
 }
 
+int clean_args(){
+  int ret = 0;
+
+  while(!VM.stack.empty()
+        && VM.stack.top().tag() != Ptr_tag::vm_op){
+    VM.stack.pop();
+    ++ret;
+  }
+
+  if(!VM.stack.empty()
+     && VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+  }
+
+  return ret;
+}

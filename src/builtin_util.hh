@@ -19,6 +19,8 @@ std::array<Lisp_ptr, i> pick_args();
 
 Lisp_ptr pick_args_1();
 
+int clean_args();
+
 
 // some builtin functions
 void procedure_list();

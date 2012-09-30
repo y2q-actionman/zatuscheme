@@ -374,6 +374,7 @@ void number_minus(){
   auto n = arg1.get<Number*>();
   if(!n){
     number_type_check_failed("-", arg1);
+    clean_args();
     return;
   }
 
@@ -408,6 +409,7 @@ void number_divide(){
   auto n = arg1.get<Number*>();
   if(!n){
     number_type_check_failed("/", arg1);
+    clean_args();
     return;
   }
 
@@ -775,6 +777,7 @@ void number_atan(){
   auto n1 = arg1.get<Number*>();
   if(!n1){
     number_type_check_failed("atan", arg1);
+    clean_args();
     return;
   }
 
@@ -982,6 +985,7 @@ void number_from_string(){
   if(!str){
     fprintf(zs::err, "native func: string->number: passed arg is not string (%s).\n",
             stringify(arg1.tag()));
+    clean_args();
     VM.return_value = {};
     return;
   }
