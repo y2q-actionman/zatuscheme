@@ -107,6 +107,33 @@ void check(const string& input, T&& t){
   fclose(f);
 }
 
+// printing test
+void check(const Number& n, int radix, const char* expect){
+  char* buf = NULL;
+  size_t buf_size = 0;
+
+  FILE* tmp_f = open_memstream(&buf, &buf_size);
+  if(!tmp_f){
+    perror(__func__);
+    goto end;
+  }
+
+  print(tmp_f, n, radix);
+
+  if(fclose(tmp_f) != 0){
+    perror(__func__);
+    goto end;
+  }
+
+  if(strcmp(expect, buf) != 0){
+    fprintf(stdout, "[failed] printed %s, expected %s\n",
+            buf, expect);
+    result = false;
+  }
+  
+ end:
+  free(buf);
+}
 
 int main(){
   result = true;
@@ -162,6 +189,16 @@ int main(){
   check("#x#x10");
   check("#i#e1");
 
+  // printing test
+  check(Number(100l), 10, "100");
+  check(Number(100l), 8, "144");
+  check(Number(100l), 16, "64");
+  check(Number(100l), 2, "1100100");
+
+  check(Number(-100l), 10, "-100");
+  check(Number(-100l), 8, "-144");
+  check(Number(-100l), 16, "-64");
+  check(Number(-100l), 2, "-1100100");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

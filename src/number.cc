@@ -471,6 +471,21 @@ bool eqv(const Number& n, const Number& m){
   }
 }
 
+static void print_binary(FILE* f, unsigned long l){
+  std::string tmp;
+
+  while(l > 0){
+    auto b = l % 2;
+    tmp.push_back(b ? '1' : '0');
+    l /= 2;
+  }
+
+  for(auto it = tmp.rbegin(), e = tmp.rend();
+      it != e; ++it){
+    fputc(*it, f);
+  }
+}
+
 void print(FILE* f, const Number& n, int radix){
   switch(n.type()){
   case Number::Type::uninitialized:
@@ -484,9 +499,31 @@ void print(FILE* f, const Number& n, int radix){
   case Number::Type::real:
     fprintf(f, "%g", n.get<Number::real_type>());
     break;
-  case Number::Type::integer:
-    fprintf(f, "%ld", n.get<Number::integer_type>());
+  case Number::Type::integer: {
+    auto i = n.get<Number::integer_type>();
+    if(i < 0){
+      fprintf(f, "-");
+    }
+    auto u = std::abs(i);
+
+    switch(radix){
+    case 10:
+      fprintf(f, "%lu", u);
+      break;
+    case 8:
+      fprintf(f, "%lo", u);
+      break;
+    case 16:
+      fprintf(f, "%lx", u);
+      break;
+    case 2:
+      print_binary(f, u);
+      break;
+    default:
+      UNEXP_DEFAULT();
+    }
     break;
+  }
   default:
     UNEXP_DEFAULT();
   }
