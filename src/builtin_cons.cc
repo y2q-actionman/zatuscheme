@@ -14,11 +14,21 @@ void type_check_pair(){
   VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
 }
 
+void cons_func(){
+  auto args = pick_args<2>();
+  VM.return_value = {new Cons(args[0], args[1])};
+}
+
+
 constexpr BuiltinFunc
 builtin_func[] = {
   {"pair?", {
       type_check_pair,
       Calling::function, {1, false}}},
+
+  {"cons", {
+      cons_func,
+      Calling::function, {2, false}}},
 };
 
 } // namespace

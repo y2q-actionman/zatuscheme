@@ -11,11 +11,16 @@ int main(){
   install_builtin();
   install_builtin_cons();
 
-  // type predicates
   check("(pair? '(a . b))", "#t");
   check("(pair? '(a b c))", "#t");
   check("(pair? '())", "#f");
   check("(pair? #(a b))", "#f");
+
+  check("(cons 'a '())", "(a)");
+  check("(cons '(a) '(b c d))", "((a) b c d)");
+  check("(cons \"a\" '(b c))", "(\"a\" b c)");
+  check("(cons 'a 3)", "(a . 3)");
+  check("(cons '(a  b) 'c)", "((a b) . c)");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
