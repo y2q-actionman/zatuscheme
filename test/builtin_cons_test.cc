@@ -55,6 +55,7 @@ int main(){
   check("(list? '(a . b))", "#f");
   check("(let ((x (list 'a))) (set-cdr! x x) (list? x))", "#f");
 
+
   check("(list 1)", "(1)");
   check("(list 1 2)", "(1 2)");
   check("(list 1 2 3)", "(1 2 3)");
@@ -64,6 +65,11 @@ int main(){
   check("(list* 1)", "1");
   check("(list* 1 2)", "(1 . 2)");
   check("(list* 1 2 3)", "(1 2 . 3)");
+
+
+  check("(length '(a b c))", "3");
+  check("(length '(a (b) (c d e)))", "3");
+  check("(length '())", "0");
 
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

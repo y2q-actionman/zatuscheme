@@ -6,6 +6,7 @@
 #include "builtin_util.hh"
 #include "procedure.hh"
 #include "cons.hh"
+#include "number.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -128,6 +129,25 @@ void cons_listp(){
   VM.return_value = Lisp_ptr{ret};
 }
 
+void cons_length(){
+  auto arg = pick_args_1();
+  if(arg.tag() != Ptr_tag::cons){
+    cons_type_check_failed("list?", arg);
+    return;
+  }
+
+  Number::integer_type length = 0;
+  
+  do_list(arg,
+          [&](Cons*) -> bool{
+            ++length;
+            return true;
+          },
+          [](Lisp_ptr){});
+
+  VM.return_value = Lisp_ptr{new Number(length)};
+}
+
 
 constexpr BuiltinFunc
 builtin_func[] = {
@@ -166,6 +186,10 @@ builtin_func[] = {
   {"list*", {
       procedure_list_star,
       Calling::function, {1, true}}},
+
+  {"length", {
+      cons_length,
+      Calling::function, {1, false}}},
 
 };
 
