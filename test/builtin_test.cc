@@ -15,14 +15,6 @@ int main(){
   install_builtin();
   install_builtin_numeric();
 
-  check("(list 1)", "(1)");
-  check("(list 1 2)", "(1 2)");
-  check("(list 1 2 3)", "(1 2 3)");
-
-  check("(list* 1)", "1");
-  check("(list* 1 2)", "(1 . 2)");
-  check("(list* 1 2 3)", "(1 2 . 3)");
-
   check("(vector 1)", "#(1)");
   check("(vector 1 2)", "#(1 2)");
   check("(vector 1 2 3)", "#(1 2 3)");

@@ -160,6 +160,13 @@ builtin_func[] = {
       cons_listp,
       Calling::function, {1, false}}},
 
+  {"list", {
+      procedure_list,
+      Calling::function, {0, true}}},
+  {"list*", {
+      procedure_list_star,
+      Calling::function, {1, true}}},
+
 };
 
 } // namespace

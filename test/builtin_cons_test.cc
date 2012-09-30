@@ -14,6 +14,7 @@ void check_undef(const char* input){
 int main(){
   install_builtin();
   install_builtin_cons();
+  install_builtin_numeric();
 
   check("(pair? '(a . b))", "#t");
   check("(pair? '(a b c))", "#t");
@@ -53,6 +54,16 @@ int main(){
   check("(list? '())", "#t");
   check("(list? '(a . b))", "#f");
   check("(let ((x (list 'a))) (set-cdr! x x) (list? x))", "#f");
+
+  check("(list 1)", "(1)");
+  check("(list 1 2)", "(1 2)");
+  check("(list 1 2 3)", "(1 2 3)");
+  check("(list 'a (+ 4 3) 'c)", "(a 7 c)");
+  check("(list)", "()");
+
+  check("(list* 1)", "1");
+  check("(list* 1 2)", "(1 . 2)");
+  check("(list* 1 2 3)", "(1 2 . 3)");
 
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

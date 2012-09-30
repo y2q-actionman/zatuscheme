@@ -347,12 +347,6 @@ builtin_func[] = {
       Calling::whole_function, {0, false}}},
 
   // functions
-  {"list", {
-      procedure_list,
-      Calling::function, {0, true}}},
-  {"list*", {
-      procedure_list_star,
-      Calling::function, {1, true}}},
   {"vector", {
       procedure_vector, 
       Calling::function, {1, true}}},
