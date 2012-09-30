@@ -202,6 +202,12 @@ int main(){
 
   // reader/writer
   check("(string->number \"7\")", "7");
+  check("(string->number \"10\" 8)", "8");
+  check("(string->number \"100\")", "100");
+  check("(string->number \"100\" 16)", "256");
+  check("(string->number \"1e2\")", "100");
+  check("(string->number \"15##\")", "1500");
+
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

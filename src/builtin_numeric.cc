@@ -999,13 +999,13 @@ void number_from_string(){
     auto arg2 = pick_args_1();
     auto num = arg2.get<Number*>();
     if(!num){
-      fprintf(zs::err, "native func: string->number: passed arg is not number (%s).\n",
+      fprintf(zs::err, "native func: string->number: passed radix is not number (%s).\n",
               stringify(arg2.tag()));
       VM.return_value = {};
       return;
     }
     if(num->type() != Number::Type::integer){
-      fprintf(zs::err, "native func: string->number: passed arg is not number (%s).\n",
+      fprintf(zs::err, "native func: string->number: passed radix is not number (%s).\n",
               stringify(arg2.tag()));
       VM.return_value = {};
       return;
@@ -1022,6 +1022,58 @@ void number_from_string(){
   }else{
     VM.return_value = {};
   }
+}
+
+void number_to_string(){
+  auto arg1 = VM.stack.top();
+  VM.stack.pop();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    fprintf(zs::err, "native func: number->string: passed arg is not number (%s).\n",
+            stringify(arg1.tag()));
+    clean_args();
+    VM.return_value = {};
+    return;
+  }
+
+  int radix;
+
+  if(VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+    radix = 10;
+  }else{
+    auto arg2 = pick_args_1();
+    auto num = arg2.get<Number*>();
+    if(!num){
+      fprintf(zs::err, "native func: number->string: passed radix is not number (%s).\n",
+              stringify(arg2.tag()));
+      VM.return_value = {};
+      return;
+    }
+    if(num->type() != Number::Type::integer){
+      fprintf(zs::err, "native func: number->string: passed radix is not number (%s).\n",
+              stringify(arg2.tag()));
+      VM.return_value = {};
+      return;
+    }
+    radix = num->get<Number::integer_type>();
+  }
+
+  char* buf = NULL;
+  size_t buf_size = 0;
+
+  auto f = open_memstream(&buf, &buf_size);
+  print(f, *n, radix);
+  fclose(f);
+
+  if(n){
+    VM.return_value = {new String(buf)};
+  }else{
+    VM.return_value = {};
+  }
+
+  free(buf);
 }
 
 
@@ -1209,6 +1261,9 @@ constexpr struct Entry {
 
   {"string->number", {
       number_from_string,
+      Calling::function, {1, true}}},
+  {"number->string", {
+      number_to_string,
       Calling::function, {1, true}}}
 };
 
