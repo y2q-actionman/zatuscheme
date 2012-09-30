@@ -18,11 +18,7 @@ void procedure_vector(){
 }
 
 Lisp_ptr pick_args_1(){
-  Lisp_ptr tmp[1];
-  if(pick_args(std::begin(tmp), std::end(tmp)) < 0){
-    return {};
-  }else{
-    return tmp[0];
-  }
+  auto tmp = pick_args<1>();
+  return tmp[0];
 }
 

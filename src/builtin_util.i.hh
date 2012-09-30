@@ -111,37 +111,28 @@ int fail(){
 
 }
 
-template<typename Iter>
-int pick_args(Iter b, Iter e){
-  int ret = 0;
+template<int size>
+std::array<Lisp_ptr, size> pick_args(){
+  auto ret = std::array<Lisp_ptr, size>();
 
-  for(Iter i = b; i != e; ++i){
-    if(VM.stack.empty())
-      return pick_args_detail::fail();
-    *i = VM.stack.top();
+  for(int i = 0; i < size; ++i){
+    if(VM.stack.empty()){
+      pick_args_detail::fail();
+      ret.fill({});
+      return ret;
+    }
+    ret[i] = VM.stack.top();
     VM.stack.pop();
-    ++ret;
   }
 
   if(VM.stack.empty()
-     || VM.stack.top().tag() != Ptr_tag::vm_op)
-    return pick_args_detail::fail();
-
+     || VM.stack.top().tag() != Ptr_tag::vm_op){
+    pick_args_detail::fail();
+    ret.fill({});
+    return ret;
+  }
   VM.stack.pop();
 
-  return ret;
-}
-
-
-template<int i>
-std::array<Lisp_ptr, i> pick_args(){
-  auto ret = std::array<Lisp_ptr, i>();
-
-  auto fillcnt = pick_args(ret.begin(), ret.end());
-  if(fillcnt < 0){
-    ret.fill({});
-  }
-    
   return ret;
 }
 

@@ -14,9 +14,6 @@ template<typename StackT>
 int list_to_stack(const char*, Lisp_ptr, StackT&);
 
 
-template<typename Iter>
-int pick_args(Iter, Iter);
-
 template<int i>
 std::array<Lisp_ptr, i> pick_args();
 
