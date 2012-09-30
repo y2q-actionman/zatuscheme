@@ -7,6 +7,10 @@ void check(const char* input, const char* expect){
   result = read_eval_print_test(input, expect);
 }
 
+void check_undef(const char* input){
+  result = !eval_text(input);
+}
+
 int main(){
   install_builtin();
   install_builtin_cons();
@@ -21,7 +25,21 @@ int main(){
   check("(cons \"a\" '(b c))", "(\"a\" b c)");
   check("(cons 'a 3)", "(a . 3)");
   check("(cons '(a  b) 'c)", "((a b) . c)");
+  
+  check("(car '(a b c))", "a");
+  check("(car '((a) b c d))", "(a)");
+  check("(car '(1 . 2))", "1");
+  {
+    with_null_stream wns;
+    check_undef("(car '())");
+  }
+  
+  check("(cdr '((a) b c d))", "(b c d)");
+  check("(cdr '(1 . 2))", "2");
+  {
+    with_null_stream wns;
+    check_undef("(cdr '())");
+  }
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-

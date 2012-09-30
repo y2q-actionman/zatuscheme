@@ -89,3 +89,17 @@ FILE* open_null_stream(){
   NULL_STREAM = s;
   return s;
 }
+
+with_null_stream::with_null_stream()
+  : in(zs::in), out(zs::out), err(zs::err){
+  if(!NULL_STREAM) open_null_stream();
+  zs::in = NULL_STREAM;
+  zs::out = NULL_STREAM;
+  zs::err = NULL_STREAM;
+}
+
+with_null_stream::~with_null_stream(){
+  zs::in = this->in;
+  zs::out = this->out;
+  zs::err = this->err;
+}
