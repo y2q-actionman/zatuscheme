@@ -7,6 +7,7 @@
 #include "procedure.hh"
 #include "cons.hh"
 #include "number.hh"
+#include "printer.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -145,7 +146,52 @@ void cons_length(){
           },
           [](Lisp_ptr){});
 
-  VM.return_value = Lisp_ptr{new Number(length)};
+  VM.return_value = {new Number(length)};
+}
+
+void cons_append(){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(VM.stack, args);
+
+  Cons* head = new Cons;
+  Cons* prev_c = head;
+  Cons* now_c = head;
+
+  for(auto i = 0u; i < args.size() - 1; ++i){
+    if(args[i].tag() != Ptr_tag::cons){
+      cons_type_check_failed("append", args[i]);
+      return;
+    }
+
+    do_list(args[i],
+            [&](Cons* c) -> bool{
+              now_c->rplaca(c->car());
+
+              auto new_c = new Cons;
+              now_c->rplacd(new_c);
+
+              prev_c = now_c;
+              now_c = new_c;
+
+              return true;
+            },
+            [](Lisp_ptr){});
+  }
+
+  // last
+  if(prev_c == now_c){
+    if(now_c == head){
+      delete head;
+      VM.return_value = args.back();
+    }else{
+      head->rplacd(args.back());
+      VM.return_value = {head};
+    }
+  }else{
+    prev_c->rplacd(args.back());
+    delete now_c;
+    VM.return_value = {head};
+  }
 }
 
 
@@ -190,6 +236,10 @@ builtin_func[] = {
   {"length", {
       cons_length,
       Calling::function, {1, false}}},
+
+  {"append", {
+      cons_append,
+      Calling::function, {1, true}}},
 
 };
 

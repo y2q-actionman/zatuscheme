@@ -71,6 +71,18 @@ int main(){
   check("(length '(a (b) (c d e)))", "3");
   check("(length '())", "0");
 
+  check("(append '(1 2 3))", "(1 2 3)");
+  check("(append '(1 2 3) '(4 5 6))", "(1 2 3 4 5 6)");
+  check("(append '(1 2 3) '())", "(1 2 3)");
+  check("(append '() '(1 2 3))", "(1 2 3)");
+  check("(append '(1 2 3) 'a)", "(1 2 3 . a)");
+  check("(append '(x) '(y))", "(x y)");
+  check("(append '(a) '(b c d))", "(a b c d)");
+  check("(append '(a (b)) '((c)))", "(a (b) (c))");
+  check("(append '(a b) '(c . d))", "(a b c . d)");
+  check("(append '() 'a)", "a");
+  check("(append '() '() '() '() 'a)", "a");
+
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
