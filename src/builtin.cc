@@ -232,7 +232,6 @@ void whole_macro_case(){
 }
   
 
-
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
@@ -286,13 +285,8 @@ void to_macro_procedure(){
                                    proc->arg_info(), proc->closure());
 }
 
-constexpr struct Entry {
-  const char* name;
-  const NProcedure func;
-
-  constexpr Entry(const char* n, const NProcedure& f)
-    : name(n), func(f){}
-} builtin_func[] = {
+constexpr BuiltinFunc
+builtin_func[] = {
   // syntaxes
   {"quote", {
       whole_function_quote,
@@ -360,16 +354,13 @@ constexpr struct Entry {
   // functions
   {"list", {
       procedure_list,
-      Calling::function, {1, true}}},
+      Calling::function, {0, true}}},
   {"list*", {
       procedure_list_star,
       Calling::function, {1, true}}},
   {"vector", {
       procedure_vector, 
       Calling::function, {1, true}}},
-  {"boolean?", {
-      type_check_pred<Ptr_tag::boolean>, 
-      Calling::function, {1, false}}},
   {"symbol?", {
       type_check_pred<Ptr_tag::symbol>,
       Calling::function, {1, false}}},
@@ -384,9 +375,6 @@ constexpr struct Entry {
       Calling::function, {1, false}}},
   {"pair?", {
       type_check_pair,
-      Calling::function, {1, false}}},
-  {"number?", {
-      type_check_pred<Ptr_tag::number>,
       Calling::function, {1, false}}},
   {"string?", {
       type_check_pred<Ptr_tag::string>,

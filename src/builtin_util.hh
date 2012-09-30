@@ -3,6 +3,8 @@
 
 #include <array>
 #include "lisp_ptr.hh"
+#include "vm.hh"
+#include "procedure.hh"
 
 template<bool dot_list, typename StackT>
 Lisp_ptr stack_to_list(StackT&);
@@ -26,6 +28,23 @@ int clean_args();
 void procedure_list();
 void procedure_list_star();
 void procedure_vector();
+
+
+// builtin func struct
+struct BuiltinFunc {
+  const char* name;
+  const Procedure::NProcedure func;
+
+  constexpr BuiltinFunc(const char* n, const Procedure::NProcedure& f)
+    : name(n), func(f){};
+};
+
+// type check predicate
+template <Ptr_tag p>
+void type_check_pred(){
+  auto arg = pick_args_1();
+  VM.return_value = Lisp_ptr{arg.tag() == p};
+}
 
 #include "builtin_util.i.hh"
 

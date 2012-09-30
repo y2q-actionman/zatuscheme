@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <cmath>
 
+#include "builtin_numeric.hh"
+#include "vm.hh"
 #include "builtin.hh"
 #include "util.hh"
 #include "number.hh"
@@ -1077,13 +1079,12 @@ void number_to_string(){
 }
 
 
-constexpr struct Entry {
-  const char* name;
-  const NProcedure func;
+constexpr BuiltinFunc
+builtin_numeric[] = {
+  {"number?", {
+      type_check_pred<Ptr_tag::number>,
+      Calling::function, {1, false}}},
 
-  constexpr Entry(const char* n, const NProcedure& f)
-    : name(n), func(f){}
-} builtin_numeric[] = {
   {"complex?", {
       complexp,
       Calling::function, {1, false}}},
