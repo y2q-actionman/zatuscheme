@@ -15,6 +15,7 @@
 #include "eval.hh"
 #include "builtin_util.hh"
 #include "printer.hh"
+#include "port.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -973,6 +974,53 @@ void number_e_to_i(){
 }
 
 
+void number_from_string(){
+  auto arg1 = VM.stack.top();
+  VM.stack.pop();
+
+  auto str = arg1.get<String*>();
+  if(!str){
+    fprintf(zs::err, "native func: string->number: passed arg is not string (%s).\n",
+            stringify(arg1.tag()));
+    VM.return_value = {};
+    return;
+  }
+
+  int radix;
+
+  if(VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+    radix = 10;
+  }else{
+    auto arg2 = pick_args_1();
+    auto num = arg2.get<Number*>();
+    if(!num){
+      fprintf(zs::err, "native func: string->number: passed arg is not number (%s).\n",
+              stringify(arg2.tag()));
+      VM.return_value = {};
+      return;
+    }
+    if(num->type() != Number::Type::integer){
+      fprintf(zs::err, "native func: string->number: passed arg is not number (%s).\n",
+              stringify(arg2.tag()));
+      VM.return_value = {};
+      return;
+    }
+    radix = num->get<Number::integer_type>();
+  }
+    
+  auto f = make_string_input_stream(str->c_str(), str->size());
+  auto n = parse_number(f, radix);
+  fclose(f);
+
+  if(n){
+    VM.return_value = {new Number(n)};
+  }else{
+    VM.return_value = {};
+  }
+}
+
+
 constexpr struct Entry {
   const char* name;
   const NProcedure func;
@@ -1154,6 +1202,10 @@ constexpr struct Entry {
   {"exact->inexact", {
       number_e_to_i,
       Calling::function, {1, false}}},
+
+  {"string->number", {
+      number_from_string,
+      Calling::function, {1, true}}}
 };
 
 } //namespace

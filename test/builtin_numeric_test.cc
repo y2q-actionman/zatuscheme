@@ -200,6 +200,9 @@ int main(){
   // exact
   check("(round 7)", "7");
 
+  // reader/writer
+  check("(string->number \"7\")", "7");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
