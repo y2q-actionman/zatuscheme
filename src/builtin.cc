@@ -20,11 +20,6 @@ void type_check_pred(){
   VM.return_value = Lisp_ptr{arg.tag() == p};
 }
 
-void type_check_pair(){
-  auto arg = pick_args_1();
-  VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
-}
-
 void type_check_procedure(){
   auto arg = pick_args_1();
   VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
@@ -372,9 +367,6 @@ builtin_func[] = {
       Calling::function, {1, false}}},
   {"procedure?", {
       type_check_procedure,
-      Calling::function, {1, false}}},
-  {"pair?", {
-      type_check_pair,
       Calling::function, {1, false}}},
   {"string?", {
       type_check_pred<Ptr_tag::string>,

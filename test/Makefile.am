@@ -18,8 +18,9 @@ check_PROGRAMS = token_test\
 		enclose_test\
 		quasiquote_test\
 		builtin_test\
+		builtin_numeric_test\
 		builtin_boolean_test\
-		builtin_numeric_test
+		builtin_cons_test
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)

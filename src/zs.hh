@@ -3,6 +3,7 @@
 
 #include "builtin.hh"
 #include "builtin_boolean.hh"
+#include "builtin_cons.hh"
 #include "builtin_numeric.hh"
 #include "builtin_util.hh"
 #include "cons.hh"
