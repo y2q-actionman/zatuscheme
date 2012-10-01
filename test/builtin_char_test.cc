@@ -69,6 +69,32 @@ int main(){
   check("(char-ci=? #\\a #\\A)", "#t");
   check("(char-ci=? #\\0 #\\Z)", "#f");
 
+
+  check("(char-alphabetic? #\\a)", "#t");
+  check("(char-alphabetic? #\\A)", "#t");
+  check("(char-alphabetic? #\\0)", "#f");
+  check("(char-alphabetic? #\\space)", "#f");
+
+  check("(char-numeric? #\\a)", "#f");
+  check("(char-numeric? #\\A)", "#f");
+  check("(char-numeric? #\\0)", "#t");
+  check("(char-numeric? #\\space)", "#f");
+
+  check("(char-whitespace? #\\a)", "#f");
+  check("(char-whitespace? #\\A)", "#f");
+  check("(char-whitespace? #\\0)", "#f");
+  check("(char-whitespace? #\\space)", "#t");
+
+  check("(char-upper-case? #\\a)", "#f");
+  check("(char-upper-case? #\\A)", "#t");
+  check("(char-upper-case? #\\0)", "#f");
+  check("(char-upper-case? #\\space)", "#f");
+
+  check("(char-lower-case? #\\a)", "#t");
+  check("(char-lower-case? #\\A)", "#f");
+  check("(char-lower-case? #\\0)", "#f");
+  check("(char-lower-case? #\\space)", "#f");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

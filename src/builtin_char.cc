@@ -82,6 +82,38 @@ void char_ci_greater_eq(){
 }
 
   
+template<typename Fun>
+void char_pred(Fun&& fun){
+  auto arg1 = pick_args_1();
+
+  auto c = arg1.get<char>();
+  if(!c){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  VM.return_value = Lisp_ptr{fun(c)};
+}
+
+void char_isalpha(){
+  char_pred([](char c) -> bool{ return std::isalpha(c); });
+}
+
+void char_isdigit(){
+  char_pred([](char c) -> bool{ return std::isdigit(c); });
+}
+
+void char_isspace(){
+  char_pred([](char c) -> bool{ return std::isspace(c); });
+}
+
+void char_isupper(){
+  char_pred([](char c) -> bool{ return std::isupper(c); });
+}
+
+void char_islower(){
+  char_pred([](char c) -> bool{ return std::islower(c); });
+}
 
 
 constexpr BuiltinFunc
@@ -121,6 +153,22 @@ builtin_func[] = {
   {"char-ci>=?", {
       char_ci_greater_eq,
       Calling::function, {2, false}}},
+
+  {"char-alphabetic?", {
+      char_isalpha,
+      Calling::function, {1, false}}},
+  {"char-numeric?", {
+      char_isdigit,
+      Calling::function, {1, false}}},
+  {"char-whitespace?", {
+      char_isspace,
+      Calling::function, {1, false}}},
+  {"char-upper-case?", {
+      char_isupper,
+      Calling::function, {1, false}}},
+  {"char-lower-case?", {
+      char_islower,
+      Calling::function, {1, false}}},
 };
 
 } // namespace
