@@ -22,8 +22,9 @@ Env::Env(Env* e)
 }
 
 Env::~Env(){
+  printf("deleted! (%p)\n", this);
   if(next_ && next_->release() <= 0){
-    // delete next_;
+    delete next_;
   }
 }
 
@@ -31,7 +32,7 @@ Env& Env::operator=(const Env& e){
   map_ = e.map_;
 
   if(next_ && next_->release() <= 0){
-    // delete next_;
+    delete next_;
   }
   next_ = e.next_;
   if(next_) next_->add_ref();

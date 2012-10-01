@@ -23,6 +23,7 @@ public:
   void local_set(Symbol*, Lisp_ptr);
   Env* push();
 
+  int ref_count() const { return refcnt_; }
   int add_ref();
   int release();
 

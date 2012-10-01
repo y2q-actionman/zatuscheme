@@ -1,8 +1,9 @@
 #ifndef PROCEDURE_HH
 #define PROCEDURE_HH
 
-#include "lisp_ptr.hh"
 #include <cstdio>
+#include "lisp_ptr.hh"
+#include "env.hh"
 
 namespace Procedure {
   typedef void(*NativeFunc)();
@@ -54,12 +55,18 @@ namespace Procedure {
   class IProcedure : protected ProcedureBase {
   public:
     IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Env* e)
-      : ProcedureBase(c, a), code_(code), env_(e){}
+      : ProcedureBase(c, a), code_(code), env_(e){
+      env_->add_ref();
+    }
 
     IProcedure(const IProcedure&) = default;
     IProcedure(IProcedure&&) = default;
 
-    ~IProcedure() = default;
+    ~IProcedure(){
+      if(env_->release() <= 0){
+        delete env_;
+      }
+    }
   
     IProcedure& operator=(const IProcedure&) = default;
     IProcedure& operator=(IProcedure&&) = default;

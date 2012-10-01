@@ -9,12 +9,17 @@ inline
 void VM_t::enter_frame(Env* e){
   frame_history_.push(frame);
   frame = e;
+  frame->add_ref();
 }  
 
 inline
 void VM_t::leave_frame(){
+  if(frame->release() <= 0){
+    delete frame;
+  }
   frame = frame_history_.top();
   frame_history_.pop();
+
 }  
 
 inline
