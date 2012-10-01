@@ -5,6 +5,7 @@
 int main(){
   install_builtin();
   install_builtin_boolean();
+  install_builtin_cons();
   install_builtin_numeric();
 
   while(1){
