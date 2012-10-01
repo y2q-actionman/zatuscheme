@@ -24,6 +24,10 @@ using namespace Procedure;
 
 namespace {
 
+void number_type_check_failed(const char* func_name, Lisp_ptr p){
+  builtin_type_check_failed(func_name, Ptr_tag::number, p);
+}
+
 template<typename Fun>
 inline void number_pred(Fun&& fun){
   auto arg = pick_args_1();
@@ -73,12 +77,6 @@ void inexactp(){
       return n->type() == Number::Type::complex
         || n->type() == Number::Type::real;
     });
-}
-
-void number_type_check_failed(const char* func_name, Lisp_ptr p){
-  fprintf(zs::err, "native func: %s: arg is not number! (%s)\n",
-          func_name, stringify(p.tag()));
-  VM.return_value = {};
 }
 
 struct complex_found{

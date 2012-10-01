@@ -38,3 +38,9 @@ int clean_args(){
 
   return ret;
 }
+
+void builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
+  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
+          func_name, stringify(tag), stringify(p.tag()));
+  VM.return_value = {};
+}
