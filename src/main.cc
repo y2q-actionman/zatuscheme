@@ -7,6 +7,7 @@ int main(){
   install_builtin_boolean();
   install_builtin_cons();
   install_builtin_numeric();
+  install_builtin_symbol();
 
   while(1){
     printf(REPL_PROMPT);

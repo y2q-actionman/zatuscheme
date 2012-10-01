@@ -20,7 +20,8 @@ check_PROGRAMS = token_test\
 		builtin_test\
 		builtin_numeric_test\
 		builtin_boolean_test\
-		builtin_cons_test
+		builtin_cons_test\
+		builtin_symbol_test
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)

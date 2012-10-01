@@ -86,9 +86,6 @@ builtin_func[] = {
   {"vector", {
       procedure_vector, 
       Calling::function, {1, true}}},
-  {"symbol?", {
-      type_check_pred<Ptr_tag::symbol>,
-      Calling::function, {1, false}}},
   {"char?", {
       type_check_pred<Ptr_tag::character>,
       Calling::function, {1, false}}},
