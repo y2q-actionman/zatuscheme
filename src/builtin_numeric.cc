@@ -475,33 +475,24 @@ template<typename Fun>
 inline
 void number_divop(const char* name, Fun&& fun){
   auto args = pick_args<2>();
+  Number* n[2];
 
-  auto n1 = args[0].get<Number*>();
-  if(!n1){
-    number_type_check_failed(name, args[0]);
-    return;
-  }
-  if(n1->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: %s: not integer type (%s)",
-            name, stringify(n1->type()));
-    VM.return_value = {};
-    return;
+  for(auto i = 0; i < 2; ++i){
+    n[i] = args[i].get<Number*>();
+    if(!n[i]){
+      number_type_check_failed(name, args[i]);
+      return;
+    }
+    if(n[i]->type() != Number::Type::integer){
+      fprintf(zs::err, "native func: %s: not integer type (%s)",
+              name, stringify(n[i]->type()));
+      VM.return_value = {};
+      return;
+    }
   }
   
-  auto n2 = args[1].get<Number*>();
-  if(!n2){
-    number_type_check_failed(name, args[1]);
-    return;
-  }
-  if(n2->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: %s: not integer type (%s)",
-            name, stringify(n2->type()));
-    VM.return_value = {};
-    return;
-  }
-
-  VM.return_value = {new Number{fun(n1->get<Number::integer_type>(),
-                                    n2->get<Number::integer_type>())}};
+  VM.return_value = {new Number{fun(n[0]->get<Number::integer_type>(),
+                                    n[1]->get<Number::integer_type>())}};
 }
 
 void number_quot(){
@@ -650,19 +641,16 @@ void number_round(){
 
 void number_rationalize(){
   auto args = pick_args<2>();
+  Number* n[2];
 
-  auto n1 = args[0].get<Number*>();
-  if(!n1){
-    number_type_check_failed("rationalize", args[0]);
-    return;
+  for(auto i = 0; i < 2; ++i){
+    n[i] = args[i].get<Number*>();
+    if(!n[i]){
+      number_type_check_failed("rationalize", args[i]);
+      return;
+    }
   }
   
-  auto n2 = args[1].get<Number*>();
-  if(!n2){
-    number_type_check_failed("rationalize", args[1]);
-    return;
-  }
-
   fprintf(zs::err, "native func: 'rationalize' is not implemented.\n");
   VM.return_value = {};
 }
@@ -838,35 +826,32 @@ void number_sqrt(){
 template<typename RFun, typename CFun>
 void number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
   auto args = pick_args<2>();
+  Number* n[2];
 
-  auto n1 = args[0].get<Number*>();
-  if(!n1){
-    number_type_check_failed(name, args[0]);
-    return;
+  for(auto i = 0; i < 2; ++i){
+    n[i] = args[i].get<Number*>();
+    if(!n[i]){
+      number_type_check_failed(name, args[i]);
+      return;
+    }
   }
   
-  auto n2 = args[1].get<Number*>();
-  if(!n2){
-    number_type_check_failed(name, args[1]);
-    return;
-  }
-
-  if(n1->type() == Number::Type::uninitialized
-     || n2->type() == Number::Type::uninitialized){
+  if(n[0]->type() == Number::Type::uninitialized
+     || n[1]->type() == Number::Type::uninitialized){
     UNEXP_DEFAULT();
   }
 
-  if(n1->type() <= Number::Type::real
-     || n2->type() <= Number::Type::real){
-    VM.return_value = {new Number(rfun(n1->coerce<Number::real_type>(),
-                                       n2->coerce<Number::real_type>()))};
+  if(n[0]->type() <= Number::Type::real
+     || n[1]->type() <= Number::Type::real){
+    VM.return_value = {new Number(rfun(n[0]->coerce<Number::real_type>(),
+                                       n[1]->coerce<Number::real_type>()))};
     return;
   }
 
-  if(n1->type() <= Number::Type::complex
-     || n2->type() <= Number::Type::complex){
-    VM.return_value = cfun(n1->coerce<Number::complex_type>(),
-                           n2->coerce<Number::complex_type>());
+  if(n[0]->type() <= Number::Type::complex
+     || n[1]->type() <= Number::Type::complex){
+    VM.return_value = cfun(n[0]->coerce<Number::complex_type>(),
+                           n[1]->coerce<Number::complex_type>());
     return;
   }
 
