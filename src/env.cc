@@ -22,7 +22,6 @@ Env::Env(Env* e)
 }
 
 Env::~Env(){
-  printf("deleted! (%p)\n", this);
   if(next_ && next_->release() <= 0){
     delete next_;
   }
