@@ -9,28 +9,30 @@ class Env {
 public:
   typedef std::unordered_map<Symbol*, Lisp_ptr> map_type;
 
-  Env();
-  Env(const Env&);
-  Env(Env&&);
-  Env(Env*);
+  Env(const Env&) = delete;
+  Env(Env&&) = delete;
+  Env(Env* e = nullptr);
 
   ~Env();
 
-  Env& operator=(const Env&);
-  Env& operator=(Env&&);
+  Env& operator=(const Env&) = delete;
+  Env& operator=(Env&&) = delete;
+
+  // void steal(Env*);
 
   Lisp_ptr traverse(Symbol*, Lisp_ptr);
   void local_set(Symbol*, Lisp_ptr);
   Env* push();
-
-  int ref_count() const { return refcnt_; }
-  int add_ref();
-  int release();
+  
+  inline int add_ref();
+  inline int release();
 
 private:
   map_type map_;
   Env* next_;
   int refcnt_;
 };
+
+#include "env.i.hh"
 
 #endif // ENV_HH

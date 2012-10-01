@@ -15,10 +15,16 @@ VM_t::~VM_t(){
   frame->release();
 }
 
-Lisp_ptr VM_t::traverse(Symbol* s, Lisp_ptr p){
-  return frame->traverse(s, p);
-}
+void VM_t::enter_frame(Env* e){
+  frame_history_.push(frame);
+  frame = e;
+  frame->add_ref();
+}  
 
-void VM_t::local_set(Symbol* s, Lisp_ptr p){
-  frame->local_set(s, p);
-}
+void VM_t::leave_frame(){
+  if(frame->release() <= 0){
+    delete frame;
+  }
+  frame = frame_history_.top();
+  frame_history_.pop();
+}  
