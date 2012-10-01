@@ -8,6 +8,7 @@ int main(){
   install_builtin_cons();
   install_builtin_numeric();
   install_builtin_symbol();
+  install_builtin_char();
 
   while(1){
     printf(REPL_PROMPT);

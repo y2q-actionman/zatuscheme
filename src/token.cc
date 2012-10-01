@@ -225,11 +225,11 @@ Token tokenize_character(FILE* f){
   }
 
   auto next = fgetc(f);
+  ungetc(next, f);
+
   if(is_delimiter(next)){
     return Token{static_cast<char>(ret_char)};
   }else{
-    ungetc(next, f);
-
     // check character name
     switch(tolower(ret_char)){
     case 's':
