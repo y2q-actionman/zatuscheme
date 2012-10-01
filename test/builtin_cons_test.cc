@@ -84,6 +84,8 @@ int main(){
   check("(append '() 'a)", "a");
   check("(append '() '() '() '() 'a)", "a");
 
+  check("(reverse '(a b c))", "(c b a)");
+  check("(reverse '(a (b c) d (e (f))))", "((e (f)) d (b c) a)");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

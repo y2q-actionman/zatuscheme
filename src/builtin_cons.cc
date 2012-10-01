@@ -194,6 +194,25 @@ void cons_append(){
   }
 }
 
+void cons_reverse(){
+  auto arg = pick_args_1();
+  if(arg.tag() != Ptr_tag::cons){
+    cons_type_check_failed("reverse", arg);
+    return;
+  }
+
+  Lisp_ptr ret = Cons::NIL;
+  
+  do_list(arg,
+          [&](Cons* c) -> bool{
+            ret = {new Cons(c->car(), ret)};
+            return true;
+          },
+          [](Lisp_ptr){});
+
+  VM.return_value = ret;
+}
+
 
 constexpr BuiltinFunc
 builtin_func[] = {
@@ -240,6 +259,10 @@ builtin_func[] = {
   {"append", {
       cons_append,
       Calling::function, {1, true}}},
+
+  {"reverse", {
+      cons_reverse,
+      Calling::function, {1, false}}},
 
 };
 
