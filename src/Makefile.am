@@ -16,6 +16,7 @@ libzs_a_SOURCES = zs.hh\
 		eval.cc eval.hh\
 		procedure.cc procedure.hh procedure.i.hh\
 		port.cc port.hh\
+		env.cc env.hh\
 		builtin_util.cc builtin_util.hh\
 		builtin.cc builtin.hh builtin.i.hh\
 		builtin_numeric.cc builtin_numeric.hh\

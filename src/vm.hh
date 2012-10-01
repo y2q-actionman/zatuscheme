@@ -7,14 +7,16 @@
 #include "lisp_ptr.hh"
 #include "cons.hh"
 #include "symbol.hh"
+#include "env.hh"
 
 class VM_t {
   typedef std::stack<Lisp_ptr, std::vector<Lisp_ptr>> stack_t;
 
 public:
   VM_t();
+  ~VM_t();
 
-  void enter_frame(Lisp_ptr);
+  void enter_frame(Env*);
   void leave_frame();
 
   Lisp_ptr find(Symbol*);
@@ -26,15 +28,13 @@ public:
   stack_t code;
   stack_t stack;
   Lisp_ptr return_value;
-  Lisp_ptr frame;
+  Env* frame;
 
 private:
-  stack_t frame_history_;
+  std::stack<Env*> frame_history_;
 
   Lisp_ptr traverse(Symbol*, Lisp_ptr);
 };
-
-Lisp_ptr push_frame(Lisp_ptr);
 
 extern VM_t VM;
 

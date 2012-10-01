@@ -6,9 +6,9 @@
 #endif
 
 inline
-void VM_t::enter_frame(Lisp_ptr p){
+void VM_t::enter_frame(Env* e){
   frame_history_.push(frame);
-  frame = p;
+  frame = e;
 }  
 
 inline

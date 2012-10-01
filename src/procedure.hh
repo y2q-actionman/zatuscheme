@@ -53,7 +53,7 @@ namespace Procedure {
 
   class IProcedure : protected ProcedureBase {
   public:
-    IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Lisp_ptr e)
+    IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Env* e)
       : ProcedureBase(c, a), code_(code), env_(e){}
 
     IProcedure(const IProcedure&) = default;
@@ -70,12 +70,12 @@ namespace Procedure {
     Lisp_ptr get() const
     { return code_; }
 
-    Lisp_ptr closure() const
+    Env* closure() const
     { return env_; }
   
   private:
     Lisp_ptr code_;
-    Lisp_ptr env_;
+    Env* env_;
   };
 
   class NProcedure : protected ProcedureBase {

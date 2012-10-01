@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <cstdio>
-#include <unordered_map>
 
 enum class Ptr_tag {
   undefined = 0,
@@ -81,7 +80,7 @@ class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
 typedef FILE Port;
-typedef std::unordered_map<Symbol*, Lisp_ptr> Env;
+class Env;
 typedef void(*VMop)();
 
 

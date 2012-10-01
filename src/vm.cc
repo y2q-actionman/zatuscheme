@@ -1,47 +1,24 @@
 #include <cassert>
 
 #include "vm.hh"
+#include "env.hh"
 
 VM_t VM;
 
 VM_t::VM_t() : symtable(), code(), stack(),
-               frame(make_cons_list({Lisp_ptr(new Env())})),
-               frame_history_(){}
+               frame(new Env()),
+               frame_history_(){
+  frame->add_ref();
+}
+
+VM_t::~VM_t(){
+  frame->release();
+}
 
 Lisp_ptr VM_t::traverse(Symbol* s, Lisp_ptr p){
-  Lisp_ptr old = {};
-
-  do_list(frame,
-          [&](Cons* c) -> bool {
-            auto e = c->car().get<Env*>();
-            assert(e);
-
-            auto ei = e->find(s);
-            if(ei != e->end()){
-              old = ei->second;
-              if(p){
-                e->erase(ei);
-                e->insert({s, p});
-              }
-              return false;
-            }
-            return true;
-          },
-          [](Lisp_ptr){});
-
-  return old;
+  return frame->traverse(s, p);
 }
 
 void VM_t::local_set(Symbol* s, Lisp_ptr p){
-  auto front = frame.get<Cons*>()->car().get<Env*>();
-  assert(front);
-
-  auto it = front->find(s);
-  if(it != front->end()) front->erase(it);
-
-  front->insert({s, p});
-}
-
-Lisp_ptr push_frame(Lisp_ptr l){
-  return push_cons_list(Lisp_ptr(new Env), l);
+  frame->local_set(s, p);
 }

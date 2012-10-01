@@ -1,6 +1,7 @@
 #include <memory>
 #include <cassert>
 
+#include "vm.hh"
 #include "eval.hh"
 #include "util.hh"
 #include "symbol.hh"
@@ -61,7 +62,7 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
   if(argi->early_bind){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
-    VM.enter_frame(push_frame(iproc->closure()));
+    VM.enter_frame(iproc->closure()->push());
   }
 
   VM.code.push(proc);
@@ -270,7 +271,7 @@ void proc_enter_interpreted(IProcedure* fun){
   }
 
   if(!fun->arg_info().early_bind){
-    VM.enter_frame(push_frame(fun->closure()));
+    VM.enter_frame(fun->closure()->push());
   }
 
   VM.code.push(vm_op_proc_leave);
@@ -805,7 +806,7 @@ static void let_internal(bool sequencial, bool early_bind){
   }
 
   if(name){
-    VM.enter_frame(push_frame(VM.frame));
+    VM.enter_frame(VM.frame->push());
   }
 
   auto proc = new IProcedure(body, Calling::function,
