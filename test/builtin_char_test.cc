@@ -18,6 +18,7 @@ int main(){
   check("(char? #\\a)", "#t");
   check("(char? 1)", "#f");
 
+
   check("(char=? #\\0 #\\1)", "#f");
   check("(char=? #\\1 #\\1)", "#t");
   check("(char=? #\\2 #\\1)", "#f");
@@ -44,6 +45,29 @@ int main(){
   check("(char<? #\\9 #\\a)", "#t");
   check("(char<? #\\9 #\\A)", "#t");
 
+
+  check("(char-ci=? #\\0 #\\1)", "#f");
+  check("(char-ci=? #\\1 #\\1)", "#t");
+  check("(char-ci=? #\\2 #\\1)", "#f");
+
+  check("(char-ci<? #\\0 #\\1)", "#t");
+  check("(char-ci<? #\\1 #\\1)", "#f");
+  check("(char-ci<? #\\2 #\\1)", "#f");
+
+  check("(char-ci>? #\\0 #\\1)", "#f");
+  check("(char-ci>? #\\1 #\\1)", "#f");
+  check("(char-ci>? #\\2 #\\1)", "#t");
+
+  check("(char-ci<=? #\\0 #\\1)", "#t");
+  check("(char-ci<=? #\\1 #\\1)", "#t");
+  check("(char-ci<=? #\\2 #\\1)", "#f");
+
+  check("(char-ci>=? #\\0 #\\1)", "#f");
+  check("(char-ci>=? #\\1 #\\1)", "#t");
+  check("(char-ci>=? #\\2 #\\1)", "#t");
+
+  check("(char-ci=? #\\a #\\A)", "#t");
+  check("(char-ci=? #\\0 #\\Z)", "#f");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

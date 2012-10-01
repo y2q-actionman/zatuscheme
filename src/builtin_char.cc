@@ -1,4 +1,5 @@
 #include <functional>
+#include <cctype>
 
 #include "builtin_char.hh"
 #include "lisp_ptr.hh"
@@ -52,12 +53,43 @@ void char_greater_eq(){
 }
   
 
+template<typename Fun>
+struct ci_comparator{
+  inline bool operator()(char c1, char c2) const{
+    static constexpr Fun fun;
+    return fun(tolower(c1), tolower(c2));
+  }
+};
+
+void char_ci_eq(){
+  char_compare("char-ci=?", ci_comparator<std::equal_to<char> >());
+}
+
+void char_ci_less(){
+  char_compare("char-ci<?", ci_comparator<std::less<char> >());
+}
+
+void char_ci_greater(){
+  char_compare("char-ci>?", ci_comparator<std::greater<char> >());
+}
+
+void char_ci_less_eq(){
+  char_compare("char-ci<=?", ci_comparator<std::less_equal<char> >());
+}
+
+void char_ci_greater_eq(){
+  char_compare("char-ci>=?", ci_comparator<std::greater_equal<char> >());
+}
+
+  
+
 
 constexpr BuiltinFunc
 builtin_func[] = {
   {"char?", {
       type_check_pred<Ptr_tag::character>,
       Calling::function, {1, false}}},
+
   {"char=?", {
       char_eq,
       Calling::function, {2, false}}},
@@ -72,6 +104,22 @@ builtin_func[] = {
       Calling::function, {2, false}}},
   {"char>=?", {
       char_greater_eq,
+      Calling::function, {2, false}}},
+
+  {"char-ci=?", {
+      char_ci_eq,
+      Calling::function, {2, false}}},
+  {"char-ci<?", {
+      char_ci_less,
+      Calling::function, {2, false}}},
+  {"char-ci>?", {
+      char_ci_greater,
+      Calling::function, {2, false}}},
+  {"char-ci<=?", {
+      char_ci_less_eq,
+      Calling::function, {2, false}}},
+  {"char-ci>=?", {
+      char_ci_greater_eq,
       Calling::function, {2, false}}},
 };
 
