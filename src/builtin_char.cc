@@ -6,6 +6,7 @@
 #include "vm.hh"
 #include "builtin_util.hh"
 #include "procedure.hh"
+#include "number.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -116,6 +117,56 @@ void char_islower(){
 }
 
 
+template<typename Fun>
+void char_conversion(const char* name, Fun&& fun){
+  auto arg1 = pick_args_1();
+
+  auto c = arg1.get<char>();
+  if(!c){
+    char_type_check_failed(name, arg1);
+    return;
+  }
+
+  VM.return_value = Lisp_ptr{fun(c)};
+}
+  
+
+void char_to_int(){
+  char_conversion("char->integer",
+                  [](char c){
+                    return new Number(static_cast<Number::integer_type>(c));
+                  });
+}
+
+void char_from_int(){
+  auto arg1 = pick_args_1();
+
+  auto n = arg1.get<Number*>();
+  if(!n){
+    builtin_type_check_failed("integer->char", Ptr_tag::number, arg1);
+    return;
+  }
+  if(n->type() != Number::Type::integer){
+    fprintf(zs::err, "native func: integer->char: passed arg is not exact integer! (%s)",
+            stringify(n->type()));
+    VM.return_value = {};
+    return;
+  }
+
+  VM.return_value = Lisp_ptr{static_cast<char>(n->get<Number::integer_type>())};
+}
+
+void char_toupper(){
+  char_conversion("char-upcase",
+                  [](char c){ return static_cast<char>(std::toupper(c)); });
+}
+
+void char_tolower(){
+  char_conversion("char-downcase",
+                  [](char c){ return static_cast<char>(std::tolower(c)); });
+}
+
+
 constexpr BuiltinFunc
 builtin_func[] = {
   {"char?", {
@@ -169,6 +220,19 @@ builtin_func[] = {
   {"char-lower-case?", {
       char_islower,
       Calling::function, {1, false}}},
+
+  {"char->integer", {
+      char_to_int,
+      Calling::function, {1, false}}},
+  {"integer->char", {
+      char_from_int,
+      Calling::function, {1, false}}},
+  {"char-upcase", {
+      char_toupper,
+      Calling::function, {1, false}}},
+  {"char-downcase", {
+      char_tolower,
+      Calling::function, {1, false}}}
 };
 
 } // namespace

@@ -14,6 +14,7 @@ int main(){
   install_builtin();
   install_builtin_syntax();
   install_builtin_char();
+  install_builtin_numeric();
 
   check("(char? #\\a)", "#t");
   check("(char? 1)", "#f");
@@ -94,6 +95,13 @@ int main(){
   check("(char-lower-case? #\\A)", "#f");
   check("(char-lower-case? #\\0)", "#f");
   check("(char-lower-case? #\\space)", "#f");
+
+  check("(char=? #\\a (integer->char (char->integer #\\a)))", "#t");
+  check("(= 100 (char->integer (integer->char 100)))", "#t");
+
+  check("(char-ci=? #\\a #\\A)", "#t");
+  check("(char=? #\\a (char-downcase #\\A))", "#t");
+  check("(char=? #\\A (char-upcase #\\a))", "#t");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
