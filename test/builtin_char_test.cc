@@ -18,6 +18,33 @@ int main(){
   check("(char? #\\a)", "#t");
   check("(char? 1)", "#f");
 
+  check("(char=? #\\0 #\\1)", "#f");
+  check("(char=? #\\1 #\\1)", "#t");
+  check("(char=? #\\2 #\\1)", "#f");
+
+  check("(char<? #\\0 #\\1)", "#t");
+  check("(char<? #\\1 #\\1)", "#f");
+  check("(char<? #\\2 #\\1)", "#f");
+
+  check("(char>? #\\0 #\\1)", "#f");
+  check("(char>? #\\1 #\\1)", "#f");
+  check("(char>? #\\2 #\\1)", "#t");
+
+  check("(char<=? #\\0 #\\1)", "#t");
+  check("(char<=? #\\1 #\\1)", "#t");
+  check("(char<=? #\\2 #\\1)", "#f");
+
+  check("(char>=? #\\0 #\\1)", "#f");
+  check("(char>=? #\\1 #\\1)", "#t");
+  check("(char>=? #\\2 #\\1)", "#t");
+
+  check("(char<? #\\a #\\b)", "#t");
+  check("(char<? #\\A #\\B)", "#t");
+  check("(char<? #\\0 #\\9)", "#t");
+  check("(char<? #\\9 #\\a)", "#t");
+  check("(char<? #\\9 #\\A)", "#t");
+
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
