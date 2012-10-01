@@ -51,7 +51,7 @@ void print_list(FILE* f, Lisp_ptr l){
 void print(FILE* f, Lisp_ptr p){
   switch(p.tag()){
   case Ptr_tag::undefined:
-    fprintf(f, "<undefined>");
+    fprintf(f, "#<undefined>");
     break;
     
   case Ptr_tag::boolean:
@@ -86,7 +86,7 @@ void print(FILE* f, Lisp_ptr p){
   case Ptr_tag::port:
   case Ptr_tag::env:
   case Ptr_tag::vm_op:
-    fprintf(f, "<%s %p>", stringify(p.tag()), p.get<void*>());
+    fprintf(f, "#<%s %p>", stringify(p.tag()), p.get<void*>());
     break;
 
   default:
