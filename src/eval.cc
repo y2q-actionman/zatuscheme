@@ -344,6 +344,20 @@ void vm_op_proc_enter(){
 }
  
 /*
+  ret = list
+  ----
+  stack = (list[0], list[1], ...)
+*/
+void vm_op_arg_push_list(){
+  list_to_stack("unquote-splicing", VM.return_value, VM.stack);
+}
+
+static const VMop vm_op_quasiquote_list = procedure_list_star;
+static const VMop vm_op_quasiquote_vector = procedure_vector;
+
+} // namespace
+
+/*
   stack = (consequent, alternative)
   ----
   stack = ()
@@ -396,61 +410,6 @@ void vm_op_local_set(){
 
   VM.local_set(var, VM.return_value);
 }
-
-/*
-  ----
-  code = (value, VM::if)
-  stack = (variable name)
-*/
-void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
-  // extracting
-  Symbol* var = nullptr;
-  Lisp_ptr val;
-
-  int len =
-    bind_cons_list(p,
-                   [&](Cons* c){
-                     var = c->car().get<Symbol*>();
-                   },
-                   [&](Cons* c){
-                     val = c->car();
-                   });
-
-  if(!var){
-    fprintf(zs::err, "eval error: variable's name is not a symbol!\n");
-    VM.return_value = {};
-    return;
-  }
-
-  if(!val){
-    fprintf(zs::err, "eval error: no value is supplied for %s\n", opname);
-    VM.return_value = {};
-    return;
-  }
-
-  if(len > 2){
-    fprintf(zs::err, "eval error: informal %s expr! (more than %d exprs)\n", opname, len);
-    VM.return_value = {};
-    return;
-  }
-
-  // evaluating
-  VM.code.push(set_op);
-  VM.code.push(val);
-  VM.stack.push(var);
-}
-
-/*
-  ret = list
-  ----
-  stack = (list[0], list[1], ...)
-*/
-void vm_op_arg_push_list(){
-  list_to_stack("unquote-splicing", VM.return_value, VM.stack);
-}
-
-static const VMop vm_op_quasiquote_list = procedure_list_star;
-static const VMop vm_op_quasiquote_vector = procedure_vector;
 
 /*
   code[0] = template
@@ -537,197 +496,7 @@ void vm_op_quasiquote(){
   }
 }
 
-void error_whole_function(const char* msg){
-  auto wargs = pick_args_1();
-  auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
-
-  assert(sym);
-
-  fprintf(zs::err, "eval error: '%s' -- %s\n",
-          sym->name().c_str(), msg);
-  VM.return_value = {};
-}
-
-} // namespace
-
-void whole_function_error(){
-  error_whole_function("cannot be used as operator!!");
-}
-
-void whole_function_unimplemented(){
-  error_whole_function("under development...");
-}
-
-void whole_function_pass_through(){
-  VM.return_value = pick_args_1();
-}
-
-void whole_function_quote(){
-  auto wargs = pick_args_1();
-  if(!wargs) return;
-
-  Lisp_ptr val;
-
-  bind_cons_list(wargs,
-                 [](Cons*){},
-                 [&](Cons* c){
-                   val = c->car();
-                 },
-                 [](Cons*){
-                   fprintf(zs::err, "eval warning: quote has two or more args. ignored.\n");
-                 });
-
-  if(!val){
-    fprintf(zs::err, "eval error: quote has no args.\n");
-    VM.return_value = {};
-    return;
-  }
-    
-  VM.return_value = val;
-}
-
-
-static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
-  auto arg_info = parse_func_arg(args);
-
-  if(!arg_info){
-    fprintf(zs::err, "eval error: lambda has invalid args!\n");
-    return {};
-  }
-  if(!code){
-    fprintf(zs::err, "eval error: lambda has invalid body!\n");
-    return {};
-  }
-  
-  return new IProcedure(code, Calling::function, arg_info, VM.frame);
-}
-
-void whole_function_lambda(){
-  auto wargs = pick_args_1();
-  if(!wargs) return;
-
-  Lisp_ptr args, code;
-
-  bind_cons_list(wargs,
-                 [](Cons*){},
-                 [&](Cons* c){
-                   args = c->car();
-                   code = c->cdr();
-                 });
-
-  VM.return_value = lambda_internal(args, code);
-}
-
-void whole_function_if(){
-  auto wargs = pick_args_1();
-  if(!wargs) return;
-
-  // extracting
-  Lisp_ptr test, conseq, alt;
-
-  int len =
-  bind_cons_list(wargs,
-                 [](Cons*){},
-                 [&](Cons* c){
-                   test = c->car();
-                 },
-                 [&](Cons* c){
-                   conseq = c->car();
-                 },
-                 [&](Cons* c){
-                   alt = c->car();
-                 });
-
-  if(len < 3){
-    fprintf(zs::err, "eval error: informal if expr! (only %d exprs)\n", len);
-    VM.return_value = {};
-    return;
-  }else if(len > 4){
-    fprintf(zs::err, "eval error: informal if expr! (more than %d exprs)\n", len);
-    VM.return_value = {};
-    return;
-  }
-
-  // evaluating
-  VM.code.push(vm_op_if);
-  VM.code.push(test);
-
-  VM.stack.push(alt);
-  VM.stack.push(conseq);
-}
-
-void whole_function_set(){
-  auto wargs = pick_args_1();
-  if(!wargs) return;
-
-  set_internal("set!", wargs.get<Cons*>()->cdr(), vm_op_set);
-}
-
-void whole_function_define(){
-  auto wargs = pick_args_1();
-  if(!wargs) return;
-
-  auto p = wargs.get<Cons*>()->cdr();
-  Cons* rest = p.get<Cons*>();
-
-  // extracting
-  auto first = rest->car();
-
-  if(first.tag() == Ptr_tag::symbol){
-    set_internal("define(value set)", p, vm_op_local_set);
-  }else if(first.tag() == Ptr_tag::cons){
-    Symbol* var = nullptr;
-    Lisp_ptr args, code;
-
-    bind_cons_list(first,
-                   [&](Cons* c){
-                     var = c->car().get<Symbol*>();
-                     args = c->cdr();
-                   });
-
-    if(!var){
-      fprintf(zs::err, "eval error: function's name is not a symbol!\n");
-      VM.return_value = {};
-      return;
-    }
-
-    code = rest->cdr();
-
-    auto value = lambda_internal(args, code);
-    VM.local_set(var, value);
-    VM.return_value = value;
-  }else{
-    fprintf(zs::err, "eval error: informal define syntax!\n");
-  }
-}
-
-void whole_function_begin(){
-  auto wargs = pick_args_1();
-  if(!wargs) return;
-
-  auto exprs = wargs.get<Cons*>()->cdr();
-  if(!exprs || nullp(exprs)){
-    fprintf(zs::err, "eval error: begin has no exprs.\n");
-    VM.return_value = {};
-    return;
-  }
-
-  list_to_stack("begin", exprs, VM.code);
-}
-
-void whole_function_quasiquote(){
-  auto wargs = pick_args_1();
-  if(!wargs) return;
-
-  bind_cons_list(wargs,
-                 [](Cons*){},
-                 [](Cons* c){
-                   VM.code.push(c->car());
-                 });
-  VM.code.push(vm_op_quasiquote);
-}
-
-static void let_internal(bool sequencial, bool early_bind){
+void let_internal(bool sequencial, bool early_bind){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -824,19 +593,6 @@ static void let_internal(bool sequencial, bool early_bind){
   VM.return_value = {};
 }
 
-void whole_function_let(){
-  let_internal(false, false);
-}
-
-void whole_function_let_star(){
-  let_internal(true, true);
-}
-
-void whole_function_letrec(){
-  let_internal(false, true);
-}
-
-                 
 void eval(){
   while(!VM.code.empty()){
     auto p = VM.code.top();
