@@ -87,5 +87,9 @@ int main(){
   check("(reverse '(a b c))", "(c b a)");
   check("(reverse '(a (b c) d (e (f))))", "((e (f)) d (b c) a)");
 
+  check("(list-tail '(a b c d) 2)", "(c d)");
+
+  check("(list-ref '(a b c d) 2)", "c");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

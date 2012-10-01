@@ -213,6 +213,61 @@ void cons_reverse(){
   VM.return_value = ret;
 }
 
+Cons* cons_list_tail_base(const char* name){
+  auto args = pick_args<2>();
+  if(args[0].tag() != Ptr_tag::cons){
+    cons_type_check_failed(name, args[0]);
+    return nullptr;
+  }
+  
+  auto num = args[1].get<Number*>();
+  if(!num){
+    fprintf(zs::err, "native func: name: passed radix is not number (%s).\n",
+            stringify(args[1].tag()));
+    return nullptr;
+  }
+  if(num->type() != Number::Type::integer){
+    fprintf(zs::err, "native func: name: passed radix is not number (%s).\n",
+            stringify(args[1].tag()));
+    return nullptr;
+  }
+  auto nth = num->get<Number::integer_type>();
+
+
+  Cons* ret = nullptr;
+
+  do_list(args[0],
+          [&](Cons* c) -> bool{
+            if(nth <= 0){
+              ret = c;
+              return false;
+            }else{
+              --nth;
+              return true;
+            }
+          },
+          [](Lisp_ptr){});
+
+  return ret;
+}
+
+void cons_list_tail(){
+  auto c = cons_list_tail_base("list-tail");
+  if(c){
+    VM.return_value = {c};
+  }else{
+    VM.return_value = {};
+  }
+}
+
+void cons_list_ref(){
+  auto c = cons_list_tail_base("list-ref");
+  if(c){
+    VM.return_value = c->car();
+  }else{
+    VM.return_value = {};
+  }
+}
 
 constexpr BuiltinFunc
 builtin_func[] = {
@@ -263,6 +318,13 @@ builtin_func[] = {
   {"reverse", {
       cons_reverse,
       Calling::function, {1, false}}},
+
+  {"list-tail", {
+      cons_list_tail,
+      Calling::function, {2, false}}},
+  {"list-ref", {
+      cons_list_ref,
+      Calling::function, {2, false}}},
 
 };
 
