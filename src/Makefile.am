@@ -19,6 +19,7 @@ libzs_a_SOURCES = zs.hh\
 		env.cc env.hh\
 		builtin_util.cc builtin_util.hh\
 		builtin.cc builtin.hh builtin.i.hh\
+		builtin_syntax.cc builtin_syntax.hh\
 		builtin_numeric.cc builtin_numeric.hh\
 		builtin_boolean.cc builtin_boolean.hh\
 		builtin_cons.cc builtin_cons.hh\
