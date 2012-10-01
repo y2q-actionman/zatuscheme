@@ -36,26 +36,10 @@ namespace Procedure {
     }
   };
 
-  class ProcedureBase {
-  protected:
-    constexpr ProcedureBase(Calling c, const ArgInfo& a)
-      : calling_(c), argi_(a){}
-
-    Calling calling() const
-    { return calling_; }
-
-    const ArgInfo& arg_info() const
-    { return argi_; }
-
-  private:
-    Calling calling_;
-    ArgInfo argi_;
-  };
-
-  class IProcedure : protected ProcedureBase {
+  class IProcedure{
   public:
     IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Env* e)
-      : ProcedureBase(c, a), code_(code), env_(e){
+      : calling_(c), argi_(a), code_(code), env_(e){
       env_->add_ref();
     }
 
@@ -71,8 +55,11 @@ namespace Procedure {
     IProcedure& operator=(const IProcedure&) = default;
     IProcedure& operator=(IProcedure&&) = default;
 
-    using ProcedureBase::calling;
-    using ProcedureBase::arg_info;
+    Calling calling() const
+    { return calling_; }
+
+    const ArgInfo& arg_info() const
+    { return argi_; }
 
     Lisp_ptr get() const
     { return code_; }
@@ -81,14 +68,16 @@ namespace Procedure {
     { return env_; }
   
   private:
+    Calling calling_;
+    ArgInfo argi_;
     Lisp_ptr code_;
     Env* env_;
   };
 
-  class NProcedure : protected ProcedureBase {
+  class NProcedure{
   public:
     constexpr NProcedure(NativeFunc f, Calling c, const ArgInfo& a)
-      : ProcedureBase(c, a), n_func_(f){}
+      : calling_(c), argi_(a), n_func_(f){}
 
     NProcedure(const NProcedure&) = default;
     NProcedure(NProcedure&&) = default;
@@ -98,13 +87,18 @@ namespace Procedure {
     NProcedure& operator=(const NProcedure&) = default;
     NProcedure& operator=(NProcedure&&) = default;
 
-    using ProcedureBase::calling;
-    using ProcedureBase::arg_info;
+    Calling calling() const
+    { return calling_; }
+
+    const ArgInfo& arg_info() const
+    { return argi_; }
 
     NativeFunc get() const
     { return n_func_; }
 
   private:
+    const Calling calling_;
+    const ArgInfo argi_;
     const NativeFunc n_func_;
   };
 }
