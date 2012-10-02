@@ -15,20 +15,24 @@ namespace Procedure {
     whole_macro
   };
 
+  enum class Variadic { f = 0, t = 1 };
+  enum class Sequencial { f = 0, t = 1 };
+  enum class EarlyBind { f = 0, t = 1 };
+
   struct ProcInfo {
     int required_args;
     bool variadic;
     bool sequencial;
     bool early_bind;
 
-    constexpr ProcInfo()
-      : required_args(-1),
-        variadic(false), sequencial(false), early_bind(false){}
-
-    constexpr ProcInfo(int rargs, bool v,
-                      bool s = false, bool e = false)
+    constexpr ProcInfo(int rargs = -1,
+                       Variadic v = Variadic::f,
+                       Sequencial s = Sequencial::f,
+                       EarlyBind e = EarlyBind::f)
       : required_args(rargs),
-        variadic(v), sequencial(s), early_bind(e){}
+        variadic(static_cast<bool>(v)),
+        sequencial(static_cast<bool>(s)),
+        early_bind(static_cast<bool>(e)){}
 
     explicit operator bool() const{
       return (required_args >= 0);

@@ -60,14 +60,14 @@ int main(){
     check_uninit("#()");
   }
 
-  check("()", {0, false});
-  check("(a)", {1, false});
-  check("(a b)", {2, false});
-  check("(a b c)", {3, false});
-  check("a", {0, true});
-  check("(a . b)", {1, true});
-  check("(a b . c)", {2, true});
-  check("(a b c . d)", {3, true});
+  check("()", {0});
+  check("(a)", {1});
+  check("(a b)", {2});
+  check("(a b c)", {3});
+  check("a", {0, Variadic::t});
+  check("(a . b)", {1, Variadic::t});
+  check("(a b . c)", {2, Variadic::t});
+  check("(a b c . d)", {3, Variadic::t});
 
   {
     with_null_stream wns;

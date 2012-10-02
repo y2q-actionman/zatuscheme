@@ -86,32 +86,32 @@ builtin_func[] = {
   // functions
   {"vector", {
       procedure_vector, 
-      Calling::function, {1, true}}},
+      Calling::function, {1, Variadic::t}}},
   {"vector?", {
       type_check_pred<Ptr_tag::vector>,
-      Calling::function, {1, false}}},
+      Calling::function, {1}}},
   {"procedure?", {
       type_check_procedure,
-      Calling::function, {1, false}}},
+      Calling::function, {1}}},
   {"string?", {
       type_check_pred<Ptr_tag::string>,
-      Calling::function, {1, false}}},
+      Calling::function, {1}}},
   {"port?", {
       type_check_pred<Ptr_tag::port>,
-      Calling::function, {1, false}}},
+      Calling::function, {1}}},
   {"eqv?", {
       eqv,
-      Calling::function, {2, false}}},
+      Calling::function, {2}}},
   {"eq?", {
       eq,
-      Calling::function, {2, false}}},
+      Calling::function, {2}}},
 
   {"eval", {
       eval_func,
-      Calling::function, {2, false}}},
+      Calling::function, {2}}},
   {"to-macro-procedure", {
       to_macro_procedure,
-      Calling::function, {1, false}}}
+      Calling::function, {1}}}
 };
 
 } //namespace

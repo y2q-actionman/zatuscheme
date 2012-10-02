@@ -18,13 +18,13 @@ ProcInfo parse_func_arg(Lisp_ptr args){
           },
           [&](Lisp_ptr last) -> ProcInfo {
             if(nullp(last)){
-              return {argc, false};
+              return {argc, Variadic::f};
             }else{
               if(last.tag() != Ptr_tag::symbol){
                 fprintf(zs::err, "eval error: informal lambda list! (including non-symbol)\n");
                 return {};
               }
-              return {argc, true};
+              return {argc, Variadic::t};
             }
           });
 }

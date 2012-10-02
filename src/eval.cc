@@ -499,7 +499,7 @@ void vm_op_quasiquote(){
   }
 }
 
-void let_internal(bool sequencial, bool early_bind){
+void let_internal(Sequencial sequencial, EarlyBind early_bind){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -582,7 +582,7 @@ void let_internal(bool sequencial, bool early_bind){
   }
 
   auto proc = new IProcedure(body, Calling::function,
-                             {len, false, sequencial, early_bind},
+                             {len, Variadic::f, sequencial, early_bind},
                              syms, VM.frame);
 
   if(name){
