@@ -320,17 +320,17 @@ struct binary_accum{
 
     // n1 type <= n2 type
     if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-      static constexpr auto imax = numeric_limits<Number::integer_type>::max();
-      static constexpr auto imin = numeric_limits<Number::integer_type>::min();
+      // static constexpr auto imax = numeric_limits<Number::integer_type>::max();
+      // static constexpr auto imin = numeric_limits<Number::integer_type>::min();
       static constexpr Op<Number::integer_type> op;
 
       long long tmp = op(n1.get<Number::integer_type>(), n2.get<Number::integer_type>());
-      if(tmp > imax || tmp < imin){
-        fprintf(zs::err, "integer operation fallen into float\n");
-        n1 = Number{static_cast<Number::real_type>(tmp)};
-      }else{
+      // if(tmp > imax || tmp < imin){
+      //   fprintf(zs::err, "integer operation fallen into float\n");
+      //   n1 = Number{static_cast<Number::real_type>(tmp)};
+      // }else{
         n1.get<Number::integer_type>() = static_cast<Number::integer_type>(tmp);
-      }
+      // }
 
       return true;
     }
