@@ -6,6 +6,7 @@
 #include <numeric>
 #include <cstdlib>
 #include <cmath>
+#include <limits>
 
 #include "builtin_numeric.hh"
 #include "vm.hh"
@@ -319,9 +320,18 @@ struct binary_accum{
 
     // n1 type <= n2 type
     if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
+      static constexpr auto imax = numeric_limits<Number::integer_type>::max();
+      static constexpr auto imin = numeric_limits<Number::integer_type>::min();
       static constexpr Op<Number::integer_type> op;
-      n1.get<Number::integer_type>() = 
-        op(n1.get<Number::integer_type>(), n2.get<Number::integer_type>());
+
+      long long tmp = op(n1.get<Number::integer_type>(), n2.get<Number::integer_type>());
+      if(tmp > imax || tmp < imin){
+        fprintf(zs::err, "integer operation fallen into float\n");
+        n1 = Number{static_cast<Number::real_type>(tmp)};
+      }else{
+        n1.get<Number::integer_type>() = static_cast<Number::integer_type>(tmp);
+      }
+
       return true;
     }
 
@@ -382,9 +392,17 @@ void number_minus(){
     VM.stack.pop();
 
     switch(n->type()){
-    case Number::Type::integer:
-      VM.return_value = {new Number(-n->get<Number::integer_type>())};
+    case Number::Type::integer: {
+      static constexpr auto imin = numeric_limits<Number::integer_type>::min();
+      auto i = n->get<Number::integer_type>();
+      if(i == imin){
+        fprintf(zs::err, "integer operation fallen into float\n");
+        VM.return_value = {new Number(-static_cast<Number::real_type>(imin))};
+      }else{
+        VM.return_value = {new Number(-i)};
+      }
       return;
+    }
     case Number::Type::real:
       VM.return_value = {new Number(-n->get<Number::real_type>())};
       return;
@@ -452,7 +470,17 @@ void number_abs(){
   switch(n->type()){
   case Number::Type::integer: {
     auto i = n->get<Number::integer_type>();
-    VM.return_value = {(i >= 0) ? n : new Number(-i)};
+    if(i >= 0){
+      VM.return_value = n;
+    }else{
+      static constexpr auto imin = numeric_limits<Number::integer_type>::min();
+      if(i == imin){
+        fprintf(zs::err, "integer operation fallen into float\n");
+        VM.return_value = new Number(-static_cast<Number::real_type>(imin));
+      }else{
+        VM.return_value = new Number(-i);
+      }
+    }
     return;
   }
   case Number::Type::real: {
