@@ -4,6 +4,7 @@
 
 int main(){
   install_builtin();
+  install_builtin_syntax();
   install_builtin_boolean();
   install_builtin_cons();
   install_builtin_numeric();
@@ -12,6 +13,7 @@ int main(){
 
   while(1){
     printf(REPL_PROMPT);
+    fflush(stdout);
     VM.code.push(read(zs::in));
     eval();
     print(zs::out, VM.return_value);
