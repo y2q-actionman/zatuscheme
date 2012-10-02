@@ -15,17 +15,17 @@ namespace Procedure {
     whole_macro
   };
 
-  struct ArgInfo {
+  struct ProcInfo {
     int required_args;
     bool variadic;
     bool sequencial;
     bool early_bind;
 
-    constexpr ArgInfo()
+    constexpr ProcInfo()
       : required_args(-1),
         variadic(false), sequencial(false), early_bind(false){}
 
-    constexpr ArgInfo(int rargs, bool v,
+    constexpr ProcInfo(int rargs, bool v,
                       bool s = false, bool e = false)
       : required_args(rargs),
         variadic(v), sequencial(s), early_bind(e){}
@@ -37,8 +37,8 @@ namespace Procedure {
 
   class IProcedure{
   public:
-    IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Lisp_ptr head, Env* e)
-      : calling_(c), argi_(a), code_(code), arg_head_(head),  env_(e){
+    IProcedure(Lisp_ptr code, Calling c, const ProcInfo& pi, Lisp_ptr head, Env* e)
+      : calling_(c), info_(pi), code_(code), arg_head_(head),  env_(e){
       env_->add_ref();
     }
 
@@ -57,8 +57,8 @@ namespace Procedure {
     Calling calling() const
     { return calling_; }
 
-    const ArgInfo& arg_info() const
-    { return argi_; }
+    const ProcInfo& info() const
+    { return info_; }
 
     Lisp_ptr arg_head() const
     { return arg_head_; }
@@ -71,7 +71,7 @@ namespace Procedure {
   
   private:
     Calling calling_;
-    ArgInfo argi_;
+    ProcInfo info_;
     Lisp_ptr code_;
     Lisp_ptr arg_head_;
     Env* env_;
@@ -79,8 +79,8 @@ namespace Procedure {
 
   class NProcedure{
   public:
-    constexpr NProcedure(NativeFunc f, Calling c, const ArgInfo& a)
-      : calling_(c), argi_(a), n_func_(f){}
+    constexpr NProcedure(NativeFunc f, Calling c, const ProcInfo& pi)
+      : calling_(c), info_(pi), n_func_(f){}
 
     NProcedure(const NProcedure&) = default;
     NProcedure(NProcedure&&) = default;
@@ -93,20 +93,20 @@ namespace Procedure {
     Calling calling() const
     { return calling_; }
 
-    const ArgInfo& arg_info() const
-    { return argi_; }
+    const ProcInfo& info() const
+    { return info_; }
 
     NativeFunc get() const
     { return n_func_; }
 
   private:
     const Calling calling_;
-    const ArgInfo argi_;
+    const ProcInfo info_;
     const NativeFunc n_func_;
   };
 }
 
-Procedure::ArgInfo parse_func_arg(Lisp_ptr);
+Procedure::ProcInfo parse_func_arg(Lisp_ptr);
 
 const char* stringify(Procedure::Calling);
 

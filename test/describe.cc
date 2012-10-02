@@ -19,9 +19,9 @@ void describe(FILE* f, const Number& n){
   fputc(')', f);
 }
 
-void describe(FILE* f, const Procedure::ArgInfo& argi){
+void describe(FILE* f, const Procedure::ProcInfo& info){
   fprintf(f, "[required_args=%d, variadic=%d]",
-          argi.required_args, argi.variadic);
+          info.required_args, info.variadic);
 }
 
 void describe(FILE* f, Token::Type t){

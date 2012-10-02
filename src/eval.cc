@@ -55,11 +55,11 @@ void vm_op_arg_push_and_set(){
     code = (argN, arg-set-move, symN, argN-1, arg-set-move, symN-1, ..., call kind, proc)
     stack = (arg-bottom)
 */
-void function_call(Lisp_ptr proc, const ArgInfo* argi, Lisp_ptr arg_head){
+void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
   auto args = VM.stack.top();
   VM.stack.pop();
 
-  if(argi->early_bind){
+  if(info->early_bind){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
     VM.enter_frame(iproc->closure()->push());
@@ -69,7 +69,7 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi, Lisp_ptr arg_head){
   VM.code.push(vm_op_proc_enter);
 
   int argc = 0;
-  const auto sequencial = argi->sequencial;
+  const auto sequencial = info->sequencial;
   Lisp_ptr bind_list = arg_head;
 
   if(!do_list(args.get<Cons*>()->cdr(),
@@ -99,11 +99,11 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi, Lisp_ptr arg_head){
                   return false;
                 }
               
-                if((argc < argi->required_args)
-                   || (!argi->variadic && argc > argi->required_args)){
+                if((argc < info->required_args)
+                   || (!info->variadic && argc > info->required_args)){
                   fprintf(zs::err, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
-                          argi->required_args,
-                          (argi->variadic) ? "variadic" : "not variadic",
+                          info->required_args,
+                          (info->variadic) ? "variadic" : "not variadic",
                           argc);
                   return false;
                 }
@@ -135,17 +135,17 @@ void vm_op_macro_call(){
   code = (call kind, proc, macro call)
   stack = (arg1, arg2, ..., arg-bottom)
 */
-void macro_call(Lisp_ptr proc, const ArgInfo* argi){
+void macro_call(Lisp_ptr proc, const ProcInfo* info){
   auto args = VM.stack.top();
   VM.stack.pop();
 
   VM.stack.push(vm_op_arg_bottom);
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack);
-  if(argc < argi->required_args
-     || (!argi->variadic && argc > argi->required_args)){
+  if(argc < info->required_args
+     || (!info->variadic && argc > info->required_args)){
     fprintf(zs::err, "macro-call error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
-            argi->required_args,
-            (argi->variadic) ? "variadic" : "not variadic",
+            info->required_args,
+            (info->variadic) ? "variadic" : "not variadic",
             argc);
     for(int i = 0; i < argc; ++i){
       VM.stack.pop();
@@ -197,16 +197,16 @@ void vm_op_call(){
   auto proc = VM.return_value;
 
   Calling c;
-  const ArgInfo* argi;
+  const ProcInfo* info;
   Lisp_ptr args;
 
   if(auto ifun = proc.get<IProcedure*>()){
     c = ifun->calling();
-    argi = &ifun->arg_info(); 
+    info = &ifun->info(); 
     args = ifun->arg_head();
   }else if(auto nfun = proc.get<const NProcedure*>()){
     c = nfun->calling();
-    argi = &nfun->arg_info();
+    info = &nfun->info();
     args = {};
   }else{
     fprintf(zs::err, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
@@ -220,9 +220,9 @@ void vm_op_call(){
 
   switch(c){
   case Calling::function:
-    function_call(proc, argi, args); return;
+    function_call(proc, info, args); return;
   case Calling::macro:
-    macro_call(proc, argi); return;
+    macro_call(proc, info); return;
   case Calling::whole_function:
     whole_function_call(proc); return;
   case Calling::whole_macro:
@@ -264,7 +264,7 @@ void proc_enter_native(const NProcedure* fun){
   stack = ()
 */
 void proc_enter_interpreted(IProcedure* fun){
-  const auto& argi = fun->arg_info();
+  const auto& argi = fun->info();
 
   // tail call check
   if(!VM.code.empty()
@@ -273,7 +273,7 @@ void proc_enter_interpreted(IProcedure* fun){
     VM.leave_frame();
   }
 
-  if(!fun->arg_info().early_bind){
+  if(!fun->info().early_bind){
     VM.enter_frame(fun->closure()->push());
   }
 

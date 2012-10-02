@@ -4,7 +4,7 @@
 
 using namespace Procedure;
 
-ArgInfo parse_func_arg(Lisp_ptr args){
+ProcInfo parse_func_arg(Lisp_ptr args){
   int argc = 0;
 
   return
@@ -16,7 +16,7 @@ ArgInfo parse_func_arg(Lisp_ptr args){
             ++argc;
             return true;
           },
-          [&](Lisp_ptr last) -> ArgInfo {
+          [&](Lisp_ptr last) -> ProcInfo {
             if(nullp(last)){
               return {argc, false};
             }else{

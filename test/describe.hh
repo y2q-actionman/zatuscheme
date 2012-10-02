@@ -8,7 +8,7 @@ void describe(FILE*, Lisp_ptr);
 void describe(FILE*, Number::Type);
 void describe(FILE*, const Number&);
 
-void describe(FILE*, const Procedure::ArgInfo&);
+void describe(FILE*, const Procedure::ProcInfo&);
 
 void describe(FILE*, Token::Type);
 void describe(FILE*, Token::Notation);

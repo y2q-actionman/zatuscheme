@@ -9,13 +9,13 @@ using namespace Procedure;
 
 static bool result = true;
 
-bool operator!=(const ArgInfo& a, const ArgInfo& b){
-  // ignores ArgInfo::head..
+bool operator!=(const ProcInfo& a, const ProcInfo& b){
+  // ignores ProcInfo::head..
   return (a.required_args != b.required_args)
     || (a.variadic != b.variadic);
 }
 
-void check(const char* input, const ArgInfo& expect){
+void check(const char* input, const ProcInfo& expect){
   auto p = read_from_string(input);
   assert(p);
 
@@ -60,14 +60,14 @@ int main(){
     check_uninit("#()");
   }
 
-  check("()", {0, false, {}});
-  check("(a)", {1, false, {}});
-  check("(a b)", {2, false, {}});
-  check("(a b c)", {3, false, {}});
-  check("a", {0, true, {}});
-  check("(a . b)", {1, true, {}});
-  check("(a b . c)", {2, true, {}});
-  check("(a b c . d)", {3, true, {}});
+  check("()", {0, false});
+  check("(a)", {1, false});
+  check("(a b)", {2, false});
+  check("(a b c)", {3, false});
+  check("a", {0, true});
+  check("(a . b)", {1, true});
+  check("(a b . c)", {2, true});
+  check("(a b c . d)", {3, true});
 
   {
     with_null_stream wns;

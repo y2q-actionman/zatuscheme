@@ -77,7 +77,7 @@ void to_macro_procedure(){
   auto proc = arg1.get<IProcedure*>();
 
   VM.return_value = new IProcedure(proc->get(), Calling::macro,
-                                   proc->arg_info(), proc->arg_head(),
+                                   proc->info(), proc->arg_head(),
                                    proc->closure());
 }
 
