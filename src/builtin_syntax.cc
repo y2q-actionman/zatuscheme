@@ -65,7 +65,7 @@ void whole_function_quote(){
 static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   auto arg_info = parse_func_arg(args);
 
-  if(!arg_info){
+  if(arg_info.first < 0){
     fprintf(zs::err, "eval error: lambda has invalid args!\n");
     return {};
   }
@@ -74,7 +74,9 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
     return {};
   }
   
-  return new IProcedure(code, Calling::function, arg_info, args, VM.frame);
+  return new IProcedure(code, Calling::function,
+                        {arg_info.first, arg_info.second},
+                        args, VM.frame);
 }
 
 void whole_function_lambda(){

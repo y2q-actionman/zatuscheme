@@ -2,6 +2,7 @@
 #define PROCEDURE_HH
 
 #include <cstdio>
+#include <utility>
 #include "lisp_ptr.hh"
 #include "env.hh"
 
@@ -25,7 +26,7 @@ namespace Procedure {
     bool sequencial;
     bool early_bind;
 
-    constexpr ProcInfo(int rargs = -1,
+    constexpr ProcInfo(int rargs,
                        Variadic v = Variadic::f,
                        Sequencial s = Sequencial::f,
                        EarlyBind e = EarlyBind::f)
@@ -33,10 +34,6 @@ namespace Procedure {
         variadic(static_cast<bool>(v)),
         sequencial(static_cast<bool>(s)),
         early_bind(static_cast<bool>(e)){}
-
-    explicit operator bool() const{
-      return (required_args >= 0);
-    }
   };
 
   class IProcedure{
@@ -108,9 +105,9 @@ namespace Procedure {
     const ProcInfo info_;
     const NativeFunc n_func_;
   };
-}
 
-Procedure::ProcInfo parse_func_arg(Lisp_ptr);
+  std::pair<int, Variadic> parse_func_arg(Lisp_ptr);
+}
 
 const char* stringify(Procedure::Calling);
 

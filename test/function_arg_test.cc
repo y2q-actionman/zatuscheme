@@ -3,30 +3,29 @@
 
 #include "zs.hh"
 #include "test_util.hh"
-#include "describe.hh"
 
 using namespace Procedure;
 
 static bool result = true;
 
-bool operator!=(const ProcInfo& a, const ProcInfo& b){
-  // ignores ProcInfo::head..
-  return (a.required_args != b.required_args)
-    || (a.variadic != b.variadic);
+typedef decltype(parse_func_arg({})) ArgT;
+
+bool operator!(const ArgT& a){
+  return (a.first < 0);
 }
 
-void check(const char* input, const ProcInfo& expect){
+bool operator!=(const ArgT& a, const ArgT& b){
+  return (a.first != b.first) || (a.second != b.second);
+}
+
+void check(const char* input, const ArgT& expect){
   auto p = read_from_string(input);
   assert(p);
 
   auto argi = parse_func_arg(p);
   if(!argi || argi != expect){
-    fprintf(zs::err, "[failed] unexpected failure: input='%s', expected=",
-            input);
-    describe(zs::err, expect);
-    fprintf(zs::err, " got=");
-    describe(zs::err, argi);
-    fputc('\n', zs::err);
+    fprintf(zs::err, "[failed] unexpected failure: input='%s', expected=[%d, %d], got=[%d, %d]\n",
+            input, argi.first, argi.second, expect.first, expect.second);
 
     result = false;
   }
@@ -37,11 +36,9 @@ void check_uninit(const char* input){
   assert(p);
 
   auto argi = parse_func_arg(p);
-  if(argi){
-    fprintf(zs::err, "[failed] unexpected succeed: input='%s', arginfo=",
-           input);
-    describe(zs::err, argi);
-    fputc('\n', zs::err);
+  if(!!argi){
+    fprintf(zs::err, "[failed] unexpected succeed: input='%s', arginfo=[%d, %d]\n",
+           input, argi.first, argi.second);
 
     result = false;
   }
@@ -60,10 +57,10 @@ int main(){
     check_uninit("#()");
   }
 
-  check("()", {0});
-  check("(a)", {1});
-  check("(a b)", {2});
-  check("(a b c)", {3});
+  check("()", {0, Variadic::f});
+  check("(a)", {1, Variadic::f});
+  check("(a b)", {2, Variadic::f});
+  check("(a b c)", {3, Variadic::f});
   check("a", {0, Variadic::t});
   check("(a . b)", {1, Variadic::t});
   check("(a b . c)", {2, Variadic::t});

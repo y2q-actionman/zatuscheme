@@ -4,10 +4,10 @@
 
 using namespace Procedure;
 
-ProcInfo parse_func_arg(Lisp_ptr args){
+std::pair<int, Variadic> Procedure::parse_func_arg(Lisp_ptr args){
   int argc = 0;
+  auto v = Variadic::f;
 
-  return
   do_list(args,
           [&](Cons* c) -> bool {
             if(c->car().tag() != Ptr_tag::symbol){
@@ -16,17 +16,20 @@ ProcInfo parse_func_arg(Lisp_ptr args){
             ++argc;
             return true;
           },
-          [&](Lisp_ptr last) -> ProcInfo {
+          [&](Lisp_ptr last){
             if(nullp(last)){
-              return {argc, Variadic::f};
+              return;
             }else{
               if(last.tag() != Ptr_tag::symbol){
                 fprintf(zs::err, "eval error: informal lambda list! (including non-symbol)\n");
-                return {};
+                argc = -1;
+                return;
               }
-              return {argc, Variadic::t};
+              v = Variadic::t;
             }
           });
+
+  return {argc, v};
 }
 
 const char* stringify(Calling c){
