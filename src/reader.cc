@@ -2,6 +2,7 @@
 #include <utility>
 
 #include "reader.hh"
+#include "vm.hh"
 #include "util.hh"
 #include "lisp_ptr.hh"
 #include "token.hh"
