@@ -20,9 +20,7 @@ void describe(FILE* f, const Number& n){
 }
 
 void describe(FILE* f, const Procedure::ArgInfo& argi){
-  fprintf(f, "[code=");
-  describe(f, argi.head);
-  fprintf(f, ", required_args=%d, variadic=%d]",
+  fprintf(f, "[required_args=%d, variadic=%d]",
           argi.required_args, argi.variadic);
 }
 

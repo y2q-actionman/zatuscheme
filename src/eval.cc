@@ -55,7 +55,7 @@ void vm_op_arg_push_and_set(){
     code = (argN, arg-set-move, symN, argN-1, arg-set-move, symN-1, ..., call kind, proc)
     stack = (arg-bottom)
 */
-void function_call(Lisp_ptr proc, const ArgInfo* argi){
+void function_call(Lisp_ptr proc, const ArgInfo* argi, Lisp_ptr arg_head){
   auto args = VM.stack.top();
   VM.stack.pop();
 
@@ -70,7 +70,7 @@ void function_call(Lisp_ptr proc, const ArgInfo* argi){
 
   int argc = 0;
   const auto sequencial = argi->sequencial;
-  Lisp_ptr bind_list = argi->head;
+  Lisp_ptr bind_list = arg_head;
 
   if(!do_list(args.get<Cons*>()->cdr(),
               [&](Cons* cell) -> bool{
@@ -198,13 +198,16 @@ void vm_op_call(){
 
   Calling c;
   const ArgInfo* argi;
+  Lisp_ptr args;
 
   if(auto ifun = proc.get<IProcedure*>()){
     c = ifun->calling();
     argi = &ifun->arg_info(); 
+    args = ifun->arg_head();
   }else if(auto nfun = proc.get<const NProcedure*>()){
     c = nfun->calling();
     argi = &nfun->arg_info();
+    args = {};
   }else{
     fprintf(zs::err, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
             stringify(proc.tag()));
@@ -217,7 +220,7 @@ void vm_op_call(){
 
   switch(c){
   case Calling::function:
-    function_call(proc, argi); return;
+    function_call(proc, argi, args); return;
   case Calling::macro:
     macro_call(proc, argi); return;
   case Calling::whole_function:
@@ -276,7 +279,7 @@ void proc_enter_interpreted(IProcedure* fun){
 
   VM.code.push(vm_op_proc_leave);
 
-  Lisp_ptr arg_name = argi.head;
+  Lisp_ptr arg_name = fun->arg_head();
   Lisp_ptr st_top;
 
   // normal arg push
@@ -579,8 +582,8 @@ void let_internal(bool sequencial, bool early_bind){
   }
 
   auto proc = new IProcedure(body, Calling::function,
-                             {len, false, syms, sequencial, early_bind},
-                             VM.frame);
+                             {len, false, sequencial, early_bind},
+                             syms, VM.frame);
 
   if(name){
     VM.local_set(name.get<Symbol*>(), proc);

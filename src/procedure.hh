@@ -16,19 +16,18 @@ namespace Procedure {
   };
 
   struct ArgInfo {
-    Lisp_ptr head;
     int required_args;
     bool variadic;
     bool sequencial;
     bool early_bind;
 
     constexpr ArgInfo()
-      : head(), required_args(-1),
+      : required_args(-1),
         variadic(false), sequencial(false), early_bind(false){}
 
-    constexpr ArgInfo(int rargs, bool v, Lisp_ptr h = Lisp_ptr(),
+    constexpr ArgInfo(int rargs, bool v,
                       bool s = false, bool e = false)
-      : head(h), required_args(rargs),
+      : required_args(rargs),
         variadic(v), sequencial(s), early_bind(e){}
 
     explicit operator bool() const{
@@ -38,8 +37,8 @@ namespace Procedure {
 
   class IProcedure{
   public:
-    IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Env* e)
-      : calling_(c), argi_(a), code_(code), env_(e){
+    IProcedure(Lisp_ptr code, Calling c, const ArgInfo& a, Lisp_ptr head, Env* e)
+      : calling_(c), argi_(a), code_(code), arg_head_(head),  env_(e){
       env_->add_ref();
     }
 
@@ -61,6 +60,9 @@ namespace Procedure {
     const ArgInfo& arg_info() const
     { return argi_; }
 
+    Lisp_ptr arg_head() const
+    { return arg_head_; }
+
     Lisp_ptr get() const
     { return code_; }
 
@@ -71,6 +73,7 @@ namespace Procedure {
     Calling calling_;
     ArgInfo argi_;
     Lisp_ptr code_;
+    Lisp_ptr arg_head_;
     Env* env_;
   };
 

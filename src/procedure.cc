@@ -18,13 +18,13 @@ ArgInfo parse_func_arg(Lisp_ptr args){
           },
           [&](Lisp_ptr last) -> ArgInfo {
             if(nullp(last)){
-              return {argc, false, args};
+              return {argc, false};
             }else{
               if(last.tag() != Ptr_tag::symbol){
                 fprintf(zs::err, "eval error: informal lambda list! (including non-symbol)\n");
                 return {};
               }
-              return {argc, true, args};
+              return {argc, true};
             }
           });
 }

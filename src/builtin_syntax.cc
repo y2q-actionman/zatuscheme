@@ -74,7 +74,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
     return {};
   }
   
-  return new IProcedure(code, Calling::function, arg_info, VM.frame);
+  return new IProcedure(code, Calling::function, arg_info, args, VM.frame);
 }
 
 void whole_function_lambda(){
