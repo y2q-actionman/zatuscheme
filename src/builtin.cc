@@ -14,12 +14,6 @@ using namespace Procedure;
 
 namespace {
 
-template <Ptr_tag p>
-void type_check_pred(){
-  auto arg = pick_args_1();
-  VM.return_value = Lisp_ptr{arg.tag() == p};
-}
-
 void type_check_procedure(){
   auto arg = pick_args_1();
   VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
