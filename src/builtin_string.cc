@@ -291,6 +291,37 @@ void string_to_list(){
   VM.return_value = make_cons_list(str->begin(), str->end());
 }
 
+void string_from_list(){
+  auto arg = pick_args_1();
+  if(arg.tag() != Ptr_tag::cons){
+    builtin_type_check_failed("list->string", Ptr_tag::cons, arg);
+    return;
+  }
+
+  bool not_char_found = false;
+  String ret;
+  
+  do_list(arg,
+          [&](Cons* c) -> bool{
+            auto ch = c->car().get<char>();
+            if(!ch){
+              builtin_type_check_failed("list->string", Ptr_tag::character, c->car());
+              not_char_found = true;
+              return false;
+            }
+              
+            ret.push_back(ch);
+            return true;
+          },
+          [](Lisp_ptr){});
+
+  if(not_char_found){
+    VM.return_value = {};
+  }else{
+    VM.return_value = {new String(std::move(ret))};
+  }
+}
+
 } // namespace
 
 const BuiltinFunc
@@ -354,6 +385,9 @@ builtin_string[] = {
 
   {"string->list", {
       string_to_list,
+      {Calling::function, 1}}},
+  {"list->string", {
+      string_from_list,
       {Calling::function, 1}}},
 };
 

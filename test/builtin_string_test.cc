@@ -121,6 +121,10 @@ int main(){
   check("(string->list \"a\")", "(#\\a)");
   check("(string->list \"abc\")", "(#\\a #\\b #\\c)");
 
+  check("(list->string '())", "\"\"");
+  check("(list->string '(#\\a))", "\"a\"");
+  check("(list->string '(#\\a #\\b #\\c))", "\"abc\"");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
