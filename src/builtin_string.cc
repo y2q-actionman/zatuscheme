@@ -1,4 +1,7 @@
 #include <utility>
+#include <functional>
+#include <string>
+#include <cstring>
 
 #include "builtin_string.hh"
 #include "lisp_ptr.hh"
@@ -154,6 +157,72 @@ void string_set(){
   VM.return_value = Lisp_ptr{ch};
 }
 
+template<typename Fun>
+void string_compare(const char* name, Fun&& fun){
+  auto args = pick_args<2>();
+  String* str[2];
+
+  for(auto i = 0; i < 2; ++i){
+    str[i] = args[i].get<String*>();
+    if(!str[i]){
+      string_type_check_failed(name, args[i]);
+      return;
+    }
+  }
+
+  VM.return_value = Lisp_ptr{fun(*str[0], *str[1])};
+}
+
+void string_equal(){
+  string_compare("string=?", std::equal_to<std::string>());
+}
+
+void string_less(){
+  string_compare("string<?", std::less<std::string>());
+}
+
+void string_greater(){
+  string_compare("string>?", std::greater<std::string>());
+}
+
+void string_less_eq(){
+  string_compare("string<=?", std::less_equal<std::string>());
+}
+
+void string_greater_eq(){
+  string_compare("string>=?", std::greater_equal<std::string>());
+}
+
+template<typename Fun>
+struct ci_compare{
+  inline bool operator()(const String& s1, const String& s2) const {
+    static constexpr Fun fun;
+    return fun(strcasecmp(s1.c_str(), s2.c_str()), 0);
+  }
+};
+
+void string_ci_equal(){
+  string_compare("string-ci=?", ci_compare<std::equal_to<int> >());
+}
+
+void string_ci_less(){
+  string_compare("string-ci<?", ci_compare<std::less<int> >());
+}
+
+void string_ci_greater(){
+  string_compare("string-ci>?", ci_compare<std::greater<int> >());
+}
+
+void string_ci_less_eq(){
+  string_compare("string-ci<=?", ci_compare<std::less_equal<int> >());
+}
+
+void string_ci_greater_eq(){
+  string_compare("string-ci>=?", ci_compare<std::greater_equal<int> >());
+}
+
+
+
 } // namespace
 
 const BuiltinFunc
@@ -176,6 +245,37 @@ builtin_string[] = {
   {"string-set!", {
       string_set,
       {Calling::function, 3}}},
+  {"string=?", {
+      string_equal,
+      {Calling::function, 2}}},
+  {"string<?", {
+      string_less,
+      {Calling::function, 2}}},
+  {"string>?", {
+      string_greater,
+      {Calling::function, 2}}},
+  {"string<=?", {
+      string_less_eq,
+      {Calling::function, 2}}},
+  {"string>=?", {
+      string_greater_eq,
+      {Calling::function, 2}}},
+  {"string-ci=?", {
+      string_ci_equal,
+      {Calling::function, 2}}},
+  {"string-ci<?", {
+      string_ci_less,
+      {Calling::function, 2}}},
+  {"string-ci>?", {
+      string_ci_greater,
+      {Calling::function, 2}}},
+  {"string-ci<=?", {
+      string_ci_less_eq,
+      {Calling::function, 2}}},
+  {"string-ci>=?", {
+      string_ci_greater_eq,
+      {Calling::function, 2}}},
+
 };
 
 const size_t builtin_string_size = sizeof(builtin_string) / sizeof(builtin_string[0]);

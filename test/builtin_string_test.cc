@@ -61,6 +61,46 @@ int main(){
   // check_undef("(string-set! (symbol->string 'immutable) 0 #\\?)");
 
 
+  check("(string=? \"aaa\" \"aaa\")", "#t");
+  check("(string=? \"aaa\" \"aab\")", "#f");
+  check("(string=? \"aba\" \"aab\")", "#f");
+
+  check("(string<? \"aaa\" \"aaa\")", "#f");
+  check("(string<? \"aaa\" \"aab\")", "#t");
+  check("(string<? \"aba\" \"aab\")", "#f");
+
+  check("(string>? \"aaa\" \"aaa\")", "#f");
+  check("(string>? \"aaa\" \"aab\")", "#f");
+  check("(string>? \"aba\" \"aab\")", "#t");
+
+  check("(string<=? \"aaa\" \"aaa\")", "#t");
+  check("(string<=? \"aaa\" \"aab\")", "#t");
+  check("(string<=? \"aba\" \"aab\")", "#f");
+
+  check("(string>=? \"aaa\" \"aaa\")", "#t");
+  check("(string>=? \"aaa\" \"aab\")", "#f");
+  check("(string>=? \"aba\" \"aab\")", "#t");
+
+  check("(string-ci=? \"Aaa\" \"aaa\")", "#t");
+  check("(string-ci=? \"Aaa\" \"aab\")", "#f");
+  check("(string-ci=? \"Aba\" \"aab\")", "#f");
+
+  check("(string-ci<? \"Aaa\" \"aaa\")", "#f");
+  check("(string-ci<? \"Aaa\" \"aab\")", "#t");
+  check("(string-ci<? \"Aba\" \"aab\")", "#f");
+
+  check("(string-ci>? \"Aaa\" \"aaa\")", "#f");
+  check("(string-ci>? \"Aaa\" \"aab\")", "#f");
+  check("(string-ci>? \"Aba\" \"aab\")", "#t");
+
+  check("(string-ci<=? \"Aaa\" \"aaa\")", "#t");
+  check("(string-ci<=? \"Aaa\" \"aab\")", "#t");
+  check("(string-ci<=? \"Aba\" \"aab\")", "#f");
+
+  check("(string-ci>=? \"Aaa\" \"aaa\")", "#t");
+  check("(string-ci>=? \"Aaa\" \"aab\")", "#f");
+  check("(string-ci>=? \"Aba\" \"aab\")", "#t");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
