@@ -1085,8 +1085,10 @@ void number_to_string(){
   free(buf);
 }
 
+} //namespace
 
-constexpr BuiltinFunc
+
+const BuiltinFunc
 builtin_numeric[] = {
   {"number?", {
       type_check_pred<Ptr_tag::number>,
@@ -1275,10 +1277,7 @@ builtin_numeric[] = {
       {Calling::function, 1, Variadic::t}}}
 };
 
-} //namespace
+const size_t builtin_numeric_size = sizeof(builtin_numeric) / sizeof(builtin_numeric[0]);
 
 void install_builtin_numeric(){
-  for(auto& e : builtin_numeric){
-    VM.set(intern(VM.symtable, e.name), {&e.func});
-  }
 }

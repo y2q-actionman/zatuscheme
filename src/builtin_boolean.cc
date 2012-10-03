@@ -14,8 +14,10 @@ void not_func(){
   VM.return_value = Lisp_ptr{!arg.get<bool>()};
 }
 
-constexpr BuiltinFunc
-builtin_func[] = {
+} // namespace
+
+const BuiltinFunc
+builtin_boolean[] = {
   {"boolean?", {
       type_check_pred<Ptr_tag::boolean>, 
       {Calling::function, 1}}},
@@ -24,10 +26,7 @@ builtin_func[] = {
       {Calling::function, 1}}}
 };
 
-} // namespace
+const size_t builtin_boolean_size = sizeof(builtin_boolean) / sizeof(builtin_boolean[0]);
 
 void install_builtin_boolean(){
-  for(auto& e : builtin_func){
-    VM.set(intern(VM.symtable, e.name), {&e.func});
-  }
 }

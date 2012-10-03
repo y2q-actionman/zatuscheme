@@ -166,9 +166,11 @@ void char_tolower(){
                   [](char c){ return static_cast<char>(std::tolower(c)); });
 }
 
+} // namespace
 
-constexpr BuiltinFunc
-builtin_func[] = {
+
+const BuiltinFunc
+builtin_char[] = {
   {"char?", {
       type_check_pred<Ptr_tag::character>,
       {Calling::function, 1}}},
@@ -235,10 +237,7 @@ builtin_func[] = {
       {Calling::function, 1}}}
 };
 
-} // namespace
+const size_t builtin_char_size = sizeof(builtin_char) / sizeof(builtin_char[0]);
 
 void install_builtin_char(){
-  for(auto& e : builtin_func){
-    VM.set(intern(VM.symtable, e.name), {&e.func});
-  }
 }

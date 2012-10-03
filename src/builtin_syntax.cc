@@ -459,8 +459,10 @@ void whole_macro_case(){
           });
 }
 
-constexpr BuiltinFunc
-builtin_func[] = {
+} //namespace
+
+const BuiltinFunc
+builtin_syntax[] = {
   {"quote", {
       whole_function_quote,
       {Calling::whole_function, 1}}},
@@ -525,10 +527,7 @@ builtin_func[] = {
       {Calling::whole_function, 0}}}
 };
 
-} //namespace
+const size_t builtin_syntax_size = sizeof(builtin_syntax) / sizeof(builtin_syntax[0]);
 
 void install_builtin_syntax(){
-  for(auto& e : builtin_func){
-    VM.set(intern(VM.symtable, e.name), {&e.func});
-  }
 }

@@ -37,8 +37,10 @@ void sym_from_string(){
   VM.return_value = {intern(VM.symtable, *str)};
 }
 
-constexpr BuiltinFunc
-builtin_func[] = {
+} // namespace
+
+const BuiltinFunc
+builtin_symbol[] = {
   {"symbol?", {
       type_check_pred<Ptr_tag::symbol>,
       {Calling::function, 1}}},
@@ -50,10 +52,7 @@ builtin_func[] = {
       {Calling::function, 1}}}
 };
 
-} // namespace
+const size_t builtin_symbol_size = sizeof(builtin_symbol) / sizeof(builtin_symbol[0]);
 
 void install_builtin_symbol(){
-  for(auto& e : builtin_func){
-    VM.set(intern(VM.symtable, e.name), {&e.func});
-  }
 }

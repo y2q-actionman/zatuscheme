@@ -267,8 +267,10 @@ void cons_list_ref(){
   }
 }
 
-constexpr BuiltinFunc
-builtin_func[] = {
+} // namespace
+
+const BuiltinFunc
+builtin_cons[] = {
   {"pair?", {
       type_check_pair,
       {Calling::function, 1}}},
@@ -326,10 +328,7 @@ builtin_func[] = {
 
 };
 
-} // namespace
+const size_t builtin_cons_size = sizeof(builtin_cons) / sizeof(builtin_cons[0]);
 
 void install_builtin_cons(){
-  for(auto& e : builtin_func){
-    VM.set(intern(VM.symtable, e.name), {&e.func});
-  }
 }
