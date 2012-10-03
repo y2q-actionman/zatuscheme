@@ -125,6 +125,15 @@ int main(){
   check("(list->string '(#\\a))", "\"a\"");
   check("(list->string '(#\\a #\\b #\\c))", "\"abc\"");
 
+
+  check("(string-copy \"abc\")", "\"abc\"");
+
+  check("(define tmpstr (string #\\a #\\b #\\c))", "\"abc\"");
+  eval_text("(string-fill! tmpstr #\\?)");
+  check("tmpstr", "\"???\"");
+  eval_text("(string-fill! tmpstr #\\!)");
+  check("tmpstr", "\"!!!\"");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

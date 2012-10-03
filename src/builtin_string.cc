@@ -2,6 +2,7 @@
 #include <functional>
 #include <string>
 #include <cstring>
+#include <algorithm>
 
 #include "builtin_string.hh"
 #include "lisp_ptr.hh"
@@ -322,6 +323,36 @@ void string_from_list(){
   }
 }
 
+void string_copy(){
+  auto arg1 = pick_args_1();
+  auto str = arg1.get<String*>();
+  if(!str){
+    string_type_check_failed("string-copy", arg1);
+    return;
+  }
+
+  VM.return_value = {new String(*str)};
+}
+
+void string_fill(){
+  auto arg = pick_args<2>();
+  auto str = arg[0].get<String*>();
+  if(!str){
+    string_type_check_failed("string-fill!", arg[0]);
+    return;
+  }
+
+  auto ch = arg[1].get<char>();
+  if(!ch){
+    builtin_type_check_failed("string-fill!", Ptr_tag::character, arg[1]);
+    return;
+  }
+
+  std::fill(str->begin(), str->end(), ch);
+  VM.return_value = {str};
+}
+
+
 } // namespace
 
 const BuiltinFunc
@@ -389,6 +420,14 @@ builtin_string[] = {
   {"list->string", {
       string_from_list,
       {Calling::function, 1}}},
+
+  {"string-copy", {
+      string_copy,
+      {Calling::function, 1}}},
+
+  {"string-fill!", {
+      string_fill,
+      {Calling::function, 2}}}
 };
 
 const size_t builtin_string_size = sizeof(builtin_string) / sizeof(builtin_string[0]);
