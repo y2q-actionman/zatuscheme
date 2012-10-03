@@ -69,9 +69,11 @@ void to_macro_procedure(){
   }
 
   auto proc = arg1.get<IProcedure*>();
+  auto info = *proc->info();
+  info.calling = Calling::macro;
 
-  VM.return_value = new IProcedure(proc->get(), Calling::macro,
-                                   *proc->info(), proc->arg_head(),
+  VM.return_value = new IProcedure(proc->get(), 
+                                   info, proc->arg_head(),
                                    proc->closure());
 }
 
@@ -80,32 +82,32 @@ builtin_func[] = {
   // functions
   {"vector", {
       procedure_vector, 
-      Calling::function, {1, Variadic::t}}},
+      {Calling::function, 1, Variadic::t}}},
   {"vector?", {
       type_check_pred<Ptr_tag::vector>,
-      Calling::function, {1}}},
+      {Calling::function, 1}}},
   {"procedure?", {
       type_check_procedure,
-      Calling::function, {1}}},
+      {Calling::function, 1}}},
   {"string?", {
       type_check_pred<Ptr_tag::string>,
-      Calling::function, {1}}},
+      {Calling::function, 1}}},
   {"port?", {
       type_check_pred<Ptr_tag::port>,
-      Calling::function, {1}}},
+      {Calling::function, 1}}},
   {"eqv?", {
       eqv,
-      Calling::function, {2}}},
+      {Calling::function, 2}}},
   {"eq?", {
       eq,
-      Calling::function, {2}}},
+      {Calling::function, 2}}},
 
   {"eval", {
       eval_func,
-      Calling::function, {2}}},
+      {Calling::function, 2}}},
   {"to-macro-procedure", {
       to_macro_procedure,
-      Calling::function, {1}}}
+      {Calling::function, 1}}}
 };
 
 } //namespace

@@ -196,16 +196,13 @@ void whole_macro_call(Lisp_ptr proc){
 void vm_op_call(){
   auto proc = VM.return_value;
 
-  Calling c;
   const ProcInfo* info;
   Lisp_ptr args;
 
   if(auto ifun = proc.get<IProcedure*>()){
-    c = ifun->calling();
     info = ifun->info(); 
     args = ifun->arg_head();
   }else if(auto nfun = proc.get<const NProcedure*>()){
-    c = nfun->calling();
     info = nfun->info();
     args = {};
   }else{
@@ -218,7 +215,7 @@ void vm_op_call(){
     return;
   }
 
-  switch(c){
+  switch(info->calling){
   case Calling::function:
     function_call(proc, info, args); return;
   case Calling::macro:
@@ -581,8 +578,8 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
     VM.enter_frame(VM.frame->push());
   }
 
-  auto proc = new IProcedure(body, Calling::function,
-                             {len, Variadic::f, sequencial, early_bind},
+  auto proc = new IProcedure(body, 
+                             {Calling::function, len, Variadic::f, sequencial, early_bind},
                              syms, VM.frame);
 
   if(name){

@@ -9,7 +9,7 @@
 namespace Procedure {
   typedef void(*NativeFunc)();
 
-  enum class Calling {
+  enum class Calling : unsigned char{
     function,
     macro,
     whole_function,
@@ -22,15 +22,18 @@ namespace Procedure {
 
   struct ProcInfo {
     int required_args;
+    Calling calling;
     bool variadic;
     bool sequencial;
     bool early_bind;
 
-    constexpr ProcInfo(int rargs,
+    constexpr ProcInfo(Calling c,
+                       int rargs,
                        Variadic v = Variadic::f,
                        Sequencial s = Sequencial::f,
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
+        calling(c),
         variadic(static_cast<bool>(v)),
         sequencial(static_cast<bool>(s)),
         early_bind(static_cast<bool>(e)){}
@@ -38,25 +41,22 @@ namespace Procedure {
 
   class IProcedure{
   public:
-    IProcedure(Lisp_ptr code, Calling c, const ProcInfo& pi, Lisp_ptr head, Env* e)
-      : calling_(c), info_(pi), code_(code), arg_head_(head),  env_(e){
-      env_->add_ref();
+    IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr head, Env* e)
+      : info_(pi), code_(code), arg_head_(head),  env_(e){
+      if(env_) env_->add_ref();
     }
 
     IProcedure(const IProcedure&) = default;
     IProcedure(IProcedure&&) = default;
 
     ~IProcedure(){
-      if(env_->release() <= 0){
+      if(env_ && env_->release() <= 0){
         delete env_;
       }
     }
   
     IProcedure& operator=(const IProcedure&) = default;
     IProcedure& operator=(IProcedure&&) = default;
-
-    Calling calling() const
-    { return calling_; }
 
     const ProcInfo* info() const
     { return &info_; }
@@ -71,7 +71,6 @@ namespace Procedure {
     { return env_; }
   
   private:
-    Calling calling_;
     ProcInfo info_;
     Lisp_ptr code_;
     Lisp_ptr arg_head_;
@@ -80,8 +79,8 @@ namespace Procedure {
 
   class NProcedure{
   public:
-    constexpr NProcedure(NativeFunc f, Calling c, const ProcInfo& pi)
-      : calling_(c), info_(pi), n_func_(f){}
+    constexpr NProcedure(NativeFunc f, const ProcInfo& pi)
+      : info_(pi), n_func_(f){}
 
     NProcedure(const NProcedure&) = default;
     NProcedure(NProcedure&&) = default;
@@ -91,9 +90,6 @@ namespace Procedure {
     NProcedure& operator=(const NProcedure&) = default;
     NProcedure& operator=(NProcedure&&) = default;
 
-    Calling calling() const
-    { return calling_; }
-
     const ProcInfo* info() const
     { return &info_; }
 
@@ -101,7 +97,6 @@ namespace Procedure {
     { return n_func_; }
 
   private:
-    const Calling calling_;
     const ProcInfo info_;
     const NativeFunc n_func_;
   };

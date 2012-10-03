@@ -74,8 +74,8 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
     return {};
   }
   
-  return new IProcedure(code, Calling::function,
-                        {arg_info.first, arg_info.second},
+  return new IProcedure(code, 
+                        {Calling::function, arg_info.first, arg_info.second},
                         args, VM.frame);
 }
 
@@ -463,66 +463,66 @@ constexpr BuiltinFunc
 builtin_func[] = {
   {"quote", {
       whole_function_quote,
-      Calling::whole_function, {1}}},
+      {Calling::whole_function, 1}}},
   {"lambda", {
       whole_function_lambda,
-      Calling::whole_function, {1, Variadic::t}}},
+      {Calling::whole_function, 1, Variadic::t}}},
   {"if", {
       whole_function_if,
-      Calling::whole_function, {3}}},
+      {Calling::whole_function, 3}}},
   {"set!", {
       whole_function_set,
-      Calling::whole_function, {2}}},
+      {Calling::whole_function, 2}}},
   {"define", {
       whole_function_define,
-      Calling::whole_function, {2, Variadic::t}}},
+      {Calling::whole_function, 2, Variadic::t}}},
   {"quasiquote", {
       whole_function_quasiquote,
-      Calling::whole_function, {1}}},
+      {Calling::whole_function, 1}}},
   {"begin", {
       whole_function_begin,
-      Calling::whole_function, {1, Variadic::t}}},
+      {Calling::whole_function, 1, Variadic::t}}},
 
   {"cond", {
       whole_macro_cond,
-      Calling::whole_macro, {1, Variadic::t}}},
+      {Calling::whole_macro, 1, Variadic::t}}},
   {"case", {
       whole_macro_case,
-      Calling::whole_macro, {2, Variadic::t}}},
+      {Calling::whole_macro, 2, Variadic::t}}},
   {"and", {
       whole_macro_and,
-      Calling::whole_macro, {0, Variadic::t}}},
+      {Calling::whole_macro, 0, Variadic::t}}},
   {"or", {
       whole_macro_or,
-      Calling::whole_macro, {0, Variadic::t}}},
+      {Calling::whole_macro, 0, Variadic::t}}},
   {"let", {
       whole_function_let,
-      Calling::whole_function, {1, Variadic::t}}},
+      {Calling::whole_function, 1, Variadic::t}}},
   {"let*", {
       whole_function_let_star,
-      Calling::whole_function, {1, Variadic::t}}},
+      {Calling::whole_function, 1, Variadic::t}}},
   {"letrec", {
       whole_function_letrec,
-      Calling::whole_function, {1, Variadic::t}}},
+      {Calling::whole_function, 1, Variadic::t}}},
   {"do", {
       whole_function_unimplemented,
-      Calling::whole_function, {0, Variadic::t}}},
+      {Calling::whole_function, 0, Variadic::t}}},
   {"delay", {
       whole_function_unimplemented,
-      Calling::whole_function, {0, Variadic::t}}},
+      {Calling::whole_function, 0, Variadic::t}}},
 
   {"unquote", {
       whole_function_pass_through,
-      Calling::whole_function, {0, Variadic::t}}},
+      {Calling::whole_function, 0, Variadic::t}}},
   {"unquote-splicing", {
       whole_function_pass_through,
-      Calling::whole_function, {0, Variadic::t}}},
+      {Calling::whole_function, 0, Variadic::t}}},
   {"else", {
       whole_function_error,
-      Calling::whole_function, {0}}},
+      {Calling::whole_function, 0}}},
   {"=>", {
       whole_function_error,
-      Calling::whole_function, {0}}}
+      {Calling::whole_function, 0}}}
 };
 
 } //namespace

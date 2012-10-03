@@ -18,10 +18,10 @@ constexpr BuiltinFunc
 builtin_func[] = {
   {"boolean?", {
       type_check_pred<Ptr_tag::boolean>, 
-      Calling::function, {1}}},
+      {Calling::function, 1}}},
   {"not", {
       not_func,
-      Calling::function, {1}}}
+      {Calling::function, 1}}}
 };
 
 } // namespace
