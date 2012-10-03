@@ -14,7 +14,7 @@ using namespace Procedure;
 namespace {
 
 void char_type_check_failed(const char* func_name, Lisp_ptr p){
-  builtin_type_check_failed(func_name, Ptr_tag::cons, p);
+  builtin_type_check_failed(func_name, Ptr_tag::character, p);
 }
 
 template<typename Fun>
