@@ -17,6 +17,9 @@ int main(){
   check("(string? 'foo)", "#f");
 
   check("(make-string 10 #\\a)", "\"aaaaaaaaaa\"");
+
+  check("(string #\\a)", "\"a\"");
+  check("(string #\\a #\\b #\\c)", "\"abc\"");
   
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

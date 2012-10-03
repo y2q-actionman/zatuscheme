@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "builtin_string.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
@@ -51,7 +53,24 @@ void string_make(){
   VM.return_value = {new String(char_count, ch)};
 }
 
+void string_string(){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(VM.stack, args);
 
+  String ret;
+  for(auto i = args.begin(), e = args.end(); i != e; ++i){
+    auto c = i->get<char>();
+    if(!c){
+      builtin_type_check_failed("string", Ptr_tag::character, *i);
+      return;
+    }
+
+    ret.push_back(c);
+  }
+
+  VM.return_value = {new String(std::move(ret))};
+}
+  
 } // namespace
 
 const BuiltinFunc
@@ -62,6 +81,9 @@ builtin_string[] = {
   {"make-string", {
       string_make,
       {Calling::function, 1, Variadic::t}}},
+  {"string", {
+      string_string,
+      {Calling::function, 0, Variadic::t}}},
 };
 
 const size_t builtin_string_size = sizeof(builtin_string) / sizeof(builtin_string[0]);
