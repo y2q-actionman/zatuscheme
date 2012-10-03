@@ -83,4 +83,35 @@ int bind_cons_list(Lisp_ptr p, Fun&&... f){
   return bind_cons_list_i<0>(p, f...);
 }
 
+template<typename Iter>
+Lisp_ptr make_cons_list(Iter b, Iter e){
+  if(b == e){
+    return Cons::NIL;
+  }
+
+  auto i = b;
+
+  Cons* head = new Cons;
+  Cons* c = head;
+
+  while(1){
+    c->rplaca(*i);
+
+    ++i;
+    if(i == e) break;
+
+    Cons* newc = new Cons;
+    c->rplacd(Lisp_ptr(newc));
+    c = newc;
+  }
+
+  c->rplacd(Cons::NIL);
+  return Lisp_ptr(head);
+}
+
+inline
+Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
+  return make_cons_list(begin(lis), end(lis));
+}
+
 #endif // CONS_I_HH

@@ -26,30 +26,6 @@ void free_cons_list(Lisp_ptr p){
           });
 }
 
-Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
-  if(lis.size() <= 0) return Cons::NIL;
-
-  auto i = begin(lis);
-  const auto e = end(lis);
-
-  Cons* head = new Cons;
-  Cons* c = head;
-
-  while(1){
-    c->rplaca(*i);
-
-    ++i;
-    if(i == e) break;
-
-    Cons* newc = new Cons;
-    c->rplacd(Lisp_ptr(newc));
-    c = newc;
-  }
-
-  c->rplacd(Cons::NIL);
-  return Lisp_ptr(head);
-}
-
 Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
   return Lisp_ptr(new Cons(p, q));
 }

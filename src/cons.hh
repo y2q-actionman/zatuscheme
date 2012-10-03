@@ -39,7 +39,11 @@ int bind_cons_list(Lisp_ptr, Fun&&...);
 
 void free_cons_list(Lisp_ptr);
 
+template<typename Iter>
+Lisp_ptr make_cons_list(Iter, Iter);
+
 Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr>);
+
 Lisp_ptr push_cons_list(Lisp_ptr, Lisp_ptr);
 
 #include "cons.i.hh"
