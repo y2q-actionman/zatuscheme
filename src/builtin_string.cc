@@ -260,6 +260,25 @@ void string_substr(){
   VM.return_value = {new String(std::move(ret))};
 }
 
+void string_append(){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(VM.stack, args);
+
+  String ret;
+
+  for(auto i = begin(args), e = end(args);
+      i != e; ++i){
+    auto str = i->get<String*>();
+    if(!str){
+      string_type_check_failed("string-append", *i);
+      return;
+    }
+
+    ret.append(*str);
+  }
+
+  VM.return_value = {new String(std::move(ret))};
+}
 
 } // namespace
 
@@ -318,6 +337,9 @@ builtin_string[] = {
   {"substring", {
       string_substr,
       {Calling::function, 3}}},
+  {"string-append", {
+      string_append,
+      {Calling::function, 0, Variadic::t}}},
 };
 
 const size_t builtin_string_size = sizeof(builtin_string) / sizeof(builtin_string[0]);

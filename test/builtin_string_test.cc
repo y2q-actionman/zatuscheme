@@ -113,6 +113,10 @@ int main(){
     check_undef("(substring \"0123456789\" 199 -1)");
   }
 
+  check("(string-append)", "\"\"");
+  check("(string-append \"\")", "\"\"");
+  check("(string-append \"\" \"1\" \"\" \"2\" \"3\")", "\"123\"");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
