@@ -14,6 +14,7 @@
 #include "builtin_char.hh"
 #include "builtin_cons.hh"
 #include "builtin_numeric.hh"
+#include "builtin_string.hh"
 #include "builtin_symbol.hh"
 #include "builtin_syntax.hh"
 
@@ -98,9 +99,6 @@ builtin_misc[] = {
   {"procedure?", {
       type_check_procedure,
       {Calling::function, 1}}},
-  {"string?", {
-      type_check_pred<Ptr_tag::string>,
-      {Calling::function, 1}}},
   {"port?", {
       type_check_pred<Ptr_tag::port>,
       {Calling::function, 1}}},
@@ -133,6 +131,7 @@ void install_builtin(){
   install_builtin_internal(builtin_char, builtin_char_size);
   install_builtin_internal(builtin_cons, builtin_cons_size);
   install_builtin_internal(builtin_numeric, builtin_numeric_size);
+  install_builtin_internal(builtin_string, builtin_string_size);
   install_builtin_internal(builtin_symbol, builtin_symbol_size);
   install_builtin_internal(builtin_syntax, builtin_syntax_size);
 }
