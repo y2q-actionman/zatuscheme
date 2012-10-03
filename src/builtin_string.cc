@@ -222,6 +222,44 @@ void string_ci_greater_eq(){
 }
 
 
+void string_substr(){
+  auto arg = pick_args<3>();
+  auto str = arg[0].get<String*>();
+  if(!str){
+    string_type_check_failed("substring", arg[0]);
+    return;
+  }
+
+  Number::integer_type ind[2];
+
+  for(int i = 1; i < 3; ++i){
+    auto n = arg[i].get<Number*>();
+    if(!n){
+      builtin_type_check_failed("substring", Ptr_tag::number, arg[i]);
+      return;
+    }
+
+    if(n->type() != Number::Type::integer){
+      fprintf(zs::err, "native func: substring: arg's number is not %s! (%s)\n",
+              stringify(Number::Type::integer), stringify(n->type()));
+      VM.return_value = {};
+      return;
+    }
+    ind[i-1] = n->get<Number::integer_type>();
+  }
+
+
+  if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= str->length())){
+    fprintf(zs::err, "native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
+            str->length(), ind[0], ind[1]);
+    VM.return_value = {};
+    return;
+  }
+
+  auto ret = str->substr(ind[0], ind[1] - ind[0]);
+  VM.return_value = {new String(std::move(ret))};
+}
+
 
 } // namespace
 
@@ -245,6 +283,7 @@ builtin_string[] = {
   {"string-set!", {
       string_set,
       {Calling::function, 3}}},
+
   {"string=?", {
       string_equal,
       {Calling::function, 2}}},
@@ -276,6 +315,9 @@ builtin_string[] = {
       string_ci_greater_eq,
       {Calling::function, 2}}},
 
+  {"substring", {
+      string_substr,
+      {Calling::function, 3}}},
 };
 
 const size_t builtin_string_size = sizeof(builtin_string) / sizeof(builtin_string[0]);

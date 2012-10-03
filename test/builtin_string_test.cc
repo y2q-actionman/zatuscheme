@@ -101,6 +101,18 @@ int main(){
   check("(string-ci>=? \"Aaa\" \"aab\")", "#f");
   check("(string-ci>=? \"Aba\" \"aab\")", "#t");
 
+
+  check("(substring \"0123456789\" 1 5)", "\"1234\"");
+  check("(substring \"0123456789\" 1 1)", "\"\"");
+  check("(substring \"0123456789\" 0 1)", "\"0\"");
+  {
+    with_null_stream wns;
+    check_undef("(substring \"0123456789\" -1 1)");
+    check_undef("(substring \"0123456789\" 0 999)");
+    check_undef("(substring \"0123456789\" 5 4)");
+    check_undef("(substring \"0123456789\" 199 -1)");
+  }
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
