@@ -1073,18 +1073,14 @@ void number_to_string(){
     radix = num->get<Number::integer_type>();
   }
 
-  char* buf = NULL;
+  char* buf = nullptr;
   size_t buf_size = 0;
 
   auto f = open_memstream(&buf, &buf_size);
   print(f, *n, radix);
   fclose(f);
 
-  if(n){
-    VM.return_value = {new String(buf)};
-  }else{
-    VM.return_value = {};
-  }
+  VM.return_value = {new String(buf)};
 
   free(buf);
 }
