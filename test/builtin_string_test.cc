@@ -117,6 +117,10 @@ int main(){
   check("(string-append \"\")", "\"\"");
   check("(string-append \"\" \"1\" \"\" \"2\" \"3\")", "\"123\"");
 
+  check("(string->list \"\")", "()");
+  check("(string->list \"a\")", "(#\\a)");
+  check("(string->list \"abc\")", "(#\\a #\\b #\\c)");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

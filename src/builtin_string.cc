@@ -280,6 +280,17 @@ void string_append(){
   VM.return_value = {new String(std::move(ret))};
 }
 
+void string_to_list(){
+  auto arg1 = pick_args_1();
+  auto str = arg1.get<String*>();
+  if(!str){
+    string_type_check_failed("string->list", arg1);
+    return;
+  }
+
+  VM.return_value = make_cons_list(str->begin(), str->end());
+}
+
 } // namespace
 
 const BuiltinFunc
@@ -340,6 +351,10 @@ builtin_string[] = {
   {"string-append", {
       string_append,
       {Calling::function, 0, Variadic::t}}},
+
+  {"string->list", {
+      string_to_list,
+      {Calling::function, 1}}},
 };
 
 const size_t builtin_string_size = sizeof(builtin_string) / sizeof(builtin_string[0]);

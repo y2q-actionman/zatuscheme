@@ -95,7 +95,7 @@ Lisp_ptr make_cons_list(Iter b, Iter e){
   Cons* c = head;
 
   while(1){
-    c->rplaca(*i);
+    c->rplaca(Lisp_ptr{*i});
 
     ++i;
     if(i == e) break;
