@@ -11,6 +11,10 @@ void check_undef(const char* input){
   result = !eval_text(input);
 }
 
+void check_success(const char* input){
+  result = !!eval_text(input);
+}
+
 // TODO: if case-insensitivity is supported, define CASE_INSENSITIVE
 
 
@@ -37,6 +41,25 @@ int main(){
     check_undef("(string-ref \"a\" 100)");
     check_undef("(string-ref \"\" 0)");
   }
+
+  check("(define tmpstr (make-string 3 #\\*))", "\"***\"");
+  eval_text("(string-set! tmpstr 0 #\\?)");
+  check("tmpstr", "\"?**\"");
+  eval_text("(string-set! tmpstr 1 #\\!)");
+  check("tmpstr", "\"?!*\"");
+  {
+    with_null_stream wns;
+    check_undef("(string-set! tmpstr -1 #\\_)");
+    check_undef("(string-set! tmpstr 100 #\\_)");
+  }
+
+  // when immutable string implemented..
+  // eval_text("(define (f) (make-string 3 #\\*))");
+  // eval_text("(define (g) \"***\")");
+  // check_success("(string-set! (f) 0 #\\?)");
+  // check_undef("(string-set! (g) 0 #\\?)");
+  // check_undef("(string-set! (symbol->string 'immutable) 0 #\\?)");
+
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

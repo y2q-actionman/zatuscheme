@@ -112,7 +112,46 @@ void string_ref(){
     return;
   }
 
-  VM.return_value = Lisp_ptr{str->operator[](ind)};
+  VM.return_value = Lisp_ptr{(*str)[ind]};
+}
+
+void string_set(){
+  auto arg = pick_args<3>();
+  auto str = arg[0].get<String*>();
+  if(!str){
+    string_type_check_failed("string-set!", arg[0]);
+    return;
+  }
+
+  auto num = arg[1].get<Number*>();
+  if(!num){
+    builtin_type_check_failed("string-set!", Ptr_tag::number, arg[1]);
+    return;
+  }
+
+  if(num->type() != Number::Type::integer){
+    fprintf(zs::err, "native func: string-set!: arg's number is not %s! (%s)\n",
+            stringify(Number::Type::integer), stringify(num->type()));
+    VM.return_value = {};
+    return;
+  }
+  auto ind = num->get<Number::integer_type>();
+
+  if(ind < 0 || ind >= str->length()){
+    fprintf(zs::err, "native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
+            str->length(), ind);
+    VM.return_value = {};
+    return;
+  }
+
+  auto ch = arg[2].get<char>();
+  if(!ch){
+    builtin_type_check_failed("string-set!", Ptr_tag::character, arg[2]);
+    return;
+  }
+
+  (*str)[ind] = ch;
+  VM.return_value = Lisp_ptr{ch};
 }
 
 } // namespace
@@ -134,6 +173,9 @@ builtin_string[] = {
   {"string-ref", {
       string_ref,
       {Calling::function, 2}}},
+  {"string-set!", {
+      string_set,
+      {Calling::function, 3}}},
 };
 
 const size_t builtin_string_size = sizeof(builtin_string) / sizeof(builtin_string[0]);
