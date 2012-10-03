@@ -202,11 +202,11 @@ void vm_op_call(){
 
   if(auto ifun = proc.get<IProcedure*>()){
     c = ifun->calling();
-    info = &ifun->info(); 
+    info = ifun->info(); 
     args = ifun->arg_head();
   }else if(auto nfun = proc.get<const NProcedure*>()){
     c = nfun->calling();
-    info = &nfun->info();
+    info = nfun->info();
     args = {};
   }else{
     fprintf(zs::err, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
@@ -273,7 +273,7 @@ void proc_enter_interpreted(IProcedure* fun){
     VM.leave_frame();
   }
 
-  if(!fun->info().early_bind){
+  if(!fun->info()->early_bind){
     VM.enter_frame(fun->closure()->push());
   }
 
@@ -300,7 +300,7 @@ void proc_enter_interpreted(IProcedure* fun){
     arg_name = arg_name_cell->cdr();
   }
 
-  if(argi.variadic){   // variadic arg push
+  if(argi->variadic){   // variadic arg push
     if(!arg_name.get<Symbol*>()){
       fprintf(zs::err, "eval error: no arg name for variadic arg!\n");
       VM.return_value = {};

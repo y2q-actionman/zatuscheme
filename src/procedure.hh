@@ -58,8 +58,8 @@ namespace Procedure {
     Calling calling() const
     { return calling_; }
 
-    const ProcInfo& info() const
-    { return info_; }
+    const ProcInfo* info() const
+    { return &info_; }
 
     Lisp_ptr arg_head() const
     { return arg_head_; }
@@ -94,8 +94,8 @@ namespace Procedure {
     Calling calling() const
     { return calling_; }
 
-    const ProcInfo& info() const
-    { return info_; }
+    const ProcInfo* info() const
+    { return &info_; }
 
     NativeFunc get() const
     { return n_func_; }
