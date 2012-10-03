@@ -53,8 +53,6 @@ bool test_true(Lisp_ptr p, const char*){
 
 int main(){
   install_builtin();
-  install_builtin_syntax();
-  install_builtin_numeric();
 
   // === self-evaluating ===
 

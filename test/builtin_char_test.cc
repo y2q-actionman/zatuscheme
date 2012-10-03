@@ -12,9 +12,6 @@ void check(const char* input, const char* expect){
 
 int main(){
   install_builtin();
-  install_builtin_syntax();
-  install_builtin_char();
-  install_builtin_numeric();
 
   check("(char? #\\a)", "#t");
   check("(char? 1)", "#f");

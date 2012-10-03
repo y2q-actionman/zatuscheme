@@ -13,8 +13,6 @@ void check(const char* input, const char* expect){
 
 int main(){
   install_builtin();
-  install_builtin_syntax();
-  install_builtin_numeric();
 
   // testing simple closure
   eval_text("(define x 1)");

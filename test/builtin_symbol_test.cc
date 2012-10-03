@@ -12,9 +12,6 @@ void check(const char* input, const char* expect){
 
 int main(){
   install_builtin();
-  install_builtin_syntax();
-  install_builtin_cons();
-  install_builtin_symbol();
 
   check("(symbol? 'foo)", "#t");
   check("(symbol? (car '(a b)))", "#t");

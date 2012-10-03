@@ -53,6 +53,3 @@ builtin_symbol[] = {
 };
 
 const size_t builtin_symbol_size = sizeof(builtin_symbol) / sizeof(builtin_symbol[0]);
-
-void install_builtin_symbol(){
-}

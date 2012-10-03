@@ -13,9 +13,6 @@ void check_undef(const char* input){
 
 int main(){
   install_builtin();
-  install_builtin_syntax();
-  install_builtin_cons();
-  install_builtin_numeric();
 
   check("(pair? '(a . b))", "#t");
   check("(pair? '(a b c))", "#t");

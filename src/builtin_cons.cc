@@ -329,6 +329,3 @@ builtin_cons[] = {
 };
 
 const size_t builtin_cons_size = sizeof(builtin_cons) / sizeof(builtin_cons[0]);
-
-void install_builtin_cons(){
-}

@@ -528,6 +528,3 @@ builtin_syntax[] = {
 };
 
 const size_t builtin_syntax_size = sizeof(builtin_syntax) / sizeof(builtin_syntax[0]);
-
-void install_builtin_syntax(){
-}

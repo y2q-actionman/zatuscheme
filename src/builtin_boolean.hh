@@ -6,6 +6,4 @@
 extern const BuiltinFunc builtin_boolean[];
 extern const size_t builtin_boolean_size;
 
-void install_builtin_boolean();
-
 #endif // BUILTIN_BOOLEAN_HH

@@ -27,6 +27,3 @@ builtin_boolean[] = {
 };
 
 const size_t builtin_boolean_size = sizeof(builtin_boolean) / sizeof(builtin_boolean[0]);
-
-void install_builtin_boolean(){
-}

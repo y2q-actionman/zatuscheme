@@ -13,8 +13,6 @@ void check(const char* input, const char* expect){
 
 int main(){
   install_builtin();
-  install_builtin_syntax();
-  install_builtin_numeric();
 
   check("(vector 1)", "#(1)");
   check("(vector 1 2)", "#(1 2)");

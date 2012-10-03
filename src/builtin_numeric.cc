@@ -1278,6 +1278,3 @@ builtin_numeric[] = {
 };
 
 const size_t builtin_numeric_size = sizeof(builtin_numeric) / sizeof(builtin_numeric[0]);
-
-void install_builtin_numeric(){
-}

@@ -11,7 +11,6 @@ void check(const char* input, const char* expect){
 
 int main(){
   install_builtin();
-  install_builtin_numeric();
 
   // type predicates
   check("(complex? ())", "#f");
