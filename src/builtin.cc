@@ -13,6 +13,7 @@
 #include "builtin_boolean.hh"
 #include "builtin_char.hh"
 #include "builtin_cons.hh"
+#include "builtin_equal.hh"
 #include "builtin_numeric.hh"
 #include "builtin_string.hh"
 #include "builtin_symbol.hh"
@@ -29,37 +30,6 @@ void type_check_procedure(){
                              || (arg.tag() == Ptr_tag::n_procedure)};
 }
   
-
-bool eq_internal(Lisp_ptr a, Lisp_ptr b){
-  if(a.tag() != b.tag()) return false;
-
-  if(a.tag() == Ptr_tag::boolean){
-    return a.get<bool>() == b.get<bool>();
-  }else if(a.tag() == Ptr_tag::character){
-     // this can be moved into eqv? in R5RS, but char is contained in Lisp_ptr.
-    return a.get<char>() == b.get<char>();
-  }else{
-    return a.get<void*>() == b.get<void*>();
-  }
-}
-
-bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
-  if(a.tag() == Ptr_tag::number && b.tag() == Ptr_tag::number){
-    return eqv(*a.get<Number*>(), *b.get<Number*>());
-  }else{
-    return eq_internal(a, b);
-  }
-}
-
-void eq(){
-  auto args = pick_args<2>();
-  VM.return_value = Lisp_ptr{eq_internal(args[0], args[1])};
-}
-
-void eqv(){
-  auto args = pick_args<2>();
-  VM.return_value = Lisp_ptr{eqv_internal(args[0], args[1])};
-}
 
 void eval_func(){
   auto args = pick_args<2>();
@@ -102,12 +72,6 @@ builtin_misc[] = {
   {"port?", {
       type_check_pred<Ptr_tag::port>,
       {Calling::function, 1}}},
-  {"eqv?", {
-      eqv,
-      {Calling::function, 2}}},
-  {"eq?", {
-      eq,
-      {Calling::function, 2}}},
 
   {"eval", {
       eval_func,
@@ -126,12 +90,14 @@ static void install_builtin_internal(const BuiltinFunc bf[], size_t s){
 }
 
 void install_builtin(){
+  install_builtin_internal(builtin_syntax, builtin_syntax_size);
+
   install_builtin_internal(builtin_misc, builtin_misc_size);
   install_builtin_internal(builtin_boolean, builtin_boolean_size);
   install_builtin_internal(builtin_char, builtin_char_size);
   install_builtin_internal(builtin_cons, builtin_cons_size);
+  install_builtin_internal(builtin_equal, builtin_equal_size);
   install_builtin_internal(builtin_numeric, builtin_numeric_size);
   install_builtin_internal(builtin_string, builtin_string_size);
   install_builtin_internal(builtin_symbol, builtin_symbol_size);
-  install_builtin_internal(builtin_syntax, builtin_syntax_size);
 }
