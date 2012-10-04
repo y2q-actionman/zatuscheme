@@ -18,6 +18,7 @@
 #include "builtin_string.hh"
 #include "builtin_symbol.hh"
 #include "builtin_syntax.hh"
+#include "builtin_vector.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -60,12 +61,6 @@ void to_macro_procedure(){
 
 const BuiltinFunc
 builtin_misc[] = {
-  {"vector", {
-      procedure_vector, 
-      {Calling::function, 1, Variadic::t}}},
-  {"vector?", {
-      type_check_pred<Ptr_tag::vector>,
-      {Calling::function, 1}}},
   {"procedure?", {
       type_check_procedure,
       {Calling::function, 1}}},
@@ -100,4 +95,5 @@ void install_builtin(){
   install_builtin_internal(builtin_numeric, builtin_numeric_size);
   install_builtin_internal(builtin_string, builtin_string_size);
   install_builtin_internal(builtin_symbol, builtin_symbol_size);
+  install_builtin_internal(builtin_vector, builtin_vector_size);
 }

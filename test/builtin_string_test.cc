@@ -42,7 +42,7 @@ int main(){
     check_undef("(string-ref \"\" 0)");
   }
 
-  check("(define tmpstr (make-string 3 #\\*))", "\"***\"");
+  eval_text("(define tmpstr (make-string 3 #\\*))");
   eval_text("(string-set! tmpstr 0 #\\?)");
   check("tmpstr", "\"?**\"");
   eval_text("(string-set! tmpstr 1 #\\!)");
@@ -128,7 +128,7 @@ int main(){
 
   check("(string-copy \"abc\")", "\"abc\"");
 
-  check("(define tmpstr (string #\\a #\\b #\\c))", "\"abc\"");
+  eval_text("(define tmpstr (string #\\a #\\b #\\c))");
   eval_text("(string-fill! tmpstr #\\?)");
   check("tmpstr", "\"???\"");
   eval_text("(string-fill! tmpstr #\\!)");
