@@ -58,6 +58,15 @@ int main(){
   check("(let ((x '#())) (eq? x x))", "#t");
   check("(let ((p (lambda (x) x))) (eq? p p))", "#t");
 
+
+  check("(equal? 'a 'a)", "#t");
+  check("(equal? '(a) '(a))", "#t");
+  check("(equal? '(a (b) c) '(a (b) c))", "#t");
+  check("(equal? \"abc\" \"abc\")", "#t");
+  check("(equal? 2 2)", "#t");
+  check("(equal? (make-vector 5 'a) (make-vector 5 'a))", "#t");
+  check("(equal? (lambda (x) x) (lambda (y) y))", "#f"); // unspecified
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
