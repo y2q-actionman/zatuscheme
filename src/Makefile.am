@@ -28,6 +28,7 @@ libzs_a_SOURCES = zs.hh\
 		builtin_string.cc builtin_string.hh\
 		builtin_equal.cc builtin_equal.hh\
 		builtin_vector.cc builtin_vector.hh\
+		builtin_port.cc builtin_port.hh\
 		vm.cc vm.hh vm.i.hh
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 

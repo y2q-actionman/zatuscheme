@@ -15,6 +15,7 @@
 #include "builtin_cons.hh"
 #include "builtin_equal.hh"
 #include "builtin_numeric.hh"
+#include "builtin_port.hh"
 #include "builtin_string.hh"
 #include "builtin_symbol.hh"
 #include "builtin_syntax.hh"
@@ -64,9 +65,6 @@ builtin_misc[] = {
   {"procedure?", {
       type_check_procedure,
       {Calling::function, 1}}},
-  {"port?", {
-      type_check_pred<Ptr_tag::port>,
-      {Calling::function, 1}}},
 
   {"eval", {
       eval_func,
@@ -96,4 +94,7 @@ void install_builtin(){
   install_builtin_internal(builtin_string, builtin_string_size);
   install_builtin_internal(builtin_symbol, builtin_symbol_size);
   install_builtin_internal(builtin_vector, builtin_vector_size);
+
+  install_builtin_port_value();
+  install_builtin_internal(builtin_port, builtin_port_size);
 }
