@@ -139,9 +139,10 @@ inline void number_compare(const char* name, Fun&& fun){
 }
 
 void number_equal(){
-  number_compare("=", 
-                 number_comparator<std::equal_to,
-                                   std::equal_to<Number::complex_type> >());
+  number_compare("=",
+                 [](const Number* n1, const Number* n2){
+                   return eqv(*n1, *n2);
+                 });
 }
 
 void number_less(){
