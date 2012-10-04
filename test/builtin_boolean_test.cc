@@ -10,7 +10,6 @@ void check(const char* input, const char* expect){
 int main(){
   install_builtin();
 
-  // type predicates
   check("(not #t)", "#f");
   check("(not 3)", "#f");
   check("(not (list 3))", "#f");

@@ -23,7 +23,8 @@ check_PROGRAMS = token_test\
 		builtin_cons_test\
 		builtin_symbol_test\
 		builtin_char_test\
-		builtin_string_test
+		builtin_string_test\
+		builtin_equal_test
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)
