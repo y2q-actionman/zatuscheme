@@ -69,28 +69,15 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
   VM.code.push(vm_op_proc_enter);
 
   int argc = 0;
-  const auto sequencial = info->sequencial;
-  Lisp_ptr bind_list = arg_head;
+  bool ret;
 
-  if(!do_list(args.get<Cons*>()->cdr(),
+  if(!info->sequencial){
+    ret = 
+      do_list(args.get<Cons*>()->cdr(),
               [&](Cons* cell) -> bool{
-                if(sequencial){
-                  auto c = bind_list.get<Cons*>();
-                  if(!c){
-                    fprintf(zs::err, "funcall internal error: sequencial calling cannot be variadic in this implementasion.\n");
-                    return false;
-                  }
-
-                  VM.code.push(c->car());
-                  VM.code.push(vm_op_arg_push_and_set);
-                  bind_list = c->cdr();
-                }else{
-                  VM.code.push(vm_op_arg_push);
-                }
-
+                VM.code.push(vm_op_arg_push);
                 VM.code.push(cell->car());
                 ++argc;
-
                 return true;
               },
               [&](Lisp_ptr dot_cdr) -> bool{
@@ -98,18 +85,44 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
                   fprintf(zs::err, "funcall error: argument binding failed.\n");
                   return false;
                 }
-              
-                if((argc < info->required_args)
-                   || (!info->variadic && argc > info->required_args)){
-                  fprintf(zs::err, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
-                          info->required_args,
-                          (info->variadic) ? "variadic" : "not variadic",
-                          argc);
-                  return false;
-                }
-
                 return true;
-              })){
+              });
+  }else{
+    Lisp_ptr bind_list = arg_head;
+
+    ret = 
+      do_list_2(args.get<Cons*>()->cdr(),
+                bind_list,
+                [&](Cons* cell, Cons* bindc) -> bool{
+                  VM.code.push(bindc->car());
+                  VM.code.push(vm_op_arg_push_and_set);
+                  VM.code.push(cell->car());
+                  ++argc;
+                  return true;
+                },
+                [&](Lisp_ptr argc_cdr, Lisp_ptr bindc_cdr) -> bool{
+                  if(!nullp(argc_cdr)){
+                    if(nullp(bindc_cdr)){
+                      fprintf(zs::err, "funcall internal error: sequencial calling cannot be variadic in this implementasion.\n");
+                    }else{
+                      fprintf(zs::err, "funcall error: argument binding failed.\n");
+                    }
+                    return false;
+                  }
+                  return true;
+                });
+  }
+  
+  if((argc < info->required_args)
+     || (!info->variadic && argc > info->required_args)){
+    fprintf(zs::err, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
+            info->required_args,
+            (info->variadic) ? "variadic" : "not variadic",
+            argc);
+    ret = false;
+  }
+
+  if(!ret){
     for(int i = 0; i < argc*2 + 2; ++i){
       VM.code.pop();
     }

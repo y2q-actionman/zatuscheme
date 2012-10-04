@@ -67,7 +67,7 @@ auto do_list_2(Lisp_ptr lis1, Lisp_ptr lis2, MainFun&& m_fun, LastFun&& l_fun)
 
   Cons *c1, *c2;
 
-  while(c1 = p1.get<Cons*>() && c2 = p2.get<Cons*>()){
+  while((c1 = p1.get<Cons*>()) && (c2 = p2.get<Cons*>())){
     auto next1 = c1->cdr();
     auto next2 = c2->cdr();
     if(!m_fun(c1, c2))
