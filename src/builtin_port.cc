@@ -59,7 +59,7 @@ void port_open_file(const char* name, const char* mode){
   }
 
   auto p = new Port(str->c_str(), mode);
-  if(!p->stream()){
+  if(!*p){
     fprintf(zs::err, "native error: %s: failed at opening file\n", name);
     VM.return_value = {};
     return;
@@ -98,8 +98,6 @@ void port_close(const char* name, Fun&& fun){
 
   if(p->close() < 0){
     fprintf(zs::err, "native func warning: %s: failed at closeing port\n", name);
-    p->print_last_error(zs::err);
-
     VM.return_value = Lisp_ptr{false};
     return;
   }

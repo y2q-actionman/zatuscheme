@@ -23,9 +23,7 @@ public:
   Port& operator=(Port&&);
 
 
-  // explicit operator bool(){ return f_ != nullptr; }
-
-  int print_last_error(FILE*);
+  explicit operator bool(){ return f_ != nullptr; }
 
   FILE* stream() const{ return f_; }
 
@@ -40,9 +38,10 @@ public:
 
   
 private:
+  void clear();
+
   FILE* f_;
   const char* mode_;
-  int eno_;
   unsigned line_;
   char* string_buf_;
   size_t string_buf_len_;
