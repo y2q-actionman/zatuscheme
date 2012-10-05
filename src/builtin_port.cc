@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <stdio_ext.h>
 #include <cstring>
 
 #include "builtin_port.hh"
@@ -27,11 +26,11 @@ void port_io_p(Fun&& fun){
 }  
   
 void port_i_p(){
-  port_io_p([](Port* p){ return __freadable(p) != 0; });
+  port_io_p([](Port* p){ return p->readable(); });
 }
 
 void port_o_p(){
-  port_io_p([](Port* p){ return __fwritable(p) != 0; });
+  port_io_p([](Port* p){ return p->writable(); });
 }
 
 
@@ -59,19 +58,14 @@ void port_open_file(const char* name, const char* mode){
     return;
   }
 
-  auto ret = fopen(str->c_str(), mode);
-  if(!ret){
-    auto eno = errno;
-    char estr[128];
-    strerror_r(eno, estr, sizeof(estr));
-    fprintf(zs::err, "native func: %s: failed at opening file '%s'with '%s' (%s)\n",
-            name, str->c_str(), mode, estr);
-
+  auto p = new Port(str->c_str(), mode);
+  if(!p->stream()){
+    fprintf(zs::err, "native error: %s: failed at opening file\n", name);
     VM.return_value = {};
     return;
   }
   
-  VM.return_value = {ret};
+  VM.return_value = {p};
 }  
 
 void port_open_file_i(){
@@ -96,12 +90,15 @@ void port_close(const char* name, Fun&& fun){
     fprintf(zs::err, "native func warning: %s: passed port is not expected direction\n", name);
   }
 
-  auto ret = freopen("/dev/null", "r+", p);
-  if(!ret){
-    auto eno = errno;
-    char estr[128];
-    strerror_r(eno, estr, sizeof(estr));
-    fprintf(zs::err, "native func warning: %s: failed at closeing port (%s)\n", name, estr);
+  if(!p->stream()){
+    fprintf(zs::err, "native func warning: %s: passed port is already closed\n", name);
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  if(p->close() < 0){
+    fprintf(zs::err, "native func warning: %s: failed at closeing port\n", name);
+    p->print_last_error(zs::err);
 
     VM.return_value = Lisp_ptr{false};
     return;
@@ -111,11 +108,11 @@ void port_close(const char* name, Fun&& fun){
 }
 
 void port_close_i(){
-  port_close("close-input-port", __freadable);
+  port_close("close-input-port", [](Port* p){ return p->readable(); });
 }
 
 void port_close_o(){
-  port_close("close-output-port", __fwritable);
+  port_close("close-output-port", [](Port* p){ return p->writable(); });
 }
 
 
@@ -154,6 +151,8 @@ builtin_port[] = {
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
-  VM.set(intern(VM.symtable, current_input_port_symname), {zs::in});
-  VM.set(intern(VM.symtable, current_output_port_symname), {zs::out});
+  VM.set(intern(VM.symtable, current_input_port_symname),
+         new Port{zs::in, "r"});
+  VM.set(intern(VM.symtable, current_output_port_symname),
+         new Port{zs::out, "w"});
 }

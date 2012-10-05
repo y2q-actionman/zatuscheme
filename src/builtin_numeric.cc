@@ -1026,10 +1026,9 @@ void number_from_string(){
     }
     radix = num->get<Number::integer_type>();
   }
-    
-  auto f = make_string_input_stream(str->c_str(), str->size());
-  auto n = parse_number(f, radix);
-  fclose(f);
+
+  Port p{(void*)(str->c_str()), str->size()};
+  auto n = parse_number(p.stream(), radix);
 
   if(n){
     VM.return_value = {new Number(n)};
@@ -1074,16 +1073,10 @@ void number_to_string(){
     radix = num->get<Number::integer_type>();
   }
 
-  char* buf = nullptr;
-  size_t buf_size = 0;
+  Port p{Port::open_output_memstream::t};
+  print(p.stream(), *n, radix);
 
-  auto f = open_memstream(&buf, &buf_size);
-  print(f, *n, radix);
-  fclose(f);
-
-  VM.return_value = {new String(buf)};
-
-  free(buf);
+  VM.return_value = {new String(p.get_string_output())};
 }
 
 } //namespace

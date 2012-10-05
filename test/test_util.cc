@@ -8,13 +8,9 @@
 using namespace std;
 
 Lisp_ptr read_from_string(const char* s){
-  auto f = make_string_input_stream(s, strlen(s));
+  Port pr{(void*)s, strlen(s)};
 
-  Lisp_ptr p{read(f)};
-
-  if(fclose(f) != 0){
-    perror(__func__);
-  }
+  Lisp_ptr p{read(pr.stream())};
 
   return p;
 }

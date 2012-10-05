@@ -79,7 +79,7 @@ namespace Procedure{
 class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
-typedef FILE Port;
+class Port;
 class Env;
 typedef void(*VMop)();
 

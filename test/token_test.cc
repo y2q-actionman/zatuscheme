@@ -108,9 +108,8 @@ void check(FILE* f){
 }
 
 void check(const string& input){
-  auto f = make_string_input_stream(input.c_str(), input.size());
-  check(f);
-  fclose(f);
+  Port p{(void*)input.c_str(), input.size()};
+  check(p.stream());
 }
 
 
@@ -143,9 +142,8 @@ void check(FILE* f, const string& expect){
 
 template<Token::Type T>
 void check(const string& input, const string& expect){
-  auto f = make_string_input_stream(input.c_str(), input.size());
-  check<T>(f, expect);
-  fclose(f);
+  Port p{(void*)input.c_str(), input.size()};
+  check<T>(p.stream(), expect);
 }
 
 #define check_ident check<Token::Type::identifier>
@@ -198,9 +196,8 @@ void check(FILE* f, Token::Notation n){
 
 template<typename T>
 void check(const string& input, T&& expect){
-  auto f = make_string_input_stream(input.c_str(), input.size());
-  check(f, expect);
-  fclose(f);
+  Port p{(void*)input.c_str(), input.size()};
+  check(p.stream(), expect);
 }
 
 
@@ -266,7 +263,8 @@ int main(){
   // consecutive access
   {
     char teststr[] = "(a . b)#(c 'd) e ...;comment\nf +11 `(,x ,@y \"ho()ge\")";
-    auto ss = make_string_input_stream(teststr, sizeof(teststr));
+    Port p{teststr, sizeof(teststr)};
+    auto ss = p.stream();
 
     check(ss, N::l_paren);
     check_ident(ss, "a");
@@ -293,8 +291,6 @@ int main(){
     check(ss, N::r_paren);
 
     check(ss);
-
-    fclose(ss);
   }
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

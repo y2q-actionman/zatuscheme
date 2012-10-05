@@ -70,9 +70,8 @@ void check(FILE* i){
 }
 
 void check(const string& input){
-  auto f = make_string_input_stream(input.c_str(), input.size());
-  check(f);
-  fclose(f);
+  Port p{(void*)input.c_str(), input.size()};
+  check(p.stream());
 }
 
 void check(FILE* i, long expect){
@@ -102,9 +101,8 @@ void check(FILE* i, const Number::complex_type& z){
 
 template<typename T>
 void check(const string& input, T&& t){
-  auto f = make_string_input_stream(input.c_str(), input.size());
-  check(f, t);
-  fclose(f);
+  Port p{(void*)input.c_str(), input.size()};
+  check(p.stream(), t);
 }
 
 // printing test
