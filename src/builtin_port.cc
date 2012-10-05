@@ -1,9 +1,12 @@
+#include <cassert>
 #include <cstdio>
 #include <cstring>
 
 #include "builtin_port.hh"
 #include "lisp_ptr.hh"
 #include "port.hh"
+#include "reader.hh"
+#include "printer.hh"
 #include "util.hh"
 
 using namespace std;
@@ -13,6 +16,10 @@ namespace {
 
 static const char current_input_port_symname[] = "current-input-port-value";
 static const char current_output_port_symname[] = "current-output-port-value";
+
+void port_type_check_failed(const char* func_name, Lisp_ptr p){
+  builtin_type_check_failed(func_name, Ptr_tag::character, p);
+}
 
 template<typename Fun>
 void port_io_p(Fun&& fun){
@@ -82,7 +89,7 @@ void port_close(const char* name, Fun&& fun){
   auto arg = pick_args_1();
   auto p = arg.get<Port*>();
   if(!p){
-    builtin_type_check_failed(name, Ptr_tag::port, arg);
+    port_type_check_failed(name, arg);
     return;
   }
 
@@ -112,6 +119,114 @@ void port_close_i(){
 void port_close_o(){
   port_close("close-output-port", [](Port* p){ return p->writable(); });
 }
+
+
+template<typename Fun>
+void port_input_call(const char* name, Fun&& fun){
+  Port* p;
+
+  if(VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+    p = VM.find(intern(VM.symtable, current_input_port_symname)).get<Port*>();
+    assert(p);
+  }else{
+    auto arg = pick_args_1();
+    p = arg.get<Port*>();
+    if(!p){
+      port_type_check_failed(name, arg);
+      return;
+    }
+  }
+
+  VM.return_value = Lisp_ptr{fun(p)};
+}
+
+void port_read(){
+  port_input_call("read",
+                  [](Port* p){ return read(p->stream()); });
+}
+
+void port_read_char(){
+  port_input_call("read-char",
+                  [](Port* p) -> char { return fgetc(p->stream()); });
+}
+
+void port_peek_char(){
+  port_input_call("peek-char",
+                  [](Port* p) -> char{
+                    auto ret = fgetc(p->stream());
+                    ungetc(ret, p->stream());
+                    return ret;
+                  });
+}
+
+void port_eof_p(){
+  auto arg = pick_args_1();
+  if(arg.tag() != Ptr_tag::character){
+    VM.return_value = Lisp_ptr{false};
+    return;
+  }
+
+  VM.return_value = Lisp_ptr{arg.get<char>() == EOF};
+}  
+
+  
+template<typename Fun>
+void port_output_call(const char* name, Fun&& fun){
+  Port* p;
+
+  auto arg1 = VM.stack.top();
+  VM.stack.pop();
+
+  if(VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+    p = VM.find(intern(VM.symtable, current_output_port_symname)).get<Port*>();
+    assert(p);
+  }else{
+    auto arg2 = pick_args_1();
+    p = arg2.get<Port*>();
+    if(!p){
+      port_type_check_failed(name, arg2);
+      return;
+    }
+  }
+
+  VM.return_value = Lisp_ptr{fun(arg1, p)};
+}
+
+void port_write_char(){
+  port_output_call("write-char",
+                   [](Lisp_ptr c, Port* p) -> Lisp_ptr{
+                     if(c.tag() != Ptr_tag::character){
+                       builtin_type_check_failed("write-char", Ptr_tag::character, c);
+                       return {};
+                     }
+
+                     fputc(c.get<char>(), p->stream());
+                     return c;
+                   });
+}
+
+void port_newline(){
+  Port* p;
+
+  if(VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+    p = VM.find(intern(VM.symtable, current_output_port_symname)).get<Port*>();
+    assert(p);
+  }else{
+    auto arg = pick_args_1();
+    p = arg.get<Port*>();
+    if(!p){
+      port_type_check_failed("newline", arg);
+      return;
+    }
+  }
+
+  fputc('\n', p->stream());
+  VM.return_value = Lisp_ptr{true};
+}
+
 
 
 } //namespace
@@ -144,6 +259,25 @@ builtin_port[] = {
       port_close_o,
       {Calling::function, 1}}},
   
+  {"read", {
+      port_read,
+      {Calling::function, 0, Variadic::t}}},
+  {"read-char", {
+      port_read_char,
+      {Calling::function, 0, Variadic::t}}},
+  {"peek-char", {
+      port_peek_char,
+      {Calling::function, 0, Variadic::t}}},
+  {"eof-object?", {
+      port_eof_p,
+      {Calling::function, 1}}},
+
+  {"newline", {
+      port_newline,
+      {Calling::function, 0, Variadic::t}}},
+  {"write-char", {
+      port_write_char,
+      {Calling::function, 1, Variadic::t}}},
 };
 
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
