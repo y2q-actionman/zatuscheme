@@ -379,9 +379,6 @@ Token tokenize(FILE* f){
       return {};
     }
 
-  case EOF:
-    return Token{static_cast<char>(EOF)};
-
   default:
     if(isalpha(c) || is_special_initial(c)){
       return tokenize_identifier(f, c);
@@ -389,7 +386,11 @@ Token tokenize(FILE* f){
       ungetc(c, f);
       return tokenize_number(f);
     }else{
-      fprintf(zs::err, "reader error: invalid char '%c' appeared.\n", c);
+      if(c == EOF){
+        fprintf(zs::err, "reader error: reached EOF.\n");
+      }else{
+        fprintf(zs::err, "reader error: invalid char '%c' appeared.\n", c);
+      }
       return {};
     }
   }
