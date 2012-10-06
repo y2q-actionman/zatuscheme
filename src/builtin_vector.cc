@@ -29,7 +29,7 @@ void vector_make(){
   if(num->type() != Number::Type::integer){
     fprintf(zs::err, "native func: make-vector: arg's number is not %s! (%s)\n",
             stringify(Number::Type::integer), stringify(num->type()));
-    VM.return_value = {};
+    VM.return_value[0] = {};
     clean_args();
     return;
   }
@@ -44,7 +44,7 @@ void vector_make(){
     fill = pick_args_1();
   }
 
-  VM.return_value = {new Vector(count, fill)};
+  VM.return_value[0] = {new Vector(count, fill)};
 }
 
 void vector_length(){
@@ -55,7 +55,7 @@ void vector_length(){
     return;
   }
 
-  VM.return_value = {new Number(static_cast<Number::integer_type>(v->size()))};
+  VM.return_value[0] = {new Number(static_cast<Number::integer_type>(v->size()))};
 }
 
 void vector_ref(){
@@ -75,7 +75,7 @@ void vector_ref(){
   if(num->type() != Number::Type::integer){
     fprintf(zs::err, "native func: vector-ref: arg's number is not %s! (%s)\n",
             stringify(Number::Type::integer), stringify(num->type()));
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
   auto ind = num->get<Number::integer_type>();
@@ -83,11 +83,11 @@ void vector_ref(){
   if(ind < 0 || ind >= v->size()){
     fprintf(zs::err, "native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
             v->size(), ind);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
-  VM.return_value = (*v)[ind];
+  VM.return_value[0] = (*v)[ind];
 }
 
 void vector_set(){
@@ -107,7 +107,7 @@ void vector_set(){
   if(num->type() != Number::Type::integer){
     fprintf(zs::err, "native func: vector-set!: arg's number is not %s! (%s)\n",
             stringify(Number::Type::integer), stringify(num->type()));
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
   auto ind = num->get<Number::integer_type>();
@@ -115,12 +115,12 @@ void vector_set(){
   if(ind < 0 || ind >= v->size()){
     fprintf(zs::err, "native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
             v->size(), ind);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
   (*v)[ind] = arg[2];
-  VM.return_value = arg[2];
+  VM.return_value[0] = arg[2];
 }
 
 void vector_to_list(){
@@ -131,7 +131,7 @@ void vector_to_list(){
     return;
   }
 
-  VM.return_value = make_cons_list(v->begin(), v->end());
+  VM.return_value[0] = make_cons_list(v->begin(), v->end());
 }
 
 void vector_from_list(){
@@ -150,7 +150,7 @@ void vector_from_list(){
           },
           [](Lisp_ptr){});
 
-  VM.return_value = {new Vector(std::move(ret))};
+  VM.return_value[0] = {new Vector(std::move(ret))};
 }
 
 void vector_fill(){
@@ -162,7 +162,7 @@ void vector_fill(){
   }
 
   std::fill(v->begin(), v->end(), arg[1]);
-  VM.return_value = {v};
+  VM.return_value[0] = {v};
 }
 
 

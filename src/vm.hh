@@ -27,7 +27,7 @@ public:
   SymTable symtable;
   stack_t code;
   stack_t stack;
-  Lisp_ptr return_value;
+  Lisp_ptr return_value[32];
   Env* frame;
 
 private:

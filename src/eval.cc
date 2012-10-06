@@ -45,7 +45,7 @@ void vm_op_proc_enter();
   stack[0] = some value
 */
 void vm_op_arg_push(){
-  VM.stack.push(VM.return_value);
+  VM.stack.push(VM.return_value[0]);
 }
 
 /*
@@ -60,7 +60,7 @@ void vm_op_arg_push_and_set(){
   VM.code.pop();
 
   assert(symp.tag() == Ptr_tag::symbol);
-  VM.local_set(symp.get<Symbol*>(), VM.return_value);
+  VM.local_set(symp.get<Symbol*>(), VM.return_value[0]);
 
   vm_op_arg_push();
 }
@@ -168,7 +168,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
   
   if(!ret || !check_argcount("funcall", argc, info)){
     clean_funcall_stack();
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
   
@@ -181,7 +181,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
   code = proc
 */
 void vm_op_macro_call(){
-  VM.code.push(VM.return_value);
+  VM.code.push(VM.return_value[0]);
 }  
 
 /*
@@ -198,7 +198,7 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack);
   if(!check_argcount("macro-call", argc, info)){
     clean_args();
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }    
 
@@ -241,7 +241,7 @@ void whole_macro_call(Lisp_ptr proc){
   goto proc_call or macro_call
 */
 void vm_op_call(){
-  auto proc = VM.return_value;
+  auto proc = VM.return_value[0];
 
   const ProcInfo* info;
   Lisp_ptr args;
@@ -257,7 +257,7 @@ void vm_op_call(){
             stringify(proc.tag()));
     fprintf(zs::err, "      expr: "); print(zs::err, VM.stack.top()); fputc('\n', zs::err);
     
-    VM.return_value = {};
+    VM.return_value[0] = {};
     VM.stack.pop();
     return;
   }
@@ -323,7 +323,7 @@ void proc_enter_interpreted(IProcedure* fun){
     VM.stack.pop();
     if(VM.stack.empty()){
       fprintf(zs::err, "eval internal error: no args and no managed funcall!\n");
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
 
@@ -339,7 +339,7 @@ void proc_enter_interpreted(IProcedure* fun){
   if(argi->variadic){   // variadic arg push
     if(!arg_name.get<Symbol*>()){
       fprintf(zs::err, "eval error: no arg name for variadic arg!\n");
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
 
@@ -349,7 +349,7 @@ void proc_enter_interpreted(IProcedure* fun){
     if(VM.stack.empty()
        || VM.stack.top().tag() != Ptr_tag::vm_op){
       fprintf(zs::err, "eval error: corrupted stack -- no bottom found!\n");
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
     VM.stack.pop();
@@ -377,7 +377,7 @@ void vm_op_proc_enter(){
     proc_enter_native(nfun);
   }else{
     fprintf(zs::err, "eval internal error: corrupted code stack -- no proc found in entering!\n");
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 }
@@ -388,7 +388,7 @@ void vm_op_proc_enter(){
   stack = (list[0], list[1], ...)
 */
 void vm_op_arg_push_list(){
-  list_to_stack("unquote-splicing", VM.return_value, VM.stack);
+  list_to_stack("unquote-splicing", VM.return_value[0], VM.stack);
 }
 
 static const VMop vm_op_quasiquote_list = procedure_list_star;
@@ -411,7 +411,7 @@ void vm_op_leave_frame(){
   code = (consequent or alternative)
 */
 void vm_op_if(){
-  auto test_result = VM.return_value;
+  auto test_result = VM.return_value[0];
 
   if(test_result.get<bool>()){
     VM.code.push(VM.stack.top());
@@ -438,7 +438,7 @@ void vm_op_set(){
     return;
   }
 
-  VM.set(var, VM.return_value);
+  VM.set(var, VM.return_value[0]);
 }
 
 /*
@@ -455,7 +455,7 @@ void vm_op_local_set(){
     return;
   }
 
-  VM.local_set(var, VM.return_value);
+  VM.local_set(var, VM.return_value[0]);
 }
 
 /*
@@ -501,7 +501,7 @@ void vm_op_quasiquote(){
 
   if(p.tag() == Ptr_tag::cons){
     if(nullp(p)){
-      VM.return_value = Cons::NIL;
+      VM.return_value[0] = Cons::NIL;
       return;
     }
 
@@ -513,7 +513,7 @@ void vm_op_quasiquote(){
         return;
       }else if(first_sym == unquote_splicing_sym){
         fprintf(zs::err, "eval error: unquote-splicing is not supported out of list");
-        VM.return_value = {};
+        VM.return_value[0] = {};
         return;
       }
     }
@@ -539,7 +539,7 @@ void vm_op_quasiquote(){
       qq_elem(*i);
     }
   }else{
-    VM.return_value = p;
+    VM.return_value[0] = p;
   }
 }
 
@@ -556,7 +556,7 @@ void vm_op_force(){
     return;
   }
 
-  delay->force(VM.return_value);
+  delay->force(VM.return_value[0]);
 }
 
 void let_internal(Sequencial sequencial, EarlyBind early_bind){
@@ -571,7 +571,7 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
   if(arg2.tag() != Ptr_tag::cons || nullp(arg2)){
     fprintf(zs::err, "eval error: informal LET syntax -- (LET . <%s>).\n",
             (nullp(arg2)) ? "nil" : stringify(arg2.tag()));
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
   arg_c = arg2.get<Cons*>();
@@ -586,7 +586,7 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
     if(arg3.tag() != Ptr_tag::cons || nullp(arg3)){
       fprintf(zs::err, "eval error: informal LET syntax -- (LET <name> . <%s>).\n",
               (nullp(arg3)) ? "nil" : stringify(arg3.tag()));
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
     
@@ -599,7 +599,7 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
 
   if(body.tag() != Ptr_tag::cons || nullp(body)){
     fprintf(zs::err, "eval error: informal syntax for LET's body!.\n");
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
@@ -633,7 +633,7 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
     fprintf(zs::err, "eval error: let binding was failed!\n");
     free_cons_list(syms);
     free_cons_list(vals);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
@@ -653,7 +653,7 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
   VM.code.push(vm_op_call);
   VM.code.push(proc);
   VM.stack.push(push_cons_list({}, vals));
-  VM.return_value = {};
+  VM.return_value[0] = {};
 }
 
 void eval(){
@@ -664,17 +664,17 @@ void eval(){
     switch(p.tag()){
     case Ptr_tag::undefined:
       fprintf(zs::err, "eval error: undefined is passed!\n");
-      VM.return_value = {};
+      VM.return_value[0] = {};
       break;
 
     case Ptr_tag::symbol:
-      VM.return_value = VM.find(p.get<Symbol*>());
+      VM.return_value[0] = VM.find(p.get<Symbol*>());
       break;
     
     case Ptr_tag::cons: {
       auto c = p.get<Cons*>();
       if(!c){
-        VM.return_value = Cons::NIL;
+        VM.return_value[0] = Cons::NIL;
         break;
       }
 
@@ -697,7 +697,7 @@ void eval(){
     case Ptr_tag::port: case Ptr_tag::env:
     case Ptr_tag::delay:
     default:
-      VM.return_value = p;
+      VM.return_value[0] = p;
       break;
     }
   }
@@ -721,7 +721,7 @@ void load(Port* p){
 
     VM.code.push(form);
     eval();
-    if(!VM.return_value){
+    if(!VM.return_value[0]){
       fprintf(zs::err, "load error: failed at evaluationg form. skipped\n");
       fprintf(zs::err, "\tform: \n");
       print(zs::err, form);
@@ -743,7 +743,7 @@ void apply_func(){
   }else{
     fprintf(zs::err, "apply error: first arg is not procedure (%s)\n",
             stringify(args[0].tag()));
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
   assert(info);
@@ -773,7 +773,7 @@ void apply_func(){
     
     if(!dl || !check_argcount("apply", argc, info)){
       clean_funcall_stack();
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
   }
@@ -785,12 +785,12 @@ void func_force(){
   auto arg = pick_args_1();
   auto d = arg.get<Delay*>();
   if(!d){
-    VM.return_value = arg;
+    VM.return_value[0] = arg;
     return;
   }
   
   if(d->forced()){
-    VM.return_value = d->get();
+    VM.return_value[0] = d->get();
     return;
   }
 

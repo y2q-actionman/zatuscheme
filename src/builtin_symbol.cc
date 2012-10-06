@@ -16,12 +16,12 @@ void sym_to_string(){
   if(!sym){
     fprintf(zs::err, "native func: symbol->string: arg is not symbol! (%s)\n",
             stringify(arg.tag()));
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
   // TODO: support invariant string!
-  VM.return_value = {new String(sym->name())};
+  VM.return_value[0] = {new String(sym->name())};
 }
 
 void sym_from_string(){
@@ -30,11 +30,11 @@ void sym_from_string(){
   if(!str){
     fprintf(zs::err, "native func: string->symbol: arg is not string! (%s)\n",
             stringify(arg.tag()));
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
-  VM.return_value = {intern(VM.symtable, *str)};
+  VM.return_value[0] = {intern(VM.symtable, *str)};
 }
 
 } // namespace

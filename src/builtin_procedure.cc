@@ -12,7 +12,7 @@ namespace {
 
 void type_check_procedure(){
   auto arg = pick_args_1();
-  VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
+  VM.return_value[0] = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
                              || (arg.tag() == Ptr_tag::n_procedure)};
 }
 

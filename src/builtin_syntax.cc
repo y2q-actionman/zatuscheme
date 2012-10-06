@@ -23,7 +23,7 @@ void error_whole_function(const char* msg){
 
   fprintf(zs::err, "eval error: '%s' -- %s\n",
           sym->name().c_str(), msg);
-  VM.return_value = {};
+  VM.return_value[0] = {};
 }
 
 void whole_function_error(){
@@ -35,7 +35,7 @@ void whole_function_unimplemented(){
 }
 
 void whole_function_pass_through(){
-  VM.return_value = pick_args_1();
+  VM.return_value[0] = pick_args_1();
 }
 
 void whole_function_quote(){
@@ -55,11 +55,11 @@ void whole_function_quote(){
 
   if(!val){
     fprintf(zs::err, "eval error: quote has no args.\n");
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
     
-  VM.return_value = val;
+  VM.return_value[0] = val;
 }
 
 
@@ -93,7 +93,7 @@ void whole_function_lambda(){
                    code = c->cdr();
                  });
 
-  VM.return_value = lambda_internal(args, code);
+  VM.return_value[0] = lambda_internal(args, code);
 }
 
 void whole_function_if(){
@@ -118,11 +118,11 @@ void whole_function_if(){
 
   if(len < 3){
     fprintf(zs::err, "eval error: informal if expr! (only %d exprs)\n", len);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }else if(len > 4){
     fprintf(zs::err, "eval error: informal if expr! (more than %d exprs)\n", len);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
@@ -155,19 +155,19 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
 
   if(!var){
     fprintf(zs::err, "eval error: variable's name is not a symbol!\n");
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
   if(!val){
     fprintf(zs::err, "eval error: no value is supplied for %s\n", opname);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
   if(len > 2){
     fprintf(zs::err, "eval error: informal %s expr! (more than %d exprs)\n", opname, len);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
@@ -208,7 +208,7 @@ void whole_function_define(){
 
     if(!var){
       fprintf(zs::err, "eval error: function's name is not a symbol!\n");
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
 
@@ -216,7 +216,7 @@ void whole_function_define(){
 
     auto value = lambda_internal(args, code);
     VM.local_set(var, value);
-    VM.return_value = value;
+    VM.return_value[0] = value;
   }else{
     fprintf(zs::err, "eval error: informal define syntax!\n");
   }
@@ -229,7 +229,7 @@ void whole_function_begin(){
   auto exprs = wargs.get<Cons*>()->cdr();
   if(!exprs || nullp(exprs)){
     fprintf(zs::err, "eval error: begin has no exprs.\n");
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
@@ -351,11 +351,11 @@ void whole_macro_conditional(T default_value, Expander e){
                              head = c;
                            });
   if(len < 2){
-    VM.return_value = Lisp_ptr(default_value);
+    VM.return_value[0] = Lisp_ptr(default_value);
     return;
   }
 
-  VM.return_value = e(head);
+  VM.return_value[0] = e(head);
 }
 
 void whole_macro_and(){
@@ -443,14 +443,14 @@ void whole_macro_case(){
                            });
   if(len < 3){
     fprintf(zs::err, "macro case: invalid syntax! (no key found)\n");
-    VM.return_value = Lisp_ptr();
+    VM.return_value[0] = Lisp_ptr();
     return;
   }
 
   // TODO: collect this by garbage collector!
   auto key_sym = new Symbol(new string("case_key_symbol"));
 
-  VM.return_value = 
+  VM.return_value[0] = 
     make_cons_list({intern(VM.symtable, "let"),
           make_cons_list({
               make_cons_list({key_sym, key})
@@ -462,7 +462,7 @@ void whole_macro_case(){
 
 void macro_delay(){
   auto args = pick_args_1();
-  VM.return_value = {new Delay(args, VM.frame)};
+  VM.return_value[0] = {new Delay(args, VM.frame)};
 }
 
 } //namespace

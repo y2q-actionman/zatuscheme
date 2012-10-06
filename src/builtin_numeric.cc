@@ -34,11 +34,11 @@ inline void number_pred(Fun&& fun){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
-    VM.return_value = Lisp_ptr{false};
+    VM.return_value[0] = Lisp_ptr{false};
     return;
   }
 
-  VM.return_value = Lisp_ptr{fun(num)};
+  VM.return_value[0] = Lisp_ptr{fun(num)};
 }
 
 void complexp(){
@@ -128,14 +128,14 @@ inline void number_compare(const char* name, Fun&& fun){
     }
 
     if(!fun(n1, n2)){
-      VM.return_value = Lisp_ptr{false};
+      VM.return_value[0] = Lisp_ptr{false};
       return;
     }
 
     n1 = n2;
   }
 
-  VM.return_value = Lisp_ptr{true};
+  VM.return_value[0] = Lisp_ptr{true};
 }
 
 void number_equal(){
@@ -253,12 +253,12 @@ void number_accumulate(const char* name, Number&& init, Fun&& fun){
     }
 
     if(!fun(init, *n)){
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
   }
 
-  VM.return_value = {new Number(init)};
+  VM.return_value[0] = {new Number(init)};
 }
 
 
@@ -398,18 +398,18 @@ void number_minus(){
       auto i = n->get<Number::integer_type>();
       if(i == imin){
         fprintf(zs::err, "integer operation fallen into float\n");
-        VM.return_value = {new Number(-static_cast<Number::real_type>(imin))};
+        VM.return_value[0] = {new Number(-static_cast<Number::real_type>(imin))};
       }else{
-        VM.return_value = {new Number(-i)};
+        VM.return_value[0] = {new Number(-i)};
       }
       return;
     }
     case Number::Type::real:
-      VM.return_value = {new Number(-n->get<Number::real_type>())};
+      VM.return_value[0] = {new Number(-n->get<Number::real_type>())};
       return;
     case Number::Type::complex: {
       auto c = n->get<Number::complex_type>();
-      VM.return_value = {new Number(Number::complex_type(-c.real(), -c.imag()))};
+      VM.return_value[0] = {new Number(Number::complex_type(-c.real(), -c.imag()))};
       return;
     }
     case Number::Type::uninitialized:
@@ -437,14 +437,14 @@ void number_divide(){
 
     switch(n->type()){
     case Number::Type::integer:
-      VM.return_value = {new Number(1.0 / n->get<Number::integer_type>())};
+      VM.return_value[0] = {new Number(1.0 / n->get<Number::integer_type>())};
       return;
     case Number::Type::real:
-      VM.return_value = {new Number(1.0 / n->get<Number::real_type>())};
+      VM.return_value[0] = {new Number(1.0 / n->get<Number::real_type>())};
       return;
     case Number::Type::complex: {
       auto c = n->get<Number::complex_type>();
-      VM.return_value = {new Number(1.0 / c)};
+      VM.return_value[0] = {new Number(1.0 / c)};
       return;
     }
     case Number::Type::uninitialized:
@@ -472,26 +472,26 @@ void number_abs(){
   case Number::Type::integer: {
     auto i = n->get<Number::integer_type>();
     if(i >= 0){
-      VM.return_value = n;
+      VM.return_value[0] = n;
     }else{
       static constexpr auto imin = numeric_limits<Number::integer_type>::min();
       if(i == imin){
         fprintf(zs::err, "integer operation fallen into float\n");
-        VM.return_value = new Number(-static_cast<Number::real_type>(imin));
+        VM.return_value[0] = new Number(-static_cast<Number::real_type>(imin));
       }else{
-        VM.return_value = new Number(-i);
+        VM.return_value[0] = new Number(-i);
       }
     }
     return;
   }
   case Number::Type::real: {
     auto d = n->get<Number::real_type>();
-    VM.return_value = {(d >= 0) ? n : new Number(-d)};
+    VM.return_value[0] = {(d >= 0) ? n : new Number(-d)};
     return;
   }
   case Number::Type::complex: {
     fprintf(zs::err, complex_found::msg);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
   case Number::Type::uninitialized:
@@ -515,12 +515,12 @@ void number_divop(const char* name, Fun&& fun){
     if(n[i]->type() != Number::Type::integer){
       fprintf(zs::err, "native func: %s: not integer type (%s)",
               name, stringify(n[i]->type()));
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
   }
   
-  VM.return_value = {new Number{fun(n[0]->get<Number::integer_type>(),
+  VM.return_value[0] = {new Number{fun(n[0]->get<Number::integer_type>(),
                                     n[1]->get<Number::integer_type>())}};
 }
 
@@ -607,7 +607,7 @@ void number_numerator(){
   }
 
   fprintf(zs::err, "native func: 'numerator' is not implemented.\n");
-  VM.return_value = {};
+  VM.return_value[0] = {};
 }
 
 void number_denominator(){
@@ -619,7 +619,7 @@ void number_denominator(){
   }
 
   fprintf(zs::err, "native func: 'denominator' is not implemented.\n");
-  VM.return_value = {};
+  VM.return_value[0] = {};
 }
 
 
@@ -636,14 +636,14 @@ void number_rounding(const char* name, Fun&& fun){
 
   switch(n->type()){
   case Number::Type::integer:
-    VM.return_value = {n};
+    VM.return_value[0] = {n};
     return;
   case Number::Type::real:
-    VM.return_value = {new Number(fun(n->get<Number::real_type>()))};
+    VM.return_value[0] = {new Number(fun(n->get<Number::real_type>()))};
     return;
   case Number::Type::complex:
     fprintf(zs::err, complex_found::msg);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   case Number::Type::uninitialized:
   default:
@@ -681,7 +681,7 @@ void number_rationalize(){
   }
   
   fprintf(zs::err, "native func: 'rationalize' is not implemented.\n");
-  VM.return_value = {};
+  VM.return_value[0] = {};
 }
 
 
@@ -699,10 +699,10 @@ void number_unary_op(const char* name, Fun&& fun){
   switch(n->type()){
   case Number::Type::integer:
   case Number::Type::real:
-    VM.return_value = {new Number(fun(n->coerce<Number::real_type>()))};
+    VM.return_value[0] = {new Number(fun(n->coerce<Number::real_type>()))};
     return;
   case Number::Type::complex:
-    VM.return_value = {new Number(fun(n->get<Number::complex_type>()))};
+    VM.return_value[0] = {new Number(fun(n->get<Number::complex_type>()))};
     return;
   case Number::Type::uninitialized:
   default:
@@ -805,10 +805,10 @@ void number_atan(){
     switch(n1->type()){
     case Number::Type::integer:
     case Number::Type::real:
-      VM.return_value = {new Number(std::atan(n1->coerce<Number::real_type>()))};
+      VM.return_value[0] = {new Number(std::atan(n1->coerce<Number::real_type>()))};
       return;
     case Number::Type::complex: {
-      VM.return_value = {new Number(std::atan(n1->get<Number::complex_type>()))};
+      VM.return_value[0] = {new Number(std::atan(n1->get<Number::complex_type>()))};
       return;
     }
     case Number::Type::uninitialized:
@@ -828,12 +828,12 @@ void number_atan(){
   switch(n2->type()){
   case Number::Type::integer:
   case Number::Type::real:
-    VM.return_value = {new Number(std::atan2(n1->coerce<Number::real_type>(),
+    VM.return_value[0] = {new Number(std::atan2(n1->coerce<Number::real_type>(),
                                              n2->coerce<Number::real_type>()))};
     return;
   case Number::Type::complex:
     fprintf(zs::err, "native func: (atan <complex> <complex>) is not implemented.\n");
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   case Number::Type::uninitialized:
   default:
@@ -872,14 +872,14 @@ void number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
 
   if(n[0]->type() <= Number::Type::real
      || n[1]->type() <= Number::Type::real){
-    VM.return_value = {new Number(rfun(n[0]->coerce<Number::real_type>(),
+    VM.return_value[0] = {new Number(rfun(n[0]->coerce<Number::real_type>(),
                                        n[1]->coerce<Number::real_type>()))};
     return;
   }
 
   if(n[0]->type() <= Number::Type::complex
      || n[1]->type() <= Number::Type::complex){
-    VM.return_value = cfun(n[0]->coerce<Number::complex_type>(),
+    VM.return_value[0] = cfun(n[0]->coerce<Number::complex_type>(),
                            n[1]->coerce<Number::complex_type>());
     return;
   }
@@ -933,7 +933,7 @@ void number_unary_op_complex(const char* name, Fun&& fun){
   case Number::Type::integer:
   case Number::Type::real:
   case Number::Type::complex:
-    VM.return_value = {new Number(fun(n->coerce<Number::complex_type>()))};
+    VM.return_value[0] = {new Number(fun(n->coerce<Number::complex_type>()))};
     return;
   case Number::Type::uninitialized:
   default:
@@ -979,7 +979,7 @@ void number_i_e(const char* name, Fun&& fun){
     return;
   }
 
-  VM.return_value = {new Number(fun(*n))};
+  VM.return_value[0] = {new Number(fun(*n))};
 }
 
 void number_i_to_e(){
@@ -1000,7 +1000,7 @@ void number_from_string(){
     fprintf(zs::err, "native func: string->number: passed arg is not string (%s).\n",
             stringify(arg1.tag()));
     clean_args();
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
@@ -1015,13 +1015,13 @@ void number_from_string(){
     if(!num){
       fprintf(zs::err, "native func: string->number: passed radix is not number (%s).\n",
               stringify(arg2.tag()));
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
     if(num->type() != Number::Type::integer){
       fprintf(zs::err, "native func: string->number: passed radix is not number (%s).\n",
               stringify(arg2.tag()));
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
     radix = num->get<Number::integer_type>();
@@ -1031,9 +1031,9 @@ void number_from_string(){
   auto n = parse_number(p.stream(), radix);
 
   if(n){
-    VM.return_value = {new Number(n)};
+    VM.return_value[0] = {new Number(n)};
   }else{
-    VM.return_value = {};
+    VM.return_value[0] = {};
   }
 }
 
@@ -1046,7 +1046,7 @@ void number_to_string(){
     fprintf(zs::err, "native func: number->string: passed arg is not number (%s).\n",
             stringify(arg1.tag()));
     clean_args();
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
@@ -1061,13 +1061,13 @@ void number_to_string(){
     if(!num){
       fprintf(zs::err, "native func: number->string: passed radix is not number (%s).\n",
               stringify(arg2.tag()));
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
     if(num->type() != Number::Type::integer){
       fprintf(zs::err, "native func: number->string: passed radix is not number (%s).\n",
               stringify(arg2.tag()));
-      VM.return_value = {};
+      VM.return_value[0] = {};
       return;
     }
     radix = num->get<Number::integer_type>();
@@ -1076,7 +1076,7 @@ void number_to_string(){
   Port p{Port::open_output_memstream::t};
   print(p.stream(), *n, radix);
 
-  VM.return_value = {new String(p.get_string_output())};
+  VM.return_value[0] = {new String(p.get_string_output())};
 }
 
 } //namespace

@@ -44,7 +44,7 @@ void env_pick_2(const char* name){
 
   if(num->type() != Number::Type::integer){
     fprintf(zs::err, "native func: %s: passed number is not exact integer\n", name);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
@@ -52,11 +52,11 @@ void env_pick_2(const char* name){
   if(ver != 5l){
     fprintf(zs::err, "native func: %s: passed number is not 5 (supplied %ld)\n",
             name, ver);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
-  VM.return_value = VM.find(intern(VM.symtable, name));
+  VM.return_value[0] = VM.find(intern(VM.symtable, name));
 }
 
 void env_r5rs(){
@@ -69,7 +69,7 @@ void env_null(){
 
 void env_interactive(){
   pick_args<0>();
-  VM.return_value = VM.find(intern(VM.symtable, interaction_env_symname));
+  VM.return_value[0] = VM.find(intern(VM.symtable, interaction_env_symname));
 }
   
 
@@ -98,12 +98,12 @@ void load_func(){
   Port p{str->c_str(), "r"};
   if(!p){
     fprintf(zs::err, "load error: failed at opening file\n");
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
 
   load(&p);
-  VM.return_value = {};
+  VM.return_value[0] = {};
 }
 
 } //namespace

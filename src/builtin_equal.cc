@@ -60,17 +60,17 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
 
 void eq(){
   auto args = pick_args<2>();
-  VM.return_value = Lisp_ptr{eq_internal(args[0], args[1])};
+  VM.return_value[0] = Lisp_ptr{eq_internal(args[0], args[1])};
 }
 
 void eqv(){
   auto args = pick_args<2>();
-  VM.return_value = Lisp_ptr{eqv_internal(args[0], args[1])};
+  VM.return_value[0] = Lisp_ptr{eqv_internal(args[0], args[1])};
 }
 
 void equal(){
   auto args = pick_args<2>();
-  VM.return_value = Lisp_ptr{equal_internal(args[0], args[1])};
+  VM.return_value[0] = Lisp_ptr{equal_internal(args[0], args[1])};
 }
 
 } //namespace

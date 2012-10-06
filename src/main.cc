@@ -10,7 +10,7 @@ int main(){
     fflush(stdout);
     VM.code.push(read(zs::in));
     eval();
-    print(zs::out, VM.return_value);
+    print(zs::out, VM.return_value[0]);
     putchar('\n');
   }
 

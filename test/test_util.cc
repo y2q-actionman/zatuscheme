@@ -24,7 +24,7 @@ Lisp_ptr eval_text(const char* s){
 
   VM.code.push(exp);
   eval();
-  auto ret = VM.return_value;
+  auto ret = VM.return_value[0];
   if(!ret){
     fprintf(zs::err, "[failed] eval error on %s\n", s);
     return {};
@@ -72,7 +72,7 @@ Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args){
 
   VM.code.push(Lisp_ptr(conses.data()));
   eval();
-  return VM.return_value;
+  return VM.return_value[0];
 }
 
 

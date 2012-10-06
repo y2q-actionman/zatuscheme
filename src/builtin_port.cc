@@ -25,11 +25,11 @@ template<typename Fun>
 void port_io_p(Fun&& fun){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::port){
-    VM.return_value = Lisp_ptr{false};
+    VM.return_value[0] = Lisp_ptr{false};
     return;
   }
 
-  VM.return_value = Lisp_ptr{fun(arg.get<Port*>())};
+  VM.return_value[0] = Lisp_ptr{fun(arg.get<Port*>())};
 }  
   
 void port_i_p(){
@@ -44,7 +44,7 @@ void port_o_p(){
 static
 void port_current(const char* name){
   pick_args<0>();
-  VM.return_value = VM.find(intern(VM.symtable, name));
+  VM.return_value[0] = VM.find(intern(VM.symtable, name));
 }  
 
 void port_current_i(){
@@ -68,11 +68,11 @@ void port_open_file(const char* name, const char* mode){
   auto p = new Port(str->c_str(), mode);
   if(!*p){
     fprintf(zs::err, "native error: %s: failed at opening file\n", name);
-    VM.return_value = {};
+    VM.return_value[0] = {};
     return;
   }
   
-  VM.return_value = {p};
+  VM.return_value[0] = {p};
 }  
 
 void port_open_file_i(){
@@ -99,17 +99,17 @@ void port_close(const char* name, Fun&& fun){
 
   if(!p->stream()){
     fprintf(zs::err, "native func warning: %s: passed port is already closed\n", name);
-    VM.return_value = Lisp_ptr{false};
+    VM.return_value[0] = Lisp_ptr{false};
     return;
   }
 
   if(p->close() < 0){
     fprintf(zs::err, "native func warning: %s: failed at closeing port\n", name);
-    VM.return_value = Lisp_ptr{false};
+    VM.return_value[0] = Lisp_ptr{false};
     return;
   }
   
-  VM.return_value = Lisp_ptr{true};
+  VM.return_value[0] = Lisp_ptr{true};
 }
 
 void port_close_i(){
@@ -138,7 +138,7 @@ void port_input_call(const char* name, Fun&& fun){
     }
   }
 
-  VM.return_value = Lisp_ptr{fun(p)};
+  VM.return_value[0] = Lisp_ptr{fun(p)};
 }
 
 void port_read(){
@@ -163,11 +163,11 @@ void port_peek_char(){
 void port_eof_p(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::character){
-    VM.return_value = Lisp_ptr{false};
+    VM.return_value[0] = Lisp_ptr{false};
     return;
   }
 
-  VM.return_value = Lisp_ptr{arg.get<char>() == EOF};
+  VM.return_value[0] = Lisp_ptr{arg.get<char>() == EOF};
 }  
 
   
@@ -191,7 +191,7 @@ void port_output_call(const char* name, Fun&& fun){
     }
   }
 
-  VM.return_value = Lisp_ptr{fun(arg1, p)};
+  VM.return_value[0] = Lisp_ptr{fun(arg1, p)};
 }
 
 void port_write(){
@@ -240,7 +240,7 @@ void port_newline(){
   }
 
   fputc('\n', p->stream());
-  VM.return_value = Lisp_ptr{true};
+  VM.return_value[0] = Lisp_ptr{true};
 }
 
 } //namespace
