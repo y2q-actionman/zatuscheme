@@ -11,7 +11,7 @@ public:
 
   Env(const Env&) = delete;
   Env(Env&&) = delete;
-  Env(Env* e = nullptr);
+  Env(Env* e);
 
   ~Env();
 

@@ -26,10 +26,53 @@ using namespace Procedure;
 
 namespace {
 
+static const char null_env_symname[] = "null-env-value";
+static const char r5rs_env_symname[] = "r5rs-env-value";
+static const char interaction_env_symname[] = "interaction-env-value";
+
 void type_check_procedure(){
   auto arg = pick_args_1();
   VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
                              || (arg.tag() == Ptr_tag::n_procedure)};
+}
+
+static
+void env_pick_2(const char* name){
+  auto p = pick_args_1();
+  auto num = p.get<Number*>();
+  if(!num){
+    builtin_type_check_failed(name, Ptr_tag::number, p);
+    return;
+  }
+
+  if(num->type() != Number::Type::integer){
+    fprintf(zs::err, "native func: %s: passed number is not exact integer\n", name);
+    VM.return_value = {};
+    return;
+  }
+
+  auto ver = num->get<Number::integer_type>();
+  if(ver != 5l){
+    fprintf(zs::err, "native func: %s: passed number is not 5 (supplied %ld)\n",
+            name, ver);
+    VM.return_value = {};
+    return;
+  }
+
+  VM.return_value = VM.find(intern(VM.symtable, name));
+}
+
+void env_r5rs(){
+  env_pick_2(r5rs_env_symname);
+}
+
+void env_null(){
+  env_pick_2(null_env_symname);
+}
+
+void env_interactive(){
+  pick_args<0>();
+  VM.return_value = VM.find(intern(VM.symtable, interaction_env_symname));
 }
   
 
@@ -60,7 +103,7 @@ void to_macro_procedure(){
 
 } //namespace
 
-const BuiltinFunc
+static const BuiltinFunc
 builtin_misc[] = {
   {"procedure?", {
       type_check_procedure,
@@ -69,12 +112,25 @@ builtin_misc[] = {
   {"eval", {
       eval_func,
       {Calling::function, 2}}},
+
+  {"scheme-report-environment", {
+      env_r5rs,
+      {Calling::function, 1}}},
+  {"null-environment", {
+      env_null,
+      {Calling::function, 1}}},
+  {"interaction_environment", {
+      env_interactive,
+      {Calling::function, 0}}},
+};
+
+static const BuiltinFunc
+builtin_extra[] = {
   {"to-macro-procedure", {
       to_macro_procedure,
       {Calling::function, 1}}}
 };
 
-const size_t builtin_misc_size = sizeof(builtin_misc) / sizeof(builtin_misc[0]);
 
 static void install_builtin_internal(const BuiltinFunc bf[], size_t s){
   for(size_t i = 0; i < s; ++i){
@@ -84,8 +140,10 @@ static void install_builtin_internal(const BuiltinFunc bf[], size_t s){
 
 void install_builtin(){
   install_builtin_internal(builtin_syntax, builtin_syntax_size);
+  VM.set(intern(VM.symtable, null_env_symname), VM.frame);
 
-  install_builtin_internal(builtin_misc, builtin_misc_size);
+  VM.frame = VM.frame->push();
+  install_builtin_internal(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
   install_builtin_internal(builtin_boolean, builtin_boolean_size);
   install_builtin_internal(builtin_char, builtin_char_size);
   install_builtin_internal(builtin_cons, builtin_cons_size);
@@ -94,7 +152,11 @@ void install_builtin(){
   install_builtin_internal(builtin_string, builtin_string_size);
   install_builtin_internal(builtin_symbol, builtin_symbol_size);
   install_builtin_internal(builtin_vector, builtin_vector_size);
-
   install_builtin_port_value();
   install_builtin_internal(builtin_port, builtin_port_size);
+  VM.set(intern(VM.symtable, r5rs_env_symname), VM.frame);
+
+  VM.frame = VM.frame->push();
+  install_builtin_internal(builtin_extra, sizeof(builtin_extra) / sizeof(builtin_extra[0]));
+  VM.set(intern(VM.symtable, interaction_env_symname), VM.frame);
 }
