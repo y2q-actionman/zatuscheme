@@ -22,23 +22,6 @@ Lisp_ptr pick_args_1(){
   return tmp[0];
 }
 
-int clean_args(){
-  int ret = 0;
-
-  while(!VM.stack.empty()
-        && VM.stack.top().tag() != Ptr_tag::vm_op){
-    VM.stack.pop();
-    ++ret;
-  }
-
-  if(!VM.stack.empty()
-     && VM.stack.top().tag() == Ptr_tag::vm_op){
-    VM.stack.pop();
-  }
-
-  return ret;
-}
-
 void builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
   fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
           func_name, stringify(tag), stringify(p.tag()));

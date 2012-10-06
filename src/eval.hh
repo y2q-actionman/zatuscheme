@@ -4,6 +4,9 @@
 #include "lisp_ptr.hh"
 #include "procedure.hh"
 
+int clean_args();
+
+// primitives for syntax call
 constexpr VMop vm_op_nop = nullptr;
 constexpr VMop vm_op_arg_bottom = nullptr;
 

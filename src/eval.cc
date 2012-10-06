@@ -17,6 +17,23 @@
 using namespace std;
 using namespace Procedure;
 
+int clean_args(){
+  int ret = 0;
+
+  while(!VM.stack.empty()
+        && VM.stack.top().tag() != Ptr_tag::vm_op){
+    VM.stack.pop();
+    ++ret;
+  }
+
+  if(!VM.stack.empty()
+     && VM.stack.top().tag() == Ptr_tag::vm_op){
+    VM.stack.pop();
+  }
+
+  return ret;
+}
+
 namespace {
 
 void vm_op_proc_enter();

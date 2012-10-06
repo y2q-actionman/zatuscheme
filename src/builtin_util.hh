@@ -21,8 +21,6 @@ std::array<Lisp_ptr, i> pick_args();
 
 Lisp_ptr pick_args_1();
 
-int clean_args();
-
 
 // builtin type checking
 void builtin_type_check_failed(const char*, Ptr_tag, Lisp_ptr);

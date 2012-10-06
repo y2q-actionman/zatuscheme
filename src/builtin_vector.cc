@@ -4,6 +4,7 @@
 #include "builtin_util.hh"
 #include "procedure.hh"
 #include "number.hh"
+#include "eval.hh"
 
 using namespace std;
 using namespace Procedure;
