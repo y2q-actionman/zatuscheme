@@ -194,6 +194,22 @@ void port_output_call(const char* name, Fun&& fun){
   VM.return_value = Lisp_ptr{fun(arg1, p)};
 }
 
+void port_write(){
+  port_output_call("write",
+                   [](Lisp_ptr c, Port* p) -> bool{
+                     print(p->stream(), c, print_human_readable::f);
+                     return true;
+                   });
+}
+
+void port_display(){
+  port_output_call("display",
+                   [](Lisp_ptr c, Port* p) -> bool{
+                     print(p->stream(), c, print_human_readable::t);
+                     return true;
+                   });
+}
+
 void port_write_char(){
   port_output_call("write-char",
                    [](Lisp_ptr c, Port* p) -> Lisp_ptr{
@@ -272,6 +288,12 @@ builtin_port[] = {
       port_eof_p,
       {Calling::function, 1}}},
 
+  {"write", {
+      port_write,
+      {Calling::function, 1, Variadic::t}}},
+  {"display", {
+      port_display,
+      {Calling::function, 1, Variadic::t}}},
   {"newline", {
       port_newline,
       {Calling::function, 0, Variadic::t}}},

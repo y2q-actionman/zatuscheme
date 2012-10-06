@@ -20,6 +20,7 @@ int main(){
   check("(output-port? (current-input-port))", "#f");
   check("(output-port? (current-output-port))", "#t");
 
+
   eval_text("(define tmpf (open-output-file "TEST_FILE_NAME"))"); 
   check("(input-port? tmpf)", "#f");
   check("(output-port? tmpf)", "#t");
@@ -29,6 +30,7 @@ int main(){
   check("(input-port? tmpf)", "#t");
   check("(output-port? tmpf)", "#f");
   eval_text("(close-input-port tmpf)");
+
 
   eval_text("(define tmpf (open-output-file "TEST_FILE_NAME"))"); 
   eval_text("(write-char #\\a tmpf)");
@@ -49,6 +51,35 @@ int main(){
   check("(eof-object? (read-char tmpf))", "#t");
   eval_text("(close-input-port tmpf)");
 
+
+  eval_text("(define tmpf (open-output-file "TEST_FILE_NAME"))"); 
+  eval_text("(write '(1 2 3 4 5) tmpf)");
+  eval_text("(write '#(#\\a #\\b #\\space) tmpf)");
+  eval_text("(write \" \\\" \" tmpf)");
+  eval_text("(close-output-port tmpf)");
+
+  eval_text("(define tmpf (open-input-file "TEST_FILE_NAME"))"); 
+  check("(read tmpf)", "(1 2 3 4 5)");
+  check("(read tmpf)", "#(#\\a #\\b #\\space)");
+  check("(read tmpf)", "\" \\\" \"");
+  check("(eof-object? (read-char tmpf))", "#t");
+  eval_text("(close-input-port tmpf)");
+
+
+  eval_text("(define tmpf (open-output-file "TEST_FILE_NAME"))"); 
+  eval_text("(display 1 tmpf)");
+  eval_text("(display #\\a tmpf)");
+  eval_text("(display \" \\\" \" tmpf)");
+  eval_text("(close-output-port tmpf)");
+
+  eval_text("(define tmpf (open-input-file "TEST_FILE_NAME"))"); 
+  check("(read tmpf)", "1");
+  check("(read-char tmpf)", "#\\a");
+  check("(read-char tmpf)", "#\\space");
+  check("(read-char tmpf)", "#\\\"");
+  check("(read-char tmpf)", "#\\space");
+  check("(eof-object? (read-char tmpf))", "#t");
+  eval_text("(close-input-port tmpf)");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
