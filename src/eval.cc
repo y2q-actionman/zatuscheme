@@ -246,14 +246,6 @@ void vm_op_call(){
 }
 
 /*
-  leaves frame.
-  no stack operations.
-*/
-void vm_op_proc_leave(){
-  VM.leave_frame();
-}  
-
-/*
   stack = (arg1, arg2, ..., arg-bottom)
   ----
   ret = returned value
@@ -281,7 +273,7 @@ void proc_enter_interpreted(IProcedure* fun){
 
   // tail call check
   if(!VM.code.empty()
-     && VM.code.top().get<VMop>() == vm_op_proc_leave){
+     && VM.code.top().get<VMop>() == vm_op_leave_frame){
     VM.code.pop();
     VM.leave_frame();
   }
@@ -290,7 +282,7 @@ void proc_enter_interpreted(IProcedure* fun){
     VM.enter_frame(fun->closure()->push());
   }
 
-  VM.code.push(vm_op_proc_leave);
+  VM.code.push(vm_op_leave_frame);
 
   Lisp_ptr arg_name = fun->arg_head();
   Lisp_ptr st_top;
@@ -372,6 +364,14 @@ static const VMop vm_op_quasiquote_list = procedure_list_star;
 static const VMop vm_op_quasiquote_vector = procedure_vector;
 
 } // namespace
+
+/*
+  leaves frame.
+  no stack operations.
+*/
+void vm_op_leave_frame(){
+  VM.leave_frame();
+}  
 
 /*
   stack = (consequent, alternative)
@@ -600,7 +600,7 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
 
   if(name){
     VM.local_set(name.get<Symbol*>(), proc);
-    VM.code.push(vm_op_proc_leave);
+    VM.code.push(vm_op_leave_frame);
   }
 
   VM.code.push(vm_op_call);

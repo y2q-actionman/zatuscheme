@@ -26,6 +26,9 @@ int main(){
   check("(make-vector 3 'a)", "#(a a a)");
   check("(make-vector 5 'a)", "#(a a a a a)");
 
+  check("(vector 1)", "#(1)");
+  check("(vector 1 2)", "#(1 2)");
+  check("(vector 1 2 3)", "#(1 2 3)");
   check("(vector 'a)", "#(a)");
   check("(vector 'a 'b 'c)", "#(a b c)");
   

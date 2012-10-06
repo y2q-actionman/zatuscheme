@@ -80,8 +80,14 @@ void env_interactive(){
 
 void eval_func(){
   auto args = pick_args<2>();
-  
-  // TODO: uses arg2 as Env struct.
+  auto env = args[1].get<Env*>();
+  if(!env){
+    builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
+    return;
+  }
+
+  VM.enter_frame(env->push());
+  VM.code.push(vm_op_leave_frame);
   VM.code.push(args[0]);
 }
 
@@ -123,7 +129,7 @@ builtin_misc[] = {
   {"null-environment", {
       env_null,
       {Calling::function, 1}}},
-  {"interaction_environment", {
+  {"interaction-environment", {
       env_interactive,
       {Calling::function, 0}}},
 
@@ -140,6 +146,7 @@ static void install_builtin_internal(const BuiltinFunc bf[], size_t s){
 }
 
 void install_builtin(){
+  install_builtin_internal(builtin_equal, builtin_equal_size);
   install_builtin_internal(builtin_syntax, builtin_syntax_size);
   VM.set(intern(VM.symtable, null_env_symname), VM.frame);
 
@@ -148,7 +155,6 @@ void install_builtin(){
   install_builtin_internal(builtin_boolean, builtin_boolean_size);
   install_builtin_internal(builtin_char, builtin_char_size);
   install_builtin_internal(builtin_cons, builtin_cons_size);
-  install_builtin_internal(builtin_equal, builtin_equal_size);
   install_builtin_internal(builtin_numeric, builtin_numeric_size);
   install_builtin_internal(builtin_string, builtin_string_size);
   install_builtin_internal(builtin_symbol, builtin_symbol_size);

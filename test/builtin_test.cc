@@ -14,10 +14,6 @@ void check(const char* input, const char* expect){
 int main(){
   install_builtin();
 
-  check("(vector 1)", "#(1)");
-  check("(vector 1 2)", "#(1 2)");
-  check("(vector 1 2 3)", "#(1 2 3)");
-
   check("(and)", "#t");
   check("(and 1)", "1");
   check("(and 1 2)", "2");
@@ -65,16 +61,16 @@ int main(){
   check("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
   check("(case a ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
 
-  check("(eval 1 ())", "1");
-  check("(eval (+ 1 3) ())", "4");
-  check("(eval '(+ 1 3) ())", "4");
-  check("(eval '(if (eqv? 1 2) \"same\" \"different\") ())", "\"different\"");
-
   check("(begin (set! tmp-func (lambda (x) `(set! ,x ',x))) #t)", "#t");
   check("(tmp-func 'a)", "(set! a (quote a))");
   check("(begin (set! tmp-macro (to-macro-procedure tmp-func)) #t)", "#t");
   check("(begin (tmp-macro a) #t)", "#t");
   check("a", "a");
+
+  check("(eval 1 (null-environment 5))", "1");
+  check("(eval (+ 1 3) (scheme-report-environment 5))", "4");
+  check("(eval '(+ 1 3) (scheme-report-environment 5))", "4");
+  check("(eval '(if (eqv? 1 2) \"same\" \"different\") (interaction-environment))", "\"different\"");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
