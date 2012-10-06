@@ -515,13 +515,9 @@ builtin_syntax[] = {
   {"do", {
       whole_function_unimplemented,
       {Calling::whole_function, 0, Variadic::t}}},
-
   {"delay", {
       macro_delay,
       {Calling::macro, 1}}},
-  {"force", {
-      func_force,
-      {Calling::function, 1}}},
 
   {"unquote", {
       whole_function_pass_through,
