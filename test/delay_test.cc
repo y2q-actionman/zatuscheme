@@ -20,10 +20,7 @@ int main(){
             "    (next 0)))");
   eval_text("(define head car)");
   eval_text("(define tail (lambda (stream) (force (cdr stream))))");
-  check("a-stream", "0");
-  check("(tail a-stream)", "0");
-  check("(tail (tail a-stream))", "0");
-  // check("(head (tail (tail a-stream)))", "2");
+  check("(head (tail (tail a-stream)))", "2");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -24,5 +24,6 @@ void eval();
 // builtin funcs near evaluator
 void load(Port*);
 void apply_func();
+void func_force();
 
 #endif // EVAL_HH

@@ -695,9 +695,7 @@ void eval(){
       if(d->forced()){
         VM.return_value = d->get();
       }else{
-        VM.stack.push(p);
-        VM.code.push(vm_op_force);
-        VM.code.push(d->get());
+        VM.return_value = p;
       }
       break;
     }
@@ -790,4 +788,24 @@ void apply_func(){
   }
 
   VM.stack.push(vm_op_arg_bottom);
+}
+
+void func_force(){
+  auto arg = pick_args_1();
+  auto d = arg.get<Delay*>();
+  if(!d){
+    VM.return_value = arg;
+    return;
+  }
+  
+  if(d->forced()){
+    VM.return_value = d->get();
+    return;
+  }
+
+  VM.stack.push(arg);
+  VM.code.push(vm_op_force);
+  VM.enter_frame(d->env()->push());
+  VM.code.push(vm_op_leave_frame);
+  VM.code.push(d->get());
 }

@@ -462,11 +462,7 @@ void whole_macro_case(){
 
 void macro_delay(){
   auto args = pick_args_1();
-  VM.return_value = {new Delay(args)};
-}
-
-void func_force(){
-  VM.return_value = {pick_args_1()};
+  VM.return_value = {new Delay(args, VM.frame)};
 }
 
 } //namespace
