@@ -61,9 +61,9 @@ int main(){
   check("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
   check("(case a ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
 
-  check("(begin (set! tmp-func (lambda (x) `(set! ,x ',x))) #t)", "#t");
-  check("(tmp-func 'a)", "(set! a (quote a))");
-  check("(begin (set! tmp-macro (to-macro-procedure tmp-func)) #t)", "#t");
+  check("(begin (define tmp-func (lambda (x) `(define ,x ',x))) #t)", "#t");
+  check("(tmp-func 'a)", "(define a (quote a))");
+  check("(begin (define tmp-macro (to-macro-procedure tmp-func)) #t)", "#t");
   check("(begin (tmp-macro a) #t)", "#t");
   check("a", "a");
 

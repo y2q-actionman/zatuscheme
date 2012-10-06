@@ -12,8 +12,7 @@ Lisp_ptr VM_t::find(Symbol* s){
 
 inline
 void VM_t::set(Symbol* s, Lisp_ptr p){
-  auto old = traverse(s, p);
-  if(!old) local_set(s, p);
+  traverse(s, p);
 }
 
 inline

@@ -303,8 +303,8 @@ builtin_port[] = {
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
-  VM.set(intern(VM.symtable, current_input_port_symname),
-         new Port{zs::in, "r"});
-  VM.set(intern(VM.symtable, current_output_port_symname),
-         new Port{zs::out, "w"});
+  VM.local_set(intern(VM.symtable, current_input_port_symname),
+               new Port{zs::in, "r"});
+  VM.local_set(intern(VM.symtable, current_output_port_symname),
+               new Port{zs::out, "w"});
 }

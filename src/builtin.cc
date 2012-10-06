@@ -132,14 +132,14 @@ builtin_misc[] = {
 
 static void install_builtin_internal(const BuiltinFunc bf[], size_t s){
   for(size_t i = 0; i < s; ++i){
-    VM.set(intern(VM.symtable, bf[i].name), {&bf[i].func});
+    VM.local_set(intern(VM.symtable, bf[i].name), {&bf[i].func});
   }
 }
 
 void install_builtin(){
   install_builtin_internal(builtin_equal, builtin_equal_size);
   install_builtin_internal(builtin_syntax, builtin_syntax_size);
-  VM.set(intern(VM.symtable, null_env_symname), VM.frame);
+  VM.local_set(intern(VM.symtable, null_env_symname), VM.frame);
 
   VM.frame = VM.frame->push();
   install_builtin_internal(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
@@ -153,9 +153,9 @@ void install_builtin(){
   install_builtin_internal(builtin_vector, builtin_vector_size);
   install_builtin_port_value();
   install_builtin_internal(builtin_port, builtin_port_size);
-  VM.set(intern(VM.symtable, r5rs_env_symname), VM.frame);
+  VM.local_set(intern(VM.symtable, r5rs_env_symname), VM.frame);
 
   VM.frame = VM.frame->push();
   install_builtin_internal(builtin_extra, builtin_extra_size);
-  VM.set(intern(VM.symtable, interaction_env_symname), VM.frame);
+  VM.local_set(intern(VM.symtable, interaction_env_symname), VM.frame);
 }
