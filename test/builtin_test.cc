@@ -72,5 +72,11 @@ int main(){
   check("(eval '(+ 1 3) (scheme-report-environment 5))", "4");
   check("(eval '(if (eqv? 1 2) \"same\" \"different\") (interaction-environment))", "\"different\"");
 
+  check("(apply + (list 3 4))", "7");
+  check("(apply + (list 3 4) (list 1 2))", "10");
+  eval_text("(define compose (lambda (f g) (lambda args (f (apply g args)))))");
+  check("((compose sqrt *) 12 75)", "30");
+
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -3,6 +3,7 @@
 #include "vm.hh"
 #include "builtin_util.hh"
 #include "procedure.hh"
+#include "eval.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -22,6 +23,9 @@ builtin_procedure[] = {
   {"procedure?", {
       type_check_procedure,
       {Calling::function, 1}}},
+  {"apply", {
+      apply_func,
+      {Calling::function, 1, Variadic::t}}},
 };
 
 const size_t builtin_procedure_size = sizeof(builtin_procedure) / sizeof(builtin_procedure[0]);

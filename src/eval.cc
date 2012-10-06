@@ -63,6 +63,22 @@ bool check_argcount(const char* name, int argc, const ProcInfo* info){
   return true;
 }
 
+static
+void clean_funcall_stack(){
+  while(!VM.stack.empty()){
+    auto op = VM.stack.top().get<VMop>();
+    if(op == vm_op_proc_enter)
+      break;
+    VM.stack.pop();
+  }
+
+  for(int i = 0; i < 2; ++i){
+    if(!VM.stack.empty()){
+      VM.stack.pop();
+    }
+  }
+}
+
 /*
   stack[0] = whole args
   ----
@@ -133,9 +149,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
   }
   
   if(!ret || !check_argcount("funcall", argc, info)){
-    for(int i = 0; i < argc*2 + 2; ++i){
-      VM.code.pop();
-    }
+    clean_funcall_stack();
     VM.return_value = {};
     return;
   }
@@ -165,10 +179,7 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   VM.stack.push(vm_op_arg_bottom);
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack);
   if(!check_argcount("macro-call", argc, info)){
-    for(int i = 0; i < argc; ++i){
-      VM.stack.pop();
-    }
-    VM.stack.pop();
+    clean_args();
     VM.return_value = {};
     return;
   }    
@@ -314,8 +325,8 @@ void proc_enter_interpreted(IProcedure* fun){
       return;
     }
 
-    // TODO: share code below with procedure_list()
-    VM.local_set(arg_name.get<Symbol*>(), stack_to_list<false>(VM.stack));
+    auto lis = stack_to_list<false>(VM.stack);
+    VM.local_set(arg_name.get<Symbol*>(), {new Cons(st_top, lis)});
   }else{  // clean stack
     if(VM.stack.empty()
        || VM.stack.top().tag() != Ptr_tag::vm_op){
@@ -682,4 +693,55 @@ void load(Port* p){
       continue;
     }
   }
+}
+
+void apply_func(){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(VM.stack, args);
+
+  const ProcInfo* info = nullptr;
+
+  if(auto iproc = args[0].get<IProcedure*>()){
+    info = iproc->info();
+  }else if(auto nproc = args[0].get<const NProcedure*>()){
+    info = nproc->info();
+  }else{
+    fprintf(zs::err, "apply error: first arg is not procedure (%s)\n",
+            stringify(args[0].tag()));
+    VM.return_value = {};
+    return;
+  }
+  assert(info);
+
+  // simulating function_call()
+  VM.code.push(args[0]);
+  VM.code.push(vm_op_proc_enter);
+
+  int argc = 0;
+
+  for(auto i = 1u; i < args.size(); ++i){
+    auto dl =
+      do_list(args[i],
+              [&](Cons* cell) -> bool{
+                VM.code.push(vm_op_arg_push);
+                VM.code.push(cell->car());
+                ++argc;
+                return true;
+              },
+              [&](Lisp_ptr dot_cdr) -> bool{
+                if(!nullp(dot_cdr)){
+                  fprintf(zs::err, "apply error: dot list passed.\n");
+                  return false;
+                }
+                return true;
+              });
+    
+    if(!dl || !check_argcount("apply", argc, info)){
+      clean_funcall_stack();
+      VM.return_value = {};
+      return;
+    }
+  }
+
+  VM.stack.push(vm_op_arg_bottom);
 }
