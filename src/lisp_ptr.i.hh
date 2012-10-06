@@ -46,6 +46,9 @@ template<>
 Env* to_type<Ptr_tag::env>() = delete;
 
 template<>
+Delay* to_type<Ptr_tag::delay>() = delete;
+
+template<>
 VMop to_type<Ptr_tag::vm_op>() = delete;
 
 
@@ -113,6 +116,12 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, Env*>(){
   return Ptr_tag::env;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, Delay*>(){
+  return Ptr_tag::delay;
 }
 
 template<>

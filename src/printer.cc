@@ -6,6 +6,7 @@
 #include "cons.hh"
 #include "number.hh"
 #include "util.hh"
+#include "delay.hh"
 
 namespace {
 
@@ -120,6 +121,16 @@ void print(FILE* f, Lisp_ptr p, print_human_readable flag){
   case Ptr_tag::vector:
     print_vector(f, p.get<Vector*>());
     break;
+
+  case Ptr_tag::delay: {
+    auto d = p.get<Delay*>();
+    if(!d->forced())
+      fprintf(f, "#<delay [");
+    print(f, d->get(), flag);
+    if(!d->forced())
+      fprintf(f, "]");
+    break;
+  }
 
   case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
   case Ptr_tag::port:

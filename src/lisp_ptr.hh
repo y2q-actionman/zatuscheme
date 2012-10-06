@@ -18,6 +18,7 @@ enum class Ptr_tag {
     vector,
     port,
     env,
+    delay,
     vm_op
     };
     
@@ -81,6 +82,7 @@ typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
 class Port;
 class Env;
+class Delay;
 typedef void(*VMop)();
 
 

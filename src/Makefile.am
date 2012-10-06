@@ -17,6 +17,7 @@ libzs_a_SOURCES = zs.hh\
 		procedure.cc procedure.hh procedure.i.hh\
 		port.cc port.hh\
 		env.cc env.hh\
+		delay.cc delay.hh\
 		builtin_util.cc builtin_util.hh\
 		builtin.cc builtin.hh builtin.i.hh\
 		builtin_syntax.cc builtin_syntax.hh\

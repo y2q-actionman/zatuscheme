@@ -13,6 +13,7 @@
 #include "builtin.hh"
 #include "builtin_util.hh"
 #include "port.hh"
+#include "delay.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -542,6 +543,22 @@ void vm_op_quasiquote(){
   }
 }
 
+/*
+  return  = forced value
+  stack[0] = delay
+*/
+void vm_op_force(){
+  auto delay = VM.stack.top().get<Delay*>();
+  VM.stack.pop();
+
+  if(!delay){
+    fprintf(zs::err, "eval error: internal error occured ('force' found before not a delay\n");
+    return;
+  }
+
+  delay->force(VM.return_value);
+}
+
 void let_internal(Sequencial sequencial, EarlyBind early_bind){
   auto arg = pick_args_1();
   if(!arg) return;
@@ -672,6 +689,18 @@ void eval(){
         op();
       }
       break;
+
+    case Ptr_tag::delay: {
+      auto d = p.get<Delay*>();
+      if(d->forced()){
+        VM.return_value = d->get();
+      }else{
+        VM.stack.push(p);
+        VM.code.push(vm_op_force);
+        VM.code.push(d->get());
+      }
+      break;
+    }
 
     case Ptr_tag::boolean: case Ptr_tag::character:
     case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:

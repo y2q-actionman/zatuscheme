@@ -77,6 +77,8 @@ int main(){
   eval_text("(define compose (lambda (f g) (lambda args (f (apply g args)))))");
   check("((compose sqrt *) 12 75)", "30");
 
+  check("(force (delay (+ 1 2)))", "3");
+  check("(let ((p (delay (+ 1 2)))) (list (force p) (force p)))", "(3 3)");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

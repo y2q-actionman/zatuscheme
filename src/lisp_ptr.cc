@@ -26,6 +26,8 @@ const char* stringify(Ptr_tag p){
     return "port";
   case Ptr_tag::env:
     return "env";
+  case Ptr_tag::delay:
+    return "delay";
   case Ptr_tag::vm_op:
     return "VMop";
   default:

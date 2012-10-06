@@ -8,6 +8,7 @@
 #include "util.hh"
 #include "procedure.hh"
 #include "printer.hh"
+#include "delay.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -459,6 +460,15 @@ void whole_macro_case(){
           });
 }
 
+void macro_delay(){
+  auto args = pick_args_1();
+  VM.return_value = {new Delay(args)};
+}
+
+void func_force(){
+  VM.return_value = {pick_args_1()};
+}
+
 } //namespace
 
 const BuiltinFunc
@@ -509,9 +519,13 @@ builtin_syntax[] = {
   {"do", {
       whole_function_unimplemented,
       {Calling::whole_function, 0, Variadic::t}}},
+
   {"delay", {
-      whole_function_unimplemented,
-      {Calling::whole_function, 0, Variadic::t}}},
+      macro_delay,
+      {Calling::macro, 1}}},
+  {"force", {
+      func_force,
+      {Calling::function, 1}}},
 
   {"unquote", {
       whole_function_pass_through,
