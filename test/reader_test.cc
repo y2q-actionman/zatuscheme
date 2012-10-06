@@ -40,7 +40,7 @@ int main(){
   // char
   check("#\\v", "#\\v");
   check("#\\s", "#\\s");
-  check("#\\space", "#\\ ");
+  check("#\\space", "#\\space");
 
   // symbol
   check("a", "a");
@@ -54,7 +54,7 @@ int main(){
   // string
   check("\"\"", "\"\"");
   check("\"aaa aaa\"", "\"aaa aaa\"");
-  check("\"aa\\\\a a\\\"aa\"", "\"aa\\a a\"aa\"");
+  check("\"aa\\\\a a\\\"aa\"", "\"aa\\\\a a\\\"aa\"");
   { 
     with_null_stream wns;
     check_undef("\" \\ \"");

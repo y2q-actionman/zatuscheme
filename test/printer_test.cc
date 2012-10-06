@@ -61,7 +61,7 @@ int main(){
   check('a', "#\\a");
   check('z', "#\\z");
   check('0', "#\\0");
-  check(' ', "#\\ ");
+  check(' ', "#\\space");
   check('\\', "#\\\\");
 
   // symbol
@@ -78,7 +78,7 @@ int main(){
 
   // string
   check("abc", "\"abc\"");
-  check("a\"bc", "\"a\"bc\"");
+  check("a\"bc", "\"a\\\"bc\"");
 
   // port (should be added in future)
   check_noprint(static_cast<Port*>(nullptr));

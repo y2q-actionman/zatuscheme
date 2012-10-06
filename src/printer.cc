@@ -46,9 +46,48 @@ void print_list(FILE* f, Lisp_ptr l){
   fputc(')', f);
 }
 
+void print_char(FILE* f, char c, print_human_readable flag){
+  if(flag == print_human_readable::t){
+    fputc(c, f);
+  }else{
+    switch(c){
+    case ' ':
+      fputs("#\\space", f);
+      break;
+    case '\n':
+      fputs("#\\newline", f);
+      break;
+    default:
+      fprintf(f, "#\\%c", c);
+    }
+  }
+}
+  
+void print_string(FILE* f, const char* str, print_human_readable flag){
+  if(flag == print_human_readable::t){
+    fputs(str, f);
+  }else{
+    fputc('\"', f);
+    for(auto s = str; *s; ++s){
+      switch(*s){
+      case '"':
+        fputs("\\\"", f);
+        break;
+      case '\\':
+        fputs("\\\\", f);
+        break;
+      default:
+        fputc(*s, f);
+      }
+    }
+    fputc('\"', f);
+  }
+}  
+
+
 } // namespace
 
-void print(FILE* f, Lisp_ptr p){
+void print(FILE* f, Lisp_ptr p, print_human_readable flag){
   switch(p.tag()){
   case Ptr_tag::undefined:
     fprintf(f, "#<undefined>");
@@ -59,7 +98,7 @@ void print(FILE* f, Lisp_ptr p){
     break;
 
   case Ptr_tag::character:
-    fprintf(f, "#\\%c", p.get<char>());
+    print_char(f, p.get<char>(), flag);
     break;
 
   case Ptr_tag::cons:
@@ -75,7 +114,7 @@ void print(FILE* f, Lisp_ptr p){
     break;
 
   case Ptr_tag::string:
-    fprintf(f, "\"%s\"", p.get<String*>()->c_str());
+    print_string(f, p.get<String*>()->c_str(), flag);
     break;
 
   case Ptr_tag::vector:

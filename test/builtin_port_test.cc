@@ -45,7 +45,7 @@ int main(){
   check("(read-char tmpf)", "#\\b");
   check("(peek-char tmpf)", "#\\c");
   check("(read-char tmpf)", "#\\c");
-  check("(read-char tmpf)", "#\\\n");
+  check("(read-char tmpf)", "#\\newline");
   check("(eof-object? (read-char tmpf))", "#t");
   eval_text("(close-input-port tmpf)");
 
