@@ -690,21 +690,12 @@ void eval(){
       }
       break;
 
-    case Ptr_tag::delay: {
-      auto d = p.get<Delay*>();
-      if(d->forced()){
-        VM.return_value = d->get();
-      }else{
-        VM.return_value = p;
-      }
-      break;
-    }
-
     case Ptr_tag::boolean: case Ptr_tag::character:
     case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
     case Ptr_tag::number:
     case Ptr_tag::string: case Ptr_tag::vector:
     case Ptr_tag::port: case Ptr_tag::env:
+    case Ptr_tag::delay:
     default:
       VM.return_value = p;
       break;
@@ -805,7 +796,7 @@ void func_force(){
 
   VM.stack.push(arg);
   VM.code.push(vm_op_force);
-  VM.enter_frame(d->env()->push());
+  VM.enter_frame(d->env());
   VM.code.push(vm_op_leave_frame);
   VM.code.push(d->get());
 }

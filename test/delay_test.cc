@@ -22,5 +22,12 @@ int main(){
   eval_text("(define tail (lambda (stream) (force (cdr stream))))");
   check("(head (tail (tail a-stream)))", "2");
 
+  eval_text("(define count 0)");
+  eval_text("(define p (delay (begin (set! count (+ count 1))"
+            "                        (if (> count x) count (force p)))))");
+  eval_text("(define x 5)");
+  check("(force p)", "6");
+  check("(begin (set! x 10) (force p))", "6");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
