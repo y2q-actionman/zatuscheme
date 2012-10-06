@@ -20,8 +20,6 @@ void type_check_procedure(){
 }
 
 void proc_values(){
-  static const auto return_value_max
-    = sizeof(VM.return_value) / sizeof(VM.return_value[0]);
   unsigned i = 0;
 
   while(1){
@@ -34,15 +32,15 @@ void proc_values(){
     VM.stack.pop();
     ++i;
 
-    if(i >= return_value_max){
+    if(i >= VM_t::return_value_max){
       fprintf(zs::err, "eval warning: values: overed max values (%ud)\n",
-              return_value_max);
+              VM_t::return_value_max);
       clean_args();
       return;
     }
   }
 
-  for(; i < return_value_max; ++i){
+  for(; i < VM_t::return_value_max; ++i){
     VM.return_value[i] = {};
   }
 }
@@ -63,6 +61,9 @@ builtin_procedure[] = {
   {"values", {
       proc_values,
       {Calling::function, 0, Variadic::t}}},
+  {"call-with-values", {
+      call_with_values,
+      {Calling::function, 2}}},
 };
 
 const size_t builtin_procedure_size = sizeof(builtin_procedure) / sizeof(builtin_procedure[0]);

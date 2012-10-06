@@ -13,6 +13,8 @@ class VM_t {
   typedef std::stack<Lisp_ptr, std::vector<Lisp_ptr>> stack_t;
 
 public:
+  static constexpr int return_value_max = 32;
+
   VM_t();
   ~VM_t();
 
@@ -27,7 +29,7 @@ public:
   SymTable symtable;
   stack_t code;
   stack_t stack;
-  Lisp_ptr return_value[32];
+  Lisp_ptr return_value[return_value_max];
   Env* frame;
 
 private:

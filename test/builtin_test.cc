@@ -77,5 +77,8 @@ int main(){
   eval_text("(define compose (lambda (f g) (lambda args (f (apply g args)))))");
   check("((compose sqrt *) 12 75)", "30");
 
+  check("(call-with-values (lambda () (values 4 5)) (lambda (a b) b))", "5");
+  check("(call-with-values * -)", "-1");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -383,6 +383,22 @@ void vm_op_proc_enter(){
 }
  
 /*
+  ret = (args)
+  ----
+  stack = (args)
+  goto proc_enter 
+*/
+void vm_op_move_values(){
+  VM.stack.push(vm_op_arg_bottom);
+
+  for(auto i = VM_t::return_value_max - 1; i >= 0; --i){
+    if(!VM.return_value[i]) continue;
+    VM.stack.push(VM.return_value[i]);
+    VM.return_value[i] = {};
+  }
+}
+ 
+/*
   ret = list
   ----
   stack = (list[0], list[1], ...)
@@ -799,4 +815,46 @@ void func_force(){
   VM.enter_frame(d->env());
   VM.code.push(vm_op_leave_frame);
   VM.code.push(d->get());
+}
+
+void call_with_values(){
+  auto args = pick_args<2>();
+
+  const ProcInfo* info = nullptr;
+
+  if(auto iproc = args[0].get<IProcedure*>()){
+    info = iproc->info();
+  }else if(auto nproc = args[0].get<const NProcedure*>()){
+    info = nproc->info();
+  }else{
+    fprintf(zs::err, "call-with-values error: first arg is not procedure (%s)\n",
+            stringify(args[0].tag()));
+    VM.return_value[0] = {};
+    return;
+  }
+  assert(info);
+  
+  if(info->required_args != 0){
+    fprintf(zs::err, "call-with-values error: first arg takes 1 or more args (%d)\n",
+            info->required_args);
+    VM.return_value[0] = {};
+    return;
+  }    
+
+  if(!args[1].get<IProcedure*>() && !args[1].get<const NProcedure*>()){
+    fprintf(zs::err, "call-with-values error: second arg is not procedure (%s)\n",
+            stringify(args[1].tag()));
+    VM.return_value[0] = {};
+    return;
+  }
+
+  // second proc call
+  VM.code.push(args[1]);
+  VM.code.push(vm_op_proc_enter);
+  VM.code.push(vm_op_move_values);
+
+  // first proc, calling with zero args.
+  VM.code.push(args[0]);
+  VM.code.push(vm_op_proc_enter);
+  VM.stack.push(vm_op_arg_bottom);
 }

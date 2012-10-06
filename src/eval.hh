@@ -25,5 +25,6 @@ void eval();
 void load(Port*);
 void apply_func();
 void func_force();
+void call_with_values();
 
 #endif // EVAL_HH
