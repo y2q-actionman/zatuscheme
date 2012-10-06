@@ -18,6 +18,7 @@
 #include "builtin_extra.hh"
 #include "builtin_numeric.hh"
 #include "builtin_port.hh"
+#include "builtin_procedure.hh"
 #include "builtin_string.hh"
 #include "builtin_symbol.hh"
 #include "builtin_syntax.hh"
@@ -31,12 +32,6 @@ namespace {
 static const char null_env_symname[] = "null-env-value";
 static const char r5rs_env_symname[] = "r5rs-env-value";
 static const char interaction_env_symname[] = "interaction-env-value";
-
-void type_check_procedure(){
-  auto arg = pick_args_1();
-  VM.return_value = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
-                             || (arg.tag() == Ptr_tag::n_procedure)};
-}
 
 static
 void env_pick_2(const char* name){
@@ -115,10 +110,6 @@ void load_func(){
 
 static const BuiltinFunc
 builtin_misc[] = {
-  {"procedure?", {
-      type_check_procedure,
-      {Calling::function, 1}}},
-
   {"eval", {
       eval_func,
       {Calling::function, 2}}},
@@ -156,6 +147,7 @@ void install_builtin(){
   install_builtin_internal(builtin_char, builtin_char_size);
   install_builtin_internal(builtin_cons, builtin_cons_size);
   install_builtin_internal(builtin_numeric, builtin_numeric_size);
+  install_builtin_internal(builtin_procedure, builtin_procedure_size);
   install_builtin_internal(builtin_string, builtin_string_size);
   install_builtin_internal(builtin_symbol, builtin_symbol_size);
   install_builtin_internal(builtin_vector, builtin_vector_size);
