@@ -47,6 +47,22 @@ void vm_op_arg_push_and_set(){
   vm_op_arg_push();
 }
 
+static
+bool check_argcount(const char* name, int argc, const ProcInfo* info){ 
+  if((argc < info->required_args)
+     || (!info->variadic && argc > info->required_args)){
+    fprintf(zs::err,
+            "%s error: number of passed args is mismatched!!"
+            " (required %d args, %s, passed %d)\n",
+            name, 
+            info->required_args,
+            (info->variadic) ? "variadic" : "not variadic",
+            argc);
+    return false;
+  }
+  return true;
+}
+
 /*
   stack[0] = whole args
   ----
@@ -116,16 +132,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
                 });
   }
   
-  if((argc < info->required_args)
-     || (!info->variadic && argc > info->required_args)){
-    fprintf(zs::err, "funcall error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
-            info->required_args,
-            (info->variadic) ? "variadic" : "not variadic",
-            argc);
-    ret = false;
-  }
-
-  if(!ret){
+  if(!ret || !check_argcount("funcall", argc, info)){
     for(int i = 0; i < argc*2 + 2; ++i){
       VM.code.pop();
     }
@@ -157,12 +164,7 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
 
   VM.stack.push(vm_op_arg_bottom);
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), VM.stack);
-  if(argc < info->required_args
-     || (!info->variadic && argc > info->required_args)){
-    fprintf(zs::err, "macro-call error: number of passed args is mismatched!! (required %d args, %s, passed %d)\n",
-            info->required_args,
-            (info->variadic) ? "variadic" : "not variadic",
-            argc);
+  if(!check_argcount("macro-call", argc, info)){
     for(int i = 0; i < argc; ++i){
       VM.stack.pop();
     }
