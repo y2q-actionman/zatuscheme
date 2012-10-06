@@ -14,6 +14,7 @@
 #include "builtin_char.hh"
 #include "builtin_cons.hh"
 #include "builtin_equal.hh"
+#include "builtin_extra.hh"
 #include "builtin_numeric.hh"
 #include "builtin_port.hh"
 #include "builtin_string.hh"
@@ -83,24 +84,6 @@ void eval_func(){
   VM.code.push(args[0]);
 }
 
-void to_macro_procedure(){
-  auto arg1 = pick_args_1();
-
-  if(arg1.tag() != Ptr_tag::i_procedure){
-    fprintf(zs::err, "to-macro-procedure: error: should be called with interpreted proc\n");
-    VM.return_value = {};
-    return;
-  }
-
-  auto proc = arg1.get<IProcedure*>();
-  auto info = *proc->info();
-  info.calling = Calling::macro;
-
-  VM.return_value = new IProcedure(proc->get(), 
-                                   info, proc->arg_head(),
-                                   proc->closure());
-}
-
 } //namespace
 
 static const BuiltinFunc
@@ -122,13 +105,6 @@ builtin_misc[] = {
   {"interaction_environment", {
       env_interactive,
       {Calling::function, 0}}},
-};
-
-static const BuiltinFunc
-builtin_extra[] = {
-  {"to-macro-procedure", {
-      to_macro_procedure,
-      {Calling::function, 1}}}
 };
 
 
@@ -157,6 +133,6 @@ void install_builtin(){
   VM.set(intern(VM.symtable, r5rs_env_symname), VM.frame);
 
   VM.frame = VM.frame->push();
-  install_builtin_internal(builtin_extra, sizeof(builtin_extra) / sizeof(builtin_extra[0]));
+  install_builtin_internal(builtin_extra, builtin_extra_size);
   VM.set(intern(VM.symtable, interaction_env_symname), VM.frame);
 }
