@@ -8,6 +8,7 @@
 #include "reader.hh"
 #include "printer.hh"
 #include "util.hh"
+#include "eval.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -244,6 +245,25 @@ void port_newline(){
 }
 
 
+void port_load(){
+  auto arg = pick_args_1();
+  auto str = arg.get<String*>();
+  if(!str){
+    builtin_type_check_failed("load", Ptr_tag::string, arg);
+    return;
+  }
+
+  Port p{str->c_str(), "r"};
+  if(!p){
+    fprintf(zs::err, "load error: failed at opening file\n");
+    VM.return_value = {};
+    return;
+  }
+
+  load(&p);
+  VM.return_value = {};
+}
+
 
 } //namespace
 
@@ -300,6 +320,10 @@ builtin_port[] = {
   {"write-char", {
       port_write_char,
       {Calling::function, 1, Variadic::t}}},
+
+  {"load", {
+      port_load,
+      {Calling::function, 1}}}
 };
 
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);

@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <memory>
 #include <cassert>
 
@@ -7,9 +8,11 @@
 #include "symbol.hh"
 #include "cons.hh"
 #include "procedure.hh"
+#include "reader.hh"
 #include "printer.hh"
 #include "builtin.hh"
 #include "builtin_util.hh"
+#include "port.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -656,5 +659,25 @@ void eval(){
     do{
       VM.stack.pop();
     }while(!VM.stack.empty());
+  }
+}
+
+
+void load(Port* p){
+  while(!feof(p->stream())){
+    auto form = read(p->stream());
+    if(!form){
+      fprintf(zs::err, "load error: failed at reading file. skipped one form\n");
+      continue;
+    }
+
+    VM.code.push(form);
+    eval();
+    if(!VM.return_value){
+      fprintf(zs::err, "load error: failed at evaluationg form. skipped\n");
+      fprintf(zs::err, "\tform: \n");
+      print(zs::err, form);
+      continue;
+    }
   }
 }

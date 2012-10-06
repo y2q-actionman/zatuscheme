@@ -17,4 +17,6 @@ void let_internal(Procedure::Sequencial, Procedure::EarlyBind);
 // main loop
 void eval();
 
+void load(Port*);
+
 #endif // EVAL_HH

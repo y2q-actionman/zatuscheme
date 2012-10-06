@@ -379,6 +379,9 @@ Token tokenize(FILE* f){
       return {};
     }
 
+  case EOF:
+    return Token{static_cast<char>(EOF)};
+
   default:
     if(isalpha(c) || is_special_initial(c)){
       return tokenize_identifier(f, c);
