@@ -26,7 +26,8 @@ check_PROGRAMS = token_test\
 		builtin_string_test\
 		builtin_equal_test\
 		builtin_vector_test\
-		builtin_port_test
+		builtin_port_test\
+		delay_test
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)
