@@ -9,6 +9,7 @@
 #include "builtin_util.hh"
 #include "printer.hh"
 #include "vm.hh"
+#include "port.hh"
 
 #include "builtin_boolean.hh"
 #include "builtin_char.hh"
@@ -84,6 +85,26 @@ void eval_func(){
   VM.code.push(args[0]);
 }
 
+
+void load_func(){
+  auto arg = pick_args_1();
+  auto str = arg.get<String*>();
+  if(!str){
+    builtin_type_check_failed("load", Ptr_tag::string, arg);
+    return;
+  }
+
+  Port p{str->c_str(), "r"};
+  if(!p){
+    fprintf(zs::err, "load error: failed at opening file\n");
+    VM.return_value = {};
+    return;
+  }
+
+  load(&p);
+  VM.return_value = {};
+}
+
 } //namespace
 
 static const BuiltinFunc
@@ -105,6 +126,10 @@ builtin_misc[] = {
   {"interaction_environment", {
       env_interactive,
       {Calling::function, 0}}},
+
+  {"load", {
+      load_func,
+      {Calling::function, 1}}}
 };
 
 
