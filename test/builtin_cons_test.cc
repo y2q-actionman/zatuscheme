@@ -4,11 +4,11 @@
 static bool result = true;
 
 void check(const char* input, const char* expect){
-  result = read_eval_print_test(input, expect);
+  result &= read_eval_print_test(input, expect);
 }
 
 void check_undef(const char* input){
-  result = !eval_text(input);
+  result &= !eval_text(input);
 }
 
 int main(){

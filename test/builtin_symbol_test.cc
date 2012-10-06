@@ -4,7 +4,7 @@
 static bool result = true;
 
 void check(const char* input, const char* expect){
-  result = read_eval_print_test(input, expect);
+  result &= read_eval_print_test(input, expect);
 }
 
 // TODO: if case-insensitivity is supported, define CASE_INSENSITIVE
@@ -50,7 +50,5 @@ int main(){
 
   //check("(string=? \"K. Harper, M.D.\" (symbol->string (string->symbol \"K. Harper, M.D.\")))", "#t");
   
-
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-

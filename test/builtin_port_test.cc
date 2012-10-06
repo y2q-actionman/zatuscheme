@@ -4,7 +4,7 @@
 static bool result = true;
 
 void check(const char* input, const char* expect){
-  result = read_eval_print_test(input, expect);
+  result &= read_eval_print_test(input, expect);
 }
 
 #define TEST_FILE_NAME "\"/tmp/zs_test.txt\""
@@ -52,4 +52,3 @@ int main(){
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
