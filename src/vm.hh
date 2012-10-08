@@ -34,8 +34,6 @@ public:
 
 private:
   std::stack<Env*> frame_history_;
-
-  Lisp_ptr traverse(Symbol*, Lisp_ptr);
 };
 
 extern VM_t VM;
