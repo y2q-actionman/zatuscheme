@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <stack>
+#include <memory>
 
 #include "lisp_ptr.hh"
 #include "cons.hh"
@@ -25,8 +26,11 @@ public:
   void set(Symbol*, Lisp_ptr);
   void local_set(Symbol*, Lisp_ptr);
 
+  SymTable& symtable(){
+    return *symtable_;
+  }
+
 public:
-  SymTable symtable;
   stack_t code;
   stack_t stack;
   Lisp_ptr return_value[return_value_max];
@@ -34,6 +38,7 @@ public:
 
 private:
   std::stack<Env*> frame_history_;
+  SymTable* symtable_;
 };
 
 extern VM_t VM;

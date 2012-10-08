@@ -489,8 +489,8 @@ void vm_op_local_set(){
       return = template
 */
 void vm_op_quasiquote(){
-  const auto unquote_sym = intern(VM.symtable, "unquote");
-  const auto unquote_splicing_sym = intern(VM.symtable, "unquote-splicing");
+  const auto unquote_sym = intern(VM.symtable(), "unquote");
+  const auto unquote_splicing_sym = intern(VM.symtable(), "unquote-splicing");
 
   const auto qq_elem = [&](Lisp_ptr p){
     if(auto l = p.get<Cons*>()){

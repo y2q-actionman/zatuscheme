@@ -52,7 +52,7 @@ bool eqv(Lisp_ptr a, Lisp_ptr b){
 Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args){
   vector<Cons> conses(args.size() + 1);
 
-  conses[0].rplaca(Lisp_ptr(intern(VM.symtable, funcname)));
+  conses[0].rplaca(Lisp_ptr(intern(VM.symtable(), funcname)));
   conses[0].rplacd(Lisp_ptr(&conses[1]));
 
   auto i = next(begin(conses)), e = end(conses);

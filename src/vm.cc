@@ -5,9 +5,11 @@
 
 VM_t VM;
 
-VM_t::VM_t() : symtable(), code(), stack(),
+VM_t::VM_t() : code(), stack(),
                frame(new Env(nullptr)),
-               frame_history_(){
+               frame_history_(),
+               symtable_(new SymTable())
+{
   frame->add_ref();
 }
 

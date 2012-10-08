@@ -44,7 +44,7 @@ void port_o_p(){
 static
 void port_current(const char* name){
   pick_args<0>();
-  VM.return_value[0] = VM.find(intern(VM.symtable, name));
+  VM.return_value[0] = VM.find(intern(VM.symtable(), name));
 }  
 
 void port_current_i(){
@@ -127,7 +127,7 @@ void port_input_call(const char* name, Fun&& fun){
 
   if(VM.stack.top().tag() == Ptr_tag::vm_op){
     VM.stack.pop();
-    p = VM.find(intern(VM.symtable, current_input_port_symname)).get<Port*>();
+    p = VM.find(intern(VM.symtable(), current_input_port_symname)).get<Port*>();
     assert(p);
   }else{
     auto arg = pick_args_1();
@@ -180,7 +180,7 @@ void port_output_call(const char* name, Fun&& fun){
 
   if(VM.stack.top().tag() == Ptr_tag::vm_op){
     VM.stack.pop();
-    p = VM.find(intern(VM.symtable, current_output_port_symname)).get<Port*>();
+    p = VM.find(intern(VM.symtable(), current_output_port_symname)).get<Port*>();
     assert(p);
   }else{
     auto arg2 = pick_args_1();
@@ -228,7 +228,7 @@ void port_newline(){
 
   if(VM.stack.top().tag() == Ptr_tag::vm_op){
     VM.stack.pop();
-    p = VM.find(intern(VM.symtable, current_output_port_symname)).get<Port*>();
+    p = VM.find(intern(VM.symtable(), current_output_port_symname)).get<Port*>();
     assert(p);
   }else{
     auto arg = pick_args_1();
@@ -303,8 +303,8 @@ builtin_port[] = {
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
-  VM.local_set(intern(VM.symtable, current_input_port_symname),
+  VM.local_set(intern(VM.symtable(), current_input_port_symname),
                new Port{zs::in, "r"});
-  VM.local_set(intern(VM.symtable, current_output_port_symname),
+  VM.local_set(intern(VM.symtable(), current_output_port_symname),
                new Port{zs::out, "w"});
 }

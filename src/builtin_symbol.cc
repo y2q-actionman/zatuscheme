@@ -34,7 +34,7 @@ void sym_from_string(){
     return;
   }
 
-  VM.return_value[0] = {intern(VM.symtable, *str)};
+  VM.return_value[0] = {intern(VM.symtable(), *str)};
 }
 
 } // namespace

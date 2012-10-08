@@ -265,7 +265,7 @@ Lisp_ptr whole_macro_or_expand(Cons* c){
     return c->car();
   }
 
-  const auto if_sym = intern(VM.symtable, "if");
+  const auto if_sym = intern(VM.symtable(), "if");
   auto else_clause = whole_macro_or_expand(c->cdr().get<Cons*>());
 
   return make_cons_list({if_sym,
@@ -279,7 +279,7 @@ Lisp_ptr whole_macro_and_expand(Cons* c){
     return c->car();
   }
 
-  const auto if_sym = intern(VM.symtable, "if");
+  const auto if_sym = intern(VM.symtable(), "if");
   auto then_clause = whole_macro_and_expand(c->cdr().get<Cons*>());
 
   return make_cons_list({if_sym,
@@ -317,7 +317,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
                                  return;
                                }
                              }
-                             then_form = push_cons_list(intern(VM.symtable, "begin"), c);
+                             then_form = push_cons_list(intern(VM.symtable(), "begin"), c);
                            });
   assert(ret >= 1); // should be handled by previous tests.
   (void)ret;
@@ -328,7 +328,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
     }
   }
 
-  const auto if_sym = intern(VM.symtable, "if");
+  const auto if_sym = intern(VM.symtable(), "if");
   auto else_form = whole_macro_cond_expand(head->cdr().get<Cons*>());
 
   return make_cons_list({if_sym,
@@ -371,14 +371,14 @@ void whole_macro_cond(){
 }
 
 Lisp_ptr whole_macro_case_keys_expand(Symbol* sym, Cons* keys){
-  const auto eqv_sym = intern(VM.symtable, "eqv?");
+  const auto eqv_sym = intern(VM.symtable(), "eqv?");
   auto eqv_expr = make_cons_list({eqv_sym, sym, keys->car()});
 
   if(!keys->cdr() || nullp(keys->cdr())){
     return eqv_expr;
   }
 
-  const auto if_sym = intern(VM.symtable, "if");
+  const auto if_sym = intern(VM.symtable(), "if");
   auto else_clause = whole_macro_case_keys_expand(sym, keys->cdr().get<Cons*>());
 
   return make_cons_list({if_sym,
@@ -451,11 +451,11 @@ void whole_macro_case(){
   auto key_sym = new Symbol(new string("case_key_symbol"));
 
   VM.return_value[0] = 
-    make_cons_list({intern(VM.symtable, "let"),
+    make_cons_list({intern(VM.symtable(), "let"),
           make_cons_list({
               make_cons_list({key_sym, key})
                 }),
-          new Cons(intern(VM.symtable, "cond"),
+          new Cons(intern(VM.symtable(), "cond"),
                    whole_macro_case_expand(key_sym, clauses))
           });
 }
