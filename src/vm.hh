@@ -38,7 +38,7 @@ public:
 
 private:
   std::stack<Env*> frame_history_;
-  SymTable* symtable_;
+  std::shared_ptr<SymTable> symtable_;
 };
 
 extern VM_t VM;
