@@ -5,6 +5,7 @@
 #include <utility>
 #include "lisp_ptr.hh"
 #include "env.hh"
+#include "vm.hh"
 
 namespace Procedure {
   typedef void(*NativeFunc)();
@@ -38,6 +39,9 @@ namespace Procedure {
         sequencial(static_cast<bool>(s)),
         early_bind(static_cast<bool>(e)){}
   };
+
+  std::pair<int, Variadic> parse_func_arg(Lisp_ptr);
+
 
   class IProcedure{
   public:
@@ -101,7 +105,29 @@ namespace Procedure {
     const NativeFunc n_func_;
   };
 
-  std::pair<int, Variadic> parse_func_arg(Lisp_ptr);
+  class Continuation{
+  public:
+    Continuation(const VM_t&);
+
+    Continuation(const Continuation&) = delete;
+    Continuation(Continuation&&) = delete;
+
+    ~Continuation();
+  
+    Continuation& operator=(const Continuation&) = delete;
+    Continuation& operator=(Continuation&&) = delete;
+
+    const ProcInfo* info() const
+    { return &cont_procinfo; }
+
+    const VM_t& get() const
+    { return vm_; }
+
+  private:
+    static constexpr ProcInfo cont_procinfo = ProcInfo{Calling::function, 1, Variadic::t};
+    const VM_t vm_;
+  };
+
 }
 
 const char* stringify(Procedure::Calling);

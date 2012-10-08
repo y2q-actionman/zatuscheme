@@ -32,6 +32,8 @@ std::pair<int, Variadic> Procedure::parse_func_arg(Lisp_ptr args){
   return {argc, v};
 }
 
+//constexpr ProcInfo Procedure::Continuation::cont_procinfo{Calling::function, 1, Variadic::t};
+
 const char* stringify(Calling c){
   switch(c){
   case Calling::function:
