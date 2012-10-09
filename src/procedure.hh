@@ -128,7 +128,10 @@ namespace Procedure {
     const VM_t vm_;
   };
 
-}
+  inline bool is_procedure(Lisp_ptr);
+  const ProcInfo* get_procinfo(Lisp_ptr);
+
+} // namespace Procedure
 
 const char* stringify(Procedure::Calling);
 

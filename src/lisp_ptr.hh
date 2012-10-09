@@ -19,6 +19,7 @@ enum class Ptr_tag {
     port,
     env,
     delay,
+    continuation,
     vm_op
     };
     
@@ -76,6 +77,7 @@ class Symbol;
 namespace Procedure{
   class IProcedure;
   class NProcedure;
+  class Continuation;
 }
 class Number;
 typedef std::string String;
