@@ -354,6 +354,17 @@ void proc_enter_interpreted(IProcedure* fun){
 }
 
 /*
+  stack = (arg1, arg2, ..., arg-bottom)
+  ----
+  replaces VM!
+*/
+void proc_enter_cont(Continuation*){
+  fprintf(zs::err, "eval warning: continuation is not implememted.\n");
+  clean_args();
+  VM.return_value[0] = {};
+}
+
+/*
   code = (proc)
   ----
   code = ()
@@ -369,8 +380,10 @@ void vm_op_proc_enter(){
     proc_enter_interpreted(ifun);
   }else if(auto nfun = proc.get<const NProcedure*>()){
     proc_enter_native(nfun);
+  }else if(auto cont = proc.get<Continuation*>()){
+    proc_enter_cont(cont);
   }else{
-    fprintf(zs::err, "eval internal error: corrupted code stack -- no proc found in entering!\n");
+    fprintf(zs::err, "eval internal error: corrupted code stack -- no proc found for entering!\n");
     VM.return_value[0] = {};
     return;
   }
