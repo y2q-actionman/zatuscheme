@@ -243,16 +243,7 @@ void whole_macro_call(Lisp_ptr proc){
 void vm_op_call(){
   auto proc = VM.return_value[0];
 
-  const ProcInfo* info;
-  Lisp_ptr args;
-
-  if(auto ifun = proc.get<IProcedure*>()){
-    info = ifun->info(); 
-    args = ifun->arg_head();
-  }else if(auto nfun = proc.get<const NProcedure*>()){
-    info = nfun->info();
-    args = {};
-  }else{
+  if(!is_procedure(proc)){
     fprintf(zs::err, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
             stringify(proc.tag()));
     fprintf(zs::err, "      expr: "); print(zs::err, VM.stack.top()); fputc('\n', zs::err);
@@ -262,15 +253,18 @@ void vm_op_call(){
     return;
   }
 
+  const ProcInfo* info = get_procinfo(proc);
+  Lisp_ptr args = get_arg_list(proc);
+
   switch(info->calling){
   case Calling::function:
-    function_call(proc, info, args); return;
+    return function_call(proc, info, args);
   case Calling::macro:
-    macro_call(proc, info); return;
+    return macro_call(proc, info);
   case Calling::whole_function:
-    whole_function_call(proc); return;
+    return whole_function_call(proc);
   case Calling::whole_macro:
-    whole_macro_call(proc); return;
+    return whole_macro_call(proc);
   default:
     UNEXP_DEFAULT();
   }
@@ -315,7 +309,7 @@ void proc_enter_interpreted(IProcedure* fun){
 
   VM.code.push(vm_op_leave_frame);
 
-  Lisp_ptr arg_name = fun->arg_head();
+  Lisp_ptr arg_name = fun->arg_list();
   Lisp_ptr st_top;
 
   // normal arg push
@@ -712,6 +706,7 @@ void eval(){
     case Ptr_tag::string: case Ptr_tag::vector:
     case Ptr_tag::port: case Ptr_tag::env:
     case Ptr_tag::delay:
+    case Ptr_tag::continuation:
     default:
       VM.return_value[0] = p;
       break;
@@ -750,19 +745,14 @@ void apply_func(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(VM.stack, args);
 
-  const ProcInfo* info = nullptr;
-
-  if(auto iproc = args[0].get<IProcedure*>()){
-    info = iproc->info();
-  }else if(auto nproc = args[0].get<const NProcedure*>()){
-    info = nproc->info();
-  }else{
+  if(!is_procedure(args[0])){
     fprintf(zs::err, "apply error: first arg is not procedure (%s)\n",
             stringify(args[0].tag()));
     VM.return_value[0] = {};
     return;
   }
-  assert(info);
+
+  auto info = get_procinfo(args[0]);
 
   // simulating function_call()
   VM.code.push(args[0]);
@@ -820,20 +810,14 @@ void func_force(){
 void call_with_values(){
   auto args = pick_args<2>();
 
-  const ProcInfo* info = nullptr;
-
-  if(auto iproc = args[0].get<IProcedure*>()){
-    info = iproc->info();
-  }else if(auto nproc = args[0].get<const NProcedure*>()){
-    info = nproc->info();
-  }else{
+  if(!is_procedure(args[0])){
     fprintf(zs::err, "call-with-values error: first arg is not procedure (%s)\n",
             stringify(args[0].tag()));
     VM.return_value[0] = {};
     return;
   }
-  assert(info);
-  
+
+  auto info = get_procinfo(args[0]);
   if(info->required_args != 0){
     fprintf(zs::err, "call-with-values error: first arg takes 1 or more args (%d)\n",
             info->required_args);
@@ -841,7 +825,7 @@ void call_with_values(){
     return;
   }    
 
-  if(!args[1].get<IProcedure*>() && !args[1].get<const NProcedure*>()){
+  if(!is_procedure(args[1])){
     fprintf(zs::err, "call-with-values error: second arg is not procedure (%s)\n",
             stringify(args[1].tag()));
     VM.return_value[0] = {};

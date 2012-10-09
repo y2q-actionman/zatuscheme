@@ -23,7 +23,7 @@ void to_macro_procedure(){
   info.calling = Calling::macro;
 
   VM.return_value[0] = new IProcedure(proc->get(), 
-                                   info, proc->arg_head(),
+                                   info, proc->arg_list(),
                                    proc->closure());
 }
 

@@ -42,11 +42,10 @@ namespace Procedure {
 
   std::pair<int, Variadic> parse_func_arg(Lisp_ptr);
 
-
   class IProcedure{
   public:
-    IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr head, Env* e)
-      : info_(pi), code_(code), arg_head_(head),  env_(e){
+    IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr al, Env* e)
+      : info_(pi), code_(code), arg_list_(al),  env_(e){
       if(env_) env_->add_ref();
     }
 
@@ -65,8 +64,8 @@ namespace Procedure {
     const ProcInfo* info() const
     { return &info_; }
 
-    Lisp_ptr arg_head() const
-    { return arg_head_; }
+    Lisp_ptr arg_list() const
+    { return arg_list_; }
 
     Lisp_ptr get() const
     { return code_; }
@@ -77,7 +76,7 @@ namespace Procedure {
   private:
     ProcInfo info_;
     Lisp_ptr code_;
-    Lisp_ptr arg_head_;
+    Lisp_ptr arg_list_;
     Env* env_;
   };
 
@@ -130,6 +129,7 @@ namespace Procedure {
 
   inline bool is_procedure(Lisp_ptr);
   const ProcInfo* get_procinfo(Lisp_ptr);
+  Lisp_ptr get_arg_list(Lisp_ptr);
 
 } // namespace Procedure
 
