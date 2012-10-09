@@ -4,9 +4,9 @@
 #include "cons.hh"
 #include "util.hh"
 
-using namespace Procedure;
+namespace Procedure{
 
-std::pair<int, Variadic> Procedure::parse_func_arg(Lisp_ptr args){
+std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
   int argc = 0;
   auto v = Variadic::f;
 
@@ -34,9 +34,9 @@ std::pair<int, Variadic> Procedure::parse_func_arg(Lisp_ptr args){
   return {argc, v};
 }
 
-constexpr ProcInfo Procedure::Continuation::cont_procinfo;
+constexpr ProcInfo Continuation::cont_procinfo;
 
-const ProcInfo* Procedure::get_procinfo(Lisp_ptr p){
+const ProcInfo* get_procinfo(Lisp_ptr p){
   switch(p.tag()){
   case Ptr_tag::i_procedure: {
     auto iproc = p.get<IProcedure*>();
@@ -69,6 +69,9 @@ const ProcInfo* Procedure::get_procinfo(Lisp_ptr p){
     UNEXP_DEFAULT();
   }
 }
+
+} // namespace Procedure
+
 
 const char* stringify(Calling c){
   switch(c){
