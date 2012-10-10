@@ -7,6 +7,7 @@
 #include "number.hh"
 #include "util.hh"
 #include "delay.hh"
+#include "vm.hh"
 
 namespace {
 
@@ -106,9 +107,15 @@ void print(FILE* f, Lisp_ptr p, print_human_readable flag){
     print_list(f, p);
     break;
 
-  case Ptr_tag::symbol:
-    fprintf(f, "%s", p.get<Symbol*>()->name().c_str());
+  case Ptr_tag::symbol: {
+    auto sym = p.get<Symbol*>();
+    if(VM.symtable().find(sym->name()) != VM.symtable().end()){
+      fprintf(f, "%s", sym->name().c_str());
+    }else{
+      fprintf(f, "#<uninterned '%s'>", sym->name().c_str());
+    }
     break;
+  }
 
   case Ptr_tag::number:
     print(f, *p.get<Number*>());

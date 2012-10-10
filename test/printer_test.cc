@@ -51,7 +51,6 @@ void check_noprint(const T& t){
 
 int main(){
   result = true;
-  SymTable stab;
 
   // boolean
   check(true, "#t");
@@ -65,8 +64,8 @@ int main(){
   check('\\', "#\\\\");
 
   // symbol
-  check(intern(stab, "hoge"), "hoge");
-  check(intern(stab, "a b c "), "a b c ");
+  check(intern(VM.symtable(), "hoge"), "hoge");
+  check(intern(VM.symtable(), "a b c "), "a b c ");
 
   // function (should be added in future)
   check_noprint(static_cast<IProcedure*>(nullptr));
