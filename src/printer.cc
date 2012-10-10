@@ -124,10 +124,13 @@ void print(FILE* f, Lisp_ptr p, print_human_readable flag){
 
   case Ptr_tag::delay: {
     auto d = p.get<Delay*>();
-    fprintf(f, "#<delay (%s) [",
-            d->forced() ? "forced" : "delaying");
+    if(flag == print_human_readable::t || !d->forced()){
+      fprintf(f, "#<delay (%s) [", d->forced() ? "forced" : "delayed");
+    }
     print(f, d->get(), flag);
-    fprintf(f, "]>");
+    if(flag == print_human_readable::t || !d->forced()){
+      fprintf(f, "]>");
+    }
     break;
   }
 

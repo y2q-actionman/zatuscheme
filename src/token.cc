@@ -374,6 +374,13 @@ Token tokenize(FILE* f){
     case 'd': case 'x':
       ungetc(sharp_c, f);
       return tokenize_number(f, '#');
+    case '<':
+      fprintf(zs::err, "reader error: '#<...>' appeared ('not printable object' in this implementation.)\n");
+      do{
+        c = fgetc(f);
+      }while(c != EOF && c != '>');
+      ungetc(c, f);
+      return {};
     default:
       fprintf(zs::err, "reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
       return {};

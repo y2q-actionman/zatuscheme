@@ -12,6 +12,7 @@ typedef std::unordered_map<std::string, Symbol> SymTable;
 // Symbol declarations.
 class Symbol{
 public:
+  // makes uninterned symbol (gensym)
   constexpr Symbol(const std::string* s) : name_(s){}
 
   Symbol(const Symbol&) = default;
