@@ -112,7 +112,7 @@ void print(FILE* f, Lisp_ptr p, print_human_readable flag){
     if(VM.symtable().find(sym->name()) != VM.symtable().end()){
       fprintf(f, "%s", sym->name().c_str());
     }else{
-      fprintf(f, "#<uninterned '%s'>", sym->name().c_str());
+      fprintf(f, "#<uninterned '%s' %p>", sym->name().c_str(), c_cast<void*>(sym));
     }
     break;
   }

@@ -3,6 +3,12 @@
 
 #include <cstdio>
 
+template<typename T, typename U>
+inline
+T c_cast(U u){
+  return (T)u;
+}
+
 // io
 namespace zs{
   extern FILE* in;

@@ -1027,7 +1027,7 @@ void number_from_string(){
     radix = num->get<Number::integer_type>();
   }
 
-  Port p{(void*)(str->c_str()), str->size()};
+  Port p{c_cast<void*>(str->c_str()), str->size()};
   auto n = parse_number(p.stream(), radix);
 
   if(n){

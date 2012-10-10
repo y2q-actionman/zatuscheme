@@ -27,13 +27,22 @@ void to_macro_procedure(){
                                    proc->closure());
 }
 
+void gensym(){
+  static const string gensym_symname = {"(gensym)"};
+  pick_args<0>();
+  VM.return_value[0] = {new Symbol(&gensym_symname)};
+}
+
 } // namespace
 
 const BuiltinFunc
 builtin_extra[] = {
   {"to-macro-procedure", {
       to_macro_procedure,
-      {Calling::function, 1}}}
+      {Calling::function, 1}}},
+  {"gensym", {
+      gensym,
+      {Calling::function, 0}}}
 };
 
 const size_t builtin_extra_size = sizeof(builtin_extra) / sizeof(builtin_extra[0]);
