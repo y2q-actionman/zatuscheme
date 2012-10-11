@@ -15,6 +15,11 @@ VM::VM() : code(), stack(),
 
 VM::~VM(){
   frame->release();
+  for(auto e : frame_history_){
+    if(e->release() <= 0){
+      delete e;
+    }
+  }
 }
 
 void VM::enter_frame(Env* e){
