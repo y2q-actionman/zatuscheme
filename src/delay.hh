@@ -6,7 +6,13 @@
 class Delay{
 public:
   Delay(Lisp_ptr, Env*);
+  Delay(const Delay&) = delete;
+  Delay(Delay&&) = delete;
+
   ~Delay();
+
+  Delay& operator=(const Delay&) = delete;
+  Delay& operator=(Delay&&) = delete;
 
   bool forced() const { return forced_; }
   Lisp_ptr get() const { return expr_; }
