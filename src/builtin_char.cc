@@ -30,7 +30,7 @@ void char_compare(const char* name, Fun&& fun){
     }
   }
 
-  VM.return_value[0] = Lisp_ptr{fun(c[0], c[1])};
+  vm.return_value[0] = Lisp_ptr{fun(c[0], c[1])};
 }
 
 void char_eq(){
@@ -89,11 +89,11 @@ void char_pred(Fun&& fun){
 
   auto c = arg1.get<char>();
   if(!c){
-    VM.return_value[0] = Lisp_ptr{false};
+    vm.return_value[0] = Lisp_ptr{false};
     return;
   }
 
-  VM.return_value[0] = Lisp_ptr{fun(c)};
+  vm.return_value[0] = Lisp_ptr{fun(c)};
 }
 
 void char_isalpha(){
@@ -127,7 +127,7 @@ void char_conversion(const char* name, Fun&& fun){
     return;
   }
 
-  VM.return_value[0] = Lisp_ptr{fun(c)};
+  vm.return_value[0] = Lisp_ptr{fun(c)};
 }
   
 
@@ -149,11 +149,11 @@ void char_from_int(){
   if(n->type() != Number::Type::integer){
     fprintf(zs::err, "native func: integer->char: passed arg is not exact integer! (%s)",
             stringify(n->type()));
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
 
-  VM.return_value[0] = Lisp_ptr{static_cast<char>(n->get<Number::integer_type>())};
+  vm.return_value[0] = Lisp_ptr{static_cast<char>(n->get<Number::integer_type>())};
 }
 
 void char_toupper(){

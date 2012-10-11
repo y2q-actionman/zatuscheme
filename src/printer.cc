@@ -109,7 +109,7 @@ void print(FILE* f, Lisp_ptr p, print_human_readable flag){
 
   case Ptr_tag::symbol: {
     auto sym = p.get<Symbol*>();
-    if(VM.symtable().find(sym->name()) != VM.symtable().end()){
+    if(vm.symtable().find(sym->name()) != vm.symtable().end()){
       fprintf(f, "%s", sym->name().c_str());
     }else{
       fprintf(f, "#<uninterned '%s' %p>", sym->name().c_str(), c_cast<void*>(sym));

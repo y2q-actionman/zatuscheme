@@ -22,9 +22,9 @@ Lisp_ptr eval_text(const char* s){
     return {};
   }
 
-  VM.code.push(exp);
+  vm.code.push(exp);
   eval();
-  auto ret = VM.return_value[0];
+  auto ret = vm.return_value[0];
   if(!ret){
     fprintf(zs::err, "[failed] eval error on %s\n", s);
     return {};
@@ -52,7 +52,7 @@ bool eqv(Lisp_ptr a, Lisp_ptr b){
 Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args){
   vector<Cons> conses(args.size() + 1);
 
-  conses[0].rplaca(Lisp_ptr(intern(VM.symtable(), funcname)));
+  conses[0].rplaca(Lisp_ptr(intern(vm.symtable(), funcname)));
   conses[0].rplacd(Lisp_ptr(&conses[1]));
 
   auto i = next(begin(conses)), e = end(conses);
@@ -70,9 +70,9 @@ Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args){
   }
   assert(i == e && args_i == args_e);
 
-  VM.code.push(Lisp_ptr(conses.data()));
+  vm.code.push(Lisp_ptr(conses.data()));
   eval();
-  return VM.return_value[0];
+  return vm.return_value[0];
 }
 
 

@@ -106,7 +106,7 @@ namespace Procedure {
 
   class Continuation{
   public:
-    Continuation(const VM_t&);
+    Continuation(const VM&);
 
     Continuation(const Continuation&) = delete;
     Continuation(Continuation&&) = delete;
@@ -119,12 +119,12 @@ namespace Procedure {
     const ProcInfo* info() const
     { return &cont_procinfo; }
 
-    const VM_t& get() const
+    const VM& get() const
     { return vm_; }
 
   private:
     static constexpr ProcInfo cont_procinfo = ProcInfo{Calling::function, 1, Variadic::t};
-    const VM_t vm_;
+    const VM vm_;
   };
 
   inline bool is_procedure(Lisp_ptr);

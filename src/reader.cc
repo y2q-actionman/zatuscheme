@@ -104,7 +104,7 @@ Lisp_ptr read_vector(FILE* f){
 }
 
 Lisp_ptr read_abbrev(const char* name, FILE* f){
-  Lisp_ptr first{intern(VM.symtable(), name)};
+  Lisp_ptr first{intern(vm.symtable(), name)};
   Lisp_ptr second{read(f)};
 
   return make_cons_list({first, second});
@@ -126,7 +126,7 @@ Lisp_ptr read_la(FILE* f, Token&& tok){
     return Lisp_ptr(new String(tok.move<string>()));
 
   case Token::Type::identifier:
-    return Lisp_ptr{intern(VM.symtable(), tok.move<string>())};
+    return Lisp_ptr{intern(vm.symtable(), tok.move<string>())};
 
     // compound datum
   case Token::Type::notation:

@@ -116,22 +116,22 @@ std::array<Lisp_ptr, size> pick_args(){
   auto ret = std::array<Lisp_ptr, size>();
 
   for(int i = 0; i < size; ++i){
-    if(VM.stack.empty()){
+    if(vm.stack.empty()){
       pick_args_detail::fail();
       ret.fill({});
       return ret;
     }
-    ret[i] = VM.stack.top();
-    VM.stack.pop();
+    ret[i] = vm.stack.top();
+    vm.stack.pop();
   }
 
-  if(VM.stack.empty()
-     || VM.stack.top().tag() != Ptr_tag::vm_op){
+  if(vm.stack.empty()
+     || vm.stack.top().tag() != Ptr_tag::vm_op){
     pick_args_detail::fail();
     ret.fill({});
     return ret;
   }
-  VM.stack.pop();
+  vm.stack.pop();
 
   return ret;
 }

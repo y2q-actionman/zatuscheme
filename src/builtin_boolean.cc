@@ -11,7 +11,7 @@ namespace {
 
 void not_func(){
   auto arg = pick_args_1();
-  VM.return_value[0] = Lisp_ptr{!arg.get<bool>()};
+  vm.return_value[0] = Lisp_ptr{!arg.get<bool>()};
 }
 
 } // namespace

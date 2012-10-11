@@ -11,14 +11,20 @@
 #include "symbol.hh"
 #include "env.hh"
 
-class VM_t {
+class VM {
   typedef std::stack<Lisp_ptr, std::vector<Lisp_ptr>> stack_t;
 
 public:
   static constexpr int return_value_max = 32;
 
-  VM_t();
-  ~VM_t();
+  VM();
+  VM(const VM&) = delete;
+  VM(VM&&) = delete;
+
+  ~VM();
+
+  VM& operator=(const VM&) = delete;
+  VM& operator=(VM&&) = delete;
 
   void enter_frame(Env*);
   void leave_frame();
@@ -42,7 +48,7 @@ private:
   std::shared_ptr<SymTable> symtable_;
 };
 
-extern VM_t VM;
+extern VM vm;
 
 #include "vm.i.hh"
 

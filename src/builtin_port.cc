@@ -25,11 +25,11 @@ template<typename Fun>
 void port_io_p(Fun&& fun){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::port){
-    VM.return_value[0] = Lisp_ptr{false};
+    vm.return_value[0] = Lisp_ptr{false};
     return;
   }
 
-  VM.return_value[0] = Lisp_ptr{fun(arg.get<Port*>())};
+  vm.return_value[0] = Lisp_ptr{fun(arg.get<Port*>())};
 }  
   
 void port_i_p(){
@@ -44,7 +44,7 @@ void port_o_p(){
 static
 void port_current(const char* name){
   pick_args<0>();
-  VM.return_value[0] = VM.find(intern(VM.symtable(), name));
+  vm.return_value[0] = vm.find(intern(vm.symtable(), name));
 }  
 
 void port_current_i(){
@@ -68,11 +68,11 @@ void port_open_file(const char* name, const char* mode){
   auto p = new Port(str->c_str(), mode);
   if(!*p){
     fprintf(zs::err, "native error: %s: failed at opening file\n", name);
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
   
-  VM.return_value[0] = {p};
+  vm.return_value[0] = {p};
 }  
 
 void port_open_file_i(){
@@ -99,17 +99,17 @@ void port_close(const char* name, Fun&& fun){
 
   if(!p->stream()){
     fprintf(zs::err, "native func warning: %s: passed port is already closed\n", name);
-    VM.return_value[0] = Lisp_ptr{false};
+    vm.return_value[0] = Lisp_ptr{false};
     return;
   }
 
   if(p->close() < 0){
     fprintf(zs::err, "native func warning: %s: failed at closeing port\n", name);
-    VM.return_value[0] = Lisp_ptr{false};
+    vm.return_value[0] = Lisp_ptr{false};
     return;
   }
   
-  VM.return_value[0] = Lisp_ptr{true};
+  vm.return_value[0] = Lisp_ptr{true};
 }
 
 void port_close_i(){
@@ -125,9 +125,9 @@ template<typename Fun>
 void port_input_call(const char* name, Fun&& fun){
   Port* p;
 
-  if(VM.stack.top().tag() == Ptr_tag::vm_op){
-    VM.stack.pop();
-    p = VM.find(intern(VM.symtable(), current_input_port_symname)).get<Port*>();
+  if(vm.stack.top().tag() == Ptr_tag::vm_op){
+    vm.stack.pop();
+    p = vm.find(intern(vm.symtable(), current_input_port_symname)).get<Port*>();
     assert(p);
   }else{
     auto arg = pick_args_1();
@@ -138,7 +138,7 @@ void port_input_call(const char* name, Fun&& fun){
     }
   }
 
-  VM.return_value[0] = Lisp_ptr{fun(p)};
+  vm.return_value[0] = Lisp_ptr{fun(p)};
 }
 
 void port_read(){
@@ -163,11 +163,11 @@ void port_peek_char(){
 void port_eof_p(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::character){
-    VM.return_value[0] = Lisp_ptr{false};
+    vm.return_value[0] = Lisp_ptr{false};
     return;
   }
 
-  VM.return_value[0] = Lisp_ptr{arg.get<char>() == EOF};
+  vm.return_value[0] = Lisp_ptr{arg.get<char>() == EOF};
 }  
 
   
@@ -175,12 +175,12 @@ template<typename Fun>
 void port_output_call(const char* name, Fun&& fun){
   Port* p;
 
-  auto arg1 = VM.stack.top();
-  VM.stack.pop();
+  auto arg1 = vm.stack.top();
+  vm.stack.pop();
 
-  if(VM.stack.top().tag() == Ptr_tag::vm_op){
-    VM.stack.pop();
-    p = VM.find(intern(VM.symtable(), current_output_port_symname)).get<Port*>();
+  if(vm.stack.top().tag() == Ptr_tag::vm_op){
+    vm.stack.pop();
+    p = vm.find(intern(vm.symtable(), current_output_port_symname)).get<Port*>();
     assert(p);
   }else{
     auto arg2 = pick_args_1();
@@ -191,7 +191,7 @@ void port_output_call(const char* name, Fun&& fun){
     }
   }
 
-  VM.return_value[0] = Lisp_ptr{fun(arg1, p)};
+  vm.return_value[0] = Lisp_ptr{fun(arg1, p)};
 }
 
 void port_write(){
@@ -226,9 +226,9 @@ void port_write_char(){
 void port_newline(){
   Port* p;
 
-  if(VM.stack.top().tag() == Ptr_tag::vm_op){
-    VM.stack.pop();
-    p = VM.find(intern(VM.symtable(), current_output_port_symname)).get<Port*>();
+  if(vm.stack.top().tag() == Ptr_tag::vm_op){
+    vm.stack.pop();
+    p = vm.find(intern(vm.symtable(), current_output_port_symname)).get<Port*>();
     assert(p);
   }else{
     auto arg = pick_args_1();
@@ -240,7 +240,7 @@ void port_newline(){
   }
 
   fputc('\n', p->stream());
-  VM.return_value[0] = Lisp_ptr{true};
+  vm.return_value[0] = Lisp_ptr{true};
 }
 
 } //namespace
@@ -303,8 +303,8 @@ builtin_port[] = {
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
-  VM.local_set(intern(VM.symtable(), current_input_port_symname),
+  vm.local_set(intern(vm.symtable(), current_input_port_symname),
                new Port{zs::in, "r"});
-  VM.local_set(intern(VM.symtable(), current_output_port_symname),
+  vm.local_set(intern(vm.symtable(), current_output_port_symname),
                new Port{zs::out, "w"});
 }

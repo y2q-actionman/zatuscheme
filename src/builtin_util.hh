@@ -44,7 +44,7 @@ struct BuiltinFunc {
 template <Ptr_tag p>
 void type_check_pred(){
   auto arg = pick_args_1();
-  VM.return_value[0] = Lisp_ptr{arg.tag() == p};
+  vm.return_value[0] = Lisp_ptr{arg.tag() == p};
 }
 
 #include "builtin_util.i.hh"

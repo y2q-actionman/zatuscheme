@@ -22,8 +22,8 @@ void string_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 void string_make(){
-  auto arg1 = VM.stack.top();
-  VM.stack.pop();
+  auto arg1 = vm.stack.top();
+  vm.stack.pop();
 
   auto num = arg1.get<Number*>();
   if(!num){
@@ -35,7 +35,7 @@ void string_make(){
   if(num->type() != Number::Type::integer){
     fprintf(zs::err, "native func: make-string: arg's number is not %s! (%s)\n",
             stringify(Number::Type::integer), stringify(num->type()));
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     clean_args();
     return;
   }
@@ -43,8 +43,8 @@ void string_make(){
 
   char ch;
 
-  if(VM.stack.top().tag() == Ptr_tag::vm_op){
-    VM.stack.pop();
+  if(vm.stack.top().tag() == Ptr_tag::vm_op){
+    vm.stack.pop();
     ch = '\0';
   }else{
     auto arg2 = pick_args_1();
@@ -56,12 +56,12 @@ void string_make(){
     ch = c;
   }
 
-  VM.return_value[0] = {new String(char_count, ch)};
+  vm.return_value[0] = {new String(char_count, ch)};
 }
 
 void string_string(){
   std::vector<Lisp_ptr> args;
-  stack_to_vector(VM.stack, args);
+  stack_to_vector(vm.stack, args);
 
   String ret;
   for(auto i = args.begin(), e = args.end(); i != e; ++i){
@@ -74,7 +74,7 @@ void string_string(){
     ret.push_back(c);
   }
 
-  VM.return_value[0] = {new String(std::move(ret))};
+  vm.return_value[0] = {new String(std::move(ret))};
 }
   
 void string_length(){
@@ -85,7 +85,7 @@ void string_length(){
     return;
   }
 
-  VM.return_value[0] = {new Number(static_cast<Number::integer_type>(str->length()))};
+  vm.return_value[0] = {new Number(static_cast<Number::integer_type>(str->length()))};
 }
 
 void string_ref(){
@@ -105,7 +105,7 @@ void string_ref(){
   if(num->type() != Number::Type::integer){
     fprintf(zs::err, "native func: string-ref: arg's number is not %s! (%s)\n",
             stringify(Number::Type::integer), stringify(num->type()));
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
   auto ind = num->get<Number::integer_type>();
@@ -113,11 +113,11 @@ void string_ref(){
   if(ind < 0 || ind >= str->length()){
     fprintf(zs::err, "native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
             str->length(), ind);
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
 
-  VM.return_value[0] = Lisp_ptr{(*str)[ind]};
+  vm.return_value[0] = Lisp_ptr{(*str)[ind]};
 }
 
 void string_set(){
@@ -137,7 +137,7 @@ void string_set(){
   if(num->type() != Number::Type::integer){
     fprintf(zs::err, "native func: string-set!: arg's number is not %s! (%s)\n",
             stringify(Number::Type::integer), stringify(num->type()));
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
   auto ind = num->get<Number::integer_type>();
@@ -145,7 +145,7 @@ void string_set(){
   if(ind < 0 || ind >= str->length()){
     fprintf(zs::err, "native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
             str->length(), ind);
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
 
@@ -156,7 +156,7 @@ void string_set(){
   }
 
   (*str)[ind] = ch;
-  VM.return_value[0] = Lisp_ptr{ch};
+  vm.return_value[0] = Lisp_ptr{ch};
 }
 
 template<typename Fun>
@@ -172,7 +172,7 @@ void string_compare(const char* name, Fun&& fun){
     }
   }
 
-  VM.return_value[0] = Lisp_ptr{fun(*str[0], *str[1])};
+  vm.return_value[0] = Lisp_ptr{fun(*str[0], *str[1])};
 }
 
 void string_equal(){
@@ -244,7 +244,7 @@ void string_substr(){
     if(n->type() != Number::Type::integer){
       fprintf(zs::err, "native func: substring: arg's number is not %s! (%s)\n",
               stringify(Number::Type::integer), stringify(n->type()));
-      VM.return_value[0] = {};
+      vm.return_value[0] = {};
       return;
     }
     ind[i-1] = n->get<Number::integer_type>();
@@ -254,17 +254,17 @@ void string_substr(){
   if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= str->length())){
     fprintf(zs::err, "native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
             str->length(), ind[0], ind[1]);
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
 
   auto ret = str->substr(ind[0], ind[1] - ind[0]);
-  VM.return_value[0] = {new String(std::move(ret))};
+  vm.return_value[0] = {new String(std::move(ret))};
 }
 
 void string_append(){
   std::vector<Lisp_ptr> args;
-  stack_to_vector(VM.stack, args);
+  stack_to_vector(vm.stack, args);
 
   String ret;
 
@@ -279,7 +279,7 @@ void string_append(){
     ret.append(*str);
   }
 
-  VM.return_value[0] = {new String(std::move(ret))};
+  vm.return_value[0] = {new String(std::move(ret))};
 }
 
 void string_to_list(){
@@ -290,7 +290,7 @@ void string_to_list(){
     return;
   }
 
-  VM.return_value[0] = make_cons_list(str->begin(), str->end());
+  vm.return_value[0] = make_cons_list(str->begin(), str->end());
 }
 
 void string_from_list(){
@@ -318,9 +318,9 @@ void string_from_list(){
           [](Lisp_ptr){});
 
   if(not_char_found){
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
   }else{
-    VM.return_value[0] = {new String(std::move(ret))};
+    vm.return_value[0] = {new String(std::move(ret))};
   }
 }
 
@@ -332,7 +332,7 @@ void string_copy(){
     return;
   }
 
-  VM.return_value[0] = {new String(*str)};
+  vm.return_value[0] = {new String(*str)};
 }
 
 void string_fill(){
@@ -350,7 +350,7 @@ void string_fill(){
   }
 
   std::fill(str->begin(), str->end(), ch);
-  VM.return_value[0] = {str};
+  vm.return_value[0] = {str};
 }
 
 

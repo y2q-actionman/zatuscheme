@@ -44,7 +44,7 @@ void env_pick_2(const char* name){
 
   if(num->type() != Number::Type::integer){
     fprintf(zs::err, "native func: %s: passed number is not exact integer\n", name);
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
 
@@ -52,11 +52,11 @@ void env_pick_2(const char* name){
   if(ver != 5l){
     fprintf(zs::err, "native func: %s: passed number is not 5 (supplied %ld)\n",
             name, ver);
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
 
-  VM.return_value[0] = VM.find(intern(VM.symtable(), name));
+  vm.return_value[0] = vm.find(intern(vm.symtable(), name));
 }
 
 void env_r5rs(){
@@ -69,7 +69,7 @@ void env_null(){
 
 void env_interactive(){
   pick_args<0>();
-  VM.return_value[0] = VM.find(intern(VM.symtable(), interaction_env_symname));
+  vm.return_value[0] = vm.find(intern(vm.symtable(), interaction_env_symname));
 }
   
 
@@ -81,9 +81,9 @@ void eval_func(){
     return;
   }
 
-  VM.enter_frame(env->push());
-  VM.code.push(vm_op_leave_frame);
-  VM.code.push(args[0]);
+  vm.enter_frame(env->push());
+  vm.code.push(vm_op_leave_frame);
+  vm.code.push(args[0]);
 }
 
 
@@ -98,12 +98,12 @@ void load_func(){
   Port p{str->c_str(), "r"};
   if(!p){
     fprintf(zs::err, "load error: failed at opening file\n");
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
 
   load(&p);
-  VM.return_value[0] = {};
+  vm.return_value[0] = {};
 }
 
 } //namespace
@@ -132,16 +132,16 @@ builtin_misc[] = {
 
 static void install_builtin_internal(const BuiltinFunc bf[], size_t s){
   for(size_t i = 0; i < s; ++i){
-    VM.local_set(intern(VM.symtable(), bf[i].name), {&bf[i].func});
+    vm.local_set(intern(vm.symtable(), bf[i].name), {&bf[i].func});
   }
 }
 
 void install_builtin(){
   install_builtin_internal(builtin_equal, builtin_equal_size);
   install_builtin_internal(builtin_syntax, builtin_syntax_size);
-  VM.local_set(intern(VM.symtable(), null_env_symname), VM.frame);
+  vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame);
 
-  VM.frame = VM.frame->push();
+  vm.frame = vm.frame->push();
   install_builtin_internal(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
   install_builtin_internal(builtin_boolean, builtin_boolean_size);
   install_builtin_internal(builtin_char, builtin_char_size);
@@ -153,9 +153,9 @@ void install_builtin(){
   install_builtin_internal(builtin_vector, builtin_vector_size);
   install_builtin_port_value();
   install_builtin_internal(builtin_port, builtin_port_size);
-  VM.local_set(intern(VM.symtable(), r5rs_env_symname), VM.frame);
+  vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame);
 
-  VM.frame = VM.frame->push();
+  vm.frame = vm.frame->push();
   install_builtin_internal(builtin_extra, builtin_extra_size);
-  VM.local_set(intern(VM.symtable(), interaction_env_symname), VM.frame);
+  vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame);
 }

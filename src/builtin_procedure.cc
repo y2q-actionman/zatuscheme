@@ -15,7 +15,7 @@ namespace {
 
 void type_check_procedure(){
   auto arg = pick_args_1();
-  VM.return_value[0] = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
+  vm.return_value[0] = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
                              || (arg.tag() == Ptr_tag::n_procedure)};
 }
 
@@ -23,25 +23,25 @@ void proc_values(){
   unsigned i = 0;
 
   while(1){
-    if(VM.stack.top().tag() == Ptr_tag::vm_op){
-      VM.stack.pop();
+    if(vm.stack.top().tag() == Ptr_tag::vm_op){
+      vm.stack.pop();
       break;
     }
 
-    VM.return_value[i] = VM.stack.top();
-    VM.stack.pop();
+    vm.return_value[i] = vm.stack.top();
+    vm.stack.pop();
     ++i;
 
-    if(i >= VM_t::return_value_max){
+    if(i >= VM::return_value_max){
       fprintf(zs::err, "eval warning: values: overed max values (%ud)\n",
-              VM_t::return_value_max);
+              VM::return_value_max);
       clean_args();
       return;
     }
   }
 
-  for(; i < VM_t::return_value_max; ++i){
-    VM.return_value[i] = {};
+  for(; i < VM::return_value_max; ++i){
+    vm.return_value[i] = {};
   }
 }
 

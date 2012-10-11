@@ -14,7 +14,7 @@ void to_macro_procedure(){
 
   if(arg1.tag() != Ptr_tag::i_procedure){
     fprintf(zs::err, "to-macro-procedure: error: should be called with interpreted proc\n");
-    VM.return_value[0] = {};
+    vm.return_value[0] = {};
     return;
   }
 
@@ -22,7 +22,7 @@ void to_macro_procedure(){
   auto info = *proc->info();
   info.calling = Calling::macro;
 
-  VM.return_value[0] = new IProcedure(proc->get(), 
+  vm.return_value[0] = new IProcedure(proc->get(), 
                                    info, proc->arg_list(),
                                    proc->closure());
 }
@@ -30,7 +30,7 @@ void to_macro_procedure(){
 void gensym(){
   static const string gensym_symname = {"(gensym)"};
   pick_args<0>();
-  VM.return_value[0] = {new Symbol(&gensym_symname)};
+  vm.return_value[0] = {new Symbol(&gensym_symname)};
 }
 
 } // namespace

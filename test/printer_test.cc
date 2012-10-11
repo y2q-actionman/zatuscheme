@@ -64,8 +64,8 @@ int main(){
   check('\\', "#\\\\");
 
   // symbol
-  check(intern(VM.symtable(), "hoge"), "hoge");
-  check(intern(VM.symtable(), "a b c "), "a b c ");
+  check(intern(vm.symtable(), "hoge"), "hoge");
+  check(intern(vm.symtable(), "a b c "), "a b c ");
 
   // function (should be added in future)
   check_noprint(static_cast<IProcedure*>(nullptr));
