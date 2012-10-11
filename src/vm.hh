@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <stack>
+#include <deque>
 #include <memory>
 
 #include "lisp_ptr.hh"
@@ -37,7 +38,7 @@ public:
   Env* frame;
 
 private:
-  std::stack<Env*> frame_history_;
+  std::deque<Env*> frame_history_;
   std::shared_ptr<SymTable> symtable_;
 };
 

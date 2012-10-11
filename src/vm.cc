@@ -18,7 +18,7 @@ VM_t::~VM_t(){
 }
 
 void VM_t::enter_frame(Env* e){
-  frame_history_.push(frame);
+  frame_history_.push_back(frame);
   frame = e;
   frame->add_ref();
 }  
@@ -27,6 +27,6 @@ void VM_t::leave_frame(){
   if(frame->release() <= 0){
     delete frame;
   }
-  frame = frame_history_.top();
-  frame_history_.pop();
+  frame = frame_history_.back();
+  frame_history_.pop_back();
 }  
