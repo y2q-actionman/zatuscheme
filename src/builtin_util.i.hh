@@ -21,17 +21,17 @@ Lisp_ptr stack_to_list(StackT& st){
   Cons* prev_c = c;
   Lisp_ptr ret = c;
 
-  if(st.top().tag() == Ptr_tag::vm_op){
-    st.pop();
+  if(st.back().tag() == Ptr_tag::vm_op){
+    st.pop_back();
     return Cons::NIL;
   }
 
   while(1){
-    c->rplaca(st.top());
-    st.pop();
+    c->rplaca(st.back());
+    st.pop_back();
 
-    if(st.top().tag() == Ptr_tag::vm_op){
-      st.pop();
+    if(st.back().tag() == Ptr_tag::vm_op){
+      st.pop_back();
       break;
     }
 
@@ -57,17 +57,17 @@ Lisp_ptr stack_to_list(StackT& st){
 
 template<typename StackT, typename VectorT>
 void stack_to_vector(StackT& st, VectorT& v){
-  if(st.top().tag() == Ptr_tag::vm_op){
-    st.pop();
+  if(st.back().tag() == Ptr_tag::vm_op){
+    st.pop_back();
     return;
   }
 
   while(1){
-    v.push_back(st.top());
-    st.pop();
+    v.push_back(st.back());
+    st.pop_back();
 
-    if(st.top().tag() == Ptr_tag::vm_op){
-      st.pop();
+    if(st.back().tag() == Ptr_tag::vm_op){
+      st.pop_back();
       break;
     }
   }
@@ -93,7 +93,7 @@ int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
   int ret = 0;
 
   while(!tmp.empty()){
-    st.push(tmp.top());
+    st.push_back(tmp.top());
     tmp.pop();
     ++ret;
   }
@@ -121,17 +121,17 @@ std::array<Lisp_ptr, size> pick_args(){
       ret.fill({});
       return ret;
     }
-    ret[i] = vm.stack.top();
-    vm.stack.pop();
+    ret[i] = vm.stack.back();
+    vm.stack.pop_back();
   }
 
   if(vm.stack.empty()
-     || vm.stack.top().tag() != Ptr_tag::vm_op){
+     || vm.stack.back().tag() != Ptr_tag::vm_op){
     pick_args_detail::fail();
     ret.fill({});
     return ret;
   }
-  vm.stack.pop();
+  vm.stack.pop_back();
 
   return ret;
 }

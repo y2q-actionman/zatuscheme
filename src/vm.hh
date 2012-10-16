@@ -12,8 +12,6 @@
 #include "env.hh"
 
 class VM {
-  typedef std::stack<Lisp_ptr, std::vector<Lisp_ptr>> stack_t;
-
 public:
   static constexpr int return_value_max = 32;
 
@@ -38,8 +36,8 @@ public:
   }
 
 public:
-  stack_t code;
-  stack_t stack;
+  std::deque<Lisp_ptr> code;
+  std::deque<Lisp_ptr> stack;
   Lisp_ptr return_value[return_value_max];
   Env* frame;
 

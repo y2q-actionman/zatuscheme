@@ -127,11 +127,11 @@ void whole_function_if(){
   }
 
   // evaluating
-  vm.code.push(vm_op_if);
-  vm.code.push(test);
+  vm.code.push_back(vm_op_if);
+  vm.code.push_back(test);
 
-  vm.stack.push(alt);
-  vm.stack.push(conseq);
+  vm.stack.push_back(alt);
+  vm.stack.push_back(conseq);
 }
 
 /*
@@ -172,9 +172,9 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   }
 
   // evaluating
-  vm.code.push(set_op);
-  vm.code.push(val);
-  vm.stack.push(var);
+  vm.code.push_back(set_op);
+  vm.code.push_back(val);
+  vm.stack.push_back(var);
 }
 
 void whole_function_set(){
@@ -243,9 +243,9 @@ void whole_function_quasiquote(){
   bind_cons_list(wargs,
                  [](Cons*){},
                  [](Cons* c){
-                   vm.code.push(c->car());
+                   vm.code.push_back(c->car());
                  });
-  vm.code.push(vm_op_quasiquote);
+  vm.code.push_back(vm_op_quasiquote);
 }
 
 void whole_function_let(){

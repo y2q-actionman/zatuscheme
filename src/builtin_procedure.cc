@@ -23,13 +23,13 @@ void proc_values(){
   unsigned i = 0;
 
   while(1){
-    if(vm.stack.top().tag() == Ptr_tag::vm_op){
-      vm.stack.pop();
+    if(vm.stack.back().tag() == Ptr_tag::vm_op){
+      vm.stack.pop_back();
       break;
     }
 
-    vm.return_value[i] = vm.stack.top();
-    vm.stack.pop();
+    vm.return_value[i] = vm.stack.back();
+    vm.stack.pop_back();
     ++i;
 
     if(i >= VM::return_value_max){

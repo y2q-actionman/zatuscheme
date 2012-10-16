@@ -22,14 +22,14 @@ int clean_args(){
   int ret = 0;
 
   while(!vm.stack.empty()
-        && vm.stack.top().tag() != Ptr_tag::vm_op){
-    vm.stack.pop();
+        && vm.stack.back().tag() != Ptr_tag::vm_op){
+    vm.stack.pop_back();
     ++ret;
   }
 
   if(!vm.stack.empty()
-     && vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+     && vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
   }
 
   return ret;
@@ -45,7 +45,7 @@ void vm_op_proc_enter();
   stack[0] = some value
 */
 void vm_op_arg_push(){
-  vm.stack.push(vm.return_value[0]);
+  vm.stack.push_back(vm.return_value[0]);
 }
 
 /*
@@ -56,8 +56,8 @@ void vm_op_arg_push(){
   value is set to symbol
 */
 void vm_op_arg_push_and_set(){
-  auto symp = vm.code.top();
-  vm.code.pop();
+  auto symp = vm.code.back();
+  vm.code.pop_back();
 
   assert(symp.tag() == Ptr_tag::symbol);
   vm.local_set(symp.get<Symbol*>(), vm.return_value[0]);
@@ -84,15 +84,15 @@ bool check_argcount(const char* name, int argc, const ProcInfo* info){
 static
 void clean_funcall_stack(){
   while(!vm.stack.empty()){
-    auto op = vm.stack.top().get<VMop>();
+    auto op = vm.stack.back().get<VMop>();
     if(op == vm_op_proc_enter)
       break;
-    vm.stack.pop();
+    vm.stack.pop_back();
   }
 
   for(int i = 0; i < 2; ++i){
     if(!vm.stack.empty()){
-      vm.stack.pop();
+      vm.stack.pop_back();
     }
   }
 }
@@ -109,8 +109,8 @@ void clean_funcall_stack(){
     stack = (arg-bottom)
 */
 void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
-  auto args = vm.stack.top();
-  vm.stack.pop();
+  auto args = vm.stack.back();
+  vm.stack.pop_back();
 
   if(info->early_bind){
     auto iproc = proc.get<IProcedure*>();
@@ -118,8 +118,8 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
     vm.enter_frame(iproc->closure()->push());
   }
 
-  vm.code.push(proc);
-  vm.code.push(vm_op_proc_enter);
+  vm.code.push_back(proc);
+  vm.code.push_back(vm_op_proc_enter);
 
   int argc = 0;
   bool ret;
@@ -128,8 +128,8 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
     ret = 
       do_list(args.get<Cons*>()->cdr(),
               [&](Cons* cell) -> bool{
-                vm.code.push(vm_op_arg_push);
-                vm.code.push(cell->car());
+                vm.code.push_back(vm_op_arg_push);
+                vm.code.push_back(cell->car());
                 ++argc;
                 return true;
               },
@@ -147,9 +147,9 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
       do_list_2(args.get<Cons*>()->cdr(),
                 bind_list,
                 [&](Cons* cell, Cons* bindc) -> bool{
-                  vm.code.push(bindc->car());
-                  vm.code.push(vm_op_arg_push_and_set);
-                  vm.code.push(cell->car());
+                  vm.code.push_back(bindc->car());
+                  vm.code.push_back(vm_op_arg_push_and_set);
+                  vm.code.push_back(cell->car());
                   ++argc;
                   return true;
                 },
@@ -172,7 +172,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
     return;
   }
   
-  vm.stack.push(vm_op_arg_bottom);
+  vm.stack.push_back(vm_op_arg_bottom);
 }
 
 /*
@@ -181,7 +181,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
   code = proc
 */
 void vm_op_macro_call(){
-  vm.code.push(vm.return_value[0]);
+  vm.code.push_back(vm.return_value[0]);
 }  
 
 /*
@@ -191,10 +191,10 @@ void vm_op_macro_call(){
   stack = (arg1, arg2, ..., arg-bottom)
 */
 void macro_call(Lisp_ptr proc, const ProcInfo* info){
-  auto args = vm.stack.top();
-  vm.stack.pop();
+  auto args = vm.stack.back();
+  vm.stack.pop_back();
 
-  vm.stack.push(vm_op_arg_bottom);
+  vm.stack.push_back(vm_op_arg_bottom);
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), vm.stack);
   if(!check_argcount("macro-call", argc, info)){
     clean_args();
@@ -202,9 +202,9 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
     return;
   }    
 
-  vm.code.push(vm_op_macro_call);
-  vm.code.push(proc);
-  vm.code.push(vm_op_proc_enter);
+  vm.code.push_back(vm_op_macro_call);
+  vm.code.push_back(proc);
+  vm.code.push_back(vm_op_proc_enter);
 }
 
 /*
@@ -214,13 +214,13 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   stack = (whole args, arg-bottom)
 */
 void whole_function_call(Lisp_ptr proc){
-  vm.code.push(proc);
-  vm.code.push(vm_op_proc_enter);
+  vm.code.push_back(proc);
+  vm.code.push_back(vm_op_proc_enter);
 
-  auto args = vm.stack.top();
-  vm.stack.pop();
-  vm.stack.push(vm_op_arg_bottom);
-  vm.stack.push(args);
+  auto args = vm.stack.back();
+  vm.stack.pop_back();
+  vm.stack.push_back(vm_op_arg_bottom);
+  vm.stack.push_back(args);
 }
 
 /*
@@ -230,7 +230,7 @@ void whole_function_call(Lisp_ptr proc){
   stack = (whole args, arg-bottom)
 */
 void whole_macro_call(Lisp_ptr proc){
-  vm.code.push(vm_op_macro_call);
+  vm.code.push_back(vm_op_macro_call);
   whole_function_call(proc);
 }
 
@@ -246,10 +246,10 @@ void vm_op_call(){
   if(!is_procedure(proc)){
     fprintf(zs::err, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
             stringify(proc.tag()));
-    fprintf(zs::err, "      expr: "); print(zs::err, vm.stack.top()); fputc('\n', zs::err);
+    fprintf(zs::err, "      expr: "); print(zs::err, vm.stack.back()); fputc('\n', zs::err);
     
     vm.return_value[0] = {};
-    vm.stack.pop();
+    vm.stack.pop_back();
     return;
   }
 
@@ -298,8 +298,8 @@ void proc_enter_interpreted(IProcedure* fun){
 
   // tail call check
   if(!vm.code.empty()
-     && vm.code.top().get<VMop>() == vm_op_leave_frame){
-    vm.code.pop();
+     && vm.code.back().get<VMop>() == vm_op_leave_frame){
+    vm.code.pop_back();
     vm.leave_frame();
   }
 
@@ -307,14 +307,14 @@ void proc_enter_interpreted(IProcedure* fun){
     vm.enter_frame(fun->closure()->push());
   }
 
-  vm.code.push(vm_op_leave_frame);
+  vm.code.push_back(vm_op_leave_frame);
 
   Lisp_ptr arg_name = fun->arg_list();
   Lisp_ptr st_top;
 
   // normal arg push
-  while((st_top = vm.stack.top()).tag() != Ptr_tag::vm_op){
-    vm.stack.pop();
+  while((st_top = vm.stack.back()).tag() != Ptr_tag::vm_op){
+    vm.stack.pop_back();
     if(vm.stack.empty()){
       fprintf(zs::err, "eval internal error: no args and no managed funcall!\n");
       vm.return_value[0] = {};
@@ -341,12 +341,12 @@ void proc_enter_interpreted(IProcedure* fun){
     vm.local_set(arg_name.get<Symbol*>(), {new Cons(st_top, lis)});
   }else{  // clean stack
     if(vm.stack.empty()
-       || vm.stack.top().tag() != Ptr_tag::vm_op){
+       || vm.stack.back().tag() != Ptr_tag::vm_op){
       fprintf(zs::err, "eval error: corrupted stack -- no bottom found!\n");
       vm.return_value[0] = {};
       return;
     }
-    vm.stack.pop();
+    vm.stack.pop_back();
   }
   
   // set up lambda body code
@@ -371,8 +371,8 @@ void proc_enter_cont(Continuation*){
    and goto handler.
 */
 void vm_op_proc_enter(){
-  auto proc = vm.code.top();
-  vm.code.pop();
+  auto proc = vm.code.back();
+  vm.code.pop_back();
 
   assert(!vm.stack.empty());
 
@@ -396,11 +396,11 @@ void vm_op_proc_enter(){
   goto proc_enter 
 */
 void vm_op_move_values(){
-  vm.stack.push(vm_op_arg_bottom);
+  vm.stack.push_back(vm_op_arg_bottom);
 
   for(auto i = VM::return_value_max - 1; i >= 0; --i){
     if(!vm.return_value[i]) continue;
-    vm.stack.push(vm.return_value[i]);
+    vm.stack.push_back(vm.return_value[i]);
     vm.return_value[i] = {};
   }
 }
@@ -437,13 +437,13 @@ void vm_op_if(){
   auto test_result = vm.return_value[0];
 
   if(test_result.get<bool>()){
-    vm.code.push(vm.stack.top());
-    vm.stack.pop();
-    vm.stack.pop();
+    vm.code.push_back(vm.stack.back());
+    vm.stack.pop_back();
+    vm.stack.pop_back();
   }else{
-    vm.stack.pop();
-    vm.code.push(vm.stack.top());
-    vm.stack.pop();
+    vm.stack.pop_back();
+    vm.code.push_back(vm.stack.back());
+    vm.stack.pop_back();
   }
 }
 
@@ -454,8 +454,8 @@ void vm_op_if(){
   return-value is setted.
 */
 void vm_op_set(){
-  auto var = vm.stack.top().get<Symbol*>();
-  vm.stack.pop();
+  auto var = vm.stack.back().get<Symbol*>();
+  vm.stack.pop_back();
   if(!var){
     fprintf(zs::err, "eval error: internal error occured (set!'s varname is dismissed)\n");
     return;
@@ -471,8 +471,8 @@ void vm_op_set(){
   return-value is setted.
 */
 void vm_op_local_set(){
-  auto var = vm.stack.top().get<Symbol*>();
-  vm.stack.pop();
+  auto var = vm.stack.back().get<Symbol*>();
+  vm.stack.pop_back();
   if(!var){
     fprintf(zs::err, "eval error: internal error occured (set!'s varname is dismissed)\n");
     return;
@@ -503,24 +503,24 @@ void vm_op_quasiquote(){
     if(auto l = p.get<Cons*>()){
       if(auto l_first_sym = l->car().get<Symbol*>()){
         if(l_first_sym == unquote_sym){
-          vm.code.push(vm_op_arg_push);
-          vm.code.push(l->cdr().get<Cons*>()->car());
+          vm.code.push_back(vm_op_arg_push);
+          vm.code.push_back(l->cdr().get<Cons*>()->car());
           return;
         }else if(l_first_sym  == unquote_splicing_sym){
-          vm.code.push(vm_op_arg_push_list);
-          vm.code.push(l->cdr().get<Cons*>()->car());
+          vm.code.push_back(vm_op_arg_push_list);
+          vm.code.push_back(l->cdr().get<Cons*>()->car());
           return;
         }
       }
     }
 
-    vm.code.push(vm_op_arg_push);
-    vm.code.push(p);
-    vm.code.push(vm_op_quasiquote);
+    vm.code.push_back(vm_op_arg_push);
+    vm.code.push_back(p);
+    vm.code.push_back(vm_op_quasiquote);
   };
 
-  auto p = vm.code.top();
-  vm.code.pop();
+  auto p = vm.code.back();
+  vm.code.pop_back();
 
   if(p.tag() == Ptr_tag::cons){
     if(nullp(p)){
@@ -532,7 +532,7 @@ void vm_op_quasiquote(){
     if(auto first_sym = p.get<Cons*>()->car().get<Symbol*>()){
       if(first_sym == unquote_sym){
         auto rest = p.get<Cons*>()->cdr().get<Cons*>()->car();
-        vm.code.push(rest);
+        vm.code.push_back(rest);
         return;
       }else if(first_sym == unquote_splicing_sym){
         fprintf(zs::err, "eval error: unquote-splicing is not supported out of list");
@@ -542,8 +542,8 @@ void vm_op_quasiquote(){
     }
 
     // generic lists
-    vm.stack.push(vm_op_arg_bottom);
-    vm.code.push(vm_op_quasiquote_list);
+    vm.stack.push_back(vm_op_arg_bottom);
+    vm.code.push_back(vm_op_quasiquote_list);
 
     do_list(p,
             [&](Cons* c) -> bool {
@@ -554,8 +554,8 @@ void vm_op_quasiquote(){
               qq_elem(last);
             });
   }else if(p.tag() == Ptr_tag::vector){
-    vm.stack.push(vm_op_arg_bottom);
-    vm.code.push(vm_op_quasiquote_vector);
+    vm.stack.push_back(vm_op_arg_bottom);
+    vm.code.push_back(vm_op_quasiquote_vector);
 
     auto v = p.get<Vector*>();
     for(auto i = begin(*v); i != end(*v); ++i){
@@ -571,8 +571,8 @@ void vm_op_quasiquote(){
   stack[0] = delay
 */
 void vm_op_force(){
-  auto delay = vm.stack.top().get<Delay*>();
-  vm.stack.pop();
+  auto delay = vm.stack.back().get<Delay*>();
+  vm.stack.pop_back();
 
   if(!delay){
     fprintf(zs::err, "eval error: internal error occured ('force' found before not a delay\n");
@@ -670,19 +670,19 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
 
   if(name){
     vm.local_set(name.get<Symbol*>(), proc);
-    vm.code.push(vm_op_leave_frame);
+    vm.code.push_back(vm_op_leave_frame);
   }
 
-  vm.code.push(vm_op_call);
-  vm.code.push(proc);
-  vm.stack.push(push_cons_list({}, vals));
+  vm.code.push_back(vm_op_call);
+  vm.code.push_back(proc);
+  vm.stack.push_back(push_cons_list({}, vals));
   vm.return_value[0] = {};
 }
 
 void eval(){
   while(!vm.code.empty()){
-    auto p = vm.code.top();
-    vm.code.pop();
+    auto p = vm.code.back();
+    vm.code.pop_back();
 
     switch(p.tag()){
     case Ptr_tag::undefined:
@@ -701,9 +701,9 @@ void eval(){
         break;
       }
 
-      vm.code.push(vm_op_call);
-      vm.code.push(c->car());
-      vm.stack.push(p);
+      vm.code.push_back(vm_op_call);
+      vm.code.push_back(c->car());
+      vm.stack.push_back(p);
       break;
     }
 
@@ -729,7 +729,7 @@ void eval(){
   if(!vm.stack.empty()){
     fprintf(zs::err, "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n");
     do{
-      vm.stack.pop();
+      vm.stack.pop_back();
     }while(!vm.stack.empty());
   }
 }
@@ -743,7 +743,7 @@ void load(Port* p){
       continue;
     }
 
-    vm.code.push(form);
+    vm.code.push_back(form);
     eval();
     if(!vm.return_value[0]){
       fprintf(zs::err, "load error: failed at evaluationg form. skipped\n");
@@ -768,8 +768,8 @@ void apply_func(){
   auto info = get_procinfo(args[0]);
 
   // simulating function_call()
-  vm.code.push(args[0]);
-  vm.code.push(vm_op_proc_enter);
+  vm.code.push_back(args[0]);
+  vm.code.push_back(vm_op_proc_enter);
 
   int argc = 0;
 
@@ -777,8 +777,8 @@ void apply_func(){
     auto dl =
       do_list(args[i],
               [&](Cons* cell) -> bool{
-                vm.code.push(vm_op_arg_push);
-                vm.code.push(cell->car());
+                vm.code.push_back(vm_op_arg_push);
+                vm.code.push_back(cell->car());
                 ++argc;
                 return true;
               },
@@ -797,7 +797,7 @@ void apply_func(){
     }
   }
 
-  vm.stack.push(vm_op_arg_bottom);
+  vm.stack.push_back(vm_op_arg_bottom);
 }
 
 void func_force(){
@@ -813,11 +813,11 @@ void func_force(){
     return;
   }
 
-  vm.stack.push(arg);
-  vm.code.push(vm_op_force);
+  vm.stack.push_back(arg);
+  vm.code.push_back(vm_op_force);
   vm.enter_frame(d->env());
-  vm.code.push(vm_op_leave_frame);
-  vm.code.push(d->get());
+  vm.code.push_back(vm_op_leave_frame);
+  vm.code.push_back(d->get());
 }
 
 void call_with_values(){
@@ -846,12 +846,12 @@ void call_with_values(){
   }
 
   // second proc call
-  vm.code.push(args[1]);
-  vm.code.push(vm_op_proc_enter);
-  vm.code.push(vm_op_move_values);
+  vm.code.push_back(args[1]);
+  vm.code.push_back(vm_op_proc_enter);
+  vm.code.push_back(vm_op_move_values);
 
   // first proc, calling with zero args.
-  vm.code.push(args[0]);
-  vm.code.push(vm_op_proc_enter);
-  vm.stack.push(vm_op_arg_bottom);
+  vm.code.push_back(args[0]);
+  vm.code.push_back(vm_op_proc_enter);
+  vm.stack.push_back(vm_op_arg_bottom);
 }

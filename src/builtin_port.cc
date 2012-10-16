@@ -125,8 +125,8 @@ template<typename Fun>
 void port_input_call(const char* name, Fun&& fun){
   Port* p;
 
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
     p = vm.find(intern(vm.symtable(), current_input_port_symname)).get<Port*>();
     assert(p);
   }else{
@@ -175,11 +175,11 @@ template<typename Fun>
 void port_output_call(const char* name, Fun&& fun){
   Port* p;
 
-  auto arg1 = vm.stack.top();
-  vm.stack.pop();
+  auto arg1 = vm.stack.back();
+  vm.stack.pop_back();
 
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
     p = vm.find(intern(vm.symtable(), current_output_port_symname)).get<Port*>();
     assert(p);
   }else{
@@ -226,8 +226,8 @@ void port_write_char(){
 void port_newline(){
   Port* p;
 
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
     p = vm.find(intern(vm.symtable(), current_output_port_symname)).get<Port*>();
     assert(p);
   }else{

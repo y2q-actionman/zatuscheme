@@ -22,7 +22,7 @@ Lisp_ptr eval_text(const char* s){
     return {};
   }
 
-  vm.code.push(exp);
+  vm.code.push_back(exp);
   eval();
   auto ret = vm.return_value[0];
   if(!ret){
@@ -70,7 +70,7 @@ Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args){
   }
   assert(i == e && args_i == args_e);
 
-  vm.code.push(Lisp_ptr(conses.data()));
+  vm.code.push_back(Lisp_ptr(conses.data()));
   eval();
   return vm.return_value[0];
 }

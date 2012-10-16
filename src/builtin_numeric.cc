@@ -379,8 +379,8 @@ void number_multiple(){
 }
 
 void number_minus(){
-  auto arg1 = vm.stack.top();
-  vm.stack.pop();
+  auto arg1 = vm.stack.back();
+  vm.stack.pop_back();
 
   auto n = arg1.get<Number*>();
   if(!n){
@@ -389,8 +389,8 @@ void number_minus(){
     return;
   }
 
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
 
     switch(n->type()){
     case Number::Type::integer: {
@@ -422,8 +422,8 @@ void number_minus(){
 }
 
 void number_divide(){
-  auto arg1 = vm.stack.top();
-  vm.stack.pop();
+  auto arg1 = vm.stack.back();
+  vm.stack.pop_back();
 
   auto n = arg1.get<Number*>();
   if(!n){
@@ -432,8 +432,8 @@ void number_divide(){
     return;
   }
 
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
 
     switch(n->type()){
     case Number::Type::integer:
@@ -788,8 +788,8 @@ void number_acos(){
 }
 
 void number_atan(){
-  auto arg1 = vm.stack.top();
-  vm.stack.pop();
+  auto arg1 = vm.stack.back();
+  vm.stack.pop_back();
 
   auto n1 = arg1.get<Number*>();
   if(!n1){
@@ -799,8 +799,8 @@ void number_atan(){
   }
 
   // std::atan()
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
 
     switch(n1->type()){
     case Number::Type::integer:
@@ -992,8 +992,8 @@ void number_e_to_i(){
 
 
 void number_from_string(){
-  auto arg1 = vm.stack.top();
-  vm.stack.pop();
+  auto arg1 = vm.stack.back();
+  vm.stack.pop_back();
 
   auto str = arg1.get<String*>();
   if(!str){
@@ -1006,8 +1006,8 @@ void number_from_string(){
 
   int radix;
 
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
     radix = 10;
   }else{
     auto arg2 = pick_args_1();
@@ -1038,8 +1038,8 @@ void number_from_string(){
 }
 
 void number_to_string(){
-  auto arg1 = vm.stack.top();
-  vm.stack.pop();
+  auto arg1 = vm.stack.back();
+  vm.stack.pop_back();
 
   auto n = arg1.get<Number*>();
   if(!n){
@@ -1052,8 +1052,8 @@ void number_to_string(){
 
   int radix;
 
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
     radix = 10;
   }else{
     auto arg2 = pick_args_1();

@@ -8,7 +8,7 @@ int main(){
   while(1){
     printf(REPL_PROMPT);
     fflush(stdout);
-    vm.code.push(read(zs::in));
+    vm.code.push_back(read(zs::in));
     eval();
     print(zs::out, vm.return_value[0]);
     putchar('\n');

@@ -16,8 +16,8 @@ void vector_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 void vector_make(){
-  auto arg1 = vm.stack.top();
-  vm.stack.pop();
+  auto arg1 = vm.stack.back();
+  vm.stack.pop_back();
 
   auto num = arg1.get<Number*>();
   if(!num){
@@ -37,8 +37,8 @@ void vector_make(){
 
   Lisp_ptr fill;
 
-  if(vm.stack.top().tag() == Ptr_tag::vm_op){
-    vm.stack.pop();
+  if(vm.stack.back().tag() == Ptr_tag::vm_op){
+    vm.stack.pop_back();
     fill = {};
   }else{
     fill = pick_args_1();
