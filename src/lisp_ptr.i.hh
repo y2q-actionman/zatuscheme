@@ -54,6 +54,9 @@ Procedure::Continuation* to_type<Ptr_tag::continuation>() = delete;
 template<>
 VMop to_type<Ptr_tag::vm_op>() = delete;
 
+template<>
+int to_type<Ptr_tag::vm_argcount>() = delete;
+
 
 template<>
 inline constexpr
@@ -158,6 +161,10 @@ Lisp_ptr::Lisp_ptr(T p)
                 "Lisp_ptr cannot accept the specified type.");
 }
 
+inline constexpr
+Lisp_ptr::Lisp_ptr(Ptr_tag p, int i)
+  : tag_(p), u_(i){}
+
 
 template<>
 inline constexpr
@@ -179,6 +186,12 @@ inline constexpr
 VMop Lisp_ptr::get<VMop>() const {
   return (tag() == to_tag<Ptr_tag, VMop>()
      ? u_.f_ : nullptr);
+}
+
+template<>
+inline constexpr
+int Lisp_ptr::get<int>() const {
+  return (tag() == Ptr_tag::vm_argcount ? u_.i_ : 0);
 }
 
 template<>

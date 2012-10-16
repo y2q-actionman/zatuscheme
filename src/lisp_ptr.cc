@@ -32,6 +32,8 @@ const char* stringify(Ptr_tag p){
     return "continuation";
   case Ptr_tag::vm_op:
     return "VMop";
+  case Ptr_tag::vm_argcount:
+    return "VMop (argcount)";
   default:
     return "(unknown PTR type)";
   }
