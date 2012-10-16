@@ -16,13 +16,12 @@ void vector_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 void vector_make(){
-  auto arg1 = vm.stack.back();
-  vm.stack.pop_back();
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
 
-  auto num = arg1.get<Number*>();
+  auto num = args[0].get<Number*>();
   if(!num){
-    builtin_type_check_failed("make-vector", Ptr_tag::number, arg1);
-    clean_args();
+    builtin_type_check_failed("make-vector", Ptr_tag::number, args[0]);
     return;
   }
 
@@ -30,18 +29,22 @@ void vector_make(){
     fprintf(zs::err, "native func: make-vector: arg's number is not %s! (%s)\n",
             stringify(Number::Type::integer), stringify(num->type()));
     vm.return_value[0] = {};
-    clean_args();
     return;
   }
   auto count = num->get<Number::integer_type>();
 
   Lisp_ptr fill;
 
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
+  switch(args.size()){
+  case 1:
     fill = {};
-  }else{
-    fill = pick_args_1();
+    break;
+  case 2:
+    fill = args[1];
+    break;
+  default:
+    builtin_variadic_argcount_failed("make-vector", 2);
+    return;
   }
 
   vm.return_value[0] = {new Vector(count, fill)};

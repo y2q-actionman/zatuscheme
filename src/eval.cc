@@ -18,6 +18,8 @@
 using namespace std;
 using namespace Procedure;
 
+namespace {
+
 int clean_args(){
   int ret = 0;
 
@@ -34,8 +36,6 @@ int clean_args(){
 
   return ret;
 }
-
-namespace {
 
 void vm_op_proc_enter();
 
