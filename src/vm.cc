@@ -6,15 +6,17 @@
 VM vm;
 
 VM::VM() : code(), stack(),
-               frame(new Env(nullptr)),
+               frame_(new Env(nullptr)),
                frame_history_(),
                symtable_(new SymTable())
 {
-  frame->add_ref();
+  frame_->add_ref();
 }
 
 VM::~VM(){
-  frame->release();
+  if(frame_->release() <= 0){
+    delete frame_;
+  }
   for(auto e : frame_history_){
     if(e->release() <= 0){
       delete e;
@@ -23,15 +25,15 @@ VM::~VM(){
 }
 
 void VM::enter_frame(Env* e){
-  frame_history_.push_back(frame);
-  frame = e;
-  frame->add_ref();
+  frame_history_.push_back(frame_);
+  frame_ = e;
+  frame_->add_ref();
 }  
 
 void VM::leave_frame(){
-  if(frame->release() <= 0){
-    delete frame;
+  if(frame_->release() <= 0){
+    delete frame_;
   }
-  frame = frame_history_.back();
+  frame_ = frame_history_.back();
   frame_history_.pop_back();
 }  

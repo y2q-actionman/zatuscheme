@@ -661,12 +661,12 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
   }
 
   if(name){
-    vm.enter_frame(vm.frame->push());
+    vm.enter_frame(vm.frame()->push());
   }
 
   auto proc = new IProcedure(body, 
                              {Calling::function, len, Variadic::f, sequencial, early_bind},
-                             syms, vm.frame);
+                             syms, vm.frame());
 
   if(name){
     vm.local_set(name.get<Symbol*>(), proc);

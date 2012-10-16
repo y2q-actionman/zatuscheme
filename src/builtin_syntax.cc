@@ -77,7 +77,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   
   return new IProcedure(code, 
                         {Calling::function, arg_info.first, arg_info.second},
-                        args, vm.frame);
+                        args, vm.frame());
 }
 
 void whole_function_lambda(){
@@ -462,7 +462,7 @@ void whole_macro_case(){
 
 void macro_delay(){
   auto args = pick_args_1();
-  vm.return_value[0] = {new Delay(args, vm.frame)};
+  vm.return_value[0] = {new Delay(args, vm.frame())};
 }
 
 } //namespace

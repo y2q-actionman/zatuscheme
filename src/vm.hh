@@ -26,6 +26,8 @@ public:
 
   void enter_frame(Env*);
   void leave_frame();
+  Env* frame(){ return frame_; }
+  void frame_replace(Env* e){ frame_ = e; }
 
   Lisp_ptr find(Symbol*);
   void set(Symbol*, Lisp_ptr);
@@ -39,9 +41,9 @@ public:
   std::deque<Lisp_ptr> code;
   std::deque<Lisp_ptr> stack;
   Lisp_ptr return_value[return_value_max];
-  Env* frame;
 
 private:
+  Env* frame_;
   std::deque<Env*> frame_history_;
   std::shared_ptr<SymTable> symtable_;
 };
