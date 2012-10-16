@@ -7,17 +7,17 @@
 
 inline
 Lisp_ptr VM::find(Symbol* s){
-  return frame_->traverse(s, Lisp_ptr{});
+  return frame()->traverse(s, Lisp_ptr{});
 }
 
 inline
 void VM::set(Symbol* s, Lisp_ptr p){
-  frame_->traverse(s, p);
+  frame()->traverse(s, p);
 }
 
 inline
 void VM::local_set(Symbol* s, Lisp_ptr p){
-  frame_->local_set(s, p);
+  frame()->local_set(s, p);
 }
 
 #endif // VM_I_HH
