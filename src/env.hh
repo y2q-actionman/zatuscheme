@@ -24,8 +24,8 @@ public:
   void local_set(Symbol*, Lisp_ptr);
   Env* push();
   
-  inline int add_ref();
-  inline int release();
+  inline friend int add_ref(Env*);
+  inline friend int release(Env*);
 
 private:
   map_type map_;

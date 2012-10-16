@@ -25,7 +25,6 @@ public:
   void enter_frame(Env*);
   void leave_frame();
   Env* frame() const { return frames_.back(); }
-  void frame_replace(Env* e){ frames_.back() = e; }
 
   Lisp_ptr find(Symbol*);
   void set(Symbol*, Lisp_ptr);

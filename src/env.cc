@@ -5,23 +5,19 @@ using namespace std;
 
 Env::Env(Env* e)
   : map_(), next_(e), refcnt_(0){
-  if(next_) next_->add_ref();
+  if(next_) add_ref(next_);
 }
 
 Env::~Env(){
-  if(next_ && next_->release() <= 0){
-    delete next_;
-  }
+  if(next_) release(next_);
 }
 
 // void Env::steal(Env* new_next){
 //   map_.clear();
 
-//   if(next_ && next_->release() <= 0){
-//     delete next_;
-//   }
+//   if(next_) release(next_);
 //   next_ = new_next;
-//   if(next_) next_->add_ref();
+//   if(next_) add_ref(next_);
 // }
 
 Lisp_ptr Env::traverse(Symbol* s, Lisp_ptr p){

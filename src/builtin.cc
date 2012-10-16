@@ -141,7 +141,7 @@ void install_builtin(){
   install_builtin_internal(builtin_syntax, builtin_syntax_size);
   vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame());
 
-  vm.frame_replace(vm.frame()->push());
+  vm.enter_frame(vm.frame()->push());
   install_builtin_internal(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
   install_builtin_internal(builtin_boolean, builtin_boolean_size);
   install_builtin_internal(builtin_char, builtin_char_size);
@@ -155,7 +155,7 @@ void install_builtin(){
   install_builtin_internal(builtin_port, builtin_port_size);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
-  vm.frame_replace(vm.frame()->push());
+  vm.enter_frame(vm.frame()->push());
   install_builtin_internal(builtin_extra, builtin_extra_size);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }

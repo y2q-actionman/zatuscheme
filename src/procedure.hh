@@ -46,16 +46,14 @@ namespace Procedure {
   public:
     IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr al, Env* e)
       : info_(pi), code_(code), arg_list_(al),  env_(e){
-      if(env_) env_->add_ref();
+      if(env_) add_ref(env_);
     }
 
     IProcedure(const IProcedure&) = default;
     IProcedure(IProcedure&&) = default;
 
     ~IProcedure(){
-      if(env_ && env_->release() <= 0){
-        delete env_;
-      }
+      if(env_) release(env_);
     }
   
     IProcedure& operator=(const IProcedure&) = default;

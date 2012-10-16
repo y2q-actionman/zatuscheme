@@ -15,20 +15,16 @@ VM::VM() : code(), stack(),
 
 VM::~VM(){
   for(auto e : frames_){
-    if(e->release() <= 0){
-      delete e;
-    }
+    release(e);
   }
 }
 
 void VM::enter_frame(Env* e){
   frames_.push_back(e);
-  frame()->add_ref();
+  add_ref(frame());
 }  
 
 void VM::leave_frame(){
-  if(frame()->release() <= 0){
-    delete frame();
-  }
+  release(frame());
   frames_.pop_back();
 }
