@@ -238,12 +238,10 @@ void evenp(){
 }
 
 
-template<class Fun>
+template<typename Fun, typename ArgsV>
 inline
-void number_accumulate(const char* name, Number&& init, Fun&& fun){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
-
+void number_accumulate(const char* name, Number&& init, Fun&& fun,
+                       ArgsV&& args){
   for(auto i = begin(args), e = end(args);
       i != e; ++i){
     auto n = i->get<Number*>();
@@ -259,6 +257,14 @@ void number_accumulate(const char* name, Number&& init, Fun&& fun){
   }
 
   vm.return_value[0] = {new Number(init)};
+}
+
+template<class Fun>
+inline
+void number_accumulate(const char* name, Number&& init, Fun&& fun){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
+  number_accumulate(name, move(init), move(fun), move(args));
 }
 
 
@@ -379,19 +385,16 @@ void number_multiple(){
 }
 
 void number_minus(){
-  auto arg1 = vm.stack.back();
-  vm.stack.pop_back();
+  std::deque<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
-    number_type_check_failed("-", arg1);
-    clean_args();
+    number_type_check_failed("-", args[0]);
     return;
   }
 
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
-
+  if(args.size() == 1){
     switch(n->type()){
     case Number::Type::integer: {
       static constexpr auto imin = numeric_limits<Number::integer_type>::min();
@@ -416,25 +419,23 @@ void number_minus(){
     default:
       UNEXP_DEFAULT();
     }
+  }else{
+    args.pop_front();
+    number_accumulate("-", Number(*n), binary_accum<std::minus>(), move(args));
   }
-   
-  number_accumulate("-", Number(*n), binary_accum<std::minus>());
 }
 
 void number_divide(){
-  auto arg1 = vm.stack.back();
-  vm.stack.pop_back();
+  std::deque<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
-    number_type_check_failed("/", arg1);
-    clean_args();
+    number_type_check_failed("/", args[0]);
     return;
   }
 
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
-
+  if(args.size() == 1){
     switch(n->type()){
     case Number::Type::integer:
       vm.return_value[0] = {new Number(1.0 / n->get<Number::integer_type>())};
@@ -451,12 +452,14 @@ void number_divide(){
     default:
       UNEXP_DEFAULT();
     }
+  }else{
+    args.pop_front();
+    number_accumulate("/", 
+                      n->type() == Number::Type::integer
+                      ? Number(n->coerce<Number::real_type>()) : Number(*n),                    
+                      binary_accum<std::divides>(),
+                      move(args));
   }
-
-  number_accumulate("/", 
-                    n->type() == Number::Type::integer
-                    ? Number(n->coerce<Number::real_type>()) : Number(*n),                    
-                    binary_accum<std::divides>());
 }
 
 void number_abs(){
@@ -788,20 +791,17 @@ void number_acos(){
 }
 
 void number_atan(){
-  auto arg1 = vm.stack.back();
-  vm.stack.pop_back();
+  std::deque<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
 
-  auto n1 = arg1.get<Number*>();
+  auto n1 = args[0].get<Number*>();
   if(!n1){
-    number_type_check_failed("atan", arg1);
-    clean_args();
+    number_type_check_failed("atan", args[0]);
     return;
   }
 
-  // std::atan()
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
-
+  switch(args.size()){
+  case 1:  // std::atan()
     switch(n1->type()){
     case Number::Type::integer:
     case Number::Type::real:
@@ -815,29 +815,36 @@ void number_atan(){
     default:
       UNEXP_DEFAULT();
     }
-  }
+    return;
 
-  // std::atan2()
-  auto arg2 = pick_args_1();
-  auto n2 = arg2.get<Number*>();
-  if(!n2){
-    number_type_check_failed("atan", arg2);
+  case 2: {// std::atan2()
+    auto n2 = args[1].get<Number*>();
+    if(!n2){
+      number_type_check_failed("atan", args[1]);
+      return;
+    }
+
+    switch(n2->type()){
+    case Number::Type::integer:
+    case Number::Type::real:
+      vm.return_value[0] = {new Number(std::atan2(n1->coerce<Number::real_type>(),
+                                                  n2->coerce<Number::real_type>()))};
+      return;
+    case Number::Type::complex:
+      fprintf(zs::err, "native func: (atan <complex> <complex>) is not implemented.\n");
+      vm.return_value[0] = {};
+      return;
+    case Number::Type::uninitialized:
+    default:
+      UNEXP_DEFAULT();
+    }
     return;
   }
 
-  switch(n2->type()){
-  case Number::Type::integer:
-  case Number::Type::real:
-    vm.return_value[0] = {new Number(std::atan2(n1->coerce<Number::real_type>(),
-                                             n2->coerce<Number::real_type>()))};
-    return;
-  case Number::Type::complex:
-    fprintf(zs::err, "native func: (atan <complex> <complex>) is not implemented.\n");
+  default:
+    fprintf(zs::err, "native func: atan: passed 3 or more args.\n");
     vm.return_value[0] = {};
     return;
-  case Number::Type::uninitialized:
-  default:
-    UNEXP_DEFAULT();
   }
 }
 
@@ -992,39 +999,44 @@ void number_e_to_i(){
 
 
 void number_from_string(){
-  auto arg1 = vm.stack.back();
-  vm.stack.pop_back();
+  std::deque<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
 
-  auto str = arg1.get<String*>();
+  auto str = args[0].get<String*>();
   if(!str){
     fprintf(zs::err, "native func: string->number: passed arg is not string (%s).\n",
-            stringify(arg1.tag()));
-    clean_args();
+            stringify(args[0].tag()));
     vm.return_value[0] = {};
     return;
   }
 
   int radix;
 
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
+  switch(args.size()){
+  case 1:
     radix = 10;
-  }else{
-    auto arg2 = pick_args_1();
-    auto num = arg2.get<Number*>();
+    break;
+  case 2: {
+    auto num = args[1].get<Number*>();
     if(!num){
       fprintf(zs::err, "native func: string->number: passed radix is not number (%s).\n",
-              stringify(arg2.tag()));
+              stringify(args[1].tag()));
       vm.return_value[0] = {};
       return;
     }
     if(num->type() != Number::Type::integer){
       fprintf(zs::err, "native func: string->number: passed radix is not number (%s).\n",
-              stringify(arg2.tag()));
+              stringify(args[1].tag()));
       vm.return_value[0] = {};
       return;
     }
     radix = num->get<Number::integer_type>();
+    break;
+  }
+  default:
+    fprintf(zs::err, "native func: string->number: got 3 or more args.\n");
+    vm.return_value[0] = {};
+    return;
   }
 
   Port p{c_cast<void*>(str->c_str()), str->size()};
@@ -1038,39 +1050,44 @@ void number_from_string(){
 }
 
 void number_to_string(){
-  auto arg1 = vm.stack.back();
-  vm.stack.pop_back();
+  std::deque<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
     fprintf(zs::err, "native func: number->string: passed arg is not number (%s).\n",
-            stringify(arg1.tag()));
-    clean_args();
+            stringify(args[0].tag()));
     vm.return_value[0] = {};
     return;
   }
 
   int radix;
 
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
+  switch(args.size()){
+  case 1:
     radix = 10;
-  }else{
-    auto arg2 = pick_args_1();
-    auto num = arg2.get<Number*>();
+    break;
+  case 2: {
+    auto num = args[1].get<Number*>();
     if(!num){
       fprintf(zs::err, "native func: number->string: passed radix is not number (%s).\n",
-              stringify(arg2.tag()));
+              stringify(args[1].tag()));
       vm.return_value[0] = {};
       return;
     }
     if(num->type() != Number::Type::integer){
       fprintf(zs::err, "native func: number->string: passed radix is not number (%s).\n",
-              stringify(arg2.tag()));
+              stringify(args[1].tag()));
       vm.return_value[0] = {};
       return;
     }
     radix = num->get<Number::integer_type>();
+    break;
+  }
+  default:
+    fprintf(zs::err, "native func: number->string: got 3 or more args.\n");
+    vm.return_value[0] = {};
+    return;
   }
 
   Port p{Port::open_output_memstream::t};
