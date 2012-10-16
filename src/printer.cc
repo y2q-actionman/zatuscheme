@@ -141,6 +141,10 @@ void print(FILE* f, Lisp_ptr p, print_human_readable flag){
     break;
   }
 
+  case Ptr_tag::vm_argcount:
+    fprintf(f, "#<argcount %d>", p.get<int>());
+    break;
+
   case Ptr_tag::i_procedure:
   case Ptr_tag::n_procedure:
   case Ptr_tag::continuation:
