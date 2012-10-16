@@ -22,13 +22,12 @@ void string_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 void string_make(){
-  auto arg1 = vm.stack.back();
-  vm.stack.pop_back();
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
 
-  auto num = arg1.get<Number*>();
+  auto num = args[0].get<Number*>();
   if(!num){
-    builtin_type_check_failed("make-string", Ptr_tag::number, arg1);
-    clean_args();
+    builtin_type_check_failed("make-string", Ptr_tag::number, args[0]);
     return;
   }
 
@@ -36,24 +35,28 @@ void string_make(){
     fprintf(zs::err, "native func: make-string: arg's number is not %s! (%s)\n",
             stringify(Number::Type::integer), stringify(num->type()));
     vm.return_value[0] = {};
-    clean_args();
     return;
   }
   auto char_count = num->get<Number::integer_type>();
 
   char ch;
 
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
+  switch(args.size()){
+  case 1:
     ch = '\0';
-  }else{
-    auto arg2 = pick_args_1();
-    auto c = arg2.get<char>();
+    break;
+  case 2: {
+    auto c = args[1].get<char>();
     if(!c){
-      builtin_type_check_failed("make-string", Ptr_tag::character, arg2);
+      builtin_type_check_failed("make-string", Ptr_tag::character, args[1]);
       return;
     }
     ch = c;
+    break;
+  }
+  default:
+    builtin_variadic_argcount_failed("make-string", 2);
+    return;
   }
 
   vm.return_value[0] = {new String(char_count, ch)};
