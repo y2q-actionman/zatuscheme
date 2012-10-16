@@ -32,7 +32,8 @@ libzs_a_SOURCES = zs.hh\
 		builtin_port.cc builtin_port.hh\
 		builtin_procedure.cc builtin_procedure.hh\
 		builtin_extra.cc builtin_extra.hh\
-		vm.cc vm.hh vm.i.hh
+		vm.cc vm.hh vm.i.hh\
+		zs.hh
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 
 noinst_PROGRAMS = zs
