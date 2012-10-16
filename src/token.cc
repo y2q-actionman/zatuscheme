@@ -187,7 +187,7 @@ void skip_intertoken_space(FILE* f){
 }
 
 
-Token tokenize_identifier(FILE* f, char first_char){
+Token tokenize_identifier(FILE* f, int first_char){
   string s(1, first_char);
 
   // subsequent
@@ -276,7 +276,7 @@ Token tokenize_string(FILE* f){
   return {};
 }
 
-Token tokenize_number(FILE* f, char read_c = 0){
+Token tokenize_number(FILE* f, int read_c = 0){
   if(read_c){
     if(ungetc(read_c, f) == EOF){
       fprintf(zs::err, "reader internal error: fatal I/O error occured. (reached unreading limit)\n");

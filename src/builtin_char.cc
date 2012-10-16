@@ -63,23 +63,23 @@ struct ci_comparator{
 };
 
 void char_ci_eq(){
-  char_compare("char-ci=?", ci_comparator<std::equal_to<char> >());
+  char_compare("char-ci=?", ci_comparator<std::equal_to<int> >());
 }
 
 void char_ci_less(){
-  char_compare("char-ci<?", ci_comparator<std::less<char> >());
+  char_compare("char-ci<?", ci_comparator<std::less<int> >());
 }
 
 void char_ci_greater(){
-  char_compare("char-ci>?", ci_comparator<std::greater<char> >());
+  char_compare("char-ci>?", ci_comparator<std::greater<int> >());
 }
 
 void char_ci_less_eq(){
-  char_compare("char-ci<=?", ci_comparator<std::less_equal<char> >());
+  char_compare("char-ci<=?", ci_comparator<std::less_equal<int> >());
 }
 
 void char_ci_greater_eq(){
-  char_compare("char-ci>=?", ci_comparator<std::greater_equal<char> >());
+  char_compare("char-ci>=?", ci_comparator<std::greater_equal<int> >());
 }
 
   

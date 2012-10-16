@@ -187,15 +187,17 @@ void zerop(){
 template<template <typename> class Fun>
 struct pos_neg_pred{
   inline bool operator()(Number* num){
-    static constexpr Fun<Number::integer_type> fun;
-
     switch(num->type()){
     case Number::Type::complex:
       return false;
-    case Number::Type::real:
+    case Number::Type::real: {
+      static constexpr Fun<Number::real_type> fun;
       return fun(num->get<Number::real_type>(), 0);
-    case Number::Type::integer:
+    }
+    case Number::Type::integer: {
+      static constexpr Fun<Number::integer_type> fun;
       return fun(num->get<Number::integer_type>(), 0);
+    }
     case Number::Type::uninitialized:
     default:
       UNEXP_DEFAULT();

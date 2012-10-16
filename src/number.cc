@@ -119,7 +119,7 @@ PrefixValue parse_number_prefix(FILE* f){
 
 
 inline
-bool is_number_char(int radix, char c){
+bool is_number_char(int radix, int c){
   switch(radix){
   case 16:
     return isxdigit(c);
@@ -213,7 +213,7 @@ ParserRet parse_unsigned(int radix, FILE* f, string& s){
 }
 
 inline
-bool check_decimal_suffix(char c){
+bool check_decimal_suffix(int c){
   switch(c){
   case 'e': case 's': case 'f': case 'd': case 'l':
     return true;
