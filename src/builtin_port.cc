@@ -123,19 +123,26 @@ void port_close_o(){
 
 template<typename Fun>
 void port_input_call(const char* name, Fun&& fun){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
+
   Port* p;
 
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
+  switch(args.size()){
+  case 0:
     p = vm.find(intern(vm.symtable(), current_input_port_symname)).get<Port*>();
     assert(p);
-  }else{
-    auto arg = pick_args_1();
-    p = arg.get<Port*>();
+    break;
+  case 1:
+    p = args[0].get<Port*>();
     if(!p){
-      port_type_check_failed(name, arg);
+      port_type_check_failed(name, args[0]);
       return;
     }
+    break;
+  default:
+    builtin_variadic_argcount_failed(name, 1);
+    return;
   }
 
   vm.return_value[0] = Lisp_ptr{fun(p)};
@@ -173,25 +180,29 @@ void port_eof_p(){
   
 template<typename Fun>
 void port_output_call(const char* name, Fun&& fun){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
+
   Port* p;
 
-  auto arg1 = vm.stack.back();
-  vm.stack.pop_back();
-
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
+  switch(args.size()){
+  case 1:
     p = vm.find(intern(vm.symtable(), current_output_port_symname)).get<Port*>();
     assert(p);
-  }else{
-    auto arg2 = pick_args_1();
-    p = arg2.get<Port*>();
+    break;
+  case 2:
+    p = args[1].get<Port*>();
     if(!p){
-      port_type_check_failed(name, arg2);
+      port_type_check_failed(name, args[1]);
       return;
     }
+    break;
+  default:
+    builtin_variadic_argcount_failed(name, 2);
+    return;
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(arg1, p)};
+  vm.return_value[0] = Lisp_ptr{fun(args[0], p)};
 }
 
 void port_write(){
@@ -224,19 +235,26 @@ void port_write_char(){
 }
 
 void port_newline(){
+  std::vector<Lisp_ptr> args;
+  stack_to_vector(vm.stack, args);
+
   Port* p;
 
-  if(vm.stack.back().tag() == Ptr_tag::vm_op){
-    vm.stack.pop_back();
+  switch(args.size()){
+  case 0:
     p = vm.find(intern(vm.symtable(), current_output_port_symname)).get<Port*>();
     assert(p);
-  }else{
-    auto arg = pick_args_1();
-    p = arg.get<Port*>();
+    break;
+  case 1:
+    p = args[0].get<Port*>();
     if(!p){
-      port_type_check_failed("newline", arg);
+      port_type_check_failed("newline", args[0]);
       return;
     }
+    break;
+  default:
+    builtin_variadic_argcount_failed("newline", 1);
+    return;
   }
 
   fputc('\n', p->stream());

@@ -842,8 +842,7 @@ void number_atan(){
   }
 
   default:
-    fprintf(zs::err, "native func: atan: passed 3 or more args.\n");
-    vm.return_value[0] = {};
+    builtin_variadic_argcount_failed("atan", 2);
     return;
   }
 }
@@ -1034,8 +1033,7 @@ void number_from_string(){
     break;
   }
   default:
-    fprintf(zs::err, "native func: string->number: got 3 or more args.\n");
-    vm.return_value[0] = {};
+    builtin_variadic_argcount_failed("string->number", 2);
     return;
   }
 
@@ -1085,8 +1083,7 @@ void number_to_string(){
     break;
   }
   default:
-    fprintf(zs::err, "native func: number->string: got 3 or more args.\n");
-    vm.return_value[0] = {};
+    builtin_variadic_argcount_failed("number->string", 2);
     return;
   }
 
