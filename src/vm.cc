@@ -6,6 +6,7 @@
 VM vm;
 
 VM::VM() : code(), stack(),
+           return_value(1, {}),
            frames_(),
            symtable_(new SymTable())
 {

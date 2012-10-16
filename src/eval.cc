@@ -398,11 +398,11 @@ void vm_op_proc_enter(){
 void vm_op_move_values(){
   vm.stack.push_back(vm_op_arg_bottom);
 
-  for(auto i = VM::return_value_max - 1; i >= 0; --i){
-    if(!vm.return_value[i]) continue;
-    vm.stack.push_back(vm.return_value[i]);
-    vm.return_value[i] = {};
+  for(auto i = vm.return_value.rbegin(), e = vm.return_value.rend();
+      i != e; ++i){
+    vm.stack.push_back(*i);
   }
+  vm.return_value.resize(1);
 }
  
 /*

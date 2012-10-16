@@ -13,8 +13,6 @@
 
 class VM {
 public:
-  static constexpr int return_value_max = 32;
-
   VM();
   VM(const VM&) = delete;
   VM(VM&&) = delete;
@@ -38,7 +36,7 @@ public:
 public:
   std::deque<Lisp_ptr> code;
   std::deque<Lisp_ptr> stack;
-  Lisp_ptr return_value[return_value_max];
+  std::vector<Lisp_ptr> return_value;
 
 private:
   std::deque<Env*> frames_;

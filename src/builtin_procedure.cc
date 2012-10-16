@@ -20,7 +20,7 @@ void type_check_procedure(){
 }
 
 void proc_values(){
-  unsigned i = 0;
+  vm.return_value.resize(0);
 
   while(1){
     if(vm.stack.back().tag() == Ptr_tag::vm_op){
@@ -28,20 +28,12 @@ void proc_values(){
       break;
     }
 
-    vm.return_value[i] = vm.stack.back();
+    vm.return_value.push_back(vm.stack.back());
     vm.stack.pop_back();
-    ++i;
-
-    if(i >= VM::return_value_max){
-      fprintf(zs::err, "eval warning: values: overed max values (%ud)\n",
-              VM::return_value_max);
-      clean_args();
-      return;
-    }
   }
 
-  for(; i < VM::return_value_max; ++i){
-    vm.return_value[i] = {};
+  if(vm.return_value.empty()){
+    vm.return_value.resize(1);
   }
 }
 
