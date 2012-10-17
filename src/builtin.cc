@@ -1,4 +1,5 @@
 #include <array>
+#include <cstring>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -130,32 +131,40 @@ builtin_misc[] = {
 };
 
 
-static void install_builtin_internal(const BuiltinFunc bf[], size_t s){
+static void install_builtin_native(const BuiltinFunc bf[], size_t s){
   for(size_t i = 0; i < s; ++i){
     vm.local_set(intern(vm.symtable(), bf[i].name), {&bf[i].func});
   }
 }
 
+static void install_builtin_interpreted(const char* ld[], size_t s){
+  for(size_t i = 0; i < s; ++i){
+    Port p{c_cast<void*>(ld[i]), strlen(ld[i])};
+    load(&p);
+  }
+}
+
 void install_builtin(){
-  install_builtin_internal(builtin_equal, builtin_equal_size);
-  install_builtin_internal(builtin_syntax, builtin_syntax_size);
+  install_builtin_native(builtin_equal, builtin_equal_size);
+  install_builtin_native(builtin_syntax, builtin_syntax_size);
   vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame());
 
   vm.enter_frame(vm.frame()->push());
-  install_builtin_internal(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
-  install_builtin_internal(builtin_boolean, builtin_boolean_size);
-  install_builtin_internal(builtin_char, builtin_char_size);
-  install_builtin_internal(builtin_cons, builtin_cons_size);
-  install_builtin_internal(builtin_numeric, builtin_numeric_size);
-  install_builtin_internal(builtin_procedure, builtin_procedure_size);
-  install_builtin_internal(builtin_string, builtin_string_size);
-  install_builtin_internal(builtin_symbol, builtin_symbol_size);
-  install_builtin_internal(builtin_vector, builtin_vector_size);
+  install_builtin_native(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
+  install_builtin_native(builtin_boolean, builtin_boolean_size);
+  install_builtin_native(builtin_char, builtin_char_size);
+  install_builtin_native(builtin_cons, builtin_cons_size);
+  install_builtin_interpreted(builtin_cons_interpreted, builtin_cons_interpreted_size);
+  install_builtin_native(builtin_numeric, builtin_numeric_size);
+  install_builtin_native(builtin_procedure, builtin_procedure_size);
+  install_builtin_native(builtin_string, builtin_string_size);
+  install_builtin_native(builtin_symbol, builtin_symbol_size);
+  install_builtin_native(builtin_vector, builtin_vector_size);
   install_builtin_port_value();
-  install_builtin_internal(builtin_port, builtin_port_size);
+  install_builtin_native(builtin_port, builtin_port_size);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
   vm.enter_frame(vm.frame()->push());
-  install_builtin_internal(builtin_extra, builtin_extra_size);
+  install_builtin_native(builtin_extra, builtin_extra_size);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }
