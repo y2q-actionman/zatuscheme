@@ -56,6 +56,9 @@ builtin_procedure[] = {
   {"call-with-values", {
       call_with_values,
       {Calling::function, 2}}},
+  {"call-with-current-continuation", {
+      call_cc,
+      {Calling::function, 1}}},
 };
 
 const size_t builtin_procedure_size = sizeof(builtin_procedure) / sizeof(builtin_procedure[0]);

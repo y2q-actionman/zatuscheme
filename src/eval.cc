@@ -358,10 +358,12 @@ void proc_enter_interpreted(IProcedure* fun){
   ----
   replaces VM!
 */
-void proc_enter_cont(Continuation*){
-  fprintf(zs::err, "eval warning: continuation is not implememted.\n");
-  clean_args();
-  vm.return_value[0] = {};
+void proc_enter_cont(Continuation* c){
+  std::vector<Lisp_ptr> tmp;
+  stack_to_vector(vm.stack, tmp);
+
+  vm = c->get();
+  vm.return_value = tmp;
 }
 
 /*
@@ -854,4 +856,31 @@ void call_with_values(){
   vm.code.push_back(args[0]);
   vm.code.push_back(vm_op_proc_enter);
   vm.stack.push_back(vm_op_arg_bottom);
+}
+
+void call_cc(){
+  auto args = pick_args<1>();
+
+  if(!is_procedure(args[0])){
+    fprintf(zs::err, "call/cc error: first arg is not procedure (%s)\n",
+            stringify(args[0].tag()));
+    vm.return_value[0] = {};
+    return;
+  }
+
+  auto info = get_procinfo(args[0]);
+  if(info->required_args != 1){
+    fprintf(zs::err, "call/cc error: first arg mush take 1 arg (%d)\n",
+            info->required_args);
+    vm.return_value[0] = {};
+    return;
+  }
+
+  auto cont = new Continuation(vm);
+
+  vm.code.push_back(args[0]);
+  vm.code.push_back(vm_op_proc_enter);
+
+  vm.stack.push_back(vm_op_arg_bottom);
+  vm.stack.push_back(cont);
 }

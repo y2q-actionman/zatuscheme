@@ -34,7 +34,14 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
   return {argc, v};
 }
 
+  // Continuation class
+
 constexpr ProcInfo Continuation::cont_procinfo;
+
+Continuation::Continuation(const VM& vm) : vm_(vm){}
+
+Continuation::~Continuation() = default;
+
 
 const ProcInfo* get_procinfo(Lisp_ptr p){
   switch(p.tag()){

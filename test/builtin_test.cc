@@ -80,5 +80,14 @@ int main(){
   check("(call-with-values (lambda () (values 4 5)) (lambda (a b) b))", "5");
   check("(call-with-values * -)", "-1");
 
+  check("(call-with-current-continuation (lambda (c) (c 1)))", "1");
+  eval_text("(define list-length (lambda (obj) (call-with-current-continuation"
+            "  (lambda (return) (letrec ((r"
+            "    (lambda (obj) (cond ((null? obj) 0) ((pair? obj) (+ (r (cdr obj)) 1)) (else (return #f))))))"
+            "  (r obj))))))");
+  check("(list-length '(1 2 3 4))", "4");
+  check("(list-length '(a b . c))", "#f");
+
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
