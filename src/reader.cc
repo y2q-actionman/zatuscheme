@@ -120,7 +120,7 @@ Lisp_ptr read_la(FILE* f, Token&& tok){
     return Lisp_ptr(new Number(tok.move<Number>()));
 
   case Token::Type::character:
-    return Lisp_ptr(tok.move<char>());
+    return (tok.get<char>() == EOF) ? Lisp_ptr{} : Lisp_ptr{tok.move<char>()};
 
   case Token::Type::string:
     return Lisp_ptr(new String(tok.move<string>()));

@@ -229,7 +229,7 @@ int main(){
   check_ident("   abc", "abc");
   check_ident("   abc    def ", "abc");
   check_ident(" ;hogehoge\n   abc", "abc");
-  check(" ;hogehoge\n");
+  check(" ;hogehoge\n", static_cast<char>(EOF));
   check_ident("   abc;fhei", "abc");
 
   // boolean

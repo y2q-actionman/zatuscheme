@@ -747,17 +747,19 @@ void eval(){
 
 
 void load(Port* p){
-  while(!feof(p->stream())){
+  while(1){
     auto form = read(p->stream());
     if(!form){
-      fprintf(zs::err, "load error: failed at reading file. skipped one form\n");
-      continue;
+      if(!feof(p->stream())){
+        fprintf(zs::err, "load error: failed at reading a form. abandoned.\n");
+      }
+      break;
     }
 
     vm.code.push_back(form);
     eval();
     if(!vm.return_value[0]){
-      fprintf(zs::err, "load error: failed at evaluationg form. skipped\n");
+      fprintf(zs::err, "load error: failed at evaluating a form. skipped.\n");
       fprintf(zs::err, "\tform: \n");
       print(zs::err, form);
       continue;
