@@ -14,12 +14,12 @@
 class VM {
 public:
   VM();
-  VM(const VM&) = delete;
+  VM(const VM&);
   VM(VM&&) = delete;
 
   ~VM();
 
-  VM& operator=(const VM&) = delete;
+  VM& operator=(const VM&);
   VM& operator=(VM&&) = delete;
 
   void enter_frame(Env*);

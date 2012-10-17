@@ -17,9 +17,9 @@ namespace Procedure {
     whole_macro
   };
 
-  enum class Variadic { f = 0, t = 1 };
-  enum class Sequencial { f = 0, t = 1 };
-  enum class EarlyBind { f = 0, t = 1 };
+  enum class Variadic : bool { f = false, t = true };
+  enum class Sequencial : bool { f = false, t = true };
+  enum class EarlyBind : bool { f = false, t = true };
 
   struct ProcInfo {
     int required_args;
