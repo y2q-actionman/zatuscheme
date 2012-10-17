@@ -115,7 +115,12 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
   if(info->early_bind){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
-    vm.enter_frame(iproc->closure()->push());
+
+    if(auto closure = iproc->closure()){
+      vm.enter_frame(closure->push());
+    }else{
+      vm.enter_frame(vm.frame()->push());
+    }
   }
 
   vm.code.push_back(proc);
@@ -304,7 +309,11 @@ void proc_enter_interpreted(IProcedure* fun){
   }
 
   if(!fun->info()->early_bind){
-    vm.enter_frame(fun->closure()->push());
+    if(auto closure = fun->closure()){
+      vm.enter_frame(closure->push());
+    }else{
+      vm.enter_frame(vm.frame()->push());
+    }
   }
 
   vm.code.push_back(vm_op_leave_frame);
