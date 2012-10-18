@@ -493,7 +493,7 @@ void print(FILE* f, const Number& n, int radix){
     break;
   case Number::Type::complex: {
     auto&& z = n.get<Number::complex_type>();
-    fprintf(f, "%g+%gi", z.real(), z.imag());
+    fprintf(f, "%g%+gi", z.real(), z.imag());
   }
     break;
   case Number::Type::real:
