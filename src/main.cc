@@ -1,7 +1,5 @@
 #include "zs.hh"
 
-#define REPL_PROMPT ">> "
-
 int main(){
   install_builtin();
 
