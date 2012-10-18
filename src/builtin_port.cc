@@ -234,33 +234,6 @@ void port_write_char(){
                    });
 }
 
-void port_newline(){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
-
-  Port* p;
-
-  switch(args.size()){
-  case 0:
-    p = vm.find(intern(vm.symtable(), current_output_port_symname)).get<Port*>();
-    assert(p);
-    break;
-  case 1:
-    p = args[0].get<Port*>();
-    if(!p){
-      port_type_check_failed("newline", args[0]);
-      return;
-    }
-    break;
-  default:
-    builtin_variadic_argcount_failed("newline", 1);
-    return;
-  }
-
-  fputc('\n', p->stream());
-  vm.return_value[0] = Lisp_ptr{true};
-}
-
 } //namespace
 
 const BuiltinFunc
@@ -310,9 +283,6 @@ builtin_port[] = {
   {"display", {
       port_display,
       {Calling::function, 1, Variadic::t}}},
-  {"newline", {
-      port_newline,
-      {Calling::function, 0, Variadic::t}}},
   {"write-char", {
       port_write_char,
       {Calling::function, 1, Variadic::t}}}
@@ -326,3 +296,11 @@ void install_builtin_port_value(){
   vm.local_set(intern(vm.symtable(), current_output_port_symname),
                new Port{zs::out, "w"});
 }
+
+
+const char* builtin_port_interpreted[] = {
+  "(define newline (lambda args (apply write-char '(#\\newline) args)))",
+};
+
+const size_t builtin_port_interpreted_size
+= sizeof(builtin_port_interpreted) / sizeof(builtin_port_interpreted[0]);

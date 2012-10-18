@@ -162,6 +162,7 @@ void install_builtin(){
   install_builtin_native(builtin_vector, builtin_vector_size);
   install_builtin_port_value();
   install_builtin_native(builtin_port, builtin_port_size);
+  install_builtin_interpreted(builtin_port_interpreted, builtin_port_interpreted_size);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
   vm.enter_frame(vm.frame()->push());
