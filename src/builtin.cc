@@ -167,5 +167,6 @@ void install_builtin(){
 
   vm.enter_frame(vm.frame()->push());
   install_builtin_native(builtin_extra, builtin_extra_size);
+  install_builtin_interpreted(builtin_extra_interpreted, builtin_extra_interpreted_size);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }

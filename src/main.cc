@@ -5,14 +5,8 @@
 int main(){
   install_builtin();
 
-  while(1){
-    printf(REPL_PROMPT);
-    fflush(stdout);
-    vm.code.push_back(read(zs::in));
-    eval();
-    print(zs::out, vm.return_value[0]);
-    putchar('\n');
-  }
+  vm.code.push_back(make_cons_list({intern(vm.symtable(), "read-eval-print-loop")}));
+  eval();
 
   return 0;
 }

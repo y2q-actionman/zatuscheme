@@ -33,6 +33,14 @@ void gensym(){
   vm.return_value[0] = {new Symbol(&gensym_symname)};
 }
 
+void exit_func(){
+  pick_args<0>();
+  fprintf(zs::err, "exiting..\n");
+  vm.return_value[0] = {};
+  vm.stack.clear();
+  vm.code.clear();
+}
+
 } // namespace
 
 const BuiltinFunc
@@ -42,7 +50,23 @@ builtin_extra[] = {
       {Calling::function, 1}}},
   {"gensym", {
       gensym,
+      {Calling::function, 0}}},
+  {"exit", {
+      exit_func,
       {Calling::function, 0}}}
 };
 
 const size_t builtin_extra_size = sizeof(builtin_extra) / sizeof(builtin_extra[0]);
+
+
+const char* builtin_extra_interpreted[] = {
+  "(define (read-eval-print-loop)"
+  "  (let loop ()"
+  "    (display \">> \")"
+  "    (display (eval (read) (interaction-environment)))"
+  "    (newline)"
+  "    (loop)))",
+};
+
+const size_t builtin_extra_interpreted_size
+= sizeof(builtin_extra_interpreted) / sizeof(builtin_extra_interpreted[0]);
