@@ -408,14 +408,17 @@ Lisp_ptr whole_macro_case_expand(Symbol* sym, Lisp_ptr cases_ptr){
   }
 
   auto keys_ptr = clause->car();
-  Symbol* keys_sym;
   Lisp_ptr new_keys;
 
   if(auto keys_lst = keys_ptr.get<Cons*>()){
     new_keys = whole_macro_case_keys_expand(sym, keys_lst);
-  }else if((keys_sym = keys_ptr.get<Symbol*>())
-           && keys_sym->name() == "else"){
-    new_keys = keys_ptr;
+  }else if(auto keys_sym = keys_ptr.get<Symbol*>()){
+    if(keys_sym->name() != "else"){
+      fprintf(zs::err, "macro case: informal clause key symbol: %s\n", keys_sym->name().c_str());
+      return {};
+    }else{
+      new_keys = keys_ptr;
+    }
   }else{
     fprintf(zs::err, "macro case: informal clause key: ");
     print(zs::err, keys_ptr);
@@ -423,10 +426,8 @@ Lisp_ptr whole_macro_case_expand(Symbol* sym, Lisp_ptr cases_ptr){
     return {};
   }
 
-  auto new_clause = new Cons(new_keys, clause->cdr());
-
-  return {new Cons(new_clause,
-                   whole_macro_case_expand(sym, cases->cdr()))};
+  return push_cons_list(push_cons_list(new_keys, clause->cdr()),
+                        whole_macro_case_expand(sym, cases->cdr()));
 }
 
 void whole_macro_case(){
