@@ -346,8 +346,13 @@ void proc_enter_interpreted(IProcedure* fun){
       return;
     }
 
-    auto lis = stack_to_list<false>(vm.stack);
-    vm.local_set(arg_name.get<Symbol*>(), {new Cons(st_top, lis)});
+    if(st_top.tag() != Ptr_tag::vm_op){
+      auto lis = stack_to_list<false>(vm.stack);
+      vm.local_set(arg_name.get<Symbol*>(), {new Cons(st_top, lis)});
+    }else{
+      vm.stack.pop_back();
+      vm.local_set(arg_name.get<Symbol*>(), Cons::NIL);
+    }
   }else{  // clean stack
     if(vm.stack.empty()
        || vm.stack.back().tag() != Ptr_tag::vm_op){
