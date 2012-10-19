@@ -641,7 +641,14 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
 
   // parses binding list
   int len = 0;
-  Lisp_ptr syms = Cons::NIL, vals = Cons::NIL;
+
+  Cons* syms_c = new Cons;
+  Lisp_ptr syms = syms_c;
+  Cons* syms_c_p = syms_c;
+
+  Cons* vals_c = new Cons;
+  Lisp_ptr vals = vals_c;
+  Cons* vals_c_p = vals_c;
 
   if(!do_list(binds,
               [&](Cons* cell) -> bool{
@@ -659,12 +666,40 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
                 }
                  
                 ++len;
-                syms = push_cons_list(c->car(), syms);
-                vals = push_cons_list(c->cdr().get<Cons*>()->car(), vals);
+
+                auto nsc = new Cons;
+                syms_c->rplaca(c->car());
+                syms_c->rplacd(nsc);
+                syms_c_p = syms_c;
+                syms_c = nsc;
+
+                auto nvc = new Cons;
+                vals_c->rplaca(c->cdr().get<Cons*>()->car());
+                vals_c->rplacd(nvc);
+                vals_c_p = vals_c;
+                vals_c = nvc;
+
                 return true;
               },
-              [&](Lisp_ptr dot_cdr){
-                return nullp(dot_cdr);
+              [&](Lisp_ptr dot_cdr) -> bool{
+                if(!nullp(dot_cdr)){
+                  return false;
+                }
+
+                if(syms_c == syms_c_p){
+                  assert(vals_c == vals_c_p);
+                  delete syms_c;
+                  delete vals_c;
+                  syms = Cons::NIL;
+                  vals = Cons::NIL;
+                }else{
+                  delete syms_c;
+                  delete vals_c;
+                  syms_c_p->rplacd(Cons::NIL);
+                  vals_c_p->rplacd(Cons::NIL);
+                }
+
+                return true;
               })){
     fprintf(zs::err, "eval error: let binding was failed!\n");
     free_cons_list(syms);

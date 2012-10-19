@@ -507,7 +507,7 @@ void whole_macro_do(){
             return true;
           },
           [&](Lisp_ptr p){
-            if(p){
+            if(!nullp(p)){
               fprintf(zs::err, "macro do warning: loop vars has dot-list. ignored last cdr\n");
             }
           });
@@ -523,7 +523,7 @@ void whole_macro_do(){
             return true;
           },
           [&](Lisp_ptr p){
-            if(p){
+            if(!nullp(p)){
               fprintf(zs::err, "macro do warning: loop body has dot-list. ignored last cdr\n");
             }
             body_c->rplacd(new Cons(push_cons_list(loop_sym, steps), Cons::NIL));
@@ -542,9 +542,6 @@ void whole_macro_do(){
             body_head,
             })
         });
-
-  print(stderr, vm.return_value[0]);
-  putc('\n', stderr);
 }
 
 void macro_delay(){
