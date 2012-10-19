@@ -5,4 +5,6 @@
 
 void install_builtin();
 
+void load(Port*);
+
 #endif // BUILTIN_HH

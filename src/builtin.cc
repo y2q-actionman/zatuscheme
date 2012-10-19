@@ -8,6 +8,7 @@
 #include "lisp_ptr.hh"
 #include "eval.hh"
 #include "builtin_util.hh"
+#include "reader.hh"
 #include "printer.hh"
 #include "vm.hh"
 #include "port.hh"
@@ -170,3 +171,25 @@ void install_builtin(){
   install_builtin_interpreted(builtin_extra_interpreted, builtin_extra_interpreted_size);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }
+
+void load(Port* p){
+  while(1){
+    auto form = read(p->stream());
+    if(!form){
+      if(!feof(p->stream())){
+        fprintf(zs::err, "load error: failed at reading a form. abandoned.\n");
+      }
+      break;
+    }
+
+    vm.code.push_back(form);
+    eval();
+    if(!vm.return_value[0]){
+      fprintf(zs::err, "load error: failed at evaluating a form. skipped.\n");
+      fprintf(zs::err, "\tform: \n");
+      print(zs::err, form);
+      continue;
+    }
+  }
+}
+

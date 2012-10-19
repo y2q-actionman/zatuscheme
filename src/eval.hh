@@ -20,7 +20,6 @@ void let_internal(Procedure::Sequencial, Procedure::EarlyBind);
 void eval();
 
 // builtin funcs near evaluator
-void load(Port*);
 void apply_func();
 void func_force();
 void call_with_values();
