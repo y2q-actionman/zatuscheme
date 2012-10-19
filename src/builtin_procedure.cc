@@ -20,17 +20,9 @@ void type_check_procedure(){
 }
 
 void proc_values(){
-  vm.return_value.resize(0);
+  vm.return_value.clear();
 
-  while(1){
-    if(vm.stack.back().tag() == Ptr_tag::vm_op){
-      vm.stack.pop_back();
-      break;
-    }
-
-    vm.return_value.push_back(vm.stack.back());
-    vm.stack.pop_back();
-  }
+  stack_to_vector(vm.stack, vm.return_value);
 
   if(vm.return_value.empty()){
     vm.return_value.resize(1);
