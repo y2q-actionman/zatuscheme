@@ -14,6 +14,8 @@ void check(const char* input, const char* expect){
 int main(){
   install_builtin();
 
+  // syntaxes
+
   check("(and)", "#t");
   check("(and 1)", "1");
   check("(and 1 2)", "2");
@@ -71,6 +73,11 @@ int main(){
   check("(eval (+ 1 3) (scheme-report-environment 5))", "4");
   check("(eval '(+ 1 3) (scheme-report-environment 5))", "4");
   check("(eval '(if (eqv? 1 2) \"same\" \"different\") (interaction-environment))", "\"different\"");
+
+  check("(do ((vec (make-vector 5)) (i 0 (+ i 1))) ((= i 5) vec) (vector-set! vec i i))",
+        "#(0 1 2 3 4)");
+
+  // control funcs
 
   check("(apply + (list 3 4))", "7");
   check("(apply + (list 3 4) (list 1 2))", "10");

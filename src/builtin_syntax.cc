@@ -461,6 +461,92 @@ void whole_macro_case(){
           });
 }
 
+void whole_macro_do(){
+  auto arg = pick_args_1();
+  if(!arg) return;
+
+  Lisp_ptr vars, end_test, end_exprs,  commands;
+
+  int len = bind_cons_list(arg,
+                           [](Cons*){}, // 'do' symbol
+                           [&](Cons* c){
+                             vars = c->car();
+                           },
+                           [&](Cons* c){
+                             auto ends = c->car();
+                             auto end_c = ends.get<Cons*>();
+                             end_test = end_c->car();
+                             end_exprs = end_c->cdr();
+                           },
+                           [&](Cons* c){
+                             commands = c;
+                           });
+  if(len < 3){
+    fprintf(zs::err, "macro do: invalid syntax! (length is %d, less than 3)\n", len);
+    vm.return_value[0] = Lisp_ptr();
+    return;
+  }
+
+  // TODO: collect this by garbage collector!
+  auto loop_sym = new Symbol(new string("do_loop_symbol"));
+
+  // extract vars
+  Lisp_ptr init_binds = Cons::NIL;
+  Lisp_ptr steps = Cons::NIL;
+  do_list(vars,
+          [&](Cons* vc) -> bool{
+            Lisp_ptr v, i, s;
+            bind_cons_list(vc->car(),
+                           [&](Cons* c){ v = c->car(); },
+                           [&](Cons* c){ i = c->car(); },
+                           [&](Cons* c){ s = c->car(); });
+            if(!s) s = v;
+
+            init_binds = push_cons_list(make_cons_list({v, i}), init_binds);
+            steps = push_cons_list(s, steps);
+            return true;
+          },
+          [&](Lisp_ptr p){
+            if(p){
+              fprintf(zs::err, "macro do warning: loop vars has dot-list. ignored last cdr\n");
+            }
+          });
+
+  // creates loop body
+  Cons* body_head = new Cons(intern(vm.symtable(), "begin"), {});
+  Cons* body_c = body_head;
+  do_list(commands,
+          [&](Cons* c) -> bool{
+            auto newc = new Cons(c->car(), {});
+            body_c->rplacd(newc);
+            body_c = newc;
+            return true;
+          },
+          [&](Lisp_ptr p){
+            if(p){
+              fprintf(zs::err, "macro do warning: loop body has dot-list. ignored last cdr\n");
+            }
+            body_c->rplacd(new Cons(push_cons_list(loop_sym, steps), Cons::NIL));
+          });
+
+  // creates 'named let' style loop
+  vm.return_value[0] = 
+    make_cons_list({
+        intern(vm.symtable(), "let"),
+        loop_sym,
+        init_binds,
+        make_cons_list({
+            intern(vm.symtable(), "if"),
+            end_test,
+            push_cons_list(intern(vm.symtable(), "begin"), end_exprs),
+            body_head,
+            })
+        });
+
+  print(stderr, vm.return_value[0]);
+  putc('\n', stderr);
+}
+
 void macro_delay(){
   auto args = pick_args_1();
   vm.return_value[0] = {new Delay(args, vm.frame())};
@@ -514,8 +600,8 @@ builtin_syntax[] = {
       whole_function_letrec,
       {Calling::whole_function, 1, Variadic::t}}},
   {"do", {
-      whole_function_unimplemented,
-      {Calling::whole_function, 0, Variadic::t}}},
+      whole_macro_do,
+      {Calling::whole_macro, 2, Variadic::t}}},
   {"delay", {
       macro_delay,
       {Calling::macro, 1}}},
