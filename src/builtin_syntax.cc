@@ -233,7 +233,9 @@ void whole_function_begin(){
     return;
   }
 
-  list_to_stack("begin", exprs, vm.code);
+  // list_to_stack("begin", exprs, vm.code);
+  vm.code.push_back(exprs);
+  vm_op_begin();
 }
 
 void whole_function_quasiquote(){

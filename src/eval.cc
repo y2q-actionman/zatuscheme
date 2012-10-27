@@ -495,6 +495,29 @@ void vm_op_local_set(){
 }
 
 /*
+  code = [#1=(...)]
+  ---
+  (cdr #1) is not null.
+    code = [(car #1) <vm-op-begin> (cdr #1)]
+  (cdr #1) is null.
+    code = [(car #1)]
+ */
+void vm_op_begin(){
+  auto next = vm.code.back();
+  auto next_c = next.get<Cons*>();
+  auto next_car = next_c->car();
+  auto next_cdr = next_c->cdr();
+
+  if(!nullp(next_cdr)){
+    vm.code.back() = next_cdr;
+    vm.code.push_back(vm_op_begin);
+    vm.code.push_back(next_car);
+  }else{
+    vm.code.back() = next_car;
+  }
+}
+
+/*
   code[0] = template
   ----
   * vector, list
