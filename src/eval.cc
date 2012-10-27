@@ -361,7 +361,9 @@ void proc_enter_interpreted(IProcedure* fun){
   }
   
   // set up lambda body code
-  list_to_stack("funcall", fun->get(), vm.code);
+  // list_to_stack("funcall", fun->get(), vm.code);
+  vm.code.push_back(fun->get());
+  vm_op_begin();
 }
 
 /*
