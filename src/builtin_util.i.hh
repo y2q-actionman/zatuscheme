@@ -17,23 +17,20 @@
 
 template<bool dot_list, typename StackT>
 Lisp_ptr stack_to_list(StackT& st){
+  Lisp_ptr argc = st.back();
+  st.pop_back();
+
+  if(argc.get<int>() == 0){
+    return Cons::NIL;
+  }
+
   Cons* c = new Cons;
   Cons* prev_c = c;
   Lisp_ptr ret = c;
 
-  if(st.back().tag() == Ptr_tag::vm_op){
-    st.pop_back();
-    return Cons::NIL;
-  }
-
-  while(1){
+  for(int i = 0; i < argc.get<int>(); ++i){
     c->rplaca(st.back());
     st.pop_back();
-
-    if(st.back().tag() == Ptr_tag::vm_op){
-      st.pop_back();
-      break;
-    }
 
     Cons* newc = new Cons;
     c->rplacd(newc);
@@ -57,19 +54,12 @@ Lisp_ptr stack_to_list(StackT& st){
 
 template<typename StackT, typename VectorT>
 void stack_to_vector(StackT& st, VectorT& v){
-  if(st.back().tag() == Ptr_tag::vm_op){
-    st.pop_back();
-    return;
-  }
+  Lisp_ptr argc = st.back();
+  st.pop_back();
 
-  while(1){
+  for(int i = 0; i < argc.get<int>(); ++i){
     v.push_back(st.back());
     st.pop_back();
-
-    if(st.back().tag() == Ptr_tag::vm_op){
-      st.pop_back();
-      break;
-    }
   }
 }
 
@@ -101,37 +91,21 @@ int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
   return ret;
 }  
 
-namespace pick_args_detail {
-
-inline
-int fail(){
-  fprintf(zs::err, "eval error: stack corruption.\n");
-  return -1;
-}
-
-}
-
 template<int size>
 std::array<Lisp_ptr, size> pick_args(){
+  Lisp_ptr argc = vm.stack.back();
+  vm.stack.pop_back();
+
   auto ret = std::array<Lisp_ptr, size>();
+  if(argc.get<int>() != size){
+    ret.fill({});
+    return ret;
+  }    
 
   for(int i = 0; i < size; ++i){
-    if(vm.stack.empty()){
-      pick_args_detail::fail();
-      ret.fill({});
-      return ret;
-    }
     ret[i] = vm.stack.back();
     vm.stack.pop_back();
   }
-
-  if(vm.stack.empty()
-     || vm.stack.back().tag() != Ptr_tag::vm_op){
-    pick_args_detail::fail();
-    ret.fill({});
-    return ret;
-  }
-  vm.stack.pop_back();
 
   return ret;
 }
