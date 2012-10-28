@@ -845,7 +845,6 @@ void call_with_values(){
 }
 
 void call_cc(){
-#if 0
   auto args = pick_args<1>();
 
   if(!is_procedure(args[0])){
@@ -868,9 +867,8 @@ void call_cc(){
   vm.code.push_back(args[0]);
   vm.code.push_back(vm_op_proc_enter);
 
-  vm.stack.push_back(vm_op_arg_bottom);
   vm.stack.push_back(cont);
-#endif
+  vm.stack.push_back({Ptr_tag::vm_argcount, 1});
 }
 
 const char* stringify(VMop op){
