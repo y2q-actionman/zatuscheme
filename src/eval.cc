@@ -263,28 +263,24 @@ void proc_enter_interpreted(IProcedure* fun){
 
   vm.code.push_back(vm_op_leave_frame);
 
+  // == processing args ==
+
   Lisp_ptr arg_name = fun->arg_list();
   Lisp_ptr argc = vm.stack.back();
   vm.stack.pop_back();
-  int i;
+
+  auto arg_start = vm.stack.end() - argc.get<int>();
+  auto arg_end = vm.stack.end();
+  auto i = arg_start;
 
   // normal arg push
-  for(i = 0; i < argc.get<int>(); ++i){
-    if(vm.stack.empty()){
-      fprintf(zs::err, "eval internal error: no args and no managed funcall!\n");
-      vm.return_value[0] = {};
-      return;
-    }
-
-    auto a = vm.stack.back();
-    vm.stack.pop_back();
-
+  for(; i != arg_end; ++i){
     auto arg_name_cell = arg_name.get<Cons*>();
     if(!arg_name_cell){
       break;
     }
    
-    vm.local_set(arg_name_cell->car().get<Symbol*>(), a);
+    vm.local_set(arg_name_cell->car().get<Symbol*>(), *i);
     arg_name = arg_name_cell->cdr();
   }
 
@@ -296,17 +292,17 @@ void proc_enter_interpreted(IProcedure* fun){
       return;
     }
 
-    vm.stack.push_back({Ptr_tag::vm_argcount, argc.get<int>() - i});
+    vm.stack.erase(arg_start, i);
+    vm.stack.push_back({Ptr_tag::vm_argcount, 
+          argc.get<int>() - static_cast<int>(std::distance(arg_start, i))});
     vm.local_set(arg_name.get<Symbol*>(), stack_to_list<false>(vm.stack));
   }else{  // clean stack
-    if(i != argc.get<int>()){
-      fprintf(zs::err, "eval error: corrupted stack -- no bottom found!\n");
-      for(; i < argc.get<int>(); ++i){
-        vm.stack.pop_back();
-      }
+    if(i != arg_end){
+      fprintf(zs::err, "eval error: corrupted stack -- passed too much args!\n");
       vm.return_value[0] = {};
       return;
     }
+    vm.stack.erase(arg_start, arg_end);
   }
   
   // set up lambda body code
@@ -575,7 +571,6 @@ void vm_op_force(){
 }
 
 void let_internal(Sequencial sequencial, EarlyBind early_bind){
-#if 0
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -583,14 +578,14 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
   auto arg_c = arg.get<Cons*>();
   assert(arg_c);
 
-  auto arg2 = arg_c->cdr();
-  if(arg2.tag() != Ptr_tag::cons || nullp(arg2)){
+  arg = arg_c->cdr();
+  if(arg.tag() != Ptr_tag::cons || nullp(arg)){
     fprintf(zs::err, "eval error: informal LET syntax -- (LET . <%s>).\n",
-            (nullp(arg2)) ? "nil" : stringify(arg2.tag()));
+            (nullp(arg)) ? "nil" : stringify(arg.tag()));
     vm.return_value[0] = {};
     return;
   }
-  arg_c = arg2.get<Cons*>();
+  arg_c = arg.get<Cons*>();
 
   // checks named let
   Lisp_ptr name = {};
@@ -598,17 +593,17 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
   if(arg_c->car().tag() == Ptr_tag::symbol){
     name = arg_c->car();
 
-    auto arg3 = arg_c->cdr();
-    if(arg3.tag() != Ptr_tag::cons || nullp(arg3)){
+    arg = arg_c->cdr();
+    if(arg.tag() != Ptr_tag::cons || nullp(arg)){
       fprintf(zs::err, "eval error: informal LET syntax -- (LET <name> . <%s>).\n",
-              (nullp(arg3)) ? "nil" : stringify(arg3.tag()));
+              (nullp(arg)) ? "nil" : stringify(arg.tag()));
       vm.return_value[0] = {};
       return;
     }
     
-    arg_c = arg3.get<Cons*>();
+    arg_c = arg.get<Cons*>();
   }
-    
+
   // picks elements
   auto binds = arg_c->car();
   auto body = arg_c->cdr();
@@ -705,7 +700,6 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
   vm.code.push_back(proc);
   vm.stack.push_back(push_cons_list({}, vals));
   vm.return_value[0] = {};
-#endif
 }
 
 void eval(){
