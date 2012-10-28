@@ -358,7 +358,7 @@ void vm_op_proc_enter(){
 void vm_op_move_values(){
   int argc = 0;
 
-  for(auto i = vm.return_value.rbegin(), e = vm.return_value.rend();
+  for(auto i = vm.return_value.begin(), e = vm.return_value.end();
       i != e; ++i){
     vm.stack.push_back(*i);
     ++argc;
@@ -809,7 +809,6 @@ void func_force(){
 }
 
 void call_with_values(){
-#if 0
   auto args = pick_args<2>();
 
   if(!is_procedure(args[0])){
@@ -842,8 +841,7 @@ void call_with_values(){
   // first proc, calling with zero args.
   vm.code.push_back(args[0]);
   vm.code.push_back(vm_op_proc_enter);
-  vm.stack.push_back(vm_op_arg_bottom);
-#endif
+  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
 }
 
 void call_cc(){
