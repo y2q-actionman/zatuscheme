@@ -25,43 +25,28 @@ void vm_op_arg_push_and_set();
 
 /*
   ret = some value
-  ----
-  1. ret を stack に移す
-     is_set == true なら ret を set!
-  2. argcount++
-  3. (car code) を stack top に
-  4. (cdr code) が nil でなければ、次の展開を仕込む
 */
 void vm_args_push_base(bool is_set){
   auto ret = vm.return_value[0];
-  auto args = vm.code.back();
-  auto& argc = vm.code[vm.code.size() - 2];
+  auto& argc = vm.code[vm.code.size() - 1];
+  auto& args = vm.code[vm.code.size() - 2];
 
-  auto args_c = args.get<Cons*>();
-  auto arg1 = args_c->car();
-  auto args_rest = args_c->cdr();
+  if(nullp(args)){
+    vm.stack.push_back(argc);
 
-  vm.stack.push_back(ret);
-  argc = Lisp_ptr{Ptr_tag::vm_argcount, argc.get<int>() + 1};
-
-  if(is_set){
-    auto& arg_syms = vm.code[vm.code.size() - 3];
-    vm.local_set(arg_syms.get<Cons*>()->car().get<Symbol*>(), ret);
-    arg_syms = arg_syms.get<Cons*>()->cdr();
-  }
-
-  if(args_c){
-    if(nullp(args_rest)){
-      vm.code.back() = arg1;
-    }else{
-      vm.code.back() = args_rest;
-      vm.code.push_back((is_set) ? vm_op_arg_push_and_set : vm_op_arg_push);
-      vm.code.push_back(arg1);
-    }
+    vm.code.pop_back();
+    vm.code.pop_back();
   }else{
-    if(is_set){
-      vm.code.pop_back();
-    }
+    auto args_c = args.get<Cons*>();
+    // auto arg1 = args_c->car(); // the EXPR just evaled.
+    auto args_rest = args_c->cdr();
+    
+    vm.stack.push_back(ret);
+
+    args = args_rest;
+    argc = {Ptr_tag::vm_argcount, argc.get<int>() + 1};
+    vm.code.push_back(vm_op_arg_push);
+    vm.code.push_back(args_rest.get<Cons*>()->car());
   }
 }
 
@@ -101,7 +86,7 @@ bool check_argcount(const char* name, int argc, const ProcInfo* info){
     code = (argN, arg-set-move, symN, argN-1, arg-set-move, symN-1, ..., call kind, proc)
     stack = (arg-bottom)
 */
-void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
+void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_names){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
@@ -116,43 +101,22 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
     }
   }
 
+  auto args_head = args.get<Cons*>()->cdr(); // skips first symbol
+
   vm.code.push_back(proc);
   vm.code.push_back(vm_op_proc_enter);
 
-  Lisp_ptr arg1, arg_rest;
-
-  bind_cons_list(args,
-                 [](Cons*){},
-                 [&](Cons* c){
-                   arg1 = c->car();
-                   arg_rest = c->cdr();
-                 });
-
-  if(!arg1 || nullp(arg1)){
-    vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-  }else if(nullp(arg_rest)){
-    vm.code.push_back({Ptr_tag::vm_argcount, 1});
-    // if(info->sequencial){
-    //   vm.code.push_back(arg_head);
-    //   vm.code.push_back(arg_rest);
-    //   vm.code.push_back(vm_op_arg_push_and_set);
-    // }else{
-    //   vm.code.push_back(arg_rest);
-    //   vm.code.push_back(vm_op_arg_push);
-    // }
-    vm.code.push_back(arg1);
-  }else{
-    vm.code.push_back({Ptr_tag::vm_argcount, 1});
-    if(info->sequencial){
-      vm.code.push_back(arg_head);
-      vm.code.push_back(arg_rest);
-      vm.code.push_back(vm_op_arg_push_and_set);
-    }else{
-      vm.code.push_back(arg_rest);
-      vm.code.push_back(vm_op_arg_push);
-    }
-    vm.code.push_back(arg1);
-  }
+  // if(info->sequencial){
+    // vm.code.push_back(arg_names);
+    // vm.code.push_back(args.get<Cons*>()->cdr());
+    // vm.code.push_back({Ptr_tag::vm_argcount, 0});
+    // vm.code.push_back(vm_op_arg_push_and_set);
+  // }else{
+    vm.code.push_back(args_head);
+    vm.code.push_back({Ptr_tag::vm_argcount, 0});
+    vm.code.push_back(vm_op_arg_push);
+    vm.code.push_back(args_head.get<Cons*>()->car());
+  // }
 }
 
 /*
@@ -775,11 +739,6 @@ void eval(){
       }
       break;
 
-    case Ptr_tag::vm_argcount:
-      vm.stack.push_back(vm.return_value[0]);
-      vm.stack.push_back(p);
-      break;
-
     case Ptr_tag::boolean: case Ptr_tag::character:
     case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
     case Ptr_tag::number:
@@ -787,8 +746,13 @@ void eval(){
     case Ptr_tag::port: case Ptr_tag::env:
     case Ptr_tag::delay:
     case Ptr_tag::continuation:
-    default:
       vm.return_value[0] = p;
+      break;
+
+    case Ptr_tag::vm_argcount:
+    default:
+      fprintf(zs::err, "eval internal error: vm-argcount is rest on VM code stack!\n");
+      vm.stack.push_back(p);
       break;
     }
   }
