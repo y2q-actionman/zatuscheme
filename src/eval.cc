@@ -32,7 +32,13 @@ void vm_args_push_base(bool is_set){
   auto& args = vm.code[vm.code.size() - 2];
 
   if(nullp(args)){
-    vm.stack.push_back(argc);
+    if(vm.stack.empty()
+       || vm.stack.back().tag() != Ptr_tag::vm_argcount){
+      vm.stack.push_back(argc);
+    }else{
+      auto prev_argc = vm.stack.back();
+      vm.stack.back() = {Ptr_tag::vm_argcount, argc.get<int>() + prev_argc.get<int>()};
+    }
 
     vm.code.pop_back();
     vm.code.pop_back();
@@ -767,7 +773,6 @@ void eval(){
 
 
 void apply_func(){
-#if 0
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -778,40 +783,15 @@ void apply_func(){
     return;
   }
 
-  auto info = get_procinfo(args[0]);
-
   // simulating function_call()
   vm.code.push_back(args[0]);
   vm.code.push_back(vm_op_proc_enter);
 
-  int argc = 0;
-
-  for(auto i = 1u; i < args.size(); ++i){
-    auto dl =
-      do_list(args[i],
-              [&](Cons* cell) -> bool{
-                vm.code.push_back(vm_op_arg_push);
-                vm.code.push_back(cell->car());
-                ++argc;
-                return true;
-              },
-              [&](Lisp_ptr dot_cdr) -> bool{
-                if(!nullp(dot_cdr)){
-                  fprintf(zs::err, "apply error: dot list passed.\n");
-                  return false;
-                }
-                return true;
-              });
-    
-    if(!dl || !check_argcount("apply", argc, info)){
-      clean_funcall_stack();
-      vm.return_value[0] = {};
-      return;
-    }
+  for(auto i = args.rbegin(), e = args.rend(); i != e; ++i){
+    vm.code.push_back(*i);
+    vm.code.push_back({Ptr_tag::vm_argcount, 0});
+    vm.code.push_back(i->get<Cons*>()->car());
   }
-
-  vm.stack.push_back(vm_op_arg_bottom);
-#endif
 }
 
 void func_force(){
