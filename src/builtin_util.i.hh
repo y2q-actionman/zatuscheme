@@ -29,9 +29,15 @@ Lisp_ptr stack_to_list(StackT& st){
   Cons* prev_c = c;
   Lisp_ptr ret = c;
 
-  for(int i = 0; i < argc.get<int>(); ++i){
-    c->rplaca(st.back());
-    st.pop_back();
+  auto arg_start = st.end() - argc.get<int>();
+  auto arg_end = st.end();
+  auto i = arg_start;
+
+  while(1){
+    c->rplaca(*i);
+
+    ++i;
+    if(i == arg_end) break;
 
     Cons* newc = new Cons;
     c->rplacd(newc);
@@ -49,6 +55,8 @@ Lisp_ptr stack_to_list(StackT& st){
   }else{
     c->rplacd(Cons::NIL);
   }
+
+  st.erase(arg_start, arg_end);
 
   return ret;
 }
