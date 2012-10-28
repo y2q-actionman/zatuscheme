@@ -27,7 +27,7 @@ void builtin_type_check_failed(const char*, Ptr_tag, Lisp_ptr);
 
 void builtin_variadic_argcount_failed(const char*, int);
 
-// some builtin functions
+// some builtin functions (TODO: remove when quasiquote is reimplemented)
 void procedure_list();
 void procedure_list_star();
 void procedure_vector();

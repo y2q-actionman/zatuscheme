@@ -238,18 +238,6 @@ void whole_function_begin(){
   vm_op_begin();
 }
 
-void whole_function_quasiquote(){
-  auto wargs = pick_args_1();
-  if(!wargs) return;
-
-  bind_cons_list(wargs,
-                 [](Cons*){},
-                 [](Cons* c){
-                   vm.code.push_back(c->car());
-                 });
-  vm.code.push_back(vm_op_quasiquote);
-}
-
 void whole_function_let(){
   let_internal(Sequencial::f, EarlyBind::f);
 }
@@ -551,6 +539,107 @@ void macro_delay(){
   vm.return_value[0] = {new Delay(args, vm.frame())};
 }
 
+void whole_macro_quasiquote(){
+  Lisp_ptr arg;
+  bind_cons_list(pick_args_1(),
+                 [](Cons*){}, // skips 'quasiquote' symbol
+                 [&](Cons* c){
+                   arg = c->car();
+                 });
+  if(!arg) return;
+
+  const auto quote_sym = intern(vm.symtable(), "quote");
+  const auto unquote_sym = intern(vm.symtable(), "unquote");
+  const auto unquote_splicing_sym = intern(vm.symtable(), "unquote-splicing");
+
+  Cons* c = new Cons({}, Cons::NIL);
+  Lisp_ptr expanded = c;
+
+  const auto qq_elem = [&](Lisp_ptr p){
+    if(auto l = p.get<Cons*>()){
+      if(auto l_first_sym = l->car().get<Symbol*>()){
+        if(l_first_sym == unquote_sym){
+          auto newc = new Cons(l->cdr().get<Cons*>()->car(), Cons::NIL);
+          c->rplacd(newc);
+          c = newc;
+          return;
+        }else if(l_first_sym  == unquote_splicing_sym){
+          do_list(l->cdr().get<Cons*>()->car(),
+                  [&](Cons* cell) -> bool{
+                    auto newc = new Cons(cell->car(), Cons::NIL);
+                    c->rplacd(newc);
+                    c = newc;
+                    return true;
+                  },
+                  [&](Lisp_ptr last){
+                    if(!nullp(last)){
+                      fprintf(zs::err, "quasiquote warning: dot list appeared in unquote-splicing. used as normal element.\n");
+                      auto newc = new Cons(last, Cons::NIL);
+                      c->rplacd(newc);
+                      c = newc;
+                    }
+                  });
+          return;
+        }
+      }
+    }
+                  
+    auto newc = new Cons(make_cons_list({quote_sym, p}), Cons::NIL);
+    c->rplacd(newc);
+    c = newc;
+  };
+
+  if(arg.tag() == Ptr_tag::cons){
+    if(nullp(arg)){
+      vm.return_value[0] = Cons::NIL;
+      return;
+    }
+
+    // check unquote -- like `,x
+    if(auto first_sym = arg.get<Cons*>()->car().get<Symbol*>()){
+      if(first_sym == unquote_sym){
+        vm.return_value[0] = arg.get<Cons*>()->cdr().get<Cons*>()->car();
+        return;
+      }else if(first_sym == unquote_splicing_sym){
+        fprintf(zs::err, "quasiquote error: unquote-splicing is not supported out of list");
+        vm.return_value[0] = {};
+        return;
+      }
+    }
+
+    // generic lists
+    c->rplaca(intern(vm.symtable(), "list*"));
+
+    do_list(arg,
+            [&](Cons* cell) -> bool {
+              qq_elem(cell->car());
+              return true;
+            },
+            [&](Lisp_ptr last){
+              qq_elem(last);
+            });
+
+    vm.return_value[0] = expanded;
+  }else if(arg.tag() == Ptr_tag::vector){
+    c->rplaca(intern(vm.symtable(), "vector"));
+
+    auto v = arg.get<Vector*>();
+    for(auto i = begin(*v); i != end(*v); ++i){
+      qq_elem(*i);
+    }
+
+    vm.return_value[0] = expanded;
+  }else{
+    vm.return_value[0] = make_cons_list({quote_sym, arg});
+  }
+
+  fflush(stdout);
+  fflush(stderr);
+  printf("start : "); print(stdout, arg); putchar('\n');
+  printf("expand: "); print(stdout, vm.return_value[0]); putchar('\n');
+  fflush(stdout);
+}
+
 } //namespace
 
 const BuiltinFunc
@@ -570,9 +659,6 @@ builtin_syntax[] = {
   {"define", {
       whole_function_define,
       {Calling::whole_function, 2, Variadic::t}}},
-  {"quasiquote", {
-      whole_function_quasiquote,
-      {Calling::whole_function, 1}}},
   {"begin", {
       whole_function_begin,
       {Calling::whole_function, 1, Variadic::t}}},
@@ -605,12 +691,16 @@ builtin_syntax[] = {
       macro_delay,
       {Calling::macro, 1}}},
 
+  {"quasiquote", {
+      whole_macro_quasiquote,
+      {Calling::whole_macro, 1}}},
   {"unquote", {
       whole_function_pass_through,
       {Calling::whole_function, 0, Variadic::t}}},
   {"unquote-splicing", {
       whole_function_pass_through,
       {Calling::whole_function, 0, Variadic::t}}},
+
   {"else", {
       whole_function_error,
       {Calling::whole_function, 0}}},

@@ -370,9 +370,6 @@ void vm_op_arg_push_list(){
   list_to_stack("unquote-splicing", vm.return_value[0], vm.stack);
 }
 
-static const VMop vm_op_quasiquote_list = procedure_list_star;
-static const VMop vm_op_quasiquote_vector = procedure_vector;
-
 } // namespace
 
 /*
@@ -458,93 +455,6 @@ void vm_op_begin(){
   }else{
     vm.code.back() = next_car;
   }
-}
-
-/*
-  code[0] = template
-  ----
-  * vector, list
-      code = (quasiquote, template[0], arg_push, # normal
-              template[1], arg_push,             # unquote
-              template[2], arg_push_list,        # unquote-splicing
-              ...,
-              stack_to_{list or vector}
-              )
-      stack[0] = arg_bottom
-  * default
-      return = template
-*/
-void vm_op_quasiquote(){
-#if 0
-  const auto unquote_sym = intern(vm.symtable(), "unquote");
-  const auto unquote_splicing_sym = intern(vm.symtable(), "unquote-splicing");
-
-  const auto qq_elem = [&](Lisp_ptr p){
-    if(auto l = p.get<Cons*>()){
-      if(auto l_first_sym = l->car().get<Symbol*>()){
-        if(l_first_sym == unquote_sym){
-          vm.code.push_back(vm_op_arg_push);
-          vm.code.push_back(l->cdr().get<Cons*>()->car());
-          return;
-        }else if(l_first_sym  == unquote_splicing_sym){
-          vm.code.push_back(vm_op_arg_push_list);
-          vm.code.push_back(l->cdr().get<Cons*>()->car());
-          return;
-        }
-      }
-    }
-
-    vm.code.push_back(vm_op_arg_push);
-    vm.code.push_back(p);
-    vm.code.push_back(vm_op_quasiquote);
-  };
-
-  auto p = vm.code.back();
-  vm.code.pop_back();
-
-  if(p.tag() == Ptr_tag::cons){
-    if(nullp(p)){
-      vm.return_value[0] = Cons::NIL;
-      return;
-    }
-
-    // check unquote -- like `,x
-    if(auto first_sym = p.get<Cons*>()->car().get<Symbol*>()){
-      if(first_sym == unquote_sym){
-        auto rest = p.get<Cons*>()->cdr().get<Cons*>()->car();
-        vm.code.push_back(rest);
-        return;
-      }else if(first_sym == unquote_splicing_sym){
-        fprintf(zs::err, "eval error: unquote-splicing is not supported out of list");
-        vm.return_value[0] = {};
-        return;
-      }
-    }
-
-    // generic lists
-    vm.stack.push_back(vm_op_arg_bottom);
-    vm.code.push_back(vm_op_quasiquote_list);
-
-    do_list(p,
-            [&](Cons* c) -> bool {
-              qq_elem(c->car());
-              return true;
-            },
-            [&](Lisp_ptr last){
-              qq_elem(last);
-            });
-  }else if(p.tag() == Ptr_tag::vector){
-    vm.stack.push_back(vm_op_arg_bottom);
-    vm.code.push_back(vm_op_quasiquote_vector);
-
-    auto v = p.get<Vector*>();
-    for(auto i = begin(*v); i != end(*v); ++i){
-      qq_elem(*i);
-    }
-  }else{
-    vm.return_value[0] = p;
-  }
-#endif
 }
 
 /*
@@ -902,18 +812,12 @@ const char* stringify(VMop op){
     return "move values";
   }else if(op == vm_op_arg_push_list){
     return "arg push list";
-  }else if(op == vm_op_quasiquote_list){
-    return "quasiquote list";
-  }else if(op == vm_op_quasiquote_vector){
-    return "quasiquote vector";
   }else if(op == vm_op_if){
     return "if";
   }else if(op == vm_op_set){
     return "set";
   }else if(op == vm_op_local_set){
     return "local set";
-  }else if(op == vm_op_quasiquote){
-    return "quasiquote";
   }else if(op == vm_op_force){
     return "force";
   }else{
