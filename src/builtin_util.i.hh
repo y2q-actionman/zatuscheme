@@ -9,6 +9,7 @@
 #include <vector>
 #include <array>
 #include <cstdio>
+#include <iterator>
 
 #include "util.hh"
 #include "lisp_ptr.hh"
@@ -57,15 +58,19 @@ void stack_to_vector(StackT& st, VectorT& v){
   Lisp_ptr argc = st.back();
   st.pop_back();
 
-  for(int i = 0; i < argc.get<int>(); ++i){
-    v.push_back(st.back());
-    st.pop_back();
+  auto arg_start = st.end() - argc.get<int>();
+  auto arg_end = st.end();
+
+  for(auto i = arg_start; i != arg_end; ++i){
+    v.push_back(*i);
   }
+
+  st.erase(arg_start, arg_end);
 }
 
 template<typename StackT>
 int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
-  std::stack<Lisp_ptr, std::vector<Lisp_ptr>> tmp;
+  std::stack<Lisp_ptr> tmp;
   
   do_list(l,
           [&](Cons* c) -> bool {
@@ -103,9 +108,9 @@ std::array<Lisp_ptr, size> pick_args(){
   }    
 
   for(int i = 0; i < size; ++i){
-    ret[i] = vm.stack.back();
-    vm.stack.pop_back();
+    ret[i] = vm.stack[vm.stack.size() - size + i];
   }
+  vm.stack.erase(vm.stack.end() - size, vm.stack.end());
 
   return ret;
 }
