@@ -8,6 +8,7 @@
 #include "util.hh"
 #include "delay.hh"
 #include "vm.hh"
+#include "eval.hh"
 
 namespace {
 
@@ -145,12 +146,15 @@ void print(FILE* f, Lisp_ptr p, print_human_readable flag){
     fprintf(f, "#<argcount %d>", p.get<int>());
     break;
 
+  case Ptr_tag::vm_op:
+    fprintf(f, "#<VMop %s>", stringify(p.get<VMop>()));
+    break;
+
   case Ptr_tag::i_procedure:
   case Ptr_tag::n_procedure:
   case Ptr_tag::continuation:
   case Ptr_tag::port:
   case Ptr_tag::env:
-  case Ptr_tag::vm_op:
     fprintf(f, "#<%s %p>", stringify(p.tag()), p.get<void*>());
     break;
 

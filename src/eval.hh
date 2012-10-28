@@ -6,7 +6,7 @@
 
 // primitives for syntax call
 constexpr VMop vm_op_nop = nullptr;
-constexpr VMop vm_op_arg_bottom = nullptr;
+// constexpr VMop vm_op_arg_bottom = nullptr;
 
 void vm_op_leave_frame();
 void vm_op_if();
@@ -25,5 +25,8 @@ void apply_func();
 void func_force();
 void call_with_values();
 void call_cc();
+
+// for debug
+const char* stringify(VMop);
 
 #endif // EVAL_HH

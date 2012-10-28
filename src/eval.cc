@@ -50,15 +50,18 @@ void vm_args_push_base(bool is_set){
     arg_syms = arg_syms.get<Cons*>()->cdr();
   }
 
-  if(nullp(args_rest)){
+  if(args_c){
+    if(nullp(args_rest)){
+      vm.code.back() = arg1;
+    }else{
+      vm.code.back() = args_rest;
+      vm.code.push_back((is_set) ? vm_op_arg_push_and_set : vm_op_arg_push);
+      vm.code.push_back(arg1);
+    }
+  }else{
     if(is_set){
       vm.code.pop_back();
     }
-    vm.code.back() = arg1;
-  }else{
-    vm.code.back() = args_rest;
-    vm.code.push_back((is_set) ? vm_op_arg_push_and_set : vm_op_arg_push);
-    vm.code.push_back(arg1);
   }
 }
 
@@ -127,6 +130,17 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_head){
 
   if(!arg1 || nullp(arg1)){
     vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  }else if(nullp(arg_rest)){
+    vm.code.push_back({Ptr_tag::vm_argcount, 1});
+    // if(info->sequencial){
+    //   vm.code.push_back(arg_head);
+    //   vm.code.push_back(arg_rest);
+    //   vm.code.push_back(vm_op_arg_push_and_set);
+    // }else{
+    //   vm.code.push_back(arg_rest);
+    //   vm.code.push_back(vm_op_arg_push);
+    // }
+    vm.code.push_back(arg1);
   }else{
     vm.code.push_back({Ptr_tag::vm_argcount, 1});
     if(info->sequencial){
@@ -726,6 +740,9 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
 
 void eval(){
   while(!vm.code.empty()){
+    // print(stdout, vm);
+    // fflush(stdout);
+
     auto p = vm.code.back();
     vm.code.pop_back();
 
@@ -759,6 +776,7 @@ void eval(){
       break;
 
     case Ptr_tag::vm_argcount:
+      vm.stack.push_back(vm.return_value[0]);
       vm.stack.push_back(p);
       break;
 
@@ -917,4 +935,46 @@ void call_cc(){
   vm.stack.push_back(vm_op_arg_bottom);
   vm.stack.push_back(cont);
 #endif
+}
+
+const char* stringify(VMop op){
+  if(op == vm_op_nop){
+    return "NOP / arg bottom";
+  }else if(op == vm_op_proc_enter){
+    return "proc enter";
+  }else if(op == vm_op_arg_push){
+    return "arg push";
+  }else if(op == vm_op_arg_push_and_set){
+    return "arg push and set";
+  }else if(op == vm_op_macro_call){
+    return "macro call";
+  }else if(op == vm_op_call){
+    return "call";
+  }else if(op == vm_op_leave_frame){
+    return "leave frame";
+  }else if(op == vm_op_begin){
+    return "begin";
+  }else if(op == vm_op_proc_enter){
+    return "proc enter";
+  }else if(op == vm_op_move_values){
+    return "move values";
+  }else if(op == vm_op_arg_push_list){
+    return "arg push list";
+  }else if(op == vm_op_quasiquote_list){
+    return "quasiquote list";
+  }else if(op == vm_op_quasiquote_vector){
+    return "quasiquote vector";
+  }else if(op == vm_op_if){
+    return "if";
+  }else if(op == vm_op_set){
+    return "set";
+  }else if(op == vm_op_local_set){
+    return "local set";
+  }else if(op == vm_op_quasiquote){
+    return "quasiquote";
+  }else if(op == vm_op_force){
+    return "force";
+  }else{
+    return "unknown vm-op";
+  }
 }
