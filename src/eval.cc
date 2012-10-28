@@ -32,14 +32,7 @@ void vm_args_push_base(bool is_set){
   auto& args = vm.code[vm.code.size() - 2];
 
   if(nullp(args)){
-    if(vm.stack.empty()
-       || vm.stack.back().tag() != Ptr_tag::vm_argcount){
-      vm.stack.push_back(argc);
-    }else{
-      auto prev_argc = vm.stack.back();
-      vm.stack.back() = {Ptr_tag::vm_argcount, argc.get<int>() + prev_argc.get<int>()};
-    }
-
+    vm.stack.push_back(argc);
     vm.code.pop_back();
     vm.code.pop_back();
   }else{
@@ -704,9 +697,6 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
 
 void eval(){
   while(!vm.code.empty()){
-    // print(stdout, vm);
-    // fflush(stdout);
-
     auto p = vm.code.back();
     vm.code.pop_back();
 
@@ -781,11 +771,29 @@ void apply_func(){
   vm.code.push_back(args[0]);
   vm.code.push_back(vm_op_proc_enter);
 
-  for(auto i = args.rbegin(), e = args.rend(); i != e; ++i){
-    vm.code.push_back(*i);
-    vm.code.push_back({Ptr_tag::vm_argcount, 0});
-    vm.code.push_back(i->get<Cons*>()->car());
+  int argc = 0;
+
+  for(auto i = std::next(args.begin()), e = args.end(); i != e; ++i){
+    if(i->tag() == Ptr_tag::cons){
+      do_list(*i,
+              [&](Cons* cell) -> bool {
+                vm.stack.push_back(cell->car());
+                ++argc;
+                return true;
+              },
+              [&](Lisp_ptr last){
+                if(!nullp(last)){
+                  fprintf(zs::err, "native func warning: apply: passed dot list. used as arg\n");
+                  vm.stack.push_back(last);
+                  ++argc;
+                }
+              });
+    }else{
+      vm.stack.push_back(*i);
+      ++argc;
+    }
   }
+  vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 }
 
 void func_force(){
