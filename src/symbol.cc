@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include "symbol.hh"
+#include "util.hh"
 
 using namespace std;
 
@@ -36,4 +37,10 @@ Symbol* intern(SymTable& table, const string& s){
 void unintern(SymTable& table, Symbol* s){
   table.erase(s->name());
   s->name_ = nullptr;
+}
+
+void print(FILE* f, const SymTable& st){
+  for(auto s : st){
+    fprintf(f, "%s %p\n", s.first.c_str(), c_cast<void*>(&s.second));
+  }
 }

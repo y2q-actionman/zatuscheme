@@ -12,7 +12,7 @@ void check(const char* input, const char* expect){
 
 
 int main(){
-  install_builtin();
+  zs_init();
 
   // testing simple closure
   eval_text("(define x 1)");

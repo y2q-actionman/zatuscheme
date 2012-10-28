@@ -8,7 +8,7 @@ void check(const char* input, const char* expect){
 }
 
 int main(){
-  install_builtin();
+  zs_init();
 
   check("(not #t)", "#f");
   check("(not 3)", "#f");

@@ -1,5 +1,9 @@
-#include "env.hh"
 #include <utility>
+
+#include "env.hh"
+#include "util.hh"
+#include "symbol.hh"
+#include "printer.hh"
 
 using namespace std;
 
@@ -47,4 +51,14 @@ void Env::local_set(Symbol* s, Lisp_ptr p){
 
 Env* Env::push(){
   return new Env{this};
+}
+
+void print(FILE* f, const Env& env){
+  fprintf(f, "Env %p (refcnt=%d, next=%p)\n",
+          c_cast<void*>(&env), env.refcnt_, c_cast<void*>(env.next_));
+  for(auto e : env.map_){
+    fprintf(f, "\t%s\t = ", e.first->name().c_str());
+    print(f, e.second);
+    fputc('\n', f);
+  }
 }

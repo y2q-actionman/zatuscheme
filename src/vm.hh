@@ -32,6 +32,8 @@ public:
 
   SymTable& symtable(){ return *symtable_; }
 
+  friend void print(FILE*, const VM&);
+
 public:
   std::deque<Lisp_ptr> code;
   std::deque<Lisp_ptr> stack;

@@ -12,7 +12,7 @@ void check_undef(const char* input){
 }
 
 int main(){
-  install_builtin();
+  zs_init();
 
   check("(pair? '(a . b))", "#t");
   check("(pair? '(a b c))", "#t");

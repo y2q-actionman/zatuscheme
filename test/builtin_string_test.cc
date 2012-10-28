@@ -19,7 +19,7 @@ void check_success(const char* input){
 
 
 int main(){
-  install_builtin();
+  zs_init();
 
   check("(string? \"foo\")", "#t");
   check("(string? 'foo)", "#f");

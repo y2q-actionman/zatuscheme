@@ -52,7 +52,7 @@ bool test_true(Lisp_ptr p, const char*){
 }
 
 int main(){
-  install_builtin();
+  zs_init();
 
   // === self-evaluating ===
 

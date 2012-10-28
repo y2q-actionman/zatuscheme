@@ -9,7 +9,7 @@ void check(const char* input, const char* expect){
 
 
 int main(){
-  install_builtin();
+  zs_init();
 
   check("(force (delay (+ 1 2)))", "3");
   check("(let ((p (delay (+ 1 2)))) (list (force p) (force p)))", "(3 3)");

@@ -10,7 +10,7 @@ void check(const char* input, const char* expect){
 #define TEST_FILE_NAME "\"/tmp/zs_test.txt\""
 
 int main(){
-  install_builtin();
+  zs_init();
 
   check("(input-port? 'hoge)", "#f");
   check("(input-port? (current-input-port))", "#t");

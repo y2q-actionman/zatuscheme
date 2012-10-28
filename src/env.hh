@@ -27,6 +27,8 @@ public:
   inline friend int add_ref(Env*);
   inline friend int release(Env*);
 
+  friend void print(FILE*, const Env&);
+
 private:
   map_type map_;
   Env* next_;

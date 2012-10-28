@@ -39,6 +39,8 @@ private:
   // add pointer to symbol table?
 };
 
+void print(FILE*, const SymTable&);
+
 #include "symbol.i.hh"
 
 #endif // SYMBOL_HH

@@ -26,4 +26,6 @@
 #include "util.hh"
 #include "vm.hh"
 
+void zs_init();
+
 #endif //ZS_HH

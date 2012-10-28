@@ -11,7 +11,7 @@ void check(const char* input, const char* expect){
 
 
 int main(){
-  install_builtin();
+  zs_init();
 
   check("(symbol? 'foo)", "#t");
   check("(symbol? (car '(a b)))", "#t");
