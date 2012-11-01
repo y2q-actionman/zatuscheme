@@ -539,7 +539,7 @@ void macro_delay(){
   vm.return_value[0] = {new Delay(args, vm.frame())};
 }
 
-void whole_macro_quasiquote(){
+void whole_function_quasiquote(){
   Lisp_ptr arg;
   bind_cons_list(pick_args_1(),
                  [](Cons*){}, // skips 'quasiquote' symbol
@@ -598,7 +598,7 @@ void whole_macro_quasiquote(){
     // check unquote -- like `,x
     if(auto first_sym = arg.get<Cons*>()->car().get<Symbol*>()){
       if(first_sym == unquote_sym){
-        vm.return_value[0] = arg.get<Cons*>()->cdr().get<Cons*>()->car();
+        vm.code.push_back(arg.get<Cons*>()->cdr().get<Cons*>()->car());
         return;
       }else if(first_sym == unquote_splicing_sym){
         fprintf(zs::err, "quasiquote error: unquote-splicing is not supported out of list");
@@ -619,7 +619,8 @@ void whole_macro_quasiquote(){
               qq_elem(last);
             });
 
-    vm.return_value[0] = expanded;
+    vm.return_value[0] = {};
+    vm.code.push_back(expanded);
   }else if(arg.tag() == Ptr_tag::vector){
     c->rplaca(intern(vm.symtable(), "vector"));
 
@@ -628,15 +629,23 @@ void whole_macro_quasiquote(){
       qq_elem(*i);
     }
 
-    vm.return_value[0] = expanded;
+    vm.return_value[0] = {};
+    vm.code.push_back(expanded);
   }else{
-    vm.return_value[0] = make_cons_list({quote_sym, arg});
+    vm.return_value[0] = arg;
   }
 
   fflush(stdout);
   fflush(stderr);
   printf("start : "); print(stdout, arg); putchar('\n');
-  printf("expand: "); print(stdout, vm.return_value[0]); putchar('\n');
+  printf("expand ret\t:"); print(stdout, vm.return_value[0]); putchar('\n');
+  printf("expand code\t:"); 
+  if(vm.code.empty()){
+    printf("(empty)");
+  }else{
+    print(stdout, vm.code.back());
+  }
+  putchar('\n');
   fflush(stdout);
 }
 
@@ -692,8 +701,8 @@ builtin_syntax[] = {
       {Calling::macro, 1}}},
 
   {"quasiquote", {
-      whole_macro_quasiquote,
-      {Calling::whole_macro, 1}}},
+      whole_function_quasiquote,
+      {Calling::whole_function, 1}}},
   {"unquote", {
       whole_function_pass_through,
       {Calling::whole_function, 0, Variadic::t}}},
