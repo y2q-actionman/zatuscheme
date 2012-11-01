@@ -16,6 +16,8 @@ void vm_op_begin();
 
 void let_internal(Procedure::Sequencial, Procedure::EarlyBind);
 
+bool is_self_evaluating(Lisp_ptr);
+
 // main loop
 void eval();
 

@@ -605,17 +605,19 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
   vm.return_value[0] = {};
 }
 
+bool is_self_evaluating(Lisp_ptr p){
+  auto tag = p.tag();
+  return (tag != Ptr_tag::symbol)
+    && (tag != Ptr_tag::cons)
+    && (tag != Ptr_tag::vm_op);
+}
+
 void eval(){
   while(!vm.code.empty()){
     auto p = vm.code.back();
     vm.code.pop_back();
 
     switch(p.tag()){
-    case Ptr_tag::undefined:
-      fprintf(zs::err, "eval error: undefined is passed!\n");
-      vm.return_value[0] = {};
-      break;
-
     case Ptr_tag::symbol:
       vm.return_value[0] = vm.find(p.get<Symbol*>());
       break;
@@ -639,6 +641,7 @@ void eval(){
       }
       break;
 
+   // self-evaluating
     case Ptr_tag::boolean: case Ptr_tag::character:
     case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
     case Ptr_tag::number:
@@ -649,10 +652,21 @@ void eval(){
       vm.return_value[0] = p;
       break;
 
+    // error
+    case Ptr_tag::undefined:
+      fprintf(zs::err, "eval error: undefined is passed!\n");
+      vm.return_value[0] = {};
+      break;
+
     case Ptr_tag::vm_argcount:
-    default:
       fprintf(zs::err, "eval internal error: vm-argcount is rest on VM code stack!\n");
-      vm.stack.push_back(p);
+      vm.return_value[0] = {};
+      break;
+
+    default:
+      fprintf(zs::err, "eval error: unknown object appeared! (tag = %d)!\n",
+              static_cast<int>(p.tag()));
+      vm.return_value[0] = {};
       break;
     }
   }
