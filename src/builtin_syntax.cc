@@ -592,7 +592,7 @@ void function_splicing(){
     vm.return_value[0] = {};
   }
 
-  auto& op = vm.code[vm.code.size() - 1];
+  // auto& op = vm.code[vm.code.size() - 1];
   auto& parent_argc = vm.code[vm.code.size() - 2];
   auto& parent_args = vm.code[vm.code.size() - 3];
 
@@ -616,7 +616,7 @@ void function_splicing(){
   // see vm_op_arg_push()
   Lisp_ptr parent_next_args, parent_next_arg1;
   bind_cons_list(parent_args,
-                 [](Cons* c){}, // (unquote-splicing ...)
+                 [](Cons*){}, // (unquote-splicing ...)
                  [&](Cons* c){
                    parent_next_args = c;
                    parent_next_arg1 = c->car();
@@ -634,9 +634,15 @@ void whole_function_quasiquote(){
                  [&](Cons* c){
                    arg = c->car();
                  });
-  if(!arg) return;
 
-  const auto quote_sym = intern(vm.symtable(), "quote");
+  if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
+    // acting as a normal quote.
+    vm.return_value[0] = arg;
+    return;
+  }
+
+
+  const auto quasiquote_sym = intern(vm.symtable(), "quasiquote");
   const auto unquote_sym = intern(vm.symtable(), "unquote");
   const auto unquote_splicing_sym = intern(vm.symtable(), "unquote-splicing");
 
@@ -659,13 +665,11 @@ void whole_function_quasiquote(){
         }
       }
     }
-                  
-    auto newc = new Cons(make_cons_list({quote_sym, p}), Cons::NIL);
+
+    auto newc = new Cons(make_cons_list({quasiquote_sym, p}), Cons::NIL);
     c->rplacd(newc);
     c = newc;
   };
-
-  vm.return_value[0] = {}; // for debug
 
   if(arg.tag() == Ptr_tag::cons){
     if(nullp(arg)){
@@ -708,22 +712,8 @@ void whole_function_quasiquote(){
 
     vm.code.push_back(expanded);
   }else{
-    vm.return_value[0] = arg;
+    UNEXP_DEFAULT();
   }
-
-  fflush(stdout);
-  fflush(stderr);
-  printf("start:\t"); print(stdout, arg); putchar('\n');
-  printf("expand:\t"); print(stdout, expanded); putchar('\n');
-  printf("expand-ret:\t"); print(stdout, vm.return_value[0]); putchar('\n');
-  printf("expand-code:\t"); 
-  if(vm.code.empty()){
-    printf("(empty)");
-  }else{
-    print(stdout, vm.code.back());
-  }
-  putchar('\n');
-  fflush(stdout);
 }
 
 } //namespace
