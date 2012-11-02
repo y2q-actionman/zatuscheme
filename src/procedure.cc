@@ -119,8 +119,6 @@ const char* stringify(Calling c){
     return "macro";
   case Calling::whole_function:
     return "whole_function";
-  case Calling::whole_macro:
-    return "whole_macro";
   default:
     return "(unknown calling type)";
   }

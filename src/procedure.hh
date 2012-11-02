@@ -13,8 +13,7 @@ namespace Procedure {
   enum class Calling : unsigned char{
     function,
     macro,
-    whole_function,
-    whole_macro
+    whole_function
   };
 
   enum class Variadic : bool { f = false, t = true };

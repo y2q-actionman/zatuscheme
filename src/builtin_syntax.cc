@@ -289,13 +289,13 @@ void whole_function_letrec(){
   let_internal(EarlyBind::t);
 }
 
-Lisp_ptr whole_macro_or_expand(Cons* c){
+Lisp_ptr or_expand(Cons* c){
   if(!c->cdr() || nullp(c->cdr())){
     return c->car();
   }
 
   const auto if_sym = intern(vm.symtable(), "if");
-  auto else_clause = whole_macro_or_expand(c->cdr().get<Cons*>());
+  auto else_clause = or_expand(c->cdr().get<Cons*>());
 
   return make_cons_list({if_sym,
         c->car(),
@@ -303,13 +303,13 @@ Lisp_ptr whole_macro_or_expand(Cons* c){
         else_clause});
 }
 
-Lisp_ptr whole_macro_and_expand(Cons* c){
+Lisp_ptr and_expand(Cons* c){
   if(!c->cdr() || nullp(c->cdr())){
     return c->car();
   }
 
   const auto if_sym = intern(vm.symtable(), "if");
-  auto then_clause = whole_macro_and_expand(c->cdr().get<Cons*>());
+  auto then_clause = and_expand(c->cdr().get<Cons*>());
 
   return make_cons_list({if_sym,
         c->car(),
@@ -317,7 +317,7 @@ Lisp_ptr whole_macro_and_expand(Cons* c){
         vm_op_nop});
 }
 
-Lisp_ptr whole_macro_cond_expand(Cons* head){
+Lisp_ptr cond_expand(Cons* head){
   if(!head) return {}; // unspecified in R5RS.
 
   auto clause = head->car();
@@ -358,7 +358,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
   }
 
   const auto if_sym = intern(vm.symtable(), "if");
-  auto else_form = whole_macro_cond_expand(head->cdr().get<Cons*>());
+  auto else_form = cond_expand(head->cdr().get<Cons*>());
 
   return make_cons_list({if_sym,
         test_form,
@@ -368,7 +368,7 @@ Lisp_ptr whole_macro_cond_expand(Cons* head){
 
 template<typename T, typename Expander>
 inline
-void whole_macro_conditional(T default_value, Expander e){
+void whole_conditional(T default_value, Expander e){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -384,22 +384,22 @@ void whole_macro_conditional(T default_value, Expander e){
     return;
   }
 
-  vm.return_value[0] = e(head);
+  vm.code.push_back(e(head));
 }
 
-void whole_macro_and(){
-  whole_macro_conditional(true, whole_macro_and_expand);
+void whole_and(){
+  whole_conditional(true, and_expand);
 }
                  
-void whole_macro_or(){
-  whole_macro_conditional(false, whole_macro_or_expand);
+void whole_or(){
+  whole_conditional(false, or_expand);
 }
 
-void whole_macro_cond(){
-  whole_macro_conditional(Lisp_ptr{}, whole_macro_cond_expand);
+void whole_cond(){
+  whole_conditional(Lisp_ptr{}, cond_expand);
 }
 
-Lisp_ptr whole_macro_case_keys_expand(Symbol* sym, Cons* keys){
+Lisp_ptr case_keys_expand(Symbol* sym, Cons* keys){
   const auto eqv_sym = intern(vm.symtable(), "eqv?");
   auto eqv_expr = make_cons_list({eqv_sym, sym, keys->car()});
 
@@ -408,7 +408,7 @@ Lisp_ptr whole_macro_case_keys_expand(Symbol* sym, Cons* keys){
   }
 
   const auto if_sym = intern(vm.symtable(), "if");
-  auto else_clause = whole_macro_case_keys_expand(sym, keys->cdr().get<Cons*>());
+  auto else_clause = case_keys_expand(sym, keys->cdr().get<Cons*>());
 
   return make_cons_list({if_sym,
         eqv_expr,
@@ -416,7 +416,7 @@ Lisp_ptr whole_macro_case_keys_expand(Symbol* sym, Cons* keys){
         else_clause});
 }
 
-Lisp_ptr whole_macro_case_expand(Symbol* sym, Lisp_ptr cases_ptr){
+Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
   if(cases_ptr.tag() != Ptr_tag::cons){
     fprintf(zs::err, "macro case: informal case syntax (dot-list?): ");
     print(zs::err, cases_ptr);
@@ -440,7 +440,7 @@ Lisp_ptr whole_macro_case_expand(Symbol* sym, Lisp_ptr cases_ptr){
   Lisp_ptr new_keys;
 
   if(auto keys_lst = keys_ptr.get<Cons*>()){
-    new_keys = whole_macro_case_keys_expand(sym, keys_lst);
+    new_keys = case_keys_expand(sym, keys_lst);
   }else if(auto keys_sym = keys_ptr.get<Symbol*>()){
     if(keys_sym->name() != "else"){
       fprintf(zs::err, "macro case: informal clause key symbol: %s\n", keys_sym->name().c_str());
@@ -456,10 +456,10 @@ Lisp_ptr whole_macro_case_expand(Symbol* sym, Lisp_ptr cases_ptr){
   }
 
   return push_cons_list(push_cons_list(new_keys, clause->cdr()),
-                        whole_macro_case_expand(sym, cases->cdr()));
+                        case_expand(sym, cases->cdr()));
 }
 
-void whole_macro_case(){
+void whole_case(){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -480,17 +480,18 @@ void whole_macro_case(){
   // TODO: collect this by garbage collector!
   auto key_sym = new Symbol(new string("case_key_symbol"));
 
-  vm.return_value[0] = 
+  auto form = 
     make_cons_list({intern(vm.symtable(), "let"),
           make_cons_list({
               make_cons_list({key_sym, key})
                 }),
           new Cons(intern(vm.symtable(), "cond"),
-                   whole_macro_case_expand(key_sym, clauses))
+                   case_expand(key_sym, clauses))
           });
+  vm.code.push_back(form);
 }
 
-void whole_macro_do(){
+void whole_do(){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -559,7 +560,7 @@ void whole_macro_do(){
           });
 
   // creates 'named let' style loop
-  vm.return_value[0] = 
+  auto form = 
     make_cons_list({
         intern(vm.symtable(), "let"),
         loop_sym,
@@ -571,6 +572,7 @@ void whole_macro_do(){
             body_head,
             })
         });
+  vm.code.push_back(form);
 }
 
 void macro_delay(){
@@ -740,17 +742,17 @@ builtin_syntax[] = {
       {Calling::whole_function, 1, Variadic::t}}},
 
   {"cond", {
-      whole_macro_cond,
-      {Calling::whole_macro, 1, Variadic::t}}},
+      whole_cond,
+      {Calling::whole_function, 1, Variadic::t}}},
   {"case", {
-      whole_macro_case,
-      {Calling::whole_macro, 2, Variadic::t}}},
+      whole_case,
+      {Calling::whole_function, 2, Variadic::t}}},
   {"and", {
-      whole_macro_and,
-      {Calling::whole_macro, 0, Variadic::t}}},
+      whole_and,
+      {Calling::whole_function, 0, Variadic::t}}},
   {"or", {
-      whole_macro_or,
-      {Calling::whole_macro, 0, Variadic::t}}},
+      whole_or,
+      {Calling::whole_function, 0, Variadic::t}}},
   {"let", {
       whole_function_let,
       {Calling::whole_function, 1, Variadic::t}}},
@@ -761,8 +763,8 @@ builtin_syntax[] = {
       whole_function_letrec,
       {Calling::whole_function, 1, Variadic::t}}},
   {"do", {
-      whole_macro_do,
-      {Calling::whole_macro, 2, Variadic::t}}},
+      whole_do,
+      {Calling::whole_function, 2, Variadic::t}}},
   {"delay", {
       macro_delay,
       {Calling::macro, 1}}},

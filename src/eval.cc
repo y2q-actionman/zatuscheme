@@ -143,17 +143,6 @@ void whole_function_call(Lisp_ptr proc){
 }
 
 /*
-  stack[0] = whole args
-  ----
-  code = (call kind, proc, macro call)
-  stack = (whole args, arg-bottom)
-*/
-void whole_macro_call(Lisp_ptr proc){
-  vm.code.push_back(vm_op_macro_call);
-  whole_function_call(proc);
-}
-
-/*
   ret = proc
   stack[0] = args
   ---
@@ -181,8 +170,6 @@ void vm_op_call(){
     return macro_call(proc, info);
   case Calling::whole_function:
     return whole_function_call(proc);
-  case Calling::whole_macro:
-    return whole_macro_call(proc);
   default:
     UNEXP_DEFAULT();
   }
