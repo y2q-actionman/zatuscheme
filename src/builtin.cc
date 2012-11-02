@@ -83,7 +83,7 @@ void eval_func(){
     return;
   }
 
-  vm.enter_frame(env->push());
+  vm.enter_frame(env);
   vm.code.push_back(vm_op_leave_frame);
   vm.code.push_back(args[0]);
 }

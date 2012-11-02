@@ -608,7 +608,12 @@ void function_splicing(){
           },
           [&](Lisp_ptr last_cdr){
             if(!nullp(last_cdr)){
-              fprintf(zs::err, "eval warning: unquote-splicing: dot list has read as proper list.\n");
+              if(argc > 0){
+                fprintf(zs::err, "eval warning: unquote-splicing: dot list has read as proper list.\n");
+              }else{
+                fprintf(zs::err, "eval warning: unquote-splicing: passed value is not list. treated as a list has one element.\n");
+
+              }
               vm.stack.push_back(last_cdr);
               ++argc;
             }
