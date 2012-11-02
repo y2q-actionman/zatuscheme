@@ -336,15 +336,6 @@ void vm_op_move_values(){
   vm.return_value.resize(1);
 }
  
-// /*
-//   ret = list
-//   ----
-//   stack = (list[0], list[1], ...)
-// */
-// void vm_op_arg_push_list(){
-//   list_to_stack("unquote-splicing", vm.return_value[0], vm.stack);
-// }
-
 } // namespace
 
 /*
@@ -799,8 +790,6 @@ const char* stringify(VMop op){
     return "proc enter";
   }else if(op == vm_op_move_values){
     return "move values";
-  // }else if(op == vm_op_arg_push_list){
-  //   return "arg push list";
   }else if(op == vm_op_if){
     return "if";
   }else if(op == vm_op_set){

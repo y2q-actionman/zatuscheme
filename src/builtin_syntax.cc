@@ -578,6 +578,55 @@ void macro_delay(){
   vm.return_value[0] = {new Delay(args, vm.frame())};
 }
 
+/*
+  stack = argcount[a], an, an-1, ..., argcount[b], bn, bn-1, ...
+  ---
+  stack = argcount[a+b], an, an-1, ..., bn, bn-1, ...
+*/
+void function_splicing(){
+  auto args = pick_args_1();
+
+  if(vm.code.empty()
+     || vm.code.back().tag() != Ptr_tag::vm_op){
+    fprintf(zs::err, "eval error: unquote-splicing: called in invalid context!");
+    vm.return_value[0] = {};
+  }
+
+  auto& op = vm.code[vm.code.size() - 1];
+  auto& parent_argc = vm.code[vm.code.size() - 2];
+  auto& parent_args = vm.code[vm.code.size() - 3];
+
+  // pushes unquote-splicing's return-value to vm.stack
+  int argc = 0;
+  do_list(args,
+          [&](Cons* c) -> bool {
+            vm.stack.push_back(c->car());
+            ++argc;
+            return true;
+          },
+          [&](Lisp_ptr last_cdr){
+            if(!nullp(last_cdr)){
+              fprintf(zs::err, "eval warning: unquote-splicing: dot list has read as proper list.\n");
+              vm.stack.push_back(last_cdr);
+              ++argc;
+            }
+          });
+
+  // formatting vm.code to 'unquote-splicing is processed'
+  // see vm_op_arg_push()
+  Lisp_ptr parent_next_args, parent_next_arg1;
+  bind_cons_list(parent_args,
+                 [](Cons* c){}, // (unquote-splicing ...)
+                 [&](Cons* c){
+                   parent_next_args = c;
+                   parent_next_arg1 = c->car();
+                 });
+
+  parent_argc = {Ptr_tag::vm_argcount, parent_argc.get<int>() + argc};
+  parent_args = parent_next_args;
+  vm.code.push_back(parent_next_arg1);
+}
+
 void whole_function_quasiquote(){
   Lisp_ptr arg;
   bind_cons_list(pick_args_1(),
@@ -603,21 +652,9 @@ void whole_function_quasiquote(){
           c = newc;
           return;
         }else if(l_first_sym  == unquote_splicing_sym){
-          do_list(l->cdr().get<Cons*>()->car(),
-                  [&](Cons* cell) -> bool{
-                    auto newc = new Cons(cell->car(), Cons::NIL);
-                    c->rplacd(newc);
-                    c = newc;
-                    return true;
-                  },
-                  [&](Lisp_ptr last){
-                    if(!nullp(last)){
-                      fprintf(zs::err, "quasiquote warning: dot list appeared in unquote-splicing. used as normal element.\n");
-                      auto newc = new Cons(last, Cons::NIL);
-                      c->rplacd(newc);
-                      c = newc;
-                    }
-                  });
+          auto newc = new Cons(l, Cons::NIL);
+          c->rplacd(newc);
+          c = newc;
           return;
         }
       }
@@ -627,6 +664,8 @@ void whole_function_quasiquote(){
     c->rplacd(newc);
     c = newc;
   };
+
+  vm.return_value[0] = {}; // for debug
 
   if(arg.tag() == Ptr_tag::cons){
     if(nullp(arg)){
@@ -658,7 +697,6 @@ void whole_function_quasiquote(){
               qq_elem(last);
             });
 
-    vm.return_value[0] = {};
     vm.code.push_back(expanded);
   }else if(arg.tag() == Ptr_tag::vector){
     c->rplaca(intern(vm.symtable(), "vector"));
@@ -668,7 +706,6 @@ void whole_function_quasiquote(){
       qq_elem(*i);
     }
 
-    vm.return_value[0] = {};
     vm.code.push_back(expanded);
   }else{
     vm.return_value[0] = arg;
@@ -676,9 +713,10 @@ void whole_function_quasiquote(){
 
   fflush(stdout);
   fflush(stderr);
-  printf("start : "); print(stdout, arg); putchar('\n');
-  printf("expand ret\t:"); print(stdout, vm.return_value[0]); putchar('\n');
-  printf("expand code\t:"); 
+  printf("start:\t"); print(stdout, arg); putchar('\n');
+  printf("expand:\t"); print(stdout, expanded); putchar('\n');
+  printf("expand-ret:\t"); print(stdout, vm.return_value[0]); putchar('\n');
+  printf("expand-code:\t"); 
   if(vm.code.empty()){
     printf("(empty)");
   }else{
@@ -744,10 +782,10 @@ builtin_syntax[] = {
       {Calling::whole_function, 1}}},
   {"unquote", {
       whole_function_pass_through,
-      {Calling::whole_function, 0, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"unquote-splicing", {
-      whole_function_pass_through,
-      {Calling::whole_function, 0, Variadic::t}}},
+      function_splicing,
+      {Calling::function, 1}}},
 
   {"else", {
       whole_function_error,
