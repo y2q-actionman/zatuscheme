@@ -242,7 +242,46 @@ void whole_function_let(){
   let_internal(Sequencial::f, EarlyBind::f);
 }
 
+Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
+  if(nullp(bindings)){
+    const auto begin_sym = intern(vm.symtable(), "begin");
+    return new Cons(begin_sym, body);
+  }else{
+    const auto let_sym = intern(vm.symtable(), "let");
+
+    Lisp_ptr b_first, b_rest;
+    bind_cons_list(bindings,
+                   [&](Cons* c){
+                     b_first = c->car();
+                     b_rest = c->cdr();
+                   });
+
+    return make_cons_list({let_sym,
+                           make_cons_list({b_first}),
+                           let_star_expand(b_rest, body)});
+  }
+}
+
 void whole_function_let_star(){
+  auto wargs = pick_args_1();
+  if(!wargs) return;
+
+  Lisp_ptr bindings, body;
+
+  int len = bind_cons_list(wargs,
+                           [](Cons*){}, // let* symbol
+                           [&](Cons* c){
+                             bindings = c->car();
+                             body = c->cdr();
+                           });
+  if(len < 2){
+    vm.return_value[0] = {};
+    return;
+  }
+
+  vm.stack.push_back(let_star_expand(bindings, body));
+  vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+
   let_internal(Sequencial::t, EarlyBind::t);
 }
 
