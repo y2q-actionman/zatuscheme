@@ -14,7 +14,7 @@ void vm_op_set();
 void vm_op_local_set();
 void vm_op_begin();
 
-void let_internal(Procedure::Sequencial, Procedure::EarlyBind);
+void let_internal(Procedure::EarlyBind);
 
 bool is_self_evaluating(Lisp_ptr);
 

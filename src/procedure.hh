@@ -18,25 +18,21 @@ namespace Procedure {
   };
 
   enum class Variadic : bool { f = false, t = true };
-  enum class Sequencial : bool { f = false, t = true };
   enum class EarlyBind : bool { f = false, t = true };
 
   struct ProcInfo {
     int required_args;
     Calling calling;
     bool variadic;
-    bool sequencial;
     bool early_bind;
 
     constexpr ProcInfo(Calling c,
                        int rargs,
                        Variadic v = Variadic::f,
-                       Sequencial s = Sequencial::f,
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
         calling(c),
         variadic(static_cast<bool>(v)),
-        sequencial(static_cast<bool>(s)),
         early_bind(static_cast<bool>(e)){}
   };
 

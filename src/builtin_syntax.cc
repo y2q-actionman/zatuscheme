@@ -239,7 +239,7 @@ void whole_function_begin(){
 }
 
 void whole_function_let(){
-  let_internal(Sequencial::f, EarlyBind::f);
+  let_internal(EarlyBind::f);
 }
 
 Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
@@ -282,11 +282,11 @@ void whole_function_let_star(){
   vm.stack.push_back(let_star_expand(bindings, body));
   vm.stack.push_back({Ptr_tag::vm_argcount, 1});
 
-  let_internal(Sequencial::t, EarlyBind::t);
+  let_internal(EarlyBind::t);
 }
 
 void whole_function_letrec(){
-  let_internal(Sequencial::f, EarlyBind::t);
+  let_internal(EarlyBind::t);
 }
 
 Lisp_ptr whole_macro_or_expand(Cons* c){

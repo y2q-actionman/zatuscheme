@@ -21,12 +21,12 @@ void vm_op_proc_enter();
 
 
 void vm_op_arg_push();
-void vm_op_arg_push_and_set();
+// void vm_op_arg_push_and_set();
 
 /*
   ret = some value
 */
-void vm_args_push_base(bool is_set){
+void vm_op_arg_push(){
   auto ret = vm.return_value[0];
   auto& argc = vm.code[vm.code.size() - 1];
   auto& args = vm.code[vm.code.size() - 2];
@@ -49,14 +49,6 @@ void vm_args_push_base(bool is_set){
   }
 }
 
-void vm_op_arg_push(){
-  vm_args_push_base(false);
-}
-
-void vm_op_arg_push_and_set(){
-  vm_args_push_base(true);
-}
-
 
 static
 bool check_argcount(const char* name, int argc, const ProcInfo* info){ 
@@ -75,17 +67,8 @@ bool check_argcount(const char* name, int argc, const ProcInfo* info){
 }
 
 /*
-  stack[0] = whole args
-  ----
-  * normal call
-    code = (argN, arg-move, argN-1, arg-move, ..., call kind, proc)
-    stack = (arg-bottom)
-
-  * sequencial call (let*)
-    code = (argN, arg-set-move, symN, argN-1, arg-set-move, symN-1, ..., call kind, proc)
-    stack = (arg-bottom)
 */
-void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_names){
+void function_call(Lisp_ptr proc, const ProcInfo* info){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
@@ -105,17 +88,10 @@ void function_call(Lisp_ptr proc, const ProcInfo* info, Lisp_ptr arg_names){
   vm.code.push_back(proc);
   vm.code.push_back(vm_op_proc_enter);
 
-  // if(info->sequencial){
-    // vm.code.push_back(arg_names);
-    // vm.code.push_back(args.get<Cons*>()->cdr());
-    // vm.code.push_back({Ptr_tag::vm_argcount, 0});
-    // vm.code.push_back(vm_op_arg_push_and_set);
-  // }else{
-    vm.code.push_back(args_head);
-    vm.code.push_back({Ptr_tag::vm_argcount, 0});
-    vm.code.push_back(vm_op_arg_push);
-    vm.code.push_back(args_head.get<Cons*>()->car());
-  // }
+  vm.code.push_back(args_head);
+  vm.code.push_back({Ptr_tag::vm_argcount, 0});
+  vm.code.push_back(vm_op_arg_push);
+  vm.code.push_back(args_head.get<Cons*>()->car());
 }
 
 /*
@@ -197,11 +173,10 @@ void vm_op_call(){
   }
 
   const ProcInfo* info = get_procinfo(proc);
-  Lisp_ptr args = get_arg_list(proc);
 
   switch(info->calling){
   case Calling::function:
-    return function_call(proc, info, args);
+    return function_call(proc, info);
   case Calling::macro:
     return macro_call(proc, info);
   case Calling::whole_function:
@@ -361,14 +336,14 @@ void vm_op_move_values(){
   vm.return_value.resize(1);
 }
  
-/*
-  ret = list
-  ----
-  stack = (list[0], list[1], ...)
-*/
-void vm_op_arg_push_list(){
-  list_to_stack("unquote-splicing", vm.return_value[0], vm.stack);
-}
+// /*
+//   ret = list
+//   ----
+//   stack = (list[0], list[1], ...)
+// */
+// void vm_op_arg_push_list(){
+//   list_to_stack("unquote-splicing", vm.return_value[0], vm.stack);
+// }
 
 } // namespace
 
@@ -473,7 +448,7 @@ void vm_op_force(){
   delay->force(vm.return_value[0]);
 }
 
-void let_internal(Sequencial sequencial, EarlyBind early_bind){
+void let_internal(EarlyBind early_bind){
   auto arg = pick_args_1();
   if(!arg) return;
 
@@ -591,7 +566,7 @@ void let_internal(Sequencial sequencial, EarlyBind early_bind){
   }
 
   auto proc = new IProcedure(body, 
-                             {Calling::function, len, Variadic::f, sequencial, early_bind},
+                             {Calling::function, len, Variadic::f, early_bind},
                              syms, vm.frame());
 
   if(name){
@@ -810,8 +785,8 @@ const char* stringify(VMop op){
     return "proc enter";
   }else if(op == vm_op_arg_push){
     return "arg push";
-  }else if(op == vm_op_arg_push_and_set){
-    return "arg push and set";
+  // }else if(op == vm_op_arg_push_and_set){
+  //   return "arg push and set";
   }else if(op == vm_op_macro_call){
     return "macro call";
   }else if(op == vm_op_call){
@@ -824,8 +799,8 @@ const char* stringify(VMop op){
     return "proc enter";
   }else if(op == vm_op_move_values){
     return "move values";
-  }else if(op == vm_op_arg_push_list){
-    return "arg push list";
+  // }else if(op == vm_op_arg_push_list){
+  //   return "arg push list";
   }else if(op == vm_op_if){
     return "if";
   }else if(op == vm_op_set){
