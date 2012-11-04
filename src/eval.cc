@@ -24,8 +24,9 @@ void vm_op_proc_enter();
   ret = some value
 */
 void vm_op_arg_push(){
+  assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_arg_push);
+
   auto ret = vm.return_value[0];
-  // code[-1] == vm_op_arg_push
   auto& argc = vm.code[vm.code.size() - 2];
   auto& args = vm.code[vm.code.size() - 3];
 
@@ -43,6 +44,7 @@ void vm_op_arg_push(){
 
     args = args_rest;
     argc = {Ptr_tag::vm_argcount, argc.get<int>() + 1};
+    // vm.code[vm.code.size() - 1] = vm_op_begin;
     vm.code.push_back(args_rest.get<Cons*>()->car());
   }
 }
@@ -66,7 +68,11 @@ bool check_argcount(const char* name, int argc, const ProcInfo* info){
 
 /*
 */
+void vm_op_call();
+
 void function_call(Lisp_ptr proc, const ProcInfo* info){
+  assert(vm.code.back().get<VMop>() == vm_op_call);
+
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
@@ -83,7 +89,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
 
   auto args_head = args.get<Cons*>()->cdr(); // skips first symbol
 
-  vm.code.push_back(proc);
+  vm.code.back() = proc;
   vm.code.push_back(vm_op_proc_enter);
 
   vm.code.push_back(args_head);
@@ -109,6 +115,8 @@ void vm_op_macro_call(){
   stack = (arg1, arg2, ..., arg-bottom)
 */
 void macro_call(Lisp_ptr proc, const ProcInfo* info){
+  assert(vm.code.back().get<VMop>() == vm_op_call);
+
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
@@ -122,9 +130,9 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   }    
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
-  vm.code.push_back(vm_op_macro_call);
+  vm.code.back() = vm_op_macro_call;
   vm.code.push_back(proc);
-  vm.code.push_back(vm_op_proc_enter);
+  vm.code.push_back(vm_op_proc_enter); // TODO: replace this with goto
 }
 
 /*
@@ -134,8 +142,10 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   stack = (whole args, arg-bottom)
 */
 void whole_function_call(Lisp_ptr proc){
-  vm.code.push_back(proc);
-  vm.code.push_back(vm_op_proc_enter);
+  assert(vm.code.back().get<VMop>() == vm_op_call);
+
+  vm.code.back() = proc;
+  vm.code.push_back(vm_op_proc_enter); // TODO: replace this with goto
 
   //vm.stack.push_back(args);
   vm.stack.push_back({Ptr_tag::vm_argcount, 1});
@@ -148,7 +158,8 @@ void whole_function_call(Lisp_ptr proc){
   goto proc_call or macro_call
 */
 void vm_op_call(){
-        vm.code.pop_back();
+  assert(vm.code.back().get<VMop>() == vm_op_call);
+
   auto proc = vm.return_value[0];
 
   if(!is_procedure(proc)){
@@ -157,6 +168,7 @@ void vm_op_call(){
     fprintf(zs::err, "      expr: "); print(zs::err, vm.stack.back()); fputc('\n', zs::err);
     
     vm.return_value[0] = {};
+    vm.code.pop_back();
     vm.stack.pop_back();
     return;
   }
@@ -286,7 +298,9 @@ void proc_enter_cont(Continuation* c){
    and goto handler.
 */
 void vm_op_proc_enter(){
-        vm.code.pop_back();
+  assert(vm.code.back().get<VMop>() == vm_op_proc_enter);
+  vm.code.pop_back();
+
   auto proc = vm.code.back();
   vm.code.pop_back();
 
@@ -312,7 +326,7 @@ void vm_op_proc_enter(){
   goto proc_enter 
 */
 void vm_op_move_values(){
-        vm.code.pop_back();
+  vm.code.pop_back();
   int argc = 0;
 
   for(auto i = vm.return_value.begin(), e = vm.return_value.end();
@@ -332,7 +346,7 @@ void vm_op_move_values(){
   no stack operations.
 */
 void vm_op_leave_frame(){
-        vm.code.pop_back();
+  vm.code.pop_back();
   vm.leave_frame();
 }  
 
@@ -343,16 +357,17 @@ void vm_op_leave_frame(){
   code = (consequent or alternative)
 */
 void vm_op_if(){
-        vm.code.pop_back();
+  assert(vm.code.back().get<VMop>() == vm_op_if);
+
   auto test_result = vm.return_value[0];
 
   if(test_result.get<bool>()){
-    vm.code.push_back(vm.stack.back());
+    vm.code.back() = vm.stack.back();
     vm.stack.pop_back();
     vm.stack.pop_back();
   }else{
     vm.stack.pop_back();
-    vm.code.push_back(vm.stack.back());
+    vm.code.back() = vm.stack.back();
     vm.stack.pop_back();
   }
 }
@@ -364,7 +379,9 @@ void vm_op_if(){
   return-value is setted.
 */
 void vm_op_set(){
-        vm.code.pop_back();
+  assert(vm.code.back().get<VMop>() == vm_op_set);
+  vm.code.pop_back();
+
   auto var = vm.stack.back().get<Symbol*>();
   vm.stack.pop_back();
   if(!var){
@@ -382,7 +399,9 @@ void vm_op_set(){
   return-value is setted.
 */
 void vm_op_local_set(){
-        vm.code.pop_back();
+  assert(vm.code.back().get<VMop>() == vm_op_local_set);
+  vm.code.pop_back();
+
   auto var = vm.stack.back().get<Symbol*>();
   vm.stack.pop_back();
   if(!var){
@@ -402,17 +421,19 @@ void vm_op_local_set(){
     code = [(car #1)]
  */
 void vm_op_begin(){
-        vm.code.pop_back();
-  auto next = vm.code.back();
+  assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_begin);
+
+  auto& next = vm.code[vm.code.size() - 2];
   auto next_c = next.get<Cons*>();
   auto next_car = next_c->car();
   auto next_cdr = next_c->cdr();
 
   if(!nullp(next_cdr)){
-    vm.code.back() = next_cdr;
-    vm.code.push_back(vm_op_begin);
+    next = next_cdr;
+    // vm.code[vm.code.size() - 1] = vm_op_begin;
     vm.code.push_back(next_car);
   }else{
+    vm.code.pop_back();
     vm.code.back() = next_car;
   }
 }
@@ -422,7 +443,9 @@ void vm_op_begin(){
   stack[0] = delay
 */
 void vm_op_force(){
-        vm.code.pop_back();
+  assert(vm.code.back().get<VMop>() == vm_op_force);
+  vm.code.pop_back();
+
   auto delay = vm.stack.back().get<Delay*>();
   vm.stack.pop_back();
 
