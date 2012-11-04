@@ -50,6 +50,12 @@ void vector_make(){
   vm.return_value[0] = {new Vector(count, fill)};
 }
 
+void vector_vector(){
+  auto v = new Vector;
+  stack_to_vector(vm.stack, *v);
+  vm.return_value[0] = v;
+}
+
 void vector_length(){
   auto arg1 = pick_args_1();
   auto v = arg1.get<Vector*>();
@@ -180,7 +186,7 @@ builtin_vector[] = {
       vector_make,
       {Calling::function, 1, Variadic::t}}},
   {"vector", {
-      procedure_vector, 
+      vector_vector, 
       {Calling::function, 1, Variadic::t}}},
   {"vector-length", {
       vector_length,

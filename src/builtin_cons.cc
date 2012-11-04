@@ -128,6 +128,14 @@ void cons_listp(){
   vm.return_value[0] = Lisp_ptr{ret};
 }
 
+void cons_list(){
+  vm.return_value[0] = stack_to_list<false>(vm.stack);
+}
+
+void cons_list_star(){
+  vm.return_value[0] = stack_to_list<true>(vm.stack);
+}
+
 void cons_length(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
@@ -301,10 +309,10 @@ builtin_cons[] = {
       {Calling::function, 1}}},
 
   {"list", {
-      procedure_list,
+      cons_list,
       {Calling::function, 0, Variadic::t}}},
   {"list*", {
-      procedure_list_star,
+      cons_list_star,
       {Calling::function, 1, Variadic::t}}},
 
   {"length", {
