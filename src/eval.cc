@@ -20,9 +20,6 @@ namespace {
 void vm_op_proc_enter();
 
 
-void vm_op_arg_push();
-// void vm_op_arg_push_and_set();
-
 /*
   ret = some value
 */
@@ -612,21 +609,21 @@ void eval(){
 
     // error
     case Ptr_tag::undefined:
-      fprintf(zs::err, "eval error: undefined is passed!\n");
       vm.code.pop_back();
+      fprintf(zs::err, "eval error: undefined is passed!\n");
       vm.return_value[0] = {};
       break;
 
     case Ptr_tag::vm_argcount:
-      fprintf(zs::err, "eval internal error: vm-argcount is rest on VM code stack!\n");
       vm.code.pop_back();
+      fprintf(zs::err, "eval internal error: vm-argcount is rest on VM code stack!\n");
       vm.return_value[0] = {};
       break;
 
     default:
+      vm.code.pop_back();
       fprintf(zs::err, "eval error: unknown object appeared! (tag = %d)!\n",
               static_cast<int>(p.tag()));
-      vm.code.pop_back();
       vm.return_value[0] = {};
       break;
     }
@@ -771,8 +768,6 @@ const char* stringify(VMop op){
     return "proc enter";
   }else if(op == vm_op_arg_push){
     return "arg push";
-  // }else if(op == vm_op_arg_push_and_set){
-  //   return "arg push and set";
   }else if(op == vm_op_macro_call){
     return "macro call";
   }else if(op == vm_op_call){
