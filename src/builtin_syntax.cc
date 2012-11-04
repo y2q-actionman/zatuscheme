@@ -235,7 +235,7 @@ void whole_function_begin(){
 
   // list_to_stack("begin", exprs, vm.code);
   vm.code.push_back(exprs);
-  vm_op_begin();
+  vm.code.push_back(vm_op_begin); // TODO: reduce this push
 }
 
 void whole_function_let(){
