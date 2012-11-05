@@ -51,6 +51,9 @@ builtin_procedure[] = {
   {"call-with-current-continuation", {
       call_cc,
       {Calling::function, 1}}},
+  {"dynamic-wind", {
+      dynamic_wind,
+      {Calling::function, 3}}},
 };
 
 const size_t builtin_procedure_size = sizeof(builtin_procedure) / sizeof(builtin_procedure[0]);

@@ -798,6 +798,28 @@ void call_cc(){
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
 }
 
+void dynamic_wind(){
+  auto args = pick_args<3>();
+
+  // third proc call
+  vm.code.push_back(args[2]);
+  vm.code.push_back(vm_op_proc_enter);
+  vm.code.push_back(Cons::NIL);
+  vm.code.push_back({Ptr_tag::vm_argcount, 0});
+  vm.code.push_back(vm_op_arg_push);
+
+  // second proc call
+  vm.code.push_back(args[1]);
+  vm.code.push_back(vm_op_proc_enter);
+  vm.code.push_back(Cons::NIL);
+  vm.code.push_back({Ptr_tag::vm_argcount, 0});
+  vm.code.push_back(vm_op_arg_push);
+
+  // first proc, calling with zero args.
+  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+}
+
 const char* stringify(VMop op){
   if(op == vm_op_nop){
     return "NOP / arg bottom";

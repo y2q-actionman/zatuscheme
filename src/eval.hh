@@ -26,6 +26,7 @@ void apply_func();
 void func_force();
 void call_with_values();
 void call_cc();
+void dynamic_wind();
 
 // for debug
 const char* stringify(VMop);
