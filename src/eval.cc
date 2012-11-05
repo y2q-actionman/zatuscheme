@@ -277,17 +277,89 @@ void proc_enter_interpreted(IProcedure* fun){
   vm.code.push_back(vm_op_begin); // TODO: reduce this push
 }
 
+
+static unsigned get_wind_index(const VM& va, const VM& vb){
+  unsigned w = 0;
+  while((w < va.extent.size())
+        && (w < vb.extent.size())
+        && (va.extent[w].thunk == vb.extent[w].thunk)){
+    ++w;
+  }
+  return w;
+}
+
+void vm_op_restore_values(){
+  assert(vm.code.back().get<VMop>() == vm_op_restore_values);
+  vm.code.pop_back();
+
+  auto values_p = vm.code.back();
+  auto values = values_p.get<Vector*>();
+  vm.code.pop_back();
+
+  vm.return_value = std::move(*values);
+  delete values;
+}
+
+void vm_op_replace_vm(){
+  assert(vm.code.back().get<VMop>() == vm_op_replace_vm);
+  vm.code.pop_back();
+
+  auto cont = vm.code.back();
+  vm.code.pop_back();
+  assert(cont.get<Continuation*>());
+
+  auto values = vm.code.back();
+  vm.code.pop_back();
+  assert(values.tag() == Ptr_tag::vector);
+
+
+  auto& next_vm = cont.get<Continuation*>()->get();
+  
+  // finds dynamic-winds for processing..
+  const auto wind_index = get_wind_index(vm, next_vm);
+
+  // ====== replaces vm! ======
+  vm = next_vm;
+
+  // restores old return values
+  vm.code.push_back(values);
+  vm.code.push_back(vm_op_restore_values);
+
+  // processes 'before' windings
+  for(unsigned i = wind_index; i < vm.extent.size(); ++i){
+    vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+    vm.code.push_back(vm.extent[i].before);
+    vm.code.push_back(vm_op_proc_enter);
+  }
+}
+
 /*
   stack = (arg1, arg2, ..., arg-bottom)
   ----
   replaces VM!
 */
 void proc_enter_cont(Continuation* c){
-  std::vector<Lisp_ptr> tmp;
-  stack_to_vector(vm.stack, tmp);
+  auto& next_vm = c->get();
 
-  vm = c->get();
-  vm.return_value = move(tmp);
+  // finds dynamic-winds for processing..
+  const auto wind_index = get_wind_index(vm, next_vm);
+
+  // saves old return values
+  auto ret_values = new std::vector<Lisp_ptr>();
+  stack_to_vector(vm.stack, *ret_values);
+
+  vm.code.push_back(ret_values);
+  vm.code.push_back(c);
+  vm.code.push_back(vm_op_replace_vm);
+
+  // processes 'after' windings
+  for(unsigned i = vm.extent.size() - 1;
+      (i >= wind_index) && (static_cast<signed>(i) >= 0);
+      --i){
+    vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+    vm.code.push_back(vm.extent[i].after);
+    vm.code.push_back(vm_op_proc_enter);
+  }
 }
 
 /*
@@ -860,6 +932,10 @@ const char* stringify(VMop op){
     return "leave frame";
   }else if(op == vm_op_begin){
     return "begin";
+  }else if(op == vm_op_restore_values){
+    return "restore values";
+  }else if(op == vm_op_replace_vm){
+    return "replace vm";
   }else if(op == vm_op_proc_enter){
     return "proc enter";
   }else if(op == vm_op_move_values){

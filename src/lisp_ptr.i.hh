@@ -230,4 +230,12 @@ T Lisp_ptr::get() const {
     : nullptr;
 }
 
+inline bool operator==(Lisp_ptr a, Lisp_ptr b){
+  return (a.tag() == b.tag()) && (a.get<void*>() == b.get<void*>());
+}
+
+inline bool operator!=(Lisp_ptr a, Lisp_ptr b){
+  return (a.tag() != b.tag()) || (a.get<void*>() != b.get<void*>());
+}
+
 #endif // LISP_PTR_I_HH

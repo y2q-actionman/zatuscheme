@@ -74,6 +74,9 @@ private:
   lisp_ptr_u u_;
 };
 
+bool operator==(Lisp_ptr, Lisp_ptr);
+bool operator!=(Lisp_ptr, Lisp_ptr);
+
 
 // typedefs & declarations
 class Cons;
