@@ -18,6 +18,7 @@ using namespace Procedure;
 namespace {
 
 void vm_op_proc_enter();
+void proc_enter_entrypoint(Lisp_ptr);
 
 
 /*
@@ -104,8 +105,8 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
   code = proc
 */
 void vm_op_macro_call(){
-  vm.code.pop_back();
-  vm.code.push_back(vm.return_value[0]);
+  assert(vm.code.back().get<VMop>() == vm_op_macro_call);
+  vm.code.back() = vm.return_value[0];
 }  
 
 /*
@@ -131,8 +132,7 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
   vm.code.back() = vm_op_macro_call;
-  vm.code.push_back(proc);
-  vm.code.push_back(vm_op_proc_enter); // TODO: replace this with goto
+  proc_enter_entrypoint(proc); // direct jump to proc_enter()
 }
 
 /*
@@ -144,11 +144,10 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
 void whole_function_call(Lisp_ptr proc){
   assert(vm.code.back().get<VMop>() == vm_op_call);
 
-  vm.code.back() = proc;
-  vm.code.push_back(vm_op_proc_enter); // TODO: replace this with goto
-
-  //vm.stack.push_back(args);
   vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+
+  vm.code.pop_back();
+  proc_enter_entrypoint(proc); // direct jump to proc_enter()
 }
 
 /*
@@ -292,18 +291,9 @@ void proc_enter_cont(Continuation* c){
 }
 
 /*
-  code = (proc)
-  ----
-  code = ()
-   and goto handler.
-*/
-void vm_op_proc_enter(){
-  assert(vm.code.back().get<VMop>() == vm_op_proc_enter);
-  vm.code.pop_back();
-
-  auto proc = vm.code.back();
-  vm.code.pop_back();
-
+  for internal direct 'goto'.
+ */
+void proc_enter_entrypoint(Lisp_ptr proc){
   assert(!vm.stack.empty());
 
   if(auto ifun = proc.get<IProcedure*>()){
@@ -320,12 +310,30 @@ void vm_op_proc_enter(){
 }
  
 /*
+  code = (proc)
+  ----
+  code = ()
+   and goto handler.
+*/
+void vm_op_proc_enter(){
+  assert(vm.code.back().get<VMop>() == vm_op_proc_enter);
+  vm.code.pop_back();
+
+  auto proc = vm.code.back();
+  vm.code.pop_back();
+
+  proc_enter_entrypoint(proc);
+}
+ 
+/*
   ret = (args)
   ----
   stack = (args)
   goto proc_enter 
 */
 void vm_op_move_values(){
+  assert(vm.code.back().get<VMop>() == vm_op_move_values);
+
   vm.code.pop_back();
   int argc = 0;
 
@@ -346,6 +354,7 @@ void vm_op_move_values(){
   no stack operations.
 */
 void vm_op_leave_frame(){
+  assert(vm.code.back().get<VMop>() == vm_op_leave_frame);
   vm.code.pop_back();
   vm.leave_frame();
 }  
@@ -683,11 +692,7 @@ void apply_func(){
   }
 
   // simulating function_call()
-  vm.code.push_back(args[0]);
-  vm.code.push_back(vm_op_proc_enter);
-
   int argc = 0;
-
   for(auto i = std::next(args.begin()), e = args.end(); i != e; ++i){
     if(i->tag() == Ptr_tag::cons){
       do_list(*i,
@@ -709,6 +714,8 @@ void apply_func(){
     }
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
+
+  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
 }
 
 void func_force(){
@@ -762,9 +769,8 @@ void call_with_values(){
   vm.code.push_back(vm_op_move_values);
 
   // first proc, calling with zero args.
-  vm.code.push_back(args[0]);
-  vm.code.push_back(vm_op_proc_enter);
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
 }
 
 void call_cc(){
@@ -786,12 +792,10 @@ void call_cc(){
   }
 
   auto cont = new Continuation(vm);
-
-  vm.code.push_back(args[0]);
-  vm.code.push_back(vm_op_proc_enter);
-
   vm.stack.push_back(cont);
   vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+
+  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
 }
 
 const char* stringify(VMop op){
