@@ -798,22 +798,47 @@ void call_cc(){
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
 }
 
+/*
+*/
+static void vm_op_leave_winding(){
+  assert(vm.code.back().get<VMop>() == vm_op_leave_winding);
+  vm.code.pop_back();
+
+  vm.extent.pop_back();
+}  
+
 void dynamic_wind(){
   auto args = pick_args<3>();
 
+  for(auto p : args){
+    if(!is_procedure(p)){
+      fprintf(zs::err, "error: dynamic-wind: arg is not procedure (%s)\n",
+              stringify(p.tag()));
+      vm.return_value[0] = {};
+      return;
+    }
+
+    auto info = get_procinfo(p);
+    if(info->required_args != 0){
+      fprintf(zs::err, "error: dynamic-wind: first arg mush take 0 arg (%d)\n",
+              info->required_args);
+      vm.return_value[0] = {};
+      return;
+    }
+  }
+
+  vm.extent.push_back({args[0], args[1], args[2]});
+  vm.code.push_back(vm_op_leave_winding);
+
   // third proc call
+  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
   vm.code.push_back(args[2]);
   vm.code.push_back(vm_op_proc_enter);
-  vm.code.push_back(Cons::NIL);
-  vm.code.push_back({Ptr_tag::vm_argcount, 0});
-  vm.code.push_back(vm_op_arg_push);
 
   // second proc call
+  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
   vm.code.push_back(args[1]);
   vm.code.push_back(vm_op_proc_enter);
-  vm.code.push_back(Cons::NIL);
-  vm.code.push_back({Ptr_tag::vm_argcount, 0});
-  vm.code.push_back(vm_op_arg_push);
 
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
@@ -847,6 +872,8 @@ const char* stringify(VMop op){
     return "local set";
   }else if(op == vm_op_force){
     return "force";
+  }else if(op == vm_op_leave_winding){
+    return "leave winding";
   }else{
     return "unknown vm-op";
   }

@@ -96,5 +96,12 @@ int main(){
   check("(list-length '(a b . c))", "#f");
 
 
+  check("(let ((n 0)) (dynamic-wind"
+        "  (lambda () (set! n (+ n 1)))"
+        "  (lambda () (set! n (+ n 10)))"
+        "  (lambda () (set! n (+ n 100))))"
+        "  n)",
+        "111");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

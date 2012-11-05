@@ -27,6 +27,7 @@ void release(T& frame_seq){
 
 VM::VM() : code(), stack(),
            return_value(1, {}),
+           extent(),
            frames_(),
            symtable_(new SymTable())
 {
@@ -35,6 +36,7 @@ VM::VM() : code(), stack(),
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           return_value(other.return_value),
+                          extent(other.extent),
                           frames_(other.frames_),
                           symtable_(other.symtable_)
 {
@@ -50,6 +52,7 @@ VM& VM::operator=(const VM& other){
   code = other.code;
   stack = other.stack;
   return_value = other.return_value;
+  extent = other.extent,
 
   release(frames_);
   add_ref(other.frames_);
@@ -89,6 +92,19 @@ void print(FILE* f, const VM& v){
     fprintf(f, "[%zd] ", v.return_value.size());
     print(f, *i);
     if(next(i) != e) fputs(", ", f);
+  }
+
+  if(!v.extent.empty()){
+    fputs("--- [extent] ---\n", f);
+    for(auto i = v.extent.begin(), e = v.extent.end(); i != e; ++i){
+      print(f, i->thunk);
+      fputs(": ", f);
+
+      print(f, i->before);
+      fputs(", ", f);
+      print(f, i->after);
+      fputs("\n", f);
+    }
   }
 
   // fputs("--- [env stack] ---\n", f);

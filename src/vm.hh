@@ -13,6 +13,12 @@
 
 class VM {
 public:
+  struct winding {
+    Lisp_ptr before;
+    Lisp_ptr thunk;
+    Lisp_ptr after;
+  };
+
   VM();
   VM(const VM&);
   VM(VM&&) = delete;
@@ -38,6 +44,8 @@ public:
   std::deque<Lisp_ptr> code;
   std::deque<Lisp_ptr> stack;
   std::vector<Lisp_ptr> return_value;
+
+  std::vector<winding> extent;
 
 private:
   std::deque<Env*> frames_;
