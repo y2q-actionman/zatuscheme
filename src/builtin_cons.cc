@@ -371,14 +371,27 @@ const char* builtin_cons_interpreted[] = {
   "(define (cdddar x) (cdr (cddar x)))",
   "(define (cddddr x) (cdr (cdddr x)))",
 
-  "(define (memq obj list)"
-  "  (if (null? list) #f (if (eq? obj (car list)) list (memq obj (cdr list)))))",
+#define MEM_FUNCS(name, equal_op)               \
+  "(define ("name" obj list)"                   \
+  "  (if (null? list) #f"                       \
+  "    (if ("equal_op" obj (car list)) list"    \
+  "        ("name" obj (cdr list)))))"
 
-  "(define (memv obj list)"
-  "  (if (null? list) #f (if (eqv? obj (car list)) list (memv obj (cdr list)))))",
+  MEM_FUNCS("memq", "eq?"),
+  MEM_FUNCS("memv", "eqv?"),
+  MEM_FUNCS("member", "equal?"),
+#undef MEM_FUNCS
 
-  "(define (member obj list)"
-  "  (if (null? list) #f (if (equal? obj (car list)) list (member obj (cdr list)))))",
+#define ASS_FUNCS(name, equal_op)                       \
+  "(define ("name" obj alist)"                          \
+  "  (if (null? alist) #f"                              \
+  "    (if ("equal_op" obj (caar alist)) (car alist)"   \
+  "      ("name" obj (cdr alist)))))"
+
+  ASS_FUNCS("assq", "eq?"),
+  ASS_FUNCS("assv", "eqv?"),
+  ASS_FUNCS("assoc", "equal?"),
+#undef ASS_FUNCS
 
 };
 
