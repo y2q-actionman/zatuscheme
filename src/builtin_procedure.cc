@@ -60,7 +60,23 @@ const size_t builtin_procedure_size = sizeof(builtin_procedure) / sizeof(builtin
 
 
 const char* builtin_procedure_load[] = {
-  "()"
+  "(define (map proc . lists)"
+  "  (define (all-null? lists)" // TODO: move this logic into arg-cllect
+  "     (if (null? lists) #t"
+  "         (if (null? (car lists)) (all-null? (cdr lists))"
+  "             #f)))"
+  "  (define (worker lists rets)"
+  "    (if (or (null? lists) (all-null? lists))"
+  "        rets"
+  "      (let arg-collect ((args ()) (next-lists ()) (lis lists))"
+  "        (if (null? lis)"
+  "            (worker next-lists (cons (apply proc args) rets))"
+  "          (if (null? (car lis))"
+  "              (begin (display \"error_lengths_are_mismatched\") (newline) #f)"
+  "            (arg-collect (cons (caar lis) args)"
+  "                         (cons (cdar lis) next-lists)"
+  "                         (cdr lis)))))))"
+  "  (reverse (worker lists ())))"
 };
 
 const size_t builtin_procedure_load_size

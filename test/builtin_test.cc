@@ -84,6 +84,18 @@ int main(){
   eval_text("(define compose (lambda (f g) (lambda args (f (apply g args)))))");
   check("((compose sqrt *) 12 75)", "30");
 
+  check("(map cadr '((a b) (d e) (g h)))", "(b e h)");
+  check("(map (lambda (n) (expt n n)) '(1 2 3 4 5))", "(1 4 27 256 3125)");
+  check("(map + '(1 2 3) '(4 5 6))", "(5 7 9)");
+  check("(let ((count 0))"
+        "  (map (lambda (ignored)"
+        "         (set! count (+ count 1))"
+        "         count)"
+        "       '(a b)))",
+        "(1 2)");
+
+
+
   check("(call-with-values (lambda () (values 4 5)) (lambda (a b) b))", "5");
   check("(call-with-values * -)", "-1");
 

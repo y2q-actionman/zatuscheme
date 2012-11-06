@@ -259,9 +259,9 @@ void proc_enter_interpreted(IProcedure* fun){
       return;
     }
 
+    auto var_argc = argc.get<int>() - static_cast<int>(std::distance(arg_start, i));
     vm.stack.erase(arg_start, i);
-    vm.stack.push_back({Ptr_tag::vm_argcount, 
-          argc.get<int>() - static_cast<int>(std::distance(arg_start, i))});
+    vm.stack.push_back({Ptr_tag::vm_argcount, var_argc});
     vm.local_set(arg_name.get<Symbol*>(), stack_to_list<false>(vm.stack));
   }else{  // clean stack
     if(i != arg_end){
@@ -271,7 +271,7 @@ void proc_enter_interpreted(IProcedure* fun){
     }
     vm.stack.erase(arg_start, arg_end);
   }
-  
+
   // set up lambda body code
   // list_to_stack("funcall", fun->get(), vm.code);
   vm.code.push_back(fun->get());
