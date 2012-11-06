@@ -76,7 +76,22 @@ const char* builtin_procedure_load[] = {
   "            (arg-collect (cons (caar lis) args)"
   "                         (cons (cdar lis) next-lists)"
   "                         (cdr lis)))))))"
-  "  (reverse (worker lists ())))"
+  "  (reverse (worker lists ())))",
+
+  "(define (for-each proc . lists)"
+  "  (define (worker lists)"
+  "    (if (null? lists)"
+  "        #t"
+  "      (let arg-collect ((args ()) (next-lists ()) (lis lists))"
+  "        (if (null? lis)"
+  "            (begin (apply proc (reverse args))"
+  "                   (worker (reverse next-lists)))"
+  "          (if (null? (car lis))"
+  "              #f"
+  "            (arg-collect (cons (caar lis) args)"
+  "                         (cons (cdar lis) next-lists)"
+  "                         (cdr lis)))))))"
+  "  (worker lists))"
 };
 
 const size_t builtin_procedure_load_size

@@ -94,7 +94,11 @@ int main(){
         "       '(a b)))",
         "(1 2)");
 
-
+  check("(let ((v (make-vector 5)))"
+        "  (for-each (lambda (i) (vector-set! v i (* i i)))"
+        "            '(0 1 2 3 4))"
+        "  v)",
+        "#(0 1 4 9 16)");
 
   check("(call-with-values (lambda () (values 4 5)) (lambda (a b) b))", "5");
   check("(call-with-values * -)", "-1");
