@@ -14,8 +14,8 @@ using namespace Procedure;
 
 namespace {
 
-static const char current_input_port_symname[] = "current-input-port-value";
-static const char current_output_port_symname[] = "current-output-port-value";
+#define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
+#define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
 
 void port_type_check_failed(const char* func_name, Lisp_ptr p){
   builtin_type_check_failed(func_name, Ptr_tag::character, p);
@@ -39,21 +39,6 @@ void port_i_p(){
 void port_o_p(){
   port_io_p([](Port* p){ return p->writable(); });
 }
-
-
-static
-void port_current(const char* name){
-  pick_args<0>();
-  vm.return_value[0] = vm.find(intern(vm.symtable(), name));
-}  
-
-void port_current_i(){
-  port_current(current_input_port_symname);
-}  
-  
-void port_current_o(){
-  port_current(current_output_port_symname);
-}  
 
 
 static
@@ -130,7 +115,7 @@ void port_input_call(const char* name, Fun&& fun){
 
   switch(args.size()){
   case 0:
-    p = vm.find(intern(vm.symtable(), current_input_port_symname)).get<Port*>();
+    p = vm.find(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME)).get<Port*>();
     assert(p);
     break;
   case 1:
@@ -187,7 +172,7 @@ void port_output_call(const char* name, Fun&& fun){
 
   switch(args.size()){
   case 1:
-    p = vm.find(intern(vm.symtable(), current_output_port_symname)).get<Port*>();
+    p = vm.find(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME)).get<Port*>();
     assert(p);
     break;
   case 2:
@@ -244,12 +229,6 @@ builtin_port[] = {
   {"output-port?", {
       port_o_p,
       {Calling::function, 1}}},
-  {"current-input-port", {
-      port_current_i,
-      {Calling::function, 0}}},
-  {"current-output-port", {
-      port_current_o,
-      {Calling::function, 0}}},
 
   {"open-input-file", {
       port_open_file_i,
@@ -257,6 +236,7 @@ builtin_port[] = {
   {"open-output-file", {
       port_open_file_o,
       {Calling::function, 1}}},
+
   {"close-input-port", {
       port_close_i,
       {Calling::function, 1}}},
@@ -291,15 +271,18 @@ builtin_port[] = {
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
-  vm.local_set(intern(vm.symtable(), current_input_port_symname),
+  vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME),
                new Port{zs::in, "r"});
-  vm.local_set(intern(vm.symtable(), current_output_port_symname),
+  vm.local_set(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME),
                new Port{zs::out, "w"});
 }
 
 
 const char* builtin_port_load[] = {
   "(define newline (lambda args (apply write-char '(#\\newline) args)))",
+ 
+  "(define (current-input-port) "CURRENT_INPUT_PORT_SYMNAME")",
+  "(define (current-output-port) "CURRENT_OUTPUT_PORT_SYMNAME")",
 
   "(define (call-with-input-file string proc)"
   "  (let* ((port (open-input-file string))"
