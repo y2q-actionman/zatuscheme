@@ -57,3 +57,11 @@ builtin_procedure[] = {
 };
 
 const size_t builtin_procedure_size = sizeof(builtin_procedure) / sizeof(builtin_procedure[0]);
+
+
+const char* builtin_procedure_load[] = {
+  "()"
+};
+
+const size_t builtin_procedure_load_size
+= sizeof(builtin_procedure_load) / sizeof(builtin_procedure_load[0]);

@@ -6,7 +6,7 @@
 extern const BuiltinFunc builtin_cons[];
 extern const size_t builtin_cons_size;
 
-extern const char* builtin_cons_interpreted[];
-extern const size_t builtin_cons_interpreted_size;
+extern const char* builtin_cons_load[];
+extern const size_t builtin_cons_load_size;
 
 #endif // BUILTIN_CONS_HH

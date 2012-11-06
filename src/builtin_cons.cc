@@ -339,7 +339,7 @@ builtin_cons[] = {
 const size_t builtin_cons_size = sizeof(builtin_cons) / sizeof(builtin_cons[0]);
 
 
-const char* builtin_cons_interpreted[] = {
+const char* builtin_cons_load[] = {
   "(define (caar x) (car (car x)))",
   "(define (cadr x) (car (cdr x)))",
   "(define (cdar x) (cdr (car x)))",
@@ -395,5 +395,5 @@ const char* builtin_cons_interpreted[] = {
 
 };
 
-const size_t builtin_cons_interpreted_size
-= sizeof(builtin_cons_interpreted) / sizeof(builtin_cons_interpreted[0]);
+const size_t builtin_cons_load_size
+= sizeof(builtin_cons_load) / sizeof(builtin_cons_load[0]);

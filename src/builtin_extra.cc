@@ -59,7 +59,7 @@ builtin_extra[] = {
 const size_t builtin_extra_size = sizeof(builtin_extra) / sizeof(builtin_extra[0]);
 
 
-const char* builtin_extra_interpreted[] = {
+const char* builtin_extra_load[] = {
   "(define (read-eval-print-loop)"
   "  (let loop ()"
   "    (display \">> \")"
@@ -68,5 +68,5 @@ const char* builtin_extra_interpreted[] = {
   "    (loop)))",
 };
 
-const size_t builtin_extra_interpreted_size
-= sizeof(builtin_extra_interpreted) / sizeof(builtin_extra_interpreted[0]);
+const size_t builtin_extra_load_size
+= sizeof(builtin_extra_load) / sizeof(builtin_extra_load[0]);

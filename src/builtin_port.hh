@@ -8,7 +8,7 @@ extern const size_t builtin_port_size;
 
 void install_builtin_port_value();
 
-extern const char* builtin_port_interpreted[];
-extern const size_t builtin_port_interpreted_size;
+extern const char* builtin_port_load[];
+extern const size_t builtin_port_load_size;
 
 #endif // BUILTIN_PORT_HH

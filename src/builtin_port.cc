@@ -298,9 +298,9 @@ void install_builtin_port_value(){
 }
 
 
-const char* builtin_port_interpreted[] = {
+const char* builtin_port_load[] = {
   "(define newline (lambda args (apply write-char '(#\\newline) args)))",
 };
 
-const size_t builtin_port_interpreted_size
-= sizeof(builtin_port_interpreted) / sizeof(builtin_port_interpreted[0]);
+const size_t builtin_port_load_size
+= sizeof(builtin_port_load) / sizeof(builtin_port_load[0]);

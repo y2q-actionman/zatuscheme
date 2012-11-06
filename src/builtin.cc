@@ -138,7 +138,7 @@ static void install_builtin_native(const BuiltinFunc bf[], size_t s){
   }
 }
 
-static void install_builtin_interpreted(const char* ld[], size_t s){
+static void install_builtin_load(const char* ld[], size_t s){
   for(size_t i = 0; i < s; ++i){
     Port p{c_cast<void*>(ld[i]), strlen(ld[i])};
     load(&p);
@@ -155,20 +155,21 @@ void install_builtin(){
   install_builtin_native(builtin_boolean, builtin_boolean_size);
   install_builtin_native(builtin_char, builtin_char_size);
   install_builtin_native(builtin_cons, builtin_cons_size);
-  install_builtin_interpreted(builtin_cons_interpreted, builtin_cons_interpreted_size);
+  install_builtin_load(builtin_cons_load, builtin_cons_load_size);
   install_builtin_native(builtin_numeric, builtin_numeric_size);
   install_builtin_native(builtin_procedure, builtin_procedure_size);
+  install_builtin_load(builtin_procedure_load, builtin_procedure_load_size);
   install_builtin_native(builtin_string, builtin_string_size);
   install_builtin_native(builtin_symbol, builtin_symbol_size);
   install_builtin_native(builtin_vector, builtin_vector_size);
   install_builtin_port_value();
   install_builtin_native(builtin_port, builtin_port_size);
-  install_builtin_interpreted(builtin_port_interpreted, builtin_port_interpreted_size);
+  install_builtin_load(builtin_port_load, builtin_port_load_size);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
   vm.enter_frame(vm.frame()->push());
   install_builtin_native(builtin_extra, builtin_extra_size);
-  install_builtin_interpreted(builtin_extra_interpreted, builtin_extra_interpreted_size);
+  install_builtin_load(builtin_extra_load, builtin_extra_load_size);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }
 
