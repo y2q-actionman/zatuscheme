@@ -81,5 +81,22 @@ int main(){
   check("(eof-object? (read-char tmpf))", "#t");
   eval_text("(close-input-port tmpf)");
 
+
+  check("(call-with-output-file "TEST_FILE_NAME""
+        "  (lambda (port)"
+        "    (write '(1 2 3 4 5) port)"
+        "    (write '#(#\\a #\\b #\\space) port)"
+        "    (write \" \\\" \" port)"
+        "    'written))",
+        "written");
+
+  check("(call-with-input-file "TEST_FILE_NAME""
+        "  (lambda (port)"
+        "    (and (equal? (read port) '(1 2 3 4 5))"
+        "         (equal? (read port) #(#\\a #\\b #\\space))"
+        "         (equal? (read port) \" \\\" \"))))",
+        "#t");
+
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

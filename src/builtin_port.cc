@@ -300,6 +300,18 @@ void install_builtin_port_value(){
 
 const char* builtin_port_load[] = {
   "(define newline (lambda args (apply write-char '(#\\newline) args)))",
+
+  "(define (call-with-input-file string proc)"
+  "  (let* ((port (open-input-file string))"
+  "         (ret (proc port)))"
+  "    (close-input-port port)"
+  "    ret))",
+
+  "(define (call-with-output-file string proc)"
+  "  (let* ((port (open-output-file string))"
+  "         (ret (proc port)))"
+  "    (close-output-port port)"
+  "    ret))",
 };
 
 const size_t builtin_port_load_size
