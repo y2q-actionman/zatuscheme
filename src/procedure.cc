@@ -2,6 +2,7 @@
 
 #include "procedure.hh"
 #include "cons.hh"
+#include "cons_util.hh"
 #include "util.hh"
 
 namespace Procedure{

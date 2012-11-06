@@ -10,6 +10,7 @@ libzs_a_SOURCES = zs.hh\
 		number.cc number.hh number.i.hh\
 		lisp_ptr.cc lisp_ptr.hh lisp_ptr.i.hh\
 		cons.cc cons.hh cons.i.hh\
+		cons_util.cc cons_util.hh cons_util.i.hh\
 		symbol.cc symbol.hh symbol.i.hh\
 		reader.cc reader.hh\
 		printer.cc printer.hh\

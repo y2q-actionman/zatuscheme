@@ -8,6 +8,7 @@
 #include "token.hh"
 #include "number.hh"
 #include "cons.hh"
+#include "cons_util.hh"
 #include "symbol.hh"
 
 using namespace std;

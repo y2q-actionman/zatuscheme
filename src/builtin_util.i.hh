@@ -14,6 +14,7 @@
 #include "util.hh"
 #include "lisp_ptr.hh"
 #include "cons.hh"
+#include "cons_util.hh"
 #include "vm.hh"
 
 template<bool dot_list, typename StackT>

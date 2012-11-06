@@ -12,6 +12,7 @@
 #include "builtin_syntax.hh"
 #include "builtin_util.hh"
 #include "cons.hh"
+#include "cons_util.hh"
 #include "decl.hh"
 #include "env.hh"
 #include "eval.hh"

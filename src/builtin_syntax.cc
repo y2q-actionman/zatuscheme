@@ -9,6 +9,7 @@
 #include "procedure.hh"
 #include "printer.hh"
 #include "delay.hh"
+#include "cons_util.hh"
 
 using namespace std;
 using namespace Procedure;

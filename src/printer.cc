@@ -4,6 +4,7 @@
 #include "printer.hh"
 #include "symbol.hh"
 #include "cons.hh"
+#include "cons_util.hh"
 #include "number.hh"
 #include "util.hh"
 #include "delay.hh"
