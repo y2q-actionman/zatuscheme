@@ -125,5 +125,14 @@ int main(){
   check("(cadddr c4r-test)", "ha");
   check("(cddddr c4r-test)", "hd");
 
+
+  check("(memq 'a '(a b c))", "(a b c)");
+  check("(memq 'b '(a b c))", "(b c)");
+  check("(memq 'a '(b c d))", "#f");
+  check("(memq (list 'a) '(b (a) c))", "#f");
+  check("(member (list 'a) '(b (a) c))", "((a) c)");
+  check("(memq 101 '(100 101 102))", "#f"); // unspecified
+  check("(memv 101 '(100 101 102))", "(101 102)");
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
