@@ -295,6 +295,20 @@ const char* builtin_port_load[] = {
   "         (ret (proc port)))"
   "    (close-output-port port)"
   "    ret))",
+
+  "(define (with-input-from-file string thunk)"
+  "  (let ((old-port (current-input-port)))"
+  "    (dynamic-wind (lambda () (set! "CURRENT_INPUT_PORT_SYMNAME" (open-input-file string)))"
+  "                  thunk"
+  "                  (lambda () (close-input-port "CURRENT_INPUT_PORT_SYMNAME")"
+  "                             (set! "CURRENT_INPUT_PORT_SYMNAME" old-port)))))",
+
+  "(define (with-output-to-file string thunk)"
+  "  (let ((old-port (current-output-port)))"
+  "    (dynamic-wind (lambda () (set! "CURRENT_OUTPUT_PORT_SYMNAME" (open-output-file string)))"
+  "                  thunk"
+  "                  (lambda () (close-output-port "CURRENT_OUTPUT_PORT_SYMNAME")"
+  "                             (set! "CURRENT_OUTPUT_PORT_SYMNAME" old-port)))))",
 };
 
 const size_t builtin_port_load_size

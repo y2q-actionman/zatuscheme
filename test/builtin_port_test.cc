@@ -98,5 +98,22 @@ int main(){
         "#t");
 
 
+  check("(with-output-to-file "TEST_FILE_NAME""
+        "  (lambda ()"
+        "    (write '(1 2 3 4 5))"
+        "    (write '#(#\\a #\\b #\\space))"
+        "    (write \" \\\" \")"
+        "    (newline)"
+        "    'written))",
+        "written");
+
+  check("(with-input-from-file "TEST_FILE_NAME""
+        "  (lambda ()"
+        "    (and (equal? (read) '(1 2 3 4 5))"
+        "         (equal? (read) #(#\\a #\\b #\\space))"
+        "         (equal? (read) \" \\\" \"))))",
+        "#t");
+
+
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

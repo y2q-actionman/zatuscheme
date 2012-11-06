@@ -295,6 +295,7 @@ void vm_op_restore_values(){
 
   auto values_p = vm.code.back();
   auto values = values_p.get<Vector*>();
+  assert(values);
   vm.code.pop_back();
 
   vm.return_value = std::move(*values);
@@ -878,7 +879,17 @@ static void vm_op_leave_winding(){
   vm.code.pop_back();
 
   vm.extent.pop_back();
-}  
+}
+
+static void vm_op_save_values_and_enter(){
+  assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_save_values_and_enter);
+  auto proc = vm.code[vm.code.size() - 2];
+
+  vm.code[vm.code.size() - 2] = new Vector(vm.return_value);
+  vm.code[vm.code.size() - 1] = vm_op_restore_values;
+  
+  proc_enter_entrypoint(proc);
+}
 
 void dynamic_wind(){
   auto args = pick_args<3>();
@@ -906,7 +917,7 @@ void dynamic_wind(){
   // third proc call
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
   vm.code.push_back(args[2]);
-  vm.code.push_back(vm_op_proc_enter);
+  vm.code.push_back(vm_op_save_values_and_enter);
 
   // second proc call
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
@@ -951,6 +962,8 @@ const char* stringify(VMop op){
     return "force";
   }else if(op == vm_op_leave_winding){
     return "leave winding";
+  }else if(op == vm_op_save_values_and_enter){
+    return "save values and enter";
   }else{
     return "unknown vm-op";
   }
