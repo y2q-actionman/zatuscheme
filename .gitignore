@@ -2,21 +2,15 @@
 *~
 
 # autotools
-*.in
 *.log
 Makefile
 config.h
 config.status
 config.cache
-configure
 configure.scan
-aclocal.m4
 autom4te.cache
 .deps
 
-depcomp
-install-sh
-missing
 stamp-h1
 
 # binaries
