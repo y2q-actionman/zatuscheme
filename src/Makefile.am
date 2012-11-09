@@ -37,7 +37,7 @@ libzs_a_SOURCES = zs.hh\
 		zs.cc zs.hh
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 
-noinst_PROGRAMS = zs
+bin_PROGRAMS = zs
 zs_SOURCES = zs.hh main.cc
 zs_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 zs_LDADD = libzs.a
