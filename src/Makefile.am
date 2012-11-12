@@ -37,10 +37,10 @@ libzs_a_SOURCES = zs.hh\
 		zs.cc zs.hh
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 
-bin_PROGRAMS = zs
-zs_SOURCES = zs.hh main.cc
-zs_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
-zs_LDADD = libzs.a
+bin_PROGRAMS = zatuscheme
+zatuscheme_SOURCES = zs.hh main.cc
+zatuscheme_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
+zatuscheme_LDADD = libzs.a
 
 check_LIBRARIES = libzs_test.a
 libzs_test_a_SOURCES = $(libzs_a_SOURCES)

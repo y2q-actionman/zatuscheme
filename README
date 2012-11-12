@@ -1,4 +1,4 @@
-;; -*- mode: org -*-
+;; -*- mode: org; coding: utf-8 -*-
 
 * 概要
   zatuscheme は、 R5RS 準拠を目指して作られている Scheme 処理系です。
@@ -12,10 +12,11 @@
 #+END_EXAMPLE
 
 * 使用
-  シェル等から 'zs' を実行して下さい。
+  シェル等から 'zatuscheme' を実行して下さい。
   実行したシェル上で REPL が起動します。
 
 * その他
   より詳細な情報は、以下を参考にして下さい。
   
   https://github.com/y2q-actionman/zatuscheme/wiki
+  https://github.com/y2q-actionman/zatuscheme/wiki/release_alpha_1
