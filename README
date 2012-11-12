@@ -1,19 +1,20 @@
 ;; -*- mode: org; coding: utf-8 -*-
 
 * 概要
-  zatuscheme は、 R5RS 準拠を目指して作られている Scheme 処理系です。
-  C++11 で記述されています。
+  zatuscheme は、 R5RS 準拠を目指して作られている Scheme インタプリタで
+  す。C++11 で記述されています。
 
 * build, install
-#+BEGIN_EXAMPLE  
-  ./configure
-  make
-  make install
+  ビルドには、GCC C++ コンパイラ 4.6 以降が必要です。
+  
+  ビルド、インストール手順は以下の通りです：
+#+BEGIN_EXAMPLE
+  ./configure make make install
 #+END_EXAMPLE
 
 * 使用
-  シェル等から 'zatuscheme' を実行して下さい。
-  実行したシェル上で REPL が起動します。
+  シェル等から 'zatuscheme' を実行して下さい。実行したシェル上で REPL
+  が起動します。
 
 * その他
   より詳細な情報は、以下を参考にして下さい。
