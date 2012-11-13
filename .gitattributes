@@ -1,0 +1,6 @@
+*.in binary
+aclocal.m4 binary
+configure binary
+depcomp binary
+install-sh binary
+missing binary
