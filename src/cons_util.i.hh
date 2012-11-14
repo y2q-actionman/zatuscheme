@@ -5,6 +5,8 @@
 #error "Please include via parent file"
 #endif
 
+#include <utility>
+
 inline
 bool nullp(Lisp_ptr p){
   // When Lisp_ptr::get<Cons*>() became constexpr,
@@ -83,28 +85,67 @@ Lisp_ptr make_cons_list(Iter b, Iter e){
   }
 
   auto i = b;
-
-  Cons* head = new Cons;
-  Cons* c = head;
+  GrowList gw;
 
   while(1){
-    c->rplaca(Lisp_ptr{*i});
+    gw.push(Lisp_ptr{*i});
 
     ++i;
     if(i == e) break;
-
-    Cons* newc = new Cons;
-    c->rplacd(Lisp_ptr(newc));
-    c = newc;
   }
 
-  c->rplacd(Cons::NIL);
-  return Lisp_ptr(head);
+  return gw.extract();
 }
 
 inline
 Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
   return make_cons_list(begin(lis), end(lis));
+}
+
+
+// GrowList class
+inline
+void GrowList::invalidate(){
+  head = {};
+  next = nullptr;
+}  
+
+inline
+GrowList::GrowList()
+  : head(Cons::NIL), next(&head)
+{}
+
+inline
+GrowList::GrowList(GrowList&& other)
+  : head(std::move(other.head)),
+    next(std::move(other.next))
+{
+  other.invalidate();
+}
+
+inline
+GrowList::~GrowList(){
+  if(auto c = head.get<Cons*>()){
+    free_cons_list(c);
+  }
+  // invalidate();
+}
+
+inline
+GrowList& GrowList::operator=(GrowList&& other){
+  head = std::move(other.head);
+  next = std::move(other.next);
+
+  other.invalidate();
+
+  return *this;
+}
+
+inline
+Lisp_ptr GrowList::extract(){
+  auto ret = head;
+  invalidate();
+  return ret;
 }
 
 #endif //CONS_UTIL_I_HH

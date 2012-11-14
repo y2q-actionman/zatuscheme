@@ -1,4 +1,8 @@
 #include "cons_util.hh"
+#include "lisp_ptr.hh"
+#include "cons.hh"
+
+#include <cassert>
 
 void free_cons_list(Lisp_ptr p){
   // TODO: erase elements!
@@ -21,3 +25,11 @@ Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
   return Lisp_ptr(new Cons(p, q));
 }
 
+void GrowList::push(Lisp_ptr p){
+  assert(*next == Cons::NIL);
+
+  auto newc = new Cons(p, Cons::NIL);
+  
+  *next = {newc};
+  next = &(newc->cdr_);
+}

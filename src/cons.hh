@@ -4,6 +4,8 @@
 #include "lisp_ptr.hh"
 
 class Cons {
+  friend class GrowList;
+
 public:
   static constexpr Lisp_ptr NIL = Lisp_ptr{static_cast<Cons*>(nullptr)};
 

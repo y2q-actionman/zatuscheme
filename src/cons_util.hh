@@ -26,6 +26,29 @@ Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr>);
 
 Lisp_ptr push_cons_list(Lisp_ptr, Lisp_ptr);
 
+
+class GrowList {
+  Lisp_ptr head;
+  Lisp_ptr* next;
+
+private:
+  void invalidate();
+
+public:
+  GrowList();
+  // GrowList(Cons*); // starting with an existing list.
+  GrowList(const GrowList&) = delete;
+  GrowList(GrowList&&);
+  
+  ~GrowList();
+
+  GrowList& operator=(const GrowList&) = delete;
+  GrowList& operator=(GrowList&&);
+
+  void push(Lisp_ptr);
+  Lisp_ptr extract();
+};
+
 #include "cons_util.i.hh"
 
 #endif //CONS_UTIL_HH
