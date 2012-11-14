@@ -654,29 +654,22 @@ void whole_function_quasiquote(){
   const auto unquote_sym = intern(vm.symtable(), "unquote");
   const auto unquote_splicing_sym = intern(vm.symtable(), "unquote-splicing");
 
-  Cons* c = new Cons({}, Cons::NIL);
-  Lisp_ptr expanded = c;
+  GrowList gl;
 
   const auto qq_elem = [&](Lisp_ptr p){
     if(auto l = p.get<Cons*>()){
       if(auto l_first_sym = l->car().get<Symbol*>()){
         if(l_first_sym == unquote_sym){
-          auto newc = new Cons(l->cdr().get<Cons*>()->car(), Cons::NIL);
-          c->rplacd(newc);
-          c = newc;
+          gl.push(l->cdr().get<Cons*>()->car());
           return;
         }else if(l_first_sym  == unquote_splicing_sym){
-          auto newc = new Cons(l, Cons::NIL);
-          c->rplacd(newc);
-          c = newc;
+          gl.push(l);
           return;
         }
       }
     }
 
-    auto newc = new Cons(make_cons_list({quasiquote_sym, p}), Cons::NIL);
-    c->rplacd(newc);
-    c = newc;
+    gl.push(make_cons_list({quasiquote_sym, p}));
   };
 
   if(arg.tag() == Ptr_tag::cons){
@@ -698,8 +691,6 @@ void whole_function_quasiquote(){
     }
 
     // generic lists
-    c->rplaca(intern(vm.symtable(), "list*"));
-
     do_list(arg,
             [&](Cons* cell) -> bool {
               qq_elem(cell->car());
@@ -709,16 +700,14 @@ void whole_function_quasiquote(){
               qq_elem(last);
             });
 
-    vm.code.push_back(expanded);
+    vm.code.push_back(push_cons_list(intern(vm.symtable(), "list*"), gl.extract()));
   }else if(arg.tag() == Ptr_tag::vector){
-    c->rplaca(intern(vm.symtable(), "vector"));
-
     auto v = arg.get<Vector*>();
     for(auto i = begin(*v); i != end(*v); ++i){
       qq_elem(*i);
     }
 
-    vm.code.push_back(expanded);
+    vm.code.push_back(push_cons_list(intern(vm.symtable(), "vector"), gl.extract()));
   }else{
     UNEXP_DEFAULT();
   }
