@@ -587,13 +587,8 @@ void let_internal(EarlyBind early_bind){
   // parses binding list
   int len = 0;
 
-  Cons* syms_c = new Cons;
-  Lisp_ptr syms = syms_c;
-  Cons* syms_c_p = syms_c;
-
-  Cons* vals_c = new Cons;
-  Lisp_ptr vals = vals_c;
-  Cons* vals_c_p = vals_c;
+  GrowList gl_syms;
+  GrowList gl_vals;
 
   if(!do_list(binds,
               [&](Cons* cell) -> bool{
@@ -612,17 +607,8 @@ void let_internal(EarlyBind early_bind){
                  
                 ++len;
 
-                auto nsc = new Cons;
-                syms_c->rplaca(c->car());
-                syms_c->rplacd(nsc);
-                syms_c_p = syms_c;
-                syms_c = nsc;
-
-                auto nvc = new Cons;
-                vals_c->rplaca(c->cdr().get<Cons*>()->car());
-                vals_c->rplacd(nvc);
-                vals_c_p = vals_c;
-                vals_c = nvc;
+                gl_syms.push(c->car());
+                gl_vals.push(c->cdr().get<Cons*>()->car());
 
                 return true;
               },
@@ -631,24 +617,9 @@ void let_internal(EarlyBind early_bind){
                   return false;
                 }
 
-                if(syms_c == syms_c_p){
-                  assert(vals_c == vals_c_p);
-                  delete syms_c;
-                  delete vals_c;
-                  syms = Cons::NIL;
-                  vals = Cons::NIL;
-                }else{
-                  delete syms_c;
-                  delete vals_c;
-                  syms_c_p->rplacd(Cons::NIL);
-                  vals_c_p->rplacd(Cons::NIL);
-                }
-
                 return true;
               })){
     fprintf(zs::err, "eval error: let binding was failed!\n");
-    free_cons_list(syms);
-    free_cons_list(vals);
     vm.return_value[0] = {};
     return;
   }
@@ -659,7 +630,7 @@ void let_internal(EarlyBind early_bind){
 
   auto proc = new IProcedure(body, 
                              {Calling::function, len, Variadic::f, early_bind},
-                             syms, vm.frame());
+                             gl_syms.extract(), vm.frame());
 
   if(name){
     vm.local_set(name.get<Symbol*>(), proc);
@@ -668,7 +639,7 @@ void let_internal(EarlyBind early_bind){
 
   vm.code.push_back(vm_op_call);
   vm.code.push_back(proc);
-  vm.stack.push_back(push_cons_list({}, vals));
+  vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
   vm.return_value[0] = {};
 }
 

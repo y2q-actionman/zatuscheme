@@ -34,8 +34,7 @@ Lisp_ptr read_list(FILE* f){
   }
 
   // main loop
-  Cons* c = new Cons();
-  const Lisp_ptr head{c};
+  GrowList gl;
 
   while(1){
     Lisp_ptr datum{read_la(f, move(t))};
@@ -43,41 +42,31 @@ Lisp_ptr read_list(FILE* f){
       return Lisp_ptr{};
     }
 
-    c->rplaca(datum);
+    gl.push(datum);
     
     // check next token
     t = tokenize(f);
     if(!t){
-      // TODO: free cons's contents (here or in free_cons_list())
-      free_cons_list(head);
       return Lisp_ptr{};
     }else if(t.type() == Token::Type::notation){
       auto n = t.get<Token::Notation>();
       if(n == Token::Notation::r_paren){ // proper list
-        c->rplacd(Cons::NIL);
-        goto end;
+        return gl.extract();
       }else if(n == Token::Notation::dot){ // dotted list
-        c->rplacd(read(f));
+        auto ret = gl.extract_with_tail(read(f));
         t = tokenize(f);
         if(t.type() != Token::Type::notation
            || t.get<Token::Notation>() != Token::Notation::r_paren){
           fprintf(zs::err, "reader error: dotted list has two or more cdrs.\n");
           return Lisp_ptr{};
         }
-        goto end;
+        return ret;
       }
     }
-    
-    // readying next cons
-    Cons* new_c = new Cons();
-    c->rplacd(Lisp_ptr{new_c});
-    c = new_c;
   }
 
- end:
   // if(c->cdr() == undef) ...
-
-  return head;
+  return {};
 }
 
 Lisp_ptr read_vector(FILE* f){
