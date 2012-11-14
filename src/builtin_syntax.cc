@@ -544,21 +544,20 @@ void whole_do(){
           });
 
   // creates loop body
-  Cons* body_head = new Cons(intern(vm.symtable(), "begin"), {});
-  Cons* body_c = body_head;
+  GrowList gw;
+
+  gw.push(intern(vm.symtable(), "begin"));
   do_list(commands,
           [&](Cons* c) -> bool{
-            auto newc = new Cons(c->car(), {});
-            body_c->rplacd(newc);
-            body_c = newc;
+            gw.push(c->car());
             return true;
           },
           [&](Lisp_ptr p){
             if(!nullp(p)){
               fprintf(zs::err, "macro do warning: loop body has dot-list. ignored last cdr\n");
             }
-            body_c->rplacd(new Cons(push_cons_list(loop_sym, steps), Cons::NIL));
           });
+  gw.push(push_cons_list(loop_sym, steps));
 
   // creates 'named let' style loop
   auto form = 
@@ -570,7 +569,7 @@ void whole_do(){
             intern(vm.symtable(), "if"),
             end_test,
             push_cons_list(intern(vm.symtable(), "begin"), end_exprs),
-            body_head,
+            gw.extract(),
             })
         });
   vm.code.push_back(form);
