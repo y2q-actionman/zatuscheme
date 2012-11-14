@@ -10,8 +10,8 @@ using namespace Procedure;
 namespace {
 
 void not_func(){
-  auto arg = pick_args_1();
-  vm.return_value[0] = Lisp_ptr{!arg.get<bool>()};
+  auto arg = ArgAccessor(1);
+  vm.return_value[0] = Lisp_ptr{!arg[0].get<bool>()};
 }
 
 } // namespace

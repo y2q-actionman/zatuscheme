@@ -15,12 +15,35 @@ void stack_to_vector(StackT&, VectorT&);
 template<typename StackT>
 int list_to_stack(const char*, Lisp_ptr, StackT&);
 
-
+// VM::stack accessor
 template<int i>
 std::array<Lisp_ptr, i> pick_args();
 
 Lisp_ptr pick_args_1();
 
+class ArgAccessor{
+public:
+  explicit ArgAccessor(VM& v = vm);
+  explicit ArgAccessor(int argc, VM& v = vm);
+  ArgAccessor(const ArgAccessor&) = delete;
+  ArgAccessor(ArgAccessor&&) = delete;
+
+  ~ArgAccessor();
+
+  ArgAccessor& operator=(const ArgAccessor&) = delete;
+  ArgAccessor& operator=(ArgAccessor&&) = delete;
+
+  
+  Lisp_ptr& operator[](int);
+  int size();
+
+  decltype(vm.stack.end()) begin();
+  decltype(vm.stack.end()) end();
+
+private:
+  VM& the_vm_;
+  int size_;
+};
 
 // builtin type checking
 void builtin_type_check_failed(const char*, Ptr_tag, Lisp_ptr);
