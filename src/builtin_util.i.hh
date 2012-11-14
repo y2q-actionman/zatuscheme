@@ -22,39 +22,26 @@ Lisp_ptr stack_to_list(StackT& st){
   Lisp_ptr argc = st.back();
   st.pop_back();
 
-  if(argc.get<int>() == 0){
+  if(argc.get<int>() <= 0){
     return Cons::NIL;
   }
 
-  Cons* c = new Cons;
-  Cons* prev_c = c;
-  Lisp_ptr ret = c;
+  Lisp_ptr ret;
+  GrowList gl;
 
   auto arg_start = st.end() - argc.get<int>();
   auto arg_end = st.end();
   auto i = arg_start;
 
-  while(1){
-    c->rplaca(*i);
-
-    ++i;
-    if(i == arg_end) break;
-
-    Cons* newc = new Cons;
-    c->rplacd(newc);
-    prev_c = c;
-    c = newc;
+  for(i = arg_start; i < arg_end - 1; ++i){
+    gl.push(*i);
   }
 
   if(dot_list){
-    if(c != prev_c){
-      prev_c->rplacd(c->car());
-    }else{
-      ret = c->car();
-    }
-    delete c;
+    ret = gl.extract_with_tail(*i);
   }else{
-    c->rplacd(Cons::NIL);
+    gl.push(*i);
+    ret = gl.extract();
   }
 
   st.erase(arg_start, arg_end);
