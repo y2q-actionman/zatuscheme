@@ -10,7 +10,7 @@ using namespace Procedure;
 namespace {
 
 void not_func(){
-  auto arg = ArgAccessor(1);
+  ArgAccessor arg{1};
   vm.return_value[0] = Lisp_ptr{!arg[0].get<bool>()};
 }
 
