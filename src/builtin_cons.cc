@@ -6,6 +6,7 @@
 #include "builtin_util.hh"
 #include "procedure.hh"
 #include "cons.hh"
+#include "cons_util.hh"
 #include "number.hh"
 #include "printer.hh"
 
@@ -159,9 +160,7 @@ void cons_append(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
-  Cons* head = new Cons;
-  Cons* prev_c = head;
-  Cons* now_c = head;
+  GrowList gl;
 
   for(auto i = 0u; i < args.size() - 1; ++i){
     if(args[i].tag() != Ptr_tag::cons){
@@ -171,33 +170,14 @@ void cons_append(){
 
     do_list(args[i],
             [&](Cons* c) -> bool{
-              now_c->rplaca(c->car());
-
-              auto new_c = new Cons;
-              now_c->rplacd(new_c);
-
-              prev_c = now_c;
-              now_c = new_c;
-
+              gl.push(c->car());
               return true;
             },
             [](Lisp_ptr){});
   }
 
   // last
-  if(prev_c == now_c){
-    if(now_c == head){
-      delete head;
-      vm.return_value[0] = args.back();
-    }else{
-      head->rplacd(args.back());
-      vm.return_value[0] = {head};
-    }
-  }else{
-    prev_c->rplacd(args.back());
-    delete now_c;
-    vm.return_value[0] = {head};
-  }
+  vm.return_value[0] = gl.extract_with_tail(args.back());
 }
 
 void cons_reverse(){

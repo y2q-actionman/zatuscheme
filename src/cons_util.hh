@@ -47,6 +47,7 @@ public:
 
   void push(Lisp_ptr);
   Lisp_ptr extract();
+  Lisp_ptr extract_with_tail(Lisp_ptr);
 };
 
 #include "cons_util.i.hh"

@@ -143,6 +143,12 @@ GrowList& GrowList::operator=(GrowList&& other){
 
 inline
 Lisp_ptr GrowList::extract(){
+  return extract_with_tail(Cons::NIL);
+}
+
+inline
+Lisp_ptr GrowList::extract_with_tail(Lisp_ptr p){
+  *next = p;
   auto ret = head;
   invalidate();
   return ret;
