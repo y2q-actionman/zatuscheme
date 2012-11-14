@@ -115,17 +115,17 @@ std::array<Lisp_ptr, size> pick_args(){
 // class ArgAccessor
 inline
 Lisp_ptr& ArgAccessor::operator[](int i){
-  return the_vm_.stack[the_vm_.stack.size() - (argc_ + 1) + i];
+  return *(stack_iter_s_ + i);
 }
 
 inline
 decltype(vm.stack.end()) ArgAccessor::begin(){
-  return the_vm_.stack.end() - (argc_ + 1);
+  return stack_iter_s_;
 }
 
 inline
 decltype(vm.stack.end()) ArgAccessor::end(){
-  return the_vm_.stack.end() - 1;
+  return stack_iter_e_ - 1;
 }
 
 #endif //BUILTIN_UTIL_I_HH

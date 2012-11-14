@@ -8,24 +8,29 @@ Lisp_ptr pick_args_1(){
   return tmp[0];
 }
 
-ArgAccessor::ArgAccessor(VM& v) : the_vm_(v){
-  Lisp_ptr p = the_vm_.stack.back();
-  argc_ = p.get<int>();
+ArgAccessor::ArgAccessor(VM& v)
+  : the_vm_(v),
+    stack_iter_s_(),
+    stack_iter_e_(v.stack.end()){
+  auto argcnt = v.stack.back().get<int>();
+  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
 }
 
-ArgAccessor::ArgAccessor(int request_argc, VM& v) : the_vm_(v){
+ArgAccessor::ArgAccessor(int request_argc, VM& v)
+  : the_vm_(v),
+    stack_iter_s_(),
+    stack_iter_e_(v.stack.end()){
   // TODO: use delegating constructor
-  Lisp_ptr p = the_vm_.stack.back();
-  argc_ = p.get<int>();
+  auto argcnt = v.stack.back().get<int>();
+  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
 
-  if(argc_ != request_argc){
+  if(argcnt != request_argc){
     // throw exception.
   }
 }
 
 ArgAccessor::~ArgAccessor(){
-  the_vm_.stack.erase(the_vm_.stack.end() - (argc_ + 1),
-                      the_vm_.stack.end());
+  the_vm_.stack.erase(stack_iter_s_, stack_iter_e_);
 }
 
 void builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){

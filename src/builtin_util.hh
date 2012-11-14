@@ -35,14 +35,15 @@ public:
 
   
   Lisp_ptr& operator[](int);
-  int argc(){ return argc_; }
+  int argc(){ return stack_iter_e_ - stack_iter_s_; }
 
   decltype(vm.stack.end()) begin();
   decltype(vm.stack.end()) end();
 
 private:
   VM& the_vm_;
-  int argc_;
+  decltype(vm.stack.end()) stack_iter_s_;
+  decltype(vm.stack.end()) stack_iter_e_; // contains last vm_argcount
 };
 
 // builtin type checking
