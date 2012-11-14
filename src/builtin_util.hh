@@ -35,7 +35,7 @@ public:
 
   
   Lisp_ptr& operator[](int);
-  int argc(){ return stack_iter_e_ - stack_iter_s_; }
+  int size(){ return stack_iter_e_ - stack_iter_s_ - 1; }
 
   decltype(vm.stack.end()) begin();
   decltype(vm.stack.end()) end();
