@@ -114,41 +114,13 @@ std::array<Lisp_ptr, size> pick_args(){
 
 // class ArgAccessor
 inline
-ArgAccessor::ArgAccessor(VM& v) : the_vm_(v){
-  Lisp_ptr p = the_vm_.stack.back();
-  size_ = p.get<int>();
-}
-
-inline
-ArgAccessor::ArgAccessor(int request_argc, VM& v) : the_vm_(v){
-  // TODO: use delegating constructor
-  Lisp_ptr p = the_vm_.stack.back();
-  size_ = p.get<int>();
-
-  if(size_ != request_argc){
-    // throw exception.
-  }
-}
-
-inline
-ArgAccessor::~ArgAccessor(){
-  the_vm_.stack.erase(the_vm_.stack.end() - (size_ + 1),
-                      the_vm_.stack.end());
-}
-
-inline
 Lisp_ptr& ArgAccessor::operator[](int i){
-  return the_vm_.stack[the_vm_.stack.size() - (size_ + 1) + i];
-}
-
-inline
-int ArgAccessor::size(){
-  return size_;
+  return the_vm_.stack[the_vm_.stack.size() - (argc_ + 1) + i];
 }
 
 inline
 decltype(vm.stack.end()) ArgAccessor::begin(){
-  return the_vm_.stack.end() - (size_ + 1);
+  return the_vm_.stack.end() - (argc_ + 1);
 }
 
 inline

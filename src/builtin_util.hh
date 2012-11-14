@@ -35,14 +35,14 @@ public:
 
   
   Lisp_ptr& operator[](int);
-  int size();
+  int argc(){ return argc_; }
 
   decltype(vm.stack.end()) begin();
   decltype(vm.stack.end()) end();
 
 private:
   VM& the_vm_;
-  int size_;
+  int argc_;
 };
 
 // builtin type checking
