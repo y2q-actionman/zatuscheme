@@ -23,8 +23,8 @@ Lisp_ptr pick_args_1();
 
 class ArgAccessor{
 public:
-  explicit ArgAccessor(VM& v = vm);
-  explicit ArgAccessor(int argc, VM& v = vm);
+  explicit ArgAccessor();
+  explicit ArgAccessor(int argc);
   ArgAccessor(const ArgAccessor&) = delete;
   ArgAccessor(ArgAccessor&&) = delete;
 
@@ -41,7 +41,6 @@ public:
   decltype(vm.stack.end()) end(){ return stack_iter_e_ - 1; }
 
 private:
-  VM& the_vm_;
   decltype(vm.stack.end()) stack_iter_s_;
   decltype(vm.stack.end()) stack_iter_e_; // contains last vm_argcount
 };
