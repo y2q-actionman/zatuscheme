@@ -34,11 +34,11 @@ public:
   ArgAccessor& operator=(ArgAccessor&&) = delete;
 
   
-  Lisp_ptr& operator[](int);
+  Lisp_ptr& operator[](int i){ return *(stack_iter_s_ + i); }
   int size(){ return stack_iter_e_ - stack_iter_s_ - 1; }
 
-  decltype(vm.stack.end()) begin();
-  decltype(vm.stack.end()) end();
+  decltype(vm.stack.end()) begin(){ return stack_iter_s_; }
+  decltype(vm.stack.end()) end(){ return stack_iter_e_ - 1; }
 
 private:
   VM& the_vm_;

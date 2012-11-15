@@ -111,21 +111,4 @@ std::array<Lisp_ptr, size> pick_args(){
   return ret;
 }
 
-
-// class ArgAccessor
-inline
-Lisp_ptr& ArgAccessor::operator[](int i){
-  return *(stack_iter_s_ + i);
-}
-
-inline
-decltype(vm.stack.end()) ArgAccessor::begin(){
-  return stack_iter_s_;
-}
-
-inline
-decltype(vm.stack.end()) ArgAccessor::end(){
-  return stack_iter_e_ - 1;
-}
-
 #endif //BUILTIN_UTIL_I_HH
