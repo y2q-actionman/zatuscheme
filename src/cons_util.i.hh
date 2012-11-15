@@ -116,29 +116,11 @@ GrowList::GrowList()
 {}
 
 inline
-GrowList::GrowList(GrowList&& other)
-  : head(std::move(other.head)),
-    next(std::move(other.next))
-{
-  other.invalidate();
-}
-
-inline
 GrowList::~GrowList(){
   if(auto c = head.get<Cons*>()){
     free_cons_list(c);
   }
   // invalidate();
-}
-
-inline
-GrowList& GrowList::operator=(GrowList&& other){
-  head = std::move(other.head);
-  next = std::move(other.next);
-
-  other.invalidate();
-
-  return *this;
 }
 
 inline

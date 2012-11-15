@@ -38,12 +38,12 @@ public:
   GrowList();
   // GrowList(Cons*); // starting with an existing list.
   GrowList(const GrowList&) = delete;
-  GrowList(GrowList&&);
+  GrowList(GrowList&&) = delete;
   
   ~GrowList();
 
   GrowList& operator=(const GrowList&) = delete;
-  GrowList& operator=(GrowList&&);
+  GrowList& operator=(GrowList&&) = delete;
 
   void push(Lisp_ptr);
   Lisp_ptr extract();
