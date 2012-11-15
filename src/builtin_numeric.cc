@@ -108,8 +108,7 @@ struct number_comparator {
 
 template<typename Fun>
 inline void number_compare(const char* name, Fun&& fun){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ArgAccessor args;
 
   auto i1 = begin(args);
   const auto e = end(args);
@@ -264,8 +263,7 @@ void number_accumulate(const char* name, Number&& init, Fun&& fun,
 template<class Fun>
 inline
 void number_accumulate(const char* name, Number&& init, Fun&& fun){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ArgAccessor args;
   number_accumulate(name, move(init), move(fun), move(args));
 }
 
