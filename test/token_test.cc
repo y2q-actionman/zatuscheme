@@ -115,7 +115,7 @@ void check(const string& input){
 
 // for normal cases
 template<Token::Type type, typename Fun, 
-         typename ex_type = decltype(to_type<type>())>
+         typename ex_type = typename to_type<Token::Type, type>::type>
 void check_generic(FILE* f, const ex_type& expect,
                    const Fun& fun){
   fpos_t init_pos;

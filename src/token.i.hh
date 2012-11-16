@@ -11,26 +11,26 @@
 #include "util.hh"
 
 // Type mapping
-template<Token::Type t, typename T>
-T to_type() = delete;
+// template<Token::Type t, typename T>
+// T to_type() = delete;
 
-template<>
-std::string to_type<Token::Type::identifier>() = delete;
+// template<>
+// std::string to_type<Token::Type::identifier>() = delete;
 
-template<>
-bool to_type<Token::Type::boolean>() = delete;
+// template<>
+// bool to_type<Token::Type::boolean>() = delete;
 
-template<>
-Number to_type<Token::Type::number>() = delete;
+// template<>
+// Number to_type<Token::Type::number>() = delete;
 
-template<>
-char to_type<Token::Type::character>() = delete;
+// template<>
+// char to_type<Token::Type::character>() = delete;
 
-template<>
-std::string to_type<Token::Type::string>() = delete;
+// template<>
+// std::string to_type<Token::Type::string>() = delete;
 
-template<>
-Token::Notation to_type<Token::Type::notation>() = delete;
+// template<>
+// Token::Notation to_type<Token::Type::notation>() = delete;
 
 
 // std::string -> Token::Type is ambigious

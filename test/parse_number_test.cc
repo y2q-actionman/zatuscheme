@@ -50,7 +50,7 @@ void check_generic(FILE* i, const Fun& f){
 }
 
 template<Number::Type type, typename Fun, 
-         typename ex_type = decltype(to_type<type>())>
+         typename ex_type = typename to_type<Number::Type, type>::type>
 void check_generic(FILE* i,
                    const ex_type& expect,
                    const Fun& f){

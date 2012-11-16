@@ -9,53 +9,80 @@
 #include "decl.hh"
 
 // Type mapping
-template<Ptr_tag t, typename T>
-T to_type() = delete;
+template<>
+struct to_type<Ptr_tag, Ptr_tag::boolean>{
+  typedef bool type;
+};
 
 template<>
-bool to_type<Ptr_tag::boolean>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::character>{
+  typedef char type;
+};
 
 template<>
-char to_type<Ptr_tag::character>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::cons>{
+  typedef Cons* type;
+};
 
 template<>
-Cons* to_type<Ptr_tag::cons>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::symbol>{
+  typedef Symbol* type;
+};
 
 template<>
-Symbol* to_type<Ptr_tag::symbol>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::i_procedure>{
+  typedef Procedure::IProcedure* type;
+};
 
 template<>
-Procedure::IProcedure* to_type<Ptr_tag::i_procedure>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::n_procedure>{
+  typedef const Procedure::IProcedure* type;
+};
 
 template<>
-const Procedure::NProcedure* to_type<Ptr_tag::n_procedure>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::number>{
+  typedef Number* type;
+};
 
 template<>
-Number* to_type<Ptr_tag::number>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::string>{
+  typedef String* type;
+};
 
 template<>
-String* to_type<Ptr_tag::string>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::vector>{
+  typedef Vector* type;
+};
 
 template<>
-Vector* to_type<Ptr_tag::vector>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::port>{
+  typedef Port* type;
+};
 
 template<>
-Port* to_type<Ptr_tag::port>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::env>{
+  typedef Env* type;
+};
 
 template<>
-Env* to_type<Ptr_tag::env>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::delay>{
+  typedef Delay* type;
+};
 
 template<>
-Delay* to_type<Ptr_tag::delay>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::continuation>{
+  typedef const Procedure::Continuation* type;
+};
 
 template<>
-Procedure::Continuation* to_type<Ptr_tag::continuation>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::vm_op>{
+  typedef VMop type;
+};
 
 template<>
-VMop to_type<Ptr_tag::vm_op>() = delete;
-
-template<>
-int to_type<Ptr_tag::vm_argcount>() = delete;
+struct to_type<Ptr_tag, Ptr_tag::vm_argcount>{
+  typedef int type;
+};
 
 
 template<>

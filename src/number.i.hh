@@ -10,17 +10,17 @@
 #include <cassert>
 
 // Type mapping
-template<Number::Type t, typename T>
-T to_type() = delete;
+// template<Number::Type t, typename T>
+// T to_type() = delete;
 
-template<>
-Number::complex_type to_type<Number::Type::complex>() = delete;
+// template<>
+// Number::complex_type to_type<Number::Type::complex>() = delete;
 
-template<>
-Number::real_type to_type<Number::Type::real>() = delete;
+// template<>
+// Number::real_type to_type<Number::Type::real>() = delete;
 
-template<>
-Number::integer_type to_type<Number::Type::integer>() = delete;
+// template<>
+// Number::integer_type to_type<Number::Type::integer>() = delete;
 
 
 template<>
