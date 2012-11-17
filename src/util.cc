@@ -23,3 +23,17 @@ unexp_conversion(const char* f, int l, const char* to){
           to, f, l);
   abort();
 }
+
+// class zs_error
+zs_error::zs_error(const std::string& s)
+: str_(s){}
+
+zs_error::zs_error(const zs_error&) = default;
+
+zs_error::~zs_error() noexcept = default;
+
+zs_error& zs_error::operator=(const zs_error&) noexcept = default;
+
+const char* zs_error::what() const noexcept{
+  return str_.c_str();
+}

@@ -651,76 +651,82 @@ bool is_self_evaluating(Lisp_ptr p){
 }
 
 void eval(){
-  while(!vm.code.empty()){
-    auto p = vm.code.back();
+  try{
+    while(!vm.code.empty()){
+      auto p = vm.code.back();
 
-    switch(p.tag()){
-    case Ptr_tag::symbol:
-      vm.code.pop_back();
-      vm.return_value[0] = vm.find(p.get<Symbol*>());
-      break;
-    
-    case Ptr_tag::cons: {
-      auto c = p.get<Cons*>();
-      if(!c){
+      switch(p.tag()){
+      case Ptr_tag::symbol:
         vm.code.pop_back();
-        vm.return_value[0] = Cons::NIL;
+        vm.return_value[0] = vm.find(p.get<Symbol*>());
+        break;
+    
+      case Ptr_tag::cons: {
+        auto c = p.get<Cons*>();
+        if(!c){
+          vm.code.pop_back();
+          vm.return_value[0] = Cons::NIL;
+          break;
+        }
+
+        vm.code.back() = vm_op_call;
+        vm.code.push_back(c->car());
+        vm.stack.push_back(p);
         break;
       }
 
-      vm.code.back() = vm_op_call;
-      vm.code.push_back(c->car());
-      vm.stack.push_back(p);
-      break;
-    }
+      case Ptr_tag::vm_op:
+        if(auto op = p.get<VMop>()){
+          op();
+        }else{
+          vm.code.pop_back();
+        }
+        break;
 
-    case Ptr_tag::vm_op:
-      if(auto op = p.get<VMop>()){
-        op();
-      }else{
+        // self-evaluating
+      case Ptr_tag::boolean: case Ptr_tag::character:
+      case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
+      case Ptr_tag::number:
+      case Ptr_tag::string: case Ptr_tag::vector:
+      case Ptr_tag::port: case Ptr_tag::env:
+      case Ptr_tag::delay:
+      case Ptr_tag::continuation:
         vm.code.pop_back();
+        vm.return_value[0] = p;
+        break;
+
+        // error
+      case Ptr_tag::undefined:
+        vm.code.pop_back();
+        fprintf(zs::err, "eval error: undefined is passed!\n");
+        vm.return_value[0] = {};
+        break;
+
+      case Ptr_tag::vm_argcount:
+        vm.code.pop_back();
+        fprintf(zs::err, "eval internal error: vm-argcount is rest on VM code stack!\n");
+        vm.return_value[0] = {};
+        break;
+
+      default:
+        vm.code.pop_back();
+        fprintf(zs::err, "eval error: unknown object appeared! (tag = %d)!\n",
+                static_cast<int>(p.tag()));
+        vm.return_value[0] = {};
+        break;
       }
-      break;
-
-   // self-evaluating
-    case Ptr_tag::boolean: case Ptr_tag::character:
-    case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
-    case Ptr_tag::number:
-    case Ptr_tag::string: case Ptr_tag::vector:
-    case Ptr_tag::port: case Ptr_tag::env:
-    case Ptr_tag::delay:
-    case Ptr_tag::continuation:
-      vm.code.pop_back();
-      vm.return_value[0] = p;
-      break;
-
-    // error
-    case Ptr_tag::undefined:
-      vm.code.pop_back();
-      fprintf(zs::err, "eval error: undefined is passed!\n");
-      vm.return_value[0] = {};
-      break;
-
-    case Ptr_tag::vm_argcount:
-      vm.code.pop_back();
-      fprintf(zs::err, "eval internal error: vm-argcount is rest on VM code stack!\n");
-      vm.return_value[0] = {};
-      break;
-
-    default:
-      vm.code.pop_back();
-      fprintf(zs::err, "eval error: unknown object appeared! (tag = %d)!\n",
-              static_cast<int>(p.tag()));
-      vm.return_value[0] = {};
-      break;
     }
+  }catch(const std::exception& e){
+    fprintf(zs::err, "%s\n", e.what());
   }
 
+  if(!vm.code.empty()){
+    fprintf(zs::err, "eval internal warning: VM code stack is broken!\n");
+    vm.code.clear();
+  }
   if(!vm.stack.empty()){
     fprintf(zs::err, "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n");
-    do{
-      vm.stack.pop_back();
-    }while(!vm.stack.empty());
+    vm.stack.clear();
   }
 }
 

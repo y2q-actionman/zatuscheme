@@ -2,6 +2,8 @@
 #define UTIL_HH
 
 #include <cstdio>
+#include <string>
+#include <exception>
 
 template<typename T, typename U>
 inline
@@ -28,6 +30,23 @@ __attribute__((noreturn))// [[noreturn]]
 unexp_conversion(const char*, int, const char*);
 
 #define UNEXP_CONVERSION(to) unexp_conversion(__FILE__, __LINE__, (to))
+
+
+class zs_error : public std::exception{
+public:
+  explicit zs_error(const std::string&);
+  zs_error(const zs_error&);
+
+  virtual ~zs_error() noexcept;
+
+  zs_error& operator=(const zs_error&) noexcept;
+
+  virtual const char* what() const noexcept; // override
+
+private:
+  std::string str_;
+};
+  
 
 // type support
 namespace zs {
