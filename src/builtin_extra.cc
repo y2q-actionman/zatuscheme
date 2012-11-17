@@ -13,9 +13,7 @@ void to_macro_procedure(){
   auto arg1 = pick_args_1();
 
   if(arg1.tag() != Ptr_tag::i_procedure){
-    fprintf(zs::err, "to-macro-procedure: error: should be called with interpreted proc\n");
-    vm.return_value[0] = {};
-    return;
+    throw zs_error("to-macro-procedure: error: should be called with interpreted proc\n");
   }
 
   auto proc = arg1.get<IProcedure*>();

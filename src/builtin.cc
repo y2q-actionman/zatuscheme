@@ -45,17 +45,13 @@ void env_pick_2(const char* name){
   }
 
   if(num->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: %s: passed number is not exact integer\n", name);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: %s: passed number is not exact integer\n", name);
   }
 
   auto ver = num->get<Number::integer_type>();
   if(ver != 5l){
-    fprintf(zs::err, "native func: %s: passed number is not 5 (supplied %ld)\n",
-            name, ver);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: %s: passed number is not 5 (supplied %ld)\n",
+                        name, ver);
   }
 
   vm.return_value[0] = vm.find(intern(vm.symtable(), name));
@@ -99,9 +95,7 @@ void load_func(){
 
   Port p{str->c_str(), "r"};
   if(!p){
-    fprintf(zs::err, "load error: failed at opening file\n");
-    vm.return_value[0] = {};
-    return;
+    throw zs_error("load error: failed at opening file\n");
   }
 
   load(&p);

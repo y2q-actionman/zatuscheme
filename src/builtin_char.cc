@@ -147,10 +147,8 @@ void char_from_int(){
     return;
   }
   if(n->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: integer->char: passed arg is not exact integer! (%s)",
-            stringify(n->type()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: integer->char: passed arg is not exact integer! (%s)",
+                        stringify(n->type()));
   }
 
   vm.return_value[0] = Lisp_ptr{static_cast<char>(n->get<Number::integer_type>())};
@@ -238,3 +236,4 @@ builtin_char[] = {
 };
 
 const size_t builtin_char_size = sizeof(builtin_char) / sizeof(builtin_char[0]);
+n

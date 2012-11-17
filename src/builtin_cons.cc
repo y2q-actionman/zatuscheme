@@ -207,15 +207,9 @@ Cons* cons_list_tail_base(const char* name){
   }
   
   auto num = args[1].get<Number*>();
-  if(!num){
-    fprintf(zs::err, "native func: name: passed radix is not number (%s).\n",
-            stringify(args[1].tag()));
-    return nullptr;
-  }
-  if(num->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: name: passed radix is not number (%s).\n",
-            stringify(args[1].tag()));
-    return nullptr;
+  if(!num || num->type() != Number::Type::integer){
+    throw make_zs_error("native func: name: passed radix is not number (%s).\n",
+                        stringify(args[1].tag()));
   }
   auto nth = num->get<Number::integer_type>();
 
