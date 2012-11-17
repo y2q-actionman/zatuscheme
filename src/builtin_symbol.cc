@@ -4,6 +4,7 @@
 #include "builtin_util.hh"
 #include "procedure.hh"
 #include "symbol.hh"
+#include "util.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -14,10 +15,8 @@ void sym_to_string(){
   auto arg = pick_args_1();
   auto sym = arg.get<Symbol*>();
   if(!sym){
-    fprintf(zs::err, "native func: symbol->string: arg is not symbol! (%s)\n",
-            stringify(arg.tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: symbol->string: arg is not symbol! (%s)\n",
+                        stringify(arg.tag()));
   }
 
   // TODO: support invariant string!
@@ -28,10 +27,8 @@ void sym_from_string(){
   auto arg = pick_args_1();
   auto str = arg.get<String*>();
   if(!str){
-    fprintf(zs::err, "native func: string->symbol: arg is not string! (%s)\n",
-            stringify(arg.tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: string->symbol: arg is not string! (%s)\n",
+                        stringify(arg.tag()));
   }
 
   vm.return_value[0] = {intern(vm.symtable(), *str)};

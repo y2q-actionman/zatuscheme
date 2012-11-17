@@ -9,6 +9,7 @@
 #include "cons_util.hh"
 #include "number.hh"
 #include "printer.hh"
+#include "util.hh"
 
 using namespace std;
 using namespace Procedure;

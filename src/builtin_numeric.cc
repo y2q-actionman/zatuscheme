@@ -83,8 +83,7 @@ void inexactp(){
 struct complex_found{
   static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
   bool operator()(const Number::complex_type&, const Number::complex_type&) const{
-    fprintf(zs::err, msg);
-    return false;
+    throw zs_error(msg);
   }
 };
 
@@ -299,8 +298,7 @@ struct minmax_accum{
       return true;
     }
 
-    fprintf(zs::err, complex_found::msg);
-    return false;
+    throw zs_error(complex_found::msg);
   }
 };    
 
@@ -370,8 +368,7 @@ struct binary_accum{
     }
 
     // ???
-    fprintf(zs::err, "native func: +-*/: failed at numeric conversion!\n");
-    return false;
+    throw zs_error("native func: +-*/: failed at numeric conversion!\n");
   }
 };
 
@@ -400,7 +397,7 @@ void number_minus(){
       static constexpr auto imin = numeric_limits<Number::integer_type>::min();
       auto i = n->get<Number::integer_type>();
       if(i == imin){
-        fprintf(zs::err, "integer operation fallen into float\n");
+        fprintf(zs::err, "warning: integer operation fallen into float\n");
         vm.return_value[0] = {new Number(-static_cast<Number::real_type>(imin))};
       }else{
         vm.return_value[0] = {new Number(-i)};
@@ -479,7 +476,7 @@ void number_abs(){
     }else{
       static constexpr auto imin = numeric_limits<Number::integer_type>::min();
       if(i == imin){
-        fprintf(zs::err, "integer operation fallen into float\n");
+        fprintf(zs::err, "warning: integer operation fallen into float\n");
         vm.return_value[0] = new Number(-static_cast<Number::real_type>(imin));
       }else{
         vm.return_value[0] = new Number(-i);
@@ -493,9 +490,7 @@ void number_abs(){
     return;
   }
   case Number::Type::complex: {
-    fprintf(zs::err, complex_found::msg);
-    vm.return_value[0] = {};
-    return;
+    throw zs_error(complex_found::msg);
   }
   case Number::Type::uninitialized:
   default:
@@ -516,10 +511,8 @@ void number_divop(const char* name, Fun&& fun){
       return;
     }
     if(n[i]->type() != Number::Type::integer){
-      fprintf(zs::err, "native func: %s: not integer type (%s)",
-              name, stringify(n[i]->type()));
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("native func: %s: not integer type (%s)",
+                          name, stringify(n[i]->type()));
     }
   }
   
@@ -573,8 +566,7 @@ void number_gcd(){
   number_accumulate("gcd", Number(0l),
                     [](Number& n1, const Number& n2) -> bool {
                       if(n1.type() != Number::Type::integer || n2.type() != Number::Type::integer){
-                        fprintf(zs::err, "native func: gcd: not integer passed.\n");
-                        return false;
+                        throw zs_error("native func: gcd: not integer passed.\n");
                       }
 
                       auto i1 = n1.get<Number::integer_type>();
@@ -589,8 +581,7 @@ void number_lcm(){
   number_accumulate("lcm", Number(1l),
                     [](Number& n1, const Number& n2) -> bool {
                       if(n1.type() != Number::Type::integer || n2.type() != Number::Type::integer){
-                        fprintf(zs::err, "native func: gcd: not integer passed.\n");
-                        return false;
+                        throw zs_error("native func: gcd: not integer passed.\n");
                       }
 
                       auto i1 = n1.get<Number::integer_type>();
@@ -831,9 +822,7 @@ void number_atan(){
                                                   n2->coerce<Number::real_type>()))};
       return;
     case Number::Type::complex:
-      fprintf(zs::err, "native func: (atan <complex> <complex>) is not implemented.\n");
-      vm.return_value[0] = {};
-      return;
+      throw zs_error("native func: (atan <complex> <complex>) is not implemented.\n");
     case Number::Type::uninitialized:
     default:
       UNEXP_DEFAULT();
@@ -1003,10 +992,8 @@ void number_from_string(){
 
   auto str = args[0].get<String*>();
   if(!str){
-    fprintf(zs::err, "native func: string->number: passed arg is not string (%s).\n",
-            stringify(args[0].tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: string->number: passed arg is not string (%s).\n",
+                        stringify(args[0].tag()));
   }
 
   int radix;
@@ -1018,16 +1005,12 @@ void number_from_string(){
   case 2: {
     auto num = args[1].get<Number*>();
     if(!num){
-      fprintf(zs::err, "native func: string->number: passed radix is not number (%s).\n",
-              stringify(args[1].tag()));
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("native func: string->number: passed radix is not number (%s).\n",
+                          stringify(args[1].tag()));
     }
     if(num->type() != Number::Type::integer){
-      fprintf(zs::err, "native func: string->number: passed radix is not number (%s).\n",
-              stringify(args[1].tag()));
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("native func: string->number: passed radix is not number (%s).\n",
+                          stringify(args[1].tag()));
     }
     radix = num->get<Number::integer_type>();
     break;
@@ -1053,10 +1036,8 @@ void number_to_string(){
 
   auto n = args[0].get<Number*>();
   if(!n){
-    fprintf(zs::err, "native func: number->string: passed arg is not number (%s).\n",
-            stringify(args[0].tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: number->string: passed arg is not number (%s).\n",
+                        stringify(args[0].tag()));
   }
 
   int radix;
@@ -1068,16 +1049,12 @@ void number_to_string(){
   case 2: {
     auto num = args[1].get<Number*>();
     if(!num){
-      fprintf(zs::err, "native func: number->string: passed radix is not number (%s).\n",
-              stringify(args[1].tag()));
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("native func: number->string: passed radix is not number (%s).\n",
+                          stringify(args[1].tag()));
     }
     if(num->type() != Number::Type::integer){
-      fprintf(zs::err, "native func: number->string: passed radix is not number (%s).\n",
-              stringify(args[1].tag()));
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("native func: number->string: passed radix is not number (%s).\n",
+                          stringify(args[1].tag()));
     }
     radix = num->get<Number::integer_type>();
     break;

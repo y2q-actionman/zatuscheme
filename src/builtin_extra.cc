@@ -3,6 +3,7 @@
 #include "vm.hh"
 #include "builtin_util.hh"
 #include "procedure.hh"
+#include "util.hh"
 
 using namespace std;
 using namespace Procedure;

@@ -5,6 +5,7 @@
 #include "procedure.hh"
 #include "number.hh"
 #include "eval.hh"
+#include "util.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -26,10 +27,8 @@ void vector_make(){
   }
 
   if(num->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: make-vector: arg's number is not %s! (%s)\n",
-            stringify(Number::Type::integer), stringify(num->type()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: make-vector: arg's number is not %s! (%s)\n",
+                        stringify(Number::Type::integer), stringify(num->type()));
   }
   auto count = num->get<Number::integer_type>();
 
@@ -82,18 +81,14 @@ void vector_ref(){
   }
 
   if(num->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: vector-ref: arg's number is not %s! (%s)\n",
-            stringify(Number::Type::integer), stringify(num->type()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: vector-ref: arg's number is not %s! (%s)\n",
+                        stringify(Number::Type::integer), stringify(num->type()));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= v->size()){
-    fprintf(zs::err, "native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
-            v->size(), ind);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
+                        v->size(), ind);
   }
 
   vm.return_value[0] = (*v)[ind];
@@ -114,18 +109,14 @@ void vector_set(){
   }
 
   if(num->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: vector-set!: arg's number is not %s! (%s)\n",
-            stringify(Number::Type::integer), stringify(num->type()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: vector-set!: arg's number is not %s! (%s)\n",
+                        stringify(Number::Type::integer), stringify(num->type()));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= v->size()){
-    fprintf(zs::err, "native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
-            v->size(), ind);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
+                        v->size(), ind);
   }
 
   (*v)[ind] = arg[2];

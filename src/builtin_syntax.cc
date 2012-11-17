@@ -22,9 +22,8 @@ void error_whole_function(const char* msg){
 
   assert(sym);
 
-  fprintf(zs::err, "eval error: '%s' -- %s\n",
-          sym->name().c_str(), msg);
-  vm.return_value[0] = {};
+  throw make_zs_error("eval error: '%s' -- %s\n",
+                      sym->name().c_str(), msg);
 }
 
 void whole_function_error(){
@@ -55,9 +54,7 @@ void whole_function_quote(){
                  });
 
   if(!val){
-    fprintf(zs::err, "eval error: quote has no args.\n");
-    vm.return_value[0] = {};
-    return;
+    throw zs_error("eval error: quote has no args.\n");
   }
     
   vm.return_value[0] = val;
@@ -68,12 +65,10 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
-    fprintf(zs::err, "eval error: lambda has invalid args!\n");
-    return {};
+    throw zs_error("eval error: lambda has invalid args!\n");
   }
   if(!code){
-    fprintf(zs::err, "eval error: lambda has invalid body!\n");
-    return {};
+    throw zs_error("eval error: lambda has invalid body!\n");
   }
   
   return new IProcedure(code, 
@@ -118,13 +113,9 @@ void whole_function_if(){
                  });
 
   if(len < 3){
-    fprintf(zs::err, "eval error: informal if expr! (only %d exprs)\n", len);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("eval error: informal if expr! (only %d exprs)\n", len);
   }else if(len > 4){
-    fprintf(zs::err, "eval error: informal if expr! (more than %d exprs)\n", len);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("eval error: informal if expr! (more than %d exprs)\n", len);
   }
 
   // evaluating
@@ -155,21 +146,15 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
                    });
 
   if(!var){
-    fprintf(zs::err, "eval error: variable's name is not a symbol!\n");
-    vm.return_value[0] = {};
-    return;
+    throw zs_error("eval error: variable's name is not a symbol!\n");
   }
 
   if(!val){
-    fprintf(zs::err, "eval error: no value is supplied for %s\n", opname);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("eval error: no value is supplied for %s\n", opname);
   }
 
   if(len > 2){
-    fprintf(zs::err, "eval error: informal %s expr! (more than %d exprs)\n", opname, len);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("eval error: informal %s expr! (more than %d exprs)\n", opname, len);
   }
 
   // evaluating
@@ -208,9 +193,7 @@ void whole_function_define(){
                    });
 
     if(!var){
-      fprintf(zs::err, "eval error: function's name is not a symbol!\n");
-      vm.return_value[0] = {};
-      return;
+      throw zs_error("eval error: function's name is not a symbol!\n");
     }
 
     code = rest->cdr();
@@ -219,7 +202,7 @@ void whole_function_define(){
     vm.local_set(var, value);
     vm.return_value[0] = value;
   }else{
-    fprintf(zs::err, "eval error: informal define syntax!\n");
+    throw zs_error("eval error: informal define syntax!\n");
   }
 }
 
@@ -229,9 +212,7 @@ void whole_function_begin(){
 
   auto exprs = wargs.get<Cons*>()->cdr();
   if(!exprs || nullp(exprs)){
-    fprintf(zs::err, "eval error: begin has no exprs.\n");
-    vm.return_value[0] = {};
-    return;
+    throw zs_error("eval error: begin has no exprs.\n");
   }
 
   // list_to_stack("begin", exprs, vm.code);
@@ -323,10 +304,7 @@ Lisp_ptr cond_expand(Cons* head){
 
   auto clause = head->car();
   if(!clause.get<Cons*>()){
-    fprintf(zs::err, "macro cond: informal clause syntax! '");
-    print(zs::err, head->car());
-    fprintf(zs::err, "'\n");
-    return {};
+    throw zs_error("macro cond: informal clause syntax! \n");
   }
 
   Lisp_ptr test_form;
@@ -342,9 +320,7 @@ Lisp_ptr cond_expand(Cons* head){
                            [&](Cons* c){
                              if(auto sym = c->car().get<Symbol*>()){
                                if(sym->name() == "=>"){
-                                 fprintf(zs::err, "macto cond: sorry, cond's => syntax is not implemented..\n");
-                                 then_form = {};
-                                 return;
+                                 throw zs_error("macto cond: sorry, cond's => syntax is not implemented..\n");
                                }
                              }
                              then_form = push_cons_list(intern(vm.symtable(), "begin"), c);
@@ -419,10 +395,7 @@ Lisp_ptr case_keys_expand(Symbol* sym, Cons* keys){
 
 Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
   if(cases_ptr.tag() != Ptr_tag::cons){
-    fprintf(zs::err, "macro case: informal case syntax (dot-list?): ");
-    print(zs::err, cases_ptr);
-    fputc('\n', zs::err);
-    return {};
+    throw zs_error("macro case: informal case syntax (dot-list?)\n");
   }
 
   auto cases = cases_ptr.get<Cons*>();
@@ -431,10 +404,7 @@ Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
 
   auto clause = cases->car().get<Cons*>();
   if(!clause){
-    fprintf(zs::err, "macro case: informal clause contained: ");
-    print(zs::err, cases->car());
-    fputc('\n', zs::err);
-    return {};
+    throw zs_error("macro case: informal clause contained\n");
   }
 
   auto keys_ptr = clause->car();
@@ -444,16 +414,12 @@ Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
     new_keys = case_keys_expand(sym, keys_lst);
   }else if(auto keys_sym = keys_ptr.get<Symbol*>()){
     if(keys_sym->name() != "else"){
-      fprintf(zs::err, "macro case: informal clause key symbol: %s\n", keys_sym->name().c_str());
-      return {};
+      throw make_zs_error("macro case: informal clause key symbol: %s\n", keys_sym->name().c_str());
     }else{
       new_keys = keys_ptr;
     }
   }else{
-    fprintf(zs::err, "macro case: informal clause key: ");
-    print(zs::err, keys_ptr);
-    fputc('\n', zs::err);
-    return {};
+    throw zs_error("macro case: informal clause key\n");
   }
 
   return push_cons_list(push_cons_list(new_keys, clause->cdr()),
@@ -473,9 +439,7 @@ void whole_case(){
                              clauses = c->cdr();
                            });
   if(len < 3){
-    fprintf(zs::err, "macro case: invalid syntax! (no key found)\n");
-    vm.return_value[0] = Lisp_ptr();
-    return;
+    throw zs_error("macro case: invalid syntax! (no key found)\n");
   }
 
   // TODO: collect this by garbage collector!
@@ -513,9 +477,7 @@ void whole_do(){
                              commands = c;
                            });
   if(len < 3){
-    fprintf(zs::err, "macro do: invalid syntax! (length is %d, less than 3)\n", len);
-    vm.return_value[0] = Lisp_ptr();
-    return;
+    throw make_zs_error("macro do: invalid syntax! (length is %d, less than 3)\n", len);
   }
 
   // TODO: collect this by garbage collector!
@@ -590,8 +552,7 @@ void function_splicing(){
 
   if(vm.code.empty()
      || vm.code.back().tag() != Ptr_tag::vm_op){
-    fprintf(zs::err, "eval error: unquote-splicing: called in invalid context!");
-    vm.return_value[0] = {};
+    throw zs_error("eval error: unquote-splicing: called in invalid context!\n");
   }
 
   // auto& op = vm.code[vm.code.size() - 1];

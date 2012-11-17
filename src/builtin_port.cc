@@ -52,9 +52,7 @@ void port_open_file(const char* name, const char* mode){
 
   auto p = new Port(str->c_str(), mode);
   if(!*p){
-    fprintf(zs::err, "native error: %s: failed at opening file\n", name);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native error: %s: failed at opening file\n", name);
   }
   
   vm.return_value[0] = {p};

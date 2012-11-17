@@ -11,6 +11,7 @@
 #include "procedure.hh"
 #include "number.hh"
 #include "eval.hh"
+#include "util.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -32,10 +33,8 @@ void string_make(){
   }
 
   if(num->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: make-string: arg's number is not %s! (%s)\n",
-            stringify(Number::Type::integer), stringify(num->type()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: make-string: arg's number is not %s! (%s)\n",
+                        stringify(Number::Type::integer), stringify(num->type()));
   }
   auto char_count = num->get<Number::integer_type>();
 
@@ -106,18 +105,14 @@ void string_ref(){
   }
 
   if(num->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: string-ref: arg's number is not %s! (%s)\n",
-            stringify(Number::Type::integer), stringify(num->type()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: string-ref: arg's number is not %s! (%s)\n",
+                        stringify(Number::Type::integer), stringify(num->type()));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= str->length()){
-    fprintf(zs::err, "native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
-            str->length(), ind);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
+                        str->length(), ind);
   }
 
   vm.return_value[0] = Lisp_ptr{(*str)[ind]};
@@ -138,18 +133,14 @@ void string_set(){
   }
 
   if(num->type() != Number::Type::integer){
-    fprintf(zs::err, "native func: string-set!: arg's number is not %s! (%s)\n",
-            stringify(Number::Type::integer), stringify(num->type()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: string-set!: arg's number is not %s! (%s)\n",
+                        stringify(Number::Type::integer), stringify(num->type()));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= str->length()){
-    fprintf(zs::err, "native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
-            str->length(), ind);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
+                        str->length(), ind);
   }
 
   auto ch = arg[2].get<char>();
@@ -245,20 +236,16 @@ void string_substr(){
     }
 
     if(n->type() != Number::Type::integer){
-      fprintf(zs::err, "native func: substring: arg's number is not %s! (%s)\n",
-              stringify(Number::Type::integer), stringify(n->type()));
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("native func: substring: arg's number is not %s! (%s)\n",
+                          stringify(Number::Type::integer), stringify(n->type()));
     }
     ind[i-1] = n->get<Number::integer_type>();
   }
 
 
   if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= str->length())){
-    fprintf(zs::err, "native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
-            str->length(), ind[0], ind[1]);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
+                        str->length(), ind[0], ind[1]);
   }
 
   auto ret = str->substr(ind[0], ind[1] - ind[0]);
