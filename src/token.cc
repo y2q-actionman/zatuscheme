@@ -279,11 +279,7 @@ Token tokenize_number(FILE* f, int read_c = 0){
     }
   }
 
-  if(auto n = parse_number(f)){
-    return Token{n};
-  }else{
-    return Token{};
-  }
+  return Token{parse_number(f)};
 }
 
 } // namespace
