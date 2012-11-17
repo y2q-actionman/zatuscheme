@@ -46,13 +46,13 @@ public:
 
   virtual const char* what() const noexcept; // override
 
-  friend zs_error make_zs_error(const char*, ...)
-    __attribute__ ((format (printf, 1, 2)))
-    ;
-
 private:
   std::string str_;
 };
+
+zs_error make_zs_error(const char*, ...)
+  __attribute__ ((format (printf, 1, 2)))
+  ;
 
 // type support
 namespace zs {
