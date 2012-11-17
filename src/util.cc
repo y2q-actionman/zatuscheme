@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <cstdio>
+#include <utility>
+#include <cstdarg>
 
 #include "util.hh"
 
@@ -25,18 +27,29 @@ unexp_conversion(const char* f, int l, const char* to){
 }
 
 // class zs_error
-zs_error::zs_error()
-: str_(){}
-
-zs_error::zs_error(const std::string& s)
-: str_(s){}
+zs_error::zs_error(const std::string& s) : str_(s){}
+zs_error::zs_error(std::string&& s) : str_(std::move(s)){}
 
 zs_error::zs_error(const zs_error&) = default;
+zs_error::zs_error(zs_error&&) = default;
 
 zs_error::~zs_error() noexcept = default;
 
 zs_error& zs_error::operator=(const zs_error&) noexcept = default;
+zs_error& zs_error::operator=(zs_error&&) noexcept = default;
 
 const char* zs_error::what() const noexcept{
   return str_.c_str();
 }
+
+zs_error make_zs_error(const char* fmt, ...){
+  char tmp[256];
+
+  va_list ap;
+  va_start(ap, fmt);
+  auto len = vsnprintf(tmp, sizeof(tmp), fmt, ap);
+  va_end(ap);
+
+  return zs_error({tmp, len});
+}
+

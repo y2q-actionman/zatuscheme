@@ -34,20 +34,25 @@ unexp_conversion(const char*, int, const char*);
 
 class zs_error : public std::exception{
 public:
-  explicit zs_error();
   explicit zs_error(const std::string&);
+  explicit zs_error(std::string&&);
   zs_error(const zs_error&);
+  zs_error(zs_error&&);
 
   virtual ~zs_error() noexcept;
 
   zs_error& operator=(const zs_error&) noexcept;
+  zs_error& operator=(zs_error&&) noexcept;
 
   virtual const char* what() const noexcept; // override
+
+  friend zs_error make_zs_error(const char*, ...)
+    __attribute__ ((format (printf, 1, 2)))
+    ;
 
 private:
   std::string str_;
 };
-  
 
 // type support
 namespace zs {
