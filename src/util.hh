@@ -34,6 +34,7 @@ unexp_conversion(const char*, int, const char*);
 
 class zs_error : public std::exception{
 public:
+  explicit zs_error();
   explicit zs_error(const std::string&);
   zs_error(const zs_error&);
 

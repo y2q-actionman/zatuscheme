@@ -25,6 +25,9 @@ unexp_conversion(const char* f, int l, const char* to){
 }
 
 // class zs_error
+zs_error::zs_error()
+: str_(){}
+
 zs_error::zs_error(const std::string& s)
 : str_(s){}
 

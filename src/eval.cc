@@ -717,7 +717,8 @@ void eval(){
       }
     }
   }catch(const std::exception& e){
-    fprintf(zs::err, "%s\n", e.what());
+    fprintf(zs::err, "%s", e.what());
+    vm.return_value[0] = {};
   }
 
   if(!vm.code.empty()){
