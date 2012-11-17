@@ -90,8 +90,7 @@ PrefixValue parse_number_prefix(FILE* f){
     switch(c = fgetc(f)){
     case 'i': case 'e':
       if(e_appeared){
-        fprintf(zs::err, "reader error: duplicated number prefix appeared (%c)\n", c);
-        return {};
+        throw make_zs_error("reader error: duplicated number prefix appeared (%c)\n", c);
       }
       e_appeared = true;
       e = (c == 'i') ? Exactness::inexact 
@@ -99,8 +98,7 @@ PrefixValue parse_number_prefix(FILE* f){
       break;
     case 'b': case 'o': case 'd': case 'x':
       if(r_appeared){
-        fprintf(zs::err, "reader error: duplicated number prefix appeared (%c)\n", c);
-        return {};
+        throw make_zs_error("reader error: duplicated number prefix appeared (%c)\n", c);
       }
       r_appeared = true;
       r = (c == 'b') ? 2
@@ -109,8 +107,7 @@ PrefixValue parse_number_prefix(FILE* f){
         : 16;
       break;
     default:
-      fprintf(zs::err, "reader error: unknown number prefix '%c' appeared!\n", c);
-      return {};
+      throw make_zs_error("reader error: unknown number prefix '%c' appeared!\n", c);
     }
   }  
   
@@ -205,8 +202,7 @@ ParserRet parse_unsigned(int radix, FILE* f, string& s){
     char estr[128];
     strerror_r(eno, estr, sizeof(estr));
 
-    fprintf(zs::err, "reader error: reading integer failed: %s\n", estr);
-    return {};
+    throw make_zs_error("reader error: reading integer failed: %s\n", estr);
   }
 
   return {Number{l}, e};
@@ -232,8 +228,7 @@ ParserRet parse_decimal(FILE* f, string& s){
       ungetc('.', f);
       dot_start = true;
     }else{
-      fprintf(zs::err, "reader error: no chars found for floating point number.\n");
-      return {};
+      throw zs_error("reader error: no chars found for floating point number.\n");
     }
   }else{
     sharps_before_dot = eat_sharp(f, s);
@@ -260,8 +255,7 @@ ParserRet parse_decimal(FILE* f, string& s){
     ungetc(c, f);
 
     if(dot_start && !digits_after_dot){
-      fprintf(zs::err, "reader error: a number starting with dot should have digits after it.\n");
-      return {};
+      throw zs_error("reader error: a number starting with dot should have digits after it.\n");
     }
 
     eat_sharp(f, s);
@@ -288,8 +282,7 @@ ParserRet parse_decimal(FILE* f, string& s){
       ungetc(c, f);
 
       if(!exp_digits){
-        fprintf(zs::err, "reader error: no number on exporational part\n");
-        return {};
+        throw zs_error("reader error: no number on exporational part\n");
       }
     }
   }else{
@@ -303,8 +296,7 @@ ParserRet parse_decimal(FILE* f, string& s){
     char estr[128];
     strerror_r(eno, estr, sizeof(estr));
 
-    fprintf(zs::err, "reader error: reading floating point number failed: %s\n", estr);
-    return {};
+    throw make_zs_error("reader error: reading floating point number failed: %s\n", estr);
   }
 
   return {Number{d}, Exactness::inexact};
@@ -334,8 +326,7 @@ ParserRet parse_real_number(int radix, FILE* f){
 
   if((c == '.') || (u1 && check_decimal_suffix(c))){
     if(radix != 10){
-      fprintf(zs::err, "reader error: non-decimal float is not supported. (radix %d)\n", radix);
-      return {};
+      throw make_zs_error("reader error: non-decimal float is not supported. (radix %d)\n", radix);
     }
 
     // decimal float
@@ -343,22 +334,19 @@ ParserRet parse_real_number(int radix, FILE* f){
     auto n = parse_decimal(f, s);
 
     if(!n){
-      fprintf(zs::err, "reader error: failed at reading a decimal float\n");
-      return {};
+      throw zs_error("reader error: failed at reading a decimal float\n");
     }
       
     return {Number{n.number.coerce<double>() * sign},
         Exactness::inexact};
   }else if(!u1){
-    fprintf(zs::err, "reader error: failed at reading a number's integer part\n");
-    return {};
+    throw zs_error("reader error: failed at reading a number's integer part\n");
   }else if(c == '/'){
     // rational
     string s2;
     auto u2 = parse_unsigned(radix, f, s2);
     if(!u2){
-      fprintf(zs::err, "reader error: failed at reading a rational number's denominator\n");
-      return {};
+      throw zs_error("reader error: failed at reading a rational number's denominator\n");
     }
 
     return {Number(sign * u1.number.coerce<double>() / u2.number.coerce<double>()),
@@ -378,16 +366,14 @@ ParserRet parse_complex(int radix, FILE* f){
   // has real part
   auto real = parse_real_number(radix, f);
   if(!real){
-    fprintf(zs::err, "reader error: failed at reading a real number\n");
-    return {};
+    throw zs_error("reader error: failed at reading a real number\n");
   }
 
   switch(auto c = fgetc(f)){
   case '@': {// polar literal
     auto deg = parse_real_number(radix, f);
     if(!deg){
-      fprintf(zs::err, "reader error: failed at reading a complex number's polar part.\n");
-      return {};
+      throw zs_error("reader error: failed at reading a complex number's polar part.\n");
     }
         
     return {Number{polar(real.number.coerce<double>(), deg.number.coerce<double>())},
@@ -404,8 +390,7 @@ ParserRet parse_complex(int radix, FILE* f){
     
     auto imag = parse_real_number(radix, f);
     if(!imag || fgetc(f) != 'i'){
-      fprintf(zs::err, "reader error: failed at reading a complex number's imaginary part.\n");
-      return {};
+      throw zs_error("reader error: failed at reading a complex number's imaginary part.\n");
     }
 
     return {Number{Number::complex_type(real.number.coerce<double>(), imag.number.coerce<double>() * sign)},
@@ -416,8 +401,7 @@ ParserRet parse_complex(int radix, FILE* f){
       return {Number{Number::complex_type(0, real.number.coerce<double>())},
           Exactness::inexact};
     }else{
-      fprintf(zs::err, "reader error: failed at reading a complex number. ('i' appeared alone.)\n");
-      return {};
+      throw zs_error("reader error: failed at reading a complex number. ('i' appeared alone.)\n");
     }
   default:
     ungetc(c, f);
@@ -430,8 +414,7 @@ ParserRet parse_complex(int radix, FILE* f){
 Number parse_number(FILE* f, int radix){
   const auto prefix_info = parse_number_prefix(f);
   if(!prefix_info){
-    fprintf(zs::err, "reader error: failed at reading a number's prefix\n");
-    return {};
+    throw zs_error("reader error: failed at reading a number's prefix\n");
   }
 
   if(!radix){
@@ -440,8 +423,7 @@ Number parse_number(FILE* f, int radix){
 
   const auto r = parse_complex(radix, f);
   if(!r){
-    fprintf(zs::err, "reader error: failed at reading a number\n");
-    return {};
+    throw zs_error("reader error: failed at reading a number\n");
   }
 
   if(prefix_info.ex == Exactness::unspecified
