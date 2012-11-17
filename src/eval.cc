@@ -52,22 +52,6 @@ void vm_op_arg_push(){
 }
 
 
-static
-bool check_argcount(const char* name, int argc, const ProcInfo* info){ 
-  if((argc < info->required_args)
-     || (!info->variadic && argc > info->required_args)){
-    fprintf(zs::err,
-            "%s error: number of passed args is mismatched!!"
-            " (required %d args, %s, passed %d)\n",
-            name, 
-            info->required_args,
-            (info->variadic) ? "variadic" : "not variadic",
-            argc);
-    return false;
-  }
-  return true;
-}
-
 /*
 */
 void vm_op_call();
@@ -123,13 +107,18 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   vm.stack.pop_back();
 
   auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), vm.stack);
-  if(!check_argcount("macro-call", argc, info)){
+
+  if((argc < info->required_args)
+     || (!info->variadic && argc > info->required_args)){
     for(int i = 0; i < argc; ++i){
       vm.stack.pop_back();
     }
-    vm.return_value[0] = {};
-    return;
-  }    
+    throw make_zs_error("macro-call error: number of passed args is mismatched!!"
+                        " (required %d args, %s, passed %d)\n",
+                        info->required_args,
+                        (info->variadic) ? "variadic" : "not variadic",
+                        argc);
+  }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
   vm.code.back() = vm_op_macro_call;
@@ -163,14 +152,11 @@ void vm_op_call(){
   auto proc = vm.return_value[0];
 
   if(!is_procedure(proc)){
-    fprintf(zs::err, "eval error: (# # ...)'s first element is not procedure (got: %s)\n",
-            stringify(proc.tag()));
-    fprintf(zs::err, "      expr: "); print(zs::err, vm.stack.back()); fputc('\n', zs::err);
-    
-    vm.return_value[0] = {};
     vm.code.pop_back();
     vm.stack.pop_back();
-    return;
+
+    throw make_zs_error("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
+                        stringify(proc.tag()));
   }
 
   const ProcInfo* info = get_procinfo(proc);
@@ -254,9 +240,7 @@ void proc_enter_interpreted(IProcedure* fun){
   // variadic arg push
   if(argi->variadic){
     if(!arg_name.get<Symbol*>()){
-      fprintf(zs::err, "eval error: no arg name for variadic arg!\n");
-      vm.return_value[0] = {};
-      return;
+      throw zs_error("eval error: no arg name for variadic arg!\n");
     }
 
     auto var_argc = argc.get<int>() - static_cast<int>(std::distance(arg_start, i));
@@ -265,9 +249,7 @@ void proc_enter_interpreted(IProcedure* fun){
     vm.local_set(arg_name.get<Symbol*>(), stack_to_list<false>(vm.stack));
   }else{  // clean stack
     if(i != arg_end){
-      fprintf(zs::err, "eval error: corrupted stack -- passed too much args!\n");
-      vm.return_value[0] = {};
-      return;
+      throw zs_error("eval error: corrupted stack -- passed too much args!\n");
     }
     vm.stack.erase(arg_start, arg_end);
   }
@@ -377,9 +359,7 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   }else if(auto cont = proc.get<Continuation*>()){
     proc_enter_cont(cont);
   }else{
-    fprintf(zs::err, "eval internal error: corrupted code stack -- no proc found for entering!\n");
-    vm.return_value[0] = {};
-    return;
+    throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
   }
 }
  
@@ -468,8 +448,7 @@ void vm_op_set(){
   auto var = vm.stack.back().get<Symbol*>();
   vm.stack.pop_back();
   if(!var){
-    fprintf(zs::err, "eval error: internal error occured (set!'s varname is dismissed)\n");
-    return;
+    throw zs_error("eval error: internal error occured (set!'s varname is dismissed)\n");
   }
 
   vm.set(var, vm.return_value[0]);
@@ -488,8 +467,7 @@ void vm_op_local_set(){
   auto var = vm.stack.back().get<Symbol*>();
   vm.stack.pop_back();
   if(!var){
-    fprintf(zs::err, "eval error: internal error occured (set!'s varname is dismissed)\n");
-    return;
+    throw zs_error("eval error: internal error occured (set!'s varname is dismissed)\n");
   }
 
   vm.local_set(var, vm.return_value[0]);
@@ -533,8 +511,7 @@ void vm_op_force(){
   vm.stack.pop_back();
 
   if(!delay){
-    fprintf(zs::err, "eval error: internal error occured ('force' found before not a delay\n");
-    return;
+    throw zs_error("eval error: internal error occured ('force' found before not a delay)\n");
   }
 
   delay->force(vm.return_value[0]);
@@ -550,10 +527,8 @@ void let_internal(EarlyBind early_bind){
 
   arg = arg_c->cdr();
   if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-    fprintf(zs::err, "eval error: informal LET syntax -- (LET . <%s>).\n",
-            (nullp(arg)) ? "nil" : stringify(arg.tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("eval error: informal LET syntax -- (LET . <%s>).\n",
+                        (nullp(arg)) ? "nil" : stringify(arg.tag()));
   }
   arg_c = arg.get<Cons*>();
 
@@ -565,10 +540,8 @@ void let_internal(EarlyBind early_bind){
 
     arg = arg_c->cdr();
     if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-      fprintf(zs::err, "eval error: informal LET syntax -- (LET <name> . <%s>).\n",
-              (nullp(arg)) ? "nil" : stringify(arg.tag()));
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("eval error: informal LET syntax -- (LET <name> . <%s>).\n",
+                          (nullp(arg)) ? "nil" : stringify(arg.tag()));
     }
     
     arg_c = arg.get<Cons*>();
@@ -579,9 +552,7 @@ void let_internal(EarlyBind early_bind){
   auto body = arg_c->cdr();
 
   if(body.tag() != Ptr_tag::cons || nullp(body)){
-    fprintf(zs::err, "eval error: informal syntax for LET's body!.\n");
-    vm.return_value[0] = {};
-    return;
+    throw zs_error("eval error: informal syntax for LET's body!.\n");
   }
 
   // parses binding list
@@ -590,39 +561,31 @@ void let_internal(EarlyBind early_bind){
   GrowList gl_syms;
   GrowList gl_vals;
 
-  if(!do_list(binds,
-              [&](Cons* cell) -> bool{
-                auto bind = cell->car();
-                if(bind.tag() != Ptr_tag::cons){
-                  fprintf(zs::err, "eval error: informal object (%s) found in let binding.\n",
-                          stringify(bind.tag()));
-                  return false;
-                }
+  do_list(binds,
+          [&](Cons* cell) -> bool{
+            auto bind = cell->car();
+            if(bind.tag() != Ptr_tag::cons){
+              throw make_zs_error("eval error: informal object (%s) found in let binding.\n",
+                                  stringify(bind.tag()));
+            }
 
-                auto c = bind.get<Cons*>();
-                if(!c){
-                  fprintf(zs::err, "eval error: null found in let binding.\n");
-                  return false;
-                }
+            auto c = bind.get<Cons*>();
+            if(!c){
+              throw zs_error("eval error: null found in let binding.\n");
+            }
                  
-                ++len;
+            ++len;
 
-                gl_syms.push(c->car());
-                gl_vals.push(c->cdr().get<Cons*>()->car());
+            gl_syms.push(c->car());
+            gl_vals.push(c->cdr().get<Cons*>()->car());
 
-                return true;
-              },
-              [&](Lisp_ptr dot_cdr) -> bool{
-                if(!nullp(dot_cdr)){
-                  return false;
-                }
-
-                return true;
-              })){
-    fprintf(zs::err, "eval error: let binding was failed!\n");
-    vm.return_value[0] = {};
-    return;
-  }
+            return true;
+          },
+          [&](Lisp_ptr dot_cdr){
+            if(!nullp(dot_cdr)){
+              throw zs_error("eval error: let binding has dot-list!\n");
+            }
+          });
 
   if(name){
     vm.enter_frame(vm.frame()->push());
@@ -737,10 +700,8 @@ void apply_func(){
   stack_to_vector(vm.stack, args);
 
   if(!is_procedure(args[0])){
-    fprintf(zs::err, "apply error: first arg is not procedure (%s)\n",
-            stringify(args[0].tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("apply error: first arg is not procedure (%s)\n",
+                        stringify(args[0].tag()));
   }
 
   // simulating function_call()
@@ -794,25 +755,19 @@ void call_with_values(){
   auto args = pick_args<2>();
 
   if(!is_procedure(args[0])){
-    fprintf(zs::err, "call-with-values error: first arg is not procedure (%s)\n",
-            stringify(args[0].tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("call-with-values error: first arg is not procedure (%s)\n",
+                        stringify(args[0].tag()));
   }
 
   auto info = get_procinfo(args[0]);
   if(info->required_args != 0){
-    fprintf(zs::err, "call-with-values error: first arg takes 1 or more args (%d)\n",
-            info->required_args);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("call-with-values error: first arg takes 1 or more args (%d)\n",
+                        info->required_args);
   }    
 
   if(!is_procedure(args[1])){
-    fprintf(zs::err, "call-with-values error: second arg is not procedure (%s)\n",
-            stringify(args[1].tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("call-with-values error: second arg is not procedure (%s)\n",
+                        stringify(args[1].tag()));
   }
 
   // second proc call
@@ -829,18 +784,14 @@ void call_cc(){
   auto args = pick_args<1>();
 
   if(!is_procedure(args[0])){
-    fprintf(zs::err, "call/cc error: first arg is not procedure (%s)\n",
-            stringify(args[0].tag()));
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("call/cc error: first arg is not procedure (%s)\n",
+                        stringify(args[0].tag()));
   }
 
   auto info = get_procinfo(args[0]);
   if(info->required_args != 1){
-    fprintf(zs::err, "call/cc error: first arg mush take 1 arg (%d)\n",
-            info->required_args);
-    vm.return_value[0] = {};
-    return;
+    throw make_zs_error("call/cc error: first arg mush take 1 arg (%d)\n",
+                        info->required_args);
   }
 
   auto cont = new Continuation(vm);
@@ -874,18 +825,14 @@ void dynamic_wind(){
 
   for(auto p : args){
     if(!is_procedure(p)){
-      fprintf(zs::err, "error: dynamic-wind: arg is not procedure (%s)\n",
-              stringify(p.tag()));
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("error: dynamic-wind: arg is not procedure (%s)\n",
+                          stringify(p.tag()));
     }
 
     auto info = get_procinfo(p);
     if(info->required_args != 0){
-      fprintf(zs::err, "error: dynamic-wind: first arg mush take 0 arg (%d)\n",
-              info->required_args);
-      vm.return_value[0] = {};
-      return;
+      throw make_zs_error("error: dynamic-wind: first arg mush take 0 arg (%d)\n",
+                          info->required_args);
     }
   }
 
