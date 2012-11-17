@@ -24,9 +24,7 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
               return;
             }else{
               if(last.tag() != Ptr_tag::symbol){
-                fprintf(zs::err, "eval error: informal lambda list! (including non-symbol)\n");
-                argc = -1;
-                return;
+                throw zs_error("eval error: informal lambda list! (including non-symbol)\n");
               }
               v = Variadic::t;
             }
@@ -98,9 +96,8 @@ Lisp_ptr get_arg_list(Lisp_ptr p){
   case Ptr_tag::port:      case Ptr_tag::env:
   case Ptr_tag::delay:     case Ptr_tag::vm_op:
   case Ptr_tag::vm_argcount:
-    fprintf(zs::err, "internal error: internal funcion '%s' called for '%s' object\n",
-            __func__, stringify(p.tag()));
-    return {};
+    throw make_zs_error("internal error: internal funcion '%s' called for '%s' object\n",
+                        __func__, stringify(p.tag()));
 
   default:
     UNEXP_DEFAULT();
