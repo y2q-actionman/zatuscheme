@@ -55,10 +55,9 @@ int main(){
   check("\"\"", "\"\"");
   check("\"aaa aaa\"", "\"aaa aaa\"");
   check("\"aa\\\\a a\\\"aa\"", "\"aa\\\\a a\\\"aa\"");
-  { 
-    with_null_stream wns;
-    check_undef("\" \\ \"");
-  }
+  with_expect_error([]() -> void {
+      check_undef("\" \\ \"");
+    });
 
   // cons, list
   check("()", "()");
@@ -69,26 +68,24 @@ int main(){
   check("(a (b . c) d e)", "(a (b . c) d e)");
   check("(a (b . ()) d e)", "(a (b) d e)");
   check("((((((((((a))))))))))", "((((((((((a))))))))))");
-  { 
-    with_null_stream wns;
-    check_undef("(a . b c)");
-    check_undef("(. a)");
-    check_undef("((a)");
-    check_undef("(");
-    check_undef(")");
-    check_undef("#(a . b . c)");
-  }
+  with_expect_error([]() -> void {
+      check_undef("(a . b c)");
+      check_undef("(. a)");
+      check_undef("((a)");
+      check_undef("(");
+      check_undef(")");
+      check_undef("#(a . b . c)");
+    });
 
   // vector
   check("#()", "#()");
   check("#(a b)", "#(a b)");
   check("#(a (b c d) e)", "#(a (b c d) e)");
   check("#(a (b #(c) d) e)", "#(a (b #(c) d) e)");
-  { 
-    with_null_stream wns;
-    check_undef("#(a . b)");
-    check_undef("#(a . b . c)");
-  }
+  with_expect_error([]() -> void {
+      check_undef("#(a . b)");
+      check_undef("#(a . b . c)");
+    });
   check("#((#((#(())))))", "#((#((#(())))))");
 
   // reader macros

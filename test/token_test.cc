@@ -94,10 +94,9 @@ void check(FILE* f){
   fgetpos(f, &init_pos);
 
   Token tok;
-  { 
-    with_null_stream wns;
-    tok = tokenize(f);
-  }
+  with_expect_error([&]() -> void{
+      tok = tokenize(f);
+    });
 
   if(tok.type() != type){
     fail_message(type, f, &init_pos, tok, [](){});

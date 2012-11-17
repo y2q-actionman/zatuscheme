@@ -56,4 +56,12 @@ struct with_null_stream{
   ~with_null_stream();
 };
 
+template<typename Fun>
+void with_expect_error(Fun f){
+  with_null_stream wns;
+  try{
+    f();
+  }catch(zs_error&){}
+}
+
 #endif // TEST_UTIL_I_HH

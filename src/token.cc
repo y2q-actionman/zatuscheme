@@ -220,8 +220,7 @@ Token tokenize_character(FILE* f){
 
   auto ret_char = fgetc(f);
   if(ret_char == EOF){
-    fprintf(zs::err, "reader error: no char found after '#\\'!\n");
-    return {};
+    throw zs_error("reader error: no char found after '#\\'!\n");
   }
 
   auto next = fgetc(f);
@@ -244,8 +243,7 @@ Token tokenize_character(FILE* f){
       break;
     }
 
-    fprintf(zs::err, "reader error: not supprted char name!\n");
-    return {};
+    throw zs_error("reader error: not supprted char name!\n");
   }
 }
 
@@ -263,8 +261,7 @@ Token tokenize_string(FILE* f){
         s.push_back(c);
         break;
       default:
-        fprintf(zs::err, "reader error: unknown string escape '%c' appeared.\n", c);
-        return {};
+        throw make_zs_error("reader error: unknown string escape '%c' appeared.\n", c);
       }
       break;
     default:
@@ -272,15 +269,13 @@ Token tokenize_string(FILE* f){
     }
   }
 
-  fprintf(zs::err, "reader error: not ended string!\n");
-  return {};
+  throw zs_error("reader error: not ended string!\n");
 }
 
 Token tokenize_number(FILE* f, int read_c = 0){
   if(read_c){
     if(ungetc(read_c, f) == EOF){
-      fprintf(zs::err, "reader internal error: fatal I/O error occured. (reached unreading limit)\n");
-      return {};
+      throw zs_error("reader internal error: fatal I/O error occured. (reached unreading limit)\n");
     }
   }
 
@@ -340,8 +335,7 @@ Token tokenize(FILE* f){
     case 3:
       return Token{"...", Token::Type::identifier};
     default:
-      fprintf(zs::err, "reader error: %d dots appeared.\n", dots);
-      return {};
+      throw make_zs_error("reader error: %d dots appeared.\n", dots);
     }
   }
 
@@ -375,15 +369,15 @@ Token tokenize(FILE* f){
       ungetc(sharp_c, f);
       return tokenize_number(f, '#');
     case '<':
-      fprintf(zs::err, "reader error: '#<...>' appeared ('not printable object' in this implementation.)\n");
+      // cleaning input stream
       do{
         c = fgetc(f);
       }while(c != EOF && c != '>');
       ungetc(c, f);
-      return {};
+
+      throw zs_error("reader error: '#<...>' appeared ('not printable object' in this implementation.)\n");
     default:
-      fprintf(zs::err, "reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
-      return {};
+      throw make_zs_error("reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
     }
 
   case EOF:
@@ -396,8 +390,7 @@ Token tokenize(FILE* f){
       ungetc(c, f);
       return tokenize_number(f);
     }else{
-      fprintf(zs::err, "reader error: invalid char '%c' appeared.\n", c);
-      return {};
+      throw make_zs_error("reader error: invalid char '%c' appeared.\n", c);
     }
   }
 }
