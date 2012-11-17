@@ -28,17 +28,15 @@ int main(){
   check("(car '(a b c))", "a");
   check("(car '((a) b c d))", "(a)");
   check("(car '(1 . 2))", "1");
-  {
-    with_null_stream wns;
-    check_undef("(car '())");
-  }
+  with_expect_error([]() -> void {
+      check_undef("(car '())");
+    });
   
   check("(cdr '((a) b c d))", "(b c d)");
   check("(cdr '(1 . 2))", "2");
-  {
-    with_null_stream wns;
-    check_undef("(cdr '())");
-  }
+  with_expect_error([]() -> void {
+      check_undef("(cdr '())");
+    });
 
   eval_text("(define tmp (cons 'a 'b))");
   check("tmp", "(a . b)");

@@ -38,12 +38,11 @@ int main(){
 
   check("(vector-ref '#(a) 0)", "a");
   check("(vector-ref '#(a b c d e) 2)", "c");
-  {
-    with_null_stream wns;
-    check_undef("(vector-ref '#(a) -1)");
-    check_undef("(vector-ref '#(a) 100)");
-    check_undef("(vector-ref '#() 0)");
-  }
+  with_expect_error([]() -> void {
+      check_undef("(vector-ref '#(a) -1)");
+      check_undef("(vector-ref '#(a) 100)");
+      check_undef("(vector-ref '#() 0)");
+    });
   
   check("(vector-ref '#(1 1 2 3 5 8 13 21) 5)", "8");
   check("(vector-ref '#(1 1 2 3 5 8 13 21)"
@@ -55,12 +54,11 @@ int main(){
   check("(let ((vec (vector 0 '(2 2 2 2) \"Anna\"))) (vector-set! vec 1 '(\"Sue\" \"Sue\")) vec)",
         "#(0 (\"Sue\" \"Sue\") \"Anna\")");
   //check_undef("(vector-set! '#(0 1 2) 1 \"doe\")");
-  {
-    with_null_stream wns;
-    eval_text("(define tmpvec (vector 1))");
-    check_undef("(vector-set! tmpvec -1 'hoge)");
-    check_undef("(vector-set! tmpvec 100 'hoge)");
-  }
+  with_expect_error([]() -> void {
+      eval_text("(define tmpvec (vector 1))");
+      check_undef("(vector-set! tmpvec -1 'hoge)");
+      check_undef("(vector-set! tmpvec 100 'hoge)");
+    });
 
   check("(vector->list '#(dah dah didah))", "(dah dah didah)");
   check("(list->vector '(dididit dah))", "#(dididit dah)");

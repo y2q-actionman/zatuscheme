@@ -48,14 +48,13 @@ void check_uninit(const char* input){
 
 int main(){
   // arginfo test
-  {
-    with_null_stream wns;
-    check_uninit("#t");
-    check_uninit("#\\h");
-    check_uninit("100");
-    check_uninit("1.01");
-    check_uninit("#()");
-  }
+  with_expect_error([]() -> void {
+      check_uninit("#t");
+      check_uninit("#\\h");
+      check_uninit("100");
+      check_uninit("1.01");
+      check_uninit("#()");
+    });
 
   check("()", {0, Variadic::f});
   check("(a)", {1, Variadic::f});
@@ -66,12 +65,11 @@ int main(){
   check("(a b . c)", {2, Variadic::t});
   check("(a b c . d)", {3, Variadic::t});
 
-  {
-    with_null_stream wns;
-    check_uninit("(a 1 b)");
-    check_uninit("(a 1 . b)");
-    check_uninit("(a b . 1)");
-  }
+  with_expect_error([]() -> void {
+      check_uninit("(a 1 b)");
+      check_uninit("(a 1 . b)");
+      check_uninit("(a b . 1)");
+    });
   
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

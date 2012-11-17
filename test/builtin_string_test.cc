@@ -35,23 +35,21 @@ int main(){
 
   check("(string-ref \"a\" 0)", "#\\a");
   check("(string-ref \"abcde\" 3)", "#\\d");
-  {
-    with_null_stream wns;
-    check_undef("(string-ref \"a\" -1)");
-    check_undef("(string-ref \"a\" 100)");
-    check_undef("(string-ref \"\" 0)");
-  }
+  with_expect_error([]() -> void {
+      check_undef("(string-ref \"a\" -1)");
+      check_undef("(string-ref \"a\" 100)");
+      check_undef("(string-ref \"\" 0)");
+    });
 
   eval_text("(define tmpstr (make-string 3 #\\*))");
   eval_text("(string-set! tmpstr 0 #\\?)");
   check("tmpstr", "\"?**\"");
   eval_text("(string-set! tmpstr 1 #\\!)");
   check("tmpstr", "\"?!*\"");
-  {
-    with_null_stream wns;
-    check_undef("(string-set! tmpstr -1 #\\_)");
-    check_undef("(string-set! tmpstr 100 #\\_)");
-  }
+  with_expect_error([]() -> void {
+      check_undef("(string-set! tmpstr -1 #\\_)");
+      check_undef("(string-set! tmpstr 100 #\\_)");
+    });
 
   // when immutable string implemented..
   // eval_text("(define (f) (make-string 3 #\\*))");
@@ -105,13 +103,12 @@ int main(){
   check("(substring \"0123456789\" 1 5)", "\"1234\"");
   check("(substring \"0123456789\" 1 1)", "\"\"");
   check("(substring \"0123456789\" 0 1)", "\"0\"");
-  {
-    with_null_stream wns;
-    check_undef("(substring \"0123456789\" -1 1)");
-    check_undef("(substring \"0123456789\" 0 999)");
-    check_undef("(substring \"0123456789\" 5 4)");
-    check_undef("(substring \"0123456789\" 199 -1)");
-  }
+  with_expect_error([]() -> void {
+      check_undef("(substring \"0123456789\" -1 1)");
+      check_undef("(substring \"0123456789\" 0 999)");
+      check_undef("(substring \"0123456789\" 5 4)");
+      check_undef("(substring \"0123456789\" 199 -1)");
+    });
 
   check("(string-append)", "\"\"");
   check("(string-append \"\")", "\"\"");

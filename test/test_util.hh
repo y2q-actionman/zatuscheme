@@ -25,8 +25,6 @@ extern FILE* NULL_STREAM;
 
 FILE* open_null_stream();
 
-struct with_null_stream;
-
 template<typename Fun>
 void with_expect_error(Fun);
 

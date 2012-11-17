@@ -47,6 +47,8 @@ bool test_on_print(Lisp_ptr input, const char* expect, Fun&& callback){
   return ret;
 }
 
+namespace test_util_detail {
+
 struct with_null_stream{
   FILE* in;
   FILE* out;
@@ -56,9 +58,11 @@ struct with_null_stream{
   ~with_null_stream();
 };
 
+} // namespace test_util_detail
+
 template<typename Fun>
 void with_expect_error(Fun f){
-  with_null_stream wns;
+  test_util_detail::with_null_stream wns;
   try{
     f();
   }catch(zs_error&){}

@@ -86,6 +86,8 @@ FILE* open_null_stream(){
   return s;
 }
 
+namespace test_util_detail {
+
 with_null_stream::with_null_stream()
   : in(zs::in), out(zs::out), err(zs::err){
   if(!NULL_STREAM) open_null_stream();
@@ -99,3 +101,5 @@ with_null_stream::~with_null_stream(){
   zs::out = this->out;
   zs::err = this->err;
 }
+
+} // namespace test_util_detail

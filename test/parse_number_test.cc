@@ -64,9 +64,9 @@ void check_generic(FILE* i,
 
 
 void check(FILE* i){
-  with_null_stream wns;
-  check_generic<Number::Type::uninitialized>
-    (i, [](){});
+  with_expect_error([&]() -> void {
+      check_generic<Number::Type::uninitialized>(i, [](){});
+    });
 }
 
 void check(const string& input){

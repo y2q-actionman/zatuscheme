@@ -78,10 +78,9 @@ int main(){
 
 
   // === symbol-value ===
-  {
-    with_null_stream wns;
-    check(test_undef, "tabun-tukattenai-namae");
-  }
+  with_expect_error([]() -> void {
+      check(test_undef, "tabun-tukattenai-namae");
+    });
 
 
   // === function call ===
@@ -90,10 +89,9 @@ int main(){
 
   // === Special Operator ===
   // syntax: quote
-  {
-    with_null_stream wns;
-    check(test_undef, "(quote)");
-  }
+  with_expect_error([]() -> void {
+      check(test_undef, "(quote)");
+    });
   check(read_eqv, "(quote 1)", "1");
   check(print_equal, "(quote (1 . 2))", "(1 . 2)");
   check(print_equal, "'(1 2 3)", "(1 2 3)");
@@ -101,22 +99,19 @@ int main(){
   // syntax: lambda
 
   // syntax: if
-  {
-    with_null_stream wns;
-    check(test_undef, "(if)");
-    check(test_undef, "(if 1)");
-  }
+  with_expect_error([]() -> void {
+      check(test_undef, "(if)");
+      check(test_undef, "(if 1)");
+    });
   check(read_eqv, "(if #t 1)", "1");
-  {
-    with_null_stream wns;
-    check(test_undef, "(if #f 1)");
-  }
+  with_expect_error([]() -> void {
+      check(test_undef, "(if #f 1)");
+    });
   check(read_eqv, "(if #t 1 2)", "1");
   check(read_eqv, "(if #f 1 2)", "2");
-  {
-    with_null_stream wns;
-    check(test_undef, "(if #f 1 2 3)");
-  }
+  with_expect_error([]() -> void {
+      check(test_undef, "(if #f 1 2 3)");
+    });
 
   // syntax: define
   check(read_eqv, "(define x 1)", "1");
@@ -131,24 +126,22 @@ int main(){
   check(read_eqv, "x", "100");
 
   // syntax: begin
-  {
-    with_null_stream wns;
-    check(test_undef, "(begin)");
-  }
+  with_expect_error([]() -> void {
+      check(test_undef, "(begin)");
+    });
   check(read_eqv, "(begin 1)", "1");
   check(read_eqv, "(begin 1 2)", "2");
   check(read_eqv, "(begin 1 2 3)", "3");
 
   // informal syntaxes
-  {
-    with_null_stream wns;
-    //check(test_undef, "else");
-    check(test_undef, "(else)");
-    check(test_undef, "(else 1)");
-    //check(test_undef, "=>");
-    check(test_undef, "(=>)");
-    check(test_undef, "(=> 1)");
-  }
+  with_expect_error([]() -> void {
+      //check(test_undef, "else");
+      check(test_undef, "(else)");
+      check(test_undef, "(else 1)");
+      //check(test_undef, "=>");
+      check(test_undef, "(=>)");
+      check(test_undef, "(=> 1)");
+    });
 
 
   // macro call
