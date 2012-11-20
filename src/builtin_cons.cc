@@ -20,12 +20,6 @@ void cons_type_check_failed(const char* func_name, Lisp_ptr p){
   builtin_type_check_failed(func_name, Ptr_tag::cons, p);
 }
 
-void nil_check_failed(const char* func_name){
-  fprintf(zs::err, "native func: %s: arg is null list!\n",
-          func_name);
-  vm.return_value[0] = {};
-}
-
 void type_check_pair(){
   auto arg = pick_args_1();
   vm.return_value[0] = Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
@@ -48,8 +42,7 @@ void cons_carcdr(const char* name, Fun&& fun){
 
   auto c = arg.get<Cons*>();
   if(!c){
-    nil_check_failed(name);
-    return;
+    throw make_zs_error("native func: %s: arg is null list!\n", name);
   }
     
   vm.return_value[0] = fun(c);
@@ -75,10 +68,8 @@ void cons_set_carcdr(const char* name, Fun&& fun){
   
   auto c = args[0].get<Cons*>();
   if(!c){
-    nil_check_failed(name);
-    return;
+    throw make_zs_error("native func: %s: arg is null list!\n", name);
   }
-
   
   vm.return_value[0] = fun(c, args[1]);
 }
