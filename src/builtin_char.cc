@@ -14,10 +14,9 @@ using namespace Procedure;
 
 namespace {
 
-void char_type_check_failed(const char* func_name, Lisp_ptr p){
-  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
-          func_name, stringify(Ptr_tag::character), stringify(p.tag()));
-  vm.return_value[0] = {};
+zs_error char_type_check_failed(const char* func_name, Lisp_ptr p){
+  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+                       func_name, stringify(Ptr_tag::character), stringify(p.tag()));
 }
 
 template<typename Fun>
@@ -28,8 +27,7 @@ void char_compare(const char* name, Fun&& fun){
   for(auto i = 0; i < 2; ++i){
     c[i] = args[i].get<char>();
     if(!c[i]){
-      char_type_check_failed(name, args[i]);
-      return;
+      throw char_type_check_failed(name, args[i]);
     }
   }
 
@@ -126,8 +124,7 @@ void char_conversion(const char* name, Fun&& fun){
 
   auto c = arg1.get<char>();
   if(!c){
-    char_type_check_failed(name, arg1);
-    return;
+    throw char_type_check_failed(name, arg1);
   }
 
   vm.return_value[0] = Lisp_ptr{fun(c)};
