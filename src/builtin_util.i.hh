@@ -10,6 +10,7 @@
 #include <array>
 #include <cstdio>
 #include <iterator>
+#include <exception>
 
 #include "util.hh"
 #include "lisp_ptr.hh"
@@ -109,6 +110,34 @@ std::array<Lisp_ptr, size> pick_args(){
   vm.stack.erase(vm.stack.end() - size, vm.stack.end());
 
   return ret;
+}
+
+// class ZsArgs
+template<ZsArgsClean c>
+ZsArgs<c>::ZsArgs()
+  : stack_iter_s_(),
+    stack_iter_e_(vm.stack.end()){
+  auto argcnt = vm.stack.back().get<int>();
+  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
+}
+
+template<ZsArgsClean c>
+ZsArgs<c>::ZsArgs(int request_argc)
+  : stack_iter_s_(),
+    stack_iter_e_(vm.stack.end()){
+  // TODO: use delegating constructor
+  auto argcnt = vm.stack.back().get<int>();
+  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
+
+  if(argcnt != request_argc){
+    // throw exception.
+  }
+}
+
+template<ZsArgsClean c>
+ZsArgs<c>::~ZsArgs(){
+  if((c == ZsArgsClean::t) && !std::uncaught_exception())
+    vm.stack.erase(stack_iter_s_, stack_iter_e_);
 }
 
 #endif //BUILTIN_UTIL_I_HH

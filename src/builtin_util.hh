@@ -22,17 +22,22 @@ std::array<Lisp_ptr, i> pick_args();
 
 Lisp_ptr pick_args_1();
 
-class ArgAccessor{
+enum ZsArgsClean : bool {
+  f = false, t = true
+    };
+
+template<ZsArgsClean c = ZsArgsClean::t>
+class ZsArgs{
 public:
-  explicit ArgAccessor();
-  explicit ArgAccessor(int argc);
-  ArgAccessor(const ArgAccessor&) = delete;
-  ArgAccessor(ArgAccessor&&) = delete;
+  explicit ZsArgs();
+  explicit ZsArgs(int argc);
+  ZsArgs(const ZsArgs&) = delete;
+  ZsArgs(ZsArgs&&) = delete;
 
-  ~ArgAccessor();
+  ~ZsArgs();
 
-  ArgAccessor& operator=(const ArgAccessor&) = delete;
-  ArgAccessor& operator=(ArgAccessor&&) = delete;
+  ZsArgs& operator=(const ZsArgs&) = delete;
+  ZsArgs& operator=(ZsArgs&&) = delete;
 
   
   Lisp_ptr& operator[](int i){ return *(stack_iter_s_ + i); }
