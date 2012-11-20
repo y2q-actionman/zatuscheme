@@ -1,4 +1,4 @@
-;; -*- mode: org; coding: utf-8 -*-
+;; -*- mode: org -*-
 
 * 概要
   zatuscheme は、 R5RS 準拠を目指して作られている Scheme インタプリタで
@@ -20,4 +20,3 @@
   より詳細な情報は、以下を参考にして下さい。
   
   https://github.com/y2q-actionman/zatuscheme/wiki
-  https://github.com/y2q-actionman/zatuscheme/wiki/release_alpha_1
