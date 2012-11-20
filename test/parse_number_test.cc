@@ -65,7 +65,8 @@ void check(istream& i){
 }
 
 void check(const string& input){
-  check(input);
+  stringstream ss(input);
+  check(ss);
 }
 
 void check(istream& i, long expect){
@@ -95,7 +96,8 @@ void check(istream& i, const Number::complex_type& z){
 
 template<typename T>
 void check(const string& input, T&& t){
-  check(input, t);
+  stringstream ss(input);
+  check(ss, t);
 }
 
 // printing test

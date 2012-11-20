@@ -10,6 +10,13 @@ static void term_handle(){
   fprintf(stderr, "uncaught exception! aborting..\n\n");
 
   print(stderr, vm);
+  fputc('\n', stderr);
+
+  try{
+    rethrow_exception(current_exception());
+  }catch(std::exception& e){
+    fprintf(stderr, "what: %s\n", e.what());
+  }
 }
 
 void zs_init(){

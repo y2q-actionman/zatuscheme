@@ -225,7 +225,7 @@ int main(){
   check_ident("   abc", "abc");
   check_ident("   abc    def ", "abc");
   check_ident(" ;hogehoge\n   abc", "abc");
-  check(" ;hogehoge\n");
+  check(" ;hogehoge\n", static_cast<char>(EOF));
   check_ident("   abc;fhei", "abc");
 
   // boolean
@@ -285,7 +285,7 @@ int main(){
     check_string(ss, "ho()ge");
     check(ss, N::r_paren);
 
-    check(ss);
+    check(ss, static_cast<char>(EOF));
   }
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
