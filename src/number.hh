@@ -3,6 +3,7 @@
 
 #include <complex>
 #include <cstdio>
+#include <istream>
 
 #include "util.hh"
 
@@ -57,7 +58,7 @@ private:
   };
 };
 
-Number parse_number(FILE*, int radix = 0);
+Number parse_number(std::istream&, int radix = 0);
 
 Number to_exact(const Number&);
 Number to_inexact(const Number&);

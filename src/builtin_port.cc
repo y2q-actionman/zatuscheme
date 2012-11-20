@@ -16,7 +16,7 @@ namespace {
 
 #define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
 #define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
-
+  /*
 zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
   return make_zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::character), stringify(p.tag()));
@@ -146,7 +146,7 @@ void port_peek_char(){
                     return ret;
                   });
 }
-
+  */
 void port_eof_p(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::character){
@@ -156,7 +156,7 @@ void port_eof_p(){
 
   vm.return_value[0] = Lisp_ptr{arg.get<char>() == EOF};
 }  
-
+  /*
   
 template<typename Fun>
 void port_output_call(const char* name, Fun&& fun){
@@ -210,11 +210,12 @@ void port_write_char(){
                      return c;
                    });
 }
-
+  */
 } //namespace
 
 const BuiltinFunc
 builtin_port[] = {
+  /*
   {"input-port?", {
       port_i_p,
       {Calling::function, 1}}},
@@ -245,10 +246,11 @@ builtin_port[] = {
   {"peek-char", {
       port_peek_char,
       {Calling::function, 0, Variadic::t}}},
+  */
   {"eof-object?", {
       port_eof_p,
       {Calling::function, 1}}},
-
+  /*
   {"write", {
       port_write,
       {Calling::function, 1, Variadic::t}}},
@@ -258,15 +260,18 @@ builtin_port[] = {
   {"write-char", {
       port_write_char,
       {Calling::function, 1, Variadic::t}}}
+  */
 };
 
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
+  /*
   vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME),
                new Port{zs::in, "r"});
   vm.local_set(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME),
                new Port{zs::out, "w"});
+  */
 }
 
 

@@ -1,5 +1,5 @@
-#include <cstdio>
 #include <utility>
+#include <istream>
 
 #include "reader.hh"
 #include "vm.hh"
@@ -15,9 +15,9 @@ using namespace std;
 
 namespace {
 
-Lisp_ptr read_la(FILE*, Token&&);
+Lisp_ptr read_la(istream& f, Token&&);
 
-Lisp_ptr read_list(FILE* f){
+Lisp_ptr read_list(istream& f){
   Token t = tokenize(f);
 
   // first check
@@ -67,7 +67,7 @@ Lisp_ptr read_list(FILE* f){
   return {};
 }
 
-Lisp_ptr read_vector(FILE* f){
+Lisp_ptr read_vector(istream& f){
   Vector* v = new Vector();
 
   while(1){
@@ -91,14 +91,14 @@ Lisp_ptr read_vector(FILE* f){
   }
 }
 
-Lisp_ptr read_abbrev(const char* name, FILE* f){
+Lisp_ptr read_abbrev(const char* name, istream& f){
   Lisp_ptr first{intern(vm.symtable(), name)};
   Lisp_ptr second{read(f)};
 
   return make_cons_list({first, second});
 }
 
-Lisp_ptr read_la(FILE* f, Token&& tok){
+Lisp_ptr read_la(istream& f, Token&& tok){
   switch(tok.type()){
     // simple datum
   case Token::Type::boolean:
@@ -166,6 +166,6 @@ Lisp_ptr read_la(FILE* f, Token&& tok){
 
 } // namespace
 
-Lisp_ptr read(FILE* f){
+Lisp_ptr read(istream& f){
   return read_la(f, tokenize(f));
 }

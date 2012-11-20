@@ -554,3 +554,8 @@ const char* stringify(Number::Type t){
     return "(unknown number type)";
   }
 }
+
+// stub
+Number parse_number(std::istream&, int radix){
+  return {};
+}

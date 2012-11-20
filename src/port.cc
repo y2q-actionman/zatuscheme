@@ -2,6 +2,7 @@
 #include "port.hh"
 #include "util.hh"
 
+/*
 static void print_port_error(int eno){
   char estr[128];
   strerror_r(eno, estr, sizeof(estr));
@@ -111,3 +112,4 @@ void Port::clear(){
   string_buf_ = nullptr;
   string_buf_len_ = 0;
 }
+*/

@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <memory>
 #include <cstdio>
+#include <sstream>
 
 #include "number.hh"
 #include "describe.hh"
@@ -15,22 +16,16 @@ using namespace std;
 static bool result;
 
 template<typename Fun>
-void fail_message(Number::Type t, FILE* i, 
+void fail_message(Number::Type t, istream& i, 
                   const Number& n, const Fun& callback){
   result = false;
 
   // extract input from stream
-  char buf[PRINT_BUFSIZE];
-
-  clearerr(i); // clear eof
-  rewind(i);
-  if(!fgets(buf, sizeof(buf), i)){
-    fprintf(stdout, "I/O error occcured. skipping..\n");
-    return;
-  }
+  string buf;
+  std::getline(i, buf);
 
   fprintf(zs::err, "[failed] input='%s', expect type='%s'",
-          buf, stringify(t));
+          buf.c_str(), stringify(t));
 
   callback();
 
@@ -40,7 +35,7 @@ void fail_message(Number::Type t, FILE* i,
 }
 
 template<Number::Type type, typename Fun>
-void check_generic(FILE* i, const Fun& f){
+void check_generic(istream& i, const Fun& f){
   const Number n = parse_number(i);
 
   if(n.type() != type){
@@ -51,7 +46,7 @@ void check_generic(FILE* i, const Fun& f){
 
 template<Number::Type type, typename Fun, 
          typename ex_type = typename to_type<Number::Type, type>::type>
-void check_generic(FILE* i,
+void check_generic(istream& i,
                    const ex_type& expect,
                    const Fun& f){
   const Number n = parse_number(i);
@@ -63,18 +58,17 @@ void check_generic(FILE* i,
 }
 
 
-void check(FILE* i){
+void check(istream& i){
   with_expect_error([&]() -> void {
       check_generic<Number::Type::uninitialized>(i, [](){});
     });
 }
 
 void check(const string& input){
-  Port p{(void*)input.c_str(), input.size()};
-  check(p.stream());
+  check(input);
 }
 
-void check(FILE* i, long expect){
+void check(istream& i, long expect){
   check_generic<Number::Type::integer>
     (i, expect,
      [=](){
@@ -82,7 +76,7 @@ void check(FILE* i, long expect){
     });
 }
 
-void check(FILE* i, double expect){
+void check(istream& i, double expect){
   check_generic<Number::Type::real>
     (i, expect,
      [=](){
@@ -90,7 +84,7 @@ void check(FILE* i, double expect){
     });
 }
 
-void check(FILE* i, const Number::complex_type& z){
+void check(istream& i, const Number::complex_type& z){
   check_generic<Number::Type::complex>
     (i, z,
      [=](){
@@ -101,8 +95,7 @@ void check(FILE* i, const Number::complex_type& z){
 
 template<typename T>
 void check(const string& input, T&& t){
-  Port p{(void*)input.c_str(), input.size()};
-  check(p.stream(), t);
+  check(input, t);
 }
 
 // printing test

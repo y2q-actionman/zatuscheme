@@ -972,7 +972,7 @@ void number_e_to_i(){
 void number_from_string(){
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
-
+  /*
   auto str = args[0].get<String*>();
   if(!str){
     throw make_zs_error("native func: string->number: passed arg is not string (%s).\n",
@@ -1010,9 +1010,11 @@ void number_from_string(){
   }else{
     vm.return_value[0] = {};
   }
+  */
 }
 
 void number_to_string(){
+  /*
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -1049,6 +1051,7 @@ void number_to_string(){
   print(p.stream(), *n, radix);
 
   vm.return_value[0] = {new String(p.get_string_output())};
+  */
 }
 
 } //namespace

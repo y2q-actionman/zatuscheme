@@ -1,5 +1,6 @@
 #include <array>
 #include <cstring>
+#include <sstream>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -90,12 +91,12 @@ void load_func(){
     throw builtin_type_check_failed("load", Ptr_tag::string, arg);
   }
 
-  Port p{str->c_str(), "r"};
-  if(!p){
+  stringstream f(*str, ios_base::in);
+  if(!f){
     throw zs_error("load error: failed at opening file\n");
   }
 
-  load(&p);
+  load(&f);
   vm.return_value[0] = {};
 }
 
@@ -131,8 +132,8 @@ static void install_builtin_native(const BuiltinFunc bf[], size_t s){
 
 static void install_builtin_load(const char* ld[], size_t s){
   for(size_t i = 0; i < s; ++i){
-    Port p{c_cast<void*>(ld[i]), strlen(ld[i])};
-    load(&p);
+    stringstream ss({ld[i]}, ios_base::in);
+    load(&ss);
   }
 }
 
@@ -166,9 +167,9 @@ void install_builtin(){
 
 void load(Port* p){
   while(1){
-    auto form = read(p->stream());
+    auto form = read(*p);
     if(!form){
-      if(!feof(p->stream())){
+      if(!*p){
         fprintf(zs::err, "load error: failed at reading a form. abandoned.\n");
       }
       break;

@@ -2,7 +2,7 @@
 #define TOKEN_HH
 
 #include <string>
-#include <cstdio>
+#include <istream>
 
 #include "number.hh"
 #include "util.hh"
@@ -71,7 +71,7 @@ private:
   template<typename T> Token& assign_from_other(T other);
 };
 
-Token tokenize(FILE*);
+Token tokenize(std::istream&);
 
 const char* stringify(Token::Notation);
 const char* stringify(Token::Type);

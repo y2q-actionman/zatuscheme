@@ -57,19 +57,18 @@ void check_copy_move(const Token& tok){
   return;
 }
 
-template<typename Fun>
-void fail_message(Token::Type t, FILE* f, const fpos_t* b_pos,
+template<typename Fun, typename Pos>
+void fail_message(Token::Type t, istream& f, const Pos& b_pos,
                   const Token& tok, const Fun& callback){
   // extract input from stream
-  char buf[PRINT_BUFSIZE];
 
-  fsetpos(f, b_pos);
-  if(!fgets(buf, sizeof(buf), f)){
-    strcpy(buf, "(read error)");
-  }
+  f.seekg(b_pos);
+
+  string buf;
+  std::getline(f, buf);
 
   fprintf(zs::err, "[failed] input='%s', expect type='%s'",
-          buf, stringify(t));
+          buf.c_str(), stringify(t));
 
   callback();
 
@@ -88,10 +87,9 @@ Token::Type Token::get<Token::Type>() const{
   return type_;
 }
 
-void check(FILE* f){
+void check(istream& f){
   static const auto type = Token::Type::uninitialized;
-  fpos_t init_pos;
-  fgetpos(f, &init_pos);
+  auto init_pos = f.tellg();
 
   Token tok;
   with_expect_error([&]() -> void{
@@ -99,7 +97,7 @@ void check(FILE* f){
     });
 
   if(tok.type() != type){
-    fail_message(type, f, &init_pos, tok, [](){});
+    fail_message(type, f, init_pos, tok, [](){});
     return;
   }
   
@@ -107,23 +105,22 @@ void check(FILE* f){
 }
 
 void check(const string& input){
-  Port p{(void*)input.c_str(), input.size()};
-  check(p.stream());
+  stringstream ss(input);
+  check(ss);
 }
 
 
 // for normal cases
 template<Token::Type type, typename Fun, 
          typename ex_type = typename to_type<Token::Type, type>::type>
-void check_generic(FILE* f, const ex_type& expect,
+void check_generic(istream& f, const ex_type& expect,
                    const Fun& fun){
-  fpos_t init_pos;
-  fgetpos(f, &init_pos);
+  auto init_pos = f.tellg();
 
   const Token tok = tokenize(f);
 
   if(tok.type() != type || tok.get<ex_type>() != expect){
-    fail_message(type, f, &init_pos, tok, fun);
+    fail_message(type, f, init_pos, tok, fun);
     return;
   }
   
@@ -131,7 +128,7 @@ void check_generic(FILE* f, const ex_type& expect,
 }
 
 template<Token::Type T>
-void check(FILE* f, const string& expect){
+void check(istream& f, const string& expect){
   check_generic<T>
     (f, expect,
      [&](){
@@ -141,8 +138,8 @@ void check(FILE* f, const string& expect){
 
 template<Token::Type T>
 void check(const string& input, const string& expect){
-  Port p{(void*)input.c_str(), input.size()};
-  check<T>(p.stream(), expect);
+  stringstream ss(input);
+  check<T>(ss, expect);
 }
 
 #define check_ident check<Token::Type::identifier>
@@ -158,7 +155,7 @@ bool operator!=(const Number& n1, const Number& n2){
   return !eqv(n1, n2);
 }
 
-void check(FILE* f, const Number& n){
+void check(istream& f, const Number& n){
   check_generic<Token::Type::number>
     (f, n, 
      [=](){
@@ -167,7 +164,7 @@ void check(FILE* f, const Number& n){
     });
 }
 
-void check(FILE* f, bool expect){
+void check(istream& f, bool expect){
   check_generic<Token::Type::boolean>
     (f, expect, 
      [=](){
@@ -175,7 +172,7 @@ void check(FILE* f, bool expect){
     });
 }
 
-void check(FILE* f, char expect){
+void check(istream& f, char expect){
   check_generic<Token::Type::character>
     (f, expect, 
      [=](){
@@ -183,7 +180,7 @@ void check(FILE* f, char expect){
     });
 }
 
-void check(FILE* f, Token::Notation n){
+void check(istream& f, Token::Notation n){
   check_generic<Token::Type::notation>
     (f, n,
      [=](){
@@ -195,8 +192,8 @@ void check(FILE* f, Token::Notation n){
 
 template<typename T>
 void check(const string& input, T&& expect){
-  Port p{(void*)input.c_str(), input.size()};
-  check(p.stream(), expect);
+  stringstream ss(input);
+  check(ss, expect);
 }
 
 
@@ -262,8 +259,7 @@ int main(){
   // consecutive access
   {
     char teststr[] = "(a . b)#(c 'd) e ...;comment\nf +11 `(,x ,@y \"ho()ge\")";
-    Port p{teststr, sizeof(teststr)};
-    auto ss = p.stream();
+    stringstream ss(teststr);
 
     check(ss, N::l_paren);
     check_ident(ss, "a");

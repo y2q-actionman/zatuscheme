@@ -1,3 +1,4 @@
+#include <istream>
 #include "token.hh"
 #include "util.hh"
 
@@ -172,59 +173,58 @@ bool is_special_initial(charT c){
   }
 }
 
-void skip_intertoken_space(FILE* f){
-  decltype(fgetc(f)) c;
+void skip_intertoken_space(istream& f){
+  decltype(f.get()) c;
     
-  while((c = fgetc(f)) != EOF
+  while((c = f.get()) != EOF
         && (isspace(c) || c == ';')){
     if(c == ';'){
       do{
-        c = fgetc(f);
+        c = f.get();
       }while(c != EOF && c != '\n');
     }
   }
-  ungetc(c, f);
+  f.unget();
 }
 
 
-Token tokenize_identifier(FILE* f, int first_char){
+Token tokenize_identifier(istream& f, int first_char){
   string s(1, first_char);
 
   // subsequent
-  decltype(fgetc(f)) c;
+  decltype(f.get()) c;
 
-  while(!is_delimiter(c = fgetc(f))
+  while(!is_delimiter(c = f.get())
         && (isalpha(c) || is_special_initial(c) 
             || isdigit(c) || c == '+' || c == '-'
             || c == '.' || c == '@')){
     s.push_back(c);
   }
-  ungetc(c, f);
+  f.unget();
 
   assert(!s.empty());
   return Token{s, Token::Type::identifier};
 }
 
-Token tokenize_character(FILE* f){
+Token tokenize_character(istream& f){
   // function for checking character-name
   const auto check_name = [&](const char* str) -> bool {
     for(const char* c = str; *c; ++c){
-      auto get_c = fgetc(f);
+      auto get_c = f.get();
       if(get_c != tolower(*c) || is_delimiter(get_c)){
-        ungetc(get_c, f);
+        f.unget();
         return false;
       }
     }
     return true;
   };
 
-  auto ret_char = fgetc(f);
+  auto ret_char = f.get();
   if(ret_char == EOF){
     throw zs_error("reader error: no char found after '#\\'!\n");
   }
 
-  auto next = fgetc(f);
-  ungetc(next, f);
+  auto next = f.peek();
 
   if(is_delimiter(next)){
     return Token{static_cast<char>(ret_char)};
@@ -247,16 +247,16 @@ Token tokenize_character(FILE* f){
   }
 }
 
-Token tokenize_string(FILE* f){
-  decltype(fgetc(f)) c;
+Token tokenize_string(istream& f){
+  decltype(f.get()) c;
   string s;
 
-  while((c = fgetc(f)) != EOF){
+  while((c = f.get()) != EOF){
     switch(c){
     case '"':
       return Token{s, Token::Type::string};
     case '\\':
-      switch(c = fgetc(f)){
+      switch(c = f.get()){
       case '"': case '\\':
         s.push_back(c);
         break;
@@ -272,22 +272,16 @@ Token tokenize_string(FILE* f){
   throw zs_error("reader error: not ended string!\n");
 }
 
-Token tokenize_number(FILE* f, int read_c = 0){
-  if(read_c){
-    if(ungetc(read_c, f) == EOF){
-      throw zs_error("reader internal error: fatal I/O error occured. (reached unreading limit)\n");
-    }
-  }
-
+Token tokenize_number(istream& f){
   return Token{parse_number(f)};
 }
 
 } // namespace
 
-Token tokenize(FILE* f){
+Token tokenize(istream& f){
   skip_intertoken_space(f);
 
-  switch(auto c = fgetc(f)){
+  switch(auto c = f.get()){
   case '(':
     return Token{Token::Notation::l_paren};
   case ')':
@@ -307,23 +301,23 @@ Token tokenize(FILE* f){
   case '|':
     return Token{Token::Notation::bar};
   case ',': {
-    auto c2 = fgetc(f);
+    auto c2 = f.get();
     if(c2 == '@'){
       return Token{Token::Notation::comma_at};
     }else{
-      ungetc(c2, f);
+      f.unget();
       return Token{Token::Notation::comma};
     }
   }
 
   case '.': {
     int dots = 1;
-    decltype(fgetc(f)) c2;
+    decltype(f.get()) c2;
 
-    while((c2 = fgetc(f)) == '.'){
+    while((c2 = f.get()) == '.'){
       ++dots;
     }
-    ungetc(c2, f);
+    f.unget();
 
     switch(dots){
     case 1:
@@ -339,18 +333,18 @@ Token tokenize(FILE* f){
     return tokenize_string(f);
 
   case '+': case '-': {
-    auto c2 = fgetc(f);
-    ungetc(c2, f);
+    auto c2 = f.peek();
 
     if(is_delimiter(c2)){
       return Token{string(1, c), Token::Type::identifier};
     }else{
-      return tokenize_number(f, c);
+      f.putback(c);
+      return tokenize_number(f);
     }
   }
 
   case '#':
-    switch(auto sharp_c = fgetc(f)){
+    switch(auto sharp_c = f.get()){
     case '(':
       return Token{Token::Notation::vector_paren};
     case 't':
@@ -362,14 +356,15 @@ Token tokenize(FILE* f){
     case 'i': case 'e':
     case 'b': case 'o':
     case 'd': case 'x':
-      ungetc(sharp_c, f);
-      return tokenize_number(f, '#');
+      f.unget();
+      f.putback('#');
+      return tokenize_number(f);
     case '<':
       // cleaning input stream
       do{
-        c = fgetc(f);
+        c = f.get();
       }while(c != EOF && c != '>');
-      ungetc(c, f);
+      f.unget();
 
       throw zs_error("reader error: '#<...>' appeared ('not printable object' in this implementation.)\n");
     default:
@@ -383,7 +378,7 @@ Token tokenize(FILE* f){
     if(isalpha(c) || is_special_initial(c)){
       return tokenize_identifier(f, c);
     }else if(isdigit(c)){
-      ungetc(c, f);
+      f.unget();
       return tokenize_number(f);
     }else{
       throw make_zs_error("reader error: invalid char '%c' appeared.\n", c);

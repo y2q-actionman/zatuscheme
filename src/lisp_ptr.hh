@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <iostream>
 
 enum class Ptr_tag {
   undefined = 0,
@@ -89,7 +90,7 @@ namespace Procedure{
 class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
-class Port;
+typedef std::iostream Port;
 class Env;
 class Delay;
 typedef void(*VMop)();

@@ -1,4 +1,5 @@
 #include <vector>
+#include <sstream>
 #include "test_util.hh"
 #include "reader.hh"
 #include "eval.hh"
@@ -8,11 +9,9 @@
 using namespace std;
 
 Lisp_ptr read_from_string(const char* s){
-  Port pr{(void*)s, strlen(s)};
+  stringstream ss(s);
 
-  Lisp_ptr p{read(pr.stream())};
-
-  return p;
+  return read(ss);
 }
 
 Lisp_ptr eval_text(const char* s){

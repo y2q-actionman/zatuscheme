@@ -1,6 +1,7 @@
 #ifndef PORT_HH
 #define PORT_HH
 
+/*
 #include <cstdio>
 #include <string>
 #include "lisp_ptr.hh"
@@ -46,5 +47,6 @@ private:
   char* string_buf_;
   size_t string_buf_len_;
 };
+*/
 
 #endif // PORT_HH

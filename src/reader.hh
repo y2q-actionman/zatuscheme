@@ -1,9 +1,9 @@
 #ifndef READER_HH
 #define READER_HH
 
-#include <cstdio>
+#include <istream>
 #include "lisp_ptr.hh"
 
-Lisp_ptr read(FILE*);
+Lisp_ptr read(std::istream&);
 
 #endif // READER_HH
