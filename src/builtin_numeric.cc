@@ -972,7 +972,7 @@ void number_e_to_i(){
 void number_from_string(){
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
-  /*
+
   auto str = args[0].get<String*>();
   if(!str){
     throw make_zs_error("native func: string->number: passed arg is not string (%s).\n",
@@ -1002,19 +1002,17 @@ void number_from_string(){
     throw builtin_variadic_argcount_failed("string->number", 2);
   }
 
-  Port p{c_cast<void*>(str->c_str()), str->size()};
-  auto n = parse_number(p.stream(), radix);
+  istringstream iss(*str);
+  auto n = parse_number(iss, radix);
 
   if(n){
     vm.return_value[0] = {new Number(n)};
   }else{
     vm.return_value[0] = {};
   }
-  */
 }
 
 void number_to_string(){
-  /*
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -1047,11 +1045,10 @@ void number_to_string(){
     throw builtin_variadic_argcount_failed("number->string", 2);
   }
 
-  Port p{Port::open_output_memstream::t};
-  print(p.stream(), *n, radix);
+  ostringstream oss;
+  print(oss, *n, radix);
 
-  vm.return_value[0] = {new String(p.get_string_output())};
-  */
+  vm.return_value[0] = {new String(oss.str())};
 }
 
 } //namespace
