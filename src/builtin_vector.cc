@@ -12,10 +12,9 @@ using namespace Procedure;
 
 namespace {
 
-void vector_type_check_failed(const char* func_name, Lisp_ptr p){
-  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
-          func_name, stringify(Ptr_tag::vector), stringify(p.tag()));
-  vm.return_value[0] = {};
+zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
+  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+                       func_name, stringify(Ptr_tag::vector), stringify(p.tag()));
 }
 
 void vector_make(){
@@ -59,8 +58,7 @@ void vector_length(){
   auto arg1 = pick_args_1();
   auto v = arg1.get<Vector*>();
   if(!v){
-    vector_type_check_failed("vector-length", arg1);
-    return;
+    throw vector_type_check_failed("vector-length", arg1);
   }
 
   vm.return_value[0] = {new Number(static_cast<Number::integer_type>(v->size()))};
@@ -70,8 +68,7 @@ void vector_ref(){
   auto arg = pick_args<2>();
   auto v = arg[0].get<Vector*>();
   if(!v){
-    vector_type_check_failed("vector-ref", arg[0]);
-    return;
+    throw vector_type_check_failed("vector-ref", arg[0]);
   }
 
   auto num = arg[1].get<Number*>();
@@ -97,8 +94,7 @@ void vector_set(){
   auto arg = pick_args<3>();
   auto v = arg[0].get<Vector*>();
   if(!v){
-    vector_type_check_failed("vector-set!", arg[0]);
-    return;
+    throw vector_type_check_failed("vector-set!", arg[0]);
   }
 
   auto num = arg[1].get<Number*>();
@@ -125,8 +121,7 @@ void vector_to_list(){
   auto arg1 = pick_args_1();
   auto v = arg1.get<Vector*>();
   if(!v){
-    vector_type_check_failed("vector->list", arg1);
-    return;
+    throw vector_type_check_failed("vector->list", arg1);
   }
 
   vm.return_value[0] = make_cons_list(v->begin(), v->end());
@@ -154,8 +149,7 @@ void vector_fill(){
   auto arg = pick_args<2>();
   auto v = arg[0].get<Vector*>();
   if(!v){
-    vector_type_check_failed("vector-fill!", arg[0]);
-    return;
+    throw vector_type_check_failed("vector-fill!", arg[0]);
   }
 
   std::fill(v->begin(), v->end(), arg[1]);
