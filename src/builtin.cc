@@ -166,11 +166,17 @@ void install_builtin(){
 }
 
 void load(Port* p){
+  auto in = dynamic_cast<std::istream*>(p);
+  if(!in){
+    fprintf(zs::err, "load error: passed port is not input port.\n");
+    return;
+  }
+
   while(1){
-    auto form = read(*p);
+    auto form = read(*in);
     if(!form){
       if(!*p){
-        fprintf(zs::err, "load error: failed at reading a form. abandoned.\n");
+        // fprintf(zs::err, "load error: failed at reading a form. abandoned.\n");
       }
       break;
     }

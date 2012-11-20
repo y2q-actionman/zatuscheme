@@ -90,7 +90,7 @@ namespace Procedure{
 class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
-typedef std::iostream Port;
+typedef std::ios Port;
 class Env;
 class Delay;
 typedef void(*VMop)();

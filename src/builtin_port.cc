@@ -1,6 +1,9 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <istream>
+#include <ostream>
+#include <fstream>
 
 #include "builtin_port.hh"
 #include "lisp_ptr.hh"
@@ -16,10 +19,10 @@ namespace {
 
 #define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
 #define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
-  /*
+
 zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
   return make_zs_error("native func: %s: arg is not %s! (%s)\n",
-                       func_name, stringify(Ptr_tag::character), stringify(p.tag()));
+                       func_name, stringify(Ptr_tag::port), stringify(p.tag()));
 }
 
 template<typename Fun>
@@ -31,26 +34,25 @@ void port_io_p(Fun&& fun){
   }
 
   vm.return_value[0] = Lisp_ptr{fun(arg.get<Port*>())};
-}  
+}
   
 void port_i_p(){
-  port_io_p([](Port* p){ return p->readable(); });
+  port_io_p([](Port* p){ return (dynamic_cast<std::istream*>(p) != nullptr); });
 }
 
 void port_o_p(){
-  port_io_p([](Port* p){ return p->writable(); });
+  port_io_p([](Port* p){ return (dynamic_cast<std::ostream*>(p) != nullptr); });
 }
 
-
-static
-void port_open_file(const char* name, const char* mode){
+template<typename IOType>
+void port_open_file(const char* name){
   auto arg = pick_args_1();
   auto str = arg.get<String*>();
   if(!str){
     throw builtin_type_check_failed(name, Ptr_tag::string, arg);
   }
 
-  auto p = new Port(str->c_str(), mode);
+  Port* p = new IOType(str->c_str());
   if(!*p){
     throw make_zs_error("native error: %s: failed at opening file\n", name);
   }
@@ -59,47 +61,42 @@ void port_open_file(const char* name, const char* mode){
 }  
 
 void port_open_file_i(){
-  port_open_file("open-input-file", "r");
+  port_open_file<ifstream>("open-input-file");
 }  
 
 void port_open_file_o(){
-  port_open_file("open-output-file", "w");
+  port_open_file<ofstream>("open-output-file");
 }  
-  
 
-template<typename Fun>
-void port_close(const char* name, Fun&& fun){
+template<typename IOType, typename F_IOType>
+void port_close(const char* name){
   auto arg = pick_args_1();
   auto p = arg.get<Port*>();
   if(!p){
     throw port_type_check_failed(name, arg);
   }
 
-  if(!fun(p)){
-    fprintf(zs::err, "native func warning: %s: passed port is not expected direction\n", name);
+  if(!dynamic_cast<IOType*>(p)){
+    throw make_zs_error("native func error: %s: passed port is not expected direction\n", name);
   }
 
-  if(!p->stream()){
-    fprintf(zs::err, "native func warning: %s: passed port is already closed\n", name);
+  auto fio = dynamic_cast<F_IOType*>(p);
+  if(!fio){
+    fprintf(zs::err, "native func warning: %s: passed port is not associated to file\n", name);
     vm.return_value[0] = Lisp_ptr{false};
     return;
   }
 
-  if(p->close() < 0){
-    fprintf(zs::err, "native func warning: %s: failed at closeing port\n", name);
-    vm.return_value[0] = Lisp_ptr{false};
-    return;
-  }
-  
+  fio->close();
   vm.return_value[0] = Lisp_ptr{true};
 }
 
 void port_close_i(){
-  port_close("close-input-port", [](Port* p){ return p->readable(); });
+  port_close<std::istream, std::ifstream>("close-input-port");
 }
 
 void port_close_o(){
-  port_close("close-output-port", [](Port* p){ return p->writable(); });
+  port_close<std::ostream, std::ofstream>("close-output-port");
 }
 
 
@@ -125,28 +122,29 @@ void port_input_call(const char* name, Fun&& fun){
     throw builtin_variadic_argcount_failed(name, 1);
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(p)};
+  auto is = dynamic_cast<std::istream*>(p);
+  if(!is){
+    throw make_zs_error("native func error: %s: passed port is not input port\n", name);
+  }
+
+  vm.return_value[0] = Lisp_ptr{fun(is)};
 }
 
 void port_read(){
   port_input_call("read",
-                  [](Port* p){ return read(p->stream()); });
+                  [](std::istream* is){ return read(*is); });
 }
 
 void port_read_char(){
   port_input_call("read-char",
-                  [](Port* p) -> char { return fgetc(p->stream()); });
+                  [](std::istream* is) -> char { return is->get(); });
 }
 
 void port_peek_char(){
   port_input_call("peek-char",
-                  [](Port* p) -> char{
-                    auto ret = fgetc(p->stream());
-                    ungetc(ret, p->stream());
-                    return ret;
-                  });
+                  [](std::istream* is) -> char{ return is->peek(); });
 }
-  */
+
 void port_eof_p(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::character){
@@ -156,7 +154,6 @@ void port_eof_p(){
 
   vm.return_value[0] = Lisp_ptr{arg.get<char>() == EOF};
 }  
-  /*
   
 template<typename Fun>
 void port_output_call(const char* name, Fun&& fun){
@@ -180,42 +177,46 @@ void port_output_call(const char* name, Fun&& fun){
     throw builtin_variadic_argcount_failed(name, 2);
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(args[0], p)};
+  auto os = dynamic_cast<std::ostream*>(p);
+  if(!os){
+    throw make_zs_error("native func error: %s: passed port is not output port\n", name);
+  }
+
+  vm.return_value[0] = Lisp_ptr{fun(args[0], os)};
 }
 
 void port_write(){
   port_output_call("write",
-                   [](Lisp_ptr c, Port* p) -> bool{
-                     print(p->stream(), c, print_human_readable::f);
+                   [](Lisp_ptr c, std::ostream* os) -> bool{
+                     print(*os, c, print_human_readable::f);
                      return true;
                    });
 }
 
 void port_display(){
   port_output_call("display",
-                   [](Lisp_ptr c, Port* p) -> bool{
-                     print(p->stream(), c, print_human_readable::t);
+                   [](Lisp_ptr c, std::ostream* os) -> bool{
+                     print(*os, c, print_human_readable::t);
                      return true;
                    });
 }
 
 void port_write_char(){
   port_output_call("write-char",
-                   [](Lisp_ptr c, Port* p) -> Lisp_ptr{
+                   [](Lisp_ptr c, std::ostream* os) -> Lisp_ptr{
                      if(c.tag() != Ptr_tag::character){
                        throw builtin_type_check_failed("write-char", Ptr_tag::character, c);
                      }
 
-                     fputc(c.get<char>(), p->stream());
+                     os->put(c.get<char>());
                      return c;
                    });
 }
-  */
+
 } //namespace
 
 const BuiltinFunc
 builtin_port[] = {
-  /*
   {"input-port?", {
       port_i_p,
       {Calling::function, 1}}},
@@ -246,11 +247,11 @@ builtin_port[] = {
   {"peek-char", {
       port_peek_char,
       {Calling::function, 0, Variadic::t}}},
-  */
+
   {"eof-object?", {
       port_eof_p,
       {Calling::function, 1}}},
-  /*
+
   {"write", {
       port_write,
       {Calling::function, 1, Variadic::t}}},
@@ -260,18 +261,15 @@ builtin_port[] = {
   {"write-char", {
       port_write_char,
       {Calling::function, 1, Variadic::t}}}
-  */
 };
 
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
-  /*
   vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME),
-               new Port{zs::in, "r"});
+               static_cast<Port*>(&std::cin));
   vm.local_set(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME),
-               new Port{zs::out, "w"});
-  */
+               static_cast<Port*>(&std::cout));
 }
 
 
