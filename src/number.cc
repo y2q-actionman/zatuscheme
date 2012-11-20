@@ -74,20 +74,20 @@ struct PrefixValue {
   }
 };
 
-PrefixValue parse_number_prefix(FILE* f){
+PrefixValue parse_number_prefix(istream& f){
   int r = 10;
   Exactness e = Exactness::unspecified;
   bool r_appeared = false, e_appeared = false;
 
   for(int loop = 0; loop < 2; ++loop){
-    decltype(fgetc(f)) c = fgetc(f);
+    auto c = f.get();
 
     if(c != '#'){
-      ungetc(c, f);
+      f.unget();
       return {r, e};
     }
 
-    switch(c = fgetc(f)){
+    switch(c = f.get()){
     case 'i': case 'e':
       if(e_appeared){
         throw make_zs_error("reader error: duplicated number prefix appeared (%c)\n", c);
@@ -147,15 +147,15 @@ bool is_number_char(int radix, int c){
   }
 }
 
-int eat_sharp(FILE* f, string& o){
-  decltype(fgetc(f)) c;
+int eat_sharp(istream& f, string& o){
+  decltype(f.get()) c;
   int sharps = 0;
 
-  while((c = fgetc(f)) == '#'){
+  while((c = f.get()) == '#'){
     o.push_back('0');
     ++sharps;
   }
-  ungetc(c, f);
+  f.unget();
 
   return sharps;
 }
@@ -176,12 +176,12 @@ struct ParserRet {
   }
 };
 
-ParserRet parse_unsigned(int radix, FILE* f, string& s){
-  decltype(fgetc(f)) c;
+ParserRet parse_unsigned(int radix, istream& f, string& s){
+  decltype(f.get()) c;
 
-  while(is_number_char(radix, c = fgetc(f)))
+  while(is_number_char(radix, c = f.get()))
     s.push_back(c);
-  ungetc(c, f);
+  f.unget();
 
   if(s.empty()){
     return {}; // no digit char. starting with dot ?
@@ -218,14 +218,14 @@ bool check_decimal_suffix(int c){
   }
 }
 
-ParserRet parse_decimal(FILE* f, string& s){
-  decltype(fgetc(f)) c;
+ParserRet parse_decimal(istream& f, string& s){
+  decltype(f.get()) c;
   bool dot_start = false;
   int sharps_before_dot = 0;
 
   if(s.empty()){
-    if((c = fgetc(f)) == '.'){
-      ungetc('.', f);
+    if((c = f.get()) == '.'){
+      f.unget();
       dot_start = true;
     }else{
       throw zs_error("reader error: no chars found for floating point number.\n");
@@ -234,8 +234,8 @@ ParserRet parse_decimal(FILE* f, string& s){
     sharps_before_dot = eat_sharp(f, s);
   }
 
-  if((c = fgetc(f)) != '.'){
-    ungetc(c, f);
+  if((c = f.get()) != '.'){
+    f.unget();
     goto end; // 1. no frac part
   }
   s.push_back('.');
@@ -248,11 +248,11 @@ ParserRet parse_decimal(FILE* f, string& s){
   {
     bool digits_after_dot = false;
 
-    while(isdigit(c = fgetc(f))){
+    while(isdigit(c = f.get())){
       digits_after_dot = true;
       s.push_back(c);
     }
-    ungetc(c, f);
+    f.unget();
 
     if(dot_start && !digits_after_dot){
       throw zs_error("reader error: a number starting with dot should have digits after it.\n");
@@ -262,31 +262,31 @@ ParserRet parse_decimal(FILE* f, string& s){
   }
   
  end:
-  if(check_decimal_suffix(c = fgetc(f))){
+  if(check_decimal_suffix(c = f.get())){
     s.push_back('e');
 
-    switch(c = fgetc(f)){
+    switch(c = f.get()){
     case '+': case '-':
       s.push_back(c); break;
     default:
-      ungetc(c, f); break;
+      f.unget(); break;
     }
 
     {
       bool exp_digits = false;
 
-      while(isdigit(c = fgetc(f))){
+      while(isdigit(c = f.get())){
         exp_digits = true;
         s.push_back(c);
       }
-      ungetc(c, f);
+      f.unget();
 
       if(!exp_digits){
         throw zs_error("reader error: no number on exporational part\n");
       }
     }
   }else{
-    ungetc(c, f);
+    f.unget();
   }
 
   errno = 0;
@@ -302,27 +302,27 @@ ParserRet parse_decimal(FILE* f, string& s){
   return {Number{d}, Exactness::inexact};
 }
 
-ParserRet parse_real_number(int radix, FILE* f){
-  decltype(fgetc(f)) c;
+ParserRet parse_real_number(int radix, istream& f){
   int sign = 1;
 
-  switch(c = fgetc(f)){
+  switch(f.peek()){
   case '+':
+    f.ignore(1);
     sign = 1;
     break;
   case '-':
+    f.ignore(1);
     sign = -1;
     break;
   default:
     sign = 1;
-    ungetc(c, f);
     break;
   }
 
   string s;
 
   auto u1 = parse_unsigned(radix, f, s);
-  c = fgetc(f);
+  auto c = f.get();
 
   if((c == '.') || (u1 && check_decimal_suffix(c))){
     if(radix != 10){
@@ -330,7 +330,7 @@ ParserRet parse_real_number(int radix, FILE* f){
     }
 
     // decimal float
-    ungetc(c, f);
+    f.unget();
     auto n = parse_decimal(f, s);
 
     if(!n){
@@ -353,15 +353,14 @@ ParserRet parse_real_number(int radix, FILE* f){
         Exactness::inexact};
   }else{
     // integer?
-    ungetc(c, f);
+    f.unget();
     // FIXME: inexact or super-big integer can be fall into float.
     return {Number(sign * u1.number.coerce<long>()), u1.ex};
   }
 }
 
-ParserRet parse_complex(int radix, FILE* f){
-  const auto first_char = fgetc(f);
-  ungetc(first_char, f);
+ParserRet parse_complex(int radix, istream& f){
+  const auto first_char = f.peek();
 
   // has real part
   auto real = parse_real_number(radix, f);
@@ -369,7 +368,7 @@ ParserRet parse_complex(int radix, FILE* f){
     throw zs_error("reader error: failed at reading a real number\n");
   }
 
-  switch(auto c = fgetc(f)){
+  switch(auto c = f.get()){
   case '@': {// polar literal
     auto deg = parse_real_number(radix, f);
     if(!deg){
@@ -382,14 +381,14 @@ ParserRet parse_complex(int radix, FILE* f){
   case '+': case '-': {
     const int sign = (c == '+') ? 1 : -1;
 
-    if((c = fgetc(f)) == 'i'){
+    if(f.peek() == 'i'){
+      f.ignore(1);
       return {Number{Number::complex_type(real.number.coerce<double>(), sign)},
           Exactness::inexact};
     }
-    ungetc(c, f);
     
     auto imag = parse_real_number(radix, f);
-    if(!imag || fgetc(f) != 'i'){
+    if(!imag || f.get() != 'i'){
       throw zs_error("reader error: failed at reading a complex number's imaginary part.\n");
     }
 
@@ -404,14 +403,14 @@ ParserRet parse_complex(int radix, FILE* f){
       throw zs_error("reader error: failed at reading a complex number. ('i' appeared alone.)\n");
     }
   default:
-    ungetc(c, f);
+    f.unget();
     return real;
   }
 }
 
 } // namespace
 
-Number parse_number(FILE* f, int radix){
+Number parse_number(istream& f, int radix){
   const auto prefix_info = parse_number_prefix(f);
   if(!prefix_info){
     throw zs_error("reader error: failed at reading a number's prefix\n");
@@ -553,9 +552,4 @@ const char* stringify(Number::Type t){
   default:
     return "(unknown number type)";
   }
-}
-
-// stub
-Number parse_number(std::istream&, int radix){
-  return {};
 }
