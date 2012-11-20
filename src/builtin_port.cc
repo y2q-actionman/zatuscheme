@@ -17,10 +17,9 @@ namespace {
 #define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
 #define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
 
-void port_type_check_failed(const char* func_name, Lisp_ptr p){
-  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
-          func_name, stringify(Ptr_tag::character), stringify(p.tag()));
-  vm.return_value[0] = {};
+zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
+  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+                       func_name, stringify(Ptr_tag::character), stringify(p.tag()));
 }
 
 template<typename Fun>
@@ -73,8 +72,7 @@ void port_close(const char* name, Fun&& fun){
   auto arg = pick_args_1();
   auto p = arg.get<Port*>();
   if(!p){
-    port_type_check_failed(name, arg);
-    return;
+    throw port_type_check_failed(name, arg);
   }
 
   if(!fun(p)){
@@ -120,8 +118,7 @@ void port_input_call(const char* name, Fun&& fun){
   case 1:
     p = args[0].get<Port*>();
     if(!p){
-      port_type_check_failed(name, args[0]);
-      return;
+      throw port_type_check_failed(name, args[0]);
     }
     break;
   default:
@@ -176,8 +173,7 @@ void port_output_call(const char* name, Fun&& fun){
   case 2:
     p = args[1].get<Port*>();
     if(!p){
-      port_type_check_failed(name, args[1]);
-      return;
+      throw port_type_check_failed(name, args[1]);
     }
     break;
   default:
