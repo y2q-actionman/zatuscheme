@@ -58,7 +58,7 @@ void print(FILE* f, const Env& env){
           c_cast<void*>(&env), env.refcnt_, c_cast<void*>(env.next_));
   for(auto e : env.map_){
     fprintf(f, "\t%s\t = ", e.first->name().c_str());
-    print(f, e.second);
+    // print(f, e.second);
     fputc('\n', f);
   }
 }

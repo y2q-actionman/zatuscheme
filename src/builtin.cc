@@ -180,7 +180,7 @@ void load(Port* p){
     if(!vm.return_value[0]){
       fprintf(zs::err, "load error: failed at evaluating a form. skipped.\n");
       fprintf(zs::err, "\tform: \n");
-      print(zs::err, form);
+      // print(zs::err, form);
       continue;
     }
   }

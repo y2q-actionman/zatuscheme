@@ -77,32 +77,32 @@ void VM::leave_frame(){
 void print(FILE* f, const VM& v){
   fputs("--- [code] ---\n", f);
   for(auto i = v.code.rbegin(), e = v.code.rend(); i != e; ++i){
-    print(f, *i);
+    // print(f, *i);
     fputc('\n', f);
   }
 
   fputs("--- [stack] ---\n", f);
   for(auto i = v.stack.rbegin(), e = v.stack.rend(); i != e; ++i){
-    print(f, *i);
+    // print(f, *i);
     fputc('\n', f);
   }
 
   fputs("--- [return value] ---\n", f);
   for(auto i = v.return_value.begin(), e = v.return_value.end(); i != e; ++i){
     fprintf(f, "[%zd] ", v.return_value.size());
-    print(f, *i);
+    // print(f, *i);
     if(next(i) != e) fputs(", ", f);
   }
 
   if(!v.extent.empty()){
     fputs("--- [extent] ---\n", f);
     for(auto i = v.extent.begin(), e = v.extent.end(); i != e; ++i){
-      print(f, i->thunk);
+      // print(f, i->thunk);
       fputs(": ", f);
 
-      print(f, i->before);
+      // print(f, i->before);
       fputs(", ", f);
-      print(f, i->after);
+      // print(f, i->after);
       fputs("\n", f);
     }
   }

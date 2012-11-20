@@ -4,6 +4,7 @@
 #include <complex>
 #include <cstdio>
 #include <istream>
+#include <ostream>
 
 #include "util.hh"
 
@@ -65,7 +66,7 @@ Number to_inexact(const Number&);
 
 bool eqv(const Number&, const Number&);
 
-void print(FILE*, const Number&, int radix = 10);
+void print(std::ostream&, const Number&, int radix = 10);
 
 const char* stringify(Number::Type);
 

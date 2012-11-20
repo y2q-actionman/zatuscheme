@@ -102,30 +102,16 @@ void check(const string& input, T&& t){
 
 // printing test
 void check(const Number& n, int radix, const char* expect){
-  char* buf = NULL;
-  size_t buf_size = 0;
+  stringstream ss;
+  print(ss, n, radix);
 
-  FILE* tmp_f = open_memstream(&buf, &buf_size);
-  if(!tmp_f){
-    perror(__func__);
-    goto end;
-  }
+  auto evaled = ss.str();
 
-  print(tmp_f, n, radix);
-
-  if(fclose(tmp_f) != 0){
-    perror(__func__);
-    goto end;
-  }
-
-  if(strcmp(expect, buf) != 0){
+  if(strcmp(expect, evaled.c_str()) != 0){
     fprintf(stdout, "[failed] printed %s, expected %s\n",
-            buf, expect);
+            evaled.c_str(), expect);
     result = false;
   }
-  
- end:
-  free(buf);
 }
 
 int main(){

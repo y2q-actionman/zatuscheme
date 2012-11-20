@@ -452,7 +452,7 @@ bool eqv(const Number& n, const Number& m){
   }
 }
 
-static void print_binary(FILE* f, unsigned long l){
+static void print_binary(ostream& f, unsigned long l){
   std::string tmp;
 
   while(l > 0){
@@ -463,39 +463,39 @@ static void print_binary(FILE* f, unsigned long l){
 
   for(auto it = tmp.rbegin(), e = tmp.rend();
       it != e; ++it){
-    fputc(*it, f);
+    f.put(*it);
   }
 }
 
-void print(FILE* f, const Number& n, int radix){
+void print(ostream& f, const Number& n, int radix){
   switch(n.type()){
   case Number::Type::uninitialized:
-    fprintf(f, "(uninitialied number)");
+    f << "(uninitialied number)";
     break;
   case Number::Type::complex: {
-    auto&& z = n.get<Number::complex_type>();
-    fprintf(f, "%g%+gi", z.real(), z.imag());
+    auto z = n.get<Number::complex_type>();
+    f << z.real() << showpos << z.imag() << noshowpos;
   }
     break;
   case Number::Type::real:
-    fprintf(f, "%g", n.get<Number::real_type>());
+    f << n.get<Number::real_type>();
     break;
   case Number::Type::integer: {
     auto i = n.get<Number::integer_type>();
     if(i < 0){
-      fprintf(f, "-");
+      f.put('-');
     }
     auto u = std::abs(i);
 
     switch(radix){
     case 10:
-      fprintf(f, "%lu", u);
+      f << dec << u;
       break;
     case 8:
-      fprintf(f, "%lo", u);
+      f << oct << u << dec;
       break;
     case 16:
-      fprintf(f, "%lx", u);
+      f << hex << u << dec;
       break;
     case 2:
       print_binary(f, u);
