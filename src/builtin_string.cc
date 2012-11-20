@@ -18,10 +18,9 @@ using namespace Procedure;
 
 namespace {
 
-void string_type_check_failed(const char* func_name, Lisp_ptr p){
-  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
-          func_name, stringify(Ptr_tag::string), stringify(p.tag()));
-  vm.return_value[0] = {};
+zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
+  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+                       func_name, stringify(Ptr_tag::string), stringify(p.tag()));
 }
 
 void string_make(){
@@ -81,8 +80,7 @@ void string_length(){
   auto arg1 = pick_args_1();
   auto str = arg1.get<String*>();
   if(!str){
-    string_type_check_failed("string-length", arg1);
-    return;
+    throw string_type_check_failed("string-length", arg1);
   }
 
   vm.return_value[0] = {new Number(static_cast<Number::integer_type>(str->length()))};
@@ -92,8 +90,7 @@ void string_ref(){
   auto arg = pick_args<2>();
   auto str = arg[0].get<String*>();
   if(!str){
-    string_type_check_failed("string-ref", arg[0]);
-    return;
+    throw string_type_check_failed("string-ref", arg[0]);
   }
 
   auto num = arg[1].get<Number*>();
@@ -119,8 +116,7 @@ void string_set(){
   auto arg = pick_args<3>();
   auto str = arg[0].get<String*>();
   if(!str){
-    string_type_check_failed("string-set!", arg[0]);
-    return;
+    throw string_type_check_failed("string-set!", arg[0]);
   }
 
   auto num = arg[1].get<Number*>();
@@ -156,8 +152,7 @@ void string_compare(const char* name, Fun&& fun){
   for(auto i = 0; i < 2; ++i){
     str[i] = args[i].get<String*>();
     if(!str[i]){
-      string_type_check_failed(name, args[i]);
-      return;
+      throw string_type_check_failed(name, args[i]);
     }
   }
 
@@ -217,8 +212,7 @@ void string_substr(){
   auto arg = pick_args<3>();
   auto str = arg[0].get<String*>();
   if(!str){
-    string_type_check_failed("substring", arg[0]);
-    return;
+    throw string_type_check_failed("substring", arg[0]);
   }
 
   Number::integer_type ind[2];
@@ -256,8 +250,7 @@ void string_append(){
       i != e; ++i){
     auto str = i->get<String*>();
     if(!str){
-      string_type_check_failed("string-append", *i);
-      return;
+      throw string_type_check_failed("string-append", *i);
     }
 
     ret.append(*str);
@@ -270,8 +263,7 @@ void string_to_list(){
   auto arg1 = pick_args_1();
   auto str = arg1.get<String*>();
   if(!str){
-    string_type_check_failed("string->list", arg1);
-    return;
+    throw string_type_check_failed("string->list", arg1);
   }
 
   vm.return_value[0] = make_cons_list(str->begin(), str->end());
@@ -304,8 +296,7 @@ void string_copy(){
   auto arg1 = pick_args_1();
   auto str = arg1.get<String*>();
   if(!str){
-    string_type_check_failed("string-copy", arg1);
-    return;
+    throw string_type_check_failed("string-copy", arg1);
   }
 
   vm.return_value[0] = {new String(*str)};
@@ -315,8 +306,7 @@ void string_fill(){
   auto arg = pick_args<2>();
   auto str = arg[0].get<String*>();
   if(!str){
-    string_type_check_failed("string-fill!", arg[0]);
-    return;
+    throw string_type_check_failed("string-fill!", arg[0]);
   }
 
   auto ch = arg[1].get<char>();
