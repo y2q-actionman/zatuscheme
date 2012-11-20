@@ -16,10 +16,9 @@ using namespace Procedure;
 
 namespace {
 
-void cons_type_check_failed(const char* func_name, Lisp_ptr p){
-  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
-          func_name, stringify(Ptr_tag::cons), stringify(p.tag()));
-  vm.return_value[0] = {};
+zs_error cons_type_check_failed(const char* func_name, Lisp_ptr p){
+  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+                       func_name, stringify(Ptr_tag::cons), stringify(p.tag()));
 }
 
 void type_check_pair(){
@@ -38,8 +37,7 @@ inline
 void cons_carcdr(const char* name, Fun&& fun){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
-    cons_type_check_failed(name, arg);
-    return;
+    throw cons_type_check_failed(name, arg);
   }
 
   auto c = arg.get<Cons*>();
@@ -64,8 +62,7 @@ inline
 void cons_set_carcdr(const char* name, Fun&& fun){
   auto args = pick_args<2>();
   if(args[0].tag() != Ptr_tag::cons){
-    cons_type_check_failed(name, args[0]);
-    return;
+    throw cons_type_check_failed(name, args[0]);
   }
   
   auto c = args[0].get<Cons*>();
@@ -101,8 +98,7 @@ void cons_nullp(){
 void cons_listp(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
-    cons_type_check_failed("list?", arg);
-    return;
+    throw cons_type_check_failed("list?", arg);
   }
 
   auto found_cons = unordered_set<Cons*>();
@@ -134,8 +130,7 @@ void cons_list_star(){
 void cons_length(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
-    cons_type_check_failed("list?", arg);
-    return;
+    throw cons_type_check_failed("list?", arg);
   }
 
   Number::integer_type length = 0;
@@ -158,8 +153,7 @@ void cons_append(){
 
   for(auto i = 0u; i < args.size() - 1; ++i){
     if(args[i].tag() != Ptr_tag::cons){
-      cons_type_check_failed("append", args[i]);
-      return;
+      throw cons_type_check_failed("append", args[i]);
     }
 
     do_list(args[i],
@@ -177,8 +171,7 @@ void cons_append(){
 void cons_reverse(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
-    cons_type_check_failed("reverse", arg);
-    return;
+    throw cons_type_check_failed("reverse", arg);
   }
 
   Lisp_ptr ret = Cons::NIL;
@@ -196,8 +189,7 @@ void cons_reverse(){
 Cons* cons_list_tail_base(const char* name){
   auto args = pick_args<2>();
   if(args[0].tag() != Ptr_tag::cons){
-    cons_type_check_failed(name, args[0]);
-    return nullptr;
+    throw cons_type_check_failed(name, args[0]);
   }
   
   auto num = args[1].get<Number*>();
