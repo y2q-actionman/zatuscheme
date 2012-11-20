@@ -37,8 +37,7 @@ void builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
   vm.return_value[0] = {};
 }
 
-void builtin_variadic_argcount_failed(const char* name, int argc){
-  fprintf(zs::err, "native func: %s: %d or more args.\n", name, argc+1);
-  vm.return_value[0] = {};
+zs_error builtin_variadic_argcount_failed(const char* name, int argc){
+  return make_zs_error( "native func: %s: %d or more args.\n", name, argc+1);
 }
 

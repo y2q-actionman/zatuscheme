@@ -42,8 +42,7 @@ void vector_make(){
     fill = args[1];
     break;
   default:
-    builtin_variadic_argcount_failed("make-vector", 2);
-    return;
+    throw builtin_variadic_argcount_failed("make-vector", 2);
   }
 
   vm.return_value[0] = {new Vector(count, fill)};

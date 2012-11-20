@@ -124,8 +124,7 @@ void port_input_call(const char* name, Fun&& fun){
     }
     break;
   default:
-    builtin_variadic_argcount_failed(name, 1);
-    return;
+    throw builtin_variadic_argcount_failed(name, 1);
   }
 
   vm.return_value[0] = Lisp_ptr{fun(p)};
@@ -181,8 +180,7 @@ void port_output_call(const char* name, Fun&& fun){
     }
     break;
   default:
-    builtin_variadic_argcount_failed(name, 2);
-    return;
+    throw builtin_variadic_argcount_failed(name, 2);
   }
 
   vm.return_value[0] = Lisp_ptr{fun(args[0], p)};

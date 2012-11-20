@@ -5,6 +5,7 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "procedure.hh"
+#include "util.hh"
 
 template<bool dot_list, typename StackT>
 Lisp_ptr stack_to_list(StackT&);
@@ -48,7 +49,7 @@ private:
 // builtin type checking
 void builtin_type_check_failed(const char*, Ptr_tag, Lisp_ptr);
 
-void builtin_variadic_argcount_failed(const char*, int);
+zs_error builtin_variadic_argcount_failed(const char*, int);
 
 
 // builtin func struct

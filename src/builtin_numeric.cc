@@ -831,8 +831,7 @@ void number_atan(){
   }
 
   default:
-    builtin_variadic_argcount_failed("atan", 2);
-    return;
+    throw builtin_variadic_argcount_failed("atan", 2);
   }
 }
 
@@ -1016,8 +1015,7 @@ void number_from_string(){
     break;
   }
   default:
-    builtin_variadic_argcount_failed("string->number", 2);
-    return;
+    throw builtin_variadic_argcount_failed("string->number", 2);
   }
 
   Port p{c_cast<void*>(str->c_str()), str->size()};
@@ -1060,8 +1058,7 @@ void number_to_string(){
     break;
   }
   default:
-    builtin_variadic_argcount_failed("number->string", 2);
-    return;
+    throw builtin_variadic_argcount_failed("number->string", 2);
   }
 
   Port p{Port::open_output_memstream::t};

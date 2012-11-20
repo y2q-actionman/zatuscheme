@@ -54,8 +54,7 @@ void string_make(){
     break;
   }
   default:
-    builtin_variadic_argcount_failed("make-string", 2);
-    return;
+    throw builtin_variadic_argcount_failed("make-string", 2);
   }
 
   vm.return_value[0] = {new String(char_count, ch)};
