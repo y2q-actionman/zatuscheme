@@ -25,10 +25,9 @@ using namespace Procedure;
 
 namespace {
 
-void number_type_check_failed(const char* func_name, Lisp_ptr p){
-  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
-          func_name, stringify(Ptr_tag::number), stringify(p.tag()));
-  vm.return_value[0] = {};
+zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
+  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+                       func_name, stringify(Ptr_tag::number), stringify(p.tag()));
 }
 
 template<typename Fun>
@@ -116,15 +115,13 @@ inline void number_compare(const char* name, Fun&& fun){
 
   auto n1 = i1->get<Number*>();
   if(!n1 || n1->type() < Number::Type::integer){
-    number_type_check_failed(name, *i1);
-    return;
+    throw number_type_check_failed(name, *i1);
   }
                               
   for(auto i2 = next(i1); i2 != e; i1 = i2, ++i2){
     auto n2 = i2->get<Number*>();
     if(!n2 || n2->type() < Number::Type::integer){
-      number_type_check_failed(name, *i2);
-      return;
+      throw number_type_check_failed(name, *i2);
     }
 
     if(!fun(n1, n2)){
@@ -248,11 +245,10 @@ void number_accumulate(const char* name, Number&& init, Fun&& fun,
       i != e; ++i){
     auto n = i->get<Number*>();
     if(!n){
-      number_type_check_failed(name, *i);
-      return;
+      throw number_type_check_failed(name, *i);
     }
 
-    if(!fun(init, *n)){
+    if(!fun(init, *n)){ // assumed 'uncaught_exception' context
       vm.return_value[0] = {};
       return;
     }
@@ -389,8 +385,7 @@ void number_minus(){
 
   auto n = args[0].get<Number*>();
   if(!n){
-    number_type_check_failed("-", args[0]);
-    return;
+    throw number_type_check_failed("-", args[0]);
   }
 
   if(args.size() == 1){
@@ -430,8 +425,7 @@ void number_divide(){
 
   auto n = args[0].get<Number*>();
   if(!n){
-    number_type_check_failed("/", args[0]);
-    return;
+    throw number_type_check_failed("/", args[0]);
   }
 
   if(args.size() == 1){
@@ -466,8 +460,7 @@ void number_abs(){
 
   auto n = arg1.get<Number*>();
   if(!n){
-    number_type_check_failed("abs", arg1);
-    return;
+    throw number_type_check_failed("abs", arg1);
   }
 
   switch(n->type()){
@@ -509,8 +502,7 @@ void number_divop(const char* name, Fun&& fun){
   for(auto i = 0; i < 2; ++i){
     n[i] = args[i].get<Number*>();
     if(!n[i]){
-      number_type_check_failed(name, args[i]);
-      return;
+      throw number_type_check_failed(name, args[i]);
     }
     if(n[i]->type() != Number::Type::integer){
       throw make_zs_error("native func: %s: not integer type (%s)",
@@ -598,8 +590,7 @@ void number_numerator(){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
-    number_type_check_failed("numerator", arg);
-    return;
+    throw number_type_check_failed("numerator", arg);
   }
 
   fprintf(zs::err, "native func: 'numerator' is not implemented.\n");
@@ -610,8 +601,7 @@ void number_denominator(){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
-    number_type_check_failed("denominator", arg);
-    return;
+    throw number_type_check_failed("denominator", arg);
   }
 
   fprintf(zs::err, "native func: 'denominator' is not implemented.\n");
@@ -626,8 +616,7 @@ void number_rounding(const char* name, Fun&& fun){
 
   auto n = arg1.get<Number*>();
   if(!n){
-    number_type_check_failed(name, arg1);
-    return;
+    throw number_type_check_failed(name, arg1);
   }
 
   switch(n->type()){
@@ -671,8 +660,7 @@ void number_rationalize(){
   for(auto i = 0; i < 2; ++i){
     n[i] = args[i].get<Number*>();
     if(!n[i]){
-      number_type_check_failed("rationalize", args[i]);
-      return;
+      throw number_type_check_failed("rationalize", args[i]);
     }
   }
   
@@ -688,8 +676,7 @@ void number_unary_op(const char* name, Fun&& fun){
 
   auto n = arg1.get<Number*>();
   if(!n){
-    number_type_check_failed(name, arg1);
-    return;
+    throw number_type_check_failed(name, arg1);
   }
 
   switch(n->type()){
@@ -789,8 +776,7 @@ void number_atan(){
 
   auto n1 = args[0].get<Number*>();
   if(!n1){
-    number_type_check_failed("atan", args[0]);
-    return;
+    throw number_type_check_failed("atan", args[0]);
   }
 
   switch(args.size()){
@@ -813,8 +799,7 @@ void number_atan(){
   case 2: {// std::atan2()
     auto n2 = args[1].get<Number*>();
     if(!n2){
-      number_type_check_failed("atan", args[1]);
-      return;
+      throw number_type_check_failed("atan", args[1]);
     }
 
     switch(n2->type()){
@@ -856,8 +841,7 @@ void number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
   for(auto i = 0; i < 2; ++i){
     n[i] = args[i].get<Number*>();
     if(!n[i]){
-      number_type_check_failed(name, args[i]);
-      return;
+      throw number_type_check_failed(name, args[i]);
     }
   }
   
@@ -921,8 +905,7 @@ void number_unary_op_complex(const char* name, Fun&& fun){
 
   auto n = arg1.get<Number*>();
   if(!n){
-    number_type_check_failed(name, arg1);
-    return;
+    throw number_type_check_failed(name, arg1);
   }
 
   switch(n->type()){
@@ -971,8 +954,7 @@ void number_i_e(const char* name, Fun&& fun){
 
   auto n = arg1.get<Number*>();
   if(!n){
-    number_type_check_failed(name, arg1);
-    return;
+    throw number_type_check_failed(name, arg1);
   }
 
   vm.return_value[0] = {new Number(fun(*n))};
