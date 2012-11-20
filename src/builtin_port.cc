@@ -18,7 +18,9 @@ namespace {
 #define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
 
 void port_type_check_failed(const char* func_name, Lisp_ptr p){
-  builtin_type_check_failed(func_name, Ptr_tag::character, p);
+  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
+          func_name, stringify(Ptr_tag::character), stringify(p.tag()));
+  vm.return_value[0] = {};
 }
 
 template<typename Fun>
@@ -46,8 +48,7 @@ void port_open_file(const char* name, const char* mode){
   auto arg = pick_args_1();
   auto str = arg.get<String*>();
   if(!str){
-    builtin_type_check_failed(name, Ptr_tag::string, arg);
-    return;
+    throw builtin_type_check_failed(name, Ptr_tag::string, arg);
   }
 
   auto p = new Port(str->c_str(), mode);
@@ -206,8 +207,7 @@ void port_write_char(){
   port_output_call("write-char",
                    [](Lisp_ptr c, Port* p) -> Lisp_ptr{
                      if(c.tag() != Ptr_tag::character){
-                       builtin_type_check_failed("write-char", Ptr_tag::character, c);
-                       return {};
+                       throw builtin_type_check_failed("write-char", Ptr_tag::character, c);
                      }
 
                      fputc(c.get<char>(), p->stream());

@@ -19,7 +19,9 @@ using namespace Procedure;
 namespace {
 
 void string_type_check_failed(const char* func_name, Lisp_ptr p){
-  builtin_type_check_failed(func_name, Ptr_tag::string, p);
+  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
+          func_name, stringify(Ptr_tag::string), stringify(p.tag()));
+  vm.return_value[0] = {};
 }
 
 void string_make(){
@@ -28,8 +30,7 @@ void string_make(){
 
   auto num = args[0].get<Number*>();
   if(!num){
-    builtin_type_check_failed("make-string", Ptr_tag::number, args[0]);
-    return;
+    throw builtin_type_check_failed("make-string", Ptr_tag::number, args[0]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -47,8 +48,7 @@ void string_make(){
   case 2: {
     auto c = args[1].get<char>();
     if(!c){
-      builtin_type_check_failed("make-string", Ptr_tag::character, args[1]);
-      return;
+      throw builtin_type_check_failed("make-string", Ptr_tag::character, args[1]);
     }
     ch = c;
     break;
@@ -68,8 +68,7 @@ void string_string(){
   for(auto i = args.begin(), e = args.end(); i != e; ++i){
     auto c = i->get<char>();
     if(!c){
-      builtin_type_check_failed("string", Ptr_tag::character, *i);
-      return;
+      throw builtin_type_check_failed("string", Ptr_tag::character, *i);
     }
 
     ret.push_back(c);
@@ -99,8 +98,7 @@ void string_ref(){
 
   auto num = arg[1].get<Number*>();
   if(!num){
-    builtin_type_check_failed("string-ref", Ptr_tag::number, arg[1]);
-    return;
+    throw builtin_type_check_failed("string-ref", Ptr_tag::number, arg[1]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -127,8 +125,7 @@ void string_set(){
 
   auto num = arg[1].get<Number*>();
   if(!num){
-    builtin_type_check_failed("string-set!", Ptr_tag::number, arg[1]);
-    return;
+    throw builtin_type_check_failed("string-set!", Ptr_tag::number, arg[1]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -144,8 +141,7 @@ void string_set(){
 
   auto ch = arg[2].get<char>();
   if(!ch){
-    builtin_type_check_failed("string-set!", Ptr_tag::character, arg[2]);
-    return;
+    throw builtin_type_check_failed("string-set!", Ptr_tag::character, arg[2]);
   }
 
   (*str)[ind] = ch;
@@ -230,8 +226,7 @@ void string_substr(){
   for(int i = 1; i < 3; ++i){
     auto n = arg[i].get<Number*>();
     if(!n){
-      builtin_type_check_failed("substring", Ptr_tag::number, arg[i]);
-      return;
+      throw builtin_type_check_failed("substring", Ptr_tag::number, arg[i]);
     }
 
     if(n->type() != Number::Type::integer){
@@ -285,20 +280,16 @@ void string_to_list(){
 void string_from_list(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
-    builtin_type_check_failed("list->string", Ptr_tag::cons, arg);
-    return;
+    throw builtin_type_check_failed("list->string", Ptr_tag::cons, arg);
   }
 
-  bool not_char_found = false;
   String ret;
   
   do_list(arg,
           [&](Cons* c) -> bool{
             auto ch = c->car().get<char>();
             if(!ch){
-              builtin_type_check_failed("list->string", Ptr_tag::character, c->car());
-              not_char_found = true;
-              return false;
+              throw builtin_type_check_failed("list->string", Ptr_tag::character, c->car());
             }
               
             ret.push_back(ch);
@@ -306,11 +297,7 @@ void string_from_list(){
           },
           [](Lisp_ptr){});
 
-  if(not_char_found){
-    vm.return_value[0] = {};
-  }else{
-    vm.return_value[0] = {new String(std::move(ret))};
-  }
+  vm.return_value[0] = {new String(std::move(ret))};
 }
 
 void string_copy(){
@@ -334,8 +321,7 @@ void string_fill(){
 
   auto ch = arg[1].get<char>();
   if(!ch){
-    builtin_type_check_failed("string-fill!", Ptr_tag::character, arg[1]);
-    return;
+    throw builtin_type_check_failed("string-fill!", Ptr_tag::character, arg[1]);
   }
 
   std::fill(str->begin(), str->end(), ch);

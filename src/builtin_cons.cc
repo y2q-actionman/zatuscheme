@@ -17,7 +17,9 @@ using namespace Procedure;
 namespace {
 
 void cons_type_check_failed(const char* func_name, Lisp_ptr p){
-  builtin_type_check_failed(func_name, Ptr_tag::cons, p);
+  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
+          func_name, stringify(Ptr_tag::cons), stringify(p.tag()));
+  vm.return_value[0] = {};
 }
 
 void type_check_pair(){

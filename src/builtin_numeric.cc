@@ -26,7 +26,9 @@ using namespace Procedure;
 namespace {
 
 void number_type_check_failed(const char* func_name, Lisp_ptr p){
-  builtin_type_check_failed(func_name, Ptr_tag::number, p);
+  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
+          func_name, stringify(Ptr_tag::number), stringify(p.tag()));
+  vm.return_value[0] = {};
 }
 
 template<typename Fun>

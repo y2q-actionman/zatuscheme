@@ -40,8 +40,7 @@ void env_pick_2(const char* name){
   auto p = pick_args_1();
   auto num = p.get<Number*>();
   if(!num){
-    builtin_type_check_failed(name, Ptr_tag::number, p);
-    return;
+    throw builtin_type_check_failed(name, Ptr_tag::number, p);
   }
 
   if(num->type() != Number::Type::integer){
@@ -75,8 +74,7 @@ void eval_func(){
   auto args = pick_args<2>();
   auto env = args[1].get<Env*>();
   if(!env){
-    builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
-    return;
+    throw builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
   }
 
   vm.enter_frame(env);
@@ -89,8 +87,7 @@ void load_func(){
   auto arg = pick_args_1();
   auto str = arg.get<String*>();
   if(!str){
-    builtin_type_check_failed("load", Ptr_tag::string, arg);
-    return;
+    throw builtin_type_check_failed("load", Ptr_tag::string, arg);
   }
 
   Port p{str->c_str(), "r"};

@@ -13,7 +13,9 @@ using namespace Procedure;
 namespace {
 
 void vector_type_check_failed(const char* func_name, Lisp_ptr p){
-  builtin_type_check_failed(func_name, Ptr_tag::vector, p);
+  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
+          func_name, stringify(Ptr_tag::vector), stringify(p.tag()));
+  vm.return_value[0] = {};
 }
 
 void vector_make(){
@@ -22,8 +24,7 @@ void vector_make(){
 
   auto num = args[0].get<Number*>();
   if(!num){
-    builtin_type_check_failed("make-vector", Ptr_tag::number, args[0]);
-    return;
+    throw builtin_type_check_failed("make-vector", Ptr_tag::number, args[0]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -75,8 +76,7 @@ void vector_ref(){
 
   auto num = arg[1].get<Number*>();
   if(!num){
-    builtin_type_check_failed("vector-ref", Ptr_tag::number, arg[1]);
-    return;
+    throw builtin_type_check_failed("vector-ref", Ptr_tag::number, arg[1]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -103,8 +103,7 @@ void vector_set(){
 
   auto num = arg[1].get<Number*>();
   if(!num){
-    builtin_type_check_failed("vector-set!", Ptr_tag::number, arg[1]);
-    return;
+    throw builtin_type_check_failed("vector-set!", Ptr_tag::number, arg[1]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -136,8 +135,7 @@ void vector_to_list(){
 void vector_from_list(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
-    builtin_type_check_failed("list->vector", Ptr_tag::cons, arg);
-    return;
+    throw builtin_type_check_failed("list->vector", Ptr_tag::cons, arg);
   }
 
   Vector ret;

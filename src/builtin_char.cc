@@ -15,7 +15,9 @@ using namespace Procedure;
 namespace {
 
 void char_type_check_failed(const char* func_name, Lisp_ptr p){
-  builtin_type_check_failed(func_name, Ptr_tag::character, p);
+  fprintf(zs::err, "native func: %s: arg is not %s! (%s)\n",
+          func_name, stringify(Ptr_tag::character), stringify(p.tag()));
+  vm.return_value[0] = {};
 }
 
 template<typename Fun>
@@ -144,8 +146,7 @@ void char_from_int(){
 
   auto n = arg1.get<Number*>();
   if(!n){
-    builtin_type_check_failed("integer->char", Ptr_tag::number, arg1);
-    return;
+    throw builtin_type_check_failed("integer->char", Ptr_tag::number, arg1);
   }
   if(n->type() != Number::Type::integer){
     throw make_zs_error("native func: integer->char: passed arg is not exact integer! (%s)",
