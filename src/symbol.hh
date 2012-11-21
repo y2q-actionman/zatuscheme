@@ -3,11 +3,14 @@
 
 #include <unordered_map>
 #include <string>
+#include <ostream>
 
 class Symbol;
 
 // SymTable declarations.
 typedef std::unordered_map<std::string, Symbol> SymTable;
+
+std::ostream& operator<<(std::ostream&, const SymTable&);
 
 // Symbol declarations.
 class Symbol{
@@ -38,8 +41,6 @@ private:
   const std::string* name_;
   // add pointer to symbol table?
 };
-
-void print(FILE*, const SymTable&);
 
 #include "symbol.i.hh"
 

@@ -5,6 +5,7 @@
 #include <stack>
 #include <deque>
 #include <memory>
+#include <ostream>
 
 #include "lisp_ptr.hh"
 #include "cons.hh"
@@ -38,7 +39,7 @@ public:
 
   SymTable& symtable(){ return *symtable_; }
 
-  friend void print(FILE*, const VM&);
+  friend std::ostream& operator<<(std::ostream&, const VM&);
 
 public:
   std::deque<Lisp_ptr> code;

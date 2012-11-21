@@ -2,6 +2,7 @@
 #define ENV_HH
 
 #include <unordered_map>
+#include <ostream>
 
 #include "lisp_ptr.hh"
 
@@ -27,7 +28,7 @@ public:
   inline friend int add_ref(Env*);
   inline friend int release(Env*);
 
-  friend void print(FILE*, const Env&);
+  friend std::ostream& operator<<(std::ostream&, const Env&);
 
 private:
   map_type map_;

@@ -1,5 +1,6 @@
 #include <exception>
 #include <cstdio>
+#include <iostream>
 
 #include "zs.hh"
 
@@ -7,15 +8,14 @@ using namespace std;
 
 static void term_handle(){
   std::set_terminate(nullptr);
-  fprintf(stderr, "uncaught exception! aborting..\n\n");
 
-  print(stderr, vm);
-  fputc('\n', stderr);
+  cerr << "uncaught exception! aborting..\n\n";
+  cerr << vm << endl;
 
   try{
     rethrow_exception(current_exception());
   }catch(std::exception& e){
-    fprintf(stderr, "what: %s\n", e.what());
+    cerr << "what: " << e.what() << endl;
   }
 }
 

@@ -53,12 +53,13 @@ Env* Env::push(){
   return new Env{this};
 }
 
-void print(FILE* f, const Env& env){
-  fprintf(f, "Env %p (refcnt=%d, next=%p)\n",
-          c_cast<void*>(&env), env.refcnt_, c_cast<void*>(env.next_));
+std::ostream& operator<<(std::ostream& f, const Env& env){
+  f << "Env " << c_cast<void*>(&env)
+    << " (refcnt=" << env.refcnt_ << ", next=" << c_cast<void*>(env.next_) << ")\n";
   for(auto e : env.map_){
-    fprintf(f, "\t%s\t = ", e.first->name().c_str());
-    // print(f, e.second);
-    fputc('\n', f);
+    f << '\t' << e.first->name() << "\t = ";
+    print(f, e.second);
+    f << '\n';
   }
+  return f;
 }

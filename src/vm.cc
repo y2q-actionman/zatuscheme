@@ -74,46 +74,48 @@ void VM::leave_frame(){
   frames_.pop_back();
 }
 
-void print(FILE* f, const VM& v){
-  fputs("--- [code] ---\n", f);
+std::ostream& operator<<(std::ostream& f, const VM& v){
+  f << "--- [code] ---\n";
   for(auto i = v.code.rbegin(), e = v.code.rend(); i != e; ++i){
-    // print(f, *i);
-    fputc('\n', f);
+    print(f, *i);
+    f << '\n';
   }
 
-  fputs("--- [stack] ---\n", f);
+  f << "--- [stack] ---\n";
   for(auto i = v.stack.rbegin(), e = v.stack.rend(); i != e; ++i){
-    // print(f, *i);
-    fputc('\n', f);
+    print(f, *i);
+    f << '\n';
   }
 
-  fputs("--- [return value] ---\n", f);
+  f << "--- [return value] ---\n";
   for(auto i = v.return_value.begin(), e = v.return_value.end(); i != e; ++i){
-    fprintf(f, "[%zd] ", v.return_value.size());
-    // print(f, *i);
-    if(next(i) != e) fputs(", ", f);
+    f << '[' << v.return_value.size() << "[ ";
+    print(f, *i);
+    if(next(i) != e) f << ", ";
   }
 
   if(!v.extent.empty()){
-    fputs("--- [extent] ---\n", f);
+    f << "--- [extent] ---\n";
     for(auto i = v.extent.begin(), e = v.extent.end(); i != e; ++i){
-      // print(f, i->thunk);
-      fputs(": ", f);
+      print(f, i->thunk);
+      f << ": ";
 
-      // print(f, i->before);
-      fputs(", ", f);
-      // print(f, i->after);
-      fputs("\n", f);
+      print(f, i->before);
+      f << ", ";
+      print(f, i->after);
+      f << "\n";
     }
   }
 
-  // fputs("--- [env stack] ---\n", f);
-  // for(auto i = v.frames_.rbegin(), e = v.frames_.rend(); i != e; ++i){
-  //   print(f, **i);
-  // }
+  f << "--- [env stack] ---\n";
+  for(auto i = v.frames_.rbegin(), e = v.frames_.rend(); i != e; ++i){
+    f << **i;
+  }
 
-  // fputs("--- [symtable] ---\n", f);
-  // print(f, *v.symtable_);
+  f << "--- [symtable] ---\n";
+  f << *v.symtable_;
 
-  fputs("\n\n", f);
+  f << "\n\n";
+
+  return f;
 }
