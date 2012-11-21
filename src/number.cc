@@ -1,6 +1,8 @@
 #include <utility>
 #include <cstdlib>
 #include <cstring>
+#include <iterator>
+#include <ostream>
 
 #include "number.hh"
 #include "util.hh"
@@ -461,10 +463,7 @@ static void print_binary(ostream& f, unsigned long l){
     l /= 2;
   }
 
-  for(auto it = tmp.rbegin(), e = tmp.rend();
-      it != e; ++it){
-    f.put(*it);
-  }
+  std::copy(tmp.rbegin(), tmp.rend(), ostreambuf_iterator<char>(f));
 }
 
 void print(ostream& f, const Number& n, int radix){
@@ -482,26 +481,32 @@ void print(ostream& f, const Number& n, int radix){
     break;
   case Number::Type::integer: {
     auto i = n.get<Number::integer_type>();
-    if(i < 0){
-      f.put('-');
-    }
-    auto u = std::abs(i);
 
-    switch(radix){
-    case 10:
-      f << dec << u;
-      break;
-    case 8:
-      f << oct << u << dec;
-      break;
-    case 16:
-      f << hex << u << dec;
-      break;
-    case 2:
-      print_binary(f, u);
-      break;
-    default:
-      UNEXP_DEFAULT();
+    if(radix == 10){
+      f << i;
+    }else{
+      auto is_minus = (i < 0);
+      auto u = std::abs(i);
+
+      switch(radix){
+      case 8:
+        f << "#o";
+        if(is_minus) f << '-';
+        f << oct << u << dec;
+        break;
+      case 16:
+        f << "#x";
+        if(is_minus) f << '-';
+        f << hex << u << dec;
+        break;
+      case 2:
+        f << "#b";
+        if(is_minus) f << '-';
+        print_binary(f, u);
+        break;
+      default:
+        UNEXP_DEFAULT();
+      }
     }
     break;
   }

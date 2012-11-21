@@ -127,8 +127,11 @@ int main(){
   check("1##", 100l);
 
   check("#b10", 2l);
+  check("#b-10", -2l);
   check("#o10", 8l);
+  check("#o-10", -8l);
   check("#x10", 16l);
+  check("#x-10", -16l);
   check("#x9abcdef", 0x9abcdefl);
 
   // float
@@ -170,14 +173,14 @@ int main(){
 
   // printing test
   check(Number(100l), 10, "100");
-  check(Number(100l), 8, "144");
-  check(Number(100l), 16, "64");
-  check(Number(100l), 2, "1100100");
+  check(Number(100l), 8, "#o144");
+  check(Number(100l), 16, "#x64");
+  check(Number(100l), 2, "#b1100100");
 
   check(Number(-100l), 10, "-100");
-  check(Number(-100l), 8, "-144");
-  check(Number(-100l), 16, "-64");
-  check(Number(-100l), 2, "-1100100");
+  check(Number(-100l), 8, "#o-144");
+  check(Number(-100l), 16, "#x-64");
+  check(Number(-100l), 2, "#b-1100100");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
