@@ -13,6 +13,14 @@ autom4te.cache
 
 stamp-h1
 
+# autotools distribute files
+*.in
+aclocal.m4
+configure
+depcomp
+install-sh
+missing
+
 # binaries
 *.a
 *_test
