@@ -27,7 +27,7 @@ std::ostream& operator<<(std::ostream& o, const Procedure::ProcInfo& info){
   return (o << "[required_args=" << info.required_args << ", variadic=" << info.variadic << "]");
 }
 
-std::ostream& operator<<(std::ostream& o, Variadic v){
+std::ostream& operator<<(std::ostream& o, Procedure::Variadic v){
   return (o << boolalpha << static_cast<bool>(v) << noboolalpha);
 }
 

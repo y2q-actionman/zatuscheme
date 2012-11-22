@@ -11,7 +11,7 @@ std::ostream& operator<<(std::ostream&, Number::Type);
 std::ostream& operator<<(std::ostream&, const Number&);
 
 std::ostream& operator<<(std::ostream&, const Procedure::ProcInfo&);
-std::ostream& operator<<(std::ostream&, Variadic);
+std::ostream& operator<<(std::ostream&, Procedure::Variadic);
 
 std::ostream& operator<<(std::ostream&, Token::Type);
 std::ostream& operator<<(std::ostream&, Token::Notation);
