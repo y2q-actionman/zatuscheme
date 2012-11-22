@@ -5,11 +5,6 @@
 #error "Please include via parent file"
 #endif
 
-#include <cstring>
-#include <cstdlib>
-#include <memory>
-#include <ostream>
-
 #include "util.hh"
 #include "lisp_ptr.hh"
 #include "printer.hh"
@@ -22,7 +17,7 @@ bool test_on_print(Lisp_ptr input, const char* expect, Fun&& callback){
 
   auto evaled = ss.str();
 
-  if(strcmp(expect, evaled.c_str()) != 0){
+  if(expect != evaled){
     callback(evaled.c_str());
     return false;
   }

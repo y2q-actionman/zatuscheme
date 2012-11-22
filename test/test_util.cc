@@ -1,16 +1,14 @@
 #include <vector>
 #include <sstream>
+#include <iostream>
 #include "test_util.hh"
 #include "reader.hh"
 #include "eval.hh"
-#include "builtin.hh"
-#include "port.hh"
 
 using namespace std;
 
 Lisp_ptr read_from_string(const char* s){
   stringstream ss(s);
-
   return read(ss);
 }
 
@@ -18,6 +16,7 @@ Lisp_ptr eval_text(const char* s){
   auto exp = read_from_string(s);
   if(!exp){
     fprintf(zs::err, "[failed] read error on %s\n", s);
+    // cerr << "[failed] read error on " << s << "\n";
     return {};
   }
 
@@ -26,6 +25,7 @@ Lisp_ptr eval_text(const char* s){
   auto ret = vm.return_value[0];
   if(!ret){
     fprintf(zs::err, "[failed] eval error on %s\n", s);
+    // cerr << "[failed] eval error on " << s << "\n";
     return {};
   }
 
@@ -39,6 +39,8 @@ bool read_eval_print_test(const char* input, const char* expect){
   const auto fun = [input, expect](const char* s){
     fprintf(zs::err, "[failed] expected %s, but got %s (from: %s)\n",
             expect, s, input);
+    // cerr << "[failed] expected " << expect
+    //      << ", but got " << s << " (from: " << input << ")\n";
   };
 
   return test_on_print(e, expect, fun);
