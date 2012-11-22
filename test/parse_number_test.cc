@@ -1,97 +1,57 @@
 #include <string>
-#include <utility>
 #include <cstdlib>
-#include <memory>
-#include <cstdio>
 #include <sstream>
 
 #include "number.hh"
 #include "describe.hh"
 #include "test_util.hh"
 
-#define PRINT_BUFSIZE 100
-
 using namespace std;
 
 static bool result;
 
-template<typename Fun>
+template<typename T>
 void fail_message(Number::Type t, istream& i, 
-                  const Number& n, const Fun& callback){
+                  const Number& n, T expect){
   result = false;
 
-  // extract input from stream
   string buf;
   std::getline(i, buf);
 
-  fprintf(zs::err, "[failed] input='%s', expect type='%s'",
-          buf.c_str(), stringify(t));
-
-  callback();
-
-  fputs("\n\tgotten: ", stdout);
+  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t) << "'";
+  cerr << ", expected = '" << expect << "'";
+  cerr << "\n\tgotten: ";
   describe(stdout, n);
-  fputc('\n', stdout);
+  cerr << '\n';
 }
-
-template<Number::Type type, typename Fun>
-void check_generic(istream& i, const Fun& f){
-  const Number n = parse_number(i);
-
-  if(n.type() != type){
-    fail_message(type, i, n, f);
-    return;
-  }
-}
-
-template<Number::Type type, typename Fun, 
-         typename ex_type = typename to_type<Number::Type, type>::type>
-void check_generic(istream& i,
-                   const ex_type& expect,
-                   const Fun& f){
-  const Number n = parse_number(i);
-
-  if(n.type() != type || n.get<ex_type>() != expect){
-    fail_message(type, i, n, f);
-    return;
-  }
-}
-
 
 void check(istream& i){
+  static constexpr auto type = Number::Type::uninitialized;
+
   with_expect_error([&]() -> void {
-      check_generic<Number::Type::uninitialized>(i, [](){});
+      const Number n = parse_number(i);
+      if(n.type() != type){
+        fail_message(type, i, n, "(uninitialized)");
+        return;
+      }
     });
 }
+
+template<typename T>
+void check(istream& i, const T& expect){
+  static constexpr auto type = to_tag<Number::Type, T>();
+
+  const Number n = parse_number(i);
+  if(n.type() != type || n.get<T>() != expect){
+    fail_message(type, i, n, expect);
+    return;
+  }
+}
+
 
 void check(const string& input){
   stringstream ss(input);
   check(ss);
-}
-
-void check(istream& i, long expect){
-  check_generic<Number::Type::integer>
-    (i, expect,
-     [=](){
-      fprintf(stdout, ", expected int='%ld'", expect);
-    });
-}
-
-void check(istream& i, double expect){
-  check_generic<Number::Type::real>
-    (i, expect,
-     [=](){
-      fprintf(stdout, ", expected real='%f'", expect);
-    });
-}
-
-void check(istream& i, const Number::complex_type& z){
-  check_generic<Number::Type::complex>
-    (i, z,
-     [=](){
-      fprintf(stdout, ", expected complex='(%f %f)'",
-              z.real(), z.imag());
-    });
 }
 
 template<typename T>
@@ -107,9 +67,8 @@ void check(const Number& n, int radix, const char* expect){
 
   auto evaled = ss.str();
 
-  if(strcmp(expect, evaled.c_str()) != 0){
-    fprintf(stdout, "[failed] printed %s, expected %s\n",
-            evaled.c_str(), expect);
+  if(evaled != expect){
+    cerr << "[failed] printed " << evaled << ", expected " << expect << "\n";
     result = false;
   }
 }
