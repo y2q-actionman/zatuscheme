@@ -5,6 +5,7 @@
 #include <memory>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 
 #include "token.hh"
 #include "test_util.hh"
@@ -22,12 +23,12 @@ void check_copy_move(const Token& tok){
   {
     Token tok_c_con(tok);
     if(tok.type() != tok_c_con.type() || tok.get<T>() != tok_c_con.get<T>()){
-      fputs("[failed] on copy construct: ", zs::err);
+      cerr << "[failed] on copy construct: ";
       goto error;
     }else{
       Token tok_m_con{move(tok_c_con)};
       if(tok.type() != tok_m_con.type() || tok.get<T>() != tok_m_con.get<T>()){
-        fputs("[failed] on move construct ", zs::err);
+        cerr << "[failed] on move construct ";
         goto error;
       }
     }
@@ -37,12 +38,12 @@ void check_copy_move(const Token& tok){
   {
     Token tok_c_op = tok;
     if(tok.type() != tok_c_op.type() || tok.get<T>() != tok_c_op.get<T>()){
-      fputs("[failed] on copy operator= ", zs::err);
+      cerr << "[failed] on copy operator= ";
       goto error;
     }else{
       Token tok_m_op = move(tok_c_op);
       if(tok.type() != tok_m_op.type() || tok.get<T>() != tok_m_op.get<T>()){
-        fputs("[failed] on move operator= ", zs::err);
+        cerr << "[failed] on move operator= ";
         goto error;
       }
     }
@@ -53,13 +54,13 @@ void check_copy_move(const Token& tok){
  error:
   result = false;
   describe(zs::err, tok);
-  fputc('\n', zs::err);
+  cerr << '\n';
   return;
 }
 
-template<typename Fun, typename Pos>
+template<typename T, typename Pos>
 void fail_message(Token::Type t, istream& f, const Pos& b_pos,
-                  const Token& tok, const Fun& callback){
+                  const Token& tok, const T& expect){
   // extract input from stream
 
   f.seekg(b_pos);
@@ -67,14 +68,11 @@ void fail_message(Token::Type t, istream& f, const Pos& b_pos,
   string buf;
   std::getline(f, buf);
 
-  fprintf(zs::err, "[failed] input='%s', expect type='%s'",
-          buf.c_str(), stringify(t));
-
-  callback();
-
-  fputs("\n\tgotten token: ", zs::err);
+  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t);
+  cerr << ", expected str='" << expect << "'";
+  cerr << "\n\tgotten token: ";
   describe(zs::err, tok);
-  fputc('\n', zs::err);
+  cerr << '\n';
 
   result = false;
 }
@@ -97,7 +95,7 @@ void check(istream& f){
     });
 
   if(tok.type() != type){
-    fail_message(type, f, init_pos, tok, [](){});
+    fail_message(type, f, init_pos, tok, "uninitialized");
     return;
   }
   
@@ -111,16 +109,15 @@ void check(const string& input){
 
 
 // for normal cases
-template<Token::Type type, typename Fun, 
+template<Token::Type type,
          typename ex_type = typename to_type<Token::Type, type>::type>
-void check_generic(istream& f, const ex_type& expect,
-                   const Fun& fun){
+void check_generic(istream& f, const ex_type& expect){
   auto init_pos = f.tellg();
 
   const Token tok = tokenize(f);
 
   if(tok.type() != type || tok.get<ex_type>() != expect){
-    fail_message(type, f, init_pos, tok, fun);
+    fail_message(type, f, init_pos, tok, expect);
     return;
   }
   
@@ -129,11 +126,7 @@ void check_generic(istream& f, const ex_type& expect,
 
 template<Token::Type T>
 void check(istream& f, const string& expect){
-  check_generic<T>
-    (f, expect,
-     [&](){
-      fprintf(zs::err, ", expected str='%s'", expect.c_str());
-    });
+  check_generic<T>(f, expect);
 }
 
 template<Token::Type T>
@@ -155,39 +148,33 @@ bool operator!=(const Number& n1, const Number& n2){
   return !eqv(n1, n2);
 }
 
+// to be fixed!!!
+ostream& operator<<(ostream& o, const Number& n){
+  describe(zs::err, n);
+  return o;
+}
+
 void check(istream& f, const Number& n){
-  check_generic<Token::Type::number>
-    (f, n, 
-     [=](){
-      fprintf(zs::err, ", expected num='");
-      describe(zs::err, n);
-    });
+  check_generic<Token::Type::number>(f, n);
 }
 
 void check(istream& f, bool expect){
-  check_generic<Token::Type::boolean>
-    (f, expect, 
-     [=](){
-      fprintf(zs::err, ", expected bool='%s'", expect ? "true" : "false");
-    });
+  check_generic<Token::Type::boolean>(f, expect);
 }
 
 void check(istream& f, char expect){
-  check_generic<Token::Type::character>
-    (f, expect, 
-     [=](){
-      fprintf(zs::err, ", expected char='%c'", expect);
-    });
+  check_generic<Token::Type::character>(f, expect);
+}
+
+// to be fixed!!!
+ostream& operator<<(ostream& o, Token::Notation n){
+  describe(zs::err, n);
+  fputc('\'', zs::err);
+  return o;
 }
 
 void check(istream& f, Token::Notation n){
-  check_generic<Token::Type::notation>
-    (f, n,
-     [=](){
-      fputs(", expected notation='", zs::err);
-      describe(zs::err, n);
-      fputc('\'', zs::err);
-    });
+  check_generic<Token::Type::notation>(f, n);
 }
 
 template<typename T>
