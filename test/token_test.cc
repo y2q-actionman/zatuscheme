@@ -109,24 +109,24 @@ void check(const string& input){
 
 
 // for normal cases
-template<Token::Type type,
-         typename ex_type = typename to_type<Token::Type, type>::type>
-void check_generic(istream& f, const ex_type& expect){
+template<typename T>
+void check_generic(istream& f, const T& expect,
+                   Token::Type type = to_tag<Token::Type, T>()){
   auto init_pos = f.tellg();
 
   const Token tok = tokenize(f);
 
-  if(tok.type() != type || tok.get<ex_type>() != expect){
+  if(tok.type() != type || tok.get<T>() != expect){
     fail_message(type, f, init_pos, tok, expect);
     return;
   }
   
-  check_copy_move<ex_type>(tok);
+  check_copy_move<T>(tok);
 }
 
 template<Token::Type T>
 void check(istream& f, const string& expect){
-  check_generic<T>(f, expect);
+  check_generic(f, expect, T);
 }
 
 template<Token::Type T>
@@ -154,18 +154,6 @@ ostream& operator<<(ostream& o, const Number& n){
   return o;
 }
 
-void check(istream& f, const Number& n){
-  check_generic<Token::Type::number>(f, n);
-}
-
-void check(istream& f, bool expect){
-  check_generic<Token::Type::boolean>(f, expect);
-}
-
-void check(istream& f, char expect){
-  check_generic<Token::Type::character>(f, expect);
-}
-
 // to be fixed!!!
 ostream& operator<<(ostream& o, Token::Notation n){
   describe(zs::err, n);
@@ -173,8 +161,9 @@ ostream& operator<<(ostream& o, Token::Notation n){
   return o;
 }
 
-void check(istream& f, Token::Notation n){
-  check_generic<Token::Type::notation>(f, n);
+template<typename T>
+void check(istream& f, const T& n){
+  check_generic(f, n);
 }
 
 template<typename T>
