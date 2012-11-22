@@ -1,4 +1,4 @@
-#include <cstring>
+#include <iostream>
 #include <string>
 
 #include "zs.hh"
@@ -10,8 +10,8 @@ static bool result = true;
 
 void check(const char* input, const char* expect){
   const auto callback = [input, expect](const char* buf){
-    fprintf(zs::err, "[failed] input:%s, expected: %s\n\treturned: %s\n",
-            input, expect, buf);
+    cerr << "[failed] input:" << input << ", expected: " << expect << "\n"
+         << "\treturned: " << buf << "\n";
   };
 
   Lisp_ptr p = read_from_string(input);
@@ -25,7 +25,7 @@ void check_undef(const char* input){
   Lisp_ptr p = read_from_string(input);
 
   if(p){
-    fprintf(zs::err, "[failed] input:%s, expected: (undefined)\n", input);
+    cerr << "[failed] input:" << input << ", expected: (undefined)\n";
     result = false;
   }
 }
