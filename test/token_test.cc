@@ -124,19 +124,17 @@ void check_generic(istream& f, const T& expect,
   check_copy_move<T>(tok);
 }
 
-template<Token::Type T>
-void check(istream& f, const string& expect){
-  check_generic(f, expect, T);
+void check(istream& f, const string& expect, Token::Type t){
+  check_generic(f, expect, t);
 }
 
-template<Token::Type T>
-void check(const string& input, const string& expect){
+void check(const string& input, const string& expect, Token::Type t){
   stringstream ss(input);
-  check<T>(ss, expect);
+  check(ss, expect, t);
 }
 
-#define check_ident check<Token::Type::identifier>
-#define check_string check<Token::Type::string>
+#define check_ident(a, b) check(a, b, Token::Type::identifier)
+#define check_string(a, b) check(a, b, Token::Type::string)
 
 inline
 bool operator==(const Number& n1, const Number& n2){
