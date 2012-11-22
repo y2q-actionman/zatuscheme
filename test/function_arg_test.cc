@@ -1,9 +1,11 @@
 #include <cstdlib>
 #include <cassert>
+#include <iostream>
 
 #include "zs.hh"
 #include "test_util.hh"
 
+using namespace std;
 using namespace Procedure;
 
 static bool result = true;
@@ -18,15 +20,19 @@ bool operator!=(const ArgT& a, const ArgT& b){
   return (a.first != b.first) || (a.second != b.second);
 }
 
+std::ostream& operator<<(std::ostream& o, Variadic v){
+  return (o << boolalpha << static_cast<bool>(v) << noboolalpha);
+}
+
 void check(const char* input, const ArgT& expect){
   auto p = read_from_string(input);
   assert(p);
 
   auto argi = parse_func_arg(p);
   if(!argi || argi != expect){
-    fprintf(zs::err, "[failed] unexpected failure: input='%s', expected=[%d, %d], got=[%d, %d]\n",
-            input, argi.first, argi.second, expect.first, expect.second);
-
+    cerr << "[failed] unexpected failure: input='" << input << "',"
+         << " expected=[" << argi.first << ", " << argi.second << "],"
+         << " got=[" << expect.first << ", " << expect.second << "]\n";
     result = false;
   }
 }
@@ -37,9 +43,8 @@ void check_uninit(const char* input){
 
   auto argi = parse_func_arg(p);
   if(!!argi){
-    fprintf(zs::err, "[failed] unexpected succeed: input='%s', arginfo=[%d, %d]\n",
-           input, argi.first, argi.second);
-
+    cerr << "[failed] unexpected succeed: input='" << input << "',"
+         << " arginfo=[" << argi.first << ", " << argi.second << "]\n";
     result = false;
   }
 }

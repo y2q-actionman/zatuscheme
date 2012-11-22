@@ -1,5 +1,4 @@
-#include <cstdio>
-#include <cstring>
+#include <iostream>
 
 #include "zs.hh"
 #include "test_util.hh"
@@ -17,7 +16,7 @@ void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
   }
 
   if(!fun(evaled, expect_s)){
-    printf("not matched!: %s vs %s\n", expr_s, expect_s);
+    cerr << "not matched!: " << expr_s << " vs " << expect_s << "\n";
     result = false;
     return;
   }
@@ -26,7 +25,7 @@ void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
 bool read_eqv(Lisp_ptr input, const char* expect_s){
   auto expect = read_from_string(expect_s);
   if(!expect){
-    printf("reader error occured in expect!: %s\n", expect_s);
+    cerr << "reader error occured in expect!: " << expect_s << "\n";
     result = false;
     return false;
   }
@@ -36,8 +35,7 @@ bool read_eqv(Lisp_ptr input, const char* expect_s){
 
 bool print_equal(Lisp_ptr input, const char* expect_s){
   const auto callback = [expect_s](const char* str){
-    fprintf(zs::err, "[failed] expected: %s\n\tevaled: %s\n",
-            expect_s, str);
+    cerr << "[failed] expected: " << expect_s << "\n\tevaled: " << str << "\n";
   };
 
   return test_on_print(input, expect_s, callback);

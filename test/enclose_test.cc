@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <cassert>
 
 #include "zs.hh"
 #include "test_util.hh"
