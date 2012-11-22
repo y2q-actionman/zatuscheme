@@ -1,5 +1,5 @@
-#include <cstring>
-#include <string>
+#include <sstream>
+#include <iostream>
 
 #include "zs.hh"
 #include "test_util.hh"
@@ -11,20 +11,14 @@ static bool result;
 
 void check(Lisp_ptr input, const char* expect){
   const auto callback = [expect](const char* str){
-    fprintf(zs::err, "[failed] expected: %s\n\treturned: %s\n",
-            expect, str);
+    cerr << "[failed] expected: " << expect << "\n"
+         << "\treturned: " << str << "\n";
   };
 
   if(!test_on_print(input, expect, callback)){
     result = false;
   }
 }
-
-void check_noprint(Lisp_ptr input){
-  stringstream ss;
-  print(ss, input);
-}
-
 
 template<typename T>
 void check(const T& t, const char* expect){
@@ -37,8 +31,13 @@ void check(const char* s, const char* expect){
 }
 
 void check(Number&& n, const char* expect){
-  Number nn{n};
-  check(Lisp_ptr{&nn}, expect);
+  check(Lisp_ptr{&n}, expect);
+}
+
+
+void check_noprint(Lisp_ptr input){
+  stringstream ss;
+  print(ss, input);
 }
 
 template<typename T>
