@@ -378,13 +378,9 @@ void vm_op_move_values(){
   assert(vm.code.back().get<VMop>() == vm_op_move_values);
 
   vm.code.pop_back();
-  int argc = 0;
+  int argc = vm.return_value.size();
 
-  for(auto i = vm.return_value.begin(), e = vm.return_value.end();
-      i != e; ++i){
-    vm.stack.push_back(*i);
-    ++argc;
-  }
+  vm.stack.insert(vm.stack.end(), vm.return_value.begin(), vm.return_value.end());
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
   vm.return_value.resize(1);
@@ -589,8 +585,7 @@ void let_internal(EarlyBind early_bind){
     vm.code.push_back(vm_op_leave_frame);
   }
 
-  vm.code.push_back(vm_op_call);
-  vm.code.push_back(proc);
+  vm.code.insert(vm.code.end(), {vm_op_call, proc});
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
   vm.return_value[0] = {};
 }
@@ -733,11 +728,10 @@ void func_force(){
     return;
   }
 
-  vm.stack.push_back(arg);
-  vm.code.push_back(vm_op_force);
   vm.enter_frame(d->env());
-  vm.code.push_back(vm_op_leave_frame);
-  vm.code.push_back(d->get());
+  vm.stack.push_back(arg);
+  vm.code.insert(vm.code.end(),
+                 {vm_op_force, vm_op_leave_frame, d->get()});
 }
 
 void call_with_values(){
@@ -760,9 +754,7 @@ void call_with_values(){
   }
 
   // second proc call
-  vm.code.push_back(args[1]);
-  vm.code.push_back(vm_op_proc_enter);
-  vm.code.push_back(vm_op_move_values);
+  vm.code.insert(vm.code.end(), {args[1], vm_op_proc_enter, vm_op_move_values});
 
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
@@ -784,8 +776,7 @@ void call_cc(){
   }
 
   auto cont = new Continuation(vm);
-  vm.stack.push_back(cont);
-  vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+  vm.stack.insert(vm.stack.end(), {cont, {Ptr_tag::vm_argcount, 1}});
 
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
 }
