@@ -20,10 +20,6 @@ bool operator!=(const ArgT& a, const ArgT& b){
   return (a.first != b.first) || (a.second != b.second);
 }
 
-std::ostream& operator<<(std::ostream& o, Variadic v){
-  return (o << boolalpha << static_cast<bool>(v) << noboolalpha);
-}
-
 void check(const char* input, const ArgT& expect){
   auto p = read_from_string(input);
   assert(p);
@@ -49,7 +45,6 @@ void check_uninit(const char* input){
   }
 }
 
-#include "cons.hh"
 
 int main(){
   // arginfo test

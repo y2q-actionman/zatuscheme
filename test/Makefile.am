@@ -5,8 +5,9 @@ AM_CXXFLAGS = $(warning_flags) $(test_flags)
 
 AM_DEFAULT_SOURCE_EXT = .cc
 
-LDADD = test_util.o\
-	describe.o\
+test_lib = test_util.o describe.o
+
+LDADD = $(test_lib)\
 	../src/libzs_test.a
 
 check_PROGRAMS = token_test\
@@ -31,3 +32,6 @@ check_PROGRAMS = token_test\
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)
+
+clean-local:
+	rm -rf $(test_lib)

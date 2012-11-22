@@ -1,64 +1,71 @@
 #include "describe.hh"
 #include "number.hh"
+#include <ostream>
 
 using namespace std;
 
-void describe(FILE* f, Lisp_ptr p){
-  // fprintf(f, "[%s] %p", stringify(p.tag()), p.get<void*>());
+std::ostream& operator<<(std::ostream& o, Ptr_tag t){
+  return (o << stringify(t));
 }
 
-void describe(FILE* f, Number::Type t){
-  // fputs(stringify(t), f);
+std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
+  return (o << "[" << p.tag() << "] " << p.get<void*>());
 }
 
-void describe(FILE* f, const Number& n){
-  // const auto t = n.type();
-
-  // fprintf(f, "Number: %s(", stringify(t));
-  // print(f, n);
-  // fputc(')', f);
+std::ostream& operator<<(std::ostream& o, Number::Type t){
+  return (o << stringify(t));
 }
 
-void describe(FILE* f, const Procedure::ProcInfo& info){
-  // fprintf(f, "[required_args=%d, variadic=%d]",
-  //         info.required_args, info.variadic);
+std::ostream& operator<<(std::ostream& o, const Number& n){
+  o << "Number: " << n.type() << "(";
+  print(o, n);
+  o << ')';
+  return o;
 }
 
-void describe(FILE* f, Token::Type t){
-  // fputs(stringify(t), f);
+std::ostream& operator<<(std::ostream& o, const Procedure::ProcInfo& info){
+  return (o << "[required_args=" << info.required_args << ", variadic=" << info.variadic << "]");
 }
 
-void describe(FILE* f, Token::Notation n){
-  // fputs(stringify(n), f);
+std::ostream& operator<<(std::ostream& o, Variadic v){
+  return (o << boolalpha << static_cast<bool>(v) << noboolalpha);
 }
 
-void describe(FILE* f, const Token& tok){
-  // const auto t = tok.type();
+std::ostream& operator<<(std::ostream& o, Token::Type t){
+  return (o << stringify(t));
+}
 
-  // fprintf(f, "Token: %s(", stringify(t));
+std::ostream& operator<<(std::ostream& o, Token::Notation n){
+  return (o << stringify(n));
+}
 
-  // switch(t){
-  // case Token::Type::uninitialized:
-  //   break;
-  // case Token::Type::identifier:
-  // case Token::Type::string:
-  //   fputs(tok.get<string>().c_str(), f);
-  //   break;
-  // case Token::Type::boolean:
-  //   fputs(tok.get<bool>() ? "true" : "false", f);
-  //   break;
-  // case Token::Type::number:
-  //   describe(f, tok.get<Number>());
-  //   break;
-  // case Token::Type::character:
-  //   fputc(tok.get<char>(), f);
-  //   break;
-  // case Token::Type::notation:
-  //   describe(f, tok.get<Token::Notation>());
-  //   break;
-  // default:
-  //   UNEXP_DEFAULT();
-  // }
+std::ostream& operator<<(std::ostream& o, const Token& tok){
+  const auto t = tok.type();
 
-  // fputc(')', f);
+  o << "Token: " << t << "(";
+  switch(t){
+  case Token::Type::uninitialized:
+    break;
+  case Token::Type::identifier:
+  case Token::Type::string:
+    o << tok.get<string>();
+    break;
+  case Token::Type::boolean:
+    o << boolalpha << tok.get<bool>() << noboolalpha;
+    break;
+  case Token::Type::number:
+    o << tok.get<Number>();
+    break;
+  case Token::Type::character:
+    o << tok.get<char>();
+    break;
+  case Token::Type::notation:
+    o << tok.get<Token::Notation>();
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
+  o << ')';
+
+  return o;
 }

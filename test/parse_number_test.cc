@@ -18,11 +18,9 @@ void fail_message(Number::Type t, istream& i,
   string buf;
   std::getline(i, buf);
 
-  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t) << "'";
-  cerr << ", expected = '" << expect << "'";
-  cerr << "\n\tgotten: ";
-  describe(stdout, n);
-  cerr << '\n';
+  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t) << "'"
+       << ", expected = '" << expect << "'\n"
+       << "\tgotten: " << n << '\n';
 }
 
 void check(istream& i){

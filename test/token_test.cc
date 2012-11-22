@@ -2,7 +2,6 @@
 #include <sstream>
 #include <utility>
 #include <cstdlib>
-#include <cstdio>
 #include <iostream>
 
 #include "token.hh"
@@ -51,8 +50,7 @@ void check_copy_move(const Token& tok){
 
  error:
   result = false;
-  describe(zs::err, tok);
-  cerr << '\n';
+  cerr << tok << '\n';
   return;
 }
 
@@ -66,11 +64,9 @@ void fail_message(Token::Type t, istream& f, const Pos& b_pos,
   string buf;
   std::getline(f, buf);
 
-  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t);
-  cerr << ", expected str='" << expect << "'";
-  cerr << "\n\tgotten token: ";
-  describe(zs::err, tok);
-  cerr << '\n';
+  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t)
+       << ", expected str='" << expect << "'\n"
+       << "\tgotten token: " << tok << '\n';
 
   result = false;
 }
@@ -149,19 +145,6 @@ bool operator==(const Number& n1, const Number& n2){
 inline
 bool operator!=(const Number& n1, const Number& n2){
   return !eqv(n1, n2);
-}
-
-// to be fixed!!!
-ostream& operator<<(ostream& o, const Number& n){
-  describe(zs::err, n);
-  return o;
-}
-
-// to be fixed!!!
-ostream& operator<<(ostream& o, Token::Notation n){
-  describe(zs::err, n);
-  fputc('\'', zs::err);
-  return o;
 }
 
 #define N Token::Notation
