@@ -2,9 +2,7 @@
 #include <sstream>
 #include <utility>
 #include <cstdlib>
-#include <memory>
 #include <cstdio>
-#include <cstring>
 #include <iostream>
 
 #include "token.hh"
@@ -102,7 +100,7 @@ void check(istream& f){
   check_copy_move<Token::Type>(tok);
 }
 
-void check(const string& input){
+void check(string&& input){
   stringstream ss(input);
   check(ss);
 }
@@ -110,8 +108,8 @@ void check(const string& input){
 
 // for normal cases
 template<typename T>
-void check_generic(istream& f, const T& expect,
-                   Token::Type type = to_tag<Token::Type, T>()){
+void check(istream& f, const T& expect,
+           Token::Type type = to_tag<Token::Type, T>()){
   auto init_pos = f.tellg();
 
   const Token tok = tokenize(f);
@@ -124,14 +122,21 @@ void check_generic(istream& f, const T& expect,
   check_copy_move<T>(tok);
 }
 
-void check(istream& f, const string& expect, Token::Type t){
-  check_generic(f, expect, t);
+template<typename T>
+void check(string&& input, T&& expect){
+  stringstream ss(input);
+  check(ss, expect);
 }
 
-void check(const string& input, const string& expect, Token::Type t){
+void check(istream& f, const char* expect, Token::Type t){
+  check(f, std::string(expect), t);
+}
+
+void check(const string& input, const char* expect, Token::Type t){
   stringstream ss(input);
   check(ss, expect, t);
 }
+
 
 #define check_ident(a, b) check(a, b, Token::Type::identifier)
 #define check_string(a, b) check(a, b, Token::Type::string)
@@ -158,18 +163,6 @@ ostream& operator<<(ostream& o, Token::Notation n){
   fputc('\'', zs::err);
   return o;
 }
-
-template<typename T>
-void check(istream& f, const T& n){
-  check_generic(f, n);
-}
-
-template<typename T>
-void check(const string& input, T&& expect){
-  stringstream ss(input);
-  check(ss, expect);
-}
-
 
 #define N Token::Notation
 
