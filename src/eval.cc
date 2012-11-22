@@ -34,9 +34,7 @@ void vm_op_arg_push(){
 
   if(nullp(args)){
     vm.stack.push_back(argc);
-    vm.code.pop_back();
-    vm.code.pop_back();
-    vm.code.pop_back();
+    vm.code.erase(vm.code.end() - 3, vm.code.end());
   }else{
     auto args_c = args.get<Cons*>();
     // auto arg1 = args_c->car(); // the EXPR just evaled.
@@ -76,12 +74,9 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
   auto args_head = args.get<Cons*>()->cdr(); // skips first symbol
 
   vm.code.back() = proc;
-  vm.code.push_back(vm_op_proc_enter);
-
-  vm.code.push_back(args_head);
-  vm.code.push_back({Ptr_tag::vm_argcount, 0});
-  vm.code.push_back(vm_op_arg_push);
-  vm.code.push_back(args_head.get<Cons*>()->car());
+  vm.code.insert(vm.code.end(), {vm_op_proc_enter,
+        args_head, {Ptr_tag::vm_argcount, 0},
+        vm_op_arg_push, args_head.get<Cons*>()->car()});
 }
 
 /*
@@ -256,8 +251,7 @@ void proc_enter_interpreted(IProcedure* fun){
 
   // set up lambda body code
   // list_to_stack("funcall", fun->get(), vm.code);
-  vm.code.push_back(fun->get());
-  vm.code.push_back(vm_op_begin); // TODO: reduce this push
+  vm.code.insert(vm.code.end(), {fun->get(), vm_op_begin});
 }
 
 
@@ -306,14 +300,12 @@ void vm_op_replace_vm(){
   vm = next_vm;
 
   // restores old return values
-  vm.code.push_back(values);
-  vm.code.push_back(vm_op_restore_values);
+  vm.code.insert(vm.code.end(), {values, vm_op_restore_values});
 
   // processes 'before' windings
   for(unsigned i = wind_index; i < vm.extent.size(); ++i){
     vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-    vm.code.push_back(vm.extent[i].before);
-    vm.code.push_back(vm_op_proc_enter);
+    vm.code.insert(vm.code.end(), {vm.extent[i].before, vm_op_proc_enter});
   }
 }
 
@@ -332,17 +324,14 @@ void proc_enter_cont(Continuation* c){
   auto ret_values = new std::vector<Lisp_ptr>();
   stack_to_vector(vm.stack, *ret_values);
 
-  vm.code.push_back(ret_values);
-  vm.code.push_back(c);
-  vm.code.push_back(vm_op_replace_vm);
+  vm.code.insert(vm.code.end(), {ret_values, c, vm_op_replace_vm});
 
   // processes 'after' windings
   for(unsigned i = vm.extent.size() - 1;
       (i >= wind_index) && (static_cast<signed>(i) >= 0);
       --i){
     vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-    vm.code.push_back(vm.extent[i].after);
-    vm.code.push_back(vm_op_proc_enter);
+    vm.code.insert(vm.code.end(), {vm.extent[i].after, vm_op_proc_enter});
   }
 }
 

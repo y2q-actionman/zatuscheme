@@ -119,11 +119,9 @@ void whole_function_if(){
   }
 
   // evaluating
-  vm.code.push_back(vm_op_if);
-  vm.code.push_back(test);
+  vm.code.insert(vm.code.end(), {vm_op_if, test});
 
-  vm.stack.push_back(alt);
-  vm.stack.push_back(conseq);
+  vm.stack.insert(vm.stack.end(), {alt, conseq});
 }
 
 /*
@@ -158,8 +156,7 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   }
 
   // evaluating
-  vm.code.push_back(set_op);
-  vm.code.push_back(val);
+  vm.code.insert(vm.code.end(), {set_op, val});
   vm.stack.push_back(var);
 }
 
@@ -216,8 +213,7 @@ void whole_function_begin(){
   }
 
   // list_to_stack("begin", exprs, vm.code);
-  vm.code.push_back(exprs);
-  vm.code.push_back(vm_op_begin); // TODO: reduce this push
+  vm.code.insert(vm.code.end(), {exprs, vm_op_begin});
 }
 
 void whole_function_let(){
@@ -261,8 +257,8 @@ void whole_function_let_star(){
     return;
   }
 
-  vm.stack.push_back(let_star_expand(bindings, body));
-  vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+  vm.stack.insert(vm.stack.end(),
+                  {let_star_expand(bindings, body), {Ptr_tag::vm_argcount, 1}});
 
   let_internal(EarlyBind::t);
 }
