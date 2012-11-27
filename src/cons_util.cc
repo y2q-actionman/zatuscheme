@@ -26,6 +26,7 @@ Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
 }
 
 void GrowList::push(Lisp_ptr p){
+  assert(head && next);
   assert(*next == Cons::NIL);
 
   auto newc = new Cons(p, Cons::NIL);

@@ -106,6 +106,7 @@ Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
 // GrowList class
 inline
 void GrowList::invalidate(){
+  assert(head && next);
   head = {};
   next = nullptr;
 }  

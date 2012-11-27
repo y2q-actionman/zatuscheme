@@ -480,8 +480,8 @@ void whole_do(){
   auto loop_sym = new Symbol(new string("do_loop_symbol"));
 
   // extract vars
-  Lisp_ptr init_binds = Cons::NIL;
-  Lisp_ptr steps = Cons::NIL;
+  GrowList init_binds;
+  GrowList steps;
   do_list(vars,
           [&](Cons* vc) -> bool{
             Lisp_ptr v, i, s;
@@ -491,13 +491,13 @@ void whole_do(){
                            [&](Cons* c){ s = c->car(); });
             if(!s) s = v;
 
-            init_binds = push_cons_list(make_cons_list({v, i}), init_binds);
-            steps = push_cons_list(s, steps);
+            init_binds.push(make_cons_list({v, i}));
+            steps.push(s);
             return true;
           },
           [&](Lisp_ptr p){
             if(!nullp(p)){
-              fprintf(zs::err, "macro do warning: loop vars has dot-list. ignored last cdr\n");
+              throw zs_error("macro do error: loop vars has dot-list!\n");
             }
           });
 
@@ -512,17 +512,17 @@ void whole_do(){
           },
           [&](Lisp_ptr p){
             if(!nullp(p)){
-              fprintf(zs::err, "macro do warning: loop body has dot-list. ignored last cdr\n");
+              throw zs_error("macro do error: loop body has dot-list!\n");
             }
           });
-  gw.push(push_cons_list(loop_sym, steps));
+  gw.push(push_cons_list(loop_sym, steps.extract()));
 
   // creates 'named let' style loop
   auto form = 
     make_cons_list({
         intern(vm.symtable(), "let"),
         loop_sym,
-        init_binds,
+        init_binds.extract(),
         make_cons_list({
             intern(vm.symtable(), "if"),
             end_test,
