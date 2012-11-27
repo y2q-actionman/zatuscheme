@@ -83,7 +83,7 @@ void port_close(const char* name){
 
   auto fio = dynamic_cast<F_IOType*>(p);
   if(!fio){
-    make_zs_error("native func warning: %s: passed port is not associated to file\n", name);
+    cerr << "native func warning: " << name << ": passed port is not associated to file\n";
     vm.return_value[0] = Lisp_ptr{false};
     return;
   }
