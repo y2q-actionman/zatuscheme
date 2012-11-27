@@ -1,4 +1,5 @@
 #include <array>
+#include <iostream>
 
 #include "builtin_syntax.hh"
 #include "lisp_ptr.hh"
@@ -50,9 +51,8 @@ void whole_function_quote(){
                    val = c->car();
                  },
                  [](Cons*){
-                   fprintf(zs::err, "eval warning: quote has two or more args. ignored.\n");
+                   throw zs_error("eval error: quote has two or more args.\n");
                  });
-
   if(!val){
     throw zs_error("eval error: quote has no args.\n");
   }
@@ -565,11 +565,11 @@ void function_splicing(){
           },
           [&](Lisp_ptr last_cdr){
             if(!nullp(last_cdr)){
+              cerr << "eval warning: unquote-splicing: ";
               if(argc > 0){
-                fprintf(zs::err, "eval warning: unquote-splicing: dot list has read as proper list.\n");
+                cerr << "dot list has read as proper list.\n";
               }else{
-                fprintf(zs::err, "eval warning: unquote-splicing: passed value is not list. treated as a list has one element.\n");
-
+                cerr << "passed value is not list. treated as a list has one element.\n";
               }
               vm.stack.push_back(last_cdr);
               ++argc;
@@ -640,9 +640,7 @@ void whole_function_quasiquote(){
         vm.code.push_back(arg.get<Cons*>()->cdr().get<Cons*>()->car());
         return;
       }else if(first_sym == unquote_splicing_sym){
-        fprintf(zs::err, "quasiquote error: unquote-splicing is not supported out of list");
-        vm.return_value[0] = {};
-        return;
+        throw zs_error("quasiquote error: unquote-splicing is not supported out of list");
       }
     }
 
