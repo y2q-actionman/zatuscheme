@@ -1,6 +1,7 @@
 #include <array>
 #include <cstring>
 #include <sstream>
+#include <iostream>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -168,15 +169,14 @@ void install_builtin(){
 void load(Port* p){
   auto in = dynamic_cast<std::istream*>(p);
   if(!in){
-    fprintf(zs::err, "load error: passed port is not input port.\n");
-    return;
+    throw zs_error("load error: passed port is not input port.\n");
   }
 
   while(1){
     auto form = read(*in);
     if(!form){
       if(!*p){
-        // fprintf(zs::err, "load error: failed at reading a form. abandoned.\n");
+        // cerr << "load error: failed at reading a form. abandoned.\n";
       }
       break;
     }
@@ -184,9 +184,9 @@ void load(Port* p){
     vm.code.push_back(form);
     eval();
     if(!vm.return_value[0]){
-      fprintf(zs::err, "load error: failed at evaluating a form. skipped.\n");
-      fprintf(zs::err, "\tform: \n");
-      // print(zs::err, form);
+      cerr << "load error: failed at evaluating a form. skipped.\n";
+      cerr << "\tform: \n";
+      print(cerr, form);
       continue;
     }
   }

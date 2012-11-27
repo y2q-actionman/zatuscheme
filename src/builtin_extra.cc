@@ -34,7 +34,7 @@ void gensym(){
 
 void exit_func(){
   pick_args<0>();
-  fprintf(zs::err, "exiting..\n");
+  // cerr << "exiting..\n";
   vm.return_value[0] = {};
   vm.stack.clear();
   vm.code.clear();

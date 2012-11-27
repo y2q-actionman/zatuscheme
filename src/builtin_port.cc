@@ -4,6 +4,7 @@
 #include <istream>
 #include <ostream>
 #include <fstream>
+#include <iostream>
 
 #include "builtin_port.hh"
 #include "lisp_ptr.hh"
@@ -82,7 +83,7 @@ void port_close(const char* name){
 
   auto fio = dynamic_cast<F_IOType*>(p);
   if(!fio){
-    fprintf(zs::err, "native func warning: %s: passed port is not associated to file\n", name);
+    make_zs_error("native func warning: %s: passed port is not associated to file\n", name);
     vm.return_value[0] = Lisp_ptr{false};
     return;
   }

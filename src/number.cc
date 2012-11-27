@@ -518,8 +518,7 @@ void print(ostream& f, const Number& n, int radix){
 Number to_exact(const Number& n){
   switch(n.type()){
   case Number::Type::complex:
-    fprintf(zs::err, "number error: conversion from complex to exact number is not supprted.\n");
-    return {}; // not supported
+    throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
   case Number::Type::real:
     return Number{n.coerce<Number::integer_type>()};
   case Number::Type::integer:
