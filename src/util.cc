@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <cstdio>
 #include <utility>
 #include <cstdarg>
@@ -13,17 +12,13 @@ namespace zs{
   FILE* err = stderr;
 }
 
-void
-unexp_default(const char* f, int l){
-  fprintf(zs::err, "unexpected default case! (file=%s, line=%d)\n", f, l);
-  abort();
+void unexp_default(const char* f, int l){
+  throw make_zs_error("unexpected default case! (file=%s, line=%d)\n", f, l);
 }
 
-void
-unexp_conversion(const char* f, int l, const char* to){
-  fprintf(zs::err, "unexpected conversion to %s! (file=%s, line=%d)\n",
-          to, f, l);
-  abort();
+void unexp_conversion(const char* f, int l, const char* to){
+  throw make_zs_error("unexpected conversion to %s! (file=%s, line=%d)\n",
+                      to, f, l);
 }
 
 // class zs_error
@@ -52,4 +47,3 @@ zs_error make_zs_error(const char* fmt, ...){
 
   return zs_error({tmp, len});
 }
-
