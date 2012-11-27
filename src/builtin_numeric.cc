@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <limits>
+#include <iostream>
 
 #include "builtin_numeric.hh"
 #include "vm.hh"
@@ -329,7 +330,7 @@ struct binary_accum{
 
       long long tmp = op(n1.get<Number::integer_type>(), n2.get<Number::integer_type>());
       // if(tmp > imax || tmp < imin){
-      //   fprintf(zs::err, "integer operation fallen into float\n");
+      //   cerr << "integer operation fallen into float\n";
       //   n1 = Number{static_cast<Number::real_type>(tmp)};
       // }else{
         n1.get<Number::integer_type>() = static_cast<Number::integer_type>(tmp);
@@ -394,7 +395,7 @@ void number_minus(){
       static constexpr auto imin = numeric_limits<Number::integer_type>::min();
       auto i = n->get<Number::integer_type>();
       if(i == imin){
-        fprintf(zs::err, "warning: integer operation fallen into float\n");
+        cerr << "warning: integer operation fallen into float\n";
         vm.return_value[0] = {new Number(-static_cast<Number::real_type>(imin))};
       }else{
         vm.return_value[0] = {new Number(-i)};
@@ -471,7 +472,7 @@ void number_abs(){
     }else{
       static constexpr auto imin = numeric_limits<Number::integer_type>::min();
       if(i == imin){
-        fprintf(zs::err, "warning: integer operation fallen into float\n");
+        cerr << "warning: integer operation fallen into float\n";
         vm.return_value[0] = new Number(-static_cast<Number::real_type>(imin));
       }else{
         vm.return_value[0] = new Number(-i);
@@ -593,8 +594,7 @@ void number_numerator(){
     throw number_type_check_failed("numerator", arg);
   }
 
-  fprintf(zs::err, "native func: 'numerator' is not implemented.\n");
-  vm.return_value[0] = {};
+  throw zs_error("internal error: native func 'numerator' is not implemented.\n");
 }
 
 void number_denominator(){
@@ -604,8 +604,7 @@ void number_denominator(){
     throw number_type_check_failed("denominator", arg);
   }
 
-  fprintf(zs::err, "native func: 'denominator' is not implemented.\n");
-  vm.return_value[0] = {};
+  throw zs_error("internal error: native func 'denominator' is not implemented.\n");
 }
 
 
@@ -627,9 +626,7 @@ void number_rounding(const char* name, Fun&& fun){
     vm.return_value[0] = {new Number(fun(n->get<Number::real_type>()))};
     return;
   case Number::Type::complex:
-    fprintf(zs::err, complex_found::msg);
-    vm.return_value[0] = {};
-    return;
+    throw zs_error(complex_found::msg);
   case Number::Type::uninitialized:
   default:
     UNEXP_DEFAULT();
@@ -664,8 +661,7 @@ void number_rationalize(){
     }
   }
   
-  fprintf(zs::err, "native func: 'rationalize' is not implemented.\n");
-  vm.return_value[0] = {};
+  throw zs_error("internal error: native func 'rationalize' is not implemented.\n");
 }
 
 
