@@ -137,4 +137,30 @@ Lisp_ptr GrowList::extract_with_tail(Lisp_ptr p){
   return ret;
 }
 
+
+// ConsIter class
+
+inline
+ConsIter::ConsIter() : c_(nullptr){}
+
+inline
+ConsIter::ConsIter(const Cons* c) : c_(c){}
+
+inline
+ConsIter ConsIter::operator++(int){
+  auto ret = *this;
+  ++(*this);
+  return ret;
+}
+
+inline
+bool operator==(const ConsIter& i1, const ConsIter& i2){
+  return i1.c_ == i2.c_;
+}
+
+inline
+bool operator!=(const ConsIter& i1, const ConsIter& i2){
+  return i1.c_ != i2.c_;
+}
+
 #endif //CONS_UTIL_I_HH

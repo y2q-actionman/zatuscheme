@@ -1,6 +1,7 @@
 #include "cons_util.hh"
 #include "lisp_ptr.hh"
 #include "cons.hh"
+#include "util.hh"
 
 #include <cassert>
 
@@ -33,4 +34,41 @@ void GrowList::push(Lisp_ptr p){
   
   *next = {newc};
   next = &(newc->cdr_);
+}
+
+
+static zs_error make_cons_iter_error(Lisp_ptr p){
+  return make_zs_error("cons list error: dot-list appeared for a proper-list procedure (%s appeared)\n",
+                       stringify(p.tag()));
+}
+
+ConsIter& ConsIter::operator++(){
+  auto p = c_->cdr();
+
+  if(p.tag() != Ptr_tag::cons){
+    throw make_cons_iter_error(c_->cdr());
+  }
+
+  c_ = p.get<Cons*>();
+  return *this;
+}
+
+ConsIter begin(Lisp_ptr p){
+  if(p.tag() != Ptr_tag::cons){
+    throw make_cons_iter_error(p);
+  }
+  return ConsIter(p.get<Cons*>());
+}
+
+ConsIter end(Lisp_ptr p){
+#ifndef NDEBUG
+  if(p.tag() != Ptr_tag::cons){
+    throw make_cons_iter_error(p);
+  }
+#else
+  (void)p;
+#endif
+
+  assert(Cons::NIL.get<Cons*>() == nullptr);
+  return ConsIter(nullptr);
 }

@@ -2,6 +2,7 @@
 #define CONS_UTIL_HH
 
 #include <initializer_list>
+#include <iterator>
 #include "cons.hh"
 
 inline bool nullp(Lisp_ptr);
@@ -50,6 +51,40 @@ public:
   Lisp_ptr extract_with_tail(Lisp_ptr);
 };
 
+
+class ConsIter
+  : public std::iterator<std::forward_iterator_tag, Lisp_ptr>
+{
+public:
+  ConsIter();
+  explicit ConsIter(const Cons*);
+  ConsIter(const ConsIter&) = default;
+  ConsIter(ConsIter&&) = default;
+
+  ~ConsIter() = default;
+
+  ConsIter& operator=(const ConsIter&) = default;
+  ConsIter& operator=(ConsIter&&) = default;
+
+  Lisp_ptr operator*() const
+  { return c_->car(); }
+
+  Lisp_ptr operator->() const
+  { return c_->car(); }
+
+  ConsIter& operator++();
+  ConsIter operator++(int);
+
+  friend bool operator==(const ConsIter&, const ConsIter&);
+  friend bool operator!=(const ConsIter&, const ConsIter&);
+
+private:
+  const Cons* c_;
+};
+
+ConsIter begin(Lisp_ptr);
+ConsIter end(Lisp_ptr);
+  
 #include "cons_util.i.hh"
 
 #endif //CONS_UTIL_HH
