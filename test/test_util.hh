@@ -1,11 +1,9 @@
 #ifndef TEST_UTIL_HH
 #define TEST_UTIL_HH
 
-#include <cstdio>
 #include <initializer_list>
 
 #include "lisp_ptr.hh"
-#include "vm.hh"
 
 
 template<typename Fun>
@@ -20,10 +18,6 @@ bool eqv(Lisp_ptr, Lisp_ptr);
 
 Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args);
 
-
-extern FILE* NULL_STREAM;
-
-FILE* open_null_stream();
 
 template<typename Fun>
 void with_expect_error(Fun);

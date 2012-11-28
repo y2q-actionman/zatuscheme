@@ -76,8 +76,7 @@ int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
           },
           [&](Lisp_ptr last_cdr){
             if(!nullp(last_cdr)){
-              fprintf(zs::err, "eval warning: dot list has read as proper list. (in %s)\n",
-                      opname);
+              std::cerr << "eval warning: dot list has read as proper list. (in " << opname << ")\n";
               tmp.push(last_cdr);
             }
           });

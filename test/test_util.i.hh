@@ -5,6 +5,9 @@
 #error "Please include via parent file"
 #endif
 
+#include <sstream>
+
+#include "vm.hh"
 #include "util.hh"
 #include "lisp_ptr.hh"
 #include "printer.hh"
@@ -28,9 +31,6 @@ bool test_on_print(Lisp_ptr input, const char* expect, Fun&& callback){
 namespace test_util_detail {
 
 struct with_null_stream{
-  FILE* in;
-  FILE* out;
-  FILE* err;
   decltype(std::cerr.rdbuf()) orig_obuf;
 
   with_null_stream();

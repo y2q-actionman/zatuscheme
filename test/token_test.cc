@@ -151,7 +151,6 @@ bool operator!=(const Number& n1, const Number& n2){
 
 int main(){
   result = true;
-  open_null_stream();
 
   // identifier
   check_ident("lambda", "lambda");

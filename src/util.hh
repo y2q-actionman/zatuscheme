@@ -11,13 +11,6 @@ T c_cast(U u){
   return (T)u;
 }
 
-// io
-namespace zs{
-  extern FILE* in;
-  extern FILE* out;
-  extern FILE* err;
-}
-
 // error report
 void
 __attribute__((noreturn))// [[noreturn]]
