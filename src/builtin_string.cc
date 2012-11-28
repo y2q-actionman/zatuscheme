@@ -278,17 +278,13 @@ void string_from_list(){
 
   String ret;
   
-  do_list(arg,
-          [&](Cons* c) -> bool{
-            auto ch = c->car().get<char>();
-            if(!ch){
-              throw builtin_type_check_failed("list->string", Ptr_tag::character, c->car());
-            }
-              
-            ret.push_back(ch);
-            return true;
-          },
-          [](Lisp_ptr){});
+  for(auto p : arg){
+    auto ch = p.get<char>();
+    if(!ch){
+      throw builtin_type_check_failed("list->string", Ptr_tag::character, p);
+    }
+    ret.push_back(ch);
+  }
 
   vm.return_value[0] = {new String(std::move(ret))};
 }
