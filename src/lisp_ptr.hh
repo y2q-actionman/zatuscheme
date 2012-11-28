@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <cstdio>
 #include <iosfwd>
 
 enum class Ptr_tag {

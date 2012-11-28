@@ -1,5 +1,4 @@
 #include <cassert>
-#include <cstdio>
 #include <istream>
 #include <ostream>
 #include <fstream>
