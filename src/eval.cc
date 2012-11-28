@@ -101,8 +101,8 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   vm.stack.pop_back();
 
   int argc = 0;
-  for(auto i = next(begin(args)), e = end(args); i != e; ++i){
-    vm.stack.push_back(*i);
+  for(auto p : args.get<Cons*>()->cdr()){
+    vm.stack.push_back(p);
     ++argc;
   }
 
