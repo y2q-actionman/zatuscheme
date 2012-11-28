@@ -31,6 +31,7 @@ struct with_null_stream{
   FILE* in;
   FILE* out;
   FILE* err;
+  decltype(std::cerr.rdbuf()) orig_obuf;
 
   with_null_stream();
   ~with_null_stream();

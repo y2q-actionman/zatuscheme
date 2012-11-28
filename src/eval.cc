@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <memory>
 #include <cassert>
+#include <iostream>
 
 #include "vm.hh"
 #include "eval.hh"
@@ -181,7 +182,7 @@ void proc_enter_native(const NProcedure* fun){
 
   native_func();
   // if(!vm.return_value())
-  //   fprintf(zs::err, "eval warning: native func returned undef!\n");
+  //   cerr << "eval warning: native func returned undef!\n";
 }
 
 /*
@@ -644,36 +645,27 @@ void eval(){
 
         // error
       case Ptr_tag::undefined:
-        vm.code.pop_back();
-        fprintf(zs::err, "eval error: undefined is passed!\n");
-        vm.return_value[0] = {};
-        break;
+        throw zs_error("eval error: undefined is passed!\n");
 
       case Ptr_tag::vm_argcount:
-        vm.code.pop_back();
-        fprintf(zs::err, "eval internal error: vm-argcount is rest on VM code stack!\n");
-        vm.return_value[0] = {};
-        break;
+        throw zs_error("eval internal error: vm-argcount is rest on VM code stack!\n");
 
       default:
-        vm.code.pop_back();
-        fprintf(zs::err, "eval error: unknown object appeared! (tag = %d)!\n",
-                static_cast<int>(p.tag()));
-        vm.return_value[0] = {};
-        break;
+        throw make_zs_error("eval error: unknown object appeared! (tag = %d)!\n",
+                            static_cast<int>(p.tag()));
       }
     }
   }catch(const std::exception& e){
-    fprintf(zs::err, "%s", e.what());
+    cerr << e.what() << endl;
     vm.return_value[0] = {};
   }
 
   if(!vm.code.empty()){
-    fprintf(zs::err, "eval internal warning: VM code stack is broken!\n");
+    cerr << "eval internal warning: VM code stack is broken!\n";
     vm.code.clear();
   }
   if(!vm.stack.empty()){
-    fprintf(zs::err, "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n");
+    cerr << "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n";
     vm.stack.clear();
   }
 }
@@ -700,7 +692,7 @@ void apply_func(){
               },
               [&](Lisp_ptr last){
                 if(!nullp(last)){
-                  fprintf(zs::err, "native func warning: apply: passed dot list. used as arg\n");
+                  cerr << "native func warning: apply: passed dot list. used as arg\n";
                   vm.stack.push_back(last);
                   ++argc;
                 }

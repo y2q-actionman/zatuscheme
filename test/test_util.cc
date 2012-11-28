@@ -90,17 +90,20 @@ FILE* open_null_stream(){
 namespace test_util_detail {
 
 with_null_stream::with_null_stream()
-  : in(zs::in), out(zs::out), err(zs::err){
+  : in(zs::in), out(zs::out), err(zs::err),
+    orig_obuf(std::cerr.rdbuf()){
   if(!NULL_STREAM) open_null_stream();
   zs::in = NULL_STREAM;
   zs::out = NULL_STREAM;
   zs::err = NULL_STREAM;
+  cerr.rdbuf(new std::stringbuf());
 }
 
 with_null_stream::~with_null_stream(){
   zs::in = this->in;
   zs::out = this->out;
   zs::err = this->err;
+  cerr.rdbuf(orig_obuf);
 }
 
 } // namespace test_util_detail
