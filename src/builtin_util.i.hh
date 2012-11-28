@@ -8,9 +8,9 @@
 #include <stack>
 #include <vector>
 #include <array>
-#include <cstdio>
 #include <iterator>
 #include <exception>
+#include <iostream>
 
 #include "util.hh"
 #include "lisp_ptr.hh"

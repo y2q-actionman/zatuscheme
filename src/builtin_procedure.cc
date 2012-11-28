@@ -1,6 +1,3 @@
-#include <algorithm>
-#include <iterator>
-
 #include "builtin_procedure.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"

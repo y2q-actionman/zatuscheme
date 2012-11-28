@@ -1,4 +1,3 @@
-#include <array>
 #include <iterator>
 #include <vector>
 #include <functional>
@@ -8,6 +7,7 @@
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <sstream>
 
 #include "builtin_numeric.hh"
 #include "vm.hh"

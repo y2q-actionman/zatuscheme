@@ -1,4 +1,4 @@
-#include <array>
+#include <string>
 #include <iostream>
 
 #include "builtin_syntax.hh"

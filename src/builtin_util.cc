@@ -1,7 +1,4 @@
 #include "builtin_util.hh"
-#include "lisp_ptr.hh"
-#include "vm.hh"
-#include <iterator>
 
 Lisp_ptr pick_args_1(){
   auto tmp = pick_args<1>();

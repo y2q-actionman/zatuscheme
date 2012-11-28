@@ -1,6 +1,6 @@
 #include <array>
-#include <cstring>
 #include <sstream>
+#include <istream>
 #include <iostream>
 
 #include "builtin.hh"
