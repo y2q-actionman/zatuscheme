@@ -1,4 +1,5 @@
 #include <unordered_set>
+#include <iterator>
 
 #include "builtin_cons.hh"
 #include "lisp_ptr.hh"
@@ -133,16 +134,7 @@ void cons_length(){
     throw cons_type_check_failed("list?", arg);
   }
 
-  Number::integer_type length = 0;
-  
-  do_list(arg,
-          [&](Cons*) -> bool{
-            ++length;
-            return true;
-          },
-          [](Lisp_ptr){});
-
-  vm.return_value[0] = {new Number(length)};
+  vm.return_value[0] = {new Number(std::distance(begin(arg), end(arg)))};
 }
 
 void cons_append(){
@@ -156,12 +148,9 @@ void cons_append(){
       throw cons_type_check_failed("append", args[i]);
     }
 
-    do_list(args[i],
-            [&](Cons* c) -> bool{
-              gl.push(c->car());
-              return true;
-            },
-            [](Lisp_ptr){});
+    for(auto p : args[i]){
+      gl.push(p);
+    }
   }
 
   // last
@@ -176,12 +165,9 @@ void cons_reverse(){
 
   Lisp_ptr ret = Cons::NIL;
   
-  do_list(arg,
-          [&](Cons* c) -> bool{
-            ret = {new Cons(c->car(), ret)};
-            return true;
-          },
-          [](Lisp_ptr){});
+  for(auto p : arg){
+    ret = push_cons_list(p, ret);
+  }
 
   vm.return_value[0] = ret;
 }
