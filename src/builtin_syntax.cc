@@ -212,7 +212,6 @@ void whole_function_begin(){
     throw zs_error("eval error: begin has no exprs.\n");
   }
 
-  // list_to_stack("begin", exprs, vm.code);
   vm.code.insert(vm.code.end(), {exprs, vm_op_begin});
 }
 
