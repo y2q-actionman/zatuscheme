@@ -544,31 +544,22 @@ void let_internal(EarlyBind early_bind){
   GrowList gl_syms;
   GrowList gl_vals;
 
-  do_list(binds,
-          [&](Cons* cell) -> bool{
-            auto bind = cell->car();
-            if(bind.tag() != Ptr_tag::cons){
-              throw make_zs_error("eval error: informal object (%s) found in let binding.\n",
-                                  stringify(bind.tag()));
-            }
+  for(auto bind : binds){
+    if(bind.tag() != Ptr_tag::cons){
+      throw make_zs_error("eval error: informal object (%s) found in let binding.\n",
+                          stringify(bind.tag()));
+    }
 
-            auto c = bind.get<Cons*>();
-            if(!c){
-              throw zs_error("eval error: null found in let binding.\n");
-            }
+    auto c = bind.get<Cons*>();
+    if(!c){
+      throw zs_error("eval error: null found in let binding.\n");
+    }
                  
-            ++len;
+    ++len;
 
-            gl_syms.push(c->car());
-            gl_vals.push(c->cdr().get<Cons*>()->car());
-
-            return true;
-          },
-          [&](Lisp_ptr dot_cdr){
-            if(!nullp(dot_cdr)){
-              throw zs_error("eval error: let binding has dot-list!\n");
-            }
-          });
+    gl_syms.push(c->car());
+    gl_vals.push(c->cdr().get<Cons*>()->car());
+  }
 
   if(name){
     vm.enter_frame(vm.frame()->push());
@@ -681,19 +672,10 @@ void apply_func(){
   int argc = 0;
   for(auto i = std::next(args.begin()), e = args.end(); i != e; ++i){
     if(i->tag() == Ptr_tag::cons){
-      do_list(*i,
-              [&](Cons* cell) -> bool {
-                vm.stack.push_back(cell->car());
-                ++argc;
-                return true;
-              },
-              [&](Lisp_ptr last){
-                if(!nullp(last)){
-                  cerr << "native func warning: apply: passed dot list. used as arg\n";
-                  vm.stack.push_back(last);
-                  ++argc;
-                }
-              });
+      for(auto p : *i){
+        vm.stack.push_back(p);
+        ++argc;
+      }
     }else{
       vm.stack.push_back(*i);
       ++argc;
