@@ -133,16 +133,7 @@ void vector_from_list(){
     throw builtin_type_check_failed("list->vector", Ptr_tag::cons, arg);
   }
 
-  Vector ret;
-  
-  do_list(arg,
-          [&](Cons* c) -> bool{
-            ret.push_back(c->car());
-            return true;
-          },
-          [](Lisp_ptr){});
-
-  vm.return_value[0] = {new Vector(std::move(ret))};
+  vm.return_value[0] = {new Vector(begin(arg), end(arg))};
 }
 
 void vector_fill(){
