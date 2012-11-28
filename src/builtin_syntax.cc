@@ -481,39 +481,26 @@ void whole_do(){
   // extract vars
   GrowList init_binds;
   GrowList steps;
-  do_list(vars,
-          [&](Cons* vc) -> bool{
-            Lisp_ptr v, i, s;
-            bind_cons_list(vc->car(),
-                           [&](Cons* c){ v = c->car(); },
-                           [&](Cons* c){ i = c->car(); },
-                           [&](Cons* c){ s = c->car(); });
-            if(!s) s = v;
 
-            init_binds.push(make_cons_list({v, i}));
-            steps.push(s);
-            return true;
-          },
-          [&](Lisp_ptr p){
-            if(!nullp(p)){
-              throw zs_error("macro do error: loop vars has dot-list!\n");
-            }
-          });
+  for(auto p : vars){
+    Lisp_ptr v, i, s;
+    bind_cons_list(p,
+                   [&](Cons* c){ v = c->car(); },
+                   [&](Cons* c){ i = c->car(); },
+                   [&](Cons* c){ s = c->car(); });
+    if(!s) s = v;
+
+    init_binds.push(make_cons_list({v, i}));
+    steps.push(s);
+  }
 
   // creates loop body
   GrowList gw;
 
   gw.push(intern(vm.symtable(), "begin"));
-  do_list(commands,
-          [&](Cons* c) -> bool{
-            gw.push(c->car());
-            return true;
-          },
-          [&](Lisp_ptr p){
-            if(!nullp(p)){
-              throw zs_error("macro do error: loop body has dot-list!\n");
-            }
-          });
+  for(auto p : commands){
+    gw.push(p);
+  }
   gw.push(push_cons_list(loop_sym, steps.extract()));
 
   // creates 'named let' style loop
