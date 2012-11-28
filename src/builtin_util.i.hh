@@ -65,33 +65,6 @@ void stack_to_vector(StackT& st, VectorT& v){
   st.erase(arg_start, arg_end);
 }
 
-template<typename StackT>
-int list_to_stack(const char* opname, Lisp_ptr l, StackT& st){
-  std::stack<Lisp_ptr> tmp;
-  
-  do_list(l,
-          [&](Cons* c) -> bool {
-            tmp.push(c->car());
-            return true;
-          },
-          [&](Lisp_ptr last_cdr){
-            if(!nullp(last_cdr)){
-              std::cerr << "eval warning: dot list has read as proper list. (in " << opname << ")\n";
-              tmp.push(last_cdr);
-            }
-          });
-
-  int ret = 0;
-
-  while(!tmp.empty()){
-    st.push_back(tmp.top());
-    tmp.pop();
-    ++ret;
-  }
-
-  return ret;
-}  
-
 template<int size>
 std::array<Lisp_ptr, size> pick_args(){
   Lisp_ptr argc = vm.stack.back();

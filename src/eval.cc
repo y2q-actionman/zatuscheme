@@ -100,7 +100,11 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
-  auto argc = list_to_stack("macro-call", args.get<Cons*>()->cdr(), vm.stack);
+  int argc = 0;
+  for(auto i = next(begin(args)), e = end(args); i != e; ++i){
+    vm.stack.push_back(*i);
+    ++argc;
+  }
 
   if((argc < info->required_args)
      || (!info->variadic && argc > info->required_args)){

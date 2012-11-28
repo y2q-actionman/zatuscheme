@@ -13,9 +13,6 @@ Lisp_ptr stack_to_list(StackT&);
 template<typename StackT, typename VectorT>
 void stack_to_vector(StackT&, VectorT&);
 
-template<typename StackT>
-int list_to_stack(const char*, Lisp_ptr, StackT&);
-
 // VM::stack accessor
 template<int i>
 std::array<Lisp_ptr, i> pick_args();
