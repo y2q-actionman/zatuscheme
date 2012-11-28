@@ -15,8 +15,7 @@ Lisp_ptr read_from_string(const char* s){
 Lisp_ptr eval_text(const char* s){
   auto exp = read_from_string(s);
   if(!exp){
-    fprintf(zs::err, "[failed] read error on %s\n", s);
-    // cerr << "[failed] read error on " << s << "\n";
+    cerr << "[failed] read error on " << s << "\n";
     return {};
   }
 
@@ -24,8 +23,7 @@ Lisp_ptr eval_text(const char* s){
   eval();
   auto ret = vm.return_value[0];
   if(!ret){
-    fprintf(zs::err, "[failed] eval error on %s\n", s);
-    // cerr << "[failed] eval error on " << s << "\n";
+    cerr << "[failed] eval error on " << s << "\n";
     return {};
   }
 
@@ -37,10 +35,8 @@ bool read_eval_print_test(const char* input, const char* expect){
   if(!e) return false;
 
   const auto fun = [input, expect](const char* s){
-    fprintf(zs::err, "[failed] expected %s, but got %s (from: %s)\n",
-            expect, s, input);
-    // cerr << "[failed] expected " << expect
-    //      << ", but got " << s << " (from: " << input << ")\n";
+    cerr << "[failed] expected " << expect
+         << ", but got " << s << " (from: " << input << ")\n";
   };
 
   return test_on_print(e, expect, fun);
