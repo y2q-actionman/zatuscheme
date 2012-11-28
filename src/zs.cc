@@ -1,5 +1,4 @@
 #include <exception>
-#include <cstdio>
 #include <iostream>
 
 #include "zs.hh"

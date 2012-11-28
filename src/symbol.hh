@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 #include <string>
-#include <ostream>
+#include <iosfwd>
 
 class Symbol;
 

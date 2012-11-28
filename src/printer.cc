@@ -1,5 +1,5 @@
-#include <cstdlib>
 #include <cassert>
+#include <ostream>
 
 #include "printer.hh"
 #include "symbol.hh"

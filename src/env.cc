@@ -1,4 +1,5 @@
 #include <utility>
+#include <ostream>
 
 #include "env.hh"
 #include "util.hh"

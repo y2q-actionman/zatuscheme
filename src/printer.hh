@@ -1,7 +1,7 @@
 #ifndef PRINTER_HH
 #define PRINTER_HH
 
-#include <ostream>
+#include <iosfwd>
 #include "lisp_ptr.hh"
 
 enum class print_human_readable{ f, t };

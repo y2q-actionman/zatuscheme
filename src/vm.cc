@@ -1,4 +1,5 @@
 #include <cassert>
+#include <ostream>
 
 #include "vm.hh"
 #include "env.hh"

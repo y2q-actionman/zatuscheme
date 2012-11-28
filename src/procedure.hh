@@ -1,7 +1,6 @@
 #ifndef PROCEDURE_HH
 #define PROCEDURE_HH
 
-#include <cstdio>
 #include <utility>
 #include "lisp_ptr.hh"
 #include "env.hh"

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
-#include <iostream>
+#include <iosfwd>
 
 enum class Ptr_tag {
   undefined = 0,

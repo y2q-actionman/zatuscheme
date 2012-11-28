@@ -1,7 +1,6 @@
 #ifndef UTIL_HH
 #define UTIL_HH
 
-#include <cstdio>
 #include <string>
 #include <exception>
 

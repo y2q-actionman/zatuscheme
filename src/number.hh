@@ -2,9 +2,7 @@
 #define NUMBER_HH
 
 #include <complex>
-#include <cstdio>
-#include <istream>
-#include <ostream>
+#include <iosfwd>
 
 #include "util.hh"
 

@@ -1,5 +1,6 @@
 #include <utility>
 #include <cassert>
+#include <ostream>
 
 #include "symbol.hh"
 #include "util.hh"

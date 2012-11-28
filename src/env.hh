@@ -2,7 +2,7 @@
 #define ENV_HH
 
 #include <unordered_map>
-#include <ostream>
+#include <iosfwd>
 
 #include "lisp_ptr.hh"
 

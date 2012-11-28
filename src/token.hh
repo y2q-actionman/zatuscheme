@@ -2,7 +2,7 @@
 #define TOKEN_HH
 
 #include <string>
-#include <istream>
+#include <iosfwd>
 
 #include "number.hh"
 #include "util.hh"

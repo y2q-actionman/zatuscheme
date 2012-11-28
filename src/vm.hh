@@ -1,11 +1,10 @@
 #ifndef VM_HH
 #define VM_HH
 
-#include <vector>
-#include <stack>
-#include <deque>
 #include <memory>
-#include <ostream>
+#include <vector>
+#include <deque>
+#include <iosfwd>
 
 #include "lisp_ptr.hh"
 #include "cons.hh"

@@ -6,7 +6,6 @@
 #endif
 
 #include <cassert>
-#include <utility>
 #include "decl.hh"
 #include "util.hh"
 
