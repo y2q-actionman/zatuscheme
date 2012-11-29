@@ -19,11 +19,6 @@ std::array<Lisp_ptr, i> pick_args();
 
 Lisp_ptr pick_args_1();
 
-enum ZsArgsClean : bool {
-  f = false, t = true
-    };
-
-template<ZsArgsClean c = ZsArgsClean::t>
 class ZsArgs{
 public:
   explicit ZsArgs();

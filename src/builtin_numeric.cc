@@ -109,7 +109,7 @@ struct number_comparator {
 
 template<typename Fun>
 inline void number_compare(const char* name, Fun&& fun){
-  ZsArgs<> args;
+  ZsArgs args;
 
   auto i1 = begin(args);
   const auto e = end(args);
@@ -261,7 +261,7 @@ void number_accumulate(const char* name, Number&& init, Fun&& fun,
 template<class Fun>
 inline
 void number_accumulate(const char* name, Number&& init, Fun&& fun){
-  ZsArgs<> args;
+  ZsArgs args;
   number_accumulate(name, move(init), move(fun), move(args));
 }
 

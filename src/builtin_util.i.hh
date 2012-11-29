@@ -85,16 +85,14 @@ std::array<Lisp_ptr, size> pick_args(){
 }
 
 // class ZsArgs
-template<ZsArgsClean c>
-ZsArgs<c>::ZsArgs()
+ZsArgs::ZsArgs()
   : stack_iter_s_(),
     stack_iter_e_(vm.stack.end()){
   auto argcnt = vm.stack.back().get<int>();
   stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
 }
 
-template<ZsArgsClean c>
-ZsArgs<c>::ZsArgs(int request_argc)
+ZsArgs::ZsArgs(int request_argc)
   : stack_iter_s_(),
     stack_iter_e_(vm.stack.end()){
   // TODO: use delegating constructor
@@ -106,9 +104,8 @@ ZsArgs<c>::ZsArgs(int request_argc)
   }
 }
 
-template<ZsArgsClean c>
-ZsArgs<c>::~ZsArgs(){
-  if((c == ZsArgsClean::t) && !std::uncaught_exception())
+ZsArgs::~ZsArgs(){
+  if(!std::uncaught_exception())
     vm.stack.erase(stack_iter_s_, stack_iter_e_);
 }
 
