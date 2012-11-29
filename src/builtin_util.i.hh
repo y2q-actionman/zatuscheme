@@ -85,6 +85,7 @@ std::array<Lisp_ptr, size> pick_args(){
 }
 
 // class ZsArgs
+inline
 ZsArgs::ZsArgs()
   : stack_iter_s_(),
     stack_iter_e_(vm.stack.end()){
@@ -92,6 +93,7 @@ ZsArgs::ZsArgs()
   stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
 }
 
+inline
 ZsArgs::ZsArgs(int request_argc)
   : stack_iter_s_(),
     stack_iter_e_(vm.stack.end()){
@@ -104,6 +106,7 @@ ZsArgs::ZsArgs(int request_argc)
   }
 }
 
+inline
 ZsArgs::~ZsArgs(){
   if(!std::uncaught_exception())
     vm.stack.erase(stack_iter_s_, stack_iter_e_);
