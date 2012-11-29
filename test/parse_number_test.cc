@@ -1,6 +1,7 @@
 #include <string>
 #include <cstdlib>
 #include <sstream>
+#include <iostream>
 
 #include "number.hh"
 #include "describe.hh"

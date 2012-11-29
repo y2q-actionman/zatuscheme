@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "builtin_util.hh"
 
 Lisp_ptr pick_args_1(){
@@ -12,5 +14,10 @@ zs_error builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr 
 
 zs_error builtin_variadic_argcount_failed(const char* name, int argc){
   return make_zs_error("native func: %s: %d or more args.\n", name, argc+1);
+}
+
+ZsArgs::~ZsArgs(){
+  if(!std::uncaught_exception())
+    vm.stack.erase(stack_iter_s_, stack_iter_e_);
 }
 

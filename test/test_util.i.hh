@@ -6,6 +6,7 @@
 #endif
 
 #include <sstream>
+#include <iostream>
 
 #include "vm.hh"
 #include "util.hh"

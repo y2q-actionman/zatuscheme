@@ -5,12 +5,8 @@
 #error "Please include via parent file"
 #endif
 
-#include <stack>
 #include <vector>
 #include <array>
-#include <iterator>
-#include <exception>
-#include <iostream>
 
 #include "util.hh"
 #include "lisp_ptr.hh"
@@ -104,12 +100,6 @@ ZsArgs::ZsArgs(int request_argc)
   if(argcnt != request_argc){
     // throw exception.
   }
-}
-
-inline
-ZsArgs::~ZsArgs(){
-  if(!std::uncaught_exception())
-    vm.stack.erase(stack_iter_s_, stack_iter_e_);
 }
 
 #endif //BUILTIN_UTIL_I_HH

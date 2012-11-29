@@ -22,10 +22,6 @@ void free_cons_list(Lisp_ptr p){
           });
 }
 
-Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
-  return Lisp_ptr(new Cons(p, q));
-}
-
 void GrowList::push(Lisp_ptr p){
   assert(head && next);
   assert(*next == Cons::NIL);
@@ -42,6 +38,17 @@ static zs_error make_cons_iter_error(Lisp_ptr p){
                        stringify(p.tag()));
 }
 
+
+// GrowList class
+GrowList::~GrowList(){
+  if(auto c = head.get<Cons*>()){
+    free_cons_list(c);
+  }
+  // invalidate();
+}
+
+
+// ConsIter class
 ConsIter& ConsIter::operator++(){
   auto p = c_->cdr();
 

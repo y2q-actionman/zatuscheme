@@ -102,6 +102,11 @@ Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
   return make_cons_list(begin(lis), end(lis));
 }
 
+inline
+Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
+  return Lisp_ptr(new Cons(p, q));
+}
+
 
 // GrowList class
 inline
@@ -115,14 +120,6 @@ inline
 GrowList::GrowList()
   : head(Cons::NIL), next(&head)
 {}
-
-inline
-GrowList::~GrowList(){
-  if(auto c = head.get<Cons*>()){
-    free_cons_list(c);
-  }
-  // invalidate();
-}
 
 inline
 Lisp_ptr GrowList::extract(){
