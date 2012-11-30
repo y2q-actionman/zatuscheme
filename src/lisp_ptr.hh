@@ -16,7 +16,8 @@ enum class Ptr_tag {
     number,
     string,
     vector,
-    port,
+    input_port,
+    output_port,
     env,
     delay,
     continuation,
@@ -89,7 +90,8 @@ namespace Procedure{
 class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
-typedef std::ios Port;
+typedef std::istream InputPort;
+typedef std::ostream OutputPort;
 class Env;
 class Delay;
 typedef void(*VMop)();

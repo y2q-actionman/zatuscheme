@@ -22,8 +22,10 @@ const char* stringify(Ptr_tag p){
     return "string";
   case Ptr_tag::vector:
     return "vector";
-  case Ptr_tag::port:
-    return "port";
+  case Ptr_tag::input_port:
+    return "input port";
+  case Ptr_tag::output_port:
+    return "output port";
   case Ptr_tag::env:
     return "env";
   case Ptr_tag::delay:

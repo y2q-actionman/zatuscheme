@@ -157,7 +157,8 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
   case Ptr_tag::i_procedure:
   case Ptr_tag::n_procedure:
   case Ptr_tag::continuation:
-  case Ptr_tag::port:
+  case Ptr_tag::input_port:
+  case Ptr_tag::output_port:
   case Ptr_tag::env:
     f << "#<" << stringify(p.tag()) << " " << p.get<void*>() << ">";
     break;

@@ -628,7 +628,8 @@ void eval(){
       case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
       case Ptr_tag::number:
       case Ptr_tag::string: case Ptr_tag::vector:
-      case Ptr_tag::port: case Ptr_tag::env:
+      case Ptr_tag::input_port: case Ptr_tag::output_port:
+      case Ptr_tag::env:
       case Ptr_tag::delay:
       case Ptr_tag::continuation:
         vm.code.pop_back();

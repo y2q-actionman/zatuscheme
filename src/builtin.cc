@@ -166,14 +166,9 @@ void install_builtin(){
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }
 
-void load(Port* p){
-  auto in = dynamic_cast<std::istream*>(p);
-  if(!in){
-    throw zs_error("load error: passed port is not input port.\n");
-  }
-
+void load(InputPort* p){
   while(1){
-    auto form = read(*in);
+    auto form = read(*p);
     if(!form){
       if(!*p){
         // cerr << "load error: failed at reading a form. abandoned.\n";

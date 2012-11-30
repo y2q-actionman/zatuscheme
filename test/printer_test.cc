@@ -78,7 +78,8 @@ int main(){
   check("a\"bc", "\"a\\\"bc\"");
 
   // port (should be added in future)
-  check_noprint(static_cast<Port*>(nullptr));
+  check_noprint(static_cast<InputPort*>(nullptr));
+  check_noprint(static_cast<OutputPort*>(nullptr));
 
 
   // cons, list

@@ -55,8 +55,13 @@ struct to_type<Ptr_tag, Ptr_tag::vector>{
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::port>{
-  typedef Port* type;
+struct to_type<Ptr_tag, Ptr_tag::input_port>{
+  typedef InputPort* type;
+};
+
+template<>
+struct to_type<Ptr_tag, Ptr_tag::output_port>{
+  typedef OutputPort* type;
 };
 
 template<>
@@ -141,8 +146,14 @@ Ptr_tag to_tag<Ptr_tag, Vector*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Port*>(){
-  return Ptr_tag::port;
+Ptr_tag to_tag<Ptr_tag, InputPort*>(){
+  return Ptr_tag::input_port;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, OutputPort*>(){
+  return Ptr_tag::output_port;
 }
 
 template<>

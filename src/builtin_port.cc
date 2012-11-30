@@ -19,31 +19,28 @@ namespace {
 #define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
 #define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
 
+template<typename T>
 zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
   return make_zs_error("native func: %s: arg is not %s! (%s)\n",
-                       func_name, stringify(Ptr_tag::port), stringify(p.tag()));
+                       func_name, stringify(to_tag<Ptr_tag, T*>()), stringify(p.tag()));
 }
 
-template<typename Fun>
-void port_io_p(Fun&& fun){
+template<typename T>
+void port_io_p(){
   auto arg = pick_args_1();
-  if(arg.tag() != Ptr_tag::port){
-    vm.return_value[0] = Lisp_ptr{false};
-    return;
-  }
 
-  vm.return_value[0] = Lisp_ptr{fun(arg.get<Port*>())};
+  vm.return_value[0] = Lisp_ptr{arg.tag() == to_tag<Ptr_tag, T*>()};
 }
   
 void port_i_p(){
-  port_io_p([](Port* p){ return (dynamic_cast<std::istream*>(p) != nullptr); });
+  port_io_p<InputPort>();
 }
 
 void port_o_p(){
-  port_io_p([](Port* p){ return (dynamic_cast<std::ostream*>(p) != nullptr); });
+  port_io_p<OutputPort>();
 }
 
-template<typename IOType>
+template<typename IOType, typename F_IOType>
 void port_open_file(const char* name){
   auto arg = pick_args_1();
   auto str = arg.get<String*>();
@@ -51,7 +48,7 @@ void port_open_file(const char* name){
     throw builtin_type_check_failed(name, Ptr_tag::string, arg);
   }
 
-  Port* p = new IOType(str->c_str());
+  IOType* p = new F_IOType(str->c_str());
   if(!*p){
     throw make_zs_error("native error: %s: failed at opening file\n", name);
   }
@@ -60,23 +57,19 @@ void port_open_file(const char* name){
 }  
 
 void port_open_file_i(){
-  port_open_file<ifstream>("open-input-file");
+  port_open_file<InputPort, ifstream>("open-input-file");
 }  
 
 void port_open_file_o(){
-  port_open_file<ofstream>("open-output-file");
+  port_open_file<OutputPort, ofstream>("open-output-file");
 }  
 
 template<typename IOType, typename F_IOType>
 void port_close(const char* name){
   auto arg = pick_args_1();
-  auto p = arg.get<Port*>();
+  auto p = arg.get<IOType*>();
   if(!p){
-    throw port_type_check_failed(name, arg);
-  }
-
-  if(!dynamic_cast<IOType*>(p)){
-    throw make_zs_error("native func error: %s: passed port is not expected direction\n", name);
+    throw port_type_check_failed<IOType>(name, arg);
   }
 
   auto fio = dynamic_cast<F_IOType*>(p);
@@ -91,11 +84,11 @@ void port_close(const char* name){
 }
 
 void port_close_i(){
-  port_close<std::istream, std::ifstream>("close-input-port");
+  port_close<InputPort, std::ifstream>("close-input-port");
 }
 
 void port_close_o(){
-  port_close<std::ostream, std::ofstream>("close-output-port");
+  port_close<OutputPort, std::ofstream>("close-output-port");
 }
 
 
@@ -104,29 +97,24 @@ void port_input_call(const char* name, Fun&& fun){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
-  Port* p;
+  InputPort* p;
 
   switch(args.size()){
   case 0:
-    p = vm.find(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME)).get<Port*>();
+    p = vm.find(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME)).get<InputPort*>();
     assert(p);
     break;
   case 1:
-    p = args[0].get<Port*>();
+    p = args[0].get<InputPort*>();
     if(!p){
-      throw port_type_check_failed(name, args[0]);
+      throw port_type_check_failed<InputPort>(name, args[0]);
     }
     break;
   default:
     throw builtin_variadic_argcount_failed(name, 1);
   }
 
-  auto is = dynamic_cast<std::istream*>(p);
-  if(!is){
-    throw make_zs_error("native func error: %s: passed port is not input port\n", name);
-  }
-
-  vm.return_value[0] = Lisp_ptr{fun(is)};
+  vm.return_value[0] = Lisp_ptr{fun(p)};
 }
 
 void port_read(){
@@ -159,29 +147,24 @@ void port_output_call(const char* name, Fun&& fun){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
-  Port* p;
+  OutputPort* p;
 
   switch(args.size()){
   case 1:
-    p = vm.find(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME)).get<Port*>();
+    p = vm.find(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME)).get<OutputPort*>();
     assert(p);
     break;
   case 2:
-    p = args[1].get<Port*>();
+    p = args[1].get<OutputPort*>();
     if(!p){
-      throw port_type_check_failed(name, args[1]);
+      throw port_type_check_failed<OutputPort>(name, args[1]);
     }
     break;
   default:
     throw builtin_variadic_argcount_failed(name, 2);
   }
 
-  auto os = dynamic_cast<std::ostream*>(p);
-  if(!os){
-    throw make_zs_error("native func error: %s: passed port is not output port\n", name);
-  }
-
-  vm.return_value[0] = Lisp_ptr{fun(args[0], os)};
+  vm.return_value[0] = Lisp_ptr{fun(args[0], p)};
 }
 
 void port_write(){
@@ -266,9 +249,9 @@ const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
   vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME),
-               static_cast<Port*>(&std::cin));
+               &std::cin);
   vm.local_set(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME),
-               static_cast<Port*>(&std::cout));
+               &std::cout);
 }
 
 
