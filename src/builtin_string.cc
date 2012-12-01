@@ -49,7 +49,7 @@ Lisp_ptr string_make(){
     return {new String(char_count, c)};
   }
   default:
-    throw builtin_variadic_argcount_failed("make-string", 2);
+    throw builtin_argcount_failed("make-string", 1, 2, args.size());
   }
 }
 

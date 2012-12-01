@@ -795,7 +795,7 @@ Lisp_ptr number_atan(){
   }
 
   default:
-    throw builtin_variadic_argcount_failed("atan", 2);
+    throw builtin_argcount_failed("atan", 1, 2, args.size());
   }
 }
 
@@ -969,7 +969,7 @@ Lisp_ptr number_from_string(){
     break;
   }
   default:
-    throw builtin_variadic_argcount_failed("string->number", 2);
+    throw builtin_argcount_failed("string->number", 1, 2, args.size());
   }
 
   istringstream iss(*str);
@@ -1005,7 +1005,7 @@ Lisp_ptr number_to_string(){
     break;
   }
   default:
-    throw builtin_variadic_argcount_failed("number->string", 2);
+    throw builtin_argcount_failed("number->string", 1, 2, args.size());
   }
 
   ostringstream oss;

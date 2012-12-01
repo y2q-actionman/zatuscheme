@@ -37,7 +37,7 @@ Lisp_ptr vector_make(){
   case 2:
     return {new Vector(count, args[1])};
   default:
-    throw builtin_variadic_argcount_failed("make-vector", 2);
+    throw builtin_argcount_failed("make-vector", 1, 2, args.size());
   }
 }
 

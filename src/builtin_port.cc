@@ -94,7 +94,7 @@ Lisp_ptr port_input_call(const char* name, Fun&& fun){
     }
     break;
   default:
-    throw builtin_variadic_argcount_failed(name, 1);
+    throw builtin_argcount_failed(name, 0, 1, args.size());
   }
 
   return Lisp_ptr{fun(p)};
@@ -142,7 +142,7 @@ Lisp_ptr port_output_call(const char* name, Fun&& fun){
     }
     break;
   default:
-    throw builtin_variadic_argcount_failed(name, 2);
+    throw builtin_argcount_failed(name, 1, 2, args.size());
   }
 
   return Lisp_ptr{fun(args[0], p)};

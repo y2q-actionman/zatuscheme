@@ -338,10 +338,8 @@ void proc_enter_entrypoint(Lisp_ptr proc){
 
   if((info->calling != Calling::whole_function)
      && !(info->required_args <= argc && argc <= info->max_args)){
-    throw make_zs_error("eval error: number of passed args is mismatched!!"
-                        " (required %d-%d args, passed %d)\n",
-                        info->required_args, info->max_args,
-                        argc);
+    throw builtin_argcount_failed("(unknown)", info->required_args,
+                                  info->max_args, argc);
   }
 
   if(auto ifun = proc.get<IProcedure*>()){
