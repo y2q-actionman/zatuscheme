@@ -23,12 +23,12 @@ zs_error cons_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 Lisp_ptr type_check_pair(){
-  auto arg = pick_args_1();
-  return Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
+  ZsArgs args{1};
+  return Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
 }
 
 Lisp_ptr cons_cons(){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   return {new Cons(args[0], args[1])};
 }
 
@@ -36,12 +36,12 @@ Lisp_ptr cons_cons(){
 template<typename Fun>
 inline
 Lisp_ptr cons_carcdr(const char* name, Fun&& fun){
-  auto arg = pick_args_1();
-  if(arg.tag() != Ptr_tag::cons){
-    throw cons_type_check_failed(name, arg);
+  ZsArgs args{1};
+  if(args[0].tag() != Ptr_tag::cons){
+    throw cons_type_check_failed(name, args[0]);
   }
 
-  auto c = arg.get<Cons*>();
+  auto c = args[0].get<Cons*>();
   if(!c){
     throw make_zs_error("native func: %s: arg is null list!\n", name);
   }
@@ -61,7 +61,7 @@ Lisp_ptr cons_cdr(){
 template<typename Fun>
 inline
 Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed(name, args[0]);
   }
@@ -92,19 +92,19 @@ Lisp_ptr cons_set_cdr(){
 
 
 Lisp_ptr cons_nullp(){
-  auto arg = pick_args_1();
-  return Lisp_ptr{nullp(arg)};
+  ZsArgs args{1};
+  return Lisp_ptr{nullp(args[0])};
 }
 
 Lisp_ptr cons_listp(){
-  auto arg = pick_args_1();
-  if(arg.tag() != Ptr_tag::cons){
-    throw cons_type_check_failed("list?", arg);
+  ZsArgs args{1};
+  if(args[0].tag() != Ptr_tag::cons){
+    throw cons_type_check_failed("list?", args[0]);
   }
 
   auto found_cons = unordered_set<Cons*>();
   
-  auto ret = do_list(arg,
+  auto ret = do_list(args[0],
                      [&](Cons* c) -> bool{
                        auto founded = found_cons.find(c);
                        if(founded != found_cons.end())
@@ -129,12 +129,12 @@ Lisp_ptr cons_list_star(){
 }
 
 Lisp_ptr cons_length(){
-  auto arg = pick_args_1();
-  if(arg.tag() != Ptr_tag::cons){
-    throw cons_type_check_failed("list?", arg);
+  ZsArgs args{1};
+  if(args[0].tag() != Ptr_tag::cons){
+    throw cons_type_check_failed("list?", args[0]);
   }
 
-  return {new Number(std::distance(begin(arg), end(arg)))};
+  return {new Number(std::distance(begin(args[0]), end(args[0])))};
 }
 
 Lisp_ptr cons_append(){
@@ -156,14 +156,14 @@ Lisp_ptr cons_append(){
 }
 
 Lisp_ptr cons_reverse(){
-  auto arg = pick_args_1();
-  if(arg.tag() != Ptr_tag::cons){
-    throw cons_type_check_failed("reverse", arg);
+  ZsArgs args{1};
+  if(args[0].tag() != Ptr_tag::cons){
+    throw cons_type_check_failed("reverse", args[0]);
   }
 
   Lisp_ptr ret = Cons::NIL;
   
-  for(auto p : arg){
+  for(auto p : args[0]){
     ret = push_cons_list(p, ret);
   }
 
@@ -171,7 +171,7 @@ Lisp_ptr cons_reverse(){
 }
 
 Cons* cons_list_tail_base(const char* name){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed(name, args[0]);
   }

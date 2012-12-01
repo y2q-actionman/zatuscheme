@@ -33,8 +33,8 @@ zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
 
 template<typename Fun>
 inline Lisp_ptr number_pred(Fun&& fun){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
+  ZsArgs args{1};
+  auto num = args[0].get<Number*>();
   if(!num){
     return Lisp_ptr{false};
   }
@@ -447,11 +447,11 @@ Lisp_ptr number_divide(){
 }
 
 Lisp_ptr number_abs(){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
-    throw number_type_check_failed("abs", arg1);
+    throw number_type_check_failed("abs", args[0]);
   }
 
   switch(n->type()){
@@ -485,7 +485,7 @@ Lisp_ptr number_abs(){
 template<typename Fun>
 inline
 Lisp_ptr number_divop(const char* name, Fun&& fun){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   Number* n[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -578,20 +578,20 @@ Lisp_ptr number_lcm(){
 }
 
 Lisp_ptr number_numerator(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
+  ZsArgs args{1};
+  auto num = args[0].get<Number*>();
   if(!num){
-    throw number_type_check_failed("numerator", arg);
+    throw number_type_check_failed("numerator", args[0]);
   }
 
   throw zs_error("internal error: native func 'numerator' is not implemented.\n");
 }
 
 Lisp_ptr number_denominator(){
-  auto arg = pick_args_1();
-  auto num = arg.get<Number*>();
+  ZsArgs args{1};
+  auto num = args[0].get<Number*>();
   if(!num){
-    throw number_type_check_failed("denominator", arg);
+    throw number_type_check_failed("denominator", args[0]);
   }
 
   throw zs_error("internal error: native func 'denominator' is not implemented.\n");
@@ -601,11 +601,11 @@ Lisp_ptr number_denominator(){
 template<typename Fun>
 inline
 Lisp_ptr number_rounding(const char* name, Fun&& fun){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
-    throw number_type_check_failed(name, arg1);
+    throw number_type_check_failed(name, args[0]);
   }
 
   switch(n->type()){
@@ -639,7 +639,7 @@ Lisp_ptr number_round(){
 
 
 Lisp_ptr number_rationalize(){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   Number* n[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -656,11 +656,11 @@ Lisp_ptr number_rationalize(){
 template<typename Fun>
 inline
 Lisp_ptr number_unary_op(const char* name, Fun&& fun){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
-    throw number_type_check_failed(name, arg1);
+    throw number_type_check_failed(name, args[0]);
   }
 
   switch(n->type()){
@@ -812,7 +812,7 @@ Lisp_ptr number_sqrt(){
 template<typename RFun, typename CFun>
 inline
 Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   Number* n[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -872,11 +872,11 @@ Lisp_ptr number_polar(){
 template<typename Fun>
 inline
 Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
-    throw number_type_check_failed(name, arg1);
+    throw number_type_check_failed(name, args[0]);
   }
 
   switch(n->type()){
@@ -920,11 +920,11 @@ Lisp_ptr number_angle(){
 
 template<typename Fun>
 Lisp_ptr number_i_e(const char* name, Fun&& fun){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
-    throw number_type_check_failed(name, arg1);
+    throw number_type_check_failed(name, args[0]);
   }
 
   return {new Number(fun(*n))};

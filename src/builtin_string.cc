@@ -70,25 +70,25 @@ Lisp_ptr string_string(){
 }
   
 Lisp_ptr string_length(){
-  auto arg1 = pick_args_1();
-  auto str = arg1.get<String*>();
+  ZsArgs args{1};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw string_type_check_failed("string-length", arg1);
+    throw string_type_check_failed("string-length", args[0]);
   }
 
   return {new Number(static_cast<Number::integer_type>(str->length()))};
 }
 
 Lisp_ptr string_ref(){
-  auto arg = pick_args<2>();
-  auto str = arg[0].get<String*>();
+  ZsArgs args{2};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw string_type_check_failed("string-ref", arg[0]);
+    throw string_type_check_failed("string-ref", args[0]);
   }
 
-  auto num = arg[1].get<Number*>();
+  auto num = args[1].get<Number*>();
   if(!num){
-    throw builtin_type_check_failed("string-ref", Ptr_tag::number, arg[1]);
+    throw builtin_type_check_failed("string-ref", Ptr_tag::number, args[1]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -106,15 +106,15 @@ Lisp_ptr string_ref(){
 }
 
 Lisp_ptr string_set(){
-  auto arg = pick_args<3>();
-  auto str = arg[0].get<String*>();
+  ZsArgs args{3};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw string_type_check_failed("string-set!", arg[0]);
+    throw string_type_check_failed("string-set!", args[0]);
   }
 
-  auto num = arg[1].get<Number*>();
+  auto num = args[1].get<Number*>();
   if(!num){
-    throw builtin_type_check_failed("string-set!", Ptr_tag::number, arg[1]);
+    throw builtin_type_check_failed("string-set!", Ptr_tag::number, args[1]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -128,9 +128,9 @@ Lisp_ptr string_set(){
                         str->length(), ind);
   }
 
-  auto ch = arg[2].get<char>();
+  auto ch = args[2].get<char>();
   if(!ch){
-    throw builtin_type_check_failed("string-set!", Ptr_tag::character, arg[2]);
+    throw builtin_type_check_failed("string-set!", Ptr_tag::character, args[2]);
   }
 
   (*str)[ind] = ch;
@@ -139,7 +139,7 @@ Lisp_ptr string_set(){
 
 template<typename Fun>
 Lisp_ptr string_compare(const char* name, Fun&& fun){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   String* str[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -202,18 +202,18 @@ Lisp_ptr string_ci_greater_eq(){
 
 
 Lisp_ptr string_substr(){
-  auto arg = pick_args<3>();
-  auto str = arg[0].get<String*>();
+  ZsArgs args{3};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw string_type_check_failed("substring", arg[0]);
+    throw string_type_check_failed("substring", args[0]);
   }
 
   Number::integer_type ind[2];
 
   for(int i = 1; i < 3; ++i){
-    auto n = arg[i].get<Number*>();
+    auto n = args[i].get<Number*>();
     if(!n){
-      throw builtin_type_check_failed("substring", Ptr_tag::number, arg[i]);
+      throw builtin_type_check_failed("substring", Ptr_tag::number, args[i]);
     }
 
     if(n->type() != Number::Type::integer){
@@ -251,24 +251,24 @@ Lisp_ptr string_append(){
 }
 
 Lisp_ptr string_to_list(){
-  auto arg1 = pick_args_1();
-  auto str = arg1.get<String*>();
+  ZsArgs args{1};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw string_type_check_failed("string->list", arg1);
+    throw string_type_check_failed("string->list", args[0]);
   }
 
   return make_cons_list(str->begin(), str->end());
 }
 
 Lisp_ptr string_from_list(){
-  auto arg = pick_args_1();
-  if(arg.tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed("list->string", Ptr_tag::cons, arg);
+  ZsArgs args{1};
+  if(args[0].tag() != Ptr_tag::cons){
+    throw builtin_type_check_failed("list->string", Ptr_tag::cons, args[0]);
   }
 
   String ret;
   
-  for(auto p : arg){
+  for(auto p : args[0]){
     auto ch = p.get<char>();
     if(!ch){
       throw builtin_type_check_failed("list->string", Ptr_tag::character, p);
@@ -280,25 +280,25 @@ Lisp_ptr string_from_list(){
 }
 
 Lisp_ptr string_copy(){
-  auto arg1 = pick_args_1();
-  auto str = arg1.get<String*>();
+  ZsArgs args{1};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw string_type_check_failed("string-copy", arg1);
+    throw string_type_check_failed("string-copy", args[0]);
   }
 
   return {new String(*str)};
 }
 
 Lisp_ptr string_fill(){
-  auto arg = pick_args<2>();
-  auto str = arg[0].get<String*>();
+  ZsArgs args{2};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw string_type_check_failed("string-fill!", arg[0]);
+    throw string_type_check_failed("string-fill!", args[0]);
   }
 
-  auto ch = arg[1].get<char>();
+  auto ch = args[1].get<char>();
   if(!ch){
-    throw builtin_type_check_failed("string-fill!", Ptr_tag::character, arg[1]);
+    throw builtin_type_check_failed("string-fill!", Ptr_tag::character, args[1]);
   }
 
   std::fill(str->begin(), str->end(), ch);

@@ -39,10 +39,10 @@ static const char interaction_env_symname[] = "interaction-env-value";
 
 static
 Lisp_ptr env_pick_2(const char* name){
-  auto p = pick_args_1();
-  auto num = p.get<Number*>();
+  ZsArgs args{1};
+  auto num = args[0].get<Number*>();
   if(!num){
-    throw builtin_type_check_failed(name, Ptr_tag::number, p);
+    throw builtin_type_check_failed(name, Ptr_tag::number, args[0]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -67,13 +67,13 @@ Lisp_ptr env_null(){
 }
 
 Lisp_ptr env_interactive(){
-  pick_args<0>();
+  ZsArgs args{0};
   return vm.find(intern(vm.symtable(), interaction_env_symname));
 }
   
 
 Lisp_ptr eval_func(){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   auto env = args[1].get<Env*>();
   if(!env){
     throw builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
@@ -87,10 +87,10 @@ Lisp_ptr eval_func(){
 
 
 Lisp_ptr load_func(){
-  auto arg = pick_args_1();
-  auto str = arg.get<String*>();
+  ZsArgs args{1};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed("load", Ptr_tag::string, arg);
+    throw builtin_type_check_failed("load", Ptr_tag::string, args[0]);
   }
 
   stringstream f(*str, ios_base::in);

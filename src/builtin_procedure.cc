@@ -12,8 +12,8 @@ using namespace Procedure;
 namespace {
 
 Lisp_ptr type_check_procedure(){
-  auto arg = pick_args_1();
-  return Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure) || (arg.tag() == Ptr_tag::n_procedure)};
+  ZsArgs args{1};
+  return Lisp_ptr{(args[0].tag() == Ptr_tag::i_procedure) || (args[0].tag() == Ptr_tag::n_procedure)};
 }
 
 Lisp_ptr proc_values(){

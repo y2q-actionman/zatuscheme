@@ -11,13 +11,13 @@ using namespace Procedure;
 namespace {
 
 Lisp_ptr to_macro_procedure(){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  if(arg1.tag() != Ptr_tag::i_procedure){
+  auto proc = args[0].get<IProcedure*>();
+  if(!proc){
     throw zs_error("to-macro-procedure: error: should be called with interpreted proc\n");
   }
 
-  auto proc = arg1.get<IProcedure*>();
   auto info = *proc->info();
   info.calling = Calling::macro;
 
@@ -28,12 +28,12 @@ Lisp_ptr to_macro_procedure(){
 
 Lisp_ptr gensym(){
   static const string gensym_symname = {"(gensym)"};
-  pick_args<0>();
+  ZsArgs args{0};
   return {new Symbol(&gensym_symname)};
 }
 
 Lisp_ptr exit_func(){
-  pick_args<0>();
+  ZsArgs args{0};
   // cerr << "exiting..\n";
   vm.stack.clear();
   vm.code.clear();

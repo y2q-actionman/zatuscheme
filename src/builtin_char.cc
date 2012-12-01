@@ -21,7 +21,7 @@ zs_error char_type_check_failed(const char* func_name, Lisp_ptr p){
 
 template<typename Fun>
 Lisp_ptr char_compare(const char* name, Fun&& fun){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   char c[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -86,9 +86,9 @@ Lisp_ptr char_ci_greater_eq(){
   
 template<typename Fun>
 Lisp_ptr char_pred(Fun&& fun){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  auto c = arg1.get<char>();
+  auto c = args[0].get<char>();
   if(!c){
     return Lisp_ptr{false};
   }
@@ -119,11 +119,11 @@ Lisp_ptr char_islower(){
 
 template<typename Fun>
 Lisp_ptr char_conversion(const char* name, Fun&& fun){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  auto c = arg1.get<char>();
+  auto c = args[0].get<char>();
   if(!c){
-    throw char_type_check_failed(name, arg1);
+    throw char_type_check_failed(name, args[0]);
   }
 
   return Lisp_ptr{fun(c)};
@@ -138,11 +138,11 @@ Lisp_ptr char_to_int(){
 }
 
 Lisp_ptr char_from_int(){
-  auto arg1 = pick_args_1();
+  ZsArgs args{1};
 
-  auto n = arg1.get<Number*>();
+  auto n = args[0].get<Number*>();
   if(!n){
-    throw builtin_type_check_failed("integer->char", Ptr_tag::number, arg1);
+    throw builtin_type_check_failed("integer->char", Ptr_tag::number, args[0]);
   }
   if(n->type() != Number::Type::integer){
     throw make_zs_error("native func: integer->char: passed arg is not exact integer! (%s)",

@@ -18,8 +18,8 @@ using namespace Procedure;
 namespace {
 
 Lisp_ptr error_whole_function(const char* msg){
-  auto wargs = pick_args_1();
-  auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
+  ZsArgs wargs{1};
+  auto sym = wargs[0].get<Cons*>()->car().get<Symbol*>();
 
   assert(sym);
 
@@ -36,16 +36,16 @@ Lisp_ptr whole_function_unimplemented(){
 }
 
 Lisp_ptr whole_function_pass_through(){
-  return pick_args_1();
+  ZsArgs wargs{1};
+  return wargs[0];
 }
 
 Lisp_ptr whole_function_quote(){
-  auto wargs = pick_args_1();
-  if(!wargs) return {};
+  ZsArgs wargs{1};
 
   Lisp_ptr val;
 
-  bind_cons_list(wargs,
+  bind_cons_list(wargs[0],
                  [](Cons*){},
                  [&](Cons* c){
                    val = c->car();
@@ -77,12 +77,11 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
 }
 
 Lisp_ptr whole_function_lambda(){
-  auto wargs = pick_args_1();
-  if(!wargs) return {};
+  ZsArgs wargs{1};
 
   Lisp_ptr args, code;
 
-  bind_cons_list(wargs,
+  bind_cons_list(wargs[0],
                  [](Cons*){},
                  [&](Cons* c){
                    args = c->car();
@@ -205,10 +204,9 @@ Lisp_ptr whole_function_define(){
 }
 
 Lisp_ptr whole_function_begin(){
-  auto wargs = pick_args_1();
-  if(!wargs) return {};
+  ZsArgs wargs{1};
 
-  auto exprs = wargs.get<Cons*>()->cdr();
+  auto exprs = wargs[0].get<Cons*>()->cdr();
   if(!exprs || nullp(exprs)){
     throw zs_error("eval error: begin has no exprs.\n");
   }
@@ -342,12 +340,11 @@ Lisp_ptr cond_expand(Cons* head){
 template<typename T, typename Expander>
 inline
 Lisp_ptr whole_conditional(T default_value, Expander e){
-  auto arg = pick_args_1();
-  if(!arg) return {};
+  ZsArgs wargs{1};
 
   Cons* head;
 
-  int len = bind_cons_list(arg,
+  int len = bind_cons_list(wargs[0],
                            [](Cons*){},
                            [&](Cons* c){
                              head = c;
@@ -423,12 +420,11 @@ Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
 }
 
 Lisp_ptr whole_case(){
-  auto arg = pick_args_1();
-  if(!arg) return {};
+  ZsArgs wargs{1};
 
   Lisp_ptr key, clauses;
 
-  int len = bind_cons_list(arg,
+  int len = bind_cons_list(wargs[0],
                            [](Cons*){},
                            [&](Cons* c){
                              key = c->car();
@@ -454,12 +450,11 @@ Lisp_ptr whole_case(){
 }
 
 Lisp_ptr whole_do(){
-  auto arg = pick_args_1();
-  if(!arg) return {};
+  ZsArgs wargs{1};
 
   Lisp_ptr vars, end_test, end_exprs,  commands;
 
-  int len = bind_cons_list(arg,
+  int len = bind_cons_list(wargs[0],
                            [](Cons*){}, // 'do' symbol
                            [&](Cons* c){
                              vars = c->car();
@@ -523,8 +518,8 @@ Lisp_ptr whole_do(){
 }
 
 Lisp_ptr macro_delay(){
-  auto args = pick_args_1();
-  return {new Delay(args, vm.frame())};
+  ZsArgs wargs{1};
+  return {new Delay(wargs[0], vm.frame())};
 }
 
 /*
@@ -582,8 +577,10 @@ Lisp_ptr function_splicing(){
 }
 
 Lisp_ptr whole_function_quasiquote(){
+  ZsArgs wargs{1};
   Lisp_ptr arg;
-  bind_cons_list(pick_args_1(),
+
+  bind_cons_list(wargs[0],
                  [](Cons*){}, // skips 'quasiquote' symbol
                  [&](Cons* c){
                    arg = c->car();

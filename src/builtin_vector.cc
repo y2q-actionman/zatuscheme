@@ -47,25 +47,27 @@ Lisp_ptr vector_vector(){
 }
 
 Lisp_ptr vector_length(){
-  auto arg1 = pick_args_1();
-  auto v = arg1.get<Vector*>();
+  ZsArgs args{1};
+
+  auto v = args[0].get<Vector*>();
   if(!v){
-    throw vector_type_check_failed("vector-length", arg1);
+    throw vector_type_check_failed("vector-length", args[0]);
   }
 
   return {new Number(static_cast<Number::integer_type>(v->size()))};
 }
 
 Lisp_ptr vector_ref(){
-  auto arg = pick_args<2>();
-  auto v = arg[0].get<Vector*>();
+  ZsArgs args{2};
+
+  auto v = args[0].get<Vector*>();
   if(!v){
-    throw vector_type_check_failed("vector-ref", arg[0]);
+    throw vector_type_check_failed("vector-ref", args[0]);
   }
 
-  auto num = arg[1].get<Number*>();
+  auto num = args[1].get<Number*>();
   if(!num){
-    throw builtin_type_check_failed("vector-ref", Ptr_tag::number, arg[1]);
+    throw builtin_type_check_failed("vector-ref", Ptr_tag::number, args[1]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -83,15 +85,16 @@ Lisp_ptr vector_ref(){
 }
 
 Lisp_ptr vector_set(){
-  auto arg = pick_args<3>();
-  auto v = arg[0].get<Vector*>();
+  ZsArgs args{3};
+
+  auto v = args[0].get<Vector*>();
   if(!v){
-    throw vector_type_check_failed("vector-set!", arg[0]);
+    throw vector_type_check_failed("vector-set!", args[0]);
   }
 
-  auto num = arg[1].get<Number*>();
+  auto num = args[1].get<Number*>();
   if(!num){
-    throw builtin_type_check_failed("vector-set!", Ptr_tag::number, arg[1]);
+    throw builtin_type_check_failed("vector-set!", Ptr_tag::number, args[1]);
   }
 
   if(num->type() != Number::Type::integer){
@@ -105,37 +108,40 @@ Lisp_ptr vector_set(){
                         v->size(), ind);
   }
 
-  (*v)[ind] = arg[2];
-  return arg[2];
+  (*v)[ind] = args[2];
+  return args[2];
 }
 
 Lisp_ptr vector_to_list(){
-  auto arg1 = pick_args_1();
-  auto v = arg1.get<Vector*>();
+  ZsArgs args{1};
+
+  auto v = args[0].get<Vector*>();
   if(!v){
-    throw vector_type_check_failed("vector->list", arg1);
+    throw vector_type_check_failed("vector->list", args[0]);
   }
 
   return make_cons_list(v->begin(), v->end());
 }
 
 Lisp_ptr vector_from_list(){
-  auto arg = pick_args_1();
-  if(arg.tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed("list->vector", Ptr_tag::cons, arg);
+  ZsArgs args{1};
+
+  if(args[0].tag() != Ptr_tag::cons){
+    throw builtin_type_check_failed("list->vector", Ptr_tag::cons, args[0]);
   }
 
-  return {new Vector(begin(arg), end(arg))};
+  return {new Vector(begin(args[0]), end(args[0]))};
 }
 
 Lisp_ptr vector_fill(){
-  auto arg = pick_args<2>();
-  auto v = arg[0].get<Vector*>();
+  ZsArgs args{2};
+
+  auto v = args[0].get<Vector*>();
   if(!v){
-    throw vector_type_check_failed("vector-fill!", arg[0]);
+    throw vector_type_check_failed("vector-fill!", args[0]);
   }
 
-  std::fill(v->begin(), v->end(), arg[1]);
+  std::fill(v->begin(), v->end(), args[1]);
   return {v};
 }
 

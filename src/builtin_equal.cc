@@ -59,17 +59,17 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
 }
 
 Lisp_ptr eq(){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   return Lisp_ptr{eq_internal(args[0], args[1])};
 }
 
 Lisp_ptr eqv(){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   return Lisp_ptr{eqv_internal(args[0], args[1])};
 }
 
 Lisp_ptr equal(){
-  auto args = pick_args<2>();
+  ZsArgs args{2};
   return Lisp_ptr{equal_internal(args[0], args[1])};
 }
 

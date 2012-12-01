@@ -3,8 +3,8 @@
 #include "builtin_util.hh"
 
 Lisp_ptr pick_args_1(){
-  auto tmp = pick_args<1>();
-  return tmp[0];
+  auto arg1 = pick_args<1>();
+  return arg1[0];
 }
 
 zs_error builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
@@ -26,6 +26,16 @@ ZsArgs::ZsArgs()
   stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
 }
 
+ZsArgs::ZsArgs(int i)
+  : stack_iter_s_(),
+    stack_iter_e_(vm.stack.end()){
+  auto argcnt = vm.stack.back().get<int>();
+  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
+
+  if(i != argcnt)
+    throw builtin_argcount_failed("(unknown func)", i, i, argcnt);
+}
+
 ZsArgs::ZsArgs(ZsArgs&& other)
   : stack_iter_s_(move(other.stack_iter_s_)),
     stack_iter_e_(move(other.stack_iter_e_)){
@@ -35,8 +45,10 @@ ZsArgs::ZsArgs(ZsArgs&& other)
 ZsArgs::~ZsArgs(){
   if(stack_iter_s_ == stack_iter_e_) return;
 
-  if(!std::uncaught_exception())
+  if(!std::uncaught_exception()){
     vm.stack.erase(stack_iter_s_, stack_iter_e_);
+    invalidate();
+  }
 }
 
 ZsArgs& ZsArgs::operator=(ZsArgs&& other){

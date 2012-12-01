@@ -27,10 +27,10 @@ zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
 
 template<typename IOType, typename F_IOType>
 Lisp_ptr port_open_file(const char* name){
-  auto arg = pick_args_1();
-  auto str = arg.get<String*>();
+  ZsArgs args{1};
+  auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(name, Ptr_tag::string, arg);
+    throw builtin_type_check_failed(name, Ptr_tag::string, args[0]);
   }
 
   IOType* p = new F_IOType(str->c_str());
@@ -51,10 +51,10 @@ Lisp_ptr port_open_file_o(){
 
 template<typename IOType, typename F_IOType>
 Lisp_ptr port_close(const char* name){
-  auto arg = pick_args_1();
-  auto p = arg.get<IOType*>();
+  ZsArgs args{1};
+  auto p = args[0].get<IOType*>();
   if(!p){
-    throw port_type_check_failed<IOType>(name, arg);
+    throw port_type_check_failed<IOType>(name, args[0]);
   }
 
   auto fio = dynamic_cast<F_IOType*>(p);
@@ -116,12 +116,12 @@ Lisp_ptr port_peek_char(){
 }
 
 Lisp_ptr port_eof_p(){
-  auto arg = pick_args_1();
-  if(arg.tag() != Ptr_tag::character){
+  ZsArgs args{1};
+  if(args[0].tag() != Ptr_tag::character){
     return Lisp_ptr{false};
   }
 
-  return Lisp_ptr{arg.get<char>() == EOF};
+  return Lisp_ptr{args[0].get<char>() == EOF};
 }  
 
 template<typename Fun>

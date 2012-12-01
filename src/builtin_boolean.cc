@@ -11,8 +11,8 @@ using namespace Procedure;
 namespace {
 
 Lisp_ptr not_func(){
-  auto arg1 = pick_args_1();
-  return Lisp_ptr{!arg1.get<bool>()};
+  ZsArgs args{1};
+  return Lisp_ptr{!args[0].get<bool>()};
 }
 
 } // namespace

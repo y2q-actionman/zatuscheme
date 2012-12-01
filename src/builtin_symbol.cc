@@ -12,11 +12,11 @@ using namespace Procedure;
 namespace {
 
 Lisp_ptr sym_to_string(){
-  auto arg = pick_args_1();
-  auto sym = arg.get<Symbol*>();
+  ZsArgs args{1};
+  auto sym = args[0].get<Symbol*>();
   if(!sym){
     throw make_zs_error("native func: symbol->string: arg is not symbol! (%s)\n",
-                        stringify(arg.tag()));
+                        stringify(args[0].tag()));
   }
 
   // TODO: support invariant string!
@@ -24,11 +24,11 @@ Lisp_ptr sym_to_string(){
 }
 
 Lisp_ptr sym_from_string(){
-  auto arg = pick_args_1();
-  auto str = arg.get<String*>();
+  ZsArgs args{1};
+  auto str = args[0].get<String*>();
   if(!str){
     throw make_zs_error("native func: string->symbol: arg is not string! (%s)\n",
-                        stringify(arg.tag()));
+                        stringify(args[0].tag()));
   }
 
   return {intern(vm.symtable(), *str)};
