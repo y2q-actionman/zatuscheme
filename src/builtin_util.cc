@@ -59,5 +59,5 @@ ZsArgs& ZsArgs::operator=(ZsArgs&& other){
 }
 
 void ZsArgs::invalidate(){
-  stack_iter_s_ = stack_iter_e_;
+  stack_iter_s_ = stack_iter_e_ = decltype(vm.stack.end()){};
 }

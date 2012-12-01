@@ -92,29 +92,30 @@ Lisp_ptr whole_function_lambda(){
 }
 
 Lisp_ptr whole_function_if(){
-  auto wargs = pick_args_1();
-  if(!wargs) return {};
-
   // extracting
   Lisp_ptr test, conseq, alt;
 
-  int len =
-  bind_cons_list(wargs,
-                 [](Cons*){},
-                 [&](Cons* c){
-                   test = c->car();
-                 },
-                 [&](Cons* c){
-                   conseq = c->car();
-                 },
-                 [&](Cons* c){
-                   alt = c->car();
-                 });
+  {
+    ZsArgs wargs{1};
+    
+    int len =
+      bind_cons_list(wargs[0],
+                     [](Cons*){},
+                     [&](Cons* c){
+                       test = c->car();
+                     },
+                     [&](Cons* c){
+                       conseq = c->car();
+                     },
+                     [&](Cons* c){
+                       alt = c->car();
+                     });
 
-  if(len < 3){
-    throw make_zs_error("eval error: informal if expr! (only %d exprs)\n", len);
-  }else if(len > 4){
-    throw make_zs_error("eval error: informal if expr! (more than %d exprs)\n", len);
+    if(len < 3){
+      throw make_zs_error("eval error: informal if expr! (only %d exprs)\n", len);
+    }else if(len > 4){
+      throw make_zs_error("eval error: informal if expr! (more than %d exprs)\n", len);
+    }
   }
 
   // evaluating
@@ -240,19 +241,20 @@ Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
 }
 
 Lisp_ptr whole_function_let_star(){
-  auto wargs = pick_args_1();
-  if(!wargs) return {};
-
   Lisp_ptr bindings, body;
 
-  int len = bind_cons_list(wargs,
-                           [](Cons*){}, // let* symbol
-                           [&](Cons* c){
-                             bindings = c->car();
-                             body = c->cdr();
-                           });
-  if(len < 2){
-    throw zs_error("eval error: informal let* syntax!\n");
+  {
+    ZsArgs wargs{1};
+
+    int len = bind_cons_list(wargs[0],
+                             [](Cons*){}, // let* symbol
+                             [&](Cons* c){
+                               bindings = c->car();
+                               body = c->cdr();
+                             });
+    if(len < 2){
+      throw zs_error("eval error: informal let* syntax!\n");
+    }
   }
 
   vm.stack.insert(vm.stack.end(),
@@ -528,12 +530,12 @@ Lisp_ptr macro_delay(){
   stack = argcount[a+b], an, an-1, ..., bn, bn-1, ...
 */
 Lisp_ptr function_splicing(){
-  auto args = pick_args_1();
-
   if(vm.code.empty()
      || vm.code.back().tag() != Ptr_tag::vm_op){
     throw zs_error("eval error: unquote-splicing: called in invalid context!\n");
   }
+
+  auto args = pick_args_1();
 
   // auto& op = vm.code[vm.code.size() - 1];
   auto& parent_argc = vm.code[vm.code.size() - 2];

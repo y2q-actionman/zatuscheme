@@ -504,64 +504,64 @@ void vm_op_force(){
 }
 
 Lisp_ptr let_internal(EarlyBind early_bind){
-  auto arg = pick_args_1();
-  if(!arg) return {};
-
-  // skips first 'let' symbol
-  auto arg_c = arg.get<Cons*>();
-  assert(arg_c);
-
-  arg = arg_c->cdr();
-  if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-    throw make_zs_error("eval error: informal LET syntax -- (LET . <%s>).\n",
-                        (nullp(arg)) ? "nil" : stringify(arg.tag()));
-  }
-  arg_c = arg.get<Cons*>();
-
-  // checks named let
   Lisp_ptr name = {};
-
-  if(arg_c->car().tag() == Ptr_tag::symbol){
-    name = arg_c->car();
-
-    arg = arg_c->cdr();
-    if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-      throw make_zs_error("eval error: informal LET syntax -- (LET <name> . <%s>).\n",
-                          (nullp(arg)) ? "nil" : stringify(arg.tag()));
-    }
-    
-    arg_c = arg.get<Cons*>();
-  }
-
-  // picks elements
-  auto binds = arg_c->car();
-  auto body = arg_c->cdr();
-
-  if(body.tag() != Ptr_tag::cons || nullp(body)){
-    throw zs_error("eval error: informal syntax for LET's body!.\n");
-  }
-
-  // parses binding list
   int len = 0;
-
   GrowList gl_syms;
   GrowList gl_vals;
+  Lisp_ptr body;
 
-  for(auto bind : binds){
-    if(bind.tag() != Ptr_tag::cons){
-      throw make_zs_error("eval error: informal object (%s) found in let binding.\n",
-                          stringify(bind.tag()));
+  {
+    ZsArgs wargs{1};
+
+    // skips first 'let' symbol
+    auto arg_c = wargs[0].get<Cons*>();
+    assert(arg_c);
+
+    auto arg = arg_c->cdr();
+    if(arg.tag() != Ptr_tag::cons || nullp(arg)){
+      throw make_zs_error("eval error: informal LET syntax -- (LET . <%s>).\n",
+                          (nullp(arg)) ? "nil" : stringify(arg.tag()));
+    }
+    arg_c = arg.get<Cons*>();
+
+    // checks named let
+    if(arg_c->car().tag() == Ptr_tag::symbol){
+      name = arg_c->car();
+
+      arg = arg_c->cdr();
+      if(arg.tag() != Ptr_tag::cons || nullp(arg)){
+        throw make_zs_error("eval error: informal LET syntax -- (LET <name> . <%s>).\n",
+                            (nullp(arg)) ? "nil" : stringify(arg.tag()));
+      }
+    
+      arg_c = arg.get<Cons*>();
     }
 
-    auto c = bind.get<Cons*>();
-    if(!c){
-      throw zs_error("eval error: null found in let binding.\n");
+    // picks elements
+    auto binds = arg_c->car();
+    body = arg_c->cdr();
+
+    if(body.tag() != Ptr_tag::cons || nullp(body)){
+      throw zs_error("eval error: informal syntax for LET's body!.\n");
     }
+
+    // parses binding list
+    for(auto bind : binds){
+      if(bind.tag() != Ptr_tag::cons){
+        throw make_zs_error("eval error: informal object (%s) found in let binding.\n",
+                            stringify(bind.tag()));
+      }
+
+      auto c = bind.get<Cons*>();
+      if(!c){
+        throw zs_error("eval error: null found in let binding.\n");
+      }
                  
-    ++len;
+      ++len;
 
-    gl_syms.push(c->car());
-    gl_vals.push(c->cdr().get<Cons*>()->car());
+      gl_syms.push(c->car());
+      gl_vals.push(c->cdr().get<Cons*>()->car());
+    }
   }
 
   if(name){
@@ -692,7 +692,7 @@ Lisp_ptr apply_func(){
 }
 
 Lisp_ptr func_force(){
-  auto arg = pick_args_1();
+  auto arg = pick_args_1();     // used because no exceptions are done!
   auto d = arg.get<Delay*>();
   if(!d){
     return arg;
@@ -710,51 +710,59 @@ Lisp_ptr func_force(){
 }
 
 Lisp_ptr call_with_values(){
-  auto args = pick_args<2>();
+  Lisp_ptr procs[2];
+  {
+    ZsArgs args{2};
 
-  if(!is_procedure(args[0])){
-    throw make_zs_error("call-with-values error: first arg is not procedure (%s)\n",
-                        stringify(args[0].tag()));
-  }
+    if(!is_procedure(args[0])){
+      throw make_zs_error("call-with-values error: first arg is not procedure (%s)\n",
+                          stringify(args[0].tag()));
+    }
 
-  auto info = get_procinfo(args[0]);
-  if(info->required_args != 0){
-    throw make_zs_error("call-with-values error: first arg takes 1 or more args (%d)\n",
-                        info->required_args);
-  }    
+    auto info = get_procinfo(args[0]);
+    if(info->required_args != 0){
+      throw make_zs_error("call-with-values error: first arg takes 1 or more args (%d)\n",
+                          info->required_args);
+    }    
 
-  if(!is_procedure(args[1])){
-    throw make_zs_error("call-with-values error: second arg is not procedure (%s)\n",
-                        stringify(args[1].tag()));
+    if(!is_procedure(args[1])){
+      throw make_zs_error("call-with-values error: second arg is not procedure (%s)\n",
+                          stringify(args[1].tag()));
+    }
+    
+    std::copy(args.begin(), args.end(), procs);
   }
 
   // second proc call
-  vm.code.insert(vm.code.end(), {args[1], vm_op_proc_enter, vm_op_move_values});
+  vm.code.insert(vm.code.end(), {procs[1], vm_op_proc_enter, vm_op_move_values});
 
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
   return vm_op_nop;
 }
 
 Lisp_ptr call_cc(){
-  auto args = pick_args<1>();
+  Lisp_ptr proc;
+  {
+    ZsArgs args{1};
 
-  if(!is_procedure(args[0])){
-    throw make_zs_error("call/cc error: first arg is not procedure (%s)\n",
-                        stringify(args[0].tag()));
-  }
+    if(!is_procedure(args[0])){
+      throw make_zs_error("call/cc error: first arg is not procedure (%s)\n",
+                          stringify(args[0].tag()));
+    }
 
-  auto info = get_procinfo(args[0]);
-  if(info->required_args != 1){
-    throw make_zs_error("call/cc error: first arg mush take 1 arg (%d)\n",
-                        info->required_args);
+    auto info = get_procinfo(args[0]);
+    if(info->required_args != 1){
+      throw make_zs_error("call/cc error: first arg mush take 1 arg (%d)\n",
+                          info->required_args);
+    }
+    proc = args[0];
   }
 
   auto cont = new Continuation(vm);
   vm.stack.insert(vm.stack.end(), {cont, {Ptr_tag::vm_argcount, 1}});
-
-  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  proc_enter_entrypoint(proc); // direct jump to proc_enter()
   return vm_op_nop;
 }
 
@@ -778,37 +786,44 @@ static void vm_op_save_values_and_enter(){
 }
 
 Lisp_ptr dynamic_wind(){
-  auto args = pick_args<3>();
+  Lisp_ptr procs[3];
+  {
+    ZsArgs args{3};
+    auto procs_i = begin(procs);
 
-  for(auto p : args){
-    if(!is_procedure(p)){
-      throw make_zs_error("error: dynamic-wind: arg is not procedure (%s)\n",
-                          stringify(p.tag()));
-    }
+    for(auto p : args){
+      if(!is_procedure(p)){
+        throw make_zs_error("error: dynamic-wind: arg is not procedure (%s)\n",
+                            stringify(p.tag()));
+      }
 
-    auto info = get_procinfo(p);
-    if(info->required_args != 0){
-      throw make_zs_error("error: dynamic-wind: first arg mush take 0 arg (%d)\n",
-                          info->required_args);
+      auto info = get_procinfo(p);
+      if(info->required_args != 0){
+        throw make_zs_error("error: dynamic-wind: first arg mush take 0 arg (%d)\n",
+                            info->required_args);
+      }
+
+      *procs_i = p;
+      ++procs_i;
     }
   }
 
-  vm.extent.push_back({args[0], args[1], args[2]});
+  vm.extent.push_back({procs[0], procs[1], procs[2]});
   vm.code.push_back(vm_op_leave_winding);
 
   // third proc call
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-  vm.code.push_back(args[2]);
+  vm.code.push_back(procs[2]);
   vm.code.push_back(vm_op_save_values_and_enter);
 
   // second proc call
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-  vm.code.push_back(args[1]);
+  vm.code.push_back(procs[1]);
   vm.code.push_back(vm_op_proc_enter);
 
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
   return vm_op_nop;
 }
 
