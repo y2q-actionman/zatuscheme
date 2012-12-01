@@ -11,7 +11,7 @@ using namespace Procedure;
 
 namespace {
 
-void sym_to_string(){
+Lisp_ptr sym_to_string(){
   auto arg = pick_args_1();
   auto sym = arg.get<Symbol*>();
   if(!sym){
@@ -20,10 +20,10 @@ void sym_to_string(){
   }
 
   // TODO: support invariant string!
-  vm.return_value[0] = {new String(sym->name())};
+  return {new String(sym->name())};
 }
 
-void sym_from_string(){
+Lisp_ptr sym_from_string(){
   auto arg = pick_args_1();
   auto str = arg.get<String*>();
   if(!str){
@@ -31,7 +31,7 @@ void sym_from_string(){
                         stringify(arg.tag()));
   }
 
-  vm.return_value[0] = {intern(vm.symtable(), *str)};
+  return {intern(vm.symtable(), *str)};
 }
 
 } // namespace

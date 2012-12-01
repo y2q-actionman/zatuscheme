@@ -20,7 +20,7 @@ zs_error char_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 template<typename Fun>
-void char_compare(const char* name, Fun&& fun){
+Lisp_ptr char_compare(const char* name, Fun&& fun){
   auto args = pick_args<2>();
   char c[2];
 
@@ -31,27 +31,27 @@ void char_compare(const char* name, Fun&& fun){
     }
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(c[0], c[1])};
+  return Lisp_ptr{fun(c[0], c[1])};
 }
 
-void char_eq(){
-  char_compare("char=?", std::equal_to<char>());
+Lisp_ptr char_eq(){
+  return char_compare("char=?", std::equal_to<char>());
 }
 
-void char_less(){
-  char_compare("char<?", std::less<char>());
+Lisp_ptr char_less(){
+  return char_compare("char<?", std::less<char>());
 }
 
-void char_greater(){
-  char_compare("char>?", std::greater<char>());
+Lisp_ptr char_greater(){
+  return char_compare("char>?", std::greater<char>());
 }
 
-void char_less_eq(){
-  char_compare("char<=?", std::less_equal<char>());
+Lisp_ptr char_less_eq(){
+  return char_compare("char<=?", std::less_equal<char>());
 }
 
-void char_greater_eq(){
-  char_compare("char>=?", std::greater_equal<char>());
+Lisp_ptr char_greater_eq(){
+  return char_compare("char>=?", std::greater_equal<char>());
 }
   
 
@@ -63,63 +63,62 @@ struct ci_comparator{
   }
 };
 
-void char_ci_eq(){
-  char_compare("char-ci=?", ci_comparator<std::equal_to<int> >());
+Lisp_ptr char_ci_eq(){
+  return char_compare("char-ci=?", ci_comparator<std::equal_to<int> >());
 }
 
-void char_ci_less(){
-  char_compare("char-ci<?", ci_comparator<std::less<int> >());
+Lisp_ptr char_ci_less(){
+  return char_compare("char-ci<?", ci_comparator<std::less<int> >());
 }
 
-void char_ci_greater(){
-  char_compare("char-ci>?", ci_comparator<std::greater<int> >());
+Lisp_ptr char_ci_greater(){
+  return char_compare("char-ci>?", ci_comparator<std::greater<int> >());
 }
 
-void char_ci_less_eq(){
-  char_compare("char-ci<=?", ci_comparator<std::less_equal<int> >());
+Lisp_ptr char_ci_less_eq(){
+  return char_compare("char-ci<=?", ci_comparator<std::less_equal<int> >());
 }
 
-void char_ci_greater_eq(){
-  char_compare("char-ci>=?", ci_comparator<std::greater_equal<int> >());
+Lisp_ptr char_ci_greater_eq(){
+  return char_compare("char-ci>=?", ci_comparator<std::greater_equal<int> >());
 }
 
   
 template<typename Fun>
-void char_pred(Fun&& fun){
+Lisp_ptr char_pred(Fun&& fun){
   auto arg1 = pick_args_1();
 
   auto c = arg1.get<char>();
   if(!c){
-    vm.return_value[0] = Lisp_ptr{false};
-    return;
+    return Lisp_ptr{false};
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(c)};
+  return Lisp_ptr{fun(c)};
 }
 
-void char_isalpha(){
-  char_pred([](char c) -> bool{ return std::isalpha(c); });
+Lisp_ptr char_isalpha(){
+  return char_pred([](char c) -> bool{ return std::isalpha(c); });
 }
 
-void char_isdigit(){
-  char_pred([](char c) -> bool{ return std::isdigit(c); });
+Lisp_ptr char_isdigit(){
+  return char_pred([](char c) -> bool{ return std::isdigit(c); });
 }
 
-void char_isspace(){
-  char_pred([](char c) -> bool{ return std::isspace(c); });
+Lisp_ptr char_isspace(){
+  return char_pred([](char c) -> bool{ return std::isspace(c); });
 }
 
-void char_isupper(){
-  char_pred([](char c) -> bool{ return std::isupper(c); });
+Lisp_ptr char_isupper(){
+  return char_pred([](char c) -> bool{ return std::isupper(c); });
 }
 
-void char_islower(){
-  char_pred([](char c) -> bool{ return std::islower(c); });
+Lisp_ptr char_islower(){
+  return char_pred([](char c) -> bool{ return std::islower(c); });
 }
 
 
 template<typename Fun>
-void char_conversion(const char* name, Fun&& fun){
+Lisp_ptr char_conversion(const char* name, Fun&& fun){
   auto arg1 = pick_args_1();
 
   auto c = arg1.get<char>();
@@ -127,18 +126,18 @@ void char_conversion(const char* name, Fun&& fun){
     throw char_type_check_failed(name, arg1);
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(c)};
+  return Lisp_ptr{fun(c)};
 }
   
 
-void char_to_int(){
-  char_conversion("char->integer",
-                  [](char c){
-                    return new Number(static_cast<Number::integer_type>(c));
-                  });
+Lisp_ptr char_to_int(){
+  return char_conversion("char->integer",
+                         [](char c){
+                           return new Number(static_cast<Number::integer_type>(c));
+                         });
 }
 
-void char_from_int(){
+Lisp_ptr char_from_int(){
   auto arg1 = pick_args_1();
 
   auto n = arg1.get<Number*>();
@@ -150,17 +149,17 @@ void char_from_int(){
                         stringify(n->type()));
   }
 
-  vm.return_value[0] = Lisp_ptr{static_cast<char>(n->get<Number::integer_type>())};
+  return Lisp_ptr{static_cast<char>(n->get<Number::integer_type>())};
 }
 
-void char_toupper(){
-  char_conversion("char-upcase",
-                  [](char c){ return static_cast<char>(std::toupper(c)); });
+Lisp_ptr char_toupper(){
+  return char_conversion("char-upcase",
+                         [](char c){ return static_cast<char>(std::toupper(c)); });
 }
 
-void char_tolower(){
-  char_conversion("char-downcase",
-                  [](char c){ return static_cast<char>(std::tolower(c)); });
+Lisp_ptr char_tolower(){
+  return char_conversion("char-downcase",
+                         [](char c){ return static_cast<char>(std::tolower(c)); });
 }
 
 } // namespace

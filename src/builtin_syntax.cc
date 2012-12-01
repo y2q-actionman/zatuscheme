@@ -17,7 +17,7 @@ using namespace Procedure;
 
 namespace {
 
-void error_whole_function(const char* msg){
+Lisp_ptr error_whole_function(const char* msg){
   auto wargs = pick_args_1();
   auto sym = wargs.get<Cons*>()->car().get<Symbol*>();
 
@@ -27,21 +27,21 @@ void error_whole_function(const char* msg){
                       sym->name().c_str(), msg);
 }
 
-void whole_function_error(){
-  error_whole_function("cannot be used as operator!!");
+Lisp_ptr whole_function_error(){
+  return error_whole_function("cannot be used as operator!!");
 }
 
-void whole_function_unimplemented(){
-  error_whole_function("under development...");
+Lisp_ptr whole_function_unimplemented(){
+  return error_whole_function("under development...");
 }
 
-void whole_function_pass_through(){
-  vm.return_value[0] = pick_args_1();
+Lisp_ptr whole_function_pass_through(){
+  return pick_args_1();
 }
 
-void whole_function_quote(){
+Lisp_ptr whole_function_quote(){
   auto wargs = pick_args_1();
-  if(!wargs) return;
+  if(!wargs) return {};
 
   Lisp_ptr val;
 
@@ -57,7 +57,7 @@ void whole_function_quote(){
     throw zs_error("eval error: quote has no args.\n");
   }
     
-  vm.return_value[0] = val;
+  return val;
 }
 
 
@@ -76,9 +76,9 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
                         args, vm.frame());
 }
 
-void whole_function_lambda(){
+Lisp_ptr whole_function_lambda(){
   auto wargs = pick_args_1();
-  if(!wargs) return;
+  if(!wargs) return {};
 
   Lisp_ptr args, code;
 
@@ -89,12 +89,12 @@ void whole_function_lambda(){
                    code = c->cdr();
                  });
 
-  vm.return_value[0] = lambda_internal(args, code);
+  return lambda_internal(args, code);
 }
 
-void whole_function_if(){
+Lisp_ptr whole_function_if(){
   auto wargs = pick_args_1();
-  if(!wargs) return;
+  if(!wargs) return {};
 
   // extracting
   Lisp_ptr test, conseq, alt;
@@ -120,8 +120,8 @@ void whole_function_if(){
 
   // evaluating
   vm.code.insert(vm.code.end(), {vm_op_if, test});
-
   vm.stack.insert(vm.stack.end(), {alt, conseq});
+  return vm_op_nop;
 }
 
 /*
@@ -129,7 +129,7 @@ void whole_function_if(){
   code = (value, VM::if)
   stack = (variable name)
 */
-void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
+Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   // extracting
   Symbol* var = nullptr;
   Lisp_ptr val;
@@ -158,18 +158,19 @@ void set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   // evaluating
   vm.code.insert(vm.code.end(), {set_op, val});
   vm.stack.push_back(var);
+  return val;
 }
 
-void whole_function_set(){
+Lisp_ptr whole_function_set(){
   auto wargs = pick_args_1();
-  if(!wargs) return;
+  if(!wargs) return {};
 
-  set_internal("set!", wargs.get<Cons*>()->cdr(), vm_op_set);
+  return set_internal("set!", wargs.get<Cons*>()->cdr(), vm_op_set);
 }
 
-void whole_function_define(){
+Lisp_ptr whole_function_define(){
   auto wargs = pick_args_1();
-  if(!wargs) return;
+  if(!wargs) return {};
 
   auto p = wargs.get<Cons*>()->cdr();
   Cons* rest = p.get<Cons*>();
@@ -178,7 +179,7 @@ void whole_function_define(){
   auto first = rest->car();
 
   if(first.tag() == Ptr_tag::symbol){
-    set_internal("define(value set)", p, vm_op_local_set);
+    return set_internal("define(value set)", p, vm_op_local_set);
   }else if(first.tag() == Ptr_tag::cons){
     Symbol* var = nullptr;
     Lisp_ptr args, code;
@@ -197,15 +198,15 @@ void whole_function_define(){
 
     auto value = lambda_internal(args, code);
     vm.local_set(var, value);
-    vm.return_value[0] = value;
+    return value;
   }else{
     throw zs_error("eval error: informal define syntax!\n");
   }
 }
 
-void whole_function_begin(){
+Lisp_ptr whole_function_begin(){
   auto wargs = pick_args_1();
-  if(!wargs) return;
+  if(!wargs) return {};
 
   auto exprs = wargs.get<Cons*>()->cdr();
   if(!exprs || nullp(exprs)){
@@ -213,10 +214,11 @@ void whole_function_begin(){
   }
 
   vm.code.insert(vm.code.end(), {exprs, vm_op_begin});
+  return vm_op_nop;
 }
 
-void whole_function_let(){
-  let_internal(EarlyBind::f);
+Lisp_ptr whole_function_let(){
+  return let_internal(EarlyBind::f);
 }
 
 Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
@@ -239,9 +241,9 @@ Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
   }
 }
 
-void whole_function_let_star(){
+Lisp_ptr whole_function_let_star(){
   auto wargs = pick_args_1();
-  if(!wargs) return;
+  if(!wargs) return {};
 
   Lisp_ptr bindings, body;
 
@@ -252,18 +254,17 @@ void whole_function_let_star(){
                              body = c->cdr();
                            });
   if(len < 2){
-    vm.return_value[0] = {};
-    return;
+    throw zs_error("eval error: informal let* syntax!\n");
   }
 
   vm.stack.insert(vm.stack.end(),
                   {let_star_expand(bindings, body), {Ptr_tag::vm_argcount, 1}});
 
-  let_internal(EarlyBind::t);
+  return let_internal(EarlyBind::t);
 }
 
-void whole_function_letrec(){
-  let_internal(EarlyBind::t);
+Lisp_ptr whole_function_letrec(){
+  return let_internal(EarlyBind::t);
 }
 
 Lisp_ptr or_expand(Cons* c){
@@ -340,9 +341,9 @@ Lisp_ptr cond_expand(Cons* head){
 
 template<typename T, typename Expander>
 inline
-void whole_conditional(T default_value, Expander e){
+Lisp_ptr whole_conditional(T default_value, Expander e){
   auto arg = pick_args_1();
-  if(!arg) return;
+  if(!arg) return {};
 
   Cons* head;
 
@@ -352,23 +353,23 @@ void whole_conditional(T default_value, Expander e){
                              head = c;
                            });
   if(len < 2){
-    vm.return_value[0] = Lisp_ptr(default_value);
-    return;
+    return Lisp_ptr(default_value);
   }
 
   vm.code.push_back(e(head));
+  return vm_op_nop;
 }
 
-void whole_and(){
-  whole_conditional(true, and_expand);
+Lisp_ptr whole_and(){
+  return whole_conditional(true, and_expand);
 }
                  
-void whole_or(){
-  whole_conditional(false, or_expand);
+Lisp_ptr whole_or(){
+  return whole_conditional(false, or_expand);
 }
 
-void whole_cond(){
-  whole_conditional(Lisp_ptr{}, cond_expand);
+Lisp_ptr whole_cond(){
+  return whole_conditional(Lisp_ptr{}, cond_expand);
 }
 
 Lisp_ptr case_keys_expand(Symbol* sym, Cons* keys){
@@ -421,9 +422,9 @@ Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
                         case_expand(sym, cases->cdr()));
 }
 
-void whole_case(){
+Lisp_ptr whole_case(){
   auto arg = pick_args_1();
-  if(!arg) return;
+  if(!arg) return {};
 
   Lisp_ptr key, clauses;
 
@@ -449,11 +450,12 @@ void whole_case(){
                    case_expand(key_sym, clauses))
           });
   vm.code.push_back(form);
+  return vm_op_nop;
 }
 
-void whole_do(){
+Lisp_ptr whole_do(){
   auto arg = pick_args_1();
-  if(!arg) return;
+  if(!arg) return {};
 
   Lisp_ptr vars, end_test, end_exprs,  commands;
 
@@ -517,11 +519,12 @@ void whole_do(){
             })
         });
   vm.code.push_back(form);
+  return vm_op_nop;
 }
 
-void macro_delay(){
+Lisp_ptr macro_delay(){
   auto args = pick_args_1();
-  vm.return_value[0] = {new Delay(args, vm.frame())};
+  return {new Delay(args, vm.frame())};
 }
 
 /*
@@ -529,7 +532,7 @@ void macro_delay(){
   ---
   stack = argcount[a+b], an, an-1, ..., bn, bn-1, ...
 */
-void function_splicing(){
+Lisp_ptr function_splicing(){
   auto args = pick_args_1();
 
   if(vm.code.empty()
@@ -575,9 +578,10 @@ void function_splicing(){
   parent_argc = {Ptr_tag::vm_argcount, parent_argc.get<int>() + argc};
   parent_args = parent_next_args;
   vm.code.push_back(parent_next_arg1);
+  return vm_op_nop;
 }
 
-void whole_function_quasiquote(){
+Lisp_ptr whole_function_quasiquote(){
   Lisp_ptr arg;
   bind_cons_list(pick_args_1(),
                  [](Cons*){}, // skips 'quasiquote' symbol
@@ -587,8 +591,7 @@ void whole_function_quasiquote(){
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
-    vm.return_value[0] = arg;
-    return;
+    return arg;
   }
 
 
@@ -616,15 +619,14 @@ void whole_function_quasiquote(){
 
   if(arg.tag() == Ptr_tag::cons){
     if(nullp(arg)){
-      vm.return_value[0] = Cons::NIL;
-      return;
+      return Cons::NIL;
     }
 
     // check unquote -- like `,x
     if(auto first_sym = arg.get<Cons*>()->car().get<Symbol*>()){
       if(first_sym == unquote_sym){
         vm.code.push_back(arg.get<Cons*>()->cdr().get<Cons*>()->car());
-        return;
+        return vm_op_nop;
       }else if(first_sym == unquote_splicing_sym){
         throw zs_error("quasiquote error: unquote-splicing is not supported out of list");
       }
@@ -641,6 +643,7 @@ void whole_function_quasiquote(){
             });
 
     vm.code.push_back(push_cons_list(intern(vm.symtable(), "list*"), gl.extract()));
+    return vm_op_nop;
   }else if(arg.tag() == Ptr_tag::vector){
     auto v = arg.get<Vector*>();
     for(auto i = begin(*v); i != end(*v); ++i){
@@ -648,6 +651,7 @@ void whole_function_quasiquote(){
     }
 
     vm.code.push_back(push_cons_list(intern(vm.symtable(), "vector"), gl.extract()));
+    return vm_op_nop;
   }else{
     UNEXP_DEFAULT();
   }

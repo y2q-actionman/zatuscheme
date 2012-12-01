@@ -38,7 +38,7 @@ static const char r5rs_env_symname[] = "r5rs-env-value";
 static const char interaction_env_symname[] = "interaction-env-value";
 
 static
-void env_pick_2(const char* name){
+Lisp_ptr env_pick_2(const char* name){
   auto p = pick_args_1();
   auto num = p.get<Number*>();
   if(!num){
@@ -55,24 +55,24 @@ void env_pick_2(const char* name){
                         name, ver);
   }
 
-  vm.return_value[0] = vm.find(intern(vm.symtable(), name));
+  return vm.find(intern(vm.symtable(), name));
 }
 
-void env_r5rs(){
-  env_pick_2(r5rs_env_symname);
+Lisp_ptr env_r5rs(){
+  return env_pick_2(r5rs_env_symname);
 }
 
-void env_null(){
-  env_pick_2(null_env_symname);
+Lisp_ptr env_null(){
+  return env_pick_2(null_env_symname);
 }
 
-void env_interactive(){
+Lisp_ptr env_interactive(){
   pick_args<0>();
-  vm.return_value[0] = vm.find(intern(vm.symtable(), interaction_env_symname));
+  return vm.find(intern(vm.symtable(), interaction_env_symname));
 }
   
 
-void eval_func(){
+Lisp_ptr eval_func(){
   auto args = pick_args<2>();
   auto env = args[1].get<Env*>();
   if(!env){
@@ -82,10 +82,11 @@ void eval_func(){
   vm.enter_frame(env);
   vm.code.push_back(vm_op_leave_frame);
   vm.code.push_back(args[0]);
+  return vm_op_nop;
 }
 
 
-void load_func(){
+Lisp_ptr load_func(){
   auto arg = pick_args_1();
   auto str = arg.get<String*>();
   if(!str){
@@ -98,7 +99,7 @@ void load_func(){
   }
 
   load(&f);
-  vm.return_value[0] = {};
+  return vm_op_nop;
 }
 
 } //namespace

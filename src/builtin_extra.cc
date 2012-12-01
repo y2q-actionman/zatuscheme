@@ -10,7 +10,7 @@ using namespace Procedure;
 
 namespace {
 
-void to_macro_procedure(){
+Lisp_ptr to_macro_procedure(){
   auto arg1 = pick_args_1();
 
   if(arg1.tag() != Ptr_tag::i_procedure){
@@ -21,23 +21,23 @@ void to_macro_procedure(){
   auto info = *proc->info();
   info.calling = Calling::macro;
 
-  vm.return_value[0] = new IProcedure(proc->get(), 
-                                   info, proc->arg_list(),
-                                   proc->closure());
+  return new IProcedure(proc->get(), 
+                        info, proc->arg_list(),
+                        proc->closure());
 }
 
-void gensym(){
+Lisp_ptr gensym(){
   static const string gensym_symname = {"(gensym)"};
   pick_args<0>();
-  vm.return_value[0] = {new Symbol(&gensym_symname)};
+  return {new Symbol(&gensym_symname)};
 }
 
-void exit_func(){
+Lisp_ptr exit_func(){
   pick_args<0>();
   // cerr << "exiting..\n";
-  vm.return_value[0] = {};
   vm.stack.clear();
   vm.code.clear();
+  return {};
 }
 
 } // namespace

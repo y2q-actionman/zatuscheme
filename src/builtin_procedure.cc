@@ -11,13 +11,12 @@ using namespace Procedure;
 
 namespace {
 
-void type_check_procedure(){
+Lisp_ptr type_check_procedure(){
   auto arg = pick_args_1();
-  vm.return_value[0] = Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure)
-                             || (arg.tag() == Ptr_tag::n_procedure)};
+  return Lisp_ptr{(arg.tag() == Ptr_tag::i_procedure) || (arg.tag() == Ptr_tag::n_procedure)};
 }
 
-void proc_values(){
+Lisp_ptr proc_values(){
   vm.return_value.clear();
 
   stack_to_vector(vm.stack, vm.return_value);
@@ -25,6 +24,8 @@ void proc_values(){
   if(vm.return_value.empty()){
     vm.return_value.resize(1);
   }
+
+  return vm_op_nop;
 }
 
 } // namespace

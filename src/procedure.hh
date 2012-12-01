@@ -7,7 +7,7 @@
 #include "vm.hh"
 
 namespace Procedure {
-  typedef void(*NativeFunc)();
+  typedef Lisp_ptr(*NativeFunc)();
 
   enum class Calling : unsigned char{
     function,

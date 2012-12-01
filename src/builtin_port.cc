@@ -25,23 +25,8 @@ zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
                        func_name, stringify(to_tag<Ptr_tag, T*>()), stringify(p.tag()));
 }
 
-template<typename T>
-void port_io_p(){
-  auto arg = pick_args_1();
-
-  vm.return_value[0] = Lisp_ptr{arg.tag() == to_tag<Ptr_tag, T*>()};
-}
-  
-void port_i_p(){
-  port_io_p<InputPort>();
-}
-
-void port_o_p(){
-  port_io_p<OutputPort>();
-}
-
 template<typename IOType, typename F_IOType>
-void port_open_file(const char* name){
+Lisp_ptr port_open_file(const char* name){
   auto arg = pick_args_1();
   auto str = arg.get<String*>();
   if(!str){
@@ -53,19 +38,19 @@ void port_open_file(const char* name){
     throw make_zs_error("native error: %s: failed at opening file\n", name);
   }
   
-  vm.return_value[0] = {p};
+  return {p};
 }  
 
-void port_open_file_i(){
-  port_open_file<InputPort, ifstream>("open-input-file");
+Lisp_ptr port_open_file_i(){
+  return port_open_file<InputPort, ifstream>("open-input-file");
 }  
 
-void port_open_file_o(){
-  port_open_file<OutputPort, ofstream>("open-output-file");
+Lisp_ptr port_open_file_o(){
+  return port_open_file<OutputPort, ofstream>("open-output-file");
 }  
 
 template<typename IOType, typename F_IOType>
-void port_close(const char* name){
+Lisp_ptr port_close(const char* name){
   auto arg = pick_args_1();
   auto p = arg.get<IOType*>();
   if(!p){
@@ -75,25 +60,24 @@ void port_close(const char* name){
   auto fio = dynamic_cast<F_IOType*>(p);
   if(!fio){
     cerr << "native func warning: " << name << ": passed port is not associated to file\n";
-    vm.return_value[0] = Lisp_ptr{false};
-    return;
+    return Lisp_ptr{false};
   }
 
   fio->close();
-  vm.return_value[0] = Lisp_ptr{true};
+  return Lisp_ptr{true};
 }
 
-void port_close_i(){
-  port_close<InputPort, std::ifstream>("close-input-port");
+Lisp_ptr port_close_i(){
+  return port_close<InputPort, std::ifstream>("close-input-port");
 }
 
-void port_close_o(){
-  port_close<OutputPort, std::ofstream>("close-output-port");
+Lisp_ptr port_close_o(){
+  return port_close<OutputPort, std::ofstream>("close-output-port");
 }
 
 
 template<typename Fun>
-void port_input_call(const char* name, Fun&& fun){
+Lisp_ptr port_input_call(const char* name, Fun&& fun){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -114,36 +98,35 @@ void port_input_call(const char* name, Fun&& fun){
     throw builtin_variadic_argcount_failed(name, 1);
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(p)};
+  return Lisp_ptr{fun(p)};
 }
 
-void port_read(){
-  port_input_call("read",
-                  [](std::istream* is){ return read(*is); });
+Lisp_ptr port_read(){
+  return port_input_call("read",
+                         [](std::istream* is){ return read(*is); });
 }
 
-void port_read_char(){
-  port_input_call("read-char",
-                  [](std::istream* is) -> char { return is->get(); });
+Lisp_ptr port_read_char(){
+  return port_input_call("read-char",
+                         [](std::istream* is) -> char { return is->get(); });
 }
 
-void port_peek_char(){
-  port_input_call("peek-char",
-                  [](std::istream* is) -> char{ return is->peek(); });
+Lisp_ptr port_peek_char(){
+  return port_input_call("peek-char",
+                         [](std::istream* is) -> char{ return is->peek(); });
 }
 
-void port_eof_p(){
+Lisp_ptr port_eof_p(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::character){
-    vm.return_value[0] = Lisp_ptr{false};
-    return;
+    return Lisp_ptr{false};
   }
 
-  vm.return_value[0] = Lisp_ptr{arg.get<char>() == EOF};
+  return Lisp_ptr{arg.get<char>() == EOF};
 }  
-  
+
 template<typename Fun>
-void port_output_call(const char* name, Fun&& fun){
+Lisp_ptr port_output_call(const char* name, Fun&& fun){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -164,35 +147,35 @@ void port_output_call(const char* name, Fun&& fun){
     throw builtin_variadic_argcount_failed(name, 2);
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(args[0], p)};
+  return Lisp_ptr{fun(args[0], p)};
 }
 
-void port_write(){
-  port_output_call("write",
-                   [](Lisp_ptr c, std::ostream* os) -> bool{
-                     print(*os, c, print_human_readable::f);
-                     return true;
-                   });
+Lisp_ptr port_write(){
+  return port_output_call("write",
+                          [](Lisp_ptr c, std::ostream* os) -> bool{
+                            print(*os, c, print_human_readable::f);
+                            return true;
+                          });
 }
 
-void port_display(){
-  port_output_call("display",
-                   [](Lisp_ptr c, std::ostream* os) -> bool{
-                     print(*os, c, print_human_readable::t);
-                     return true;
-                   });
+Lisp_ptr port_display(){
+  return port_output_call("display",
+                          [](Lisp_ptr c, std::ostream* os) -> bool{
+                            print(*os, c, print_human_readable::t);
+                            return true;
+                          });
 }
 
-void port_write_char(){
-  port_output_call("write-char",
-                   [](Lisp_ptr c, std::ostream* os) -> Lisp_ptr{
-                     if(c.tag() != Ptr_tag::character){
-                       throw builtin_type_check_failed("write-char", Ptr_tag::character, c);
-                     }
+Lisp_ptr port_write_char(){
+  return port_output_call("write-char",
+                          [](Lisp_ptr c, std::ostream* os) -> Lisp_ptr{
+                            if(c.tag() != Ptr_tag::character){
+                              throw builtin_type_check_failed("write-char", Ptr_tag::character, c);
+                            }
 
-                     os->put(c.get<char>());
-                     return c;
-                   });
+                            os->put(c.get<char>());
+                            return c;
+                          });
 }
 
 } //namespace
@@ -200,10 +183,10 @@ void port_write_char(){
 const BuiltinFunc
 builtin_port[] = {
   {"input-port?", {
-      port_i_p,
+      type_check_pred<Ptr_tag::input_port>,
       {Calling::function, 1}}},
   {"output-port?", {
-      port_o_p,
+      type_check_pred<Ptr_tag::output_port>,
       {Calling::function, 1}}},
 
   {"open-input-file", {

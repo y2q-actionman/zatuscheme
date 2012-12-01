@@ -17,7 +17,7 @@ zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
                        func_name, stringify(Ptr_tag::vector), stringify(p.tag()));
 }
 
-void vector_make(){
+Lisp_ptr vector_make(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -32,39 +32,33 @@ void vector_make(){
   }
   auto count = num->get<Number::integer_type>();
 
-  Lisp_ptr fill;
-
   switch(args.size()){
   case 1:
-    fill = {};
-    break;
+    return {new Vector(count, {})};
   case 2:
-    fill = args[1];
-    break;
+    return {new Vector(count, args[1])};
   default:
     throw builtin_variadic_argcount_failed("make-vector", 2);
   }
-
-  vm.return_value[0] = {new Vector(count, fill)};
 }
 
-void vector_vector(){
+Lisp_ptr vector_vector(){
   auto v = new Vector;
   stack_to_vector(vm.stack, *v);
-  vm.return_value[0] = v;
+  return v;
 }
 
-void vector_length(){
+Lisp_ptr vector_length(){
   auto arg1 = pick_args_1();
   auto v = arg1.get<Vector*>();
   if(!v){
     throw vector_type_check_failed("vector-length", arg1);
   }
 
-  vm.return_value[0] = {new Number(static_cast<Number::integer_type>(v->size()))};
+  return {new Number(static_cast<Number::integer_type>(v->size()))};
 }
 
-void vector_ref(){
+Lisp_ptr vector_ref(){
   auto arg = pick_args<2>();
   auto v = arg[0].get<Vector*>();
   if(!v){
@@ -87,10 +81,10 @@ void vector_ref(){
                         v->size(), ind);
   }
 
-  vm.return_value[0] = (*v)[ind];
+  return (*v)[ind];
 }
 
-void vector_set(){
+Lisp_ptr vector_set(){
   auto arg = pick_args<3>();
   auto v = arg[0].get<Vector*>();
   if(!v){
@@ -114,29 +108,29 @@ void vector_set(){
   }
 
   (*v)[ind] = arg[2];
-  vm.return_value[0] = arg[2];
+  return arg[2];
 }
 
-void vector_to_list(){
+Lisp_ptr vector_to_list(){
   auto arg1 = pick_args_1();
   auto v = arg1.get<Vector*>();
   if(!v){
     throw vector_type_check_failed("vector->list", arg1);
   }
 
-  vm.return_value[0] = make_cons_list(v->begin(), v->end());
+  return make_cons_list(v->begin(), v->end());
 }
 
-void vector_from_list(){
+Lisp_ptr vector_from_list(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
     throw builtin_type_check_failed("list->vector", Ptr_tag::cons, arg);
   }
 
-  vm.return_value[0] = {new Vector(begin(arg), end(arg))};
+  return {new Vector(begin(arg), end(arg))};
 }
 
-void vector_fill(){
+Lisp_ptr vector_fill(){
   auto arg = pick_args<2>();
   auto v = arg[0].get<Vector*>();
   if(!v){
@@ -144,7 +138,7 @@ void vector_fill(){
   }
 
   std::fill(v->begin(), v->end(), arg[1]);
-  vm.return_value[0] = {v};
+  return {v};
 }
 
 

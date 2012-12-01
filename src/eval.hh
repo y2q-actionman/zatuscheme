@@ -14,7 +14,7 @@ void vm_op_set();
 void vm_op_local_set();
 void vm_op_begin();
 
-void let_internal(Procedure::EarlyBind);
+Lisp_ptr let_internal(Procedure::EarlyBind);
 
 bool is_self_evaluating(Lisp_ptr);
 
@@ -22,11 +22,11 @@ bool is_self_evaluating(Lisp_ptr);
 void eval();
 
 // builtin funcs near evaluator
-void apply_func();
-void func_force();
-void call_with_values();
-void call_cc();
-void dynamic_wind();
+Lisp_ptr apply_func();
+Lisp_ptr func_force();
+Lisp_ptr call_with_values();
+Lisp_ptr call_cc();
+Lisp_ptr dynamic_wind();
 
 // for debug
 const char* stringify(VMop);

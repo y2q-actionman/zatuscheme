@@ -182,9 +182,12 @@ void proc_enter_native(const NProcedure* fun){
   auto native_func = fun->get();
   assert(native_func);
 
-  native_func();
-  // if(!vm.return_value())
-  //   cerr << "eval warning: native func returned undef!\n";
+  auto p = native_func();
+  if(p.tag() == Ptr_tag::vm_op){
+    // assumed return-value is set by native func.
+  }else{
+    vm.return_value[0] = p;
+  }
 }
 
 /*
@@ -344,11 +347,11 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   assert(!vm.stack.empty());
 
   if(auto ifun = proc.get<IProcedure*>()){
-    proc_enter_interpreted(ifun);
+    return proc_enter_interpreted(ifun);
   }else if(auto nfun = proc.get<const NProcedure*>()){
-    proc_enter_native(nfun);
+    return proc_enter_native(nfun);
   }else if(auto cont = proc.get<Continuation*>()){
-    proc_enter_cont(cont);
+    return proc_enter_cont(cont);
   }else{
     throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
   }
@@ -504,9 +507,9 @@ void vm_op_force(){
   delay->force(vm.return_value[0]);
 }
 
-void let_internal(EarlyBind early_bind){
+Lisp_ptr let_internal(EarlyBind early_bind){
   auto arg = pick_args_1();
-  if(!arg) return;
+  if(!arg) return {};
 
   // skips first 'let' symbol
   auto arg_c = arg.get<Cons*>();
@@ -580,7 +583,7 @@ void let_internal(EarlyBind early_bind){
 
   vm.code.insert(vm.code.end(), {vm_op_call, proc});
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
-  vm.return_value[0] = {};
+  return vm_op_nop;
 }
 
 bool is_self_evaluating(Lisp_ptr p){
@@ -664,7 +667,7 @@ void eval(){
 }
 
 
-void apply_func(){
+Lisp_ptr apply_func(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -689,28 +692,28 @@ void apply_func(){
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  return vm_op_nop;
 }
 
-void func_force(){
+Lisp_ptr func_force(){
   auto arg = pick_args_1();
   auto d = arg.get<Delay*>();
   if(!d){
-    vm.return_value[0] = arg;
-    return;
+    return arg;
   }
   
   if(d->forced()){
-    vm.return_value[0] = d->get();
-    return;
+    return d->get();
   }
 
   vm.enter_frame(d->env());
   vm.stack.push_back(arg);
   vm.code.insert(vm.code.end(),
                  {vm_op_force, vm_op_leave_frame, d->get()});
+  return vm_op_nop;
 }
 
-void call_with_values(){
+Lisp_ptr call_with_values(){
   auto args = pick_args<2>();
 
   if(!is_procedure(args[0])){
@@ -735,9 +738,10 @@ void call_with_values(){
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  return vm_op_nop;
 }
 
-void call_cc(){
+Lisp_ptr call_cc(){
   auto args = pick_args<1>();
 
   if(!is_procedure(args[0])){
@@ -755,6 +759,7 @@ void call_cc(){
   vm.stack.insert(vm.stack.end(), {cont, {Ptr_tag::vm_argcount, 1}});
 
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  return vm_op_nop;
 }
 
 /*
@@ -776,7 +781,7 @@ static void vm_op_save_values_and_enter(){
   proc_enter_entrypoint(proc);
 }
 
-void dynamic_wind(){
+Lisp_ptr dynamic_wind(){
   auto args = pick_args<3>();
 
   for(auto p : args){
@@ -808,6 +813,7 @@ void dynamic_wind(){
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  return vm_op_nop;
 }
 
 const char* stringify(VMop op){

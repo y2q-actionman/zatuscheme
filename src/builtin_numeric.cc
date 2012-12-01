@@ -32,51 +32,50 @@ zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 template<typename Fun>
-inline void number_pred(Fun&& fun){
+inline Lisp_ptr number_pred(Fun&& fun){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
-    vm.return_value[0] = Lisp_ptr{false};
-    return;
+    return Lisp_ptr{false};
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(num)};
+  return Lisp_ptr{fun(num)};
 }
 
-void complexp(){
-  number_pred([](Number* n){
+Lisp_ptr complexp(){
+  return number_pred([](Number* n){
       return n->type() >= Number::Type::integer;
     });
 }
 
-void realp(){
-  number_pred([](Number* n){
+Lisp_ptr realp(){
+  return number_pred([](Number* n){
       return n->type() >= Number::Type::integer
         && n->type() <= Number::Type::real;
     });
 }
 
-void rationalp(){
-  number_pred([](Number* n){
+Lisp_ptr rationalp(){
+  return number_pred([](Number* n){
       return n->type() >= Number::Type::integer
         && n->type() < Number::Type::real;
     });
 }
 
-void integerp(){
-  number_pred([](Number* n){
+Lisp_ptr integerp(){
+  return number_pred([](Number* n){
       return n->type() == Number::Type::integer;
     });
 }
 
-void exactp(){
-  number_pred([](Number* n){
+Lisp_ptr exactp(){
+  return number_pred([](Number* n){
       return n->type() == Number::Type::integer;
     });
 }
 
-void inexactp(){
-  number_pred([](Number* n){
+Lisp_ptr inexactp(){
+  return number_pred([](Number* n){
       return n->type() == Number::Type::complex
         || n->type() == Number::Type::real;
     });
@@ -108,7 +107,7 @@ struct number_comparator {
 
 
 template<typename Fun>
-inline void number_compare(const char* name, Fun&& fun){
+inline Lisp_ptr number_compare(const char* name, Fun&& fun){
   ZsArgs args;
 
   auto i1 = begin(args);
@@ -126,46 +125,45 @@ inline void number_compare(const char* name, Fun&& fun){
     }
 
     if(!fun(n1, n2)){
-      vm.return_value[0] = Lisp_ptr{false};
-      return;
+      return Lisp_ptr{false};
     }
 
     n1 = n2;
   }
 
-  vm.return_value[0] = Lisp_ptr{true};
+  return Lisp_ptr{true};
 }
 
-void number_equal(){
-  number_compare("=",
-                 [](const Number* n1, const Number* n2){
-                   return eqv(*n1, *n2);
-                 });
+Lisp_ptr number_equal(){
+  return number_compare("=",
+                        [](const Number* n1, const Number* n2){
+                          return eqv(*n1, *n2);
+                        });
 }
 
-void number_less(){
-  number_compare("<",
-                 number_comparator<std::less>()); 
+Lisp_ptr number_less(){
+  return number_compare("<",
+                        number_comparator<std::less>()); 
 }
 
-void number_greater(){
-  number_compare(">",
-                 number_comparator<std::greater>());
+Lisp_ptr number_greater(){
+  return number_compare(">",
+                        number_comparator<std::greater>());
 }
   
-void number_less_eq(){
-  number_compare("<=",
-                 number_comparator<std::less_equal>());
+Lisp_ptr number_less_eq(){
+  return number_compare("<=",
+                        number_comparator<std::less_equal>());
 }
   
-void number_greater_eq(){
-  number_compare(">=",
-                 number_comparator<std::greater_equal>());
+Lisp_ptr number_greater_eq(){
+  return number_compare(">=",
+                        number_comparator<std::greater_equal>());
 }
 
 
-void zerop(){
-  number_pred([](Number* num) -> bool {
+Lisp_ptr zerop(){
+  return number_pred([](Number* num) -> bool {
       switch(num->type()){
       case Number::Type::complex: {
         auto c = num->get<Number::complex_type>();
@@ -203,12 +201,12 @@ struct pos_neg_pred{
   }
 };
 
-void positivep(){
-  number_pred(pos_neg_pred<std::greater>());
+Lisp_ptr positivep(){
+  return number_pred(pos_neg_pred<std::greater>());
 }
 
-void negativep(){
-  number_pred(pos_neg_pred<std::less>());
+Lisp_ptr negativep(){
+  return number_pred(pos_neg_pred<std::less>());
 }
 
 template<template <typename> class Fun>
@@ -229,19 +227,19 @@ struct even_odd_pred{
   }
 };
 
-void oddp(){
-  number_pred(even_odd_pred<std::not_equal_to>());
+Lisp_ptr oddp(){
+  return number_pred(even_odd_pred<std::not_equal_to>());
 }
 
-void evenp(){
-  number_pred(even_odd_pred<std::equal_to>());
+Lisp_ptr evenp(){
+  return number_pred(even_odd_pred<std::equal_to>());
 }
 
 
 template<typename Fun, typename ArgsV>
 inline
-void number_accumulate(const char* name, Number&& init, Fun&& fun,
-                       ArgsV&& args){
+Lisp_ptr number_accumulate(const char* name, Number&& init, Fun&& fun,
+                           ArgsV&& args){
   for(auto i = begin(args), e = end(args);
       i != e; ++i){
     auto n = i->get<Number*>();
@@ -250,19 +248,18 @@ void number_accumulate(const char* name, Number&& init, Fun&& fun,
     }
 
     if(!fun(init, *n)){ // assumed 'uncaught_exception' context
-      vm.return_value[0] = {};
-      return;
+      return {};
     }
   }
 
-  vm.return_value[0] = {new Number(init)};
+  return {new Number(init)};
 }
 
 template<class Fun>
 inline
-void number_accumulate(const char* name, Number&& init, Fun&& fun){
+Lisp_ptr number_accumulate(const char* name, Number&& init, Fun&& fun){
   ZsArgs args;
-  number_accumulate(name, move(init), move(fun), move(args));
+  return number_accumulate(name, move(init), move(fun), move(args));
 }
 
 
@@ -302,12 +299,12 @@ struct minmax_accum{
 };    
 
 
-void number_max(){
-  number_accumulate("max", Number(), minmax_accum<std::greater>());
+Lisp_ptr number_max(){
+  return number_accumulate("max", Number(), minmax_accum<std::greater>());
 }
 
-void number_min(){
-  number_accumulate("min", Number(), minmax_accum<std::less>());
+Lisp_ptr number_min(){
+  return number_accumulate("min", Number(), minmax_accum<std::less>());
 }
 
 template<template <typename> class Op>
@@ -372,15 +369,15 @@ struct binary_accum{
 };
 
 
-void number_plus(){
-  number_accumulate("+", Number(0l), binary_accum<std::plus>());
+Lisp_ptr number_plus(){
+  return number_accumulate("+", Number(0l), binary_accum<std::plus>());
 }
 
-void number_multiple(){
-  number_accumulate("*", Number(1l), binary_accum<std::multiplies>());
+Lisp_ptr number_multiple(){
+  return number_accumulate("*", Number(1l), binary_accum<std::multiplies>());
 }
 
-void number_minus(){
+Lisp_ptr number_minus(){
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -396,19 +393,16 @@ void number_minus(){
       auto i = n->get<Number::integer_type>();
       if(i == imin){
         cerr << "warning: integer operation fallen into float\n";
-        vm.return_value[0] = {new Number(-static_cast<Number::real_type>(imin))};
+        return {new Number(-static_cast<Number::real_type>(imin))};
       }else{
-        vm.return_value[0] = {new Number(-i)};
+        return {new Number(-i)};
       }
-      return;
     }
     case Number::Type::real:
-      vm.return_value[0] = {new Number(-n->get<Number::real_type>())};
-      return;
+      return {new Number(-n->get<Number::real_type>())};
     case Number::Type::complex: {
       auto c = n->get<Number::complex_type>();
-      vm.return_value[0] = {new Number(Number::complex_type(-c.real(), -c.imag()))};
-      return;
+      return {new Number(Number::complex_type(-c.real(), -c.imag()))};
     }
     case Number::Type::uninitialized:
     default:
@@ -416,11 +410,11 @@ void number_minus(){
     }
   }else{
     args.pop_front();
-    number_accumulate("-", Number(*n), binary_accum<std::minus>(), move(args));
+    return number_accumulate("-", Number(*n), binary_accum<std::minus>(), move(args));
   }
 }
 
-void number_divide(){
+Lisp_ptr number_divide(){
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -432,15 +426,12 @@ void number_divide(){
   if(args.size() == 1){
     switch(n->type()){
     case Number::Type::integer:
-      vm.return_value[0] = {new Number(1.0 / n->get<Number::integer_type>())};
-      return;
+      return {new Number(1.0 / n->get<Number::integer_type>())};
     case Number::Type::real:
-      vm.return_value[0] = {new Number(1.0 / n->get<Number::real_type>())};
-      return;
+      return {new Number(1.0 / n->get<Number::real_type>())};
     case Number::Type::complex: {
       auto c = n->get<Number::complex_type>();
-      vm.return_value[0] = {new Number(1.0 / c)};
-      return;
+      return {new Number(1.0 / c)};
     }
     case Number::Type::uninitialized:
     default:
@@ -448,15 +439,15 @@ void number_divide(){
     }
   }else{
     args.pop_front();
-    number_accumulate("/", 
-                      n->type() == Number::Type::integer
-                      ? Number(n->coerce<Number::real_type>()) : Number(*n),                    
-                      binary_accum<std::divides>(),
-                      move(args));
+    return number_accumulate("/", 
+                             n->type() == Number::Type::integer
+                             ? Number(n->coerce<Number::real_type>()) : Number(*n),                    
+                             binary_accum<std::divides>(),
+                             move(args));
   }
 }
 
-void number_abs(){
+Lisp_ptr number_abs(){
   auto arg1 = pick_args_1();
 
   auto n = arg1.get<Number*>();
@@ -468,22 +459,20 @@ void number_abs(){
   case Number::Type::integer: {
     auto i = n->get<Number::integer_type>();
     if(i >= 0){
-      vm.return_value[0] = n;
+      return n;
     }else{
       static constexpr auto imin = numeric_limits<Number::integer_type>::min();
       if(i == imin){
         cerr << "warning: integer operation fallen into float\n";
-        vm.return_value[0] = new Number(-static_cast<Number::real_type>(imin));
+        return new Number(-static_cast<Number::real_type>(imin));
       }else{
-        vm.return_value[0] = new Number(-i);
+        return new Number(-i);
       }
     }
-    return;
   }
   case Number::Type::real: {
     auto d = n->get<Number::real_type>();
-    vm.return_value[0] = {(d >= 0) ? n : new Number(-d)};
-    return;
+    return {(d >= 0) ? n : new Number(-d)};
   }
   case Number::Type::complex: {
     throw zs_error(complex_found::msg);
@@ -496,7 +485,7 @@ void number_abs(){
 
 template<typename Fun>
 inline
-void number_divop(const char* name, Fun&& fun){
+Lisp_ptr number_divop(const char* name, Fun&& fun){
   auto args = pick_args<2>();
   Number* n[2];
 
@@ -511,33 +500,33 @@ void number_divop(const char* name, Fun&& fun){
     }
   }
   
-  vm.return_value[0] = {new Number{fun(n[0]->get<Number::integer_type>(),
-                                    n[1]->get<Number::integer_type>())}};
+  return {new Number{fun(n[0]->get<Number::integer_type>(),
+                         n[1]->get<Number::integer_type>())}};
 }
 
-void number_quot(){
-  number_divop("quotient", std::divides<Number::integer_type>());
+Lisp_ptr number_quot(){
+  return number_divop("quotient", std::divides<Number::integer_type>());
 }
 
-void number_rem(){
-  number_divop("remainder",
-               [](Number::integer_type i1, Number::integer_type i2) -> Number::integer_type{
-                 auto q = i1 / i2;
-                 return i1 - (q * i2);
-               });
+Lisp_ptr number_rem(){
+  return number_divop("remainder",
+                      [](Number::integer_type i1, Number::integer_type i2) -> Number::integer_type{
+                        auto q = i1 / i2;
+                        return i1 - (q * i2);
+                      });
 }
 
-void number_mod(){
-  number_divop("modulo", 
-               [](Number::integer_type i1, Number::integer_type i2) -> Number::integer_type{
-                 auto m = i1 % i2;
+Lisp_ptr number_mod(){
+  return number_divop("modulo", 
+                      [](Number::integer_type i1, Number::integer_type i2) -> Number::integer_type{
+                        auto m = i1 % i2;
 
-                 if((m < 0 && i2 > 0) || (m > 0 && i2 < 0)){
-                   return m + i2;
-                 }else{
-                   return m;
-                 }
-               });
+                        if((m < 0 && i2 > 0) || (m > 0 && i2 < 0)){
+                          return m + i2;
+                        }else{
+                          return m;
+                        }
+                      });
 }
 
 template<typename T>
@@ -557,37 +546,39 @@ T gcd(T m, T n){
   return m;
 }
 
-void number_gcd(){
-  number_accumulate("gcd", Number(0l),
-                    [](Number& n1, const Number& n2) -> bool {
-                      if(n1.type() != Number::Type::integer || n2.type() != Number::Type::integer){
-                        throw zs_error("native func: gcd: not integer passed.\n");
-                      }
+Lisp_ptr number_gcd(){
+  return number_accumulate("gcd", Number(0l),
+                           [](Number& n1, const Number& n2) -> bool {
+                             if(n1.type() != Number::Type::integer
+                                || n2.type() != Number::Type::integer){
+                               throw zs_error("native func: gcd: not integer passed.\n");
+                             }
 
-                      auto i1 = n1.get<Number::integer_type>();
-                      auto i2 = n2.get<Number::integer_type>();
+                             auto i1 = n1.get<Number::integer_type>();
+                             auto i2 = n2.get<Number::integer_type>();
 
-                      n1 = Number{gcd(i1, i2)};
-                      return true;
-                    });
+                             n1 = Number{gcd(i1, i2)};
+                             return true;
+                           });
 }
 
-void number_lcm(){
-  number_accumulate("lcm", Number(1l),
-                    [](Number& n1, const Number& n2) -> bool {
-                      if(n1.type() != Number::Type::integer || n2.type() != Number::Type::integer){
-                        throw zs_error("native func: gcd: not integer passed.\n");
-                      }
+Lisp_ptr number_lcm(){
+  return number_accumulate("lcm", Number(1l),
+                           [](Number& n1, const Number& n2) -> bool {
+                             if(n1.type() != Number::Type::integer
+                                || n2.type() != Number::Type::integer){
+                               throw zs_error("native func: gcd: not integer passed.\n");
+                             }
 
-                      auto i1 = n1.get<Number::integer_type>();
-                      auto i2 = n2.get<Number::integer_type>();
+                             auto i1 = n1.get<Number::integer_type>();
+                             auto i2 = n2.get<Number::integer_type>();
 
-                      n1 = Number{abs(i1 * i2 / gcd(i1, i2))};
-                      return true;
-                    });
+                             n1 = Number{abs(i1 * i2 / gcd(i1, i2))};
+                             return true;
+                           });
 }
 
-void number_numerator(){
+Lisp_ptr number_numerator(){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
@@ -597,7 +588,7 @@ void number_numerator(){
   throw zs_error("internal error: native func 'numerator' is not implemented.\n");
 }
 
-void number_denominator(){
+Lisp_ptr number_denominator(){
   auto arg = pick_args_1();
   auto num = arg.get<Number*>();
   if(!num){
@@ -610,7 +601,7 @@ void number_denominator(){
 
 template<typename Fun>
 inline
-void number_rounding(const char* name, Fun&& fun){
+Lisp_ptr number_rounding(const char* name, Fun&& fun){
   auto arg1 = pick_args_1();
 
   auto n = arg1.get<Number*>();
@@ -620,11 +611,9 @@ void number_rounding(const char* name, Fun&& fun){
 
   switch(n->type()){
   case Number::Type::integer:
-    vm.return_value[0] = {n};
-    return;
+    return {n};
   case Number::Type::real:
-    vm.return_value[0] = {new Number(fun(n->get<Number::real_type>()))};
-    return;
+    return {new Number(fun(n->get<Number::real_type>()))};
   case Number::Type::complex:
     throw zs_error(complex_found::msg);
   case Number::Type::uninitialized:
@@ -633,24 +622,24 @@ void number_rounding(const char* name, Fun&& fun){
   }
 }
 
-void number_floor(){
-  number_rounding("floor", [](Number::real_type d){ return std::floor(d); });
+Lisp_ptr number_floor(){
+  return number_rounding("floor", [](Number::real_type d){ return std::floor(d); });
 }
 
-void number_ceil(){
-  number_rounding("ceiling", [](Number::real_type d){ return std::ceil(d); });
+Lisp_ptr number_ceil(){
+  return number_rounding("ceiling", [](Number::real_type d){ return std::ceil(d); });
 }
 
-void number_trunc(){
-  number_rounding("truncate", [](Number::real_type d){ return std::trunc(d); });
+Lisp_ptr number_trunc(){
+  return number_rounding("truncate", [](Number::real_type d){ return std::trunc(d); });
 }
 
-void number_round(){
-  number_rounding("round", [](Number::real_type d){ return std::round(d); });
+Lisp_ptr number_round(){
+  return number_rounding("round", [](Number::real_type d){ return std::round(d); });
 }
 
 
-void number_rationalize(){
+Lisp_ptr number_rationalize(){
   auto args = pick_args<2>();
   Number* n[2];
 
@@ -667,7 +656,7 @@ void number_rationalize(){
 
 template<typename Fun>
 inline
-void number_unary_op(const char* name, Fun&& fun){
+Lisp_ptr number_unary_op(const char* name, Fun&& fun){
   auto arg1 = pick_args_1();
 
   auto n = arg1.get<Number*>();
@@ -678,11 +667,9 @@ void number_unary_op(const char* name, Fun&& fun){
   switch(n->type()){
   case Number::Type::integer:
   case Number::Type::real:
-    vm.return_value[0] = {new Number(fun(n->coerce<Number::real_type>()))};
-    return;
+    return {new Number(fun(n->coerce<Number::real_type>()))};
   case Number::Type::complex:
-    vm.return_value[0] = {new Number(fun(n->get<Number::complex_type>()))};
-    return;
+    return {new Number(fun(n->get<Number::complex_type>()))};
   case Number::Type::uninitialized:
   default:
     UNEXP_DEFAULT();
@@ -696,8 +683,8 @@ struct exp_fun{
   }
 };
 
-void number_exp(){
-  number_unary_op("exp", exp_fun());
+Lisp_ptr number_exp(){
+  return number_unary_op("exp", exp_fun());
 }
 
 struct log_fun{
@@ -707,8 +694,8 @@ struct log_fun{
   }
 };
 
-void number_log(){
-  number_unary_op("log", log_fun());
+Lisp_ptr number_log(){
+  return number_unary_op("log", log_fun());
 }
 
 struct sin_fun{
@@ -718,8 +705,8 @@ struct sin_fun{
   }
 };
 
-void number_sin(){
-  number_unary_op("sin", sin_fun());
+Lisp_ptr number_sin(){
+  return number_unary_op("sin", sin_fun());
 }
 
 struct cos_fun{
@@ -729,8 +716,8 @@ struct cos_fun{
   }
 };
 
-void number_cos(){
-  number_unary_op("cos", cos_fun());
+Lisp_ptr number_cos(){
+  return number_unary_op("cos", cos_fun());
 }
 
 struct tan_fun{
@@ -740,8 +727,8 @@ struct tan_fun{
   }
 };
 
-void number_tan(){
-  number_unary_op("tan", tan_fun());
+Lisp_ptr number_tan(){
+  return number_unary_op("tan", tan_fun());
 }
 
 struct asin_fun{
@@ -751,8 +738,8 @@ struct asin_fun{
   }
 };
 
-void number_asin(){
-  number_unary_op("asin", asin_fun());
+Lisp_ptr number_asin(){
+  return number_unary_op("asin", asin_fun());
 }
 
 struct acos_fun{
@@ -762,11 +749,11 @@ struct acos_fun{
   }
 };
 
-void number_acos(){
-  number_unary_op("acos", acos_fun());
+Lisp_ptr number_acos(){
+  return number_unary_op("acos", acos_fun());
 }
 
-void number_atan(){
+Lisp_ptr number_atan(){
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -780,17 +767,14 @@ void number_atan(){
     switch(n1->type()){
     case Number::Type::integer:
     case Number::Type::real:
-      vm.return_value[0] = {new Number(std::atan(n1->coerce<Number::real_type>()))};
-      return;
+      return {new Number(std::atan(n1->coerce<Number::real_type>()))};
     case Number::Type::complex: {
-      vm.return_value[0] = {new Number(std::atan(n1->get<Number::complex_type>()))};
-      return;
+      return {new Number(std::atan(n1->get<Number::complex_type>()))};
     }
     case Number::Type::uninitialized:
     default:
       UNEXP_DEFAULT();
     }
-    return;
 
   case 2: {// std::atan2()
     auto n2 = args[1].get<Number*>();
@@ -801,16 +785,14 @@ void number_atan(){
     switch(n2->type()){
     case Number::Type::integer:
     case Number::Type::real:
-      vm.return_value[0] = {new Number(std::atan2(n1->coerce<Number::real_type>(),
-                                                  n2->coerce<Number::real_type>()))};
-      return;
+      return {new Number(std::atan2(n1->coerce<Number::real_type>(),
+                                    n2->coerce<Number::real_type>()))};
     case Number::Type::complex:
       throw zs_error("native func: (atan <complex> <complex>) is not implemented.\n");
     case Number::Type::uninitialized:
     default:
       UNEXP_DEFAULT();
     }
-    return;
   }
 
   default:
@@ -825,12 +807,13 @@ struct sqrt_fun{
   }
 };
 
-void number_sqrt(){
-  number_unary_op("sqrt", sqrt_fun());
+Lisp_ptr number_sqrt(){
+  return number_unary_op("sqrt", sqrt_fun());
 }
 
 template<typename RFun, typename CFun>
-void number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
+inline
+Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
   auto args = pick_args<2>();
   Number* n[2];
 
@@ -848,55 +831,49 @@ void number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
 
   if(n[0]->type() <= Number::Type::real
      || n[1]->type() <= Number::Type::real){
-    vm.return_value[0] = {new Number(rfun(n[0]->coerce<Number::real_type>(),
-                                       n[1]->coerce<Number::real_type>()))};
-    return;
+    return {new Number(rfun(n[0]->coerce<Number::real_type>(),
+                            n[1]->coerce<Number::real_type>()))};
   }
 
   if(n[0]->type() <= Number::Type::complex
      || n[1]->type() <= Number::Type::complex){
-    vm.return_value[0] = cfun(n[0]->coerce<Number::complex_type>(),
-                           n[1]->coerce<Number::complex_type>());
-    return;
+    return Lisp_ptr{cfun(n[0]->coerce<Number::complex_type>(),
+                         n[1]->coerce<Number::complex_type>())};
   }
 
   UNEXP_DEFAULT();
 }
 
-void number_expt(){
-  number_binary_op("expt",
-                   [](Number::real_type n1, Number::real_type n2){
-                     return std::pow(n1, n2);
-                   },
-                   [](const Number::complex_type& n1, const Number::complex_type& n2){
-                     return Lisp_ptr{new Number(std::pow(n1, n2))};
-                   });
+Lisp_ptr number_expt(){
+  return number_binary_op("expt",
+                          [](Number::real_type n1, Number::real_type n2){
+                            return std::pow(n1, n2);
+                          },
+                          [](const Number::complex_type& n1, const Number::complex_type& n2){
+                            return Lisp_ptr{new Number(std::pow(n1, n2))};
+                          });
 }
 
-void number_rect(){
-  number_binary_op("make-rectangular",
-                   [](Number::real_type n1, Number::real_type n2){
-                     return Number::complex_type(n1, n2);
-                   },
-                   [](const Number::complex_type&, const Number::complex_type&){
-                     return Lisp_ptr{};
-                   });
+Lisp_ptr number_rect(){
+  return number_binary_op("make-rectangular",
+                          [](Number::real_type n1, Number::real_type n2){
+                            return Number::complex_type(n1, n2);
+                          },
+                          complex_found());
 }
 
-void number_polar(){
-  number_binary_op("make-polar",
-                   [](Number::real_type n1, Number::real_type n2){
-                     return polar(n1, n2);
-                   },
-                   [](const Number::complex_type&, const Number::complex_type&){
-                     return Lisp_ptr{};
-                   });
+Lisp_ptr number_polar(){
+  return number_binary_op("make-polar",
+                          [](Number::real_type n1, Number::real_type n2){
+                            return polar(n1, n2);
+                          },
+                          complex_found());
 }
 
 
 template<typename Fun>
 inline
-void number_unary_op_complex(const char* name, Fun&& fun){
+Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
   auto arg1 = pick_args_1();
 
   auto n = arg1.get<Number*>();
@@ -908,44 +885,43 @@ void number_unary_op_complex(const char* name, Fun&& fun){
   case Number::Type::integer:
   case Number::Type::real:
   case Number::Type::complex:
-    vm.return_value[0] = {new Number(fun(n->coerce<Number::complex_type>()))};
-    return;
+    return {new Number(fun(n->coerce<Number::complex_type>()))};
   case Number::Type::uninitialized:
   default:
     UNEXP_DEFAULT();
   }
 }
 
-void number_real(){
-  number_unary_op_complex("real-part",
-                          [](const Number::complex_type& z){
-                            return z.real();
-                          });
+Lisp_ptr number_real(){
+  return number_unary_op_complex("real-part",
+                                 [](const Number::complex_type& z){
+                                   return z.real();
+                                 });
 }
 
-void number_imag(){
-  number_unary_op_complex("imag-part",
-                          [](const Number::complex_type& z){
-                            return z.imag();
-                          });
+Lisp_ptr number_imag(){
+  return number_unary_op_complex("imag-part",
+                                 [](const Number::complex_type& z){
+                                   return z.imag();
+                                 });
 }
 
-void number_mag(){
-  number_unary_op_complex("magnitude",
-                          [](const Number::complex_type& z){
-                            return std::abs(z);
-                          });
+Lisp_ptr number_mag(){
+  return number_unary_op_complex("magnitude",
+                                 [](const Number::complex_type& z){
+                                   return std::abs(z);
+                                 });
 }
 
-void number_angle(){
-  number_unary_op_complex("angle",
-                          [](const Number::complex_type& z){
-                            return arg(z);
-                          });
+Lisp_ptr number_angle(){
+  return number_unary_op_complex("angle",
+                                 [](const Number::complex_type& z){
+                                   return arg(z);
+                                 });
 }
 
 template<typename Fun>
-void number_i_e(const char* name, Fun&& fun){
+Lisp_ptr number_i_e(const char* name, Fun&& fun){
   auto arg1 = pick_args_1();
 
   auto n = arg1.get<Number*>();
@@ -953,19 +929,19 @@ void number_i_e(const char* name, Fun&& fun){
     throw number_type_check_failed(name, arg1);
   }
 
-  vm.return_value[0] = {new Number(fun(*n))};
+  return {new Number(fun(*n))};
 }
 
-void number_i_to_e(){
-  number_i_e("inexact->exact", to_exact);
+Lisp_ptr number_i_to_e(){
+  return number_i_e("inexact->exact", to_exact);
 }
 
-void number_e_to_i(){
-  number_i_e("exact->inexact", to_inexact);
+Lisp_ptr number_e_to_i(){
+  return number_i_e("exact->inexact", to_inexact);
 }
 
 
-void number_from_string(){
+Lisp_ptr number_from_string(){
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -999,16 +975,10 @@ void number_from_string(){
   }
 
   istringstream iss(*str);
-  auto n = parse_number(iss, radix);
-
-  if(n){
-    vm.return_value[0] = {new Number(n)};
-  }else{
-    vm.return_value[0] = {};
-  }
+  return {new Number{parse_number(iss, radix)}};
 }
 
-void number_to_string(){
+Lisp_ptr number_to_string(){
   std::deque<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -1044,7 +1014,7 @@ void number_to_string(){
   ostringstream oss;
   print(oss, *n, radix);
 
-  vm.return_value[0] = {new String(oss.str())};
+  return {new String(oss.str())};
 }
 
 } //namespace

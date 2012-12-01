@@ -22,20 +22,20 @@ zs_error cons_type_check_failed(const char* func_name, Lisp_ptr p){
                        func_name, stringify(Ptr_tag::cons), stringify(p.tag()));
 }
 
-void type_check_pair(){
+Lisp_ptr type_check_pair(){
   auto arg = pick_args_1();
-  vm.return_value[0] = Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
+  return Lisp_ptr{(arg.tag() == Ptr_tag::cons) && !nullp(arg)};
 }
 
-void cons_cons(){
+Lisp_ptr cons_cons(){
   auto args = pick_args<2>();
-  vm.return_value[0] = {new Cons(args[0], args[1])};
+  return {new Cons(args[0], args[1])};
 }
 
 
 template<typename Fun>
 inline
-void cons_carcdr(const char* name, Fun&& fun){
+Lisp_ptr cons_carcdr(const char* name, Fun&& fun){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
     throw cons_type_check_failed(name, arg);
@@ -46,21 +46,21 @@ void cons_carcdr(const char* name, Fun&& fun){
     throw make_zs_error("native func: %s: arg is null list!\n", name);
   }
     
-  vm.return_value[0] = fun(c);
+  return fun(c);
 }
 
-void cons_car(){
-  cons_carcdr("car", [](Cons* c){ return c->car(); });
+Lisp_ptr cons_car(){
+  return cons_carcdr("car", [](Cons* c){ return c->car(); });
 }
 
-void cons_cdr(){
-  cons_carcdr("cdr", [](Cons* c){ return c->cdr(); });
+Lisp_ptr cons_cdr(){
+  return cons_carcdr("cdr", [](Cons* c){ return c->cdr(); });
 }
 
 
 template<typename Fun>
 inline
-void cons_set_carcdr(const char* name, Fun&& fun){
+Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
   auto args = pick_args<2>();
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed(name, args[0]);
@@ -71,32 +71,32 @@ void cons_set_carcdr(const char* name, Fun&& fun){
     throw make_zs_error("native func: %s: arg is null list!\n", name);
   }
   
-  vm.return_value[0] = fun(c, args[1]);
+  return fun(c, args[1]);
 }
 
-void cons_set_car(){
-  cons_set_carcdr("set-car!",
-                  [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
-                    c->rplaca(p);
-                    return p;
-                  });
+Lisp_ptr cons_set_car(){
+  return cons_set_carcdr("set-car!",
+                         [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
+                           c->rplaca(p);
+                           return p;
+                         });
 }
 
-void cons_set_cdr(){
-  cons_set_carcdr("set-cdr!",
-                  [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
-                    c->rplacd(p);
-                    return p;
-                  });
+Lisp_ptr cons_set_cdr(){
+  return cons_set_carcdr("set-cdr!",
+                         [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
+                           c->rplacd(p);
+                           return p;
+                         });
 }
 
 
-void cons_nullp(){
+Lisp_ptr cons_nullp(){
   auto arg = pick_args_1();
-  vm.return_value[0] = Lisp_ptr{nullp(arg)};
+  return Lisp_ptr{nullp(arg)};
 }
 
-void cons_listp(){
+Lisp_ptr cons_listp(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
     throw cons_type_check_failed("list?", arg);
@@ -117,27 +117,27 @@ void cons_listp(){
                        return nullp(p);
                      });
 
-  vm.return_value[0] = Lisp_ptr{ret};
+  return Lisp_ptr{ret};
 }
 
-void cons_list(){
-  vm.return_value[0] = stack_to_list<false>(vm.stack);
+Lisp_ptr cons_list(){
+  return stack_to_list<false>(vm.stack);
 }
 
-void cons_list_star(){
-  vm.return_value[0] = stack_to_list<true>(vm.stack);
+Lisp_ptr cons_list_star(){
+  return stack_to_list<true>(vm.stack);
 }
 
-void cons_length(){
+Lisp_ptr cons_length(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
     throw cons_type_check_failed("list?", arg);
   }
 
-  vm.return_value[0] = {new Number(std::distance(begin(arg), end(arg)))};
+  return {new Number(std::distance(begin(arg), end(arg)))};
 }
 
-void cons_append(){
+Lisp_ptr cons_append(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -154,10 +154,10 @@ void cons_append(){
   }
 
   // last
-  vm.return_value[0] = gl.extract_with_tail(args.back());
+  return gl.extract_with_tail(args.back());
 }
 
-void cons_reverse(){
+Lisp_ptr cons_reverse(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
     throw cons_type_check_failed("reverse", arg);
@@ -169,7 +169,7 @@ void cons_reverse(){
     ret = push_cons_list(p, ret);
   }
 
-  vm.return_value[0] = ret;
+  return ret;
 }
 
 Cons* cons_list_tail_base(const char* name){
@@ -187,7 +187,7 @@ Cons* cons_list_tail_base(const char* name){
 
 
   Cons* ret = nullptr;
-
+  
   do_list(args[0],
           [&](Cons* c) -> bool{
             if(nth <= 0){
@@ -203,21 +203,21 @@ Cons* cons_list_tail_base(const char* name){
   return ret;
 }
 
-void cons_list_tail(){
+Lisp_ptr cons_list_tail(){
   auto c = cons_list_tail_base("list-tail");
   if(c){
-    vm.return_value[0] = {c};
+    return {c};
   }else{
-    vm.return_value[0] = {};
+    return {};
   }
 }
 
-void cons_list_ref(){
+Lisp_ptr cons_list_ref(){
   auto c = cons_list_tail_base("list-ref");
   if(c){
-    vm.return_value[0] = c->car();
+    return c->car();
   }else{
-    vm.return_value[0] = {};
+    return {};
   }
 }
 

@@ -24,7 +24,7 @@ zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
                        func_name, stringify(Ptr_tag::string), stringify(p.tag()));
 }
 
-void string_make(){
+Lisp_ptr string_make(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -39,28 +39,22 @@ void string_make(){
   }
   auto char_count = num->get<Number::integer_type>();
 
-  char ch;
-
   switch(args.size()){
   case 1:
-    ch = '\0';
-    break;
+    return {new String(char_count, '\0')};
   case 2: {
     auto c = args[1].get<char>();
     if(!c){
       throw builtin_type_check_failed("make-string", Ptr_tag::character, args[1]);
     }
-    ch = c;
-    break;
+    return {new String(char_count, c)};
   }
   default:
     throw builtin_variadic_argcount_failed("make-string", 2);
   }
-
-  vm.return_value[0] = {new String(char_count, ch)};
 }
 
-void string_string(){
+Lisp_ptr string_string(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -74,20 +68,20 @@ void string_string(){
     ret.push_back(c);
   }
 
-  vm.return_value[0] = {new String(std::move(ret))};
+  return {new String(std::move(ret))};
 }
   
-void string_length(){
+Lisp_ptr string_length(){
   auto arg1 = pick_args_1();
   auto str = arg1.get<String*>();
   if(!str){
     throw string_type_check_failed("string-length", arg1);
   }
 
-  vm.return_value[0] = {new Number(static_cast<Number::integer_type>(str->length()))};
+  return {new Number(static_cast<Number::integer_type>(str->length()))};
 }
 
-void string_ref(){
+Lisp_ptr string_ref(){
   auto arg = pick_args<2>();
   auto str = arg[0].get<String*>();
   if(!str){
@@ -110,10 +104,10 @@ void string_ref(){
                         str->length(), ind);
   }
 
-  vm.return_value[0] = Lisp_ptr{(*str)[ind]};
+  return Lisp_ptr{(*str)[ind]};
 }
 
-void string_set(){
+Lisp_ptr string_set(){
   auto arg = pick_args<3>();
   auto str = arg[0].get<String*>();
   if(!str){
@@ -142,11 +136,11 @@ void string_set(){
   }
 
   (*str)[ind] = ch;
-  vm.return_value[0] = Lisp_ptr{ch};
+  return Lisp_ptr{ch};
 }
 
 template<typename Fun>
-void string_compare(const char* name, Fun&& fun){
+Lisp_ptr string_compare(const char* name, Fun&& fun){
   auto args = pick_args<2>();
   String* str[2];
 
@@ -157,27 +151,27 @@ void string_compare(const char* name, Fun&& fun){
     }
   }
 
-  vm.return_value[0] = Lisp_ptr{fun(*str[0], *str[1])};
+  return Lisp_ptr{fun(*str[0], *str[1])};
 }
 
-void string_equal(){
-  string_compare("string=?", std::equal_to<std::string>());
+Lisp_ptr string_equal(){
+  return string_compare("string=?", std::equal_to<std::string>());
 }
 
-void string_less(){
-  string_compare("string<?", std::less<std::string>());
+Lisp_ptr string_less(){
+  return string_compare("string<?", std::less<std::string>());
 }
 
-void string_greater(){
-  string_compare("string>?", std::greater<std::string>());
+Lisp_ptr string_greater(){
+  return string_compare("string>?", std::greater<std::string>());
 }
 
-void string_less_eq(){
-  string_compare("string<=?", std::less_equal<std::string>());
+Lisp_ptr string_less_eq(){
+  return string_compare("string<=?", std::less_equal<std::string>());
 }
 
-void string_greater_eq(){
-  string_compare("string>=?", std::greater_equal<std::string>());
+Lisp_ptr string_greater_eq(){
+  return string_compare("string>=?", std::greater_equal<std::string>());
 }
 
 template<typename Fun>
@@ -188,28 +182,28 @@ struct ci_compare{
   }
 };
 
-void string_ci_equal(){
-  string_compare("string-ci=?", ci_compare<std::equal_to<int> >());
+Lisp_ptr string_ci_equal(){
+  return string_compare("string-ci=?", ci_compare<std::equal_to<int> >());
 }
 
-void string_ci_less(){
-  string_compare("string-ci<?", ci_compare<std::less<int> >());
+Lisp_ptr string_ci_less(){
+  return string_compare("string-ci<?", ci_compare<std::less<int> >());
 }
 
-void string_ci_greater(){
-  string_compare("string-ci>?", ci_compare<std::greater<int> >());
+Lisp_ptr string_ci_greater(){
+  return string_compare("string-ci>?", ci_compare<std::greater<int> >());
 }
 
-void string_ci_less_eq(){
-  string_compare("string-ci<=?", ci_compare<std::less_equal<int> >());
+Lisp_ptr string_ci_less_eq(){
+  return string_compare("string-ci<=?", ci_compare<std::less_equal<int> >());
 }
 
-void string_ci_greater_eq(){
-  string_compare("string-ci>=?", ci_compare<std::greater_equal<int> >());
+Lisp_ptr string_ci_greater_eq(){
+  return string_compare("string-ci>=?", ci_compare<std::greater_equal<int> >());
 }
 
 
-void string_substr(){
+Lisp_ptr string_substr(){
   auto arg = pick_args<3>();
   auto str = arg[0].get<String*>();
   if(!str){
@@ -237,11 +231,10 @@ void string_substr(){
                         str->length(), ind[0], ind[1]);
   }
 
-  auto ret = str->substr(ind[0], ind[1] - ind[0]);
-  vm.return_value[0] = {new String(std::move(ret))};
+  return {new String(str->substr(ind[0], ind[1] - ind[0]))};
 }
 
-void string_append(){
+Lisp_ptr string_append(){
   std::vector<Lisp_ptr> args;
   stack_to_vector(vm.stack, args);
 
@@ -257,20 +250,20 @@ void string_append(){
     ret.append(*str);
   }
 
-  vm.return_value[0] = {new String(std::move(ret))};
+  return {new String(std::move(ret))};
 }
 
-void string_to_list(){
+Lisp_ptr string_to_list(){
   auto arg1 = pick_args_1();
   auto str = arg1.get<String*>();
   if(!str){
     throw string_type_check_failed("string->list", arg1);
   }
 
-  vm.return_value[0] = make_cons_list(str->begin(), str->end());
+  return make_cons_list(str->begin(), str->end());
 }
 
-void string_from_list(){
+Lisp_ptr string_from_list(){
   auto arg = pick_args_1();
   if(arg.tag() != Ptr_tag::cons){
     throw builtin_type_check_failed("list->string", Ptr_tag::cons, arg);
@@ -286,20 +279,20 @@ void string_from_list(){
     ret.push_back(ch);
   }
 
-  vm.return_value[0] = {new String(std::move(ret))};
+  return {new String(std::move(ret))};
 }
 
-void string_copy(){
+Lisp_ptr string_copy(){
   auto arg1 = pick_args_1();
   auto str = arg1.get<String*>();
   if(!str){
     throw string_type_check_failed("string-copy", arg1);
   }
 
-  vm.return_value[0] = {new String(*str)};
+  return {new String(*str)};
 }
 
-void string_fill(){
+Lisp_ptr string_fill(){
   auto arg = pick_args<2>();
   auto str = arg[0].get<String*>();
   if(!str){
@@ -312,9 +305,8 @@ void string_fill(){
   }
 
   std::fill(str->begin(), str->end(), ch);
-  vm.return_value[0] = {str};
+  return {str};
 }
-
 
 } // namespace
 
