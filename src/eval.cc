@@ -106,15 +106,13 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
     ++argc;
   }
 
-  if((argc < info->required_args)
-     || (!info->variadic && argc > info->required_args)){
+  if((argc < info->required_args) || (argc > info->max_args)){
     for(int i = 0; i < argc; ++i){
       vm.stack.pop_back();
     }
     throw make_zs_error("macro-call error: number of passed args is mismatched!!"
-                        " (required %d args, %s, passed %d)\n",
-                        info->required_args,
-                        (info->variadic) ? "variadic" : "not variadic",
+                        " (required %d-%d args, passed %d)\n",
+                        info->required_args, info->max_args,
                         argc);
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
@@ -239,7 +237,7 @@ void proc_enter_interpreted(IProcedure* fun){
   }
 
   // variadic arg push
-  if(argi->variadic){
+  if(argi->max_args > argi->required_args){
     if(!arg_name.get<Symbol*>()){
       throw zs_error("eval error: no arg name for variadic arg!\n");
     }

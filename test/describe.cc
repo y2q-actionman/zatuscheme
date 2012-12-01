@@ -24,7 +24,7 @@ std::ostream& operator<<(std::ostream& o, const Number& n){
 }
 
 std::ostream& operator<<(std::ostream& o, const Procedure::ProcInfo& info){
-  return (o << "[required_args=" << info.required_args << ", variadic=" << info.variadic << "]");
+  return (o << "[required_args=" << info.required_args << ", max_args=" << info.max_args << "]");
 }
 
 std::ostream& operator<<(std::ostream& o, Procedure::Variadic v){

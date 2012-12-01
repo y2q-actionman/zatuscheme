@@ -2,6 +2,7 @@
 #define PROCEDURE_HH
 
 #include <utility>
+#include <limits>
 #include "lisp_ptr.hh"
 #include "env.hh"
 #include "vm.hh"
@@ -20,17 +21,27 @@ namespace Procedure {
 
   struct ProcInfo {
     int required_args;
+    int max_args;
     Calling calling;
-    bool variadic;
     bool early_bind;
 
     constexpr ProcInfo(Calling c,
                        int rargs,
-                       Variadic v = Variadic::f,
+                       int margs,
+                       EarlyBind e)
+      : required_args(rargs),
+        max_args(margs),
+        calling(c),
+        early_bind(static_cast<bool>(e)){}
+
+    // TODO: use delegating constructor
+    constexpr ProcInfo(Calling c,
+                       int rargs,
+                       Variadic v = Variadic::t,
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
+        max_args((v == Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
         calling(c),
-        variadic(static_cast<bool>(v)),
         early_bind(static_cast<bool>(e)){}
   };
 
