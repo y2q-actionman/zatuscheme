@@ -260,7 +260,7 @@ Lisp_ptr whole_function_let_star(){
   vm.stack.insert(vm.stack.end(),
                   {let_star_expand(bindings, body), {Ptr_tag::vm_argcount, 1}});
 
-  return let_internal(EarlyBind::t);
+  return let_internal(EarlyBind::f);
 }
 
 Lisp_ptr whole_function_letrec(){

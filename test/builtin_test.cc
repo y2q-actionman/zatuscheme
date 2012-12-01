@@ -54,6 +54,10 @@ int main(){
   check("(letrec ((x 1) (y 2) (z 3)) z)", "3");
   check("(letrec ((x 1)) (let ((x 2)) x))", "2");
   check("(letrec ((x 1)) (let ((x 2)) x) x)", "1");
+  check("(letrec ((even? (lambda (n) (if (zero? n) #t (odd? (- n 1)))))"
+        "         (odd?  (lambda (n) (if (zero? n) #f (even? (- n 1))))))"
+        "  (even? 88))",
+        "#t");
 
   check("(cond ((eqv? 1 1) 1))", "1");
   check("(cond ((eqv? 1 2) xxx) ((eqv? 2 3) yyy) ((eqv? 3 3) 3))", "3");
