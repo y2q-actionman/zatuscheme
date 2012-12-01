@@ -42,7 +42,7 @@ public:
 
 public:
   std::deque<Lisp_ptr> code;
-  std::deque<Lisp_ptr> stack;
+  std::vector<Lisp_ptr> stack;
   std::vector<Lisp_ptr> return_value;
 
   std::vector<winding> extent;
