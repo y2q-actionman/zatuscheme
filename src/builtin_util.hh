@@ -24,12 +24,12 @@ public:
   explicit ZsArgs();
   explicit ZsArgs(int);
   ZsArgs(const ZsArgs&) = delete;
-  ZsArgs(ZsArgs&&);
+  ZsArgs(ZsArgs&&) = delete;
 
   ~ZsArgs();
 
   ZsArgs& operator=(const ZsArgs&) = delete;
-  ZsArgs& operator=(ZsArgs&&);
+  ZsArgs& operator=(ZsArgs&&) = delete;
 
   
   Lisp_ptr& operator[](int i){ return *(stack_iter_s_ + i); }

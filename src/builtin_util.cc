@@ -35,29 +35,29 @@ ZsArgs::ZsArgs(int i)
   if(i != argcnt)
     throw builtin_argcount_failed("(unknown func)", i, i, argcnt);
 }
-
+/*
 ZsArgs::ZsArgs(ZsArgs&& other)
   : stack_iter_s_(move(other.stack_iter_s_)),
     stack_iter_e_(move(other.stack_iter_e_)){
   other.invalidate();
 }
-
+*/
 ZsArgs::~ZsArgs(){
-  if(stack_iter_s_ == stack_iter_e_) return;
+  // if(!(stack_iter_s_ < stack_iter_e_)) return;
 
   if(!std::uncaught_exception()){
     vm.stack.erase(stack_iter_s_, stack_iter_e_);
     invalidate();
   }
 }
-
+/*
 ZsArgs& ZsArgs::operator=(ZsArgs&& other){
   stack_iter_s_ = move(other.stack_iter_s_);
   stack_iter_e_ = move(other.stack_iter_e_);
   other.invalidate();
   return *this;
 }
-
+*/
 void ZsArgs::invalidate(){
-  stack_iter_s_ = stack_iter_e_ = decltype(vm.stack.end()){};
+  // stack_iter_s_ = stack_iter_e_ = decltype(vm.stack.end()){};
 }
