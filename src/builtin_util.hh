@@ -22,7 +22,6 @@ Lisp_ptr pick_args_1();
 class ZsArgs{
 public:
   explicit ZsArgs();
-  explicit ZsArgs(int argc);
   ZsArgs(const ZsArgs&) = delete;
   ZsArgs(ZsArgs&&);
 

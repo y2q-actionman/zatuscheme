@@ -26,18 +26,6 @@ ZsArgs::ZsArgs()
   stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
 }
 
-ZsArgs::ZsArgs(int request_argc)
-  : stack_iter_s_(),
-    stack_iter_e_(vm.stack.end()){
-  // TODO: use delegating constructor
-  auto argcnt = vm.stack.back().get<int>();
-  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
-
-  if(argcnt != request_argc){
-    // throw exception.
-  }
-}
-
 ZsArgs::ZsArgs(ZsArgs&& other)
   : stack_iter_s_(move(other.stack_iter_s_)),
     stack_iter_e_(move(other.stack_iter_e_)){

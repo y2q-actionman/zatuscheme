@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <array>
+#include <algorithm>
 
 #include "util.hh"
 #include "lisp_ptr.hh"
@@ -63,20 +64,14 @@ void stack_to_vector(StackT& st, VectorT& v){
 
 template<int size>
 std::array<Lisp_ptr, size> pick_args(){
-  Lisp_ptr argc = vm.stack.back();
-  vm.stack.pop_back();
+  ZsArgs args;
+  
+  if(args.size() != size){
+    throw builtin_argcount_failed("", size, size, args.size());
+  }
 
   auto ret = std::array<Lisp_ptr, size>();
-  if(argc.get<int>() != size){
-    ret.fill({});
-    return ret;
-  }    
-
-  for(int i = 0; i < size; ++i){
-    ret[i] = vm.stack[vm.stack.size() - size + i];
-  }
-  vm.stack.erase(vm.stack.end() - size, vm.stack.end());
-
+  std::copy(args.begin(), args.end(), ret.begin());
   return ret;
 }
 
