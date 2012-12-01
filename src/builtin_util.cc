@@ -16,8 +16,27 @@ zs_error builtin_variadic_argcount_failed(const char* name, int argc){
   return make_zs_error("native func: %s: %d or more args.\n", name, argc+1);
 }
 
+// class ZsArgs
+ZsArgs::ZsArgs()
+  : stack_iter_s_(),
+    stack_iter_e_(vm.stack.end()){
+  auto argcnt = vm.stack.back().get<int>();
+  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
+}
+
+ZsArgs::ZsArgs(int request_argc)
+  : stack_iter_s_(),
+    stack_iter_e_(vm.stack.end()){
+  // TODO: use delegating constructor
+  auto argcnt = vm.stack.back().get<int>();
+  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
+
+  if(argcnt != request_argc){
+    // throw exception.
+  }
+}
+
 ZsArgs::~ZsArgs(){
   if(!std::uncaught_exception())
     vm.stack.erase(stack_iter_s_, stack_iter_e_);
 }
-
