@@ -94,7 +94,7 @@ void vm_op_macro_call(){
   code = (call kind, proc, macro call)
   stack = (arg1, arg2, ..., arg-bottom)
 */
-void macro_call(Lisp_ptr proc, const ProcInfo* info){
+void macro_call(Lisp_ptr proc){
   assert(vm.code.back().get<VMop>() == vm_op_call);
 
   auto args = vm.stack.back();
@@ -104,16 +104,6 @@ void macro_call(Lisp_ptr proc, const ProcInfo* info){
   for(auto p : args.get<Cons*>()->cdr()){
     vm.stack.push_back(p);
     ++argc;
-  }
-
-  if((argc < info->required_args) || (argc > info->max_args)){
-    for(int i = 0; i < argc; ++i){
-      vm.stack.pop_back();
-    }
-    throw make_zs_error("macro-call error: number of passed args is mismatched!!"
-                        " (required %d-%d args, passed %d)\n",
-                        info->required_args, info->max_args,
-                        argc);
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
@@ -161,7 +151,7 @@ void vm_op_call(){
   case Calling::function:
     return function_call(proc, info);
   case Calling::macro:
-    return macro_call(proc, info);
+    return macro_call(proc);
   case Calling::whole_function:
     return whole_function_call(proc);
   default:
@@ -195,9 +185,7 @@ void proc_enter_native(const NProcedure* fun){
   code = (body1, body2, ..., leave_frame)
   stack = ()
 */
-void proc_enter_interpreted(IProcedure* fun){
-  const auto& argi = fun->info();
-
+void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
   // tail call check
   if(!vm.code.empty()
      && vm.code.back().get<VMop>() == vm_op_leave_frame){
@@ -343,9 +331,21 @@ void proc_enter_cont(Continuation* c){
  */
 void proc_enter_entrypoint(Lisp_ptr proc){
   assert(!vm.stack.empty());
+  assert(is_procedure(proc));
+
+  auto info = get_procinfo(proc);
+  auto argc = vm.stack.back().get<int>();
+
+  if((info->calling != Calling::whole_function)
+     && !(info->required_args <= argc && argc <= info->max_args)){
+    throw make_zs_error("eval error: number of passed args is mismatched!!"
+                        " (required %d-%d args, passed %d)\n",
+                        info->required_args, info->max_args,
+                        argc);
+  }
 
   if(auto ifun = proc.get<IProcedure*>()){
-    return proc_enter_interpreted(ifun);
+    return proc_enter_interpreted(ifun, info);
   }else if(auto nfun = proc.get<const NProcedure*>()){
     return proc_enter_native(nfun);
   }else if(auto cont = proc.get<Continuation*>()){
