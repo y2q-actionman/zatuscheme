@@ -236,11 +236,11 @@ Lisp_ptr evenp(){
 }
 
 
-template<typename Fun, typename ArgsV>
+template<typename Fun, typename Iter>
 inline
 Lisp_ptr number_accumulate(const char* name, Number&& init, Fun&& fun,
-                           ArgsV&& args){
-  for(auto i = begin(args), e = end(args);
+                           const Iter& args_begin, const Iter& args_end){
+  for(auto i = args_begin, e = args_end;
       i != e; ++i){
     auto n = i->get<Number*>();
     if(!n){
@@ -259,7 +259,8 @@ template<class Fun>
 inline
 Lisp_ptr number_accumulate(const char* name, Number&& init, Fun&& fun){
   ZsArgs args;
-  return number_accumulate(name, move(init), move(fun), move(args));
+  return number_accumulate(name, move(init), move(fun),
+                           args.begin(), args.end());
 }
 
 
@@ -378,8 +379,7 @@ Lisp_ptr number_multiple(){
 }
 
 Lisp_ptr number_minus(){
-  std::deque<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){
@@ -409,14 +409,13 @@ Lisp_ptr number_minus(){
       UNEXP_DEFAULT();
     }
   }else{
-    args.pop_front();
-    return number_accumulate("-", Number(*n), binary_accum<std::minus>(), move(args));
+    return number_accumulate("-", Number(*n), binary_accum<std::minus>(),
+                             next(args.begin()), args.end());
   }
 }
 
 Lisp_ptr number_divide(){
-  std::deque<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){
@@ -438,12 +437,12 @@ Lisp_ptr number_divide(){
       UNEXP_DEFAULT();
     }
   }else{
-    args.pop_front();
     return number_accumulate("/", 
                              n->type() == Number::Type::integer
                              ? Number(n->coerce<Number::real_type>()) : Number(*n),                    
                              binary_accum<std::divides>(),
-                             move(args));
+                             next(args.begin()),
+                             args.end());
   }
 }
 
