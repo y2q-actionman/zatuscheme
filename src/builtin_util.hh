@@ -24,12 +24,12 @@ public:
   explicit ZsArgs();
   explicit ZsArgs(int argc);
   ZsArgs(const ZsArgs&) = delete;
-  ZsArgs(ZsArgs&&) = delete;
+  ZsArgs(ZsArgs&&);
 
   ~ZsArgs();
 
   ZsArgs& operator=(const ZsArgs&) = delete;
-  ZsArgs& operator=(ZsArgs&&) = delete;
+  ZsArgs& operator=(ZsArgs&&);
 
   
   Lisp_ptr& operator[](int i){ return *(stack_iter_s_ + i); }
@@ -39,6 +39,8 @@ public:
   decltype(vm.stack.end()) end(){ return stack_iter_e_ - 1; }
 
 private:
+  void invalidate();
+
   decltype(vm.stack.end()) stack_iter_s_;
   decltype(vm.stack.end()) stack_iter_e_; // contains last vm_argcount
 };
