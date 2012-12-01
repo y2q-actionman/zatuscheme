@@ -28,7 +28,7 @@ namespace Procedure {
     constexpr ProcInfo(Calling c,
                        int rargs,
                        int margs,
-                       EarlyBind e)
+                       EarlyBind e = EarlyBind::f)
       : required_args(rargs),
         max_args(margs),
         calling(c),

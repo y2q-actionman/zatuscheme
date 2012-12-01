@@ -1166,7 +1166,7 @@ builtin_numeric[] = {
       {Calling::function, 1}}},
   {"atan", {
       number_atan,
-      {Calling::function, 1, Variadic::t}}},
+      {Calling::function, 1, 2}}},
 
   {"sqrt", {
       number_sqrt,
@@ -1203,10 +1203,10 @@ builtin_numeric[] = {
 
   {"string->number", {
       number_from_string,
-      {Calling::function, 1, Variadic::t}}},
+      {Calling::function, 1, 2}}},
   {"number->string", {
       number_to_string,
-      {Calling::function, 1, Variadic::t}}}
+      {Calling::function, 1, 2}}}
 };
 
 const size_t builtin_numeric_size = sizeof(builtin_numeric) / sizeof(builtin_numeric[0]);

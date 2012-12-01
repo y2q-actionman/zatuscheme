@@ -205,13 +205,13 @@ builtin_port[] = {
   
   {"read", {
       port_read,
-      {Calling::function, 0, Variadic::t}}},
+      {Calling::function, 0, 1}}},
   {"read-char", {
       port_read_char,
-      {Calling::function, 0, Variadic::t}}},
+      {Calling::function, 0, 1}}},
   {"peek-char", {
       port_peek_char,
-      {Calling::function, 0, Variadic::t}}},
+      {Calling::function, 0, 1}}},
 
   {"eof-object?", {
       port_eof_p,
@@ -219,13 +219,13 @@ builtin_port[] = {
 
   {"write", {
       port_write,
-      {Calling::function, 1, Variadic::t}}},
+      {Calling::function, 1, 2}}},
   {"display", {
       port_display,
-      {Calling::function, 1, Variadic::t}}},
+      {Calling::function, 1, 2}}},
   {"write-char", {
       port_write_char,
-      {Calling::function, 1, Variadic::t}}}
+      {Calling::function, 1, 2}}}
 };
 
 const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);

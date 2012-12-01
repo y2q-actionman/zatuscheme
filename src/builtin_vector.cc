@@ -151,7 +151,7 @@ builtin_vector[] = {
       {Calling::function, 1}}},
   {"make-vector", {
       vector_make,
-      {Calling::function, 1, Variadic::t}}},
+      {Calling::function, 1, 2}}},
   {"vector", {
       vector_vector, 
       {Calling::function, 1, Variadic::t}}},

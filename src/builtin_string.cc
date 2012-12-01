@@ -317,7 +317,7 @@ builtin_string[] = {
       {Calling::function, 1}}},
   {"make-string", {
       string_make,
-      {Calling::function, 1, Variadic::t}}},
+      {Calling::function, 1, 2}}},
   {"string", {
       string_string,
       {Calling::function, 0, Variadic::t}}},
