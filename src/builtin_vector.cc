@@ -18,8 +18,7 @@ zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 Lisp_ptr vector_make(){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   auto num = args[0].get<Number*>();
   if(!num){
@@ -43,9 +42,8 @@ Lisp_ptr vector_make(){
 }
 
 Lisp_ptr vector_vector(){
-  auto v = new Vector;
-  stack_to_vector(vm.stack, *v);
-  return v;
+  ZsArgs args;
+  return {new Vector(args.begin(), args.end())};
 }
 
 Lisp_ptr vector_length(){

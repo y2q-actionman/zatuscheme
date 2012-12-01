@@ -25,8 +25,7 @@ zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 Lisp_ptr string_make(){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   auto num = args[0].get<Number*>();
   if(!num){
@@ -55,8 +54,7 @@ Lisp_ptr string_make(){
 }
 
 Lisp_ptr string_string(){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   String ret;
   for(auto i = args.begin(), e = args.end(); i != e; ++i){
@@ -235,8 +233,7 @@ Lisp_ptr string_substr(){
 }
 
 Lisp_ptr string_append(){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   String ret;
 

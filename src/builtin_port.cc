@@ -78,8 +78,7 @@ Lisp_ptr port_close_o(){
 
 template<typename Fun>
 Lisp_ptr port_input_call(const char* name, Fun&& fun){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   InputPort* p;
 
@@ -127,8 +126,7 @@ Lisp_ptr port_eof_p(){
 
 template<typename Fun>
 Lisp_ptr port_output_call(const char* name, Fun&& fun){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   OutputPort* p;
 

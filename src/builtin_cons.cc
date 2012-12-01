@@ -138,9 +138,7 @@ Lisp_ptr cons_length(){
 }
 
 Lisp_ptr cons_append(){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
-
+  ZsArgs args;
   GrowList gl;
 
   for(auto i = 0u; i < args.size() - 1; ++i){
@@ -154,7 +152,7 @@ Lisp_ptr cons_append(){
   }
 
   // last
-  return gl.extract_with_tail(args.back());
+  return gl.extract_with_tail(args[args.size() - 1]);
 }
 
 Lisp_ptr cons_reverse(){

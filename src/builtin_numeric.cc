@@ -754,8 +754,7 @@ Lisp_ptr number_acos(){
 }
 
 Lisp_ptr number_atan(){
-  std::deque<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   auto n1 = args[0].get<Number*>();
   if(!n1){
@@ -942,8 +941,7 @@ Lisp_ptr number_e_to_i(){
 
 
 Lisp_ptr number_from_string(){
-  std::deque<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   auto str = args[0].get<String*>();
   if(!str){
@@ -979,8 +977,7 @@ Lisp_ptr number_from_string(){
 }
 
 Lisp_ptr number_to_string(){
-  std::deque<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){
