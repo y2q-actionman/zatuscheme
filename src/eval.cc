@@ -400,24 +400,22 @@ void vm_op_leave_frame(){
 }  
 
 /*
-  stack = (consequent, alternative)
+  code = [consequent, alternative]
   ----
-  stack = ()
-  code = (consequent or alternative)
+  stack = (consequent or alternative)
 */
 void vm_op_if(){
   assert(vm.code.back().get<VMop>() == vm_op_if);
+  vm.code.pop_back();
 
   auto test_result = vm.return_value[0];
 
   if(test_result.get<bool>()){
-    vm.code.back() = vm.stack.back();
-    vm.stack.pop_back();
-    vm.stack.pop_back();
+    auto conseq = vm.code.back();
+    vm.code.pop_back();
+    vm.code.back() = conseq;
   }else{
-    vm.stack.pop_back();
-    vm.code.back() = vm.stack.back();
-    vm.stack.pop_back();
+    vm.code.pop_back();
   }
 }
 

@@ -110,8 +110,7 @@ Lisp_ptr whole_function_if(){
   }
 
   // evaluating
-  vm.code.insert(vm.code.end(), {vm_op_if, test});
-  vm.stack.insert(vm.stack.end(), {alt, conseq});
+  vm.code.insert(vm.code.end(), {alt, conseq, vm_op_if, test});
   return vm_op_nop;
 }
 
