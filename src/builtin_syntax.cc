@@ -598,6 +598,10 @@ Lisp_ptr whole_function_quasiquote(){
   const auto unquote_sym = intern(vm.symtable(), "unquote");
   const auto unquote_splicing_sym = intern(vm.symtable(), "unquote-splicing");
 
+  static const Procedure::NProcedure splicing_nproc{
+    function_splicing, {Calling::function, 1}
+  };
+
   GrowList gl;
 
   const auto qq_elem = [&](Lisp_ptr p){
@@ -606,8 +610,8 @@ Lisp_ptr whole_function_quasiquote(){
         if(l_first_sym == unquote_sym){
           gl.push(l->cdr().get<Cons*>()->car());
           return;
-        }else if(l_first_sym  == unquote_splicing_sym){
-          gl.push(l);
+        }else if(l_first_sym == unquote_splicing_sym){
+          gl.push(push_cons_list(&splicing_nproc, l->cdr()));
           return;
         }
       }
@@ -714,8 +718,8 @@ builtin_syntax[] = {
       whole_function_pass_through,
       {Calling::whole_function, 1}}},
   {"unquote-splicing", {
-      function_splicing,
-      {Calling::function, 1}}},
+      whole_function_error,
+      {Calling::whole_function, 1}}},
 
   {"else", {
       whole_function_error,
