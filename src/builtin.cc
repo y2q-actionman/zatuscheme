@@ -79,9 +79,10 @@ Lisp_ptr eval_func(){
     throw builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
   }
 
+  auto oldenv = vm.frame();
   vm.enter_frame(env);
   vm.code.insert(vm.code.end(),
-                 {vm_op_leave_frame, args[0]});
+                 {oldenv, vm_op_leave_frame, args[0]});
   return vm_op_nop;
 }
 

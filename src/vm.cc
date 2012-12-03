@@ -7,45 +7,26 @@
 
 VM vm;
 
-namespace {
-
-template<typename T>
-void add_ref(T& frame_seq){
-  for(auto e : frame_seq){
-    add_ref(e);
-  }
-}
-
-template<typename T>
-void release(T& frame_seq){
-  for(auto e : frame_seq){
-    release(e);
-  }
-}
-
-} // namespace
-
 
 VM::VM() : code(), stack(),
            return_value(1, {}),
            extent(),
-           frames_(),
+           frame_(new Env{nullptr}),
            symtable_(new SymTable())
 {
-  enter_frame(new Env{nullptr});
 }
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           return_value(other.return_value),
                           extent(other.extent),
-                          frames_(other.frames_),
+                          frame_(other.frame_),
                           symtable_(other.symtable_)
 {
-  add_ref(frames_);
+  add_ref(frame_);
 }
 
 VM::~VM(){
-  release(frames_);
+  release(frame_);
 }
 
 
@@ -55,9 +36,9 @@ VM& VM::operator=(const VM& other){
   return_value = other.return_value;
   extent = other.extent,
 
-  release(frames_);
-  add_ref(other.frames_);
-  frames_ = other.frames_;
+  release(frame_);
+  add_ref(other.frame_);
+  frame_ = other.frame_;
   
   symtable_ = other.symtable_;
 
@@ -66,13 +47,13 @@ VM& VM::operator=(const VM& other){
 
 
 void VM::enter_frame(Env* e){
-  frames_.push_back(e);
+  frame_ = e;
   add_ref(frame());
 }  
 
-void VM::leave_frame(){
+void VM::leave_frame(Env* e){
   release(frame());
-  frames_.pop_back();
+  frame_ = e;
 }
 
 std::ostream& operator<<(std::ostream& f, const VM& v){
@@ -108,10 +89,8 @@ std::ostream& operator<<(std::ostream& f, const VM& v){
     }
   }
 
-  f << "--- [env stack] ---\n";
-  for(auto i = v.frames_.rbegin(), e = v.frames_.rend(); i != e; ++i){
-    f << **i;
-  }
+  f << "--- [env] ---\n";
+  f << *v.frame_;
 
   f << "--- [symtable] ---\n";
   f << *v.symtable_;

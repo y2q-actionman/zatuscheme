@@ -65,12 +65,13 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
 
+    auto oldenv = vm.frame();
     if(auto closure = iproc->closure()){
       vm.enter_frame(closure->push());
     }else{
       vm.enter_frame(vm.frame()->push());
     }
-    vm.code.push_back(vm_op_leave_frame);
+    vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
   }
 
   auto args_head = args.get<Cons*>()->cdr(); // skips first symbol
@@ -191,17 +192,17 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
   // tail call check
   if(!vm.code.empty()
      && vm.code.back().get<VMop>() == vm_op_leave_frame){
-    vm.code.pop_back();
-    vm.leave_frame();
+    vm_op_leave_frame();
   }
 
   if(!fun->info()->early_bind){
+    auto oldenv = vm.frame();
     if(auto closure = fun->closure()){
       vm.enter_frame(closure->push());
     }else{
       vm.enter_frame(vm.frame()->push());
     }
-    vm.code.push_back(vm_op_leave_frame);
+    vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
   }
 
   // == processing args ==
@@ -397,7 +398,12 @@ void vm_op_move_values(){
 void vm_op_leave_frame(){
   assert(vm.code.back().get<VMop>() == vm_op_leave_frame);
   vm.code.pop_back();
-  vm.leave_frame();
+
+  auto oldenv = vm.code.back();
+  assert(oldenv.tag() == Ptr_tag::env);
+  vm.code.pop_back();
+
+  vm.leave_frame(oldenv.get<Env*>());
 }  
 
 /*
@@ -560,7 +566,9 @@ Lisp_ptr let_internal(EarlyBind early_bind){
   }
 
   if(name){
+    auto oldenv = vm.frame();
     vm.enter_frame(vm.frame()->push());
+    vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
   }
 
   auto proc = new IProcedure(body, 
@@ -569,7 +577,6 @@ Lisp_ptr let_internal(EarlyBind early_bind){
 
   if(name){
     vm.local_set(name.get<Symbol*>(), proc);
-    vm.code.push_back(vm_op_leave_frame);
   }
 
   vm.code.insert(vm.code.end(), {vm_op_call, proc});
@@ -697,10 +704,12 @@ Lisp_ptr func_force(){
     return d->get();
   }
 
+  auto oldenv = vm.frame();
+
   vm.enter_frame(d->env());
   vm.stack.push_back(arg);
   vm.code.insert(vm.code.end(),
-                 {vm_op_force, vm_op_leave_frame, d->get()});
+                 {vm_op_force, oldenv, vm_op_leave_frame, d->get()});
   return vm_op_nop;
 }
 

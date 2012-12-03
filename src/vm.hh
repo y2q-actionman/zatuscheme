@@ -29,8 +29,8 @@ public:
   VM& operator=(VM&&) = delete;
 
   void enter_frame(Env*);
-  void leave_frame();
-  Env* frame() const { return frames_.back(); }
+  void leave_frame(Env*);
+  Env* frame() const { return frame_; }
 
   Lisp_ptr find(Symbol*);
   void set(Symbol*, Lisp_ptr);
@@ -48,7 +48,7 @@ public:
   std::vector<winding> extent;
 
 private:
-  std::deque<Env*> frames_;
+  Env* frame_;
   std::shared_ptr<SymTable> symtable_;
 };
 
