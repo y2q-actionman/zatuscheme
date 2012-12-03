@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <functional>
 
 #include "vm.hh"
 #include "eval.hh"
@@ -419,6 +420,20 @@ void vm_op_if(){
   }
 }
 
+template<typename Fun>
+void vm_op_set_base(Fun fun){
+  assert(vm.code.back().tag() == Ptr_tag::vm_op);
+  vm.code.pop_back();
+
+  auto var = vm.code.back().get<Symbol*>();
+  if(!var){
+    throw zs_error("eval error: internal error occured (set!'s varname is dismissed)\n");
+  }
+  vm.code.pop_back();
+
+  fun(vm, var, vm.return_value[0]); 
+}
+
 /*
   stack = (variable name)
   ----
@@ -426,16 +441,7 @@ void vm_op_if(){
   return-value is setted.
 */
 void vm_op_set(){
-  assert(vm.code.back().get<VMop>() == vm_op_set);
-  vm.code.pop_back();
-
-  auto var = vm.stack.back().get<Symbol*>();
-  vm.stack.pop_back();
-  if(!var){
-    throw zs_error("eval error: internal error occured (set!'s varname is dismissed)\n");
-  }
-
-  vm.set(var, vm.return_value[0]);
+  vm_op_set_base(mem_fn(&VM::set));
 }
 
 /*
@@ -445,16 +451,7 @@ void vm_op_set(){
   return-value is setted.
 */
 void vm_op_local_set(){
-  assert(vm.code.back().get<VMop>() == vm_op_local_set);
-  vm.code.pop_back();
-
-  auto var = vm.stack.back().get<Symbol*>();
-  vm.stack.pop_back();
-  if(!var){
-    throw zs_error("eval error: internal error occured (set!'s varname is dismissed)\n");
-  }
-
-  vm.local_set(var, vm.return_value[0]);
+  vm_op_set_base(mem_fn(&VM::local_set));
 }
 
 /*

@@ -146,8 +146,7 @@ Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   }
 
   // evaluating
-  vm.code.insert(vm.code.end(), {set_op, val});
-  vm.stack.push_back(var);
+  vm.code.insert(vm.code.end(), {var, set_op, val});
   return val;
 }
 
