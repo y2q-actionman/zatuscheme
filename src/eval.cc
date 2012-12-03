@@ -65,6 +65,12 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
 
+    // tail call check
+    if(!vm.code.empty()
+       && vm.code.back().get<VMop>() == vm_op_leave_frame){
+      vm_op_leave_frame();
+    }
+
     auto oldenv = vm.frame();
     if(auto closure = iproc->closure()){
       vm.enter_frame(closure->push());
@@ -189,13 +195,13 @@ void proc_enter_native(const NProcedure* fun){
   stack = ()
 */
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
-  // tail call check
-  if(!vm.code.empty()
-     && vm.code.back().get<VMop>() == vm_op_leave_frame){
-    vm_op_leave_frame();
-  }
-
   if(!fun->info()->early_bind){
+    // tail call check
+    if(!vm.code.empty()
+       && vm.code.back().get<VMop>() == vm_op_leave_frame){
+      vm_op_leave_frame();
+    }
+
     auto oldenv = vm.frame();
     if(auto closure = fun->closure()){
       vm.enter_frame(closure->push());
