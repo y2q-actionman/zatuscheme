@@ -151,17 +151,15 @@ Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
 }
 
 Lisp_ptr whole_function_set(){
-  auto wargs = pick_args_1();
-  if(!wargs) return {};
+  ZsArgs args{1};
 
-  return set_internal("set!", wargs.get<Cons*>()->cdr(), vm_op_set);
+  return set_internal("set!", args[0].get<Cons*>()->cdr(), vm_op_set);
 }
 
 Lisp_ptr whole_function_define(){
-  auto wargs = pick_args_1();
-  if(!wargs) return {};
+  ZsArgs args{1};
 
-  auto p = wargs.get<Cons*>()->cdr();
+  auto p = args[0].get<Cons*>()->cdr();
   Cons* rest = p.get<Cons*>();
 
   // extracting
@@ -171,12 +169,12 @@ Lisp_ptr whole_function_define(){
     return set_internal("define(value set)", p, vm_op_local_set);
   }else if(first.tag() == Ptr_tag::cons){
     Symbol* var = nullptr;
-    Lisp_ptr args, code;
+    Lisp_ptr l_args, code;
 
     bind_cons_list(first,
                    [&](Cons* c){
                      var = c->car().get<Symbol*>();
-                     args = c->cdr();
+                     l_args = c->cdr();
                    });
 
     if(!var){
@@ -185,7 +183,7 @@ Lisp_ptr whole_function_define(){
 
     code = rest->cdr();
 
-    auto value = lambda_internal(args, code);
+    auto value = lambda_internal(l_args, code);
     vm.local_set(var, value);
     return value;
   }else{
