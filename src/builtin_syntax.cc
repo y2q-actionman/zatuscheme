@@ -658,44 +658,44 @@ builtin_syntax[] = {
       {Calling::whole_function, 1}}},
   {"lambda", {
       whole_function_lambda,
-      {Calling::whole_function, 1, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"if", {
       whole_function_if,
-      {Calling::whole_function, 3}}},
+      {Calling::whole_function, 1}}},
   {"set!", {
       whole_function_set,
-      {Calling::whole_function, 2}}},
+      {Calling::whole_function, 1}}},
   {"define", {
       whole_function_define,
-      {Calling::whole_function, 2, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"begin", {
       whole_function_begin,
-      {Calling::whole_function, 1, Variadic::t}}},
+      {Calling::whole_function, 1}}},
 
   {"cond", {
       whole_cond,
-      {Calling::whole_function, 1, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"case", {
       whole_case,
-      {Calling::whole_function, 2, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"and", {
       whole_and,
-      {Calling::whole_function, 0, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"or", {
       whole_or,
-      {Calling::whole_function, 0, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"let", {
       whole_function_let,
-      {Calling::whole_function, 1, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"let*", {
       whole_function_let_star,
-      {Calling::whole_function, 1, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"letrec", {
       whole_function_letrec,
-      {Calling::whole_function, 1, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"do", {
       whole_do,
-      {Calling::whole_function, 2, Variadic::t}}},
+      {Calling::whole_function, 1}}},
   {"delay", {
       macro_delay,
       {Calling::macro, 1}}},
@@ -712,10 +712,10 @@ builtin_syntax[] = {
 
   {"else", {
       whole_function_error,
-      {Calling::whole_function, 0}}},
+      {Calling::whole_function, 1}}},
   {"=>", {
       whole_function_error,
-      {Calling::whole_function, 0}}}
+      {Calling::whole_function, 1}}}
 };
 
 const size_t builtin_syntax_size = sizeof(builtin_syntax) / sizeof(builtin_syntax[0]);

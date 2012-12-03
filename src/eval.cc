@@ -338,8 +338,7 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   auto info = get_procinfo(proc);
   auto argc = vm.stack.back().get<int>();
 
-  if((info->calling != Calling::whole_function)
-     && !(info->required_args <= argc && argc <= info->max_args)){
+  if(!(info->required_args <= argc && argc <= info->max_args)){
     throw builtin_argcount_failed("(unknown)", info->required_args,
                                   info->max_args, argc);
   }
