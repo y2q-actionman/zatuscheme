@@ -17,22 +17,13 @@ using namespace Procedure;
 
 namespace {
 
-Lisp_ptr error_whole_function(const char* msg){
+Lisp_ptr whole_function_error(){
   ZsArgs wargs{1};
   auto sym = wargs[0].get<Cons*>()->car().get<Symbol*>();
-
   assert(sym);
 
-  throw make_zs_error("eval error: '%s' -- %s\n",
-                      sym->name().c_str(), msg);
-}
-
-Lisp_ptr whole_function_error(){
-  return error_whole_function("cannot be used as operator!!");
-}
-
-Lisp_ptr whole_function_unimplemented(){
-  return error_whole_function("under development...");
+  throw make_zs_error("eval error: '%s' -- cannot be used as operator!!\n",
+                      sym->name().c_str());
 }
 
 Lisp_ptr whole_function_pass_through(){
