@@ -80,8 +80,8 @@ Lisp_ptr eval_func(){
   }
 
   vm.enter_frame(env);
-  vm.code.push_back(vm_op_leave_frame);
-  vm.code.push_back(args[0]);
+  vm.code.insert(vm.code.end(),
+                 {vm_op_leave_frame, args[0]});
   return vm_op_nop;
 }
 

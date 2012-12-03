@@ -56,6 +56,7 @@ void vm_op_call();
 
 void function_call(Lisp_ptr proc, const ProcInfo* info){
   assert(vm.code.back().get<VMop>() == vm_op_call);
+  vm.code.pop_back();
 
   auto args = vm.stack.back();
   vm.stack.pop_back();
@@ -69,12 +70,12 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
     }else{
       vm.enter_frame(vm.frame()->push());
     }
+    vm.code.push_back(vm_op_leave_frame);
   }
 
   auto args_head = args.get<Cons*>()->cdr(); // skips first symbol
 
-  vm.code.back() = proc;
-  vm.code.insert(vm.code.end(), {vm_op_proc_enter,
+  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter,
         args_head, {Ptr_tag::vm_argcount, 0},
         vm_op_arg_push, args_head.get<Cons*>()->car()});
 }
@@ -200,9 +201,8 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
     }else{
       vm.enter_frame(vm.frame()->push());
     }
+    vm.code.push_back(vm_op_leave_frame);
   }
-
-  vm.code.push_back(vm_op_leave_frame);
 
   // == processing args ==
 
