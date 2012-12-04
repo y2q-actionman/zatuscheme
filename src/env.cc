@@ -9,21 +9,11 @@
 using namespace std;
 
 Env::Env(Env* e)
-  : map_(), next_(e), refcnt_(0){
-  if(next_) add_ref(next_);
+  : map_(), next_(e){
 }
 
 Env::~Env(){
-  if(next_) release(next_);
 }
-
-// void Env::steal(Env* new_next){
-//   map_.clear();
-
-//   if(next_) release(next_);
-//   next_ = new_next;
-//   if(next_) add_ref(next_);
-// }
 
 Lisp_ptr Env::traverse(Symbol* s, Lisp_ptr p){
   Lisp_ptr old = {};
@@ -56,7 +46,7 @@ Env* Env::push(){
 
 std::ostream& operator<<(std::ostream& f, const Env& env){
   f << "Env " << c_cast<void*>(&env)
-    << " (refcnt=" << env.refcnt_ << ", next=" << c_cast<void*>(env.next_) << ")\n";
+    << " (next=" << c_cast<void*>(env.next_) << ")\n";
   for(auto e : env.map_){
     f << '\t' << e.first->name() << "\t = ";
     print(f, e.second);

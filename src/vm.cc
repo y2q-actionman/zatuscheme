@@ -22,11 +22,9 @@ VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           frame_(other.frame_),
                           symtable_(other.symtable_)
 {
-  add_ref(frame_);
 }
 
 VM::~VM(){
-  release(frame_);
 }
 
 
@@ -36,8 +34,6 @@ VM& VM::operator=(const VM& other){
   return_value = other.return_value;
   extent = other.extent,
 
-  release(frame_);
-  add_ref(other.frame_);
   frame_ = other.frame_;
   
   symtable_ = other.symtable_;
@@ -48,11 +44,9 @@ VM& VM::operator=(const VM& other){
 
 void VM::enter_frame(Env* e){
   frame_ = e;
-  add_ref(frame());
 }  
 
 void VM::leave_frame(Env* e){
-  release(frame());
   frame_ = e;
 }
 

@@ -25,15 +25,11 @@ public:
   void local_set(Symbol*, Lisp_ptr);
   Env* push();
   
-  inline friend int add_ref(Env*);
-  inline friend int release(Env*);
-
   friend std::ostream& operator<<(std::ostream&, const Env&);
 
 private:
   map_type map_;
   Env* next_;
-  int refcnt_;
 };
 
 #include "env.i.hh"
