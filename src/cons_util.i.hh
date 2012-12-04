@@ -56,6 +56,7 @@ auto do_list_2(Lisp_ptr lis1, Lisp_ptr lis2, MainFun&& m_fun, LastFun&& l_fun)
   return l_fun(p1, p2);
 }
 
+// bind_cons_list first version. uses number of functions
 template<int len, typename Fun1, typename... FunRest>
 inline
 int bind_cons_list_i(Lisp_ptr p, Fun1&& f, FunRest&&... fr){
@@ -80,6 +81,32 @@ int bind_cons_list(Lisp_ptr p, Fun&&... f){
   return bind_cons_list_i<0>(p, f...);
 }
 
+// bind_cons_list second version. uses std::function.
+template<unsigned i>
+struct destruct_cons_list{
+  template<typename Fun, typename... Args>
+  typename Fun::result_type
+  operator()(Fun f, Lisp_ptr p, Args... args) const{
+    static constexpr destruct_cons_list<i - 1> expander;
+    Cons* c = p.get<Cons*>();
+    return expander(f, c->cdr(), args..., c);
+  }
+};
+
+template<>
+template<typename Fun, typename... Args>
+typename Fun::result_type
+destruct_cons_list<0>::operator()(Fun f, Lisp_ptr, Args... args) const{
+  return f(args...);
+}
+
+template<typename Ret, typename... Args>
+Ret bind_cons_list(Lisp_ptr p, std::function<Ret (Args...)> fun){
+  static constexpr destruct_cons_list<sizeof...(Args)> expander;
+  return expander(fun, p);
+}
+
+// make_cons_list 
 template<typename Iter>
 Lisp_ptr make_cons_list(Iter b, Iter e){
   if(b == e){
@@ -162,7 +189,7 @@ bool operator!=(const ConsIter& i1, const ConsIter& i2){
   return i1.c_ != i2.c_;
 }
 
-//
+// cons_list_to_array
 template<int size>
 std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr p){
   std::array<Lisp_ptr, size> ret;
