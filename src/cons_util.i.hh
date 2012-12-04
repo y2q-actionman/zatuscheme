@@ -6,6 +6,8 @@
 #endif
 
 #include <utility>
+#include <algorithm>
+#include "util.hh"
 
 inline
 bool nullp(Lisp_ptr p){
@@ -158,6 +160,26 @@ bool operator==(const ConsIter& i1, const ConsIter& i2){
 inline
 bool operator!=(const ConsIter& i1, const ConsIter& i2){
   return i1.c_ != i2.c_;
+}
+
+//
+template<int size>
+std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr p){
+  std::array<Lisp_ptr, size> ret;
+  int i = 0;
+
+  for(auto it = begin(p), e_it = end(p); it != e_it; ++it){
+    if(i >= size)
+      throw make_zs_error("passed list is longer than expected size (%d)\n", size);
+
+    ret[i] = *it;
+    ++i;
+  }
+  
+  if(i != size)
+    throw make_zs_error("passed list is shorter than expected size (%d)\n", size);
+
+  return ret;
 }
 
 #endif //CONS_UTIL_I_HH

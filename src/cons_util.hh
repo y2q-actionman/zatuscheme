@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <iterator>
+#include <array>
 #include "cons.hh"
 
 inline bool nullp(Lisp_ptr);
@@ -85,6 +86,9 @@ private:
 ConsIter begin(Lisp_ptr);
 ConsIter end(Lisp_ptr);
   
+template<int size>
+std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr);
+
 #include "cons_util.i.hh"
 
 #endif //CONS_UTIL_HH
