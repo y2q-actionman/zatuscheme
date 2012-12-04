@@ -34,21 +34,9 @@ Lisp_ptr whole_function_pass_through(){
 Lisp_ptr whole_function_quote(){
   ZsArgs wargs{1};
 
-  Lisp_ptr val;
-
-  bind_cons_list(wargs[0],
-                 [](Cons*){},
-                 [&](Cons* c){
-                   val = c->car();
-                 },
-                 [](Cons*){
-                   throw zs_error("eval error: quote has two or more args.\n");
-                 });
-  if(!val){
-    throw zs_error("eval error: quote has no args.\n");
-  }
+  auto ex_wargs = cons_list_to_array<2>(wargs[0]);
     
-  return val;
+  return ex_wargs[1];
 }
 
 
@@ -121,33 +109,15 @@ Lisp_ptr whole_function_if(){
 */
 Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   // extracting
-  Symbol* var = nullptr;
-  Lisp_ptr val;
+  auto ex_lis = cons_list_to_array<2>(p);
 
-  int len =
-    bind_cons_list(p,
-                   [&](Cons* c){
-                     var = c->car().get<Symbol*>();
-                   },
-                   [&](Cons* c){
-                     val = c->car();
-                   });
-
-  if(!var){
-    throw zs_error("eval error: variable's name is not a symbol!\n");
+  if(ex_lis[0].tag() != Ptr_tag::symbol){
+    throw make_zs_error("eval error: %s: variable's name is not a symbol!\n", opname);
   }
-
-  if(!val){
-    throw make_zs_error("eval error: no value is supplied for %s\n", opname);
-  }
-
-  if(len > 2){
-    throw make_zs_error("eval error: informal %s expr! (more than %d exprs)\n", opname, len);
-  }
-
+    
   // evaluating
-  vm.code.insert(vm.code.end(), {var, set_op, val});
-  return val;
+  vm.code.insert(vm.code.end(), {ex_lis[0], set_op, ex_lis[1]});
+  return ex_lis[1];
 }
 
 Lisp_ptr whole_function_set(){
@@ -567,13 +537,9 @@ Lisp_ptr function_splicing(){
 
 Lisp_ptr whole_function_quasiquote(){
   ZsArgs wargs{1};
-  Lisp_ptr arg;
 
-  bind_cons_list(wargs[0],
-                 [](Cons*){}, // skips 'quasiquote' symbol
-                 [&](Cons* c){
-                   arg = c->car();
-                 });
+  auto ex_wargs = cons_list_to_array<2>(wargs[0]);
+  Lisp_ptr arg = ex_wargs[1];
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
