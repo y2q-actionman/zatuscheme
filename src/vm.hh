@@ -28,8 +28,7 @@ public:
   VM& operator=(const VM&);
   VM& operator=(VM&&) = delete;
 
-  void enter_frame(Env*);
-  void leave_frame(Env*);
+  void set_frame(Env* e){ frame_ = e; }
   Env* frame() const { return frame_; }
 
   Lisp_ptr find(Symbol*);

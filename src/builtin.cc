@@ -80,7 +80,7 @@ Lisp_ptr eval_func(){
   }
 
   auto oldenv = vm.frame();
-  vm.enter_frame(env);
+  vm.set_frame(env);
   vm.code.insert(vm.code.end(),
                  {oldenv, vm_op_leave_frame, args[0]});
   return vm_op_nop;
@@ -145,7 +145,7 @@ void install_builtin(){
   install_builtin_native(builtin_syntax, builtin_syntax_size);
   vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame());
 
-  vm.enter_frame(vm.frame()->push());
+  vm.set_frame(vm.frame()->push());
   install_builtin_native(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
   install_builtin_native(builtin_boolean, builtin_boolean_size);
   install_builtin_native(builtin_char, builtin_char_size);
@@ -162,7 +162,7 @@ void install_builtin(){
   install_builtin_load(builtin_port_load, builtin_port_load_size);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
-  vm.enter_frame(vm.frame()->push());
+  vm.set_frame(vm.frame()->push());
   install_builtin_native(builtin_extra, builtin_extra_size);
   install_builtin_load(builtin_extra_load, builtin_extra_load_size);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());

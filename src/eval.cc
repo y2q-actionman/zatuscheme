@@ -73,9 +73,9 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
 
     auto oldenv = vm.frame();
     if(auto closure = iproc->closure()){
-      vm.enter_frame(closure->push());
+      vm.set_frame(closure->push());
     }else{
-      vm.enter_frame(vm.frame()->push());
+      vm.set_frame(vm.frame()->push());
     }
     vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
   }
@@ -204,9 +204,9 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
 
     auto oldenv = vm.frame();
     if(auto closure = fun->closure()){
-      vm.enter_frame(closure->push());
+      vm.set_frame(closure->push());
     }else{
-      vm.enter_frame(vm.frame()->push());
+      vm.set_frame(vm.frame()->push());
     }
     vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
   }
@@ -408,7 +408,7 @@ void vm_op_leave_frame(){
   assert(oldenv.tag() == Ptr_tag::env);
   vm.code.pop_back();
 
-  vm.leave_frame(oldenv.get<Env*>());
+  vm.set_frame(oldenv.get<Env*>());
 }  
 
 /*
@@ -572,7 +572,7 @@ Lisp_ptr let_internal(EarlyBind early_bind){
 
   if(name){
     auto oldenv = vm.frame();
-    vm.enter_frame(vm.frame()->push());
+    vm.set_frame(vm.frame()->push());
     vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
   }
 
@@ -711,7 +711,7 @@ Lisp_ptr func_force(){
 
   auto oldenv = vm.frame();
 
-  vm.enter_frame(d->env());
+  vm.set_frame(d->env());
   vm.stack.push_back(arg);
   vm.code.insert(vm.code.end(),
                  {vm_op_force, oldenv, vm_op_leave_frame, d->get()});

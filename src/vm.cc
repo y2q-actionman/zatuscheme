@@ -42,14 +42,6 @@ VM& VM::operator=(const VM& other){
 }
 
 
-void VM::enter_frame(Env* e){
-  frame_ = e;
-}  
-
-void VM::leave_frame(Env* e){
-  frame_ = e;
-}
-
 std::ostream& operator<<(std::ostream& f, const VM& v){
   f << "--- [code] ---\n";
   for(auto i = v.code.rbegin(), e = v.code.rend(); i != e; ++i){
