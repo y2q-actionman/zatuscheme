@@ -67,6 +67,23 @@ Lisp_ptr whole_function_lambda(){
                    code = c->cdr();
                  });
 
+  // bind_cons_list_t(wargs[0],
+  //                  std::function<Lisp_ptr (Cons*, Cons*, Cons*)>
+  //                  ([](Cons* c1, Cons* c2, Cons* c3) -> Lisp_ptr{
+  //                    print(cerr, {c1}); cerr << endl;
+  //                    print(cerr, {c2}); cerr << endl;
+  //                    print(cerr, {c3}); cerr << endl;
+  //                    return Cons::NIL;
+  //                  }));
+
+  // bind_cons_list_t(wargs[0],
+  //                  [](Cons* c1, Cons* c2, Cons* c3) -> Lisp_ptr{
+  //                    print(cerr, {c1}); cerr << endl;
+  //                    print(cerr, {c2}); cerr << endl;
+  //                    print(cerr, {c3}); cerr << endl;
+  //                    return Cons::NIL;
+  //                  });
+
   return lambda_internal(args, code);
 }
 

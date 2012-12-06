@@ -84,8 +84,7 @@ int bind_cons_list(Lisp_ptr p, Fun&&... f){
 // bind_cons_list second version. uses std::function.
 template<unsigned i>
 struct destruct_cons_list{
-  static constexpr destruct_cons_list<i - 1> expander
-  = destruct_cons_list<i - 1>();
+  static constexpr auto expander = destruct_cons_list<i - 1>();
 
   template<typename Fun, typename... Args>
   auto operator()(Lisp_ptr p, Fun f, Args... args) const
@@ -111,6 +110,60 @@ Ret bind_cons_list(Lisp_ptr p, std::function<Ret (Args...)> fun){
   static constexpr destruct_cons_list<sizeof...(Args)> expander;
   return expander(p, fun);
 }
+
+
+// experimental third version
+// http://stackoverflow.com/questions/6512019/can-we-get-the-type-of-a-lambda-argument
+template<unsigned i, typename... F_Args>
+struct typed_destruct;
+
+template<unsigned i, typename F_Arg1, typename... F_Args>
+struct typed_destruct<i, F_Arg1, F_Args...>{
+  static constexpr auto expander = typed_destruct<i - 1, F_Args...>();
+
+  template<typename Fun, typename... Args>
+  auto operator()(Lisp_ptr p, Fun f, Args... args) const
+    -> decltype(expander(p, f, args..., nullptr))
+  {
+    Cons* c = p.get<Cons*>();
+    return expander(c->cdr(), f, args..., c);
+  }
+
+};
+
+template<typename... F_Args>
+struct typed_destruct<0, F_Args...>{
+  template<typename Fun, typename... Args>
+  auto operator()(Lisp_ptr, Fun f, Args... args) const
+    -> decltype(f(args...))
+  {
+    return f(args...);
+  }
+};
+
+template<typename Fun, typename Ret, typename... Args>
+Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (Fun::*)(Args...)){
+  return typed_destruct<sizeof...(Args), Args...>()(p, fun);
+}
+  
+template<typename Fun, typename Ret, typename... Args>
+Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (Fun::*)(Args...) const){
+  return typed_destruct<sizeof...(Args), Args...>()(p, fun);
+}
+  
+template<typename Fun, typename Ret, typename... Args>
+Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (*)(Args...)){
+  return typed_destruct<sizeof...(Args), Args...>()(p, fun);
+}
+  
+template<typename Fun>
+auto bind_cons_list_t(Lisp_ptr p, Fun fun)
+  -> decltype(entry_typed_destruct(p, fun, &Fun::operator()))
+{
+  return entry_typed_destruct(p, fun, &Fun::operator());
+}
+
+  
 
 // make_cons_list 
 template<typename Iter>
