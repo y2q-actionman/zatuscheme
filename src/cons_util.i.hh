@@ -114,12 +114,12 @@ Ret bind_cons_list(Lisp_ptr p, std::function<Ret (Args...)> fun){
 
 // experimental third version
 // http://stackoverflow.com/questions/6512019/can-we-get-the-type-of-a-lambda-argument
-template<unsigned i, typename... F_Args>
+template<typename... F_Args>
 struct typed_destruct;
 
-template<unsigned i, typename F_Arg1, typename... F_Args>
-struct typed_destruct<i, F_Arg1, F_Args...>{
-  static constexpr auto expander = typed_destruct<i - 1, F_Args...>();
+template<typename F_Arg1, typename... F_Args>
+struct typed_destruct<F_Arg1, F_Args...>{
+  static constexpr auto expander = typed_destruct<F_Args...>();
 
   template<typename Fun, typename... Args>
   auto operator()(Lisp_ptr p, Fun f, Args... args) const
@@ -131,8 +131,8 @@ struct typed_destruct<i, F_Arg1, F_Args...>{
 
 };
 
-template<typename... F_Args>
-struct typed_destruct<0, F_Args...>{
+template<>
+struct typed_destruct<>{
   template<typename Fun, typename... Args>
   auto operator()(Lisp_ptr, Fun f, Args... args) const
     -> decltype(f(args...))
@@ -143,17 +143,17 @@ struct typed_destruct<0, F_Args...>{
 
 template<typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (Fun::*)(Args...)){
-  return typed_destruct<sizeof...(Args), Args...>()(p, fun);
+  return typed_destruct<Args...>()(p, fun);
 }
   
 template<typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (Fun::*)(Args...) const){
-  return typed_destruct<sizeof...(Args), Args...>()(p, fun);
+  return typed_destruct<Args...>()(p, fun);
 }
   
 template<typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (*)(Args...)){
-  return typed_destruct<sizeof...(Args), Args...>()(p, fun);
+  return typed_destruct<Args...>()(p, fun);
 }
   
 template<typename Fun>
