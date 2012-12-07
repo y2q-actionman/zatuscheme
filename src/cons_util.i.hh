@@ -113,6 +113,30 @@ Ret bind_cons_list(Lisp_ptr p, std::function<Ret (Args...)> fun){
 
 
 // experimental third version
+
+template<typename T>
+inline
+T typed_destruct_cast(Cons* cell){
+  return cell->car().get<T>();
+}
+
+template<>
+inline
+Lisp_ptr typed_destruct_cast(Cons* cell){
+  return cell->car();
+}
+
+struct wrapping_cell {
+  Cons* cell;
+  // operator Cons*() {return cell;}
+};
+
+template<>
+inline
+wrapping_cell typed_destruct_cast(Cons* cell){
+  return {cell};
+}
+
 // http://stackoverflow.com/questions/6512019/can-we-get-the-type-of-a-lambda-argument
 template<typename... F_Args>
 struct typed_destruct;
@@ -123,10 +147,10 @@ struct typed_destruct<F_Arg1, F_Args...>{
 
   template<typename Fun, typename... Args>
   auto operator()(Lisp_ptr p, Fun f, Args... args) const
-    -> decltype(expander(p, f, args..., nullptr))
+    -> decltype(expander(p, f, args..., F_Arg1()))
   {
     Cons* c = p.get<Cons*>();
-    return expander(c->cdr(), f, args..., c);
+    return expander(c->cdr(), f, args..., typed_destruct_cast<F_Arg1>(c));
   }
 
 };

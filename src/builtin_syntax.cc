@@ -77,10 +77,10 @@ Lisp_ptr whole_function_lambda(){
   //                  }));
 
   // bind_cons_list_t(wargs[0],
-  //                  [](Cons* c1, Cons* c2, Cons* c3) -> Lisp_ptr{
-  //                    print(cerr, {c1}); cerr << endl;
-  //                    print(cerr, {c2}); cerr << endl;
-  //                    print(cerr, {c3}); cerr << endl;
+  //                  [](Lisp_ptr c1, Lisp_ptr c2, wrapping_cell rest) -> Lisp_ptr{
+  //                    cerr << "lambda symb: "; print(cerr, c1); cerr << endl;
+  //                    cerr << "lambda args: "; print(cerr, c2); cerr << endl;
+  //                    cerr << "lambda code: "; print(cerr, {rest.cell}); cerr << endl;
   //                    return Cons::NIL;
   //                  });
 
