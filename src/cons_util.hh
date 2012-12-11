@@ -83,6 +83,9 @@ public:
   friend bool operator==(const ConsIter&, const ConsIter&);
   friend bool operator!=(const ConsIter&, const ConsIter&);
 
+  Cons* base() const
+  { return c_; }
+
 private:
   Cons* c_;
 };

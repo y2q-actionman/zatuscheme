@@ -178,45 +178,29 @@ Cons* cons_list_tail_base(const char* name){
   
   auto num = args[1].get<Number*>();
   if(!num || num->type() != Number::Type::integer){
-    throw make_zs_error("native func: name: passed radix is not number (%s).\n",
-                        stringify(args[1].tag()));
+    throw make_zs_error("native func: %s: passed radix is not number (%s).\n",
+                        name, stringify(args[1].tag()));
   }
   auto nth = num->get<Number::integer_type>();
 
+  for(auto i = begin(args[0]), e = end(args[0]); i != e; ++i){
+    if(nth <= 0){
+      return i.base();
+    }
+    --nth;
+  }
 
-  Cons* ret = nullptr;
-  
-  do_list(args[0],
-          [&](Cons* c) -> bool{
-            if(nth <= 0){
-              ret = c;
-              return false;
-            }else{
-              --nth;
-              return true;
-            }
-          },
-          [](Lisp_ptr){});
-
-  return ret;
+  throw make_zs_error("native func: %s: passed list is shorter than expected (%ld).\n",
+                      name, num->get<Number::integer_type>());
 }
 
 Lisp_ptr cons_list_tail(){
-  auto c = cons_list_tail_base("list-tail");
-  if(c){
-    return {c};
-  }else{
-    return {};
-  }
+  return cons_list_tail_base("list-tail");
 }
 
 Lisp_ptr cons_list_ref(){
   auto c = cons_list_tail_base("list-ref");
-  if(c){
-    return c->car();
-  }else{
-    return {};
-  }
+  return c->car();
 }
 
 } // namespace
