@@ -126,9 +126,10 @@ Lisp_ptr typed_destruct_cast(Cons* cell){
   return cell->car();
 }
 
+// TODO: use ConsIter
 struct wrapping_cell {
   Cons* cell;
-  // operator Cons*() {return cell;}
+  explicit operator bool() const {return !!cell;}
 };
 
 template<>
@@ -138,53 +139,76 @@ wrapping_cell typed_destruct_cast(Cons* cell){
 }
 
 // http://stackoverflow.com/questions/6512019/can-we-get-the-type-of-a-lambda-argument
-template<typename... F_Args>
+template<bool strict_mode, typename... F_Args>
 struct typed_destruct;
 
-template<typename F_Arg1, typename... F_Args>
-struct typed_destruct<F_Arg1, F_Args...>{
-  static constexpr auto expander = typed_destruct<F_Args...>();
+template<bool strict_mode, typename F_Arg1, typename... F_Args>
+struct typed_destruct<strict_mode, F_Arg1, F_Args...>{
+  static constexpr auto expander = typed_destruct<strict_mode, F_Args...>();
 
   template<typename Fun, typename... Args>
   auto operator()(Lisp_ptr p, Fun f, Args... args) const
     -> decltype(expander(p, f, args..., F_Arg1()))
   {
     Cons* c = p.get<Cons*>();
-    return expander(c->cdr(), f, args..., typed_destruct_cast<F_Arg1>(c));
+    if(strict_mode && !c){
+      throw make_zs_error("eval internal error: cons list is shorter(%lu) than expected(%lu)\n",
+                          sizeof...(Args),
+                          sizeof...(F_Args) + 1 + sizeof...(Args));
+    }
+
+    auto arg1 = typed_destruct_cast<F_Arg1>(c);
+    if(strict_mode && !arg1){
+      throw zs_error("eval internal error: cons list has unexpected object\n");
+    }
+    return expander(c->cdr(), f, args..., arg1);
   }
 
 };
 
-template<>
-struct typed_destruct<>{
+template<bool strict_mode>
+struct typed_destruct<strict_mode>{
   template<typename Fun, typename... Args>
-  auto operator()(Lisp_ptr, Fun f, Args... args) const
+  auto operator()(Lisp_ptr p, Fun f, Args... args) const
     -> decltype(f(args...))
   {
+    // TODO: check 'rest parameter' is used previously.
+    // if(strict_mode && !nullp(p)){
+    //   throw zs_error("eval internal error: cons list is longer than expected\n");
+    // }
+    (void)p;
+
     return f(args...);
   }
 };
 
-template<typename Fun, typename Ret, typename... Args>
+template<bool strict_mode, typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (Fun::*)(Args...)){
-  return typed_destruct<Args...>()(p, fun);
+  return typed_destruct<strict_mode, Args...>()(p, fun);
 }
   
-template<typename Fun, typename Ret, typename... Args>
+template<bool strict_mode, typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (Fun::*)(Args...) const){
-  return typed_destruct<Args...>()(p, fun);
+  return typed_destruct<strict_mode, Args...>()(p, fun);
 }
   
-template<typename Fun, typename Ret, typename... Args>
+template<bool strict_mode, typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Lisp_ptr p, Fun fun, Ret (*)(Args...)){
-  return typed_destruct<Args...>()(p, fun);
+  return typed_destruct<strict_mode, Args...>()(p, fun);
 }
   
 template<typename Fun>
 auto bind_cons_list_t(Lisp_ptr p, Fun fun)
-  -> decltype(entry_typed_destruct(p, fun, &Fun::operator()))
+  -> decltype(entry_typed_destruct<false>(p, fun, &Fun::operator()))
 {
-  return entry_typed_destruct(p, fun, &Fun::operator());
+  return entry_typed_destruct<false>(p, fun, &Fun::operator());
+}
+
+template<typename Fun>
+auto bind_cons_list_strict(Lisp_ptr p, Fun fun)
+  -> decltype(entry_typed_destruct<true>(p, fun, &Fun::operator()))
+{
+  return entry_typed_destruct<true>(p, fun, &Fun::operator());
 }
 
   
