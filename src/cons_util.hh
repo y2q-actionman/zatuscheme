@@ -23,6 +23,14 @@ int bind_cons_list(Lisp_ptr, Fun&&...);
 template<typename Ret, typename... Args>
 Ret bind_cons_list(Lisp_ptr, std::function<Ret (Args...)>);
 
+// defined in ".i.hh"
+
+// template<typename Fun>
+// auto bind_cons_list_loose(Lisp_ptr p, Fun fun);
+
+// template<typename Fun>
+// auto bind_cons_list_strict(Lisp_ptr p, Fun fun);
+
 void free_cons_list(Lisp_ptr);
 
 template<typename Iter>
@@ -79,6 +87,9 @@ public:
 
   ConsIter& operator++();
   ConsIter operator++(int);
+
+  bool operator!() const
+  { return !c_; }
 
   friend bool operator==(const ConsIter&, const ConsIter&);
   friend bool operator!=(const ConsIter&, const ConsIter&);
