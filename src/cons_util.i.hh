@@ -100,45 +100,68 @@ ConsIter typed_destruct_cast(ConsIter i){
   return i;
 }
 
-// http://stackoverflow.com/questions/6512019/can-we-get-the-type-of-a-lambda-argument
-template<bool strict_mode, bool rest_used, typename... F_Args>
+enum class typed_destruct_mode {
+  loose, strict, strict_variadic
+};
+
+constexpr bool is_strict(typed_destruct_mode mode){
+  return (mode != typed_destruct_mode::loose);
+}
+
+constexpr typed_destruct_mode to_variadic(typed_destruct_mode mode){
+  return (mode == typed_destruct_mode::strict) ? typed_destruct_mode::strict_variadic : mode;
+}
+
+template<typed_destruct_mode mode, typename... F_Args>
 struct typed_destruct;
 
-template<bool strict_mode, bool rest_used, typename F_Arg1, typename... F_Args>
-struct typed_destruct<strict_mode, rest_used, F_Arg1, F_Args...>{
-  static constexpr auto expander_t = typed_destruct<strict_mode, true, F_Args...>();
-  static constexpr auto expander_f = typed_destruct<strict_mode, false, F_Args...>();
+template<typed_destruct_mode mode, typename F_Arg1, typename... F_Args>
+struct typed_destruct<mode, F_Arg1, F_Args...>{
+  typedef typed_destruct<mode, F_Args...> NextF;
+  typedef typed_destruct<to_variadic(mode), F_Args...> NextV;
 
-  template<typename Iter, typename Fun, typename... Args>
-  auto operator()(Iter b, Iter e, Fun f, Args... args) const
-    -> decltype(expander_t(b, e, f, args..., F_Arg1()))
+  template<typename Next, typename Iter, typename Fun, typename... Args>
+  auto go_next(Iter b, Iter e, Fun f, Args... args) const
+    -> decltype(Next()(b, e, f, args..., F_Arg1()))
   {
-    if(strict_mode && (b == e)){
+    if(is_strict(mode) && (b == e)){
       throw make_zs_error("eval internal error: cons list is shorter(%lu) than expected(%lu)\n",
                           sizeof...(Args),
                           sizeof...(F_Args) + 1 + sizeof...(Args));
     }
 
     auto arg1 = typed_destruct_cast<F_Arg1>(b);
-    if(strict_mode && !arg1){
+    if(is_strict(mode) && !arg1){
       throw zs_error("eval internal error: cons list has unexpected object\n");
     }
 
-    if(strict_mode && (rest_used || std::is_same<F_Arg1, Iter>::value))
-      return expander_t(++b, e, f, args..., arg1);
-    else
-      return expander_f(++b, e, f, args..., arg1);
+    return Next()(++b, e, f, args..., arg1);
   }
 
+  // if Iter != F_Arg1 :: fixed args
+  template<typename Iter, typename Fun, typename... Args>
+  auto operator()(Iter b, Iter e, Fun f, Args... args) const
+    -> decltype(NextF()(b, e, f, args..., F_Arg1()))
+  {
+    return go_next<NextF>(b, e, f, args...);
+  }
+
+  // if Iter == F_Arg1 :: variadic args
+  template<typename Fun, typename... Args>
+  auto operator()(F_Arg1 b, F_Arg1 e, Fun f, Args... args) const
+    -> decltype(NextV()(b, e, f, args..., F_Arg1()))
+  {
+    return go_next<NextV>(b, e, f, args...);
+  }
 };
 
-template<bool strict_mode, bool rest_used>
-struct typed_destruct<strict_mode, rest_used>{
+template<typed_destruct_mode mode>
+struct typed_destruct<mode>{
   template<typename Iter, typename Fun, typename... Args>
   auto operator()(Iter b, Iter e, Fun f, Args... args) const
     -> decltype(f(args...))
   {
-    if(strict_mode && !rest_used && (b != e)){
+    if((mode == typed_destruct_mode::strict) && (b != e)){
       throw make_zs_error("eval internal error: cons list is longer than expected(%lu)\n",
                           sizeof...(Args));
     }
@@ -147,34 +170,41 @@ struct typed_destruct<strict_mode, rest_used>{
   }
 };
 
-template<bool strict_mode, typename Iter, typename Fun, typename Ret, typename... Args>
+// http://stackoverflow.com/questions/6512019/can-we-get-the-type-of-a-lambda-argument
+template<typed_destruct_mode mode,
+         typename Iter, typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Iter b, Iter e, Fun fun, Ret (Fun::*)(Args...)){
-  return typed_destruct<strict_mode, false, Args...>()(b, e, fun);
+  return typed_destruct<mode, Args...>()(b, e, fun);
 }
   
-template<bool strict_mode, typename Iter, typename Fun, typename Ret, typename... Args>
+template<typed_destruct_mode mode,
+         typename Iter, typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Iter b, Iter e, Fun fun, Ret (Fun::*)(Args...) const){
-  return typed_destruct<strict_mode, false, Args...>()(b, e, fun);
+  return typed_destruct<mode, Args...>()(b, e, fun);
 }
   
-template<bool strict_mode, 
+template<typed_destruct_mode mode,
          typename Iter, typename Fun, typename Ret, typename... Args>
 Ret entry_typed_destruct(Iter b, Iter e, Fun fun, Ret (*)(Args...)){
-  return typed_destruct<strict_mode, false, Args...>()(b, e, fun);
+  return typed_destruct<mode, Args...>()(b, e, fun);
 }
-  
+
 template<typename Fun>
 auto bind_cons_list_loose(Lisp_ptr p, Fun fun)
-  -> decltype(entry_typed_destruct<false>(ConsIter(), ConsIter(), fun, &Fun::operator()))
+  -> decltype(entry_typed_destruct<typed_destruct_mode::loose>
+              (ConsIter(), ConsIter(), fun, &Fun::operator()))
 {
-  return entry_typed_destruct<false>(begin(p), end(p), fun, &Fun::operator());
+  return entry_typed_destruct<typed_destruct_mode::loose>
+    (begin(p), end(p), fun, &Fun::operator());
 }
 
 template<typename Fun>
 auto bind_cons_list_strict(Lisp_ptr p, Fun fun)
-  -> decltype(entry_typed_destruct<true>(ConsIter(), ConsIter(), fun, &Fun::operator()))
+  -> decltype(entry_typed_destruct<typed_destruct_mode::strict>
+              (ConsIter(), ConsIter(), fun, &Fun::operator()))
 {
-  return entry_typed_destruct<true>(begin(p), end(p), fun, &Fun::operator());
+  return entry_typed_destruct<typed_destruct_mode::strict>
+    (begin(p), end(p), fun, &Fun::operator());
 }
   
 
