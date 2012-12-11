@@ -62,7 +62,7 @@ class ConsIter
 {
 public:
   ConsIter();
-  explicit ConsIter(const Cons*);
+  explicit ConsIter(Cons*);
   ConsIter(const ConsIter&) = default;
   ConsIter(ConsIter&&) = default;
 
@@ -84,7 +84,7 @@ public:
   friend bool operator!=(const ConsIter&, const ConsIter&);
 
 private:
-  const Cons* c_;
+  Cons* c_;
 };
 
 ConsIter begin(Lisp_ptr);

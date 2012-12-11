@@ -60,6 +60,12 @@ ConsIter& ConsIter::operator++(){
   return *this;
 }
 
+ConsIter ConsIter::operator++(int){
+  auto ret = *this;
+  ++(*this);
+  return ret;
+}
+
 ConsIter begin(Lisp_ptr p){
   if(p.tag() != Ptr_tag::cons){
     throw make_cons_iter_error(p);
