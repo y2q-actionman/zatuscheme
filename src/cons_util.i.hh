@@ -81,39 +81,7 @@ int bind_cons_list(Lisp_ptr p, Fun&&... f){
   return bind_cons_list_i<0>(p, f...);
 }
 
-// bind_cons_list second version. uses std::function.
-template<unsigned i>
-struct destruct_cons_list{
-  static constexpr auto expander = destruct_cons_list<i - 1>();
-
-  template<typename Fun, typename... Args>
-  auto operator()(Lisp_ptr p, Fun f, Args... args) const
-    -> decltype(expander(p, f, args..., nullptr))
-  {
-    Cons* c = p.get<Cons*>();
-    return expander(c->cdr(), f, args..., c);
-  }
-};
-
-template<>
-struct destruct_cons_list<0>{
-  template<typename Fun, typename... Args>
-  auto operator()(Lisp_ptr, Fun f, Args... args) const
-    -> decltype(f(args...))
-  {
-    return f(args...);
-  }
-};
-
-template<typename Ret, typename... Args>
-Ret bind_cons_list(Lisp_ptr p, std::function<Ret (Args...)> fun){
-  static constexpr destruct_cons_list<sizeof...(Args)> expander;
-  return expander(p, fun);
-}
-
-
 // experimental third version
-
 template<typename T>
 inline
 T typed_destruct_cast(ConsIter i){

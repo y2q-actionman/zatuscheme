@@ -4,7 +4,6 @@
 #include <initializer_list>
 #include <iterator>
 #include <array>
-#include <functional>
 #include "cons.hh"
 
 inline bool nullp(Lisp_ptr);
@@ -19,9 +18,6 @@ auto do_list_2(Lisp_ptr p, Lisp_ptr q, MainFun&&, LastFun&& lf)
 
 template<typename... Fun>
 int bind_cons_list(Lisp_ptr, Fun&&...);
-
-template<typename Ret, typename... Args>
-Ret bind_cons_list(Lisp_ptr, std::function<Ret (Args...)>);
 
 // defined in ".i.hh"
 
