@@ -91,7 +91,7 @@ T typed_destruct_cast(ConsIter i){
 template<>
 inline
 Lisp_ptr typed_destruct_cast(ConsIter i){
-  return *i;
+  return (i) ? (*i) : Lisp_ptr{};
 }
 
 template<>

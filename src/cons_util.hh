@@ -82,8 +82,8 @@ public:
   ConsIter& operator++();
   ConsIter operator++(int);
 
-  bool operator!() const
-  { return !c_; }
+  explicit operator bool() const
+  { return c_; }
 
   friend bool operator==(const ConsIter&, const ConsIter&);
   friend bool operator!=(const ConsIter&, const ConsIter&);

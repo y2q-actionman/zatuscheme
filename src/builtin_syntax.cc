@@ -58,56 +58,28 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
 Lisp_ptr whole_function_lambda(){
   ZsArgs wargs{1};
 
-  Lisp_ptr args, code;
-
-  bind_cons_list(wargs[0],
-                 [](Cons*){},
-                 [&](Cons* c){
-                   args = c->car();
-                   code = c->cdr();
-                 });
-
-  // bind_cons_list_strict(wargs[0],
-  //                  [](Lisp_ptr c1, Lisp_ptr c2, ConsIter rest) -> Lisp_ptr{
-  //                    cerr << "lambda symb: "; print(cerr, c1); cerr << endl;
-  //                    cerr << "lambda args: "; print(cerr, c2); cerr << endl;
-  //                    cerr << "lambda code: "; print(cerr, {rest.base()}); cerr << endl;
-  //                    return Cons::NIL;
-  //                  });
-
-  return lambda_internal(args, code);
+  return bind_cons_list_strict
+    (wargs[0],
+     [](Symbol*, Lisp_ptr args, ConsIter code){
+      return lambda_internal(args, code.base());
+    });
 }
 
 Lisp_ptr whole_function_if(){
-  // extracting
-  Lisp_ptr test, conseq, alt;
-
-  {
-    ZsArgs wargs{1};
+  ZsArgs wargs{1};
     
-    int len =
-      bind_cons_list(wargs[0],
-                     [](Cons*){},
-                     [&](Cons* c){
-                       test = c->car();
-                     },
-                     [&](Cons* c){
-                       conseq = c->car();
-                     },
-                     [&](Cons* c){
-                       alt = c->car();
-                     });
+  return bind_cons_list_loose
+    (wargs[0],
+     [&](Symbol*, Lisp_ptr test, Lisp_ptr conseq, Lisp_ptr alt, ConsIter rest) -> Lisp_ptr{
+      if(!conseq)
+        throw zs_error("eval error: informal if expr! (only 2 exprs)\n");
 
-    if(len < 3){
-      throw make_zs_error("eval error: informal if expr! (only %d exprs)\n", len);
-    }else if(len > 4){
-      throw make_zs_error("eval error: informal if expr! (more than %d exprs)\n", len);
-    }
-  }
+      if(rest)
+        throw zs_error("eval error: informal if expr! (more than 3 exprs)\n");
 
-  // evaluating
-  vm.code.insert(vm.code.end(), {alt, conseq, vm_op_if, test});
-  return vm_op_nop;
+      vm.code.insert(vm.code.end(), {alt, conseq, vm_op_if, test});
+      return vm_op_nop;
+    });
 }
 
 /*
