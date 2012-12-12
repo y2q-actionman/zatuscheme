@@ -144,13 +144,16 @@ Lisp_ptr whole_function_define(){
 Lisp_ptr whole_function_begin(){
   ZsArgs wargs{1};
 
-  auto exprs = wargs[0].get<Cons*>()->cdr();
-  if(!exprs || nullp(exprs)){
-    throw zs_error("eval error: begin has no exprs.\n");
-  }
+  return bind_cons_list_strict
+    (wargs[0],
+     [](Symbol*, ConsIter body) -> Lisp_ptr{
+      if(!body){
+        throw zs_error("eval error: begin has no exprs.\n");
+      }
 
-  vm.code.insert(vm.code.end(), {exprs, vm_op_begin});
-  return vm_op_nop;
+      vm.code.insert(vm.code.end(), {body.base(), vm_op_begin});
+      return vm_op_nop;
+    });
 }
 
 Lisp_ptr whole_function_let(){

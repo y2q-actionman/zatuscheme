@@ -124,12 +124,6 @@ struct typed_destruct<mode, F_Arg1, F_Args...>{
   auto go_next(Iter b, Iter e, Fun f, Args... args) const
     -> decltype(Next()(b, e, f, args..., F_Arg1()))
   {
-    if(is_strict(mode) && (b == e)){
-      throw make_zs_error("eval internal error: cons list is shorter(%lu) than expected(%lu)\n",
-                          sizeof...(Args),
-                          sizeof...(F_Args) + 1 + sizeof...(Args));
-    }
-
     auto arg1 = typed_destruct_cast<F_Arg1>(b);
     if(is_strict(mode) && !arg1){
       throw zs_error("eval internal error: cons list has unexpected object\n");
@@ -143,6 +137,12 @@ struct typed_destruct<mode, F_Arg1, F_Args...>{
   auto operator()(Iter b, Iter e, Fun f, Args... args) const
     -> decltype(NextF()(b, e, f, args..., F_Arg1()))
   {
+    if(is_strict(mode) && (b == e)){
+      throw make_zs_error("eval internal error: cons list is shorter(%lu) than expected(%lu)\n",
+                          sizeof...(Args),
+                          sizeof...(F_Args) + 1 + sizeof...(Args));
+    }
+
     return go_next<NextF>(b, e, f, args...);
   }
 
