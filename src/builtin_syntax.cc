@@ -167,16 +167,13 @@ Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
   }else{
     const auto let_sym = intern(vm.symtable(), "let");
 
-    Lisp_ptr b_first, b_rest;
-    bind_cons_list(bindings,
-                   [&](Cons* c){
-                     b_first = c->car();
-                     b_rest = c->cdr();
-                   });
-
-    return make_cons_list({let_sym,
-                           make_cons_list({b_first}),
-                           let_star_expand(b_rest, body)});
+    return bind_cons_list_strict
+      (bindings,
+       [&](Lisp_ptr b_first, ConsIter b_rest) -> Lisp_ptr {
+        return make_cons_list({let_sym,
+                               make_cons_list({b_first}),
+                               let_star_expand(b_rest.base(), body)});
+      });
   }
 }
 

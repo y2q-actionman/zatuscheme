@@ -120,18 +120,6 @@ struct typed_destruct<mode, F_Arg1, F_Args...>{
   typedef typed_destruct<mode, F_Args...> NextF;
   typedef typed_destruct<to_variadic(mode), F_Args...> NextV;
 
-  template<typename Next, typename Iter, typename Fun, typename... Args>
-  auto go_next(Iter b, Iter e, Fun f, Args... args) const
-    -> decltype(Next()(b, e, f, args..., F_Arg1()))
-  {
-    auto arg1 = typed_destruct_cast<F_Arg1>(b);
-    if(is_strict(mode) && !arg1){
-      throw zs_error("eval internal error: cons list has unexpected object\n");
-    }
-
-    return Next()(++b, e, f, args..., arg1);
-  }
-
   // if Iter != F_Arg1 :: fixed args
   template<typename Iter, typename Fun, typename... Args>
   auto operator()(Iter b, Iter e, Fun f, Args... args) const
@@ -143,7 +131,12 @@ struct typed_destruct<mode, F_Arg1, F_Args...>{
                           sizeof...(F_Args) + 1 + sizeof...(Args));
     }
 
-    return go_next<NextF>(b, e, f, args...);
+    auto arg1 = typed_destruct_cast<F_Arg1>(b);
+    if(is_strict(mode) && !arg1){
+      throw zs_error("eval internal error: cons list has unexpected object\n");
+    }
+
+    return NextF()(++b, e, f, args..., arg1);
   }
 
   // if Iter == F_Arg1 :: variadic args
@@ -151,7 +144,8 @@ struct typed_destruct<mode, F_Arg1, F_Args...>{
   auto operator()(F_Arg1 b, F_Arg1 e, Fun f, Args... args) const
     -> decltype(NextV()(b, e, f, args..., F_Arg1()))
   {
-    return go_next<NextV>(b, e, f, args...);
+    auto arg1 = b;
+    return NextV()(++b, e, f, args..., arg1);
   }
 };
 
