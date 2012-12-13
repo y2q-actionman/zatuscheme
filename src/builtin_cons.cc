@@ -185,7 +185,7 @@ Cons* cons_list_tail_base(const char* name){
 
   for(auto i = begin(args[0]), e = end(args[0]); i != e; ++i){
     if(nth <= 0){
-      return i.base();
+      return i.base().get<Cons*>();
     }
     --nth;
   }

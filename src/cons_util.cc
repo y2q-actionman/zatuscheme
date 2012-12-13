@@ -49,14 +49,21 @@ GrowList::~GrowList(){
 
 
 // ConsIter class
-ConsIter& ConsIter::operator++(){
-  auto p = c_->cdr();
+Lisp_ptr* ConsIter::operator->() const{
+  if(!(*this)){
+    throw make_zs_error("cons list error: dereferenced invalid ConsIter!\n");
+  }
+  return &(p_.get<Cons*>()->car_);
+}
 
-  if(p.tag() != Ptr_tag::cons){
-    throw make_cons_iter_error(c_->cdr());
+ConsIter& ConsIter::operator++(){
+  if(p_.tag() != Ptr_tag::cons){
+    throw make_cons_iter_error(p_);
   }
 
-  c_ = p.get<Cons*>();
+  if(auto c = p_.get<Cons*>()){
+    p_ = c->cdr();
+  }
   return *this;
 }
 
@@ -70,7 +77,7 @@ ConsIter begin(Lisp_ptr p){
   if(p.tag() != Ptr_tag::cons){
     throw make_cons_iter_error(p);
   }
-  return ConsIter(p.get<Cons*>());
+  return ConsIter(p);
 }
 
 ConsIter end(Lisp_ptr p){
@@ -82,6 +89,5 @@ ConsIter end(Lisp_ptr p){
   (void)p;
 #endif
 
-  assert(Cons::NIL.get<Cons*>() == nullptr);
-  return ConsIter(nullptr);
+  return ConsIter();
 }

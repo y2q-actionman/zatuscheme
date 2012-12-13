@@ -5,6 +5,7 @@
 
 class Cons {
   friend class GrowList;
+  friend class ConsIter;
 
 public:
   static constexpr Lisp_ptr NIL = Lisp_ptr{static_cast<Cons*>(nullptr)};

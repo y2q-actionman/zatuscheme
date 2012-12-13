@@ -63,8 +63,8 @@ class ConsIter
   : public std::iterator<std::forward_iterator_tag, Lisp_ptr>
 {
 public:
-  ConsIter();
-  explicit ConsIter(Cons*);
+  ConsIter() : p_(Cons::NIL){}
+  explicit ConsIter(Lisp_ptr p) : p_(p){}
   ConsIter(const ConsIter&) = default;
   ConsIter(ConsIter&&) = default;
 
@@ -74,26 +74,26 @@ public:
   ConsIter& operator=(ConsIter&&) = default;
 
   Lisp_ptr operator*() const
-  { return c_->car(); }
+  { return (*this) ? p_.get<Cons*>()->car() : Lisp_ptr{}; }
 
-  Lisp_ptr operator->() const
-  { return c_->car(); }
+  Lisp_ptr* operator->() const;
 
   ConsIter& operator++();
   ConsIter operator++(int);
 
   explicit operator bool() const
-  { return c_; }
+  { return (p_.get<Cons*>()); }
 
-  friend bool operator==(const ConsIter&, const ConsIter&);
-  friend bool operator!=(const ConsIter&, const ConsIter&);
 
-  Cons* base() const
-  { return c_; }
+  Lisp_ptr base() const
+  { return p_; }
 
 private:
-  Cons* c_;
+  Lisp_ptr p_;
 };
+
+bool operator==(const ConsIter&, const ConsIter&);
+bool operator!=(const ConsIter&, const ConsIter&);
 
 ConsIter begin(Lisp_ptr);
 ConsIter end(Lisp_ptr);
