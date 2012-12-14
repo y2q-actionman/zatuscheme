@@ -118,24 +118,16 @@ Lisp_ptr whole_function_define(){
   if(first.tag() == Ptr_tag::symbol){
     return set_internal("define(value set)", p, vm_op_local_set);
   }else if(first.tag() == Ptr_tag::cons){
-    Symbol* var = nullptr;
-    Lisp_ptr l_args, code;
+    Lisp_ptr code = rest->cdr();
 
-    bind_cons_list(first,
-                   [&](Cons* c){
-                     var = c->car().get<Symbol*>();
-                     l_args = c->cdr();
-                   });
-
-    if(!var){
-      throw zs_error("eval error: function's name is not a symbol!\n");
-    }
-
-    code = rest->cdr();
-
-    auto value = lambda_internal(l_args, code);
-    vm.local_set(var, value);
-    return value;
+    return
+      bind_cons_list_strict
+      (first,
+       [&](Symbol* var, ConsIter l_args) -> Lisp_ptr{
+        auto value = lambda_internal(l_args.base(), code);
+        vm.local_set(var, value);
+        return value;
+      });
   }else{
     throw zs_error("eval error: informal define syntax!\n");
   }
