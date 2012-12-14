@@ -5,11 +5,24 @@
   す。C++11 で記述されています。
 
 * build, install
+** zip パッケージから
   ビルドには、GCC C++ コンパイラ 4.6 以降が必要です。
   
   ビルド、インストール手順は以下の通りです：
 #+BEGIN_EXAMPLE
-  ./configure make make install
+./configure make make install
+#+END_EXAMPLE
+
+** github repository から
+   ビルドには、以下が必要です：
+    - GCC C++ コンパイラ 4.6 以降
+    - GNU Autoconf 2.68
+    - GNU automake 1.11.3
+  
+  ビルド、インストール手順は以下の通りです：
+#+BEGIN_EXAMPLE
+autoreconf -i
+./configure make make install
 #+END_EXAMPLE
 
 * 使用
