@@ -57,6 +57,7 @@ auto do_list_2(Lisp_ptr lis1, Lisp_ptr lis2, MainFun&& m_fun, LastFun&& l_fun)
 }
 
 // bind_cons_list first version. uses number of functions
+/*
 template<int len, typename Fun1, typename... FunRest>
 inline
 int bind_cons_list_i(Lisp_ptr p, Fun1&& f, FunRest&&... fr){
@@ -80,6 +81,7 @@ inline
 int bind_cons_list(Lisp_ptr p, Fun&&... f){
   return bind_cons_list_i<0>(p, f...);
 }
+*/
 
 // experimental third version
 template<typename T>

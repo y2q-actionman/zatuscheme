@@ -485,13 +485,13 @@ Lisp_ptr function_splicing(){
 
   // formatting vm.code to 'unquote-splicing is processed'
   // see vm_op_arg_push()
-  Lisp_ptr parent_next_args, parent_next_arg1;
-  bind_cons_list(parent_args,
-                 [](Cons*){}, // (unquote-splicing ...)
-                 [&](Cons* c){
-                   parent_next_args = c;
-                   parent_next_arg1 = c->car();
-                 });
+  Lisp_ptr parent_next_args;
+  bind_cons_list_loose
+    (parent_args,
+     [&](Lisp_ptr, ConsIter i){
+      parent_next_args = i.base();
+    });
+  auto parent_next_arg1 = parent_next_args.get<Cons*>()->car();
 
   parent_argc = {Ptr_tag::vm_argcount, parent_argc.get<int>() + argc};
   parent_args = parent_next_args;

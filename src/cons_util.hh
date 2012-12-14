@@ -16,8 +16,9 @@ template<typename MainFun, typename LastFun>
 auto do_list_2(Lisp_ptr p, Lisp_ptr q, MainFun&&, LastFun&& lf)
   -> decltype(lf(p, q));
 
-template<typename... Fun>
-int bind_cons_list(Lisp_ptr, Fun&&...);
+//Old style version
+// template<typename... Fun>
+// int bind_cons_list(Lisp_ptr, Fun&&...);
 
 //these are defined in ".i.hh"
 // template<typename Fun>
