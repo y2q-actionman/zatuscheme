@@ -235,23 +235,27 @@ Lisp_ptr cond_expand(Cons* head){
   Lisp_ptr test_form;
   Lisp_ptr then_form;
 
-  int ret = bind_cons_list(clause,
-                           [&](Cons* c){
-                             test_form = c->car();
-                             if(nullp(c->cdr())){
-                               then_form = vm_op_nop;
-                             }
-                           },
-                           [&](Cons* c){
-                             if(auto sym = c->car().get<Symbol*>()){
-                               if(sym->name() == "=>"){
-                                 throw zs_error("macto cond: sorry, cond's => syntax is not implemented..\n");
-                               }
-                             }
-                             then_form = push_cons_list(intern(vm.symtable(), "begin"), c);
-                           });
-  assert(ret >= 1); // should be handled by previous tests.
-  (void)ret;
+  bind_cons_list_strict
+    (clause,
+     [&](Lisp_ptr test, ConsIter last_i) -> void{
+      test_form = test;
+      
+      auto last = last_i.base();
+
+      if(nullp(last)){
+        then_form = vm_op_nop;
+        return;
+      }
+      
+      if(auto sym = last.get<Symbol*>()){
+        if(sym->name() == "=>"){
+          throw zs_error("macro cond: sorry, cond's => syntax is not implemented..\n");
+          return;
+        }
+      }
+      
+      then_form = push_cons_list(intern(vm.symtable(), "begin"), last);
+    });
 
   if(auto sym = test_form.get<Symbol*>()){
     if(sym->name() == "else"){
