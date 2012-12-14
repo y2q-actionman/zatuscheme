@@ -64,7 +64,7 @@ class ConsIter
   : public std::iterator<std::forward_iterator_tag, Lisp_ptr>
 {
 public:
-  ConsIter() : p_(Cons::NIL){}
+  ConsIter() : p_(){}
   explicit ConsIter(Lisp_ptr p) : p_(p){}
   ConsIter(const ConsIter&) = default;
   ConsIter(ConsIter&&) = default;

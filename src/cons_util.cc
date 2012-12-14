@@ -22,6 +22,7 @@ void free_cons_list(Lisp_ptr p){
           });
 }
 
+// GrowList class
 void GrowList::push(Lisp_ptr p){
   assert(head && next);
   assert(*next == Cons::NIL);
@@ -32,14 +33,6 @@ void GrowList::push(Lisp_ptr p){
   next = &(newc->cdr_);
 }
 
-
-static zs_error make_cons_iter_error(Lisp_ptr p){
-  return make_zs_error("cons list error: dot-list appeared for a proper-list procedure (%s appeared)\n",
-                       stringify(p.tag()));
-}
-
-
-// GrowList class
 GrowList::~GrowList(){
   if(auto c = head.get<Cons*>()){
     free_cons_list(c);
@@ -51,14 +44,14 @@ GrowList::~GrowList(){
 // ConsIter class
 Lisp_ptr* ConsIter::operator->() const{
   if(!(*this)){
-    throw make_zs_error("cons list error: dereferenced invalid ConsIter!\n");
+    throw zs_error("cons list error: dereferenced invalid ConsIter!\n");
   }
   return &(p_.get<Cons*>()->car_);
 }
 
 ConsIter& ConsIter::operator++(){
   if(p_.tag() != Ptr_tag::cons){
-    throw make_cons_iter_error(p_);
+    throw zs_error("cons list error: forwarded ConsIter pointing the tail of a dotted list!\n");
   }
 
   if(auto c = p_.get<Cons*>()){
@@ -71,6 +64,12 @@ ConsIter ConsIter::operator++(int){
   auto ret = *this;
   ++(*this);
   return ret;
+}
+
+
+static zs_error make_cons_iter_error(Lisp_ptr p){
+  return make_zs_error("cons list error: dot-list appeared for a proper-list procedure (%s appeared)\n",
+                       stringify(p.tag()));
 }
 
 ConsIter begin(Lisp_ptr p){
@@ -89,5 +88,5 @@ ConsIter end(Lisp_ptr p){
   (void)p;
 #endif
 
-  return ConsIter();
+  return ConsIter(Cons::NIL);
 }
