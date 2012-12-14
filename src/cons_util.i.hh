@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <algorithm>
+#include <type_traits>
 #include "util.hh"
 
 inline
@@ -134,7 +135,7 @@ struct typed_destruct<mode, F_Arg1, F_Args...>{
     }
 
     auto arg1 = typed_destruct_cast<F_Arg1>(b);
-    if(is_strict(mode) && !arg1){
+    if(!std::is_convertible<decltype(*b), F_Arg1>::value && !arg1){
       throw zs_error("eval internal error: cons list has unexpected object\n");
     }
 
