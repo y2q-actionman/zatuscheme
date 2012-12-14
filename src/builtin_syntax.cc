@@ -175,15 +175,12 @@ Lisp_ptr whole_function_let_star(){
   {
     ZsArgs wargs{1};
 
-    int len = bind_cons_list(wargs[0],
-                             [](Cons*){}, // let* symbol
-                             [&](Cons* c){
-                               bindings = c->car();
-                               body = c->cdr();
-                             });
-    if(len < 2){
-      throw zs_error("eval error: informal let* syntax!\n");
-    }
+    bind_cons_list_strict
+      (wargs[0],
+       [&](Symbol*, Lisp_ptr bindings1, ConsIter body1){
+        bindings = bindings1;
+        body = body1.base();
+      });
   }
 
   vm.stack.insert(vm.stack.end(),
@@ -279,12 +276,13 @@ Lisp_ptr whole_conditional(T default_value, Expander e){
 
   Cons* head;
 
-  int len = bind_cons_list(wargs[0],
-                           [](Cons*){},
-                           [&](Cons* c){
-                             head = c;
-                           });
-  if(len < 2){
+  bind_cons_list_loose
+    (wargs[0],
+     [&](Symbol*, ConsIter rest){
+      head = rest.base().get<Cons*>();
+    });
+
+  if(!head){
     return Lisp_ptr(default_value);
   }
 
@@ -359,15 +357,12 @@ Lisp_ptr whole_case(){
 
   Lisp_ptr key, clauses;
 
-  int len = bind_cons_list(wargs[0],
-                           [](Cons*){},
-                           [&](Cons* c){
-                             key = c->car();
-                             clauses = c->cdr();
-                           });
-  if(len < 3){
-    throw zs_error("macro case: invalid syntax! (no key found)\n");
-  }
+  bind_cons_list_strict
+    (wargs[0],
+     [&](Symbol*, Lisp_ptr key1, ConsIter clauses1) -> void{
+      key = key1;
+      clauses = clauses1.base();
+    });
 
   // TODO: collect this by garbage collector!
   auto key_sym = new Symbol(new string("case_key_symbol"));
