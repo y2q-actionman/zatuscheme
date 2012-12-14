@@ -384,23 +384,17 @@ Lisp_ptr whole_do(){
 
   Lisp_ptr vars, end_test, end_exprs,  commands;
 
-  int len = bind_cons_list(wargs[0],
-                           [](Cons*){}, // 'do' symbol
-                           [&](Cons* c){
-                             vars = c->car();
-                           },
-                           [&](Cons* c){
-                             auto ends = c->car();
-                             auto end_c = ends.get<Cons*>();
-                             end_test = end_c->car();
-                             end_exprs = end_c->cdr();
-                           },
-                           [&](Cons* c){
-                             commands = c;
-                           });
-  if(len < 3){
-    throw make_zs_error("macro do: invalid syntax! (length is %d, less than 3)\n", len);
-  }
+  bind_cons_list_strict
+    (wargs[0],
+     [&](Symbol*, Lisp_ptr vars1, Lisp_ptr ends, ConsIter commands1) -> void{
+      vars = vars1;
+
+      auto end_c = ends.get<Cons*>();
+      end_test = end_c->car();
+      end_exprs = end_c->cdr();
+
+      commands = commands1.base();
+    });
 
   // TODO: collect this by garbage collector!
   auto loop_sym = new Symbol(new string("do_loop_symbol"));
@@ -410,15 +404,14 @@ Lisp_ptr whole_do(){
   GrowList steps;
 
   for(auto p : vars){
-    Lisp_ptr v, i, s;
-    bind_cons_list(p,
-                   [&](Cons* c){ v = c->car(); },
-                   [&](Cons* c){ i = c->car(); },
-                   [&](Cons* c){ s = c->car(); });
-    if(!s) s = v;
+    bind_cons_list_loose
+      (p,
+       [&](Lisp_ptr v, Lisp_ptr i, Lisp_ptr s) -> void{
+        if(!s) s = v;
 
-    init_binds.push(make_cons_list({v, i}));
-    steps.push(s);
+        init_binds.push(make_cons_list({v, i}));
+        steps.push(s);
+      });
   }
 
   // creates loop body
