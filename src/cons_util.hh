@@ -99,8 +99,8 @@ bool operator!=(const ConsIter&, const ConsIter&);
 ConsIter begin(Lisp_ptr);
 ConsIter end(Lisp_ptr);
   
-template<int size>
-std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr);
+// template<int size>
+// std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr);
 
 #include "cons_util.i.hh"
 

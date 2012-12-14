@@ -274,7 +274,8 @@ bool operator!=(const ConsIter& i1, const ConsIter& i2){
   return i1.base() != i2.base();
 }
 
-// cons_list_to_array
+// cons_list_to_array (deprecated)
+/*
 template<int size>
 std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr p){
   std::array<Lisp_ptr, size> ret;
@@ -293,5 +294,6 @@ std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr p){
 
   return ret;
 }
+*/
 
 #endif //CONS_UTIL_I_HH

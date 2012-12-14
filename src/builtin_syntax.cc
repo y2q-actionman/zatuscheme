@@ -34,9 +34,11 @@ Lisp_ptr whole_function_pass_through(){
 Lisp_ptr whole_function_quote(){
   ZsArgs wargs{1};
 
-  auto ex_wargs = cons_list_to_array<2>(wargs[0]);
-    
-  return ex_wargs[1];
+  return bind_cons_list_strict
+    (wargs[0],
+     [](Symbol*, Lisp_ptr datum){
+      return datum;
+    });
 }
 
 
@@ -88,16 +90,12 @@ Lisp_ptr whole_function_if(){
   stack = (variable name)
 */
 Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
-  // extracting
-  auto ex_lis = cons_list_to_array<2>(p);
-
-  if(ex_lis[0].tag() != Ptr_tag::symbol){
-    throw make_zs_error("eval error: %s: variable's name is not a symbol!\n", opname);
-  }
-    
-  // evaluating
-  vm.code.insert(vm.code.end(), {ex_lis[0], set_op, ex_lis[1]});
-  return ex_lis[1];
+  return bind_cons_list_strict
+    (p,
+     [&](Symbol* var, Lisp_ptr expr) -> Lisp_ptr {
+      vm.code.insert(vm.code.end(), {var, set_op, expr});
+      return expr;
+    });
 }
 
 Lisp_ptr whole_function_set(){
@@ -502,8 +500,13 @@ Lisp_ptr function_splicing(){
 Lisp_ptr whole_function_quasiquote(){
   ZsArgs wargs{1};
 
-  auto ex_wargs = cons_list_to_array<2>(wargs[0]);
-  Lisp_ptr arg = ex_wargs[1];
+  Lisp_ptr arg;
+
+  bind_cons_list_strict
+    (wargs[0],
+     [&](Symbol*, Lisp_ptr expr){
+      arg = expr;
+    });
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
