@@ -24,9 +24,9 @@ libzs_a_SOURCES = zs.hh\
 		builtin_syntax.cc builtin_syntax.hh\
 		builtin_numeric.cc builtin_numeric.hh\
 		builtin_boolean.cc builtin_boolean.hh builtin_boolean.defs.hh\
+		builtin_char.cc builtin_char.hh builtin_char.defs.hh\
 		builtin_cons.cc builtin_cons.hh builtin_cons.defs.hh\
 		builtin_symbol.cc builtin_symbol.hh\
-		builtin_char.cc builtin_char.hh\
 		builtin_string.cc builtin_string.hh\
 		builtin_equal.cc builtin_equal.hh\
 		builtin_vector.cc builtin_vector.hh\
