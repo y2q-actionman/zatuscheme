@@ -126,6 +126,7 @@ builtin_misc[] = {
       {Calling::function, 1}}},
 
 #include "builtin_boolean.defs.hh"
+#include "builtin_char.defs.hh"
 };
 
 
@@ -149,7 +150,6 @@ void install_builtin(){
 
   vm.set_frame(vm.frame()->push());
   install_builtin_native(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
-  install_builtin_native(builtin_char, builtin_char_size);
   install_builtin_native(builtin_cons, builtin_cons_size);
   install_builtin_load(builtin_cons_load, builtin_cons_load_size);
   install_builtin_native(builtin_numeric, builtin_numeric_size);
