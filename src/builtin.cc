@@ -123,7 +123,9 @@ builtin_misc[] = {
 
   {"load", {
       load_func,
-      {Calling::function, 1}}}
+      {Calling::function, 1}}},
+
+#include "builtin_boolean.defs.hh"
 };
 
 
@@ -147,7 +149,6 @@ void install_builtin(){
 
   vm.set_frame(vm.frame()->push());
   install_builtin_native(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
-  install_builtin_native(builtin_boolean, builtin_boolean_size);
   install_builtin_native(builtin_char, builtin_char_size);
   install_builtin_native(builtin_cons, builtin_cons_size);
   install_builtin_load(builtin_cons_load, builtin_cons_load_size);
