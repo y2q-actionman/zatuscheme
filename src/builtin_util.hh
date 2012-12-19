@@ -63,8 +63,8 @@ struct BuiltinFunc {
 // type check predicate
 template <Ptr_tag p>
 Lisp_ptr type_check_pred(){
-  auto arg = pick_args_1();
-  return Lisp_ptr{arg.tag() == p};
+  ZsArgs args{1};
+  return Lisp_ptr{args[0].tag() == p};
 }
 
 #include "builtin_util.i.hh"
