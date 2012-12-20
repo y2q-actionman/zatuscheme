@@ -10,7 +10,9 @@
   
   ビルド、インストール手順は以下の通りです：
 #+BEGIN_EXAMPLE
-./configure make make install
+./configure
+make
+make install
 #+END_EXAMPLE
 
 ** github repository から
@@ -22,7 +24,9 @@
   ビルド、インストール手順は以下の通りです：
 #+BEGIN_EXAMPLE
 autoreconf -i
-./configure make make install
+./configure
+make
+make install
 #+END_EXAMPLE
 
 * 使用
