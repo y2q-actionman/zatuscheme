@@ -9,8 +9,6 @@
 using namespace std;
 using namespace Procedure;
 
-namespace {
-
 Lisp_ptr type_check_procedure(){
   ZsArgs args{1};
   return Lisp_ptr{(args[0].tag() == Ptr_tag::i_procedure) || (args[0].tag() == Ptr_tag::n_procedure)};
@@ -27,35 +25,6 @@ Lisp_ptr proc_values(){
 
   return vm_op_nop;
 }
-
-} // namespace
-
-const BuiltinFunc
-builtin_procedure[] = {
-  {"procedure?", {
-      type_check_procedure,
-      {Calling::function, 1}}},
-  {"apply", {
-      apply_func,
-      {Calling::function, 1, Variadic::t}}},
-  {"force", {
-      func_force,
-      {Calling::function, 1}}},
-  {"values", {
-      proc_values,
-      {Calling::function, 0, Variadic::t}}},
-  {"call-with-values", {
-      call_with_values,
-      {Calling::function, 2}}},
-  {"call-with-current-continuation", {
-      call_cc,
-      {Calling::function, 1}}},
-  {"dynamic-wind", {
-      dynamic_wind,
-      {Calling::function, 3}}},
-};
-
-const size_t builtin_procedure_size = sizeof(builtin_procedure) / sizeof(builtin_procedure[0]);
 
 
 const char* builtin_procedure_load[] = {
