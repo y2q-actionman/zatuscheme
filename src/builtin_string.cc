@@ -9,13 +9,11 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "builtin_util.hh"
-#include "procedure.hh"
 #include "number.hh"
 #include "eval.hh"
 #include "util.hh"
 
 using namespace std;
-using namespace Procedure;
 
 namespace {
 
@@ -23,6 +21,31 @@ zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
   return make_zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::string), stringify(p.tag()));
 }
+
+template<typename Fun>
+Lisp_ptr string_compare(const char* name, Fun&& fun){
+  ZsArgs args{2};
+  String* str[2];
+
+  for(auto i = 0; i < 2; ++i){
+    str[i] = args[i].get<String*>();
+    if(!str[i]){
+      throw string_type_check_failed(name, args[i]);
+    }
+  }
+
+  return Lisp_ptr{fun(*str[0], *str[1])};
+}
+
+template<typename Fun>
+struct ci_compare{
+  inline bool operator()(const String& s1, const String& s2) const {
+    static constexpr Fun fun;
+    return fun(strcasecmp(s1.c_str(), s2.c_str()), 0);
+  }
+};
+
+} // namespace
 
 Lisp_ptr string_make(){
   ZsArgs args;
@@ -137,20 +160,6 @@ Lisp_ptr string_set(){
   return Lisp_ptr{ch};
 }
 
-template<typename Fun>
-Lisp_ptr string_compare(const char* name, Fun&& fun){
-  ZsArgs args{2};
-  String* str[2];
-
-  for(auto i = 0; i < 2; ++i){
-    str[i] = args[i].get<String*>();
-    if(!str[i]){
-      throw string_type_check_failed(name, args[i]);
-    }
-  }
-
-  return Lisp_ptr{fun(*str[0], *str[1])};
-}
 
 Lisp_ptr string_equal(){
   return string_compare("string=?", std::equal_to<std::string>());
@@ -171,14 +180,6 @@ Lisp_ptr string_less_eq(){
 Lisp_ptr string_greater_eq(){
   return string_compare("string>=?", std::greater_equal<std::string>());
 }
-
-template<typename Fun>
-struct ci_compare{
-  inline bool operator()(const String& s1, const String& s2) const {
-    static constexpr Fun fun;
-    return fun(strcasecmp(s1.c_str(), s2.c_str()), 0);
-  }
-};
 
 Lisp_ptr string_ci_equal(){
   return string_compare("string-ci=?", ci_compare<std::equal_to<int> >());
@@ -304,82 +305,3 @@ Lisp_ptr string_fill(){
   std::fill(str->begin(), str->end(), ch);
   return {str};
 }
-
-} // namespace
-
-const BuiltinFunc
-builtin_string[] = {
-  {"string?", {
-      type_check_pred<Ptr_tag::string>,
-      {Calling::function, 1}}},
-  {"make-string", {
-      string_make,
-      {Calling::function, 1, 2}}},
-  {"string", {
-      string_string,
-      {Calling::function, 0, Variadic::t}}},
-  {"string-length", {
-      string_length,
-      {Calling::function, 1}}},
-  {"string-ref", {
-      string_ref,
-      {Calling::function, 2}}},
-  {"string-set!", {
-      string_set,
-      {Calling::function, 3}}},
-
-  {"string=?", {
-      string_equal,
-      {Calling::function, 2}}},
-  {"string<?", {
-      string_less,
-      {Calling::function, 2}}},
-  {"string>?", {
-      string_greater,
-      {Calling::function, 2}}},
-  {"string<=?", {
-      string_less_eq,
-      {Calling::function, 2}}},
-  {"string>=?", {
-      string_greater_eq,
-      {Calling::function, 2}}},
-  {"string-ci=?", {
-      string_ci_equal,
-      {Calling::function, 2}}},
-  {"string-ci<?", {
-      string_ci_less,
-      {Calling::function, 2}}},
-  {"string-ci>?", {
-      string_ci_greater,
-      {Calling::function, 2}}},
-  {"string-ci<=?", {
-      string_ci_less_eq,
-      {Calling::function, 2}}},
-  {"string-ci>=?", {
-      string_ci_greater_eq,
-      {Calling::function, 2}}},
-
-  {"substring", {
-      string_substr,
-      {Calling::function, 3}}},
-  {"string-append", {
-      string_append,
-      {Calling::function, 0, Variadic::t}}},
-
-  {"string->list", {
-      string_to_list,
-      {Calling::function, 1}}},
-  {"list->string", {
-      string_from_list,
-      {Calling::function, 1}}},
-
-  {"string-copy", {
-      string_copy,
-      {Calling::function, 1}}},
-
-  {"string-fill!", {
-      string_fill,
-      {Calling::function, 2}}}
-};
-
-const size_t builtin_string_size = sizeof(builtin_string) / sizeof(builtin_string[0]);
