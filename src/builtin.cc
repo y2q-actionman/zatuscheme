@@ -139,6 +139,7 @@ builtin_misc[] = {
 #include "builtin_procedure.defs.hh"
 #include "builtin_string.defs.hh"
 #include "builtin_symbol.defs.hh"
+#include "builtin_vector.defs.hh"
 };
 
 static const BuiltinFunc
@@ -169,7 +170,6 @@ void install_builtin(){
   install_builtin_native(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
   install_builtin_load(builtin_cons_load, builtin_cons_load_size);
   install_builtin_load(builtin_procedure_load, builtin_procedure_load_size);
-  install_builtin_native(builtin_vector, builtin_vector_size);
   install_builtin_port_value();
   install_builtin_load(builtin_port_load, builtin_port_load_size);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
