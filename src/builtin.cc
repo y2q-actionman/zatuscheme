@@ -135,6 +135,11 @@ builtin_misc[] = {
 #include "builtin_cons.defs.hh"
 };
 
+static const BuiltinFunc
+builtin_extra_funcs[] = {
+#include "builtin_extra.defs.hh"
+};
+
 
 static void install_builtin_native(const BuiltinFunc bf[], size_t s){
   for(size_t i = 0; i < s; ++i){
@@ -170,7 +175,8 @@ void install_builtin(){
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
   vm.set_frame(vm.frame()->push());
-  install_builtin_native(builtin_extra, builtin_extra_size);
+  install_builtin_native(builtin_extra_funcs,
+                         sizeof(builtin_extra_funcs) / sizeof(builtin_extra_funcs[0]));
   install_builtin_load(builtin_extra_load, builtin_extra_load_size);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }
