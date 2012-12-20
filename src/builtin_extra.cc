@@ -8,8 +8,6 @@
 using namespace std;
 using namespace Procedure;
 
-namespace {
-
 Lisp_ptr to_macro_procedure(){
   ZsArgs args{1};
 
@@ -39,23 +37,6 @@ Lisp_ptr exit_func(){
   vm.code.clear();
   return {};
 }
-
-} // namespace
-
-const BuiltinFunc
-builtin_extra[] = {
-  {"to-macro-procedure", {
-      to_macro_procedure,
-      {Calling::function, 1}}},
-  {"gensym", {
-      gensym,
-      {Calling::function, 0}}},
-  {"exit", {
-      exit_func,
-      {Calling::function, 0}}}
-};
-
-const size_t builtin_extra_size = sizeof(builtin_extra) / sizeof(builtin_extra[0]);
 
 
 const char* builtin_extra_load[] = {

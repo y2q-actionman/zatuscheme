@@ -1,9 +1,10 @@
 #ifndef BUILTIN_EQUAL_HH
 #define BUILTIN_EQUAL_HH
 
-#include "builtin_util.hh"
+#include "lisp_ptr.hh"
 
-extern const BuiltinFunc builtin_equal[];
-extern const size_t builtin_equal_size;
+Lisp_ptr eq();
+Lisp_ptr eqv();
+Lisp_ptr equal();
 
 #endif // BUILTIN_EQUAL_HH

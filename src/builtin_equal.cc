@@ -1,21 +1,17 @@
-#include <array>
 #include <algorithm>
 
 #include "builtin_equal.hh"
 #include "util.hh"
 #include "lisp_ptr.hh"
 #include "number.hh"
-#include "procedure.hh"
 #include "builtin_util.hh"
 #include "printer.hh"
 #include "vm.hh"
 #include "cons.hh"
 
 using namespace std;
-using namespace Procedure;
 
 namespace {
-
 
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
@@ -58,6 +54,8 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
   }
 }
 
+} //namespace
+
 Lisp_ptr eq(){
   ZsArgs args{2};
   return Lisp_ptr{eq_internal(args[0], args[1])};
@@ -72,20 +70,3 @@ Lisp_ptr equal(){
   ZsArgs args{2};
   return Lisp_ptr{equal_internal(args[0], args[1])};
 }
-
-} //namespace
-
-const BuiltinFunc
-builtin_equal[] = {
-  {"eq?", {
-      eq,
-      {Calling::function, 2}}},
-  {"eqv?", {
-      eqv,
-      {Calling::function, 2}}},
-  {"equal?", {
-      equal,
-      {Calling::function, 2}}}
-};
-
-const size_t builtin_equal_size = sizeof(builtin_equal) / sizeof(builtin_equal[0]);

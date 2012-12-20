@@ -2,13 +2,11 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "builtin_util.hh"
-#include "procedure.hh"
 #include "number.hh"
 #include "eval.hh"
 #include "util.hh"
 
 using namespace std;
-using namespace Procedure;
 
 namespace {
 
@@ -16,6 +14,8 @@ zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
   return make_zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::vector), stringify(p.tag()));
 }
+
+} // namespace
 
 Lisp_ptr vector_make(){
   ZsArgs args;
@@ -144,41 +144,3 @@ Lisp_ptr vector_fill(){
   std::fill(v->begin(), v->end(), args[1]);
   return {v};
 }
-
-
-} // namespace
-
-const BuiltinFunc
-builtin_vector[] = {
-  {"vector?", {
-      type_check_pred<Ptr_tag::vector>,
-      {Calling::function, 1}}},
-  {"make-vector", {
-      vector_make,
-      {Calling::function, 1, 2}}},
-  {"vector", {
-      vector_vector, 
-      {Calling::function, 1, Variadic::t}}},
-  {"vector-length", {
-      vector_length,
-      {Calling::function, 1}}},
-  {"vector-ref", {
-      vector_ref,
-      {Calling::function, 2}}},
-  {"vector-set!", {
-      vector_set,
-      {Calling::function, 3}}},
-
-  {"vector->list", {
-      vector_to_list,
-      {Calling::function, 1}}},
-  {"list->vector", {
-      vector_from_list,
-      {Calling::function, 1}}},
-
-  {"vector-fill!", {
-      vector_fill,
-      {Calling::function, 2}}}
-};
-
-const size_t builtin_vector_size = sizeof(builtin_vector) / sizeof(builtin_vector[0]);

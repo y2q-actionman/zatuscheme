@@ -1,9 +1,8 @@
 #ifndef BUILTIN_BOOLEAN_HH
 #define BUILTIN_BOOLEAN_HH
 
-#include "builtin_util.hh"
+#include "lisp_ptr.hh"
 
-extern const BuiltinFunc builtin_boolean[];
-extern const size_t builtin_boolean_size;
+Lisp_ptr not_func();
 
 #endif // BUILTIN_BOOLEAN_HH

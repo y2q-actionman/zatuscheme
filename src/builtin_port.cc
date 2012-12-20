@@ -10,9 +10,9 @@
 #include "reader.hh"
 #include "printer.hh"
 #include "util.hh"
+#include "builtin_util.hh"
 
 using namespace std;
-using namespace Procedure;
 
 namespace {
 
@@ -41,14 +41,6 @@ Lisp_ptr port_open_file(const char* name){
   return {p};
 }  
 
-Lisp_ptr port_open_file_i(){
-  return port_open_file<InputPort, ifstream>("open-input-file");
-}  
-
-Lisp_ptr port_open_file_o(){
-  return port_open_file<OutputPort, ofstream>("open-output-file");
-}  
-
 template<typename IOType, typename F_IOType>
 Lisp_ptr port_close(const char* name){
   ZsArgs args{1};
@@ -66,15 +58,6 @@ Lisp_ptr port_close(const char* name){
   fio->close();
   return Lisp_ptr{true};
 }
-
-Lisp_ptr port_close_i(){
-  return port_close<InputPort, std::ifstream>("close-input-port");
-}
-
-Lisp_ptr port_close_o(){
-  return port_close<OutputPort, std::ofstream>("close-output-port");
-}
-
 
 template<typename Fun>
 Lisp_ptr port_input_call(const char* name, Fun&& fun){
@@ -100,6 +83,49 @@ Lisp_ptr port_input_call(const char* name, Fun&& fun){
   return Lisp_ptr{fun(p)};
 }
 
+template<typename Fun>
+Lisp_ptr port_output_call(const char* name, Fun&& fun){
+  ZsArgs args;
+
+  OutputPort* p;
+
+  switch(args.size()){
+  case 1:
+    p = vm.find(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME)).get<OutputPort*>();
+    assert(p);
+    break;
+  case 2:
+    p = args[1].get<OutputPort*>();
+    if(!p){
+      throw port_type_check_failed<OutputPort>(name, args[1]);
+    }
+    break;
+  default:
+    throw builtin_argcount_failed(name, 1, 2, args.size());
+  }
+
+  return Lisp_ptr{fun(args[0], p)};
+}
+
+} //namespace
+
+Lisp_ptr port_open_file_i(){
+  return port_open_file<InputPort, ifstream>("open-input-file");
+}  
+
+Lisp_ptr port_open_file_o(){
+  return port_open_file<OutputPort, ofstream>("open-output-file");
+}  
+
+Lisp_ptr port_close_i(){
+  return port_close<InputPort, std::ifstream>("close-input-port");
+}
+
+Lisp_ptr port_close_o(){
+  return port_close<OutputPort, std::ofstream>("close-output-port");
+}
+
+
 Lisp_ptr port_read(){
   return port_input_call("read",
                          [](std::istream* is){ return read(*is); });
@@ -124,29 +150,6 @@ Lisp_ptr port_eof_p(){
   return Lisp_ptr{args[0].get<char>() == EOF};
 }  
 
-template<typename Fun>
-Lisp_ptr port_output_call(const char* name, Fun&& fun){
-  ZsArgs args;
-
-  OutputPort* p;
-
-  switch(args.size()){
-  case 1:
-    p = vm.find(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME)).get<OutputPort*>();
-    assert(p);
-    break;
-  case 2:
-    p = args[1].get<OutputPort*>();
-    if(!p){
-      throw port_type_check_failed<OutputPort>(name, args[1]);
-    }
-    break;
-  default:
-    throw builtin_argcount_failed(name, 1, 2, args.size());
-  }
-
-  return Lisp_ptr{fun(args[0], p)};
-}
 
 Lisp_ptr port_write(){
   return port_output_call("write",
@@ -176,57 +179,6 @@ Lisp_ptr port_write_char(){
                           });
 }
 
-} //namespace
-
-const BuiltinFunc
-builtin_port[] = {
-  {"input-port?", {
-      type_check_pred<Ptr_tag::input_port>,
-      {Calling::function, 1}}},
-  {"output-port?", {
-      type_check_pred<Ptr_tag::output_port>,
-      {Calling::function, 1}}},
-
-  {"open-input-file", {
-      port_open_file_i,
-      {Calling::function, 1}}},
-  {"open-output-file", {
-      port_open_file_o,
-      {Calling::function, 1}}},
-
-  {"close-input-port", {
-      port_close_i,
-      {Calling::function, 1}}},
-  {"close-output-port", {
-      port_close_o,
-      {Calling::function, 1}}},
-  
-  {"read", {
-      port_read,
-      {Calling::function, 0, 1}}},
-  {"read-char", {
-      port_read_char,
-      {Calling::function, 0, 1}}},
-  {"peek-char", {
-      port_peek_char,
-      {Calling::function, 0, 1}}},
-
-  {"eof-object?", {
-      port_eof_p,
-      {Calling::function, 1}}},
-
-  {"write", {
-      port_write,
-      {Calling::function, 1, 2}}},
-  {"display", {
-      port_display,
-      {Calling::function, 1, 2}}},
-  {"write-char", {
-      port_write_char,
-      {Calling::function, 1, 2}}}
-};
-
-const size_t builtin_port_size = sizeof(builtin_port) / sizeof(builtin_port[0]);
 
 void install_builtin_port_value(){
   vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME),

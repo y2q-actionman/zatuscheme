@@ -15,8 +15,6 @@
 using namespace std;
 using namespace Procedure;
 
-namespace {
-
 Lisp_ptr whole_function_error(){
   ZsArgs wargs{1};
   auto sym = wargs[0].get<Cons*>()->car().get<Symbol*>();
@@ -84,11 +82,7 @@ Lisp_ptr whole_function_if(){
     });
 }
 
-/*
-  ----
-  code = (value, VM::if)
-  stack = (variable name)
-*/
+static
 Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
   return bind_cons_list_strict
     (p,
@@ -150,6 +144,7 @@ Lisp_ptr whole_function_let(){
   return let_internal(EarlyBind::f);
 }
 
+static
 Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
   if(nullp(bindings)){
     const auto begin_sym = intern(vm.symtable(), "begin");
@@ -191,6 +186,7 @@ Lisp_ptr whole_function_letrec(){
   return let_internal(EarlyBind::t);
 }
 
+static
 Lisp_ptr or_expand(Cons* c){
   if(!c->cdr() || nullp(c->cdr())){
     return c->car();
@@ -205,6 +201,7 @@ Lisp_ptr or_expand(Cons* c){
         else_clause});
 }
 
+static
 Lisp_ptr and_expand(Cons* c){
   if(!c->cdr() || nullp(c->cdr())){
     return c->car();
@@ -219,6 +216,7 @@ Lisp_ptr and_expand(Cons* c){
         vm_op_nop});
 }
 
+static
 Lisp_ptr cond_expand(Cons* head){
   if(!head) return {}; // unspecified in R5RS.
 
@@ -268,7 +266,7 @@ Lisp_ptr cond_expand(Cons* head){
 }
 
 template<typename T, typename Expander>
-inline
+static inline
 Lisp_ptr whole_conditional(T default_value, Expander e){
   ZsArgs wargs{1};
 
@@ -300,6 +298,7 @@ Lisp_ptr whole_cond(){
   return whole_conditional(Lisp_ptr{}, cond_expand);
 }
 
+static
 Lisp_ptr case_keys_expand(Symbol* sym, Cons* keys){
   const auto eqv_sym = intern(vm.symtable(), "eqv?");
   auto eqv_expr = make_cons_list({eqv_sym, sym, keys->car()});
@@ -317,6 +316,7 @@ Lisp_ptr case_keys_expand(Symbol* sym, Cons* keys){
         else_clause});
 }
 
+static
 Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
   if(cases_ptr.tag() != Ptr_tag::cons){
     throw zs_error("macro case: informal case syntax (dot-list?)\n");
@@ -448,6 +448,7 @@ Lisp_ptr macro_delay(){
   ---
   stack = argcount[a+b], an, an-1, ..., bn, bn-1, ...
 */
+static
 Lisp_ptr function_splicing(){
   if(vm.code.empty()
      || vm.code.back().tag() != Ptr_tag::vm_op){
@@ -579,74 +580,3 @@ Lisp_ptr whole_function_quasiquote(){
     UNEXP_DEFAULT();
   }
 }
-
-} //namespace
-
-const BuiltinFunc
-builtin_syntax[] = {
-  {"quote", {
-      whole_function_quote,
-      {Calling::whole_function, 1}}},
-  {"lambda", {
-      whole_function_lambda,
-      {Calling::whole_function, 1}}},
-  {"if", {
-      whole_function_if,
-      {Calling::whole_function, 1}}},
-  {"set!", {
-      whole_function_set,
-      {Calling::whole_function, 1}}},
-  {"define", {
-      whole_function_define,
-      {Calling::whole_function, 1}}},
-  {"begin", {
-      whole_function_begin,
-      {Calling::whole_function, 1}}},
-
-  {"cond", {
-      whole_cond,
-      {Calling::whole_function, 1}}},
-  {"case", {
-      whole_case,
-      {Calling::whole_function, 1}}},
-  {"and", {
-      whole_and,
-      {Calling::whole_function, 1}}},
-  {"or", {
-      whole_or,
-      {Calling::whole_function, 1}}},
-  {"let", {
-      whole_function_let,
-      {Calling::whole_function, 1}}},
-  {"let*", {
-      whole_function_let_star,
-      {Calling::whole_function, 1}}},
-  {"letrec", {
-      whole_function_letrec,
-      {Calling::whole_function, 1}}},
-  {"do", {
-      whole_do,
-      {Calling::whole_function, 1}}},
-  {"delay", {
-      macro_delay,
-      {Calling::macro, 1}}},
-
-  {"quasiquote", {
-      whole_function_quasiquote,
-      {Calling::whole_function, 1}}},
-  {"unquote", {
-      whole_function_pass_through,
-      {Calling::whole_function, 1}}},
-  {"unquote-splicing", {
-      whole_function_error,
-      {Calling::whole_function, 1}}},
-
-  {"else", {
-      whole_function_error,
-      {Calling::whole_function, 1}}},
-  {"=>", {
-      whole_function_error,
-      {Calling::whole_function, 1}}}
-};
-
-const size_t builtin_syntax_size = sizeof(builtin_syntax) / sizeof(builtin_syntax[0]);

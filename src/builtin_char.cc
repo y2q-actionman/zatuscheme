@@ -5,12 +5,10 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "builtin_util.hh"
-#include "procedure.hh"
 #include "number.hh"
 #include "util.hh"
 
 using namespace std;
-using namespace Procedure;
 
 namespace {
 
@@ -34,6 +32,41 @@ Lisp_ptr char_compare(const char* name, Fun&& fun){
   return Lisp_ptr{fun(c[0], c[1])};
 }
 
+template<typename Fun>
+struct ci_comparator{
+  inline bool operator()(char c1, char c2) const{
+    static constexpr Fun fun;
+    return fun(tolower(c1), tolower(c2));
+  }
+};
+
+template<typename Fun>
+Lisp_ptr char_pred(Fun&& fun){
+  ZsArgs args{1};
+
+  auto c = args[0].get<char>();
+  if(!c){
+    return Lisp_ptr{false};
+  }
+
+  return Lisp_ptr{fun(c)};
+}
+
+template<typename Fun>
+Lisp_ptr char_conversion(const char* name, Fun&& fun){
+  ZsArgs args{1};
+
+  auto c = args[0].get<char>();
+  if(!c){
+    throw char_type_check_failed(name, args[0]);
+  }
+
+  return Lisp_ptr{fun(c)};
+}
+  
+} // namespace
+
+
 Lisp_ptr char_eq(){
   return char_compare("char=?", std::equal_to<char>());
 }
@@ -54,14 +87,6 @@ Lisp_ptr char_greater_eq(){
   return char_compare("char>=?", std::greater_equal<char>());
 }
   
-
-template<typename Fun>
-struct ci_comparator{
-  inline bool operator()(char c1, char c2) const{
-    static constexpr Fun fun;
-    return fun(tolower(c1), tolower(c2));
-  }
-};
 
 Lisp_ptr char_ci_eq(){
   return char_compare("char-ci=?", ci_comparator<std::equal_to<int> >());
@@ -84,18 +109,6 @@ Lisp_ptr char_ci_greater_eq(){
 }
 
   
-template<typename Fun>
-Lisp_ptr char_pred(Fun&& fun){
-  ZsArgs args{1};
-
-  auto c = args[0].get<char>();
-  if(!c){
-    return Lisp_ptr{false};
-  }
-
-  return Lisp_ptr{fun(c)};
-}
-
 Lisp_ptr char_isalpha(){
   return char_pred([](char c) -> bool{ return std::isalpha(c); });
 }
@@ -116,19 +129,6 @@ Lisp_ptr char_islower(){
   return char_pred([](char c) -> bool{ return std::islower(c); });
 }
 
-
-template<typename Fun>
-Lisp_ptr char_conversion(const char* name, Fun&& fun){
-  ZsArgs args{1};
-
-  auto c = args[0].get<char>();
-  if(!c){
-    throw char_type_check_failed(name, args[0]);
-  }
-
-  return Lisp_ptr{fun(c)};
-}
-  
 
 Lisp_ptr char_to_int(){
   return char_conversion("char->integer",
@@ -161,77 +161,3 @@ Lisp_ptr char_tolower(){
   return char_conversion("char-downcase",
                          [](char c){ return static_cast<char>(std::tolower(c)); });
 }
-
-} // namespace
-
-
-const BuiltinFunc
-builtin_char[] = {
-  {"char?", {
-      type_check_pred<Ptr_tag::character>,
-      {Calling::function, 1}}},
-
-  {"char=?", {
-      char_eq,
-      {Calling::function, 2}}},
-  {"char<?", {
-      char_less,
-      {Calling::function, 2}}},
-  {"char>?", {
-      char_greater,
-      {Calling::function, 2}}},
-  {"char<=?", {
-      char_less_eq,
-      {Calling::function, 2}}},
-  {"char>=?", {
-      char_greater_eq,
-      {Calling::function, 2}}},
-
-  {"char-ci=?", {
-      char_ci_eq,
-      {Calling::function, 2}}},
-  {"char-ci<?", {
-      char_ci_less,
-      {Calling::function, 2}}},
-  {"char-ci>?", {
-      char_ci_greater,
-      {Calling::function, 2}}},
-  {"char-ci<=?", {
-      char_ci_less_eq,
-      {Calling::function, 2}}},
-  {"char-ci>=?", {
-      char_ci_greater_eq,
-      {Calling::function, 2}}},
-
-  {"char-alphabetic?", {
-      char_isalpha,
-      {Calling::function, 1}}},
-  {"char-numeric?", {
-      char_isdigit,
-      {Calling::function, 1}}},
-  {"char-whitespace?", {
-      char_isspace,
-      {Calling::function, 1}}},
-  {"char-upper-case?", {
-      char_isupper,
-      {Calling::function, 1}}},
-  {"char-lower-case?", {
-      char_islower,
-      {Calling::function, 1}}},
-
-  {"char->integer", {
-      char_to_int,
-      {Calling::function, 1}}},
-  {"integer->char", {
-      char_from_int,
-      {Calling::function, 1}}},
-  {"char-upcase", {
-      char_toupper,
-      {Calling::function, 1}}},
-  {"char-downcase", {
-      char_tolower,
-      {Calling::function, 1}}}
-};
-
-const size_t builtin_char_size = sizeof(builtin_char) / sizeof(builtin_char[0]);
-

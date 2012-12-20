@@ -1,10 +1,11 @@
 #ifndef BUILTIN_EXTRA_HH
 #define BUILTIN_EXTRA_HH
 
-#include "builtin_util.hh"
+#include "lisp_ptr.hh"
 
-extern const BuiltinFunc builtin_extra[];
-extern const size_t builtin_extra_size;
+Lisp_ptr to_macro_procedure();
+Lisp_ptr gensym();
+Lisp_ptr exit_func();
 
 extern const char* builtin_extra_load[];
 extern const size_t builtin_extra_load_size;

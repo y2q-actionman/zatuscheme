@@ -5,7 +5,6 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "builtin_util.hh"
-#include "procedure.hh"
 #include "cons.hh"
 #include "cons_util.hh"
 #include "number.hh"
@@ -13,7 +12,6 @@
 #include "util.hh"
 
 using namespace std;
-using namespace Procedure;
 
 namespace {
 
@@ -21,17 +19,6 @@ zs_error cons_type_check_failed(const char* func_name, Lisp_ptr p){
   return make_zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::cons), stringify(p.tag()));
 }
-
-Lisp_ptr type_check_pair(){
-  ZsArgs args{1};
-  return Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
-}
-
-Lisp_ptr cons_cons(){
-  ZsArgs args{2};
-  return {new Cons(args[0], args[1])};
-}
-
 
 template<typename Fun>
 inline
@@ -49,15 +36,6 @@ Lisp_ptr cons_carcdr(const char* name, Fun&& fun){
   return fun(c);
 }
 
-Lisp_ptr cons_car(){
-  return cons_carcdr("car", [](Cons* c){ return c->car(); });
-}
-
-Lisp_ptr cons_cdr(){
-  return cons_carcdr("cdr", [](Cons* c){ return c->cdr(); });
-}
-
-
 template<typename Fun>
 inline
 Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
@@ -73,6 +51,52 @@ Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
   
   return fun(c, args[1]);
 }
+
+Cons* cons_list_tail_base(const char* name){
+  ZsArgs args{2};
+  if(args[0].tag() != Ptr_tag::cons){
+    throw cons_type_check_failed(name, args[0]);
+  }
+  
+  auto num = args[1].get<Number*>();
+  if(!num || num->type() != Number::Type::integer){
+    throw make_zs_error("native func: %s: passed radix is not number (%s).\n",
+                        name, stringify(args[1].tag()));
+  }
+  auto nth = num->get<Number::integer_type>();
+
+  for(auto i = begin(args[0]), e = end(args[0]); i != e; ++i){
+    if(nth <= 0){
+      return i.base().get<Cons*>();
+    }
+    --nth;
+  }
+
+  throw make_zs_error("native func: %s: passed list is shorter than expected (%ld).\n",
+                      name, num->get<Number::integer_type>());
+}
+
+} // namespace
+
+
+Lisp_ptr type_check_pair(){
+  ZsArgs args{1};
+  return Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
+}
+
+Lisp_ptr cons_cons(){
+  ZsArgs args{2};
+  return {new Cons(args[0], args[1])};
+}
+
+Lisp_ptr cons_car(){
+  return cons_carcdr("car", [](Cons* c){ return c->car(); });
+}
+
+Lisp_ptr cons_cdr(){
+  return cons_carcdr("cdr", [](Cons* c){ return c->cdr(); });
+}
+
 
 Lisp_ptr cons_set_car(){
   return cons_set_carcdr("set-car!",
@@ -106,8 +130,8 @@ Lisp_ptr cons_listp(){
   
   auto ret = do_list(args[0],
                      [&](Cons* c) -> bool{
-                       auto founded = found_cons.find(c);
-                       if(founded != found_cons.end())
+                       auto found = found_cons.find(c);
+                       if(found != found_cons.end())
                          return false; //circular list
                        
                        found_cons.insert(c);
@@ -170,30 +194,6 @@ Lisp_ptr cons_reverse(){
   return ret;
 }
 
-Cons* cons_list_tail_base(const char* name){
-  ZsArgs args{2};
-  if(args[0].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed(name, args[0]);
-  }
-  
-  auto num = args[1].get<Number*>();
-  if(!num || num->type() != Number::Type::integer){
-    throw make_zs_error("native func: %s: passed radix is not number (%s).\n",
-                        name, stringify(args[1].tag()));
-  }
-  auto nth = num->get<Number::integer_type>();
-
-  for(auto i = begin(args[0]), e = end(args[0]); i != e; ++i){
-    if(nth <= 0){
-      return i.base().get<Cons*>();
-    }
-    --nth;
-  }
-
-  throw make_zs_error("native func: %s: passed list is shorter than expected (%ld).\n",
-                      name, num->get<Number::integer_type>());
-}
-
 Lisp_ptr cons_list_tail(){
   return cons_list_tail_base("list-tail");
 }
@@ -202,69 +202,6 @@ Lisp_ptr cons_list_ref(){
   auto c = cons_list_tail_base("list-ref");
   return c->car();
 }
-
-} // namespace
-
-const BuiltinFunc
-builtin_cons[] = {
-  {"pair?", {
-      type_check_pair,
-      {Calling::function, 1}}},
-
-  {"cons", {
-      cons_cons,
-      {Calling::function, 2}}},
-
-  {"car", {
-      cons_car,
-      {Calling::function, 1}}},
-  {"cdr", {
-      cons_cdr,
-      {Calling::function, 1}}},
-
-  {"set-car!", {
-      cons_set_car,
-      {Calling::function, 2}}},
-  {"set-cdr!", {
-      cons_set_cdr,
-      {Calling::function, 2}}},
-
-  {"null?", {
-      cons_nullp,
-      {Calling::function, 1}}},
-  {"list?", {
-      cons_listp,
-      {Calling::function, 1}}},
-
-  {"list", {
-      cons_list,
-      {Calling::function, 0, Variadic::t}}},
-  {"list*", {
-      cons_list_star,
-      {Calling::function, 1, Variadic::t}}},
-
-  {"length", {
-      cons_length,
-      {Calling::function, 1}}},
-
-  {"append", {
-      cons_append,
-      {Calling::function, 1, Variadic::t}}},
-
-  {"reverse", {
-      cons_reverse,
-      {Calling::function, 1}}},
-
-  {"list-tail", {
-      cons_list_tail,
-      {Calling::function, 2}}},
-  {"list-ref", {
-      cons_list_ref,
-      {Calling::function, 2}}},
-
-};
-
-const size_t builtin_cons_size = sizeof(builtin_cons) / sizeof(builtin_cons[0]);
 
 
 const char* builtin_cons_load[] = {

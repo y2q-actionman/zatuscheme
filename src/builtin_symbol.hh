@@ -1,9 +1,9 @@
 #ifndef BUILTIN_SYMBOL_HH
 #define BUILTIN_SYMBOL_HH
 
-#include "builtin_util.hh"
+#include "lisp_ptr.hh"
 
-extern const BuiltinFunc builtin_symbol[];
-extern const size_t builtin_symbol_size;
+Lisp_ptr sym_to_string();
+Lisp_ptr sym_from_string();
 
 #endif // BUILTIN_SYMBOL_HH
