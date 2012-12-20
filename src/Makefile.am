@@ -31,7 +31,7 @@ libzs_a_SOURCES = zs.hh\
 		builtin_port.cc builtin_port.hh builtin_port.defs.hh\
 		builtin_procedure.cc builtin_procedure.hh builtin_procedure.defs.hh\
 		builtin_string.cc builtin_string.hh builtin_string.defs.hh\
-		builtin_symbol.cc builtin_symbol.hh\
+		builtin_symbol.cc builtin_symbol.hh builtin_symbol.defs.hh\
 		builtin_vector.cc builtin_vector.hh\
 		vm.cc vm.hh vm.i.hh\
 		zs.cc zs.hh
