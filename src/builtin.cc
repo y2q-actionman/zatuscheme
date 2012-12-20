@@ -108,6 +108,7 @@ Lisp_ptr load_func(){
 static const BuiltinFunc
 builtin_syntax_funcs[] = {
 #include "builtin_equal.defs.hh"
+#include "builtin_syntax.defs.hh"
 };
 
 static const BuiltinFunc
@@ -162,7 +163,6 @@ static void install_builtin_load(const char* ld[], size_t s){
 void install_builtin(){
   install_builtin_native(builtin_syntax_funcs,
                          sizeof(builtin_syntax_funcs) / sizeof(builtin_syntax_funcs[0]));
-  install_builtin_native(builtin_syntax, builtin_syntax_size);
   vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame());
 
   vm.set_frame(vm.frame()->push());
