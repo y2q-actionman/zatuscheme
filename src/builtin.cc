@@ -134,6 +134,7 @@ builtin_misc[] = {
 #include "builtin_char.defs.hh"
 #include "builtin_cons.defs.hh"
 #include "builtin_numeric.defs.hh"
+#include "builtin_port.defs.hh"
 };
 
 static const BuiltinFunc
@@ -170,7 +171,6 @@ void install_builtin(){
   install_builtin_native(builtin_symbol, builtin_symbol_size);
   install_builtin_native(builtin_vector, builtin_vector_size);
   install_builtin_port_value();
-  install_builtin_native(builtin_port, builtin_port_size);
   install_builtin_load(builtin_port_load, builtin_port_load_size);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
