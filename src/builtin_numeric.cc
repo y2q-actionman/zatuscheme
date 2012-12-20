@@ -14,7 +14,6 @@
 #include "builtin.hh"
 #include "util.hh"
 #include "number.hh"
-#include "procedure.hh"
 #include "lisp_ptr.hh"
 #include "eval.hh"
 #include "builtin_util.hh"
@@ -22,7 +21,6 @@
 #include "port.hh"
 
 using namespace std;
-using namespace Procedure;
 
 namespace {
 
@@ -42,44 +40,6 @@ inline Lisp_ptr number_pred(Fun&& fun){
   return Lisp_ptr{fun(num)};
 }
 
-Lisp_ptr complexp(){
-  return number_pred([](Number* n){
-      return n->type() >= Number::Type::integer;
-    });
-}
-
-Lisp_ptr realp(){
-  return number_pred([](Number* n){
-      return n->type() >= Number::Type::integer
-        && n->type() <= Number::Type::real;
-    });
-}
-
-Lisp_ptr rationalp(){
-  return number_pred([](Number* n){
-      return n->type() >= Number::Type::integer
-        && n->type() < Number::Type::real;
-    });
-}
-
-Lisp_ptr integerp(){
-  return number_pred([](Number* n){
-      return n->type() == Number::Type::integer;
-    });
-}
-
-Lisp_ptr exactp(){
-  return number_pred([](Number* n){
-      return n->type() == Number::Type::integer;
-    });
-}
-
-Lisp_ptr inexactp(){
-  return number_pred([](Number* n){
-      return n->type() == Number::Type::complex
-        || n->type() == Number::Type::real;
-    });
-}
 
 struct complex_found{
   static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
@@ -134,51 +94,6 @@ inline Lisp_ptr number_compare(const char* name, Fun&& fun){
   return Lisp_ptr{true};
 }
 
-Lisp_ptr number_equal(){
-  return number_compare("=",
-                        [](const Number* n1, const Number* n2){
-                          return eqv(*n1, *n2);
-                        });
-}
-
-Lisp_ptr number_less(){
-  return number_compare("<",
-                        number_comparator<std::less>()); 
-}
-
-Lisp_ptr number_greater(){
-  return number_compare(">",
-                        number_comparator<std::greater>());
-}
-  
-Lisp_ptr number_less_eq(){
-  return number_compare("<=",
-                        number_comparator<std::less_equal>());
-}
-  
-Lisp_ptr number_greater_eq(){
-  return number_compare(">=",
-                        number_comparator<std::greater_equal>());
-}
-
-
-Lisp_ptr zerop(){
-  return number_pred([](Number* num) -> bool {
-      switch(num->type()){
-      case Number::Type::complex: {
-        auto c = num->get<Number::complex_type>();
-        return (c.real() == 0 && c.imag() == 0);
-      }
-      case Number::Type::real:
-        return num->get<Number::real_type>() == 0;
-      case Number::Type::integer:
-        return num->get<Number::integer_type>() == 0;
-      case Number::Type::uninitialized:
-      default:
-        UNEXP_DEFAULT();
-      }
-    });
-}
 
 template<template <typename> class Fun>
 struct pos_neg_pred{
@@ -201,14 +116,6 @@ struct pos_neg_pred{
   }
 };
 
-Lisp_ptr positivep(){
-  return number_pred(pos_neg_pred<std::greater>());
-}
-
-Lisp_ptr negativep(){
-  return number_pred(pos_neg_pred<std::less>());
-}
-
 template<template <typename> class Fun>
 struct even_odd_pred{
   inline bool operator()(Number* num){
@@ -226,14 +133,6 @@ struct even_odd_pred{
     }
   }
 };
-
-Lisp_ptr oddp(){
-  return number_pred(even_odd_pred<std::not_equal_to>());
-}
-
-Lisp_ptr evenp(){
-  return number_pred(even_odd_pred<std::equal_to>());
-}
 
 
 template<typename Fun, typename Iter>
@@ -299,15 +198,6 @@ struct minmax_accum{
   }
 };    
 
-
-Lisp_ptr number_max(){
-  return number_accumulate("max", Number(), minmax_accum<std::greater>());
-}
-
-Lisp_ptr number_min(){
-  return number_accumulate("min", Number(), minmax_accum<std::less>());
-}
-
 template<template <typename> class Op>
 struct binary_accum{
   inline bool operator()(Number& n1, const Number& n2){
@@ -368,6 +258,325 @@ struct binary_accum{
     throw zs_error("native func: +-*/: failed at numeric conversion!\n");
   }
 };
+
+template<typename Fun>
+inline
+Lisp_ptr number_divop(const char* name, Fun&& fun){
+  ZsArgs args{2};
+  Number* n[2];
+
+  for(auto i = 0; i < 2; ++i){
+    n[i] = args[i].get<Number*>();
+    if(!n[i]){
+      throw number_type_check_failed(name, args[i]);
+    }
+    if(n[i]->type() != Number::Type::integer){
+      throw make_zs_error("native func: %s: not integer type (%s)",
+                          name, stringify(n[i]->type()));
+    }
+  }
+  
+  return {new Number{fun(n[0]->get<Number::integer_type>(),
+                         n[1]->get<Number::integer_type>())}};
+}
+
+template<typename T>
+T gcd(T m, T n){
+  if(m < 0) m = -m;
+  if(n < 0) n = -n;
+
+  if(m < n)
+    std::swap(m, n);
+
+  while(n > 0){
+    auto mod = m % n;
+    m = n;
+    n = mod;
+  }
+
+  return m;
+}
+
+template<typename Fun>
+inline
+Lisp_ptr number_rounding(const char* name, Fun&& fun){
+  ZsArgs args{1};
+
+  auto n = args[0].get<Number*>();
+  if(!n){
+    throw number_type_check_failed(name, args[0]);
+  }
+
+  switch(n->type()){
+  case Number::Type::integer:
+    return {n};
+  case Number::Type::real:
+    return {new Number(fun(n->get<Number::real_type>()))};
+  case Number::Type::complex:
+    throw zs_error(complex_found::msg);
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+template<typename Fun>
+inline
+Lisp_ptr number_unary_op(const char* name, Fun&& fun){
+  ZsArgs args{1};
+
+  auto n = args[0].get<Number*>();
+  if(!n){
+    throw number_type_check_failed(name, args[0]);
+  }
+
+  switch(n->type()){
+  case Number::Type::integer:
+  case Number::Type::real:
+    return {new Number(fun(n->coerce<Number::real_type>()))};
+  case Number::Type::complex:
+    return {new Number(fun(n->get<Number::complex_type>()))};
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+struct exp_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::exp(t1);
+  }
+};
+
+struct log_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::log(t1);
+  }
+};
+
+struct sin_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::sin(t1);
+  }
+};
+
+struct cos_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::cos(t1);
+  }
+};
+
+struct tan_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::tan(t1);
+  }
+};
+
+struct asin_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::asin(t1);
+  }
+};
+
+struct acos_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::acos(t1);
+  }
+};
+
+struct sqrt_fun{
+  template<typename T>
+  inline T operator()(const T& t1) const{
+    return std::sqrt(t1);
+  }
+};
+
+template<typename RFun, typename CFun>
+inline
+Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
+  ZsArgs args{2};
+  Number* n[2];
+
+  for(auto i = 0; i < 2; ++i){
+    n[i] = args[i].get<Number*>();
+    if(!n[i]){
+      throw number_type_check_failed(name, args[i]);
+    }
+  }
+  
+  if(n[0]->type() == Number::Type::uninitialized
+     || n[1]->type() == Number::Type::uninitialized){
+    UNEXP_DEFAULT();
+  }
+
+  if(n[0]->type() <= Number::Type::real
+     || n[1]->type() <= Number::Type::real){
+    return {new Number(rfun(n[0]->coerce<Number::real_type>(),
+                            n[1]->coerce<Number::real_type>()))};
+  }
+
+  if(n[0]->type() <= Number::Type::complex
+     || n[1]->type() <= Number::Type::complex){
+    return Lisp_ptr{cfun(n[0]->coerce<Number::complex_type>(),
+                         n[1]->coerce<Number::complex_type>())};
+  }
+
+  UNEXP_DEFAULT();
+}
+
+template<typename Fun>
+inline
+Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
+  ZsArgs args{1};
+
+  auto n = args[0].get<Number*>();
+  if(!n){
+    throw number_type_check_failed(name, args[0]);
+  }
+
+  switch(n->type()){
+  case Number::Type::integer:
+  case Number::Type::real:
+  case Number::Type::complex:
+    return {new Number(fun(n->coerce<Number::complex_type>()))};
+  case Number::Type::uninitialized:
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+template<typename Fun>
+Lisp_ptr number_i_e(const char* name, Fun&& fun){
+  ZsArgs args{1};
+
+  auto n = args[0].get<Number*>();
+  if(!n){
+    throw number_type_check_failed(name, args[0]);
+  }
+
+  return {new Number(fun(*n))};
+}
+
+} // namespace
+
+
+Lisp_ptr complexp(){
+  return number_pred([](Number* n){
+      return n->type() >= Number::Type::integer;
+    });
+}
+
+Lisp_ptr realp(){
+  return number_pred([](Number* n){
+      return n->type() >= Number::Type::integer
+        && n->type() <= Number::Type::real;
+    });
+}
+
+Lisp_ptr rationalp(){
+  return number_pred([](Number* n){
+      return n->type() >= Number::Type::integer
+        && n->type() < Number::Type::real;
+    });
+}
+
+Lisp_ptr integerp(){
+  return number_pred([](Number* n){
+      return n->type() == Number::Type::integer;
+    });
+}
+
+Lisp_ptr exactp(){
+  return number_pred([](Number* n){
+      return n->type() == Number::Type::integer;
+    });
+}
+
+Lisp_ptr inexactp(){
+  return number_pred([](Number* n){
+      return n->type() == Number::Type::complex
+        || n->type() == Number::Type::real;
+    });
+}
+
+
+Lisp_ptr number_equal(){
+  return number_compare("=",
+                        [](const Number* n1, const Number* n2){
+                          return eqv(*n1, *n2);
+                        });
+}
+
+Lisp_ptr number_less(){
+  return number_compare("<",
+                        number_comparator<std::less>()); 
+}
+
+Lisp_ptr number_greater(){
+  return number_compare(">",
+                        number_comparator<std::greater>());
+}
+  
+Lisp_ptr number_less_eq(){
+  return number_compare("<=",
+                        number_comparator<std::less_equal>());
+}
+  
+Lisp_ptr number_greater_eq(){
+  return number_compare(">=",
+                        number_comparator<std::greater_equal>());
+}
+
+
+Lisp_ptr zerop(){
+  return number_pred([](Number* num) -> bool {
+      switch(num->type()){
+      case Number::Type::complex: {
+        auto c = num->get<Number::complex_type>();
+        return (c.real() == 0 && c.imag() == 0);
+      }
+      case Number::Type::real:
+        return num->get<Number::real_type>() == 0;
+      case Number::Type::integer:
+        return num->get<Number::integer_type>() == 0;
+      case Number::Type::uninitialized:
+      default:
+        UNEXP_DEFAULT();
+      }
+    });
+}
+
+Lisp_ptr positivep(){
+  return number_pred(pos_neg_pred<std::greater>());
+}
+
+Lisp_ptr negativep(){
+  return number_pred(pos_neg_pred<std::less>());
+}
+
+Lisp_ptr oddp(){
+  return number_pred(even_odd_pred<std::not_equal_to>());
+}
+
+Lisp_ptr evenp(){
+  return number_pred(even_odd_pred<std::equal_to>());
+}
+
+
+Lisp_ptr number_max(){
+  return number_accumulate("max", Number(), minmax_accum<std::greater>());
+}
+
+Lisp_ptr number_min(){
+  return number_accumulate("min", Number(), minmax_accum<std::less>());
+}
 
 
 Lisp_ptr number_plus(){
@@ -482,26 +691,6 @@ Lisp_ptr number_abs(){
   }
 }
 
-template<typename Fun>
-inline
-Lisp_ptr number_divop(const char* name, Fun&& fun){
-  ZsArgs args{2};
-  Number* n[2];
-
-  for(auto i = 0; i < 2; ++i){
-    n[i] = args[i].get<Number*>();
-    if(!n[i]){
-      throw number_type_check_failed(name, args[i]);
-    }
-    if(n[i]->type() != Number::Type::integer){
-      throw make_zs_error("native func: %s: not integer type (%s)",
-                          name, stringify(n[i]->type()));
-    }
-  }
-  
-  return {new Number{fun(n[0]->get<Number::integer_type>(),
-                         n[1]->get<Number::integer_type>())}};
-}
 
 Lisp_ptr number_quot(){
   return number_divop("quotient", std::divides<Number::integer_type>());
@@ -526,23 +715,6 @@ Lisp_ptr number_mod(){
                           return m;
                         }
                       });
-}
-
-template<typename T>
-T gcd(T m, T n){
-  if(m < 0) m = -m;
-  if(n < 0) n = -n;
-
-  if(m < n)
-    std::swap(m, n);
-
-  while(n > 0){
-    auto mod = m % n;
-    m = n;
-    n = mod;
-  }
-
-  return m;
 }
 
 Lisp_ptr number_gcd(){
@@ -598,29 +770,6 @@ Lisp_ptr number_denominator(){
 }
 
 
-template<typename Fun>
-inline
-Lisp_ptr number_rounding(const char* name, Fun&& fun){
-  ZsArgs args{1};
-
-  auto n = args[0].get<Number*>();
-  if(!n){
-    throw number_type_check_failed(name, args[0]);
-  }
-
-  switch(n->type()){
-  case Number::Type::integer:
-    return {n};
-  case Number::Type::real:
-    return {new Number(fun(n->get<Number::real_type>()))};
-  case Number::Type::complex:
-    throw zs_error(complex_found::msg);
-  case Number::Type::uninitialized:
-  default:
-    UNEXP_DEFAULT();
-  }
-}
-
 Lisp_ptr number_floor(){
   return number_rounding("floor", [](Number::real_type d){ return std::floor(d); });
 }
@@ -653,100 +802,29 @@ Lisp_ptr number_rationalize(){
 }
 
 
-template<typename Fun>
-inline
-Lisp_ptr number_unary_op(const char* name, Fun&& fun){
-  ZsArgs args{1};
-
-  auto n = args[0].get<Number*>();
-  if(!n){
-    throw number_type_check_failed(name, args[0]);
-  }
-
-  switch(n->type()){
-  case Number::Type::integer:
-  case Number::Type::real:
-    return {new Number(fun(n->coerce<Number::real_type>()))};
-  case Number::Type::complex:
-    return {new Number(fun(n->get<Number::complex_type>()))};
-  case Number::Type::uninitialized:
-  default:
-    UNEXP_DEFAULT();
-  }
-}
-
-struct exp_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::exp(t1);
-  }
-};
-
 Lisp_ptr number_exp(){
   return number_unary_op("exp", exp_fun());
 }
-
-struct log_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::log(t1);
-  }
-};
 
 Lisp_ptr number_log(){
   return number_unary_op("log", log_fun());
 }
 
-struct sin_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::sin(t1);
-  }
-};
-
 Lisp_ptr number_sin(){
   return number_unary_op("sin", sin_fun());
 }
-
-struct cos_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::cos(t1);
-  }
-};
 
 Lisp_ptr number_cos(){
   return number_unary_op("cos", cos_fun());
 }
 
-struct tan_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::tan(t1);
-  }
-};
-
 Lisp_ptr number_tan(){
   return number_unary_op("tan", tan_fun());
 }
 
-struct asin_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::asin(t1);
-  }
-};
-
 Lisp_ptr number_asin(){
   return number_unary_op("asin", asin_fun());
 }
-
-struct acos_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::acos(t1);
-  }
-};
 
 Lisp_ptr number_acos(){
   return number_unary_op("acos", acos_fun());
@@ -798,49 +876,10 @@ Lisp_ptr number_atan(){
   }
 }
 
-struct sqrt_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::sqrt(t1);
-  }
-};
-
 Lisp_ptr number_sqrt(){
   return number_unary_op("sqrt", sqrt_fun());
 }
 
-template<typename RFun, typename CFun>
-inline
-Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
-  ZsArgs args{2};
-  Number* n[2];
-
-  for(auto i = 0; i < 2; ++i){
-    n[i] = args[i].get<Number*>();
-    if(!n[i]){
-      throw number_type_check_failed(name, args[i]);
-    }
-  }
-  
-  if(n[0]->type() == Number::Type::uninitialized
-     || n[1]->type() == Number::Type::uninitialized){
-    UNEXP_DEFAULT();
-  }
-
-  if(n[0]->type() <= Number::Type::real
-     || n[1]->type() <= Number::Type::real){
-    return {new Number(rfun(n[0]->coerce<Number::real_type>(),
-                            n[1]->coerce<Number::real_type>()))};
-  }
-
-  if(n[0]->type() <= Number::Type::complex
-     || n[1]->type() <= Number::Type::complex){
-    return Lisp_ptr{cfun(n[0]->coerce<Number::complex_type>(),
-                         n[1]->coerce<Number::complex_type>())};
-  }
-
-  UNEXP_DEFAULT();
-}
 
 Lisp_ptr number_expt(){
   return number_binary_op("expt",
@@ -868,27 +907,6 @@ Lisp_ptr number_polar(){
                           complex_found());
 }
 
-
-template<typename Fun>
-inline
-Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
-  ZsArgs args{1};
-
-  auto n = args[0].get<Number*>();
-  if(!n){
-    throw number_type_check_failed(name, args[0]);
-  }
-
-  switch(n->type()){
-  case Number::Type::integer:
-  case Number::Type::real:
-  case Number::Type::complex:
-    return {new Number(fun(n->coerce<Number::complex_type>()))};
-  case Number::Type::uninitialized:
-  default:
-    UNEXP_DEFAULT();
-  }
-}
 
 Lisp_ptr number_real(){
   return number_unary_op_complex("real-part",
@@ -918,17 +936,6 @@ Lisp_ptr number_angle(){
                                  });
 }
 
-template<typename Fun>
-Lisp_ptr number_i_e(const char* name, Fun&& fun){
-  ZsArgs args{1};
-
-  auto n = args[0].get<Number*>();
-  if(!n){
-    throw number_type_check_failed(name, args[0]);
-  }
-
-  return {new Number(fun(*n))};
-}
 
 Lisp_ptr number_i_to_e(){
   return number_i_e("inexact->exact", to_exact);
@@ -1012,197 +1019,3 @@ Lisp_ptr number_to_string(){
 
   return {new String(oss.str())};
 }
-
-} //namespace
-
-
-const BuiltinFunc
-builtin_numeric[] = {
-  {"number?", {
-      type_check_pred<Ptr_tag::number>,
-      {Calling::function, 1}}},
-
-  {"complex?", {
-      complexp,
-      {Calling::function, 1}}},
-  {"real?", {
-      realp,
-      {Calling::function, 1}}},
-  {"rational?", {
-      rationalp,
-      {Calling::function, 1}}},
-  {"integer?", {
-      integerp,
-      {Calling::function, 1}}},
-
-  {"exact?", {
-      exactp,
-      {Calling::function, 1}}},
-  {"inexact?", {
-      inexactp,
-      {Calling::function, 1}}},
-
-  {"=", {
-      number_equal,
-      {Calling::function, 2, Variadic::t}}},
-  {"<", {
-      number_less,
-      {Calling::function, 2, Variadic::t}}},
-  {">", {
-      number_greater,
-      {Calling::function, 2, Variadic::t}}},
-  {"<=", {
-      number_less_eq,
-      {Calling::function, 2, Variadic::t}}},
-  {">=", {
-      number_greater_eq,
-      {Calling::function, 2, Variadic::t}}},
-
-  {"zero?", {
-      zerop,
-      {Calling::function, 1}}},
-  {"positive?", {
-      positivep,
-      {Calling::function, 1}}},
-  {"negative?", {
-      negativep,
-      {Calling::function, 1}}},
-  {"odd?", {
-      oddp,
-      {Calling::function, 1}}},
-  {"even?", {
-      evenp,
-      {Calling::function, 1}}},
-
-  {"max", {
-      number_max,
-      {Calling::function, 2, Variadic::t}}},
-  {"min", {
-      number_min,
-      {Calling::function, 2, Variadic::t}}},
-
-  {"+", {
-      number_plus,
-      {Calling::function, 0, Variadic::t}}},
-  {"*", {
-      number_multiple,
-      {Calling::function, 0, Variadic::t}}},
-  {"-", {
-      number_minus,
-      {Calling::function, 1, Variadic::t}}},
-  {"/", {
-      number_divide,
-      {Calling::function, 1, Variadic::t}}},
-
-  {"abs", {
-      number_abs,
-      {Calling::function, 1}}},
-
-  {"quotient", {
-      number_quot,
-      {Calling::function, 2}}},
-  {"remainder", {
-      number_rem,
-      {Calling::function, 2}}},
-  {"modulo", {
-      number_mod,
-      {Calling::function, 2}}},
-
-  {"gcd", {
-      number_gcd,
-      {Calling::function, 0, Variadic::t}}},
-  {"lcm", {
-      number_lcm,
-      {Calling::function, 0, Variadic::t}}},
-
-  {"numerator", {
-      number_numerator,
-      {Calling::function, 1}}},
-  {"denominator", {
-      number_denominator,
-      {Calling::function, 1}}},
-
-  {"floor", {
-      number_floor,
-      {Calling::function, 1}}},
-  {"ceiling", {
-      number_ceil,
-      {Calling::function, 1}}},
-  {"truncate", {
-      number_trunc,
-      {Calling::function, 1}}},
-  {"round", {
-      number_round,
-      {Calling::function, 1}}},
-
-  {"rationalize", {
-      number_rationalize,
-      {Calling::function, 1}}},
-
-  {"exp", {
-      number_exp,
-      {Calling::function, 1}}},
-  {"log", {
-      number_log,
-      {Calling::function, 1}}},
-  {"sin", {
-      number_sin,
-      {Calling::function, 1}}},
-  {"cos", {
-      number_cos,
-      {Calling::function, 1}}},
-  {"tan", {
-      number_tan,
-      {Calling::function, 1}}},
-  {"asin", {
-      number_asin,
-      {Calling::function, 1}}},
-  {"acos", {
-      number_acos,
-      {Calling::function, 1}}},
-  {"atan", {
-      number_atan,
-      {Calling::function, 1, 2}}},
-
-  {"sqrt", {
-      number_sqrt,
-      {Calling::function, 1}}},
-  {"expt", {
-      number_expt,
-      {Calling::function, 2}}},
-
-  {"make-rectangular", {
-      number_rect,
-      {Calling::function, 2}}},
-  {"make-polar", {
-      number_polar,
-      {Calling::function, 2}}},
-  {"real-part", {
-      number_real,
-      {Calling::function, 1}}},
-  {"imag-part", {
-      number_imag,
-      {Calling::function, 1}}},
-  {"magnitude", {
-      number_mag,
-      {Calling::function, 1}}},
-  {"angle", {
-      number_angle,
-      {Calling::function, 1}}},
-
-  {"inexact->exact", {
-      number_i_to_e,
-      {Calling::function, 1}}},
-  {"exact->inexact", {
-      number_e_to_i,
-      {Calling::function, 1}}},
-
-  {"string->number", {
-      number_from_string,
-      {Calling::function, 1, 2}}},
-  {"number->string", {
-      number_to_string,
-      {Calling::function, 1, 2}}}
-};
-
-const size_t builtin_numeric_size = sizeof(builtin_numeric) / sizeof(builtin_numeric[0]);
