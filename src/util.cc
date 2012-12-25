@@ -19,6 +19,17 @@ void unexp_conversion(const char* f, int l, const char* to){
 zs_error::zs_error(const std::string& s) : str_(s){}
 zs_error::zs_error(std::string&& s) : str_(std::move(s)){}
 
+zs_error::zs_error(const char* fmt, ...) : str_(){
+  char tmp[256];
+
+  va_list ap;
+  va_start(ap, fmt);
+  auto len = vsnprintf(tmp, sizeof(tmp), fmt, ap);
+  va_end(ap);
+
+  str_ = std::string(tmp, len);
+}
+
 zs_error::zs_error(const zs_error&) = default;
 zs_error::zs_error(zs_error&&) = default;
 
@@ -31,6 +42,7 @@ const char* zs_error::what() const noexcept{
   return str_.c_str();
 }
 
+/*
 zs_error make_zs_error(const char* fmt, ...){
   char tmp[256];
 
@@ -41,3 +53,4 @@ zs_error make_zs_error(const char* fmt, ...){
 
   return zs_error({tmp, len});
 }
+*/

@@ -28,6 +28,9 @@ class zs_error : public std::exception{
 public:
   explicit zs_error(const std::string&);
   explicit zs_error(std::string&&);
+  explicit zs_error(const char*, ...)
+    __attribute__ ((format (printf, 2, 3)))
+    ;
   zs_error(const zs_error&);
   zs_error(zs_error&&);
 
@@ -42,9 +45,12 @@ private:
   std::string str_;
 };
 
+#define make_zs_error zs_error
+/*
 zs_error make_zs_error(const char*, ...)
   __attribute__ ((format (printf, 1, 2)))
   ;
+*/
 
 // type support
 namespace zs {
