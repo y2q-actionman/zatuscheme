@@ -112,7 +112,7 @@ builtin_syntax_funcs[] = {
 };
 
 static const BuiltinFunc
-builtin_misc[] = {
+builtin_funcs[] = {
   {"eval", {
       eval_func,
       {Calling::function, 2}}},
@@ -167,7 +167,7 @@ void install_builtin(){
   vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame());
 
   vm.set_frame(vm.frame()->push());
-  install_builtin_native(builtin_misc, sizeof(builtin_misc) / sizeof(builtin_misc[0]));
+  install_builtin_native(builtin_funcs, sizeof(builtin_funcs) / sizeof(builtin_funcs[0]));
   install_builtin_load(builtin_cons_load, builtin_cons_load_size);
   install_builtin_load(builtin_procedure_load, builtin_procedure_load_size);
   install_builtin_port_value();
