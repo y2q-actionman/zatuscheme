@@ -1,5 +1,6 @@
 #include <utility>
 #include <istream>
+#include <iostream>
 
 #include "reader.hh"
 #include "vm.hh"
@@ -22,7 +23,7 @@ Lisp_ptr read_list(istream& f){
 
   // first check
   if(!t){
-    return Lisp_ptr{};
+    throw zs_error("reader error: reached EOF in a list.\n");
   }else if(t.type() == Token::Type::notation){
     auto n = t.get<Token::Notation>();
     if(n == Token::Notation::r_paren){ // empty list
@@ -46,7 +47,7 @@ Lisp_ptr read_list(istream& f){
     // check next token
     t = tokenize(f);
     if(!t){
-      return Lisp_ptr{};
+      throw zs_error("reader error: reached EOF in a list.\n");
     }else if(t.type() == Token::Type::notation){
       auto n = t.get<Token::Notation>();
       if(n == Token::Notation::r_paren){ // proper list
@@ -63,8 +64,7 @@ Lisp_ptr read_list(istream& f){
     }
   }
 
-  // if(c->cdr() == undef) ...
-  return {};
+  UNEXP_DEFAULT(); // should not come here.
 }
 
 Lisp_ptr read_vector(istream& f){
@@ -73,9 +73,8 @@ Lisp_ptr read_vector(istream& f){
   while(1){
     auto t = tokenize(f);
     if(!t){
-      // TODO: free vector's contents
       delete v;
-      return Lisp_ptr{};
+      throw zs_error("reader error: reached EOF in a vector.\n");
     }else if((t.type() == Token::Type::notation)
              && (t.get<Token::Notation>()
                  == Token::Notation::r_paren)){
@@ -89,13 +88,12 @@ Lisp_ptr read_vector(istream& f){
       v->emplace_back(datum);
     }
   }
+
+  UNEXP_DEFAULT(); // should not come here.
 }
 
 Lisp_ptr read_abbrev(const char* name, istream& f){
-  Lisp_ptr first{intern(vm.symtable(), name)};
-  Lisp_ptr second{read(f)};
-
-  return make_cons_list({first, second});
+  return make_cons_list({intern(vm.symtable(), name), read(f)});
 }
 
 Lisp_ptr read_la(istream& f, Token&& tok){
@@ -158,9 +156,10 @@ Lisp_ptr read_la(istream& f, Token&& tok){
     }
 
   case Token::Type::uninitialized:
+    return Lisp_ptr{};
+
   default:
-    throw make_zs_error("reader error: unknown token was passed! (type=%s)\n",
-                        stringify(tok.type()));
+    UNEXP_DEFAULT();
   }
 }
 

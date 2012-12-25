@@ -366,7 +366,7 @@ Token tokenize(istream& f){
     }
 
   case EOF:
-    return Token{static_cast<char>(EOF)};
+    return Token{};
 
   default:
     if(isalpha(c) || is_special_initial(c)){
