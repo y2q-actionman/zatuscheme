@@ -16,9 +16,6 @@ using namespace std;
 
 namespace {
 
-#define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
-#define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
-
 template<typename T>
 zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
   return make_zs_error("native func: %s: arg is not %s! (%s)\n",
@@ -177,14 +174,6 @@ Lisp_ptr port_write_char(){
                             os->put(c.get<char>());
                             return c;
                           });
-}
-
-
-void install_builtin_port_value(){
-  vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME),
-               &std::cin);
-  vm.local_set(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME),
-               &std::cout);
 }
 
 

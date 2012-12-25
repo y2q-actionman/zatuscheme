@@ -160,19 +160,24 @@ void install_builtin(){
     vm.local_set(intern(vm.symtable(), bf.name), {&bf.func});
   };    
 
+  // null-environment
   for_each(std::begin(builtin_syntax_funcs), std::end(builtin_syntax_funcs),
            install_builtin_native);
   vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame());
 
+  // r5rs-environment
   vm.set_frame(vm.frame()->push());
   for_each(std::begin(builtin_funcs), std::end(builtin_funcs),
            install_builtin_native);
   install_builtin_load(builtin_cons_load, builtin_cons_load_size);
   install_builtin_load(builtin_procedure_load, builtin_procedure_load_size);
-  install_builtin_port_value();
   install_builtin_load(builtin_port_load, builtin_port_load_size);
+
+  vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME), &std::cin);
+  vm.local_set(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
+  // interaction-environment
   vm.set_frame(vm.frame()->push());
   for_each(std::begin(builtin_extra_funcs), std::end(builtin_extra_funcs),
            install_builtin_native);

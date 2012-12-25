@@ -3,6 +3,9 @@
 
 #include "decl.hh"
 
+#define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
+#define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
+
 Lisp_ptr port_open_file_i();
 Lisp_ptr port_open_file_o();
 Lisp_ptr port_close_i();
@@ -16,8 +19,6 @@ Lisp_ptr port_eof_p();
 Lisp_ptr port_write();
 Lisp_ptr port_display();
 Lisp_ptr port_write_char();
-
-void install_builtin_port_value();
 
 extern const char* builtin_port_load[];
 extern const size_t builtin_port_load_size;
