@@ -1,7 +1,7 @@
 #ifndef BUILTIN_EQUAL_HH
 #define BUILTIN_EQUAL_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr eq();
 Lisp_ptr eqv();

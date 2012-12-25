@@ -1,7 +1,7 @@
 #ifndef BUILTIN_PORT_HH
 #define BUILTIN_PORT_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr port_open_file_i();
 Lisp_ptr port_open_file_o();

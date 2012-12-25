@@ -1,7 +1,7 @@
 #ifndef BUILTIN_VECTOR_HH
 #define BUILTIN_VECTOR_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr vector_make();
 Lisp_ptr vector_vector();

@@ -1,7 +1,7 @@
 #ifndef BUILTIN_HH
 #define BUILTIN_HH
 
-#include "builtin_util.hh"
+#include "decl.hh"
 
 void install_builtin();
 

@@ -1,7 +1,7 @@
 #ifndef BUILTIN_CONS_HH
 #define BUILTIN_CONS_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 extern const char* builtin_cons_load[];
 extern const size_t builtin_cons_load_size;

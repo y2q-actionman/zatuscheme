@@ -1,7 +1,7 @@
 #ifndef BUILTIN_CHAR_HH
 #define BUILTIN_CHAR_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr char_eq();
 Lisp_ptr char_less();

@@ -1,7 +1,7 @@
 #ifndef BUILTIN_EXTRA_HH
 #define BUILTIN_EXTRA_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr to_macro_procedure();
 Lisp_ptr gensym();

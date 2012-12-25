@@ -1,7 +1,7 @@
 #ifndef BUILTIN_SYNTAX_HH
 #define BUILTIN_SYNTAX_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr whole_function_error();
 Lisp_ptr whole_function_pass_through();

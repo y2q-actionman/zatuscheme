@@ -1,7 +1,7 @@
 #ifndef BUILTIN_STRING_HH
 #define BUILTIN_STRING_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr string_make();
 Lisp_ptr string_string();

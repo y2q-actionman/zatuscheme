@@ -1,7 +1,7 @@
 #ifndef BUILTIN_PROCEDURE_HH
 #define BUILTIN_PROCEDURE_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr type_check_procedure();
 Lisp_ptr proc_values();

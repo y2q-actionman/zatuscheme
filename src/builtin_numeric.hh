@@ -1,7 +1,7 @@
 #ifndef BUILTIN_NUMERIC_HH
 #define BUILTIN_NUMERIC_HH
 
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr complexp();
 Lisp_ptr realp();
