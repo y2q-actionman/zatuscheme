@@ -1,7 +1,7 @@
-#include <array>
 #include <sstream>
 #include <istream>
 #include <iostream>
+#include <algorithm>
 
 #include "builtin.hh"
 #include "util.hh"
@@ -148,12 +148,6 @@ builtin_extra_funcs[] = {
 };
 
 
-static void install_builtin_native(const BuiltinFunc bf[], size_t s){
-  for(size_t i = 0; i < s; ++i){
-    vm.local_set(intern(vm.symtable(), bf[i].name), {&bf[i].func});
-  }
-}
-
 static void install_builtin_load(const char* ld[], size_t s){
   for(size_t i = 0; i < s; ++i){
     stringstream ss({ld[i]}, ios_base::in);
@@ -162,12 +156,17 @@ static void install_builtin_load(const char* ld[], size_t s){
 }
 
 void install_builtin(){
-  install_builtin_native(builtin_syntax_funcs,
-                         sizeof(builtin_syntax_funcs) / sizeof(builtin_syntax_funcs[0]));
+  static constexpr auto install_builtin_native = [](const BuiltinFunc& bf){
+    vm.local_set(intern(vm.symtable(), bf.name), {&bf.func});
+  };    
+
+  for_each(std::begin(builtin_syntax_funcs), std::end(builtin_syntax_funcs),
+           install_builtin_native);
   vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame());
 
   vm.set_frame(vm.frame()->push());
-  install_builtin_native(builtin_funcs, sizeof(builtin_funcs) / sizeof(builtin_funcs[0]));
+  for_each(std::begin(builtin_funcs), std::end(builtin_funcs),
+           install_builtin_native);
   install_builtin_load(builtin_cons_load, builtin_cons_load_size);
   install_builtin_load(builtin_procedure_load, builtin_procedure_load_size);
   install_builtin_port_value();
@@ -175,8 +174,8 @@ void install_builtin(){
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
 
   vm.set_frame(vm.frame()->push());
-  install_builtin_native(builtin_extra_funcs,
-                         sizeof(builtin_extra_funcs) / sizeof(builtin_extra_funcs[0]));
+  for_each(std::begin(builtin_extra_funcs), std::end(builtin_extra_funcs),
+           install_builtin_native);
   install_builtin_load(builtin_extra_load, builtin_extra_load_size);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }
