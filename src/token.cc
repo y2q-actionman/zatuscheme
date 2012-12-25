@@ -203,7 +203,7 @@ Token tokenize_identifier(istream& f, int first_char){
   f.unget();
 
   assert(!s.empty());
-  return Token{s, Token::Type::identifier};
+  return Token{move(s), Token::Type::identifier};
 }
 
 Token tokenize_character(istream& f){
@@ -212,7 +212,6 @@ Token tokenize_character(istream& f){
     for(const char* c = str; *c; ++c){
       auto get_c = f.get();
       if(get_c != tolower(*c) || is_delimiter(get_c)){
-        f.unget();
         return false;
       }
     }
@@ -224,9 +223,7 @@ Token tokenize_character(istream& f){
     throw zs_error("reader error: no char found after '#\\'!\n");
   }
 
-  auto next = f.peek();
-
-  if(is_delimiter(next)){
+  if(is_delimiter(f.peek())){
     return Token{static_cast<char>(ret_char)};
   }else{
     // check character name
@@ -243,7 +240,7 @@ Token tokenize_character(istream& f){
       break;
     }
 
-    throw zs_error("reader error: not supprted char name!\n");
+    throw zs_error("reader error: not supported char name!\n");
   }
 }
 
@@ -254,7 +251,7 @@ Token tokenize_string(istream& f){
   while((c = f.get()) != EOF){
     switch(c){
     case '"':
-      return Token{s, Token::Type::string};
+      return Token{move(s), Token::Type::string};
     case '\\':
       switch(c = f.get()){
       case '"': case '\\':
@@ -301,11 +298,10 @@ Token tokenize(istream& f){
   case '|':
     return Token{Token::Notation::bar};
   case ',': {
-    auto c2 = f.get();
-    if(c2 == '@'){
+    if(f.peek() == '@'){
+      f.ignore(1);
       return Token{Token::Notation::comma_at};
     }else{
-      f.unget();
       return Token{Token::Notation::comma};
     }
   }
@@ -333,12 +329,10 @@ Token tokenize(istream& f){
     return tokenize_string(f);
 
   case '+': case '-': {
-    auto c2 = f.peek();
-
-    if(is_delimiter(c2)){
+    if(is_delimiter(f.peek())){
       return Token{string(1, c), Token::Type::identifier};
     }else{
-      f.putback(c);
+      f.unget();
       return tokenize_number(f);
     }
   }
