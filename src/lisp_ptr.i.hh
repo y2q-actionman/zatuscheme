@@ -6,7 +6,6 @@
 #endif
 
 #include <type_traits>
-#include "decl.hh"
 
 // Type mapping
 template<>

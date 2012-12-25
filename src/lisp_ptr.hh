@@ -1,9 +1,7 @@
 #ifndef LISP_PTR_HH
 #define LISP_PTR_HH
 
-#include <string>
-#include <vector>
-#include <iosfwd>
+#include "decl.hh"
 
 enum class Ptr_tag {
   undefined = 0,
@@ -77,25 +75,6 @@ private:
 
 bool operator==(Lisp_ptr, Lisp_ptr);
 bool operator!=(Lisp_ptr, Lisp_ptr);
-
-
-// typedefs & declarations
-class Cons;
-class Symbol;
-namespace Procedure{
-  class IProcedure;
-  class NProcedure;
-  class Continuation;
-}
-class Number;
-typedef std::string String;
-typedef std::vector<Lisp_ptr> Vector;
-typedef std::istream InputPort;
-typedef std::ostream OutputPort;
-class Env;
-class Delay;
-typedef void(*VMop)();
-
 
 const char* stringify(Ptr_tag);
 

@@ -1,8 +1,7 @@
 #ifndef READER_HH
 #define READER_HH
 
-#include <iosfwd>
-#include "lisp_ptr.hh"
+#include "decl.hh"
 
 Lisp_ptr read(std::istream&);
 

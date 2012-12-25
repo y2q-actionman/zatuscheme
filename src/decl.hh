@@ -1,6 +1,31 @@
 #ifndef DECL_HH
 #define DECL_HH
 
+#include <vector>
+#include <string>
+#include <iosfwd>
+
+// typedefs & declarations
+class Lisp_ptr;
+
+class Cons;
+class Symbol;
+namespace Procedure{
+  class IProcedure;
+  class NProcedure;
+  class Continuation;
+}
+class Number;
+typedef std::string String;
+typedef std::vector<Lisp_ptr> Vector;
+typedef std::istream InputPort;
+typedef std::ostream OutputPort;
+class Env;
+class Delay;
+typedef void(*VMop)();
+
+
+
 // declares generic facilities.
 
 // Type mapping - provided by overload

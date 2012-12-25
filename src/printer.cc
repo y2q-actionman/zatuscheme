@@ -1,6 +1,7 @@
 #include <cassert>
 #include <ostream>
 
+#include "lisp_ptr.hh"
 #include "printer.hh"
 #include "symbol.hh"
 #include "cons.hh"
