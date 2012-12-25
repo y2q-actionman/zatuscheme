@@ -3,9 +3,6 @@
 
 #include "decl.hh"
 
-extern const char* builtin_cons_load[];
-extern const size_t builtin_cons_load_size;
-
 Lisp_ptr type_check_pair();
 Lisp_ptr cons_cons();
 Lisp_ptr cons_car();

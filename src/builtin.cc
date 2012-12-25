@@ -105,14 +105,12 @@ Lisp_ptr load_func(){
 
 } //namespace
 
-static const BuiltinFunc
-builtin_syntax_funcs[] = {
+static const BuiltinFunc builtin_syntax_funcs[] = {
 #include "builtin_equal.defs.hh"
 #include "builtin_syntax.defs.hh"
 };
 
-static const BuiltinFunc
-builtin_funcs[] = {
+static const BuiltinFunc builtin_funcs[] = {
   {"eval", {
       eval_func,
       {Calling::function, 2}}},
@@ -142,22 +140,28 @@ builtin_funcs[] = {
 #include "builtin_vector.defs.hh"
 };
 
-static const BuiltinFunc
-builtin_extra_funcs[] = {
+static const char* builtin_strs[] = {
+#include "builtin_cons.strs.hh"
+#include "builtin_procedure.strs.hh"
+#include "builtin_port.strs.hh"
+};
+
+static const BuiltinFunc builtin_extra_funcs[] = {
 #include "builtin_extra.defs.hh"
 };
 
+static const char* builtin_extra_strs[] = {
+#include "builtin_extra.strs.hh"
+};
 
-static void install_builtin_load(const char* ld[], size_t s){
-  for(size_t i = 0; i < s; ++i){
-    stringstream ss({ld[i]}, ios_base::in);
-    load(&ss);
-  }
-}
 
 void install_builtin(){
   static constexpr auto install_builtin_native = [](const BuiltinFunc& bf){
     vm.local_set(intern(vm.symtable(), bf.name), {&bf.func});
+  };    
+  static constexpr auto install_builtin_string = [](const char* s){
+    stringstream ss({s}, ios_base::in);
+    load(&ss);
   };    
 
   // null-environment
@@ -169,10 +173,8 @@ void install_builtin(){
   vm.set_frame(vm.frame()->push());
   for_each(std::begin(builtin_funcs), std::end(builtin_funcs),
            install_builtin_native);
-  install_builtin_load(builtin_cons_load, builtin_cons_load_size);
-  install_builtin_load(builtin_procedure_load, builtin_procedure_load_size);
-  install_builtin_load(builtin_port_load, builtin_port_load_size);
-
+  for_each(std::begin(builtin_strs), std::end(builtin_strs),
+           install_builtin_string);
   vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME), &std::cin);
   vm.local_set(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
   vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
@@ -181,7 +183,8 @@ void install_builtin(){
   vm.set_frame(vm.frame()->push());
   for_each(std::begin(builtin_extra_funcs), std::end(builtin_extra_funcs),
            install_builtin_native);
-  install_builtin_load(builtin_extra_load, builtin_extra_load_size);
+  for_each(std::begin(builtin_extra_strs), std::end(builtin_extra_strs),
+           install_builtin_string);
   vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
 }
 
@@ -205,4 +208,3 @@ void load(InputPort* p){
     }
   }
 }
-

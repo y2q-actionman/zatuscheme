@@ -37,16 +37,3 @@ Lisp_ptr exit_func(){
   vm.code.clear();
   return {};
 }
-
-
-const char* builtin_extra_load[] = {
-  "(define (read-eval-print-loop)"
-  "  (let loop ()"
-  "    (display \">> \")"
-  "    (display (eval (read) (interaction-environment)))"
-  "    (newline)"
-  "    (loop)))",
-};
-
-const size_t builtin_extra_load_size
-= sizeof(builtin_extra_load) / sizeof(builtin_extra_load[0]);

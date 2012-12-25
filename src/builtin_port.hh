@@ -20,7 +20,4 @@ Lisp_ptr port_write();
 Lisp_ptr port_display();
 Lisp_ptr port_write_char();
 
-extern const char* builtin_port_load[];
-extern const size_t builtin_port_load_size;
-
 #endif // BUILTIN_PORT_HH
