@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <vector>
-#include <deque>
 #include <iosfwd>
 
 #include "lisp_ptr.hh"
@@ -40,7 +39,7 @@ public:
   friend std::ostream& operator<<(std::ostream&, const VM&);
 
 public:
-  std::deque<Lisp_ptr> code;
+  std::vector<Lisp_ptr> code;
   std::vector<Lisp_ptr> stack;
   std::vector<Lisp_ptr> return_value;
 
