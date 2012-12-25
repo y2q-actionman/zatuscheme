@@ -27,7 +27,7 @@ zs_error::zs_error(const char* fmt, ...) : str_(){
   auto len = vsnprintf(tmp, sizeof(tmp), fmt, ap);
   va_end(ap);
 
-  str_ = std::string(tmp, len);
+  str_ = {tmp, len};
 }
 
 zs_error::zs_error(const zs_error&) = default;
