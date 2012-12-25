@@ -37,12 +37,7 @@ Lisp_ptr read_list(istream& f){
   GrowList gl;
 
   while(1){
-    Lisp_ptr datum{read_la(f, move(t))};
-    if(!datum){
-      return Lisp_ptr{};
-    }
-
-    gl.push(datum);
+    gl.push(read_la(f, move(t)));
     
     // check next token
     t = tokenize(f);
@@ -80,12 +75,7 @@ Lisp_ptr read_vector(istream& f){
                  == Token::Notation::r_paren)){
       return Lisp_ptr{v};
     }else{
-      Lisp_ptr datum{read_la(f, move(t))};
-      if(!datum){
-        return Lisp_ptr{};
-      }
-
-      v->emplace_back(datum);
+      v->emplace_back(read_la(f, move(t)));
     }
   }
 
