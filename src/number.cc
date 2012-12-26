@@ -337,6 +337,17 @@ ParserRet parse_real_number(int radix, istream& f){
 ParserRet parse_complex(int radix, istream& f){
   const auto first_char = f.peek();
 
+  // treating +i, -i. (dirty part!)
+  if(first_char == '+' || first_char == '-'){
+    f.get();
+    if(f.peek() == 'i'){
+      f.ignore(1);
+      return {Number{Number::complex_type(0, (first_char == '+') ? 1 : -1)},
+          Exactness::inexact};
+    }
+    f.unget();
+  }
+
   // has real part
   auto real = parse_real_number(radix, f);
 
