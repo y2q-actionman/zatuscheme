@@ -190,9 +190,9 @@ pair<string, Exactness> collect_integer_digits(int radix, istream& f){
 }
   
 
-ParserRet parse_unsigned(int radix, const string& s, Exactness e){
+Number::integer_type zs_stol(int radix, const string& s){
   try{
-    return {Number{std::stol(s, nullptr, radix)}, e};
+    return std::stol(s, nullptr, radix);
   }catch(const std::logic_error& err){
     throw make_zs_error("reader error: reading integer failed: %s\n", err.what());
   }
@@ -324,7 +324,7 @@ ParserRet parse_real_number(int radix, istream& f){
     throw zs_error("reader error: failed at reading a number's integer part\n");
   }
 
-  auto u1 = parse_unsigned(radix, digit_chars.first, digit_chars.second);
+  auto u1 = zs_stol(radix, digit_chars.first);
 
   if(c == '/'){
     f.ignore(1);
@@ -335,14 +335,14 @@ ParserRet parse_real_number(int radix, istream& f){
       throw zs_error("reader error: failed at reading a rational number's denominator\n");
     }
 
-    auto u2 = parse_unsigned(radix, digit_chars_2.first, digit_chars_2.second);
+    auto u2 = zs_stol(radix, digit_chars_2.first);
 
-    return {Number(sign * u1.number.coerce<double>() / u2.number.coerce<double>()),
+    return {Number(sign * static_cast<double>(u1) / static_cast<double>(u2)),
         Exactness::inexact};
   }
 
   // FIXME: inexact or super-big integer can be fall into float.
-  return {Number(sign * u1.number.coerce<long>()), u1.ex};
+  return {Number(sign * u1), digit_chars.second};
 }
 
 ParserRet parse_complex(int radix, istream& f){
