@@ -170,17 +170,14 @@ struct ParserRet {
   }
 };
 
-ParserRet parse_unsigned(int radix, istream& f, string& s){
+pair<string, Exactness> collect_integer_digits(int radix, istream& f){
   decltype(f.get()) c;
+  string s;
 
   while(is_number_char(radix, c = f.get()))
     s.push_back(c);
   f.unget();
 
-  if(s.empty()){
-    return {}; // no digit char. starting with dot ?
-  }
-   
   Exactness e;
 
   if(eat_sharp(f, s) > 0){
@@ -189,6 +186,11 @@ ParserRet parse_unsigned(int radix, istream& f, string& s){
     e = Exactness::exact;
   }
 
+  return {s, e};
+}
+  
+
+ParserRet parse_unsigned(int radix, const string& s, Exactness e){
   try{
     return {Number{std::stol(s, nullptr, radix)}, e};
   }catch(const std::logic_error& err){
@@ -303,44 +305,44 @@ ParserRet parse_real_number(int radix, istream& f){
     break;
   }
 
-  string s;
+  auto digit_chars = collect_integer_digits(radix, f);
+  auto c = f.peek();
 
-  auto u1 = parse_unsigned(radix, f, s);
-  auto c = f.get();
-
-  if((c == '.') || (u1 && check_decimal_suffix(c))){
+  if((c == '.') || (!digit_chars.first.empty() && check_decimal_suffix(c))){
     if(radix != 10){
       throw make_zs_error("reader error: non-decimal float is not supported. (radix %d)\n", radix);
     }
 
     // decimal float
-    f.unget();
-    auto n = parse_decimal(f, s);
-
-    if(!n){
-      throw zs_error("reader error: failed at reading a decimal float\n");
-    }
+    auto n = parse_decimal(f, digit_chars.first);
       
     return {Number{n.number.coerce<double>() * sign},
         Exactness::inexact};
-  }else if(!u1){
+  }
+
+  if(digit_chars.first.empty()){
     throw zs_error("reader error: failed at reading a number's integer part\n");
-  }else if(c == '/'){
+  }
+
+  auto u1 = parse_unsigned(radix, digit_chars.first, digit_chars.second);
+
+  if(c == '/'){
+    f.ignore(1);
+
     // rational
-    string s2;
-    auto u2 = parse_unsigned(radix, f, s2);
-    if(!u2){
+    auto digit_chars_2 = collect_integer_digits(radix, f);
+    if(digit_chars_2.first.empty()){
       throw zs_error("reader error: failed at reading a rational number's denominator\n");
     }
 
+    auto u2 = parse_unsigned(radix, digit_chars_2.first, digit_chars_2.second);
+
     return {Number(sign * u1.number.coerce<double>() / u2.number.coerce<double>()),
         Exactness::inexact};
-  }else{
-    // integer?
-    f.unget();
-    // FIXME: inexact or super-big integer can be fall into float.
-    return {Number(sign * u1.number.coerce<long>()), u1.ex};
   }
+
+  // FIXME: inexact or super-big integer can be fall into float.
+  return {Number(sign * u1.number.coerce<long>()), u1.ex};
 }
 
 ParserRet parse_complex(int radix, istream& f){
