@@ -20,20 +20,14 @@ zs_error builtin_argcount_failed(const char* name, int required, int max, int pa
 
 // class ZsArgs
 ZsArgs::ZsArgs()
-  : stack_iter_s_(),
-    stack_iter_e_(vm.stack.end()){
-  auto argcnt = vm.stack.back().get<int>();
-  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
-}
+  : size_(vm.stack.back().get<int>()),
+    stack_iter_s_(vm.stack.end() - (size_ + 1)){}
 
 ZsArgs::ZsArgs(int i)
-  : stack_iter_s_(),
-    stack_iter_e_(vm.stack.end()){
-  auto argcnt = vm.stack.back().get<int>();
-  stack_iter_s_  = stack_iter_e_ - (argcnt + 1);
-
-  if(i != argcnt)
-    throw builtin_argcount_failed("(unknown func)", i, i, argcnt);
+  : size_(vm.stack.back().get<int>()),
+    stack_iter_s_(vm.stack.end() - (size_ + 1)){
+  if(i != size_)
+    throw builtin_argcount_failed("(unknown func)", i, i, size_);
 }
 /*
 ZsArgs::ZsArgs(ZsArgs&& other)
@@ -46,7 +40,7 @@ ZsArgs::~ZsArgs(){
   // if(!(stack_iter_s_ < stack_iter_e_)) return;
 
   if(!std::uncaught_exception()){
-    vm.stack.erase(stack_iter_s_, stack_iter_e_);
+    vm.stack.erase(this->begin(), this->end() + 1);
     invalidate();
   }
 }
