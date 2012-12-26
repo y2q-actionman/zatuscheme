@@ -52,10 +52,12 @@ ZsArgs& ZsArgs::operator=(ZsArgs&& other){
   return *this;
 }
 
+inline
 void ZsArgs::invalidate(){
   size_ = -1;
 }
 
+inline
 bool ZsArgs::valid() const{
   return (size_ >= 0);
 }
