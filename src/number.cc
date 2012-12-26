@@ -4,6 +4,7 @@
 #include <iterator>
 #include <istream>
 #include <ostream>
+#include <stdexcept>
 
 #include "number.hh"
 #include "util.hh"
@@ -63,18 +64,8 @@ enum class Exactness{
     };
 
 struct PrefixValue {
-  const int radix;
-  const Exactness ex;
-
-  constexpr PrefixValue() // error value
-    : radix(0), ex(Exactness::unspecified){}
-
-  constexpr PrefixValue(int r, Exactness e)
-    : radix(r), ex(e){}
-
-  explicit operator bool() const {
-    return (radix != 0);
-  }
+  int radix;
+  Exactness ex;
 };
 
 PrefixValue parse_number_prefix(istream& f){
@@ -106,8 +97,8 @@ PrefixValue parse_number_prefix(istream& f){
       r_appeared = true;
       r = (c == 'b') ? 2
         : (c == 'o') ? 8
-        : (c == 'd') ? 10
-        : 16;
+        : (c == 'x') ? 16
+        : 10;
       break;
     default:
       throw make_zs_error("reader error: unknown number prefix '%c' appeared!\n", c);
@@ -198,17 +189,11 @@ ParserRet parse_unsigned(int radix, istream& f, string& s){
     e = Exactness::exact;
   }
 
-  errno = 0;
-  auto l = strtol(s.c_str(), nullptr, radix);
-  if(errno){
-    auto eno = errno;
-    char estr[128];
-    strerror_r(eno, estr, sizeof(estr));
-
-    throw make_zs_error("reader error: reading integer failed: %s\n", estr);
+  try{
+    return {Number{std::stol(s, nullptr, radix)}, e};
+  }catch(const std::logic_error& err){
+    throw make_zs_error("reader error: reading integer failed: %s\n", err.what());
   }
-
-  return {Number{l}, e};
 }
 
 inline
@@ -415,9 +400,6 @@ ParserRet parse_complex(int radix, istream& f){
 
 Number parse_number(istream& f, int radix){
   const auto prefix_info = parse_number_prefix(f);
-  if(!prefix_info){
-    throw zs_error("reader error: failed at reading a number's prefix\n");
-  }
 
   if(!radix){
     radix = prefix_info.radix;
