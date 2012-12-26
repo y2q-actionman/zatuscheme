@@ -208,7 +208,7 @@ bool check_decimal_suffix(int c){
   }
 }
 
-ParserRet parse_decimal(istream& f, string& s){
+Number::real_type zs_stof(istream& f, string s){
   decltype(f.get()) c;
 
   // treating dot char
@@ -283,7 +283,7 @@ ParserRet parse_decimal(istream& f, string& s){
   }
 
   try{
-    return {Number{std::stod(s, nullptr)}, Exactness::inexact};
+    return std::stod(s, nullptr);
   }catch(const std::logic_error& err){
     throw make_zs_error("reader error: reading floating point number failed: %s\n", err.what());
   }
@@ -314,10 +314,9 @@ ParserRet parse_real_number(int radix, istream& f){
     }
 
     // decimal float
-    auto n = parse_decimal(f, digit_chars.first);
+    auto d = zs_stof(f, move(digit_chars.first));
       
-    return {Number{n.number.coerce<double>() * sign},
-        Exactness::inexact};
+    return {Number{d * sign}, Exactness::inexact};
   }
 
   if(digit_chars.first.empty()){
