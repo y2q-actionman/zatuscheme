@@ -208,12 +208,13 @@ bool check_decimal_suffix(int c){
 
 ParserRet parse_decimal(istream& f, string& s){
   decltype(f.get()) c;
+
+  // treating dot char
   bool dot_start = false;
   int sharps_before_dot = 0;
 
   if(s.empty()){
-    if((c = f.get()) == '.'){
-      f.unget();
+    if(f.peek() == '.'){
       dot_start = true;
     }else{
       throw zs_error("reader error: no chars found for floating point number.\n");
@@ -222,7 +223,7 @@ ParserRet parse_decimal(istream& f, string& s){
     sharps_before_dot = eat_sharp(f, s);
   }
 
-  if((c = f.get()) != '.'){
+  if(f.get() != '.'){
     f.unget();
     goto end; // 1. no frac part
   }
@@ -233,6 +234,7 @@ ParserRet parse_decimal(istream& f, string& s){
     goto end; // 4. only sharps after dot
   }
 
+  // treating fractional part
   {
     bool digits_after_dot = false;
 
@@ -250,14 +252,17 @@ ParserRet parse_decimal(istream& f, string& s){
   }
   
  end:
-  if(check_decimal_suffix(c = f.get())){
+  // treating exporational part
+  if(check_decimal_suffix(f.peek())){
+    f.ignore(1);
     s.push_back('e');
 
-    switch(c = f.get()){
+    switch(f.peek()){
     case '+': case '-':
-      s.push_back(c); break;
+      s.push_back(f.get());
+      break;
     default:
-      f.unget(); break;
+      break;
     }
 
     {
@@ -273,21 +278,13 @@ ParserRet parse_decimal(istream& f, string& s){
         throw zs_error("reader error: no number on exporational part\n");
       }
     }
-  }else{
-    f.unget();
   }
 
-  errno = 0;
-  auto d = strtod(s.c_str(), nullptr);
-  if(errno){
-    auto eno = errno;
-    char estr[128];
-    strerror_r(eno, estr, sizeof(estr));
-
-    throw make_zs_error("reader error: reading floating point number failed: %s\n", estr);
+  try{
+    return {Number{std::stod(s, nullptr)}, Exactness::inexact};
+  }catch(const std::logic_error& err){
+    throw make_zs_error("reader error: reading floating point number failed: %s\n", err.what());
   }
-
-  return {Number{d}, Exactness::inexact};
 }
 
 ParserRet parse_real_number(int radix, istream& f){
@@ -303,7 +300,6 @@ ParserRet parse_real_number(int radix, istream& f){
     sign = -1;
     break;
   default:
-    sign = 1;
     break;
   }
 
