@@ -114,6 +114,8 @@ int main(){
   check("1.0@3", polar(1.0, 3.0));
   check("1.0i");
   check("+1.0i", Number::complex_type(0, 1.0));
+  check("+1i", Number::complex_type(0, 1));
+  check("+i", Number::complex_type(0, 1));
 
   // prefix
   check("#e1", 1l);
