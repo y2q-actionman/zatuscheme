@@ -158,16 +158,6 @@ int eat_sharp(istream& f, string& o){
 struct ParserRet {
   const Number number;
   const Exactness ex;
-
-  constexpr ParserRet() // error value
-    : number(), ex(Exactness::unspecified){}
-
-  constexpr ParserRet(const Number& n, Exactness e)
-    : number(n), ex(e){}
-
-  explicit operator bool() const {
-    return static_cast<bool>(number);
-  }
 };
 
 pair<string, Exactness> collect_integer_digits(int radix, istream& f){
@@ -349,16 +339,10 @@ ParserRet parse_complex(int radix, istream& f){
 
   // has real part
   auto real = parse_real_number(radix, f);
-  if(!real){
-    throw zs_error("reader error: failed at reading a real number\n");
-  }
 
   switch(auto c = f.get()){
   case '@': {// polar literal
     auto deg = parse_real_number(radix, f);
-    if(!deg){
-      throw zs_error("reader error: failed at reading a complex number's polar part.\n");
-    }
         
     return {Number{polar(real.number.coerce<double>(), deg.number.coerce<double>())},
         Exactness::inexact};
@@ -373,7 +357,7 @@ ParserRet parse_complex(int radix, istream& f){
     }
     
     auto imag = parse_real_number(radix, f);
-    if(!imag || f.get() != 'i'){
+    if(f.get() != 'i'){
       throw zs_error("reader error: failed at reading a complex number's imaginary part.\n");
     }
 
@@ -403,9 +387,6 @@ Number parse_number(istream& f, int radix){
   }
 
   const auto r = parse_complex(radix, f);
-  if(!r){
-    throw zs_error("reader error: failed at reading a number\n");
-  }
 
   if(prefix_info.ex == Exactness::unspecified
      || prefix_info.ex == r.ex){
