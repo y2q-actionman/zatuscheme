@@ -29,29 +29,33 @@ ZsArgs::ZsArgs(int i)
   if(i != size_)
     throw builtin_argcount_failed("(unknown func)", i, i, size_);
 }
-/*
+
 ZsArgs::ZsArgs(ZsArgs&& other)
-  : stack_iter_s_(move(other.stack_iter_s_)),
-    stack_iter_e_(move(other.stack_iter_e_)){
+  : size_(other.size_),
+    stack_iter_s_(move(other.stack_iter_s_)){
   other.invalidate();
 }
-*/
+
 ZsArgs::~ZsArgs(){
-  // if(!(stack_iter_s_ < stack_iter_e_)) return;
+  if(!valid()) return;
 
   if(!std::uncaught_exception()){
     vm.stack.erase(this->begin(), this->end() + 1);
     invalidate();
   }
 }
-/*
+
 ZsArgs& ZsArgs::operator=(ZsArgs&& other){
+  size_ = other.size_;
   stack_iter_s_ = move(other.stack_iter_s_);
-  stack_iter_e_ = move(other.stack_iter_e_);
   other.invalidate();
   return *this;
 }
-*/
+
 void ZsArgs::invalidate(){
-  // stack_iter_s_ = stack_iter_e_ = decltype(vm.stack.end()){};
+  size_ = -1;
+}
+
+bool ZsArgs::valid() const{
+  return (size_ >= 0);
 }

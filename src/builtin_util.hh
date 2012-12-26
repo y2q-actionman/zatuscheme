@@ -21,6 +21,8 @@ Lisp_ptr pick_args_1();
 
 class ZsArgs{
 public:
+  typedef decltype(vm.stack.end()) IterType;
+
   explicit ZsArgs();
   explicit ZsArgs(int);
   ZsArgs(const ZsArgs&) = delete;
@@ -32,17 +34,24 @@ public:
   ZsArgs& operator=(ZsArgs&&);
 
   
-  Lisp_ptr& operator[](int i){ return *(stack_iter_s_ + i); }
-  int size(){ return size_; }
+  Lisp_ptr& operator[](int i) const
+  { return *(stack_iter_s_ + i); }
 
-  decltype(vm.stack.end()) begin(){ return stack_iter_s_; }
-  decltype(vm.stack.end()) end(){ return stack_iter_s_ + size(); }
+  int size() const
+  { return size_; }
+
+  IterType begin() const
+  { return stack_iter_s_; }
+
+  IterType end() const
+  { return stack_iter_s_ + size(); }
 
 private:
   void invalidate();
+  bool valid() const;
 
   int size_; // not containing last vm_argcount
-  decltype(vm.stack.end()) stack_iter_s_;
+  IterType stack_iter_s_;
 };
 
 // builtin type checking
