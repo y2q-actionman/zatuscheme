@@ -18,16 +18,17 @@ check_PROGRAMS = token_test\
 		function_arg_test\
 		enclose_test\
 		quasiquote_test\
-		builtin_test\
-		builtin_numeric_test\
 		builtin_boolean_test\
-		builtin_cons_test\
-		builtin_symbol_test\
 		builtin_char_test\
-		builtin_string_test\
+		builtin_cons_test\
+		builtin_control_test\
 		builtin_equal_test\
-		builtin_vector_test\
+		builtin_numeric_test\
 		builtin_port_test\
+		builtin_string_test\
+		builtin_symbol_test\
+		builtin_syntax_test\
+		builtin_vector_test\
 		delay_test
 
 TESTS = $(check_PROGRAMS)
