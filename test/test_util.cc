@@ -4,6 +4,7 @@
 #include "test_util.hh"
 #include "reader.hh"
 #include "eval.hh"
+#include "builtin_util.hh"
 
 using namespace std;
 
@@ -43,31 +44,12 @@ bool read_eval_print_test(const char* input, const char* expect){
 }
 
 bool eqv(Lisp_ptr a, Lisp_ptr b){
-  return zs_call("eqv?", {a, b}).get<bool>();
+  auto eqv_ret = zs_call({intern(vm.symtable(), "eqv?"), a, b});
+  return eqv_ret.get<bool>();
 }
   
-Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args){
-  vector<Cons> conses(args.size() + 1);
-
-  conses[0].rplaca(Lisp_ptr(intern(vm.symtable(), funcname)));
-  conses[0].rplacd(Lisp_ptr(&conses[1]));
-
-  auto i = next(begin(conses)), e = end(conses);
-  auto args_i = begin(args), args_e = end(args);
-
-  for(; i != e && args_i != args_e; ++i, ++args_i){
-    i->rplaca(*args_i);
-
-    auto n = next(i);
-    if(n >= e){
-      i->rplacd(Cons::NIL);
-    }else{
-      i->rplacd(Lisp_ptr(&*next(i)));
-    }
-  }
-  assert(i == e && args_i == args_e);
-
-  vm.code.push_back(Lisp_ptr(conses.data()));
+Lisp_ptr zs_call(std::initializer_list<Lisp_ptr> args){
+  vm.code.push_back(make_cons_list(args));
   eval();
   return vm.return_value[0];
 }

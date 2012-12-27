@@ -16,7 +16,7 @@ bool read_eval_print_test(const char* in, const char* expect);
 
 bool eqv(Lisp_ptr, Lisp_ptr);
 
-Lisp_ptr zs_call(const char* funcname, std::initializer_list<Lisp_ptr> args);
+Lisp_ptr zs_call(std::initializer_list<Lisp_ptr> args);
 
 
 template<typename Fun>
