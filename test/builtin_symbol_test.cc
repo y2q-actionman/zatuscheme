@@ -44,5 +44,5 @@ int main(){
 
   //check_e("(string=? \"K. Harper, M.D.\" (symbol->string (string->symbol \"K. Harper, M.D.\")))", "#t");
   
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

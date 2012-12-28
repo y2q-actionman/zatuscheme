@@ -50,5 +50,5 @@ int main(){
   eval_text("(vector-fill! tmpv '!)");
   check_e("tmpv", "#(! ! !)");
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -93,5 +93,5 @@ int main(){
   check_e("(fun2 100)", "101");
 
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

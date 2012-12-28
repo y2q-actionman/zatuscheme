@@ -35,5 +35,5 @@ int main(){
 
   // testing various syntaxes
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

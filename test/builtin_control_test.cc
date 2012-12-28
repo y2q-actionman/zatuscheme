@@ -64,5 +64,5 @@ int main(){
           "        (reverse path))))",
           "(connect talk1 disconnect connect talk2 disconnect)");
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

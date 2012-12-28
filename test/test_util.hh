@@ -17,7 +17,7 @@ template<typename Fun>
 void with_expect_error(Fun);
 
 
-extern int result;
+extern int RESULT;
 
 // (pass) -> print -> strcmp
 bool check_p(Lisp_ptr input, const char* expect);

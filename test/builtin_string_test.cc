@@ -111,5 +111,5 @@ int main(){
   eval_text("(string-fill! tmpstr #\\!)");
   check_e("tmpstr", "\"!!!\"");
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

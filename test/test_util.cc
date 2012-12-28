@@ -60,7 +60,7 @@ with_null_stream::~with_null_stream(){
 } // namespace test_util_detail
 
 
-int result = true;
+int RESULT = true;
 
 struct print_check_error{
   string result;
@@ -74,7 +74,7 @@ void print_check(Lisp_ptr input, const char* expect){
   auto evaled = ss.str();
 
   if(expect != evaled){
-    result = false;
+    RESULT = false;
     throw print_check_error{evaled};
   }
 }
@@ -86,7 +86,7 @@ bool check_p(Lisp_ptr input, const char* expect){
   }catch(const print_check_error& e){
     cerr << "[failed] expected: " << expect << "\n"
          << "\treturned: " << e.result << "\n";
-    result = false;
+    RESULT = false;
     return false;
   }
 }
@@ -108,7 +108,7 @@ bool check_r(const char* input, const char* expect){
   auto r = read_from_string(input);
   if(!r){
     cerr << "[failed] read error on " << input << "\n";
-    result = false;
+    RESULT = false;
     return false;
   }
 
@@ -118,7 +118,7 @@ bool check_r(const char* input, const char* expect){
   }catch(const print_check_error& e){
     cerr << "[failed] input:" << input << ", expected: " << expect << "\n"
          << "\treturned: " << e.result << "\n";
-    result = false;
+    RESULT = false;
     return false;
   };
 }
@@ -130,16 +130,16 @@ bool check_r_undef(const char* input){
   if(!ret){
     return true;
   }else{
-    cerr << "[failed] read:" << input << ", expected: (undefined)\n";
-    result = false;
-    return false;
+        cerr << "[failed] read:" << input << ", expected: (undefined)\n";
+        RESULT = false;
+        return false;
   }
 }
 
 bool check_e(const char* input, const char* expect){
   auto e = eval_text(input);
   if(!e){
-    result = false;
+    RESULT = false;
     return false;
   }
 
@@ -149,7 +149,7 @@ bool check_e(const char* input, const char* expect){
   }catch(const print_check_error& err){
     cerr << "[failed] expected " << expect
          << ", but got " << err.result << " (from: " << input << ")\n";
-    result = false;
+    RESULT = false;
     return false;
   }
 }
@@ -159,7 +159,7 @@ bool check_e_success(const char* input){
     return true;
   }else{
     cerr << "[failed] eval:" << input << ", expected: (success)\n";
-    result = false;
+    RESULT = false;
     return false;
   }
 }
@@ -172,7 +172,7 @@ bool check_e_undef(const char* input){
     return true;
   }else{
     cerr << "[failed] eval:" << input << ", expected: (undefined)\n";
-    result = false;
+    RESULT = false;
     return false;
   }
 }
@@ -180,7 +180,7 @@ bool check_e_undef(const char* input){
 bool check_er(const char* input, const char* expect){
   auto e = eval_text(input);
   if(!e){
-    result = false;
+    RESULT = false;
     return false;
   }
 
@@ -189,10 +189,11 @@ bool check_er(const char* input, const char* expect){
 
   auto ret = eqv(e, r);
   if(!ret){
-    result = false;
     cerr << "[failed] expected " << expect << ", but got ";
     print(cerr, e);
     cerr << " (from: " << input << ")\n";
+    RESULT = false;
+    return false;
   }
-  return result;
+  return true;
 }

@@ -128,5 +128,5 @@ int main(){
   check_e("(assq 5 '((2 3) (5 7) (11 13)))", "#f"); // unspecified
   check_e("(assv 5 '((2 3) (5 7) (11 13)))", "(5 7)");
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

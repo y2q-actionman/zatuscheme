@@ -94,5 +94,5 @@ int main(){
   check_e("(char=? #\\a (char-downcase #\\A))", "#t");
   check_e("(char=? #\\A (char-upcase #\\a))", "#t");
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

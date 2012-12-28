@@ -201,5 +201,5 @@ int main(){
   check_e("(string->number \"15##\")", "1500");
 
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

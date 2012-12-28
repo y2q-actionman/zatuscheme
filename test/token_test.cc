@@ -47,7 +47,7 @@ void check_copy_move(const Token& tok){
   return;
 
  error:
-  result = false;
+  RESULT = false;
   cerr << tok << '\n';
   return;
 }
@@ -66,7 +66,7 @@ void fail_message(Token::Type t, istream& f, const Pos& b_pos,
        << ", expected str='" << expect << "'\n"
        << "\tgotten token: " << tok << '\n';
 
-  result = false;
+  RESULT = false;
 }
 
 
@@ -148,8 +148,6 @@ bool operator!=(const Number& n1, const Number& n2){
 #define N Token::Notation
 
 int main(){
-  result = true;
-
   // identifier
   check_ident("lambda", "lambda");
   check_ident("q", "q");
@@ -235,5 +233,5 @@ int main(){
     check(ss); // EOF
   }
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

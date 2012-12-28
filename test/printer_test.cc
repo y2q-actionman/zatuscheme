@@ -5,8 +5,6 @@ using namespace std;
 using namespace Procedure;
 
 int main(){
-  result = true;
-
   // boolean
   check_p(Lisp_ptr{true}, "#t");
   check_p(Lisp_ptr{false}, "#f");
@@ -74,5 +72,5 @@ int main(){
     check_p(&v2, "#(#(() ()))");
   }
 
-  return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
