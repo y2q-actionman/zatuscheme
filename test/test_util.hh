@@ -23,9 +23,19 @@ void with_expect_error(Fun);
 
 extern int result;
 
+// read -> print -> strcmp
+int check_r(const char* input, const char* expect);
+
+// eval -> print -> strcmp
 int check_e(const char* input, const char* expect);
+
+// eval -> true?
 int check_e_success(const char*);
+
+// eval -> false?
 int check_e_undef(const char*);
+
+// eval -> read(expect) -> eqv?
 int check_er(const char* input, const char* expect);
 
 

@@ -61,6 +61,23 @@ with_null_stream::~with_null_stream(){
 
 int result = true;
 
+int check_r(const char* input, const char* expect){
+  auto r = read_from_string(input);
+  if(!r){
+    result = false;
+    return false;
+  }
+
+  const auto fun = [input, expect](const char* buf){
+    cerr << "[failed] input:" << input << ", expected: " << expect << "\n"
+         << "\treturned: " << buf << "\n";
+  };
+
+  auto ret = test_on_print(r, expect, fun);
+  if(!ret) result = false;
+  return result;
+}
+
 int check_e(const char* input, const char* expect){
   auto e = eval_text(input);
   if(!e){
