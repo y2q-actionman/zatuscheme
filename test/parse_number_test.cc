@@ -22,40 +22,33 @@ void fail_message(Number::Type t, istream& i,
        << "\tgotten: " << n << '\n';
 }
 
-void check(istream& i){
+void check(const char* input){
   static constexpr auto type = Number::Type::uninitialized;
 
+  stringstream ss(input);
+
   with_expect_error([&]() -> void {
-      const Number n = parse_number(i);
+      const Number n = parse_number(ss);
       if(n.type() != type){
-        fail_message(type, i, n, "(uninitialized)");
+        fail_message(type, ss, n, "(uninitialized)");
         return;
       }
     });
 }
 
 template<typename T>
-void check(istream& i, const T& expect){
+void check(const char* input, const T& expect){
   static constexpr auto type = to_tag<Number::Type, T>();
 
-  const Number n = parse_number(i);
+  stringstream ss(input);
+
+  const Number n = parse_number(ss);
   if(n.type() != type || n.get<T>() != expect){
-    fail_message(type, i, n, expect);
+    fail_message(type, ss, n, expect);
     return;
   }
 }
 
-
-void check(const string& input){
-  stringstream ss(input);
-  check(ss);
-}
-
-template<typename T>
-void check(const string& input, T&& t){
-  stringstream ss(input);
-  check(ss, t);
-}
 
 // printing test
 void check(const Number& n, int radix, const char* expect){
@@ -71,8 +64,6 @@ void check(const Number& n, int radix, const char* expect){
 }
 
 int main(){
-  result = true;
-
   // invalids
   check("hogehoge");
   check(".");
