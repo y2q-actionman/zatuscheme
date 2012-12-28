@@ -1,10 +1,6 @@
 #include "zs.hh"
 #include "test_util.hh"
 
-void check_undef(const char* input){
-  result &= !eval_text(input);
-}
-
 void check_success(const char* input){
   result &= !!eval_text(input);
 }
@@ -29,28 +25,24 @@ int main(){
 
   check_e("(string-ref \"a\" 0)", "#\\a");
   check_e("(string-ref \"abcde\" 3)", "#\\d");
-  with_expect_error([]() -> void {
-      check_undef("(string-ref \"a\" -1)");
-      check_undef("(string-ref \"a\" 100)");
-      check_undef("(string-ref \"\" 0)");
-    });
+  check_e_undef("(string-ref \"a\" -1)");
+  check_e_undef("(string-ref \"a\" 100)");
+  check_e_undef("(string-ref \"\" 0)");
 
   eval_text("(define tmpstr (make-string 3 #\\*))");
   eval_text("(string-set! tmpstr 0 #\\?)");
   check_e("tmpstr", "\"?**\"");
   eval_text("(string-set! tmpstr 1 #\\!)");
   check_e("tmpstr", "\"?!*\"");
-  with_expect_error([]() -> void {
-      check_undef("(string-set! tmpstr -1 #\\_)");
-      check_undef("(string-set! tmpstr 100 #\\_)");
-    });
+  check_e_undef("(string-set! tmpstr -1 #\\_)");
+  check_e_undef("(string-set! tmpstr 100 #\\_)");
 
   // when immutable string implemented..
   // eval_text("(define (f) (make-string 3 #\\*))");
   // eval_text("(define (g) \"***\")");
   // check_success("(string-set! (f) 0 #\\?)");
-  // check_undef("(string-set! (g) 0 #\\?)");
-  // check_undef("(string-set! (symbol->string 'immutable) 0 #\\?)");
+  // check_e_undef("(string-set! (g) 0 #\\?)");
+  // check_e_undef("(string-set! (symbol->string 'immutable) 0 #\\?)");
 
 
   check_e("(string=? \"aaa\" \"aaa\")", "#t");
@@ -97,12 +89,10 @@ int main(){
   check_e("(substring \"0123456789\" 1 5)", "\"1234\"");
   check_e("(substring \"0123456789\" 1 1)", "\"\"");
   check_e("(substring \"0123456789\" 0 1)", "\"0\"");
-  with_expect_error([]() -> void {
-      check_undef("(substring \"0123456789\" -1 1)");
-      check_undef("(substring \"0123456789\" 0 999)");
-      check_undef("(substring \"0123456789\" 5 4)");
-      check_undef("(substring \"0123456789\" 199 -1)");
-    });
+  check_e_undef("(substring \"0123456789\" -1 1)");
+  check_e_undef("(substring \"0123456789\" 0 999)");
+  check_e_undef("(substring \"0123456789\" 5 4)");
+  check_e_undef("(substring \"0123456789\" 199 -1)");
 
   check_e("(string-append)", "\"\"");
   check_e("(string-append \"\")", "\"\"");

@@ -1,10 +1,6 @@
 #include "zs.hh"
 #include "test_util.hh"
 
-void check_undef(const char* input){
-  result &= !eval_text(input);
-}
-
 int main(){
   zs_init();
 
@@ -22,15 +18,11 @@ int main(){
   check_e("(car '(a b c))", "a");
   check_e("(car '((a) b c d))", "(a)");
   check_e("(car '(1 . 2))", "1");
-  with_expect_error([]() -> void {
-      check_undef("(car '())");
-    });
+  check_e_undef("(car '())");
   
   check_e("(cdr '((a) b c d))", "(b c d)");
   check_e("(cdr '(1 . 2))", "2");
-  with_expect_error([]() -> void {
-      check_undef("(cdr '())");
-    });
+  check_e_undef("(cdr '())");
 
   eval_text("(define tmp (cons 'a 'b))");
   check_e("tmp", "(a . b)");
