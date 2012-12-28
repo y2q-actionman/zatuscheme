@@ -23,6 +23,12 @@ void with_expect_error(Fun);
 
 extern int result;
 
+// pass -> print -> strcmp
+int check_p(Lisp_ptr input, const char* expect);
+
+// pass -> checks printable
+int check_p_success(Lisp_ptr);
+
 // read -> print -> strcmp
 int check_r(const char* input, const char* expect);
 

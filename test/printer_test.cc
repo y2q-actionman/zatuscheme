@@ -1,118 +1,77 @@
-#include <sstream>
-#include <iostream>
-
 #include "zs.hh"
 #include "test_util.hh"
 
 using namespace std;
 using namespace Procedure;
 
-void check(Lisp_ptr input, const char* expect){
-  const auto callback = [expect](const char* str){
-    cerr << "[failed] expected: " << expect << "\n"
-         << "\treturned: " << str << "\n";
-  };
-
-  if(!test_on_print(input, expect, callback)){
-    result = false;
-  }
-}
-
-template<typename T>
-void check(const T& t, const char* expect){
-  check(Lisp_ptr{t}, expect);
-}
-
-void check(const char* s, const char* expect){
-  string ss{s};
-  check(Lisp_ptr{&ss}, expect);
-}
-
-void check(Number&& n, const char* expect){
-  check(Lisp_ptr{&n}, expect);
-}
-
-
-void check_noprint(Lisp_ptr input){
-  stringstream ss;
-  print(ss, input);
-}
-
-template<typename T>
-void check_noprint(const T& t){
-  check_noprint(Lisp_ptr{t});
-}  
-
-
-
 int main(){
   result = true;
 
   // boolean
-  check(true, "#t");
-  check(false, "#f");
+  check_p(Lisp_ptr{true}, "#t");
+  check_p(Lisp_ptr{false}, "#f");
 
   // char
-  check('a', "#\\a");
-  check('z', "#\\z");
-  check('0', "#\\0");
-  check(' ', "#\\space");
-  check('\\', "#\\\\");
+  check_p(Lisp_ptr{'a'}, "#\\a");
+  check_p(Lisp_ptr{'z'}, "#\\z");
+  check_p(Lisp_ptr{'0'}, "#\\0");
+  check_p(Lisp_ptr{' '}, "#\\space");
+  check_p(Lisp_ptr{'\\'}, "#\\\\");
 
   // symbol
-  check(intern(vm.symtable(), "hoge"), "hoge");
-  check(intern(vm.symtable(), "a b c "), "a b c ");
+  check_p(intern(vm.symtable(), "hoge"), "hoge");
+  check_p(intern(vm.symtable(), "a b c "), "a b c ");
 
   // function (should be added in future)
-  check_noprint(static_cast<IProcedure*>(nullptr));
-  check_noprint(static_cast<const NProcedure*>(nullptr));
+  check_p_success(static_cast<IProcedure*>(nullptr));
+  check_p_success(static_cast<const NProcedure*>(nullptr));
 
   // number
-  check(Number(100l), "100");
-  check(Number(1.1), "1.1");
+  check_p(new Number(100l), "100");
+  check_p(new Number(1.1), "1.1");
 
   // string
-  check("abc", "\"abc\"");
-  check("a\"bc", "\"a\\\"bc\"");
+  check_p(new String("abc"), "\"abc\"");
+  check_p(new String("a\"bc"), "\"a\\\"bc\"");
 
   // port (should be added in future)
-  check_noprint(static_cast<InputPort*>(nullptr));
-  check_noprint(static_cast<OutputPort*>(nullptr));
+  check_p_success(static_cast<InputPort*>(nullptr));
+  check_p_success(static_cast<OutputPort*>(nullptr));
 
 
   // cons, list
-  check(Cons::NIL, "()");
+  check_p(Cons::NIL, "()");
   {
     Cons c1{Cons::NIL, Cons::NIL};
-    check(&c1, "(())");
+    check_p(&c1, "(())");
 
     Cons c2{Cons::NIL, Lisp_ptr{&c1}};
-    check(&c2, "(() ())");
+    check_p(&c2, "(() ())");
 
     Cons c3{Lisp_ptr{true}, Lisp_ptr{&c2}};
-    check(&c3, "(#t () ())");
+    check_p(&c3, "(#t () ())");
 
     Cons c4{Lisp_ptr{true}, Lisp_ptr{false}};
-    check(&c4, "(#t . #f)");
+    check_p(&c4, "(#t . #f)");
 
     Cons c5{Lisp_ptr{&c3}, Lisp_ptr{&c4}};
-    check(&c5, "((#t () ()) #t . #f)");
+    check_p(&c5, "((#t () ()) #t . #f)");
   }
 
   // vector
   {
     Vector v1;
-    check(&v1, "#()");
+    check_p(&v1, "#()");
 
     v1.push_back(Cons::NIL);
-    check(&v1, "#(())");
+    check_p(&v1, "#(())");
 
     v1.push_back(Cons::NIL);
-    check(&v1, "#(() ())");
+    check_p(&v1, "#(() ())");
 
     Vector v2;
     v2.push_back(Lisp_ptr{&v1});
-    check(&v2, "#(#(() ()))");
+    check_p(&v2, "#(#(() ()))");
   }
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;

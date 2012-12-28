@@ -61,6 +61,23 @@ with_null_stream::~with_null_stream(){
 
 int result = true;
 
+int check_p(Lisp_ptr input, const char* expect){
+  const auto callback = [expect](const char* str){
+    cerr << "[failed] expected: " << expect << "\n"
+         << "\treturned: " << str << "\n";
+  };
+
+  auto ret = test_on_print(input, expect, callback);
+  if(!ret) result = false;
+  return result;
+}
+
+int check_p_success(Lisp_ptr input){
+  stringstream ss;
+  print(ss, input);
+  return result;
+}
+
 int check_r(const char* input, const char* expect){
   auto r = read_from_string(input);
   if(!r){
