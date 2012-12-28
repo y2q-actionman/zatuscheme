@@ -32,18 +32,6 @@ Lisp_ptr eval_text(const char* s){
   return ret;
 }
 
-bool read_eval_print_test(const char* input, const char* expect){
-  auto e = eval_text(input);
-  if(!e) return false;
-
-  const auto fun = [input, expect](const char* s){
-    cerr << "[failed] expected " << expect
-         << ", but got " << s << " (from: " << input << ")\n";
-  };
-
-  return test_on_print(e, expect, fun);
-}
-
 bool eqv(Lisp_ptr a, Lisp_ptr b){
   auto eqv_ret = zs_call({intern(vm.symtable(), "eqv?"), a, b});
   return eqv_ret.get<bool>();
@@ -73,7 +61,18 @@ with_null_stream::~with_null_stream(){
 int result = true;
 
 int check_e(const char* input, const char* expect){
-  auto ret = read_eval_print_test(input, expect);
+  auto e = eval_text(input);
+  if(!e){
+    result = false;
+    return false;
+  }
+
+  const auto fun = [input, expect](const char* s){
+    cerr << "[failed] expected " << expect
+         << ", but got " << s << " (from: " << input << ")\n";
+  };
+
+  auto ret =  test_on_print(e, expect, fun);
   if(!ret) result = false;
   return result;
 }
