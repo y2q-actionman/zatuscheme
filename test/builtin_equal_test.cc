@@ -61,5 +61,5 @@ int main(){
   check_e("(equal? (make-vector 5 'a) (make-vector 5 'a))", "#t");
   check_e("(equal? (lambda (x) x) (lambda (y) y))", "#f"); // unspecified
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

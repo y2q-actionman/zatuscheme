@@ -1,5 +1,3 @@
-#include <cstdlib>
-
 #include "zs.hh"
 #include "test_util.hh"
 
@@ -201,5 +199,5 @@ int main(){
   check_e("(string->number \"15##\")", "1500");
 
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

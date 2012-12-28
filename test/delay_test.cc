@@ -22,5 +22,5 @@ int main(){
   check_e("(force p)", "6");
   check_e("(begin (set! x 10) (force p))", "6");
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

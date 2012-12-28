@@ -28,7 +28,7 @@ void check(const char* input, const ArgT& expect){
     cerr << "[failed] unexpected failure: input='" << input << "',"
          << " expected=[" << argi.first << ", " << argi.second << "],"
          << " got=[" << expect.first << ", " << expect.second << "]\n";
-    RESULT = false;
+    RESULT = EXIT_FAILURE;
   }
 }
 
@@ -41,7 +41,7 @@ void check_uninit(const char* input){
       if(!!argi){
         cerr << "[failed] unexpected succeed: input='" << input << "',"
              << " arginfo=[" << argi.first << ", " << argi.second << "]\n";
-        RESULT = false;
+        RESULT = EXIT_FAILURE;
       }
     });
 }
@@ -68,5 +68,5 @@ int main(){
   check_uninit("(a 1 . b)");
   check_uninit("(a b . 1)");
   
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

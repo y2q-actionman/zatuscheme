@@ -12,7 +12,7 @@ using namespace std;
 template<typename T>
 void fail_message(Number::Type t, istream& i, 
                   const Number& n, T expect){
-  RESULT = false;
+  RESULT = EXIT_FAILURE;
 
   string buf;
   std::getline(i, buf);
@@ -59,7 +59,7 @@ void check(const Number& n, int radix, const char* expect){
 
   if(evaled != expect){
     cerr << "[failed] printed " << evaled << ", expected " << expect << "\n";
-    RESULT = false;
+    RESULT = EXIT_FAILURE;
   }
 }
 
@@ -131,5 +131,5 @@ int main(){
   check(Number(-100l), 16, "#x-64");
   check(Number(-100l), 2, "#b-1100100");
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

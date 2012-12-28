@@ -47,7 +47,7 @@ void check_copy_move(const Token& tok){
   return;
 
  error:
-  RESULT = false;
+  RESULT = EXIT_FAILURE;
   cerr << tok << '\n';
   return;
 }
@@ -66,7 +66,7 @@ void fail_message(Token::Type t, istream& f, const Pos& b_pos,
        << ", expected str='" << expect << "'\n"
        << "\tgotten token: " << tok << '\n';
 
-  RESULT = false;
+  RESULT = EXIT_FAILURE;
 }
 
 
@@ -233,5 +233,5 @@ int main(){
     check(ss); // EOF
   }
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

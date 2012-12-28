@@ -1,5 +1,3 @@
-#include <cstdlib>
-
 #include "zs.hh"
 #include "test_util.hh"
 
@@ -35,5 +33,5 @@ int main(){
 
   // testing various syntaxes
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

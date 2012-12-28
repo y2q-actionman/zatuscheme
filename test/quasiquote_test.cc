@@ -1,5 +1,3 @@
-#include <cstdlib>
-
 #include "zs.hh"
 #include "test_util.hh"
 
@@ -22,5 +20,5 @@ int main(){
   check_e("`(,() 1 2 ,() 3)", "(() 1 2 () 3)");
   check_e("`(,@() 1 2 ,() 3)", "(1 2 () 3)");
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

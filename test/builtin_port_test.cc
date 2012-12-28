@@ -109,5 +109,5 @@ int main(){
           "#t");
 
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

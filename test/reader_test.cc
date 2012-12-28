@@ -72,5 +72,5 @@ int main(){
   check_r("`(0,(+ 1 2))", "(quasiquote (0 (unquote (+ 1 2))))");
   check_r("`(0,@(+ 1 2))", "(quasiquote (0 (unquote-splicing (+ 1 2))))");
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

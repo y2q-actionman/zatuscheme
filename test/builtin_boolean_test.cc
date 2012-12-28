@@ -16,5 +16,5 @@ int main(){
   check_e("(boolean? 0)", "#f");
   check_e("(boolean? '())", "#f");
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

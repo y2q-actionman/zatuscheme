@@ -1,5 +1,3 @@
-#include <cstdlib>
-
 #include "zs.hh"
 #include "test_util.hh"
 
@@ -64,5 +62,5 @@ int main(){
           "        (reverse path))))",
           "(connect talk1 disconnect connect talk2 disconnect)");
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

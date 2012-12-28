@@ -72,5 +72,5 @@ int main(){
     check_p(&v2, "#(#(() ()))");
   }
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }

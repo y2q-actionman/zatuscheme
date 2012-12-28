@@ -1,5 +1,3 @@
-#include <cstdlib>
-
 #include "zs.hh"
 #include "test_util.hh"
 
@@ -72,5 +70,5 @@ int main(){
   check_e("(do ((vec (make-vector 5)) (i 0 (+ i 1))) ((= i 5) vec) (vector-set! vec i i))",
           "#(0 1 2 3 4)");
 
-  return (RESULT) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return RESULT;
 }
