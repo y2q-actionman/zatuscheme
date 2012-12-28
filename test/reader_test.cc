@@ -6,8 +6,6 @@
 
 using namespace std;
 
-static bool result = true;
-
 void check(const char* input, const char* expect){
   const auto callback = [input, expect](const char* buf){
     cerr << "[failed] input:" << input << ", expected: " << expect << "\n"

@@ -12,8 +12,6 @@
 
 using namespace std;
 
-static bool result;
-
 template<typename T>
 void check_copy_move(const Token& tok){
   // constructor

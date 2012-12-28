@@ -9,8 +9,6 @@
 
 using namespace std;
 
-static bool result;
-
 template<typename T>
 void fail_message(Number::Type t, istream& i, 
                   const Number& n, T expect){

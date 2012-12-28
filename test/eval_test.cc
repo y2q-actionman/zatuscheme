@@ -5,8 +5,6 @@
 
 using namespace std;
 
-static bool result = true;
-
 template<typename Fun>
 void check(const Fun& fun, const char* expr_s, const char* expect_s = nullptr){
   auto evaled = eval_text(expr_s);

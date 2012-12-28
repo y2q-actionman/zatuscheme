@@ -1,6 +1,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <cstdlib>
 #include "test_util.hh"
 #include "reader.hh"
 #include "eval.hh"
@@ -67,3 +68,12 @@ with_null_stream::~with_null_stream(){
 }
 
 } // namespace test_util_detail
+
+
+int result = true;
+
+int check_e(const char* input, const char* expect){
+  auto ret = read_eval_print_test(input, expect);
+  if(!ret) result = false;
+  return result;
+}

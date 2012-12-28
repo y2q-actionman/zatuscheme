@@ -7,8 +7,6 @@
 using namespace std;
 using namespace Procedure;
 
-static bool result;
-
 void check(Lisp_ptr input, const char* expect){
   const auto callback = [expect](const char* str){
     cerr << "[failed] expected: " << expect << "\n"

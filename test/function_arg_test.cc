@@ -9,8 +9,6 @@
 using namespace std;
 using namespace Procedure;
 
-static bool result = true;
-
 typedef decltype(parse_func_arg({})) ArgT;
 
 bool operator!(const ArgT& a){
