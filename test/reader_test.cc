@@ -1,19 +1,5 @@
-#include <iostream>
-#include <string>
-
 #include "zs.hh"
 #include "test_util.hh"
-
-using namespace std;
-
-void check_undef(const char* input){
-  Lisp_ptr p = read_from_string(input);
-
-  if(p){
-    cerr << "[failed] input:" << input << ", expected: (undefined)\n";
-    result = false;
-  }
-}
 
 int main(){
   // boolean
@@ -40,9 +26,7 @@ int main(){
   check_r("\"\"", "\"\"");
   check_r("\"aaa aaa\"", "\"aaa aaa\"");
   check_r("\"aa\\\\a a\\\"aa\"", "\"aa\\\\a a\\\"aa\"");
-  with_expect_error([]() -> void {
-      check_undef("\" \\ \"");
-    });
+  check_r_undef("\" \\ \"");
 
   // cons, list
   check_r("()", "()");
@@ -53,24 +37,20 @@ int main(){
   check_r("(a (b . c) d e)", "(a (b . c) d e)");
   check_r("(a (b . ()) d e)", "(a (b) d e)");
   check_r("((((((((((a))))))))))", "((((((((((a))))))))))");
-  with_expect_error([]() -> void {
-      check_undef("(a . b c)");
-      check_undef("(. a)");
-      check_undef("((a)");
-      check_undef("(");
-      check_undef(")");
-      check_undef("#(a . b . c)");
-    });
+  check_r_undef("(a . b c)");
+  check_r_undef("(. a)");
+  check_r_undef("((a)");
+  check_r_undef("(");
+  check_r_undef(")");
+  check_r_undef("#(a . b . c)");
 
   // vector
   check_r("#()", "#()");
   check_r("#(a b)", "#(a b)");
   check_r("#(a (b c d) e)", "#(a (b c d) e)");
   check_r("#(a (b #(c) d) e)", "#(a (b #(c) d) e)");
-  with_expect_error([]() -> void {
-      check_undef("#(a . b)");
-      check_undef("#(a . b . c)");
-    });
+  check_r_undef("#(a . b)");
+  check_r_undef("#(a . b . c)");
   check_r("#((#((#(())))))", "#((#((#(())))))");
 
   // reader macros

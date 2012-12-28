@@ -65,6 +65,7 @@ int check_r(const char* input, const char* expect){
   auto r = read_from_string(input);
   if(!r){
     result = false;
+    cerr << "[failed] read error on " << input << "\n";
     return false;
   }
 
@@ -75,6 +76,17 @@ int check_r(const char* input, const char* expect){
 
   auto ret = test_on_print(r, expect, fun);
   if(!ret) result = false;
+  return result;
+}
+
+int check_r_undef(const char* input){
+  with_expect_error([&]() -> void {
+      auto ret = !read_from_string(input);
+      if(!ret){
+        result = false;
+        cerr << "[failed] read:" << input << ", expected: (undefined)\n";
+      }
+    });
   return result;
 }
 
@@ -97,14 +109,20 @@ int check_e(const char* input, const char* expect){
 
 int check_e_success(const char* input){
   auto ret = eval_text(input);
-  if(!ret) result = false;
+  if(!ret){
+    result = false;
+    cerr << "[failed] eval:" << input << ", expected: (success)\n";
+  }
   return result;
 }
 
 int check_e_undef(const char* input){
   with_expect_error([&]() -> void {
       auto ret = !eval_text(input);
-      if(!ret) result = false;
+      if(!ret){
+        result = false;
+        cerr << "[failed] eval:" << input << ", expected: (undefined)\n";
+      }
     });
   return result;
 }

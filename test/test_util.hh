@@ -26,6 +26,9 @@ extern int result;
 // read -> print -> strcmp
 int check_r(const char* input, const char* expect);
 
+// read -> print -> false?
+int check_r_undef(const char*);
+
 // eval -> print -> strcmp
 int check_e(const char* input, const char* expect);
 
