@@ -31,10 +31,6 @@ bool read_eqv(Lisp_ptr input, const char* expect_s){
   return eqv(input, expect);
 }
 
-bool test_true(Lisp_ptr p, const char*){
-  return !!p;
-}
-
 int main(){
   zs_init();
 
@@ -118,12 +114,12 @@ int main(){
 
 
   // function test (basic syntax only)
-  check(test_true, "(define fun (lambda (y) (set! x y) (+ y y)))");
-  check(test_true, "fun");
+  eval_text("(define fun (lambda (y) (set! x y) (+ y y)))");
+  check_e_success("fun");
   check_e("(fun 2)", "4");
   check_e("x", "2");
     
-  check(test_true, "(define (fun2 x) (+ 1 x))");
+  eval_text("(define (fun2 x) (+ 1 x))");
   check_e("(fun2 100)", "101");
 
 

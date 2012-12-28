@@ -1,10 +1,6 @@
 #include "zs.hh"
 #include "test_util.hh"
 
-void check_success(const char* input){
-  result &= !!eval_text(input);
-}
-
 // TODO: if case-insensitivity is supported, define CASE_INSENSITIVE
 
 
@@ -40,7 +36,7 @@ int main(){
   // when immutable string implemented..
   // eval_text("(define (f) (make-string 3 #\\*))");
   // eval_text("(define (g) \"***\")");
-  // check_success("(string-set! (f) 0 #\\?)");
+  // check_e_success("(string-set! (f) 0 #\\?)");
   // check_e_undef("(string-set! (g) 0 #\\?)");
   // check_e_undef("(string-set! (symbol->string 'immutable) 0 #\\?)");
 

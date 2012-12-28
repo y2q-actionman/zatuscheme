@@ -77,6 +77,12 @@ int check_e(const char* input, const char* expect){
   return result;
 }
 
+int check_e_success(const char* input){
+  auto ret = eval_text(input);
+  if(!ret) result = false;
+  return result;
+}
+
 int check_e_undef(const char* input){
   with_expect_error([&]() -> void {
       auto ret = !eval_text(input);

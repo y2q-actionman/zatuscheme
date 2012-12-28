@@ -1,11 +1,6 @@
 #include "zs.hh"
 #include "test_util.hh"
 
-void check_success(const char* input){
-  result &= !!eval_text(input);
-}
-
-
 int main(){
   zs_init();
 
