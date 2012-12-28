@@ -1,52 +1,48 @@
 #include "zs.hh"
 #include "test_util.hh"
 
-void check(const char* input, const char* expect){
-  result &= read_eval_print_test(input, expect);
-}
-
 // TODO: if case-insensitivity is supported, define CASE_INSENSITIVE
 
 
 int main(){
   zs_init();
 
-  check("(symbol? 'foo)", "#t");
-  check("(symbol? (car '(a b)))", "#t");
-  check("(symbol? \"bar\")", "#f");
-  check("(symbol? 'nil)", "#t");
-  check("(symbol? '())", "#f");
-  check("(symbol? #f)", "#f");
+  check_e("(symbol? 'foo)", "#t");
+  check_e("(symbol? (car '(a b)))", "#t");
+  check_e("(symbol? \"bar\")", "#f");
+  check_e("(symbol? 'nil)", "#t");
+  check_e("(symbol? '())", "#f");
+  check_e("(symbol? #f)", "#f");
 
 
-  check("(symbol->string 'flying-fish)", "\"flying-fish\"");
-
-#if CASE_INSENSITIVE
-  check("(symbol->string 'Martin)", "\"martin\"");
-#else
-  check("(symbol->string 'Martin)", "\"Martin\"");
-#endif
-
-  check("(symbol->string (string->symbol \"Malvina\"))", "\"Malvina\"");
-
+  check_e("(symbol->string 'flying-fish)", "\"flying-fish\"");
 
 #if CASE_INSENSITIVE
-  check("(eq? 'mISSISSIppi 'mississippi)", "#t");
+  check_e("(symbol->string 'Martin)", "\"martin\"");
 #else
-  check("(eq? 'mISSISSIppi 'mISSISSIppi)", "#t");
+  check_e("(symbol->string 'Martin)", "\"Martin\"");
 #endif
 
-  check("(string->symbol \"mISSISSIppi\")", "mISSISSIppi");
+  check_e("(symbol->string (string->symbol \"Malvina\"))", "\"Malvina\"");
+
 
 #if CASE_INSENSITIVE
-  check("(eq? 'bitBlt (string->symbol \"bitBlt\"))", "#f");
+  check_e("(eq? 'mISSISSIppi 'mississippi)", "#t");
 #else
-  check("(eq? 'bitBlt (string->symbol \"bitBlt\"))", "#t");
+  check_e("(eq? 'mISSISSIppi 'mISSISSIppi)", "#t");
 #endif
 
-  check("(eq? 'JollyWog (string->symbol (symbol->string 'JollyWog)))", "#t");
+  check_e("(string->symbol \"mISSISSIppi\")", "mISSISSIppi");
 
-  //check("(string=? \"K. Harper, M.D.\" (symbol->string (string->symbol \"K. Harper, M.D.\")))", "#t");
+#if CASE_INSENSITIVE
+  check_e("(eq? 'bitBlt (string->symbol \"bitBlt\"))", "#f");
+#else
+  check_e("(eq? 'bitBlt (string->symbol \"bitBlt\"))", "#t");
+#endif
+
+  check_e("(eq? 'JollyWog (string->symbol (symbol->string 'JollyWog)))", "#t");
+
+  //check_e("(string=? \"K. Harper, M.D.\" (symbol->string (string->symbol \"K. Harper, M.D.\")))", "#t");
   
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

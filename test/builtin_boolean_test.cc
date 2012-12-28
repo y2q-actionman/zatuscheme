@@ -1,24 +1,20 @@
 #include "zs.hh"
 #include "test_util.hh"
 
-void check(const char* input, const char* expect){
-  result &= read_eval_print_test(input, expect);
-}
-
 int main(){
   zs_init();
 
-  check("(not #t)", "#f");
-  check("(not 3)", "#f");
-  check("(not (list 3))", "#f");
-  check("(not #f)", "#t");
-  check("(not '())", "#f");
-  check("(not (list))", "#f");
-  check("(not 'nil)", "#f");
+  check_e("(not #t)", "#f");
+  check_e("(not 3)", "#f");
+  check_e("(not (list 3))", "#f");
+  check_e("(not #f)", "#t");
+  check_e("(not '())", "#f");
+  check_e("(not (list))", "#f");
+  check_e("(not 'nil)", "#f");
 
-  check("(boolean? #f)", "#t");
-  check("(boolean? 0)", "#f");
-  check("(boolean? '())", "#f");
+  check_e("(boolean? #f)", "#t");
+  check_e("(boolean? 0)", "#f");
+  check_e("(boolean? '())", "#f");
 
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
