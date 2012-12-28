@@ -26,6 +26,7 @@ extern int result;
 int check_e(const char* input, const char* expect);
 int check_e_success(const char*);
 int check_e_undef(const char*);
+int check_er(const char* input, const char* expect);
 
 
 #include "test_util.i.hh"

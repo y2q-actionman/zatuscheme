@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include "test_util.hh"
 #include "reader.hh"
+#include "printer.hh"
 #include "eval.hh"
 #include "builtin_util.hh"
 
@@ -91,3 +92,23 @@ int check_e_undef(const char* input){
   return result;
 }
 
+int check_er(const char* input, const char* expect){
+  auto e = eval_text(input);
+  if(!e){
+    result = false;
+    return false;
+  }
+
+  auto r = read_from_string(expect);
+  assert(r);
+
+  auto ret = eqv(e, r);
+  if(!ret){
+    result = false;
+    cerr << "[failed] expected " << expect
+         << ", but got ";
+    print(cerr, e);
+    cerr << " (from: " << input << ")\n";
+  }
+  return result;
+}
