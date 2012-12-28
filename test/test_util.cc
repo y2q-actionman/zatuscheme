@@ -7,6 +7,7 @@
 #include "printer.hh"
 #include "eval.hh"
 #include "builtin_util.hh"
+#include "vm.hh"
 
 using namespace std;
 
@@ -61,45 +62,70 @@ with_null_stream::~with_null_stream(){
 
 int result = true;
 
-int check_p(Lisp_ptr input, const char* expect){
-  const auto callback = [expect](const char* str){
-    cerr << "[failed] expected: " << expect << "\n"
-         << "\treturned: " << str << "\n";
-  };
+struct print_check_error{
+  string result;
+};
 
-  auto ret = test_on_print(input, expect, callback);
-  if(!ret) result = false;
-  return result;
-}
-
-int check_p_success(Lisp_ptr input){
-  stringstream ss;
+static
+void print_check(Lisp_ptr input, const char* expect){
+  std::stringstream ss;
   print(ss, input);
-  return result;
+
+  auto evaled = ss.str();
+
+  if(expect != evaled){
+    result = false;
+    throw print_check_error{evaled};
+  }
 }
 
-int check_r(const char* input, const char* expect){
+bool check_p(Lisp_ptr input, const char* expect){
+  try{
+    print_check(input, expect);
+    return true;
+  }catch(const print_check_error& e){
+    cerr << "[failed] expected: " << expect << "\n"
+         << "\treturned: " << e.result << "\n";
+    result = false;
+    return false;
+  }
+}
+
+bool check_p_success(Lisp_ptr input){
+  stringstream ss;
+  try{
+    print(ss, input);
+    return true;
+  }catch(...){
+    cerr << "[failed] print error: ";
+    print(cerr, input);
+    cerr << "\n";
+    return false;
+  }
+}
+
+bool check_r(const char* input, const char* expect){
   auto r = read_from_string(input);
   if(!r){
-    result = false;
     cerr << "[failed] read error on " << input << "\n";
+    result = false;
     return false;
   }
 
-  const auto fun = [input, expect](const char* buf){
+  try{
+    print_check(r, expect);
+    return true;
+  }catch(const print_check_error& e){
     cerr << "[failed] input:" << input << ", expected: " << expect << "\n"
-         << "\treturned: " << buf << "\n";
+         << "\treturned: " << e.result << "\n";
+    result = false;
+    return false;
   };
-
-  auto ret = test_on_print(r, expect, fun);
-  if(!ret) result = false;
-  return result;
 }
 
-int check_r_undef(const char* input){
+bool check_r_undef(const char* input){
   with_expect_error([&]() -> void {
-      auto ret = !read_from_string(input);
-      if(!ret){
+      if(read_from_string(input)){
         result = false;
         cerr << "[failed] read:" << input << ", expected: (undefined)\n";
       }
@@ -107,36 +133,37 @@ int check_r_undef(const char* input){
   return result;
 }
 
-int check_e(const char* input, const char* expect){
+bool check_e(const char* input, const char* expect){
   auto e = eval_text(input);
   if(!e){
     result = false;
     return false;
   }
 
-  const auto fun = [input, expect](const char* s){
+  try{
+    print_check(e, expect);
+    return true;
+  }catch(const print_check_error& err){
     cerr << "[failed] expected " << expect
-         << ", but got " << s << " (from: " << input << ")\n";
-  };
-
-  auto ret = test_on_print(e, expect, fun);
-  if(!ret) result = false;
-  return result;
-}
-
-int check_e_success(const char* input){
-  auto ret = eval_text(input);
-  if(!ret){
+         << ", but got " << err.result << " (from: " << input << ")\n";
     result = false;
-    cerr << "[failed] eval:" << input << ", expected: (success)\n";
+    return false;
   }
-  return result;
 }
 
-int check_e_undef(const char* input){
+bool check_e_success(const char* input){
+  if(eval_text(input)){
+    return true;
+  }else{
+    cerr << "[failed] eval:" << input << ", expected: (success)\n";
+    result = false;
+    return false;
+  }
+}
+
+bool check_e_undef(const char* input){
   with_expect_error([&]() -> void {
-      auto ret = !eval_text(input);
-      if(!ret){
+      if(eval_text(input)){
         result = false;
         cerr << "[failed] eval:" << input << ", expected: (undefined)\n";
       }
@@ -144,7 +171,7 @@ int check_e_undef(const char* input){
   return result;
 }
 
-int check_er(const char* input, const char* expect){
+bool check_er(const char* input, const char* expect){
   auto e = eval_text(input);
   if(!e){
     result = false;
@@ -157,8 +184,7 @@ int check_er(const char* input, const char* expect){
   auto ret = eqv(e, r);
   if(!ret){
     result = false;
-    cerr << "[failed] expected " << expect
-         << ", but got ";
+    cerr << "[failed] expected " << expect << ", but got ";
     print(cerr, e);
     cerr << " (from: " << input << ")\n";
   }

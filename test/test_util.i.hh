@@ -5,29 +5,8 @@
 #error "Please include via parent file"
 #endif
 
-#include <sstream>
 #include <iostream>
-
-#include "vm.hh"
 #include "util.hh"
-#include "lisp_ptr.hh"
-#include "printer.hh"
-
-
-template<typename Fun>
-bool test_on_print(Lisp_ptr input, const char* expect, Fun&& callback){
-  std::stringstream ss;
-  print(ss, input);
-
-  auto evaled = ss.str();
-
-  if(expect != evaled){
-    callback(evaled.c_str());
-    return false;
-  }
-
-  return true;
-}
 
 namespace test_util_detail {
 
