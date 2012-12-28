@@ -11,11 +11,11 @@ using namespace Procedure;
 
 typedef decltype(parse_func_arg({})) ArgT;
 
-bool operator!(const ArgT& a){
+static bool operator!(const ArgT& a){
   return (a.first < 0);
 }
 
-bool operator!=(const ArgT& a, const ArgT& b){
+static bool operator!=(const ArgT& a, const ArgT& b){
   return (a.first != b.first) || (a.second != b.second);
 }
 
@@ -36,24 +36,24 @@ void check_uninit(const char* input){
   auto p = read_from_string(input);
   assert(p);
 
-  auto argi = parse_func_arg(p);
-  if(!!argi){
-    cerr << "[failed] unexpected succeed: input='" << input << "',"
-         << " arginfo=[" << argi.first << ", " << argi.second << "]\n";
-    result = false;
-  }
+  with_expect_error([&]() -> void {
+      auto argi = parse_func_arg(p);
+      if(!!argi){
+        cerr << "[failed] unexpected succeed: input='" << input << "',"
+             << " arginfo=[" << argi.first << ", " << argi.second << "]\n";
+        result = false;
+      }
+    });
 }
 
 
 int main(){
   // arginfo test
-  with_expect_error([]() -> void {
-      check_uninit("#t");
-      check_uninit("#\\h");
-      check_uninit("100");
-      check_uninit("1.01");
-      check_uninit("#()");
-    });
+  check_uninit("#t");
+  check_uninit("#\\h");
+  check_uninit("100");
+  check_uninit("1.01");
+  check_uninit("#()");
 
   check("()", {0, Variadic::f});
   check("(a)", {1, Variadic::f});
@@ -64,11 +64,9 @@ int main(){
   check("(a b . c)", {2, Variadic::t});
   check("(a b c . d)", {3, Variadic::t});
 
-  with_expect_error([]() -> void {
-      check_uninit("(a 1 b)");
-      check_uninit("(a 1 . b)");
-      check_uninit("(a b . 1)");
-    });
+  check_uninit("(a 1 b)");
+  check_uninit("(a 1 . b)");
+  check_uninit("(a b . 1)");
   
   return (result) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
