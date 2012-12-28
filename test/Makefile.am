@@ -13,9 +13,9 @@ LDADD = $(test_lib)\
 check_PROGRAMS = token_test\
 		parse_number_test\
 		printer_test\
+		function_arg_test\
 		reader_test\
 		eval_test\
-		function_arg_test\
 		enclose_test\
 		quasiquote_test\
 		builtin_boolean_test\
