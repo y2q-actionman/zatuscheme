@@ -124,13 +124,16 @@ bool check_r(const char* input, const char* expect){
 }
 
 bool check_r_undef(const char* input){
-  with_expect_error([&]() -> void {
-      if(read_from_string(input)){
-        result = false;
-        cerr << "[failed] read:" << input << ", expected: (undefined)\n";
-      }
-    });
-  return result;
+  Lisp_ptr ret;
+  with_expect_error([&](){ ret = read_from_string(input); });
+
+  if(!ret){
+    return true;
+  }else{
+    cerr << "[failed] read:" << input << ", expected: (undefined)\n";
+    result = false;
+    return false;
+  }
 }
 
 bool check_e(const char* input, const char* expect){
@@ -162,13 +165,16 @@ bool check_e_success(const char* input){
 }
 
 bool check_e_undef(const char* input){
-  with_expect_error([&]() -> void {
-      if(eval_text(input)){
-        result = false;
-        cerr << "[failed] eval:" << input << ", expected: (undefined)\n";
-      }
-    });
-  return result;
+  Lisp_ptr ret;
+  with_expect_error([&](){ ret = eval_text(input); });
+
+  if(!ret){
+    return true;
+  }else{
+    cerr << "[failed] eval:" << input << ", expected: (undefined)\n";
+    result = false;
+    return false;
+  }
 }
 
 bool check_er(const char* input, const char* expect){
