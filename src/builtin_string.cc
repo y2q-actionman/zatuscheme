@@ -120,7 +120,7 @@ Lisp_ptr string_ref(){
   }
   auto ind = num->get<Number::integer_type>();
 
-  if(ind < 0 || ind >= str->length()){
+  if(ind < 0 || ind >= static_cast<signed>(str->length())){
     throw zs_error("native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
                         str->length(), ind);
   }
@@ -146,7 +146,7 @@ Lisp_ptr string_set(){
   }
   auto ind = num->get<Number::integer_type>();
 
-  if(ind < 0 || ind >= str->length()){
+  if(ind < 0 || ind >= static_cast<signed>(str->length())){
     throw zs_error("native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
                         str->length(), ind);
   }
@@ -225,7 +225,7 @@ Lisp_ptr string_substr(){
   }
 
 
-  if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= str->length())){
+  if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= static_cast<signed>(str->length()))){
     throw zs_error("native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
                         str->length(), ind[0], ind[1]);
   }

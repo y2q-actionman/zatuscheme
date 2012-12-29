@@ -84,6 +84,7 @@ Lisp_ptr whole_function_if(){
 
 static
 Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
+  (void)opname;
   return bind_cons_list_strict
     (p,
      [&](Symbol* var, Lisp_ptr expr) -> Lisp_ptr {

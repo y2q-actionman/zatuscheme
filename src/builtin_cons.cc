@@ -165,7 +165,7 @@ Lisp_ptr cons_append(){
   ZsArgs args;
   GrowList gl;
 
-  for(auto i = 0u; i < args.size() - 1; ++i){
+  for(auto i = 0; i < args.size() - 1; ++i){
     if(args[i].tag() != Ptr_tag::cons){
       throw cons_type_check_failed("append", args[i]);
     }

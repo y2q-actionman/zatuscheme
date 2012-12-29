@@ -76,7 +76,7 @@ Lisp_ptr vector_ref(){
   }
   auto ind = num->get<Number::integer_type>();
 
-  if(ind < 0 || ind >= v->size()){
+  if(ind < 0 || ind >= static_cast<signed>(v->size())){
     throw zs_error("native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
                         v->size(), ind);
   }
@@ -103,7 +103,7 @@ Lisp_ptr vector_set(){
   }
   auto ind = num->get<Number::integer_type>();
 
-  if(ind < 0 || ind >= v->size()){
+  if(ind < 0 || ind >= static_cast<signed>(v->size())){
     throw zs_error("native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
                         v->size(), ind);
   }
