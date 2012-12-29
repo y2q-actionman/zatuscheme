@@ -5,7 +5,7 @@
 
 Lisp_ptr whole_function_error();
 Lisp_ptr whole_function_pass_through();
-Lisp_ptr whole_function_quote();
+Lisp_ptr macro_quote();
 Lisp_ptr whole_function_lambda();
 Lisp_ptr whole_function_if();
 Lisp_ptr whole_function_set();
