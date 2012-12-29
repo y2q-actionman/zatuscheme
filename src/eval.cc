@@ -113,7 +113,6 @@ void macro_call(Lisp_ptr proc){
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
-  vm.code.push_back(vm_op_macro_call);
   proc_enter_entrypoint(proc); // direct jump to proc_enter()
 }
 
@@ -123,7 +122,7 @@ void macro_call(Lisp_ptr proc){
   code = (call kind, proc)
   stack = (whole args, arg-bottom)
 */
-void whole_function_call(Lisp_ptr proc){
+void whole_call(Lisp_ptr proc){
   vm.stack.push_back({Ptr_tag::vm_argcount, 1});
 
   proc_enter_entrypoint(proc); // direct jump to proc_enter()
@@ -151,13 +150,23 @@ void vm_op_call(){
 
   const ProcInfo* info = get_procinfo(proc);
 
+  switch(info->returning){
+  case Returning::pass:
+    break;
+  case Returning::code:
+    vm.code.push_back(vm_op_macro_call);
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
+
   switch(info->passing){
   case Passing::eval:
     return function_call(proc, info);
   case Passing::quote:
     return macro_call(proc);
   case Passing::whole:
-    return whole_function_call(proc);
+    return whole_call(proc);
   default:
     UNEXP_DEFAULT();
   }
@@ -569,7 +578,7 @@ Lisp_ptr let_internal(EarlyBind early_bind){
   }
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
-  function_call(proc, proc->info()); // direct jump!
+  vm.code.insert(vm.code.end(), {vm_op_call, proc});
   return vm_op_nop;
 }
 
