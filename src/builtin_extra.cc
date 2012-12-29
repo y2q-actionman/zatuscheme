@@ -17,7 +17,8 @@ Lisp_ptr to_macro_procedure(){
   }
 
   auto info = *proc->info();
-  info.calling = Calling::macro;
+  info.passing = Passing::quote;
+  info.returning = Returning::code;
 
   return new IProcedure(proc->get(), 
                         info, proc->arg_list(),

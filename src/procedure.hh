@@ -16,13 +16,34 @@ namespace Procedure {
     whole_function
   };
 
+  enum class Passing : unsigned char{
+    eval, quote, whole
+  };
+
+  enum class Returning : unsigned char{
+    pass, code
+  };
+
   enum class Variadic : bool { f = false, t = true };
   enum class EarlyBind : bool { f = false, t = true };
+
+  constexpr Passing to_p(Calling c){
+    return (c == Calling::function) ? Passing::eval
+      : (c == Calling::macro) ? Passing::quote
+      : Passing::whole;
+  }
+
+  constexpr Returning to_r(Calling c){
+    return (c == Calling::function) ? Returning::pass
+      : (c == Calling::macro) ? Returning::code
+      : Returning::pass;
+  }
 
   struct ProcInfo {
     int required_args;
     int max_args;
-    Calling calling;
+    Passing passing;
+    Returning returning;
     EarlyBind early_bind;
 
     constexpr ProcInfo(Calling c,
@@ -31,7 +52,8 @@ namespace Procedure {
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
         max_args(margs),
-        calling(c),
+        passing(to_p(c)),
+        returning(to_r(c)),
         early_bind(e){}
 
     // TODO: use delegating constructor
@@ -41,7 +63,8 @@ namespace Procedure {
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
         max_args((v == Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
-        calling(c),
+        passing(to_p(c)),
+        returning(to_r(c)),
         early_bind(e){}
   };
 
