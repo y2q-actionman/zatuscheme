@@ -93,5 +93,15 @@ int main(){
   check_e("(fun2 100)", "101");
 
 
+  check_e_undef("(fun)");
+  check_e_success("(fun 191)");
+  check_e_undef("(fun 100 101)");
+  check_e_undef("(fun 100 101 102)");
+
+  check_e_undef("(fun2)");
+  check_e_success("(fun2 191)");
+  check_e_undef("(fun2 100 101)");
+  check_e_undef("(fun2 100 101 102)");
+  
   return RESULT;
 }
