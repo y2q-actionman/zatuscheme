@@ -575,8 +575,9 @@ Lisp_ptr let_internal(EarlyBind early_bind){
     vm.local_set(name.get<Symbol*>(), proc);
   }
 
-  vm.code.insert(vm.code.end(), {vm_op_call, proc});
+  vm.code.push_back(vm_op_call);
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
+  function_call(proc, proc->info()); // direct jump!
   return vm_op_nop;
 }
 
