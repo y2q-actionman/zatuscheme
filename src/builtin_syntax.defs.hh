@@ -1,8 +1,8 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"quote", {
-    macro_quote,
-    {1, Variadic::f, Passing::quote}}},
+    whole_function_quote,
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"lambda", {
     whole_function_lambda,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
