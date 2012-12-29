@@ -19,8 +19,6 @@ using namespace Procedure;
 namespace {
 
 void vm_op_proc_enter();
-void proc_enter_entrypoint(Lisp_ptr);
-
 
 /*
   ret = some value
@@ -326,9 +324,8 @@ void proc_enter_cont(Continuation* c){
   }
 }
 
-/*
-  for internal direct 'goto'.
- */
+} //namespace
+
 void proc_enter_entrypoint(Lisp_ptr proc){
   assert(!vm.stack.empty());
   assert(is_procedure(proc));
@@ -342,15 +339,17 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   }
 
   if(auto ifun = proc.get<IProcedure*>()){
-    return proc_enter_interpreted(ifun, info);
+    proc_enter_interpreted(ifun, info);
   }else if(auto nfun = proc.get<const NProcedure*>()){
-    return proc_enter_native(nfun);
+    proc_enter_native(nfun);
   }else if(auto cont = proc.get<Continuation*>()){
-    return proc_enter_cont(cont);
+    proc_enter_cont(cont);
   }else{
     throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
   }
 }
+
+namespace {
  
 /*
   code = (proc)

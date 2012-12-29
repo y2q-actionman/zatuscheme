@@ -18,6 +18,10 @@ Lisp_ptr let_internal(Procedure::EarlyBind);
 
 bool is_self_evaluating(Lisp_ptr);
 
+
+// for internal direct 'goto'.
+void proc_enter_entrypoint(Lisp_ptr);
+
 // main loop
 void eval();
 
