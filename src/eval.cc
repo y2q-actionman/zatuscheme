@@ -75,7 +75,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
-  if(info->early_bind){
+  if(info->early_bind == EarlyBind::t){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
 
@@ -197,7 +197,7 @@ void proc_enter_native(const NProcedure* fun){
   stack = ()
 */
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
-  if(!fun->info()->early_bind){
+  if(fun->info()->early_bind != EarlyBind::t){
     enter_frame(fun);
   }
 

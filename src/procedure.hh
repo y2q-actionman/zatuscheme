@@ -23,7 +23,7 @@ namespace Procedure {
     int required_args;
     int max_args;
     Calling calling;
-    bool early_bind;
+    EarlyBind early_bind;
 
     constexpr ProcInfo(Calling c,
                        int rargs,
@@ -32,7 +32,7 @@ namespace Procedure {
       : required_args(rargs),
         max_args(margs),
         calling(c),
-        early_bind(static_cast<bool>(e)){}
+        early_bind(e){}
 
     // TODO: use delegating constructor
     constexpr ProcInfo(Calling c,
@@ -42,7 +42,7 @@ namespace Procedure {
       : required_args(rargs),
         max_args((v == Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
         calling(c),
-        early_bind(static_cast<bool>(e)){}
+        early_bind(e){}
   };
 
   std::pair<int, Variadic> parse_func_arg(Lisp_ptr);
