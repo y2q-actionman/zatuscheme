@@ -54,6 +54,22 @@ void vm_op_arg_push(){
 */
 void vm_op_call();
 
+static void enter_frame(IProcedure* iproc){
+  // tail call check
+  if(!vm.code.empty()
+     && vm.code.back().get<VMop>() == vm_op_leave_frame){
+    vm_op_leave_frame();
+  }
+
+  auto oldenv = vm.frame();
+  if(auto closure = iproc->closure()){
+    vm.set_frame(closure->push());
+  }else{
+    vm.set_frame(vm.frame()->push());
+  }
+  vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
+}
+
 void function_call(Lisp_ptr proc, const ProcInfo* info){
   assert(vm.code.back().get<VMop>() == vm_op_call);
   vm.code.pop_back();
@@ -65,19 +81,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
 
-    // tail call check
-    if(!vm.code.empty()
-       && vm.code.back().get<VMop>() == vm_op_leave_frame){
-      vm_op_leave_frame();
-    }
-
-    auto oldenv = vm.frame();
-    if(auto closure = iproc->closure()){
-      vm.set_frame(closure->push());
-    }else{
-      vm.set_frame(vm.frame()->push());
-    }
-    vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
+    enter_frame(iproc);
   }
 
   auto args_head = args.get<Cons*>()->cdr(); // skips first symbol
@@ -196,19 +200,7 @@ void proc_enter_native(const NProcedure* fun){
 */
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
   if(!fun->info()->early_bind){
-    // tail call check
-    if(!vm.code.empty()
-       && vm.code.back().get<VMop>() == vm_op_leave_frame){
-      vm_op_leave_frame();
-    }
-
-    auto oldenv = vm.frame();
-    if(auto closure = fun->closure()){
-      vm.set_frame(closure->push());
-    }else{
-      vm.set_frame(vm.frame()->push());
-    }
-    vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
+    enter_frame(fun);
   }
 
   // == processing args ==
