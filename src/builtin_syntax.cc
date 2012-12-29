@@ -184,6 +184,20 @@ Lisp_ptr whole_function_let_star(){
 }
 
 Lisp_ptr whole_function_letrec(){
+  // This heavyly depends on the implementation.
+  //
+  // normal let / funtion call
+  //   1. evaluate args
+  //      when a lambda form occurs, captures outer environment.
+  //   2. enter a new environment.
+  //   3. set args to the environment.
+  // 
+  // early bind
+  //   1. enter a new environment.
+  //   2. evaluate args
+  //      when a lambda form occurs, captures the environment.
+  //      so these lambdas refer the same environment.
+  //   3. set args to the environment.
   return let_internal(EarlyBind::t);
 }
 
