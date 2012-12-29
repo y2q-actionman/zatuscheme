@@ -6,7 +6,7 @@
 #endif
 
 #include <iostream>
-#include "util.hh"
+#include "zs_error.hh"
 
 namespace test_util_detail {
 

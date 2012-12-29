@@ -6,7 +6,7 @@
 #include "vm.hh"
 #include "eval.hh"
 #include "builtin_util.hh"
-#include "util.hh"
+#include "zs_error.hh"
 #include "procedure.hh"
 #include "printer.hh"
 #include "delay.hh"
@@ -20,7 +20,7 @@ Lisp_ptr whole_function_error(){
   auto sym = wargs[0].get<Cons*>()->car().get<Symbol*>();
   assert(sym);
 
-  throw make_zs_error("eval error: '%s' -- cannot be used as operator!!\n",
+  throw zs_error("eval error: '%s' -- cannot be used as operator!!\n",
                       sym->name().c_str());
 }
 
@@ -338,7 +338,7 @@ Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
     new_keys = case_keys_expand(sym, keys_lst);
   }else if(auto keys_sym = keys_ptr.get<Symbol*>()){
     if(keys_sym->name() != "else"){
-      throw make_zs_error("macro case: informal clause key symbol: %s\n", keys_sym->name().c_str());
+      throw zs_error("macro case: informal clause key symbol: %s\n", keys_sym->name().c_str());
     }else{
       new_keys = keys_ptr;
     }

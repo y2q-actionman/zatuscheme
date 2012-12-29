@@ -1,7 +1,6 @@
 #include "cons_util.hh"
 #include "lisp_ptr.hh"
 #include "cons.hh"
-#include "util.hh"
 
 #include <cassert>
 
@@ -68,7 +67,7 @@ ConsIter ConsIter::operator++(int){
 
 
 static zs_error make_cons_iter_error(Lisp_ptr p){
-  return make_zs_error("cons list error: dot-list appeared for a proper-list procedure (%s appeared)\n",
+  return zs_error("cons list error: dot-list appeared for a proper-list procedure (%s appeared)\n",
                        stringify(p.tag()));
 }
 

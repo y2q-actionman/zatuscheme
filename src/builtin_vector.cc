@@ -4,14 +4,14 @@
 #include "builtin_util.hh"
 #include "number.hh"
 #include "eval.hh"
-#include "util.hh"
+#include "zs_error.hh"
 
 using namespace std;
 
 namespace {
 
 zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
-  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+  return zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::vector), stringify(p.tag()));
 }
 
@@ -26,7 +26,7 @@ Lisp_ptr vector_make(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw make_zs_error("native func: make-vector: arg's number is not %s! (%s)\n",
+    throw zs_error("native func: make-vector: arg's number is not %s! (%s)\n",
                         stringify(Number::Type::integer), stringify(num->type()));
   }
   auto count = num->get<Number::integer_type>();
@@ -71,13 +71,13 @@ Lisp_ptr vector_ref(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw make_zs_error("native func: vector-ref: arg's number is not %s! (%s)\n",
+    throw zs_error("native func: vector-ref: arg's number is not %s! (%s)\n",
                         stringify(Number::Type::integer), stringify(num->type()));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= v->size()){
-    throw make_zs_error("native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
+    throw zs_error("native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
                         v->size(), ind);
   }
 
@@ -98,13 +98,13 @@ Lisp_ptr vector_set(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw make_zs_error("native func: vector-set!: arg's number is not %s! (%s)\n",
+    throw zs_error("native func: vector-set!: arg's number is not %s! (%s)\n",
                         stringify(Number::Type::integer), stringify(num->type()));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= v->size()){
-    throw make_zs_error("native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
+    throw zs_error("native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
                         v->size(), ind);
   }
 

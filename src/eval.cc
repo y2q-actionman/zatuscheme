@@ -4,7 +4,7 @@
 
 #include "vm.hh"
 #include "eval.hh"
-#include "util.hh"
+#include "zs_error.hh"
 #include "symbol.hh"
 #include "cons.hh"
 #include "cons_util.hh"
@@ -150,7 +150,7 @@ void vm_op_call(){
     vm.code.pop_back();
     vm.stack.pop_back();
 
-    throw make_zs_error("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
+    throw zs_error("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
                         stringify(proc.tag()));
   }
 
@@ -525,7 +525,7 @@ Lisp_ptr let_internal(EarlyBind early_bind){
 
     auto arg = arg_c->cdr();
     if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-      throw make_zs_error("eval error: informal LET syntax -- (LET . <%s>).\n",
+      throw zs_error("eval error: informal LET syntax -- (LET . <%s>).\n",
                           (nullp(arg)) ? "nil" : stringify(arg.tag()));
     }
     arg_c = arg.get<Cons*>();
@@ -536,7 +536,7 @@ Lisp_ptr let_internal(EarlyBind early_bind){
 
       arg = arg_c->cdr();
       if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-        throw make_zs_error("eval error: informal LET syntax -- (LET <name> . <%s>).\n",
+        throw zs_error("eval error: informal LET syntax -- (LET <name> . <%s>).\n",
                             (nullp(arg)) ? "nil" : stringify(arg.tag()));
       }
     
@@ -554,7 +554,7 @@ Lisp_ptr let_internal(EarlyBind early_bind){
     // parses binding list
     for(auto bind : binds){
       if(bind.tag() != Ptr_tag::cons){
-        throw make_zs_error("eval error: informal object (%s) found in let binding.\n",
+        throw zs_error("eval error: informal object (%s) found in let binding.\n",
                             stringify(bind.tag()));
       }
 
@@ -650,7 +650,7 @@ void eval(){
         throw zs_error("eval internal error: vm-argcount is rest on VM code stack!\n");
 
       default:
-        throw make_zs_error("eval error: unknown object appeared! (tag = %d)!\n",
+        throw zs_error("eval error: unknown object appeared! (tag = %d)!\n",
                             static_cast<int>(p.tag()));
       }
     }
@@ -675,7 +675,7 @@ Lisp_ptr apply_func(){
   stack_to_vector(vm.stack, args);
 
   if(!is_procedure(args[0])){
-    throw make_zs_error("apply error: first arg is not procedure (%s)\n",
+    throw zs_error("apply error: first arg is not procedure (%s)\n",
                         stringify(args[0].tag()));
   }
 
@@ -724,18 +724,18 @@ Lisp_ptr call_with_values(){
     ZsArgs args{2};
 
     if(!is_procedure(args[0])){
-      throw make_zs_error("call-with-values error: first arg is not procedure (%s)\n",
+      throw zs_error("call-with-values error: first arg is not procedure (%s)\n",
                           stringify(args[0].tag()));
     }
 
     auto info = get_procinfo(args[0]);
     if(info->required_args != 0){
-      throw make_zs_error("call-with-values error: first arg takes 1 or more args (%d)\n",
+      throw zs_error("call-with-values error: first arg takes 1 or more args (%d)\n",
                           info->required_args);
     }    
 
     if(!is_procedure(args[1])){
-      throw make_zs_error("call-with-values error: second arg is not procedure (%s)\n",
+      throw zs_error("call-with-values error: second arg is not procedure (%s)\n",
                           stringify(args[1].tag()));
     }
     
@@ -757,13 +757,13 @@ Lisp_ptr call_cc(){
     ZsArgs args{1};
 
     if(!is_procedure(args[0])){
-      throw make_zs_error("call/cc error: first arg is not procedure (%s)\n",
+      throw zs_error("call/cc error: first arg is not procedure (%s)\n",
                           stringify(args[0].tag()));
     }
 
     auto info = get_procinfo(args[0]);
     if(info->required_args != 1){
-      throw make_zs_error("call/cc error: first arg mush take 1 arg (%d)\n",
+      throw zs_error("call/cc error: first arg mush take 1 arg (%d)\n",
                           info->required_args);
     }
     proc = args[0];
@@ -802,13 +802,13 @@ Lisp_ptr dynamic_wind(){
 
     for(auto p : args){
       if(!is_procedure(p)){
-        throw make_zs_error("error: dynamic-wind: arg is not procedure (%s)\n",
+        throw zs_error("error: dynamic-wind: arg is not procedure (%s)\n",
                             stringify(p.tag()));
       }
 
       auto info = get_procinfo(p);
       if(info->required_args != 0){
-        throw make_zs_error("error: dynamic-wind: first arg mush take 0 arg (%d)\n",
+        throw zs_error("error: dynamic-wind: first arg mush take 0 arg (%d)\n",
                             info->required_args);
       }
 

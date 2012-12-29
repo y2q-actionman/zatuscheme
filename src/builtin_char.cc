@@ -6,14 +6,14 @@
 #include "vm.hh"
 #include "builtin_util.hh"
 #include "number.hh"
-#include "util.hh"
+#include "zs_error.hh"
 
 using namespace std;
 
 namespace {
 
 zs_error char_type_check_failed(const char* func_name, Lisp_ptr p){
-  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+  return zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::character), stringify(p.tag()));
 }
 
@@ -145,7 +145,7 @@ Lisp_ptr char_from_int(){
     throw builtin_type_check_failed("integer->char", Ptr_tag::number, args[0]);
   }
   if(n->type() != Number::Type::integer){
-    throw make_zs_error("native func: integer->char: passed arg is not exact integer! (%s)",
+    throw zs_error("native func: integer->char: passed arg is not exact integer! (%s)",
                         stringify(n->type()));
   }
 

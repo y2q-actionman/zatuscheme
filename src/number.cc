@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 #include "number.hh"
-#include "util.hh"
+#include "zs_error.hh"
 
 using namespace std;
 
@@ -84,7 +84,7 @@ PrefixValue parse_number_prefix(istream& f){
     switch(c = f.get()){
     case 'i': case 'e':
       if(e_appeared){
-        throw make_zs_error("reader error: duplicated number prefix appeared (%c)\n", c);
+        throw zs_error("reader error: duplicated number prefix appeared (%c)\n", c);
       }
       e_appeared = true;
       e = (c == 'i') ? Exactness::inexact 
@@ -92,7 +92,7 @@ PrefixValue parse_number_prefix(istream& f){
       break;
     case 'b': case 'o': case 'd': case 'x':
       if(r_appeared){
-        throw make_zs_error("reader error: duplicated number prefix appeared (%c)\n", c);
+        throw zs_error("reader error: duplicated number prefix appeared (%c)\n", c);
       }
       r_appeared = true;
       r = (c == 'b') ? 2
@@ -101,7 +101,7 @@ PrefixValue parse_number_prefix(istream& f){
         : 10;
       break;
     default:
-      throw make_zs_error("reader error: unknown number prefix '%c' appeared!\n", c);
+      throw zs_error("reader error: unknown number prefix '%c' appeared!\n", c);
     }
   }  
   
@@ -184,7 +184,7 @@ Number::integer_type zs_stol(int radix, const string& s){
   try{
     return std::stol(s, nullptr, radix);
   }catch(const std::logic_error& err){
-    throw make_zs_error("reader error: reading integer failed: %s\n", err.what());
+    throw zs_error("reader error: reading integer failed: %s\n", err.what());
   }
 }
 
@@ -275,7 +275,7 @@ Number::real_type zs_stof(istream& f, string s){
   try{
     return std::stod(s, nullptr);
   }catch(const std::logic_error& err){
-    throw make_zs_error("reader error: reading floating point number failed: %s\n", err.what());
+    throw zs_error("reader error: reading floating point number failed: %s\n", err.what());
   }
 }
 
@@ -300,7 +300,7 @@ ParserRet parse_real_number(int radix, istream& f){
 
   if((c == '.') || (!digit_chars.first.empty() && check_decimal_suffix(c))){
     if(radix != 10){
-      throw make_zs_error("reader error: non-decimal float is not supported. (radix %d)\n", radix);
+      throw zs_error("reader error: non-decimal float is not supported. (radix %d)\n", radix);
     }
 
     // decimal float

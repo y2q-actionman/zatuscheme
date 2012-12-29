@@ -98,7 +98,7 @@ Lisp_ptr get_arg_list(Lisp_ptr p){
   case Ptr_tag::env:
   case Ptr_tag::delay:     case Ptr_tag::vm_op:
   case Ptr_tag::vm_argcount:
-    throw make_zs_error("internal error: internal funcion '%s' called for '%s' object\n",
+    throw zs_error("internal error: internal funcion '%s' called for '%s' object\n",
                         __func__, stringify(p.tag()));
 
   default:

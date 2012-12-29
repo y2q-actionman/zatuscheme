@@ -5,7 +5,7 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "procedure.hh"
-#include "util.hh"
+#include "zs_error.hh"
 
 template<bool dot_list, typename StackT>
 Lisp_ptr stack_to_list(StackT&);

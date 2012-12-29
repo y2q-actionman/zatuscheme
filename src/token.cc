@@ -1,6 +1,6 @@
 #include <istream>
 #include "token.hh"
-#include "util.hh"
+#include "zs_error.hh"
 
 using namespace std;
 
@@ -258,7 +258,7 @@ Token tokenize_string(istream& f){
         s.push_back(c);
         break;
       default:
-        throw make_zs_error("reader error: unknown string escape '%c' appeared.\n", c);
+        throw zs_error("reader error: unknown string escape '%c' appeared.\n", c);
       }
       break;
     default:
@@ -321,7 +321,7 @@ Token tokenize(istream& f){
     case 3:
       return Token{"...", Token::Type::identifier};
     default:
-      throw make_zs_error("reader error: %d dots appeared.\n", dots);
+      throw zs_error("reader error: %d dots appeared.\n", dots);
     }
   }
 
@@ -362,7 +362,7 @@ Token tokenize(istream& f){
 
       throw zs_error("reader error: '#<...>' appeared ('not printable object' in this implementation.)\n");
     default:
-      throw make_zs_error("reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
+      throw zs_error("reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
     }
 
   case EOF:
@@ -375,7 +375,7 @@ Token tokenize(istream& f){
       f.unget();
       return tokenize_number(f);
     }else{
-      throw make_zs_error("reader error: invalid char '%c' appeared.\n", c);
+      throw zs_error("reader error: invalid char '%c' appeared.\n", c);
     }
   }
 }

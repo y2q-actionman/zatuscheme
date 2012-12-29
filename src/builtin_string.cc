@@ -11,14 +11,14 @@
 #include "builtin_util.hh"
 #include "number.hh"
 #include "eval.hh"
-#include "util.hh"
+#include "zs_error.hh"
 
 using namespace std;
 
 namespace {
 
 zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
-  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+  return zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::string), stringify(p.tag()));
 }
 
@@ -56,7 +56,7 @@ Lisp_ptr string_make(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw make_zs_error("native func: make-string: arg's number is not %s! (%s)\n",
+    throw zs_error("native func: make-string: arg's number is not %s! (%s)\n",
                         stringify(Number::Type::integer), stringify(num->type()));
   }
   auto char_count = num->get<Number::integer_type>();
@@ -115,13 +115,13 @@ Lisp_ptr string_ref(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw make_zs_error("native func: string-ref: arg's number is not %s! (%s)\n",
+    throw zs_error("native func: string-ref: arg's number is not %s! (%s)\n",
                         stringify(Number::Type::integer), stringify(num->type()));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= str->length()){
-    throw make_zs_error("native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
+    throw zs_error("native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
                         str->length(), ind);
   }
 
@@ -141,13 +141,13 @@ Lisp_ptr string_set(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw make_zs_error("native func: string-set!: arg's number is not %s! (%s)\n",
+    throw zs_error("native func: string-set!: arg's number is not %s! (%s)\n",
                         stringify(Number::Type::integer), stringify(num->type()));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= str->length()){
-    throw make_zs_error("native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
+    throw zs_error("native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
                         str->length(), ind);
   }
 
@@ -218,7 +218,7 @@ Lisp_ptr string_substr(){
     }
 
     if(n->type() != Number::Type::integer){
-      throw make_zs_error("native func: substring: arg's number is not %s! (%s)\n",
+      throw zs_error("native func: substring: arg's number is not %s! (%s)\n",
                           stringify(Number::Type::integer), stringify(n->type()));
     }
     ind[i-1] = n->get<Number::integer_type>();
@@ -226,7 +226,7 @@ Lisp_ptr string_substr(){
 
 
   if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= str->length())){
-    throw make_zs_error("native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
+    throw zs_error("native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
                         str->length(), ind[0], ind[1]);
   }
 

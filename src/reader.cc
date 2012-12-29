@@ -4,7 +4,7 @@
 
 #include "reader.hh"
 #include "vm.hh"
-#include "util.hh"
+#include "zs_error.hh"
 #include "lisp_ptr.hh"
 #include "token.hh"
 #include "number.hh"
@@ -129,19 +129,19 @@ Lisp_ptr read_la(istream& f, Token&& tok){
       
     case Token::Notation::l_bracket:
     case Token::Notation::l_brace:
-      throw make_zs_error("reader error: not supported notation! (type=%s)\n",
+      throw zs_error("reader error: not supported notation! (type=%s)\n",
                           stringify(n));
 
     case Token::Notation::r_paren:
     case Token::Notation::r_bracket:
     case Token::Notation::r_brace:
-      throw make_zs_error("reader error: closing notation appeared alone! (type=%s)\n",
+      throw zs_error("reader error: closing notation appeared alone! (type=%s)\n",
                           stringify(n));
 
     case Token::Notation::dot:
     case Token::Notation::bar:
     default:
-      throw make_zs_error("reader error: unexpected notation was passed! (type=%s)\n",
+      throw zs_error("reader error: unexpected notation was passed! (type=%s)\n",
                           stringify(n));
     }
 

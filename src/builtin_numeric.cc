@@ -12,7 +12,7 @@
 #include "builtin_numeric.hh"
 #include "vm.hh"
 #include "builtin.hh"
-#include "util.hh"
+#include "zs_error.hh"
 #include "number.hh"
 #include "lisp_ptr.hh"
 #include "eval.hh"
@@ -25,7 +25,7 @@ using namespace std;
 namespace {
 
 zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
-  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+  return zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::number), stringify(p.tag()));
 }
 
@@ -271,7 +271,7 @@ Lisp_ptr number_divop(const char* name, Fun&& fun){
       throw number_type_check_failed(name, args[i]);
     }
     if(n[i]->type() != Number::Type::integer){
-      throw make_zs_error("native func: %s: not integer type (%s)",
+      throw zs_error("native func: %s: not integer type (%s)",
                           name, stringify(n[i]->type()));
     }
   }
@@ -951,7 +951,7 @@ Lisp_ptr number_from_string(){
 
   auto str = args[0].get<String*>();
   if(!str){
-    throw make_zs_error("native func: string->number: passed arg is not string (%s).\n",
+    throw zs_error("native func: string->number: passed arg is not string (%s).\n",
                         stringify(args[0].tag()));
   }
 
@@ -964,11 +964,11 @@ Lisp_ptr number_from_string(){
   case 2: {
     auto num = args[1].get<Number*>();
     if(!num){
-      throw make_zs_error("native func: string->number: passed radix is not number (%s).\n",
+      throw zs_error("native func: string->number: passed radix is not number (%s).\n",
                           stringify(args[1].tag()));
     }
     if(num->type() != Number::Type::integer){
-      throw make_zs_error("native func: string->number: passed radix is not number (%s).\n",
+      throw zs_error("native func: string->number: passed radix is not number (%s).\n",
                           stringify(args[1].tag()));
     }
     radix = num->get<Number::integer_type>();
@@ -987,7 +987,7 @@ Lisp_ptr number_to_string(){
 
   auto n = args[0].get<Number*>();
   if(!n){
-    throw make_zs_error("native func: number->string: passed arg is not number (%s).\n",
+    throw zs_error("native func: number->string: passed arg is not number (%s).\n",
                         stringify(args[0].tag()));
   }
 
@@ -1000,11 +1000,11 @@ Lisp_ptr number_to_string(){
   case 2: {
     auto num = args[1].get<Number*>();
     if(!num){
-      throw make_zs_error("native func: number->string: passed radix is not number (%s).\n",
+      throw zs_error("native func: number->string: passed radix is not number (%s).\n",
                           stringify(args[1].tag()));
     }
     if(num->type() != Number::Type::integer){
-      throw make_zs_error("native func: number->string: passed radix is not number (%s).\n",
+      throw zs_error("native func: number->string: passed radix is not number (%s).\n",
                           stringify(args[1].tag()));
     }
     radix = num->get<Number::integer_type>();

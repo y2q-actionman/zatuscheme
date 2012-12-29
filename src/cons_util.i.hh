@@ -8,7 +8,7 @@
 #include <utility>
 #include <algorithm>
 #include <type_traits>
-#include "util.hh"
+#include "zs_error.hh"
 
 inline
 bool nullp(Lisp_ptr p){
@@ -129,7 +129,7 @@ struct typed_destruct<mode, F_Arg1, F_Args...>{
     -> decltype(NextF()(b, e, f, args..., F_Arg1()))
   {
     if(is_strict(mode) && (b == e)){
-      throw make_zs_error("eval internal error: cons list is shorter(%lu) than expected(%lu)\n",
+      throw zs_error("eval internal error: cons list is shorter(%lu) than expected(%lu)\n",
                           sizeof...(Args),
                           sizeof...(F_Args) + 1 + sizeof...(Args));
     }
@@ -159,7 +159,7 @@ struct typed_destruct<mode>{
     -> decltype(f(args...))
   {
     if((mode == typed_destruct_mode::strict) && (b != e)){
-      throw make_zs_error("eval internal error: cons list is longer than expected(%lu)\n",
+      throw zs_error("eval internal error: cons list is longer than expected(%lu)\n",
                           sizeof...(Args));
     }
 
@@ -283,14 +283,14 @@ std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr p){
 
   for(auto it = begin(p), e_it = end(p); it != e_it; ++it){
     if(i >= size)
-      throw make_zs_error("passed list is longer than expected size (%d)\n", size);
+      throw zs_error("passed list is longer than expected size (%d)\n", size);
 
     ret[i] = *it;
     ++i;
   }
   
   if(i != size)
-    throw make_zs_error("passed list is shorter than expected size (%d)\n", size);
+    throw zs_error("passed list is shorter than expected size (%d)\n", size);
 
   return ret;
 }

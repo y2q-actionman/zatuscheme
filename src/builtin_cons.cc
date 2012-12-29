@@ -9,14 +9,14 @@
 #include "cons_util.hh"
 #include "number.hh"
 #include "printer.hh"
-#include "util.hh"
+#include "zs_error.hh"
 
 using namespace std;
 
 namespace {
 
 zs_error cons_type_check_failed(const char* func_name, Lisp_ptr p){
-  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+  return zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(Ptr_tag::cons), stringify(p.tag()));
 }
 
@@ -30,7 +30,7 @@ Lisp_ptr cons_carcdr(const char* name, Fun&& fun){
 
   auto c = args[0].get<Cons*>();
   if(!c){
-    throw make_zs_error("native func: %s: arg is null list!\n", name);
+    throw zs_error("native func: %s: arg is null list!\n", name);
   }
     
   return fun(c);
@@ -46,7 +46,7 @@ Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
   
   auto c = args[0].get<Cons*>();
   if(!c){
-    throw make_zs_error("native func: %s: arg is null list!\n", name);
+    throw zs_error("native func: %s: arg is null list!\n", name);
   }
   
   return fun(c, args[1]);
@@ -60,7 +60,7 @@ Cons* cons_list_tail_base(const char* name){
   
   auto num = args[1].get<Number*>();
   if(!num || num->type() != Number::Type::integer){
-    throw make_zs_error("native func: %s: passed radix is not number (%s).\n",
+    throw zs_error("native func: %s: passed radix is not number (%s).\n",
                         name, stringify(args[1].tag()));
   }
   auto nth = num->get<Number::integer_type>();
@@ -72,7 +72,7 @@ Cons* cons_list_tail_base(const char* name){
     --nth;
   }
 
-  throw make_zs_error("native func: %s: passed list is shorter than expected (%ld).\n",
+  throw zs_error("native func: %s: passed list is shorter than expected (%ld).\n",
                       name, num->get<Number::integer_type>());
 }
 

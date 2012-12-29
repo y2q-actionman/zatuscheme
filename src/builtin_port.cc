@@ -9,7 +9,7 @@
 #include "port.hh"
 #include "reader.hh"
 #include "printer.hh"
-#include "util.hh"
+#include "zs_error.hh"
 #include "builtin_util.hh"
 
 using namespace std;
@@ -18,7 +18,7 @@ namespace {
 
 template<typename T>
 zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
-  return make_zs_error("native func: %s: arg is not %s! (%s)\n",
+  return zs_error("native func: %s: arg is not %s! (%s)\n",
                        func_name, stringify(to_tag<Ptr_tag, T*>()), stringify(p.tag()));
 }
 
@@ -32,7 +32,7 @@ Lisp_ptr port_open_file(const char* name){
 
   IOType* p = new F_IOType(str->c_str());
   if(!*p){
-    throw make_zs_error("native error: %s: failed at opening file\n", name);
+    throw zs_error("native error: %s: failed at opening file\n", name);
   }
   
   return {p};

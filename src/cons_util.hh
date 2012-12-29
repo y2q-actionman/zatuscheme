@@ -3,7 +3,7 @@
 
 #include <initializer_list>
 #include <iterator>
-#include <array>
+// #include <array>
 #include "cons.hh"
 
 inline bool nullp(Lisp_ptr);

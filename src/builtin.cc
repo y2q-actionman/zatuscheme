@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "builtin.hh"
-#include "util.hh"
+#include "zs_error.hh"
 #include "number.hh"
 #include "procedure.hh"
 #include "lisp_ptr.hh"
@@ -46,12 +46,12 @@ Lisp_ptr env_pick_2(const char* name){
   }
 
   if(num->type() != Number::Type::integer){
-    throw make_zs_error("native func: %s: passed number is not exact integer\n", name);
+    throw zs_error("native func: %s: passed number is not exact integer\n", name);
   }
 
   auto ver = num->get<Number::integer_type>();
   if(ver != 5l){
-    throw make_zs_error("native func: %s: passed number is not 5 (supplied %ld)\n",
+    throw zs_error("native func: %s: passed number is not 5 (supplied %ld)\n",
                         name, ver);
   }
 
