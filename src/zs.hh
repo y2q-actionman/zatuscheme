@@ -31,6 +31,7 @@
 #include "token.hh"
 #include "util.hh"
 #include "vm.hh"
+#include "zs_error.hh"
 
 void zs_init();
 
