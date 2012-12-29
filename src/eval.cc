@@ -570,7 +570,8 @@ Lisp_ptr let_internal(EarlyBind early_bind){
   }
 
   auto proc = new IProcedure(body, 
-                             {Calling::function, len, Variadic::f, early_bind},
+                             {len, Variadic::f,
+                                 Passing::eval, Returning::pass, early_bind},
                              gl_syms.extract(), vm.frame());
 
   if(name){

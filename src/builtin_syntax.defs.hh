@@ -2,64 +2,64 @@
 
 {"quote", {
     whole_function_quote,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"lambda", {
     whole_function_lambda,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"if", {
     whole_function_if,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"set!", {
     whole_function_set,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"define", {
     whole_function_define,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"begin", {
     whole_function_begin,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 
 {"cond", {
     whole_cond,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"case", {
     whole_case,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"and", {
     whole_and,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"or", {
     whole_or,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"let", {
     whole_function_let,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"let*", {
     whole_function_let_star,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"letrec", {
     whole_function_letrec,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"do", {
     whole_do,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"delay", {
     macro_delay,
-    {Calling::macro, 1}}},
+    {1, Variadic::f, Passing::quote, Returning::code}}},
 
 {"quasiquote", {
     whole_function_quasiquote,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"unquote", {
     whole_function_pass_through,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"unquote-splicing", {
     whole_function_error,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 
 {"else", {
     whole_function_error,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"=>", {
     whole_function_error,
-    {Calling::whole_function, 1}}},
+    {1, Variadic::f, Passing::whole, Returning::pass}}},

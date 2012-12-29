@@ -113,21 +113,21 @@ static const BuiltinFunc builtin_syntax_funcs[] = {
 static const BuiltinFunc builtin_funcs[] = {
   {"eval", {
       eval_func,
-      {Calling::function, 2}}},
+      {2}}},
 
   {"scheme-report-environment", {
       env_r5rs,
-      {Calling::function, 1}}},
+      {1}}},
   {"null-environment", {
       env_null,
-      {Calling::function, 1}}},
+      {1}}},
   {"interaction-environment", {
       env_interactive,
-      {Calling::function, 0}}},
+      {0}}},
 
   {"load", {
       load_func,
-      {Calling::function, 1}}},
+      {1}}},
 
 #include "builtin_boolean.defs.hh"
 #include "builtin_char.defs.hh"

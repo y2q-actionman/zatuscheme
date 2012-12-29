@@ -10,12 +10,6 @@
 namespace Procedure {
   typedef Lisp_ptr(*NativeFunc)();
 
-  enum class Calling : unsigned char{
-    function,
-    macro,
-    whole_function
-  };
-
   enum class Passing : unsigned char{
     eval, quote, whole
   };
@@ -27,18 +21,6 @@ namespace Procedure {
   enum class Variadic : bool { f = false, t = true };
   enum class EarlyBind : bool { f = false, t = true };
 
-  constexpr Passing to_p(Calling c){
-    return (c == Calling::function) ? Passing::eval
-      : (c == Calling::macro) ? Passing::quote
-      : Passing::whole;
-  }
-
-  constexpr Returning to_r(Calling c){
-    return (c == Calling::function) ? Returning::pass
-      : (c == Calling::macro) ? Returning::code
-      : Returning::pass;
-  }
-
   struct ProcInfo {
     int required_args;
     int max_args;
@@ -46,25 +28,27 @@ namespace Procedure {
     Returning returning;
     EarlyBind early_bind;
 
-    constexpr ProcInfo(Calling c,
-                       int rargs,
+    constexpr ProcInfo(int rargs,
                        int margs,
+                       Passing p = Passing::eval,
+                       Returning r = Returning::pass,
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
         max_args(margs),
-        passing(to_p(c)),
-        returning(to_r(c)),
+        passing(p),
+        returning(r),
         early_bind(e){}
 
     // TODO: use delegating constructor
-    constexpr ProcInfo(Calling c,
-                       int rargs,
-                       Variadic v = Variadic::t,
+    constexpr ProcInfo(int rargs,
+                       Variadic v = Variadic::f,
+                       Passing p = Passing::eval,
+                       Returning r = Returning::pass,
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
         max_args((v == Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
-        passing(to_p(c)),
-        returning(to_r(c)),
+        passing(p),
+        returning(r),
         early_bind(e){}
   };
 
@@ -145,7 +129,7 @@ namespace Procedure {
     { return vm_; }
 
   private:
-    static constexpr ProcInfo cont_procinfo = ProcInfo{Calling::function, 1, Variadic::t};
+    static constexpr ProcInfo cont_procinfo = ProcInfo{1, Variadic::t};
     const VM vm_;
   };
 
@@ -154,8 +138,6 @@ namespace Procedure {
   Lisp_ptr get_arg_list(Lisp_ptr);
 
 } // namespace Procedure
-
-const char* stringify(Procedure::Calling);
 
 #include "procedure.i.hh"
 

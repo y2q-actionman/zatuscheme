@@ -107,19 +107,3 @@ Lisp_ptr get_arg_list(Lisp_ptr p){
 }
 
 } // namespace Procedure
-
-
-using namespace Procedure;
-
-const char* stringify(Calling c){
-  switch(c){
-  case Calling::function:
-    return "function";
-  case Calling::macro:
-    return "macro";
-  case Calling::whole_function:
-    return "whole_function";
-  default:
-    return "(unknown calling type)";
-  }
-}

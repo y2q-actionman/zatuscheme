@@ -51,7 +51,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   }
   
   return new IProcedure(code, 
-                        {Calling::function, arg_info.first, arg_info.second},
+                        {arg_info.first, arg_info.second},
                         args, vm.frame());
 }
 
@@ -535,7 +535,7 @@ Lisp_ptr whole_function_quasiquote(){
   const auto unquote_splicing_sym = intern(vm.symtable(), "unquote-splicing");
 
   static const Procedure::NProcedure splicing_nproc{
-    function_splicing, {Calling::function, 1}
+    function_splicing, {1}
   };
 
   GrowList gl;

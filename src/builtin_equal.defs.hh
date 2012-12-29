@@ -2,10 +2,10 @@
 
 {"eq?", {
     eq,
-    {Calling::function, 2}}},
+    {2}}},
 {"eqv?", {
     eqv,
-    {Calling::function, 2}}},
+    {2}}},
 {"equal?", {
     equal,
-    {Calling::function, 2}}},
+    {2}}},
