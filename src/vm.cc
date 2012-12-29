@@ -57,7 +57,7 @@ std::ostream& operator<<(std::ostream& f, const VM& v){
 
   f << "--- [return value] ---\n";
   for(auto i = v.return_value.begin(), e = v.return_value.end(); i != e; ++i){
-    f << '[' << v.return_value.size() << "[ ";
+    f << '[' << v.return_value.size() << "] ";
     print(f, *i);
     if(next(i) != e) f << ", ";
   }
@@ -75,11 +75,11 @@ std::ostream& operator<<(std::ostream& f, const VM& v){
     }
   }
 
-  f << "--- [env] ---\n";
-  f << *v.frame_;
+  // f << "--- [env] ---\n";
+  // f << *v.frame_;
 
-  f << "--- [symtable] ---\n";
-  f << *v.symtable_;
+  // f << "--- [symtable] ---\n";
+  // f << *v.symtable_;
 
   f << "\n\n";
 

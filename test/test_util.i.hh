@@ -24,7 +24,9 @@ void with_expect_error(Fun f){
   test_util_detail::with_null_stream wns;
   try{
     f();
-  }catch(zs_error&){}
+  }catch(const zs_error& e){
+    std::cerr << e.what() << std::endl;
+  }
 }
 
 #endif // TEST_UTIL_I_HH
