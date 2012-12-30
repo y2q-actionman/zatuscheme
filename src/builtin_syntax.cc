@@ -69,8 +69,7 @@ Lisp_ptr syntax_if(){
   Lisp_ptr conseq = args[1];
   Lisp_ptr alt = (args.size() == 3) ? args[2] : Lisp_ptr();
     
-  // TODO: add 'Retuning expanded code'
-  vm.code.insert(vm.code.end(), {alt, conseq, vm_op_if, test});
+  vm.return_value = {alt, conseq, vm_op_if, test};
   return vm_op_nop;
 }
 

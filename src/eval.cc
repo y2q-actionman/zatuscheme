@@ -94,6 +94,12 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
 void vm_op_macro_call(){
   assert(vm.code.back().get<VMop>() == vm_op_macro_call);
   vm.code.back() = vm.return_value[0];
+
+  if(vm.return_value.size() > 1){
+    vm.code.insert(vm.code.end(),
+                   next(vm.return_value.begin()), vm.return_value.end());
+    vm.return_value.resize(1);
+  }
 }  
 
 /*

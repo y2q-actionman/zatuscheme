@@ -8,7 +8,7 @@
     {1, Variadic::f, Passing::whole}}},
 {"if", {
     syntax_if,
-    {2, 3, Passing::quote, Returning::pass}}},
+    {2, 3, Passing::quote, Returning::code}}},
 {"set!", {
     syntax_set,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
