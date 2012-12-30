@@ -2,22 +2,22 @@
 
 {"quote", {
     syntax_quote,
-    {1, Variadic::f, Passing::quote}}},
+    {1, 1, Passing::quote}}},
 {"lambda", {
     syntax_lambda,
-    {1, Variadic::f, Passing::whole}}},
+    {1, 1, Passing::whole}}},
 {"if", {
     syntax_if,
     {2, 3, Passing::quote, Returning::code, MoveReturnValue::f}}},
 {"set!", {
     syntax_set,
-    {2, Variadic::f, Passing::quote, Returning::code, MoveReturnValue::f}}},
+    {2, 2, Passing::quote, Returning::code, MoveReturnValue::f}}},
 {"define", {
     syntax_define,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"begin", {
     syntax_begin,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    {1, Variadic::f, Passing::whole, Returning::code, MoveReturnValue::f}}},
 
 {"let", {
     syntax_let,

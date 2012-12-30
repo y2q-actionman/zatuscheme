@@ -127,8 +127,8 @@ Lisp_ptr syntax_begin(){
         throw zs_error("eval error: begin has no exprs.\n");
       }
 
-      vm.code.insert(vm.code.end(), {body.base(), vm_op_begin});
-      return vm_op_nop;
+      vm.return_value = {body.base(), vm_op_begin};
+      return {};
     });
 }
 
