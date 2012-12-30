@@ -11,7 +11,7 @@
     {2, 3, Passing::quote, Returning::code, MoveReturnValue::f}}},
 {"set!", {
     syntax_set,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    {2, Variadic::f, Passing::quote, Returning::code, MoveReturnValue::f}}},
 {"define", {
     syntax_define,
     {1, Variadic::f, Passing::whole, Returning::pass}}},

@@ -70,18 +70,19 @@ Lisp_ptr syntax_if(){
   Lisp_ptr alt = (args.size() == 3) ? args[2] : Lisp_ptr();
     
   vm.return_value = {alt, conseq, vm_op_if, test};
-  return vm_op_nop;
+  return {};
 }
 
 Lisp_ptr syntax_set(){
-  ZsArgs args{1};
+  ZsArgs args{2};
 
-  return bind_cons_list_strict
-    (args[0].get<Cons*>()->cdr(),
-     [&](Symbol* var, Lisp_ptr expr) -> Lisp_ptr {
-      vm.code.insert(vm.code.end(), {var, vm_op_set, expr});
-      return expr;
-    });
+  Symbol* var = args[0].get<Symbol*>();
+  if(!var){
+    throw builtin_type_check_failed("set!", Ptr_tag::symbol, args[0]);
+  }
+
+  vm.return_value = {var, vm_op_set, args[1]};
+  return {};
 }
 
 Lisp_ptr syntax_define(){
