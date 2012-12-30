@@ -10,13 +10,13 @@
     syntax_if,
     {2, 3, Passing::quote, Returning::pass}}},
 {"set!", {
-    whole_function_set,
+    syntax_set,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"define", {
-    whole_function_define,
+    syntax_define,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"begin", {
-    whole_function_begin,
+    syntax_begin,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
 
 {"cond", {

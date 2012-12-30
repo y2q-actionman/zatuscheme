@@ -69,6 +69,7 @@ Lisp_ptr syntax_if(){
   Lisp_ptr conseq = args[1];
   Lisp_ptr alt = (args.size() == 3) ? args[2] : Lisp_ptr();
     
+  // TODO: add 'Retuning expanded code'
   vm.code.insert(vm.code.end(), {alt, conseq, vm_op_if, test});
   return vm_op_nop;
 }
@@ -84,13 +85,13 @@ Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
     });
 }
 
-Lisp_ptr whole_function_set(){
+Lisp_ptr syntax_set(){
   ZsArgs args{1};
 
   return set_internal("set!", args[0].get<Cons*>()->cdr(), vm_op_set);
 }
 
-Lisp_ptr whole_function_define(){
+Lisp_ptr syntax_define(){
   ZsArgs args{1};
 
   auto p = args[0].get<Cons*>()->cdr();
@@ -117,7 +118,7 @@ Lisp_ptr whole_function_define(){
   }
 }
 
-Lisp_ptr whole_function_begin(){
+Lisp_ptr syntax_begin(){
   ZsArgs wargs{1};
 
   return bind_cons_list_strict
