@@ -29,14 +29,9 @@ Lisp_ptr whole_function_pass_through(){
   return wargs[0];
 }
 
-Lisp_ptr whole_function_quote(){
-  ZsArgs wargs{1};
-
-  return bind_cons_list_strict
-    (wargs[0],
-     [](Symbol*, Lisp_ptr datum){
-      return datum;
-    });
+Lisp_ptr macro_quote(){
+  ZsArgs args{1};
+  return args[0];
 }
 
 
