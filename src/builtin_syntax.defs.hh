@@ -19,27 +19,30 @@
     syntax_begin,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
 
-{"cond", {
-    whole_cond,
+{"let", {
+    syntax_let,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
+{"let*", {
+    syntax_let_star,
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
+{"letrec", {
+    syntax_letrec,
+    {1, Variadic::f, Passing::whole, Returning::pass}}},
+
+{"cond", {
+    syntax_cond,
+    {1, Variadic::f, Passing::whole, Returning::code}}},
+{"and", {
+    syntax_and,
+    {1, Variadic::f, Passing::whole, Returning::code}}},
+{"or", {
+    syntax_or,
+    {1, Variadic::f, Passing::whole, Returning::code}}},
+
 {"case", {
     whole_case,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
-{"and", {
-    whole_and,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
-{"or", {
-    whole_or,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
-{"let", {
-    whole_function_let,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
-{"let*", {
-    whole_function_let_star,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
-{"letrec", {
-    whole_function_letrec,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+
 {"do", {
     whole_do,
     {1, Variadic::f, Passing::whole, Returning::pass}}},

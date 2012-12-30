@@ -133,7 +133,7 @@ Lisp_ptr syntax_begin(){
     });
 }
 
-Lisp_ptr whole_function_let(){
+Lisp_ptr syntax_let(){
   return let_internal(EarlyBind::f);
 }
 
@@ -155,7 +155,7 @@ Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
   }
 }
 
-Lisp_ptr whole_function_let_star(){
+Lisp_ptr syntax_let_star(){
   Lisp_ptr bindings, body;
 
   {
@@ -175,7 +175,7 @@ Lisp_ptr whole_function_let_star(){
   return let_internal(EarlyBind::f);
 }
 
-Lisp_ptr whole_function_letrec(){
+Lisp_ptr syntax_letrec(){
   // This heavyly depends on the implementation.
   //
   // normal let / funtion call
@@ -274,7 +274,7 @@ Lisp_ptr cond_expand(Cons* head){
 
 template<typename T, typename Expander>
 static inline
-Lisp_ptr whole_conditional(T default_value, Expander e){
+Lisp_ptr syntax_conditional(T default_value, Expander e){
   ZsArgs wargs{1};
 
   Cons* head;
@@ -289,20 +289,19 @@ Lisp_ptr whole_conditional(T default_value, Expander e){
     return Lisp_ptr(default_value);
   }
 
-  vm.code.push_back(e(head));
-  return vm_op_nop;
+  return e(head);
 }
 
-Lisp_ptr whole_and(){
-  return whole_conditional(true, and_expand);
+Lisp_ptr syntax_and(){
+  return syntax_conditional(true, and_expand);
 }
                  
-Lisp_ptr whole_or(){
-  return whole_conditional(false, or_expand);
+Lisp_ptr syntax_or(){
+  return syntax_conditional(false, or_expand);
 }
 
-Lisp_ptr whole_cond(){
-  return whole_conditional(Lisp_ptr{}, cond_expand);
+Lisp_ptr syntax_cond(){
+  return syntax_conditional(Lisp_ptr{}, cond_expand);
 }
 
 static
