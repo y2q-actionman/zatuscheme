@@ -190,10 +190,16 @@ void proc_enter_native(const NProcedure* fun){
   assert(native_func);
 
   auto p = native_func();
-  if(p.tag() == Ptr_tag::vm_op){
-    // assumed return-value is set by native func.
-  }else{
-    vm.return_value[0] = p;
+
+  auto info = fun->info();
+  assert(info);
+
+  if(info->move_ret == MoveReturnValue::t){
+    if(p.tag() == Ptr_tag::vm_op){
+      // assumed return-value is set by native func.
+    }else{
+      vm.return_value[0] = p;
+    }
   }
 }
 
@@ -580,8 +586,9 @@ Lisp_ptr let_internal(EarlyBind early_bind){
   }
 
   auto proc = new IProcedure(body, 
-                             {len, Variadic::f,
-                                 Passing::eval, Returning::pass, early_bind},
+                             {len, Variadic::f,  Passing::eval,
+                                 Returning::pass, MoveReturnValue::t,
+                                 early_bind},
                              gl_syms.extract(), vm.frame());
 
   if(name){

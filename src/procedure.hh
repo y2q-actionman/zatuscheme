@@ -10,6 +10,8 @@
 namespace Procedure {
   typedef Lisp_ptr(*NativeFunc)();
 
+  enum class Variadic : bool { f = false, t = true };
+
   enum class Passing : unsigned char{
     eval, quote, whole
   };
@@ -18,7 +20,8 @@ namespace Procedure {
     pass, code
   };
 
-  enum class Variadic : bool { f = false, t = true };
+  enum class MoveReturnValue : bool { f = false, t = true };
+
   enum class EarlyBind : bool { f = false, t = true };
 
   struct ProcInfo {
@@ -26,17 +29,20 @@ namespace Procedure {
     int max_args;
     Passing passing;
     Returning returning;
+    MoveReturnValue move_ret;
     EarlyBind early_bind;
 
     constexpr ProcInfo(int rargs,
                        int margs,
                        Passing p = Passing::eval,
                        Returning r = Returning::pass,
+                       MoveReturnValue m = MoveReturnValue::t,
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
         max_args(margs),
         passing(p),
         returning(r),
+        move_ret(m),
         early_bind(e){}
 
     // TODO: use delegating constructor
@@ -44,13 +50,18 @@ namespace Procedure {
                        Variadic v = Variadic::f,
                        Passing p = Passing::eval,
                        Returning r = Returning::pass,
+                       MoveReturnValue m = MoveReturnValue::t,
                        EarlyBind e = EarlyBind::f)
       : required_args(rargs),
         max_args((v == Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
         passing(p),
         returning(r),
+        move_ret(m),
         early_bind(e){}
   };
+
+  static_assert(sizeof(ProcInfo) == (sizeof(int) + sizeof(int) + sizeof(int)),
+                "ProcInfo became too big!!");
 
   std::pair<int, Variadic> parse_func_arg(Lisp_ptr);
 
