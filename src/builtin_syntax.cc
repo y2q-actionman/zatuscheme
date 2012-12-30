@@ -29,7 +29,7 @@ Lisp_ptr whole_function_pass_through(){
   return wargs[0];
 }
 
-Lisp_ptr macro_quote(){
+Lisp_ptr syntax_quote(){
   ZsArgs args{1};
   return args[0];
 }
@@ -50,7 +50,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
                         args, vm.frame());
 }
 
-Lisp_ptr whole_function_lambda(){
+Lisp_ptr syntax_lambda(){
   ZsArgs wargs{1};
 
   return bind_cons_list_strict
@@ -60,7 +60,7 @@ Lisp_ptr whole_function_lambda(){
     });
 }
 
-Lisp_ptr whole_function_if(){
+Lisp_ptr syntax_if(){
   ZsArgs args;
 
   assert(args.size() == 2 || args.size() == 3);

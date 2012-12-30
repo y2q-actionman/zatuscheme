@@ -1,13 +1,13 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"quote", {
-    macro_quote,
+    syntax_quote,
     {1, Variadic::f, Passing::quote}}},
 {"lambda", {
-    whole_function_lambda,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    syntax_lambda,
+    {1, Variadic::f, Passing::whole}}},
 {"if", {
-    whole_function_if,
+    syntax_if,
     {2, 3, Passing::quote, Returning::pass}}},
 {"set!", {
     whole_function_set,
