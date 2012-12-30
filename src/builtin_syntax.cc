@@ -61,20 +61,16 @@ Lisp_ptr whole_function_lambda(){
 }
 
 Lisp_ptr whole_function_if(){
-  ZsArgs wargs{1};
+  ZsArgs args;
+
+  assert(args.size() == 2 || args.size() == 3);
+
+  Lisp_ptr test = args[0];
+  Lisp_ptr conseq = args[1];
+  Lisp_ptr alt = (args.size() == 3) ? args[2] : Lisp_ptr();
     
-  return bind_cons_list_loose
-    (wargs[0],
-     [&](Symbol*, Lisp_ptr test, Lisp_ptr conseq, Lisp_ptr alt, ConsIter rest) -> Lisp_ptr{
-      if(!conseq)
-        throw zs_error("eval error: informal if expr! (only 2 exprs)\n");
-
-      if(rest)
-        throw zs_error("eval error: informal if expr! (more than 3 exprs)\n");
-
-      vm.code.insert(vm.code.end(), {alt, conseq, vm_op_if, test});
-      return vm_op_nop;
-    });
+  vm.code.insert(vm.code.end(), {alt, conseq, vm_op_if, test});
+  return vm_op_nop;
 }
 
 static

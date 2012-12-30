@@ -8,7 +8,7 @@
     {1, Variadic::f, Passing::whole, Returning::pass}}},
 {"if", {
     whole_function_if,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    {2, 3, Passing::quote, Returning::pass}}},
 {"set!", {
     whole_function_set,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
