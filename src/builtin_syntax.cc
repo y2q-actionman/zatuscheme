@@ -73,21 +73,15 @@ Lisp_ptr syntax_if(){
   return vm_op_nop;
 }
 
-static
-Lisp_ptr set_internal(const char* opname, Lisp_ptr p, VMop set_op){
-  (void)opname;
-  return bind_cons_list_strict
-    (p,
-     [&](Symbol* var, Lisp_ptr expr) -> Lisp_ptr {
-      vm.code.insert(vm.code.end(), {var, set_op, expr});
-      return expr;
-    });
-}
-
 Lisp_ptr syntax_set(){
   ZsArgs args{1};
 
-  return set_internal("set!", args[0].get<Cons*>()->cdr(), vm_op_set);
+  return bind_cons_list_strict
+    (args[0].get<Cons*>()->cdr(),
+     [&](Symbol* var, Lisp_ptr expr) -> Lisp_ptr {
+      vm.code.insert(vm.code.end(), {var, vm_op_set, expr});
+      return expr;
+    });
 }
 
 Lisp_ptr syntax_define(){
@@ -100,7 +94,12 @@ Lisp_ptr syntax_define(){
   auto first = rest->car();
 
   if(first.tag() == Ptr_tag::symbol){
-    return set_internal("define(value set)", p, vm_op_local_set);
+    return bind_cons_list_strict
+      (p,
+       [&](Symbol* var, Lisp_ptr expr) -> Lisp_ptr {
+        vm.code.insert(vm.code.end(), {var, vm_op_local_set, expr});
+        return expr;
+      });
   }else if(first.tag() == Ptr_tag::cons){
     Lisp_ptr code = rest->cdr();
 
