@@ -21,5 +21,8 @@ Lisp_ptr syntax_case();
 Lisp_ptr syntax_do();
 Lisp_ptr syntax_delay();
 Lisp_ptr syntax_quasiquote();
+Lisp_ptr syntax_define_syntax();
+Lisp_ptr syntax_let_syntax();
+Lisp_ptr syntax_letrec_syntax();
 
 #endif // BUILTIN_SYNTAX_HH

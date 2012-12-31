@@ -58,7 +58,7 @@ int main(){
 
   check_e("(begin (define tmp-func (lambda (x) `(define ,x ',x))) #t)", "#t");
   check_e("(tmp-func 'a)", "(define a (quote a))");
-  check_e("(begin (define tmp-macro (traditional-transformer tmp-func)) #t)", "#t");
+  check_e_success("(define-syntax tmp-macro (traditional-transformer tmp-func))");
   check_e("(begin (tmp-macro a) #t)", "#t");
   check_e("a", "a");
 

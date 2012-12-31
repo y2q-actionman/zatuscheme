@@ -67,3 +67,7 @@
 {"=>", {
     whole_function_error,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
+
+{"define-syntax", {
+    syntax_define_syntax,
+    {2, 2, Passing::quote}}},

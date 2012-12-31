@@ -536,3 +536,17 @@ Lisp_ptr syntax_quasiquote(){
     UNEXP_DEFAULT();
   }
 }
+
+Lisp_ptr syntax_define_syntax(){
+  ZsArgs args{2};
+
+  auto var = args[0].get<Symbol*>();
+  if(!var){
+    throw builtin_type_check_failed("define-syntax", Ptr_tag::symbol, args[0]);
+  }
+
+  // TODO: check args[1] is a transformer.
+  vm.code.insert(vm.code.end(), {var, vm_op_local_set, args[1]});
+  return Lisp_ptr{true};
+}
+
