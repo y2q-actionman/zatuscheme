@@ -468,7 +468,8 @@ Lisp_ptr syntax_quasiquote(){
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
-    return arg;
+    const auto quote_sym = intern(vm.symtable(), "quote");
+    return make_cons_list({quote_sym, arg});
   }
 
 
@@ -524,16 +525,14 @@ Lisp_ptr syntax_quasiquote(){
               qq_elem(last);
             });
 
-    vm.code.push_back(push_cons_list(intern(vm.symtable(), "list*"), gl.extract()));
-    return vm_op_nop;
+    return push_cons_list(intern(vm.symtable(), "list*"), gl.extract());
   }else if(arg.tag() == Ptr_tag::vector){
     auto v = arg.get<Vector*>();
     for(auto i = begin(*v); i != end(*v); ++i){
       qq_elem(*i);
     }
 
-    vm.code.push_back(push_cons_list(intern(vm.symtable(), "vector"), gl.extract()));
-    return vm_op_nop;
+    return push_cons_list(intern(vm.symtable(), "vector"), gl.extract());
   }else{
     UNEXP_DEFAULT();
   }

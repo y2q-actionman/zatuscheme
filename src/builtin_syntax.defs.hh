@@ -53,7 +53,7 @@
 
 {"quasiquote", {
     syntax_quasiquote,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    {1, Variadic::f, Passing::whole, Returning::code}}},
 {"unquote", {
     whole_function_pass_through,
     {1, Variadic::f, Passing::whole, Returning::pass}}},
