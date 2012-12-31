@@ -1,7 +1,7 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
-{"to-macro-procedure", {
-    to_macro_procedure,
+{"traditional-transformer", {
+    traditional_transformer,
     {1}}},
 {"gensym", {
     gensym,

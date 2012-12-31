@@ -3,7 +3,8 @@
 
 #include "decl.hh"
 
-Lisp_ptr to_macro_procedure();
+Lisp_ptr traditional_transformer();
+
 Lisp_ptr gensym();
 Lisp_ptr exit_func();
 

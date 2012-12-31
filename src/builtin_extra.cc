@@ -8,21 +8,26 @@
 using namespace std;
 using namespace Procedure;
 
-Lisp_ptr to_macro_procedure(){
+Lisp_ptr traditional_transformer(){
   ZsArgs args{1};
 
-  auto proc = args[0].get<IProcedure*>();
-  if(!proc){
-    throw zs_error("to-macro-procedure: error: should be called with interpreted proc\n");
+  if(auto iproc = args[0].get<IProcedure*>()){
+    auto info = *iproc->info();
+    info.passing = Passing::quote;
+    info.returning = Returning::code;
+
+    return new IProcedure(iproc->get(), info,
+                          iproc->arg_list(), iproc->closure());
+  }else if(auto nproc = args[0].get<const NProcedure*>()){
+    auto info = *nproc->info();
+    info.passing = Passing::quote;
+    info.returning = Returning::code;
+
+    return static_cast<const NProcedure*>(new NProcedure(nproc->get(), info));
+  }else{
+    throw zs_error("traditional_transformer: error: called with wrong type (%s)\n",
+                   stringify(args[0].tag()));
   }
-
-  auto info = *proc->info();
-  info.passing = Passing::quote;
-  info.returning = Returning::code;
-
-  return new IProcedure(proc->get(), 
-                        info, proc->arg_list(),
-                        proc->closure());
 }
 
 Lisp_ptr gensym(){
