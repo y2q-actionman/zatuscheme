@@ -238,11 +238,7 @@ void proc_enter_native(const NProcedure* fun){
   assert(info);
 
   if(info->move_ret == MoveReturnValue::t){
-    if(p.tag() == Ptr_tag::vm_op){
-      // assumed return-value is set by native func.
-    }else{
-      vm.return_value[0] = p;
-    }
+    vm.return_value[0] = p;
   }
 }
 
