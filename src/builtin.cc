@@ -81,9 +81,8 @@ Lisp_ptr eval_func(){
 
   auto oldenv = vm.frame();
   vm.set_frame(env);
-  vm.code.insert(vm.code.end(),
-                 {oldenv, vm_op_leave_frame, args[0]});
-  return vm_op_nop;
+  vm.return_value = {oldenv, vm_op_leave_frame, args[0]};
+  return {};
 }
 
 
@@ -113,7 +112,7 @@ static const BuiltinFunc builtin_syntax_funcs[] = {
 static const BuiltinFunc builtin_funcs[] = {
   {"eval", {
       eval_func,
-      {2}}},
+      {2, 2, Passing::eval, Returning::code, MoveReturnValue::f}}},
 
   {"scheme-report-environment", {
       env_r5rs,
