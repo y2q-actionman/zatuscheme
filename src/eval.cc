@@ -756,11 +756,13 @@ Lisp_ptr func_force(){
   auto arg = pick_args_1();     // used because no exceptions are done!
   auto d = arg.get<Delay*>();
   if(!d){
-    return arg;
+    vm.return_value[0] = arg;
+    return {};
   }
   
   if(d->forced()){
-    return d->get();
+    vm.return_value[0] = d->get();
+    return {};
   }
 
   auto oldenv = vm.frame();
@@ -769,7 +771,7 @@ Lisp_ptr func_force(){
   vm.stack.push_back(arg);
   vm.code.insert(vm.code.end(),
                  {vm_op_force, oldenv, vm_op_leave_frame, d->get()});
-  return vm_op_nop;
+  return {};
 }
 
 Lisp_ptr call_with_values(){
