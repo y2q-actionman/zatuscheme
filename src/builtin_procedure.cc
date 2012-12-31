@@ -23,5 +23,5 @@ Lisp_ptr proc_values(){
     vm.return_value.resize(1);
   }
 
-  return vm_op_nop;
+  return {};
 }

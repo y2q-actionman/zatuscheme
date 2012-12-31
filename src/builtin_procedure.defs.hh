@@ -11,7 +11,7 @@
     {1}}},
 {"values", {
     proc_values,
-    {0, Variadic::t}}},
+    {0, Variadic::t, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"call-with-values", {
     call_with_values,
     {2}}},
