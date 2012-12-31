@@ -56,12 +56,6 @@ int main(){
   check_e("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
   check_e("(case a ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
 
-  check_e("(begin (define tmp-func (lambda (x) `(define ,x ',x))) #t)", "#t");
-  check_e("(tmp-func 'a)", "(define a (quote a))");
-  check_e_success("(define-syntax tmp-macro (traditional-transformer tmp-func))");
-  check_e("(begin (tmp-macro a) #t)", "#t");
-  check_e("a", "a");
-
   check_e("(eval 1 (null-environment 5))", "1");
   check_e("(eval (+ 1 3) (scheme-report-environment 5))", "4");
   check_e("(eval '(+ 1 3) (scheme-report-environment 5))", "4");
