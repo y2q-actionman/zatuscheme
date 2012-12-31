@@ -130,9 +130,11 @@ bool check_r_undef(const char* input){
   if(!ret){
     return true;
   }else{
-        cerr << "[failed] read:" << input << ", expected: (undefined)\n";
-        RESULT = EXIT_FAILURE;
-        return false;
+    cerr << "[failed] read:" << input << ", expected: (undefined), returned: ";
+    print(cerr, ret);
+    cerr << endl;
+    RESULT = EXIT_FAILURE;
+    return false;
   }
 }
 
@@ -171,7 +173,9 @@ bool check_e_undef(const char* input){
   if(!ret){
     return true;
   }else{
-    cerr << "[failed] eval:" << input << ", expected: (undefined)\n";
+    cerr << "[failed] eval:" << input << ", expected: (undefined), returned: ";
+    print(cerr, ret);
+    cerr << endl;
     RESULT = EXIT_FAILURE;
     return false;
   }

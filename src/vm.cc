@@ -56,8 +56,8 @@ std::ostream& operator<<(std::ostream& f, const VM& v){
   }
 
   f << "--- [return value] ---\n";
+  f << '[' << v.return_value.size() << "] ";
   for(auto i = v.return_value.begin(), e = v.return_value.end(); i != e; ++i){
-    f << '[' << v.return_value.size() << "] ";
     print(f, *i);
     if(next(i) != e) f << ", ";
   }

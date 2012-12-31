@@ -4,6 +4,10 @@
 int main(){
   zs_init();
 
+  check_e_undef(",@(1)");
+  check_e_undef("`(,@1)");
+  check_e("`(,@())", "()");
+  
   check_e("`1", "1");
   check_e("`,1", "1");
   check_e("`#(1)", "#(1)");
