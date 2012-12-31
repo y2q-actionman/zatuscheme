@@ -17,7 +17,7 @@ namespace Procedure {
   };
 
   enum class Returning : unsigned char{
-    pass, code
+    pass, code, stack_splice
   };
 
   enum class MoveReturnValue : bool { f = false, t = true };

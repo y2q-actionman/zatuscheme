@@ -103,6 +103,46 @@ void vm_op_macro_call(){
 }  
 
 /*
+  return = an, an-1, ...
+  code = (this), <VMop>, argcount[b], args(b)
+  stack = bn, bn-1, ...
+  ---
+  return = {}
+  code = (this), <VMop>, argcount[a+b], args(b)
+  stack = bn, bn-1, ..., an, an-1, ...
+*/
+void vm_op_stack_splicing(){
+  assert(vm.code.back() == vm_op_stack_splicing);
+
+  auto& op = vm.code[vm.code.size() - 2];
+  if(op.tag() != Ptr_tag::vm_op){
+    throw zs_error("eval error: unquote-splicing: called in invalid context!\n");
+  }
+
+  auto& outer_argc = vm.code[vm.code.size() - 3];
+  auto& outer_args = vm.code[vm.code.size() - 4];
+
+  // pushes return-value to vm.stack
+  int argc = vm.return_value.size();
+  vm.stack.insert(vm.stack.end(), vm.return_value.begin(), vm.return_value.end());
+  vm.return_value.resize(1);
+
+  // formatting vm.code to 'splicing is processed'
+  // see vm_op_arg_push()
+  Lisp_ptr outer_next_args;
+  bind_cons_list_loose
+    (outer_args,
+     [&](Lisp_ptr, ConsIter i){
+      outer_next_args = i.base();
+    });
+  auto outer_next_arg1 = outer_next_args.get<Cons*>()->car();
+
+  outer_argc = {Ptr_tag::vm_argcount, outer_argc.get<int>() + argc};
+  outer_args = outer_next_args;
+  vm.code.back() = outer_next_arg1;
+}
+
+/*
   stack[0] = whole args
   ----
   code = (call kind, proc, macro call)
@@ -161,6 +201,9 @@ void vm_op_call(){
     break;
   case Returning::code:
     vm.code.push_back(vm_op_macro_call);
+    break;
+  case Returning::stack_splice:
+    vm.code.push_back(vm_op_stack_splicing);
     break;
   default:
     UNEXP_DEFAULT();
@@ -882,6 +925,8 @@ const char* stringify(VMop op){
     return "leave winding";
   }else if(op == vm_op_save_values_and_enter){
     return "save values and enter";
+  }else if(op == vm_op_stack_splicing){
+    return "splicing args";
   }else{
     return "unknown vm-op";
   }

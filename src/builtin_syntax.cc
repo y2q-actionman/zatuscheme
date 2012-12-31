@@ -444,59 +444,15 @@ Lisp_ptr syntax_delay(){
   return {new Delay(wargs[0], vm.frame())};
 }
 
-/*
-  stack = argcount[a], an, an-1, ..., argcount[b], bn, bn-1, ...
-  ---
-  stack = argcount[a+b], an, an-1, ..., bn, bn-1, ...
-*/
 static
 Lisp_ptr function_splicing(){
-  if(vm.code.empty()
-     || vm.code.back().tag() != Ptr_tag::vm_op){
-    throw zs_error("eval error: unquote-splicing: called in invalid context!\n");
+  ZsArgs args{1};
+  if(args[0].tag() != Ptr_tag::cons){
+    builtin_type_check_failed("unquote-splicing", Ptr_tag::cons, args[0]);
   }
 
-  auto args = pick_args_1();
-
-  // auto& op = vm.code[vm.code.size() - 1];
-  auto& parent_argc = vm.code[vm.code.size() - 2];
-  auto& parent_args = vm.code[vm.code.size() - 3];
-
-  // pushes unquote-splicing's return-value to vm.stack
-  int argc = 0;
-  do_list(args,
-          [&](Cons* c) -> bool {
-            vm.stack.push_back(c->car());
-            ++argc;
-            return true;
-          },
-          [&](Lisp_ptr last_cdr){
-            if(!nullp(last_cdr)){
-              cerr << "eval warning: unquote-splicing: ";
-              if(argc > 0){
-                cerr << "dot list has read as proper list.\n";
-              }else{
-                cerr << "passed value is not list. treated as a list has one element.\n";
-              }
-              vm.stack.push_back(last_cdr);
-              ++argc;
-            }
-          });
-
-  // formatting vm.code to 'unquote-splicing is processed'
-  // see vm_op_arg_push()
-  Lisp_ptr parent_next_args;
-  bind_cons_list_loose
-    (parent_args,
-     [&](Lisp_ptr, ConsIter i){
-      parent_next_args = i.base();
-    });
-  auto parent_next_arg1 = parent_next_args.get<Cons*>()->car();
-
-  parent_argc = {Ptr_tag::vm_argcount, parent_argc.get<int>() + argc};
-  parent_args = parent_next_args;
-  vm.code.push_back(parent_next_arg1);
-  return vm_op_nop;
+  vm.return_value.assign(begin(args[0]), end(args[0]));
+  return {};
 }
 
 Lisp_ptr whole_function_quasiquote(){
@@ -521,7 +477,8 @@ Lisp_ptr whole_function_quasiquote(){
   const auto unquote_splicing_sym = intern(vm.symtable(), "unquote-splicing");
 
   static const Procedure::NProcedure splicing_nproc{
-    function_splicing, {1}
+    function_splicing,
+    {1, Variadic::f, Passing::eval, Returning::stack_splice, MoveReturnValue::f}
   };
 
   GrowList gl;
