@@ -20,4 +20,4 @@
     {1, 1, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"dynamic-wind", {
     dynamic_wind,
-    {3}}},
+    {3, 3, Passing::eval, Returning::pass, MoveReturnValue::f}}},
