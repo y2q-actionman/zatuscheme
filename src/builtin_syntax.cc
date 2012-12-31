@@ -455,7 +455,7 @@ Lisp_ptr function_splicing(){
   return {};
 }
 
-Lisp_ptr whole_function_quasiquote(){
+Lisp_ptr syntax_quasiquote(){
   ZsArgs wargs{1};
 
   Lisp_ptr arg;

@@ -20,6 +20,6 @@ Lisp_ptr syntax_cond();
 Lisp_ptr syntax_case();
 Lisp_ptr syntax_do();
 Lisp_ptr syntax_delay();
-Lisp_ptr whole_function_quasiquote();
+Lisp_ptr syntax_quasiquote();
 
 #endif // BUILTIN_SYNTAX_HH
