@@ -828,7 +828,7 @@ Lisp_ptr call_cc(){
   auto cont = new Continuation(vm);
   vm.stack.insert(vm.stack.end(), {cont, {Ptr_tag::vm_argcount, 1}});
   proc_enter_entrypoint(proc); // direct jump to proc_enter()
-  return vm_op_nop;
+  return {};
 }
 
 /*

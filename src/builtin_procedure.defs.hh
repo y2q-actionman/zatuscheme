@@ -17,7 +17,7 @@
     {2, 2, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"call-with-current-continuation", {
     call_cc,
-    {1}}},
+    {1, 1, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"dynamic-wind", {
     dynamic_wind,
     {3}}},
