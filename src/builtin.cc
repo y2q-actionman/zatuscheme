@@ -99,7 +99,7 @@ Lisp_ptr load_func(){
   }
 
   load(&f);
-  return vm_op_nop;
+  return Lisp_ptr{true};
 }
 
 } //namespace
