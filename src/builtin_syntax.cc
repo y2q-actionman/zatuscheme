@@ -508,8 +508,7 @@ Lisp_ptr syntax_quasiquote(){
     // check unquote -- like `,x
     if(auto first_sym = arg.get<Cons*>()->car().get<Symbol*>()){
       if(first_sym == unquote_sym){
-        vm.code.push_back(arg.get<Cons*>()->cdr().get<Cons*>()->car());
-        return vm_op_nop;
+        return arg.get<Cons*>()->cdr().get<Cons*>()->car();
       }else if(first_sym == unquote_splicing_sym){
         throw zs_error("quasiquote error: unquote-splicing is not supported out of list");
       }
