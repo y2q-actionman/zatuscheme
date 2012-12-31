@@ -439,7 +439,7 @@ Lisp_ptr syntax_do(){
         });
 }
 
-Lisp_ptr macro_delay(){
+Lisp_ptr syntax_delay(){
   ZsArgs wargs{1};
   return {new Delay(wargs[0], vm.frame())};
 }

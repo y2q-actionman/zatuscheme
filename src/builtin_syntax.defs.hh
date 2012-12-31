@@ -48,7 +48,7 @@
     {1, Variadic::f, Passing::whole, Returning::code}}},
 
 {"delay", {
-    macro_delay,
+    syntax_delay,
     {1, Variadic::f, Passing::quote, Returning::code}}},
 
 {"quasiquote", {
