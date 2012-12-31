@@ -40,8 +40,8 @@
     {1, Variadic::f, Passing::whole, Returning::code}}},
 
 {"case", {
-    whole_case,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    syntax_case,
+    {1, Variadic::f, Passing::whole, Returning::code}}},
 
 {"do", {
     whole_do,

@@ -355,7 +355,7 @@ Lisp_ptr case_expand(Symbol* sym, Lisp_ptr cases_ptr){
                         case_expand(sym, cases->cdr()));
 }
 
-Lisp_ptr whole_case(){
+Lisp_ptr syntax_case(){
   ZsArgs wargs{1};
 
   Lisp_ptr key, clauses;
@@ -370,7 +370,7 @@ Lisp_ptr whole_case(){
   // TODO: collect this by garbage collector!
   auto key_sym = new Symbol(new string("case_key_symbol"));
 
-  auto form = 
+  return
     make_cons_list({intern(vm.symtable(), "let"),
           make_cons_list({
               make_cons_list({key_sym, key})
@@ -378,8 +378,6 @@ Lisp_ptr whole_case(){
           new Cons(intern(vm.symtable(), "cond"),
                    case_expand(key_sym, clauses))
           });
-  vm.code.push_back(form);
-  return vm_op_nop;
 }
 
 Lisp_ptr whole_do(){
