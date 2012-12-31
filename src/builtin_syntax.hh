@@ -18,7 +18,7 @@ Lisp_ptr syntax_and();
 Lisp_ptr syntax_or();
 Lisp_ptr syntax_cond();
 Lisp_ptr syntax_case();
-Lisp_ptr whole_do();
+Lisp_ptr syntax_do();
 Lisp_ptr macro_delay();
 Lisp_ptr whole_function_quasiquote();
 

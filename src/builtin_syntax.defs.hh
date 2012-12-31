@@ -44,8 +44,9 @@
     {1, Variadic::f, Passing::whole, Returning::code}}},
 
 {"do", {
-    whole_do,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    syntax_do,
+    {1, Variadic::f, Passing::whole, Returning::code}}},
+
 {"delay", {
     macro_delay,
     {1, Variadic::f, Passing::quote, Returning::code}}},

@@ -380,7 +380,7 @@ Lisp_ptr syntax_case(){
           });
 }
 
-Lisp_ptr whole_do(){
+Lisp_ptr syntax_do(){
   ZsArgs wargs{1};
 
   Lisp_ptr vars, end_test, end_exprs,  commands;
@@ -425,7 +425,7 @@ Lisp_ptr whole_do(){
   gw.push(push_cons_list(loop_sym, steps.extract()));
 
   // creates 'named let' style loop
-  auto form = 
+  return
     make_cons_list({
         intern(vm.symtable(), "let"),
         loop_sym,
@@ -437,8 +437,6 @@ Lisp_ptr whole_do(){
             gw.extract(),
             })
         });
-  vm.code.push_back(form);
-  return vm_op_nop;
 }
 
 Lisp_ptr macro_delay(){
