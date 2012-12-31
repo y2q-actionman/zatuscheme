@@ -749,7 +749,7 @@ Lisp_ptr apply_func(){
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
-  return vm_op_nop;
+  return {};
 }
 
 Lisp_ptr func_force(){

@@ -5,7 +5,7 @@
     {1}}},
 {"apply", {
     apply_func,
-    {1, Variadic::t}}},
+    {1, Variadic::t, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"force", {
     func_force,
     {1}}},
