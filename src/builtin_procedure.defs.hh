@@ -14,7 +14,7 @@
     {0, Variadic::t, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"call-with-values", {
     call_with_values,
-    {2}}},
+    {2, 2, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"call-with-current-continuation", {
     call_cc,
     {1}}},

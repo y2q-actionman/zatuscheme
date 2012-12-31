@@ -804,7 +804,7 @@ Lisp_ptr call_with_values(){
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
   proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
-  return vm_op_nop;
+  return {};
 }
 
 Lisp_ptr call_cc(){
