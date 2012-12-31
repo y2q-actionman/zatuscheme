@@ -550,3 +550,12 @@ Lisp_ptr syntax_define_syntax(){
   return Lisp_ptr{true};
 }
 
+Lisp_ptr syntax_let_syntax(){
+  // TODO: check each arg is a transformer.
+  return let_internal(EarlyBind::f);
+}
+
+Lisp_ptr syntax_letrec_syntax(){
+  // TODO: check each arg is a transformer.
+  return let_internal(EarlyBind::t);
+}

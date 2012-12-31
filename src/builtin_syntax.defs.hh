@@ -71,3 +71,9 @@
 {"define-syntax", {
     syntax_define_syntax,
     {2, 2, Passing::quote}}},
+{"let-syntax", {
+    syntax_let_syntax,
+    {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
+{"letrec-syntax", {
+    syntax_letrec_syntax,
+    {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
