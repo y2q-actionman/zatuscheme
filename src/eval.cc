@@ -640,7 +640,7 @@ Lisp_ptr let_internal(EarlyBind early_bind){
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
   vm.code.insert(vm.code.end(), {vm_op_call, proc});
-  return vm_op_nop;
+  return {};
 }
 
 bool is_self_evaluating(Lisp_ptr p){
