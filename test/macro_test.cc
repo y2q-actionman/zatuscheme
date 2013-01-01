@@ -26,5 +26,13 @@ int main(){
   check_e("x", "2");
   check_e("y", "1");
 
+  check_e_success("(define-syntax sc-test-1 (sc-macro-transformer"
+                  "(lambda (form env) (cadr form))))");
+  check_e("(sc-test-1 (list x y))", "(2 1)");
+  check_e_success("(swap! x y)");
+  check_e("x", "1");
+  check_e("y", "2");
+  check_e("(sc-test-1 (list x y))", "(2 1)");
+
   return RESULT;
 }

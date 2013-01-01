@@ -168,8 +168,18 @@ void macro_call(Lisp_ptr proc){
   code = (call kind, proc)
   stack = (whole args, arg-bottom)
 */
-void whole_call(Lisp_ptr proc){
-  vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+void whole_call(Lisp_ptr proc, const ProcInfo* info){
+  switch(info->required_args){
+  case 1:
+    vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+    break;
+  case 2:
+    vm.stack.push_back(vm.frame());
+    vm.stack.push_back({Ptr_tag::vm_argcount, 2});
+    break;
+  default:
+    throw zs_error("eval error: 'whole' function must take one or two args\n");
+  }
 
   proc_enter_entrypoint(proc); // direct jump to proc_enter()
 }
@@ -215,7 +225,7 @@ void vm_op_call(){
   case Passing::quote:
     return macro_call(proc);
   case Passing::whole:
-    return whole_call(proc);
+    return whole_call(proc, info);
   default:
     UNEXP_DEFAULT();
   }
@@ -257,9 +267,39 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   switch(info->leaving){
   case Leaving::immediate:
     break;
-  case Leaving::after_returning_op:
-    // TODO: move vm_op_leave_frame
+  case Leaving::after_returning_op: {
+    // finds last leave_op
+    decltype(vm.code.begin()) leave_op_i, b = vm.code.begin();
+    for(leave_op_i = prev(vm.code.end()); leave_op_i > b; --leave_op_i){
+      if(leave_op_i->tag() == Ptr_tag::vm_op 
+         && leave_op_i->get<VMop>() == vm_op_leave_frame)
+        break;
+    }
+
+    if(leave_op_i == b){
+      throw zs_error("eval internal error: vm_op_leave_frame is not found!\n");
+    }
+
+    // replacing
+    // {..., <VMop>, env, leave_frame} -> {..., env, leave_frame, <VMop>}
+    auto env_i = prev(leave_op_i);
+    if(env_i->tag() != Ptr_tag::env){
+      throw zs_error("eval internal error: leave op has no env!\n");
+    }
+
+    if(env_i == b){
+      throw zs_error("eval internal error: return op is not found!\n");
+    }
+
+    auto return_op_i = prev(env_i);
+    if(return_op_i->tag() != Ptr_tag::vm_op){
+      throw zs_error("eval internal error: return op is not VMop!\n");
+    }
+
+    std::swap(*return_op_i, *env_i);
+    std::swap(*env_i, *leave_op_i);
     break;
+  }
   default:
     UNEXP_DEFAULT();
   }

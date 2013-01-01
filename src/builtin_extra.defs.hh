@@ -3,6 +3,9 @@
 {"traditional-transformer", {
     traditional_transformer,
     {1}}},
+{"sc-macro-transformer", {
+    sc_macro_transformer,
+    {1}}},
 {"gensym", {
     gensym,
     {0}}},

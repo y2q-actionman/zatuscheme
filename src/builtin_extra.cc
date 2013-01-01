@@ -24,6 +24,29 @@ Lisp_ptr traditional_transformer(){
                         iproc->arg_list(), iproc->closure());
 }
 
+Lisp_ptr sc_macro_transformer(){
+  ZsArgs args{1};
+
+  auto iproc = args[0].get<IProcedure*>();
+  if(!iproc){
+    throw zs_error("sc-macro-transformer: error: called with a wrong type (%s)\n",
+                   stringify(args[0].tag()));
+  }
+
+  auto info = *iproc->info();
+  if(info.required_args != 2 || info.max_args != 2){
+    throw zs_error("sc-macro-transformer: error: procedure must take exactly 2 args (%d-%d)\n",
+                   info.required_args, info.max_args);
+  }
+
+  info.passing = Passing::whole;
+  info.returning = Returning::code;
+  info.leaving = Leaving::after_returning_op;
+
+  return new IProcedure(iproc->get(), info,
+                        iproc->arg_list(), iproc->closure());
+}
+
 Lisp_ptr gensym(){
   static const string gensym_symname = {"(gensym)"};
   ZsArgs args{0};
