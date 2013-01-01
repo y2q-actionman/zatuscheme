@@ -26,6 +26,10 @@ namespace Procedure {
     at_bind, at_jump
   };
 
+  enum class Leaving : unsigned char {
+    immediate, after_returning_op
+  };
+
   struct ProcInfo {
     int required_args;
     int max_args;
@@ -33,19 +37,22 @@ namespace Procedure {
     Returning returning;
     MoveReturnValue move_ret;
     Entering entering;
+    Leaving leaving;
 
     constexpr ProcInfo(int rargs,
                        int margs,
                        Passing p = Passing::eval,
                        Returning r = Returning::pass,
                        MoveReturnValue m = MoveReturnValue::t,
-                       Entering e = Entering::at_jump)
+                       Entering e = Entering::at_jump,
+                       Leaving l = Leaving::immediate)
       : required_args(rargs),
         max_args(margs),
         passing(p),
         returning(r),
         move_ret(m),
-        entering(e){}
+        entering(e),
+        leaving(l){}
 
     // TODO: use delegating constructor
     constexpr ProcInfo(int rargs,
@@ -53,17 +60,19 @@ namespace Procedure {
                        Passing p = Passing::eval,
                        Returning r = Returning::pass,
                        MoveReturnValue m = MoveReturnValue::t,
-                       Entering e = Entering::at_jump)
+                       Entering e = Entering::at_jump,
+                       Leaving l = Leaving::immediate)
       : required_args(rargs),
         max_args((v == Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
         passing(p),
         returning(r),
         move_ret(m),
-        entering(e){}
+        entering(e),
+        leaving(l){}
   };
 
-  static_assert(sizeof(ProcInfo) == (sizeof(int) + sizeof(int) + sizeof(int)),
-                "ProcInfo became too big!!");
+  // static_assert(sizeof(ProcInfo) == (sizeof(int) + sizeof(int) + sizeof(int)),
+  //               "ProcInfo became too big!!");
 
   std::pair<int, Variadic> parse_func_arg(Lisp_ptr);
 

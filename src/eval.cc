@@ -249,9 +249,19 @@ void proc_enter_native(const NProcedure* fun){
   code = (body1, body2, ..., leave_frame)
   stack = ()
 */
-void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
-  if(fun->info()->entering == Entering::at_jump){
+void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
+  if(info->entering == Entering::at_jump){
     enter_frame(fun);
+  }
+
+  switch(info->leaving){
+  case Leaving::immediate:
+    break;
+  case Leaving::after_returning_op:
+    // TODO: move vm_op_leave_frame
+    break;
+  default:
+    UNEXP_DEFAULT();
   }
 
   // == processing args ==
@@ -276,7 +286,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
   }
 
   // variadic arg push
-  if(argi->max_args > argi->required_args){
+  if(info->max_args > info->required_args){
     if(!arg_name.get<Symbol*>()){
       throw zs_error("eval error: no arg name for variadic arg!\n");
     }
