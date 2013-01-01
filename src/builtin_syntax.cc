@@ -133,7 +133,7 @@ Lisp_ptr syntax_begin(){
 }
 
 Lisp_ptr syntax_let(){
-  return let_internal(EarlyBind::f);
+  return let_internal(Entering::at_jump);
 }
 
 static
@@ -171,7 +171,7 @@ Lisp_ptr syntax_let_star(){
   vm.stack.insert(vm.stack.end(),
                   {let_star_expand(bindings, body), {Ptr_tag::vm_argcount, 1}});
 
-  return let_internal(EarlyBind::f);
+  return let_internal(Entering::at_jump);
 }
 
 Lisp_ptr syntax_letrec(){
@@ -189,7 +189,7 @@ Lisp_ptr syntax_letrec(){
   //      when a lambda form occurs, captures the environment.
   //      so these lambdas refer the same environment.
   //   3. set args to the environment.
-  return let_internal(EarlyBind::t);
+  return let_internal(Entering::at_bind);
 }
 
 static
@@ -552,10 +552,10 @@ Lisp_ptr syntax_define_syntax(){
 
 Lisp_ptr syntax_let_syntax(){
   // TODO: check each arg is a transformer.
-  return let_internal(EarlyBind::f);
+  return let_internal(Entering::at_jump);
 }
 
 Lisp_ptr syntax_letrec_syntax(){
   // TODO: check each arg is a transformer.
-  return let_internal(EarlyBind::t);
+  return let_internal(Entering::at_bind);
 }

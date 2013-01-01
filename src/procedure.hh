@@ -22,7 +22,9 @@ namespace Procedure {
 
   enum class MoveReturnValue : bool { f = false, t = true };
 
-  enum class EarlyBind : bool { f = false, t = true };
+  enum class Entering : unsigned char { 
+    at_bind, at_jump
+  };
 
   struct ProcInfo {
     int required_args;
@@ -30,20 +32,20 @@ namespace Procedure {
     Passing passing;
     Returning returning;
     MoveReturnValue move_ret;
-    EarlyBind early_bind;
+    Entering entering;
 
     constexpr ProcInfo(int rargs,
                        int margs,
                        Passing p = Passing::eval,
                        Returning r = Returning::pass,
                        MoveReturnValue m = MoveReturnValue::t,
-                       EarlyBind e = EarlyBind::f)
+                       Entering e = Entering::at_jump)
       : required_args(rargs),
         max_args(margs),
         passing(p),
         returning(r),
         move_ret(m),
-        early_bind(e){}
+        entering(e){}
 
     // TODO: use delegating constructor
     constexpr ProcInfo(int rargs,
@@ -51,13 +53,13 @@ namespace Procedure {
                        Passing p = Passing::eval,
                        Returning r = Returning::pass,
                        MoveReturnValue m = MoveReturnValue::t,
-                       EarlyBind e = EarlyBind::f)
+                       Entering e = Entering::at_jump)
       : required_args(rargs),
         max_args((v == Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
         passing(p),
         returning(r),
         move_ret(m),
-        early_bind(e){}
+        entering(e){}
   };
 
   static_assert(sizeof(ProcInfo) == (sizeof(int) + sizeof(int) + sizeof(int)),

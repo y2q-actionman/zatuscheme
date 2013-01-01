@@ -72,7 +72,7 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
-  if(info->early_bind == EarlyBind::t){
+  if(info->entering == Entering::at_bind){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
 
@@ -250,7 +250,7 @@ void proc_enter_native(const NProcedure* fun){
   stack = ()
 */
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* argi){
-  if(fun->info()->early_bind != EarlyBind::t){
+  if(fun->info()->entering == Entering::at_jump){
     enter_frame(fun);
   }
 
@@ -557,7 +557,7 @@ void vm_op_force(){
   delay->force(vm.return_value[0]);
 }
 
-Lisp_ptr let_internal(EarlyBind early_bind){
+Lisp_ptr let_internal(Entering entering){
   Lisp_ptr name = {};
   int len = 0;
   GrowList gl_syms;
@@ -627,7 +627,7 @@ Lisp_ptr let_internal(EarlyBind early_bind){
   auto proc = new IProcedure(body, 
                              {len, Variadic::f,  Passing::eval,
                                  Returning::pass, MoveReturnValue::t,
-                                 early_bind},
+                                 entering},
                              gl_syms.extract(), vm.frame());
 
   if(name){
