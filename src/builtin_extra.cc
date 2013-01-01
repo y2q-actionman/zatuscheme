@@ -11,23 +11,17 @@ using namespace Procedure;
 Lisp_ptr traditional_transformer(){
   ZsArgs args{1};
 
-  if(auto iproc = args[0].get<IProcedure*>()){
-    auto info = *iproc->info();
-    info.passing = Passing::quote;
-    info.returning = Returning::code;
-
-    return new IProcedure(iproc->get(), info,
-                          iproc->arg_list(), iproc->closure());
-  }else if(auto nproc = args[0].get<const NProcedure*>()){
-    auto info = *nproc->info();
-    info.passing = Passing::quote;
-    info.returning = Returning::code;
-
-    return static_cast<const NProcedure*>(new NProcedure(nproc->get(), info));
-  }else{
-    throw zs_error("traditional_transformer: error: called with wrong type (%s)\n",
+  auto iproc = args[0].get<IProcedure*>();
+  if(!iproc){
+    throw zs_error("traditional-transformer: error: called with a wrong type (%s)\n",
                    stringify(args[0].tag()));
   }
+  auto info = *iproc->info();
+  info.passing = Passing::quote;
+  info.returning = Returning::code;
+
+  return new IProcedure(iproc->get(), info,
+                        iproc->arg_list(), iproc->closure());
 }
 
 Lisp_ptr gensym(){
