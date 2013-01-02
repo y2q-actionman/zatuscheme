@@ -43,5 +43,17 @@ int main(){
   check_e("y", "1");
   check_e("(sc-test-2 (list x y))", "(2 1)");
 
+  check_e_success(
+  "(define-syntax push"
+  "  (sc-macro-transformer"
+  "   (lambda (exp env)"
+  "    (let ((item (make-syntactic-closure env '() (cadr exp)))"
+  "                    (list (make-syntactic-closure env '() (caddr exp))))"
+  "     `(set! ,list (cons ,item ,list))))))");
+  check_e_success("(define push-test-lis ())");
+  check_e("push-test-lis", "()");
+  check_e_success("(push 1 push-test-lis)");
+  check_e("push-test-lis", "(1)");
+
   return RESULT;
 }
