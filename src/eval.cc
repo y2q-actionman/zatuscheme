@@ -538,10 +538,10 @@ void vm_op_set_base(Fun fun){
     throw builtin_identifier_check_failed("(set)", vm.code.back());
   }
 
-  auto var = vm.code.get<Symbol*>();
+  auto var = vm.code.back();
   vm.code.pop_back();
 
-  fun(vm, var, vm.return_value[0]); 
+  fun(vm, var.get<Symbol*>(), vm.return_value[0]); 
 }
 
 /*

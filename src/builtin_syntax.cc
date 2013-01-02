@@ -98,7 +98,7 @@ Lisp_ptr syntax_define(){
       (first,
        [&](Lisp_ptr var, ConsIter l_args) -> Lisp_ptr{
         auto value = lambda_internal(l_args.base(), code);
-        vm.local_set(var, value);
+        vm.local_set(var.get<Symbol*>(), value);
         return value;
       });
   }else{
@@ -544,7 +544,7 @@ Lisp_ptr syntax_arrow(){
 Lisp_ptr syntax_define_syntax(){
   ZsArgs args{2};
 
-  if(!identifier(args[0])){
+  if(!identifierp(args[0])){
     throw builtin_identifier_check_failed("define-syntax", args[0]);
   }
 
