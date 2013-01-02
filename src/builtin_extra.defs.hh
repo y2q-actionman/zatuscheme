@@ -9,6 +9,9 @@
 {"make-syntactic-closure", {
     make_syntactic_closure,
     {3}}},
+{"identifier?", {
+    identifier_p,
+    {1}}},
 {"gensym", {
     gensym,
     {0}}},

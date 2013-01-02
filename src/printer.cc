@@ -153,7 +153,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     f << "#<SyntactinClosure [";
     print(f, sc->expr(), flag);
     f << ']';
-    if(sc->expr().tag() == Ptr_tag::symbol)
+    if(sc->is_alias())
       f << " (alias)";
     f << '>';
     break;

@@ -48,6 +48,16 @@ int main(){
   check_e_success("sc-test-3");
   check_e("(eval sc-test-3 (null-environment 5))", "x");
 
+  
+  check_e("(identifier? 'a)", "#t");
+  check_e("(identifier? (make-syntactic-closure env '() 'a))", "#t");
+  check_e("(identifier? \"a\")", "#f");
+  check_e("(identifier? #\\a)", "#f");
+  check_e("(identifier? 97)", "#f");
+  check_e("(identifier? #f)", "#f");
+  check_e("(identifier? '(a))", "#f");
+  check_e("(identifier? '#(a))", "#f");
+
 
   check_e_success(
   "(define-syntax push"
