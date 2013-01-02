@@ -49,7 +49,7 @@ Lisp_ptr syntax_lambda(){
 
   return bind_cons_list_strict
     (wargs[0],
-     [](Symbol*, Lisp_ptr args, ConsIter code){
+     [](Lisp_ptr, Lisp_ptr args, ConsIter code){
       return lambda_internal(args, code.base());
     });
 }
@@ -116,11 +116,10 @@ Lisp_ptr syntax_begin(){
 
   return bind_cons_list_strict
     (wargs[0],
-     [](Symbol*, ConsIter body) -> Lisp_ptr{
+     [](Lisp_ptr, ConsIter body) -> Lisp_ptr{
       if(!body){
         throw zs_error("eval error: begin has no exprs.\n");
       }
-
       vm.return_value = {body.base(), vm_op_begin};
       return {};
     });
@@ -156,7 +155,7 @@ Lisp_ptr syntax_let_star(){
 
     bind_cons_list_strict
       (wargs[0],
-       [&](Symbol*, Lisp_ptr bindings1, ConsIter body1){
+       [&](Lisp_ptr, Lisp_ptr bindings1, ConsIter body1){
         bindings = bindings1;
         body = body1.base();
       });
@@ -274,7 +273,7 @@ Lisp_ptr syntax_conditional(T default_value, Expander e){
 
   bind_cons_list_loose
     (wargs[0],
-     [&](Symbol*, ConsIter rest){
+     [&](Lisp_ptr, ConsIter rest){
       head = rest.base().get<Cons*>();
     });
 
@@ -356,7 +355,7 @@ Lisp_ptr syntax_case(){
 
   bind_cons_list_strict
     (wargs[0],
-     [&](Symbol*, Lisp_ptr key1, ConsIter clauses1) -> void{
+     [&](Lisp_ptr, Lisp_ptr key1, ConsIter clauses1) -> void{
       key = key1;
       clauses = clauses1.base();
     });
@@ -381,7 +380,7 @@ Lisp_ptr syntax_do(){
 
   bind_cons_list_strict
     (wargs[0],
-     [&](Symbol*, Lisp_ptr vars1, Lisp_ptr ends, ConsIter commands1) -> void{
+     [&](Lisp_ptr, Lisp_ptr vars1, Lisp_ptr ends, ConsIter commands1) -> void{
       vars = vars1;
 
       auto end_c = ends.get<Cons*>();
@@ -456,7 +455,7 @@ Lisp_ptr syntax_quasiquote(){
 
   bind_cons_list_strict
     (wargs[0],
-     [&](Symbol*, Lisp_ptr expr){
+     [&](Lisp_ptr, Lisp_ptr expr){
       arg = expr;
     });
 
