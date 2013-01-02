@@ -44,9 +44,9 @@ int main(){
   check_e("(sc-test-2 (list x y))", "(2 1)");
 
   check_e_success("(define sc-test-3"
-                  "  (make-syntactic-closure (interaction-environment) ()"
-                  "                          'x))");
-  check_e("sc-test-3", "x");
+                  "  (make-syntactic-closure (interaction-environment) '(x) 'x))");
+  check_e_success("sc-test-3");
+  check_e("(eval sc-test-3 (null-environment 5))", "x");
 
 
   check_e_success(
@@ -54,7 +54,7 @@ int main(){
   "  (sc-macro-transformer"
   "   (lambda (exp env)"
   "    (let ((item (make-syntactic-closure env '() (cadr exp)))"
-  "                    (list (make-syntactic-closure env '() (caddr exp))))"
+  "          (list (make-syntactic-closure env '() (caddr exp))))"
   "     `(set! ,list (cons ,item ,list))))))");
   check_e_success("(define push-test-lis ())");
   check_e("push-test-lis", "()");
