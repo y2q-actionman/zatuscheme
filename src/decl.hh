@@ -22,6 +22,7 @@ typedef std::istream InputPort;
 typedef std::ostream OutputPort;
 class Env;
 class Delay;
+class SyntacticClosure;
 typedef void(*VMop)();
 
 

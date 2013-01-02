@@ -39,6 +39,11 @@ struct to_type<Ptr_tag, Ptr_tag::n_procedure>{
 };
 
 template<>
+struct to_type<Ptr_tag, Ptr_tag::continuation>{
+  typedef const Procedure::Continuation* type;
+};
+
+template<>
 struct to_type<Ptr_tag, Ptr_tag::number>{
   typedef Number* type;
 };
@@ -74,8 +79,8 @@ struct to_type<Ptr_tag, Ptr_tag::delay>{
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::continuation>{
-  typedef const Procedure::Continuation* type;
+struct to_type<Ptr_tag, Ptr_tag::syntactic_closure>{
+  typedef SyntacticClosure* type;
 };
 
 template<>
@@ -127,6 +132,12 @@ Ptr_tag to_tag<Ptr_tag, const Procedure::NProcedure*>(){
 
 template<>
 inline constexpr
+Ptr_tag to_tag<Ptr_tag, Procedure::Continuation*>(){
+  return Ptr_tag::continuation;
+}
+
+template<>
+inline constexpr
 Ptr_tag to_tag<Ptr_tag, Number*>(){
   return Ptr_tag::number;
 }
@@ -169,8 +180,8 @@ Ptr_tag to_tag<Ptr_tag, Delay*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Procedure::Continuation*>(){
-  return Ptr_tag::continuation;
+Ptr_tag to_tag<Ptr_tag, SyntacticClosure*>(){
+  return Ptr_tag::syntactic_closure;
 }
 
 template<>

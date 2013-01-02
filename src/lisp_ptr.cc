@@ -16,6 +16,8 @@ const char* stringify(Ptr_tag p){
     return "interpreted procedure";
   case Ptr_tag::n_procedure:
     return "native procedure";
+  case Ptr_tag::continuation:
+    return "continuation";
   case Ptr_tag::number:
     return "number";
   case Ptr_tag::string:
@@ -30,8 +32,8 @@ const char* stringify(Ptr_tag p){
     return "env";
   case Ptr_tag::delay:
     return "delay";
-  case Ptr_tag::continuation:
-    return "continuation";
+  case Ptr_tag::syntactic_closure:
+    return "syntactic closure";
   case Ptr_tag::vm_op:
     return "VMop";
   case Ptr_tag::vm_argcount:

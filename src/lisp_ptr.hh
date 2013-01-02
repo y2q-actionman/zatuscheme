@@ -11,6 +11,7 @@ enum class Ptr_tag {
     symbol,
     i_procedure,
     n_procedure,
+    continuation,
     number,
     string,
     vector,
@@ -18,7 +19,7 @@ enum class Ptr_tag {
     output_port,
     env,
     delay,
-    continuation,
+    syntactic_closure,
     vm_op,
     vm_argcount
     };

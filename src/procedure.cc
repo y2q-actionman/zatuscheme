@@ -69,7 +69,9 @@ const ProcInfo* get_procinfo(Lisp_ptr p){
   case Ptr_tag::string:    case Ptr_tag::vector:
   case Ptr_tag::input_port: case Ptr_tag::output_port:
   case Ptr_tag::env:
-  case Ptr_tag::delay:     case Ptr_tag::vm_op:
+  case Ptr_tag::delay:
+  case Ptr_tag::syntactic_closure:
+  case Ptr_tag::vm_op:
   case Ptr_tag::vm_argcount:
     return nullptr;
 
@@ -96,7 +98,9 @@ Lisp_ptr get_arg_list(Lisp_ptr p){
   case Ptr_tag::string:    case Ptr_tag::vector:
   case Ptr_tag::input_port: case Ptr_tag::output_port:
   case Ptr_tag::env:
-  case Ptr_tag::delay:     case Ptr_tag::vm_op:
+  case Ptr_tag::delay:
+  case Ptr_tag::syntactic_closure:
+  case Ptr_tag::vm_op:
   case Ptr_tag::vm_argcount:
     throw zs_error("internal error: internal funcion '%s' called for '%s' object\n",
                         __func__, stringify(p.tag()));

@@ -11,6 +11,7 @@
 #include "delay.hh"
 #include "vm.hh"
 #include "eval.hh"
+#include "s_closure.hh"
 
 using namespace std;
 
@@ -145,6 +146,13 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
       f << "]>";
     }
     break;
+  }
+
+  case Ptr_tag::syntactic_closure: {
+    auto sc = p.get<SyntacticClosure*>();
+    f << "#<SyntactinClosure (";
+    print(f, sc->expr(), flag);
+    f << ")>";
   }
 
   case Ptr_tag::vm_argcount:
