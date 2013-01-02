@@ -697,33 +697,10 @@ bool is_self_evaluating(Lisp_ptr p){
     && (tag != Ptr_tag::vm_op);
 }
 
-void vm_op_eval_free_list(){
-  assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_eval_free_list);
-  auto& argc = vm.code[vm.code.size() - 2];
-  auto& args = vm.code[vm.code.size() - 3];
-
-  if(nullp(args)){
-    vm.stack.push_back(argc);
-    vm.code.erase(vm.code.end() - 3, vm.code.end());
-  }else{
-    auto args_c = args.get<Cons*>();
-    auto arg1 = args_c->car(); // the EXPR just evaled.
-    auto args_rest = args_c->cdr();
-
-    if(arg1.tag() == Ptr_tag::symbol){
-      vm.stack.push_back(arg1.get<Symbol*>());
-    }else if(arg1.tag() == Ptr_tag::syntactic_closure){
-      vm.stack.push_back(vm.return_value[0]);
-    }else{
-      throw zs_error("eval error: syntactic closure's free-list contains wrong type value (%s)\n",
-                     stringify(arg1.tag()));
-    }
-
-    args = args_rest;
-    argc = {Ptr_tag::vm_argcount, argc.get<int>() + 1};
-    if(auto sc = args_rest.get<Cons*>()->car().get<SyntacticClosure*>())
-      vm.code.push_back(sc);
-  }
+void vm_op_reset_symbol_eval(){
+  assert(vm.code.back() == vm_op_reset_symbol_eval);
+  vm.code.pop_back();
+  vm.symbol_eval = true;
 }
 
 void vm_op_eval_sc(){
@@ -762,7 +739,11 @@ void eval(){
       switch(p.tag()){
       case Ptr_tag::symbol:
         vm.code.pop_back();
-        vm.return_value[0] = vm.find(p.get<Symbol*>());
+        if(vm.symbol_eval){
+          vm.return_value[0] = vm.find(p.get<Symbol*>());
+        }else{
+          vm.return_value[0] = p;
+        }
         break;
     
       case Ptr_tag::cons: {
@@ -793,13 +774,12 @@ void eval(){
 
         auto f_names = sc->free_names();
 
+        vm.symbol_eval = false;
         assert(vm.code.back() == p);
         vm.code.insert(vm.code.end(), 
-                       {vm_op_eval_sc,
-                        f_names, {Ptr_tag::vm_argcount, 0},
-                        vm_op_eval_free_list});
-        if(auto first_sc = f_names->car().get<SyntacticClosure*>())
-          vm.code.push_back(first_sc);
+                       {vm_op_eval_sc, vm_op_reset_symbol_eval,
+                        {f_names}, {Ptr_tag::vm_argcount, 0},
+                        vm_op_arg_push, f_names->car()});
         break;
       }
 

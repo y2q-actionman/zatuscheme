@@ -12,20 +12,17 @@ VM::VM() : code(), stack(),
            return_value(1, {}),
            extent(),
            frame_(new Env{nullptr}),
-           symtable_(new SymTable())
-{
-}
+           symtable_(new SymTable()),
+           symbol_eval(true){}
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           return_value(other.return_value),
                           extent(other.extent),
                           frame_(other.frame_),
-                          symtable_(other.symtable_)
-{
-}
+                          symtable_(other.symtable_),
+                          symbol_eval(other.symbol_eval){}
 
-VM::~VM(){
-}
+VM::~VM(){}
 
 
 VM& VM::operator=(const VM& other){
@@ -37,6 +34,8 @@ VM& VM::operator=(const VM& other){
   frame_ = other.frame_;
   
   symtable_ = other.symtable_;
+
+  symbol_eval = other.symbol_eval;
 
   return *this;
 }

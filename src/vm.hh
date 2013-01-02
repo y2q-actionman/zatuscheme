@@ -48,6 +48,9 @@ public:
 private:
   Env* frame_;
   std::shared_ptr<SymTable> symtable_;
+
+public:
+  bool symbol_eval;
 };
 
 extern VM vm;
