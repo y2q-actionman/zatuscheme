@@ -55,18 +55,18 @@
     syntax_quasiquote,
     {1, Variadic::f, Passing::whole, Returning::code}}},
 {"unquote", {
-    whole_function_pass_through,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    syntax_unquote,
+    {1, Variadic::f, Passing::whole}}},
 {"unquote-splicing", {
-    whole_function_error,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    syntax_unquote_splicing,
+    {1, Variadic::f, Passing::whole}}},
 
 {"else", {
-    whole_function_error,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    syntax_else,
+    {1, Variadic::f, Passing::whole}}},
 {"=>", {
-    whole_function_error,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    syntax_arrow,
+    {1, Variadic::f, Passing::whole}}},
 
 {"define-syntax", {
     syntax_define_syntax,

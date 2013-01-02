@@ -15,19 +15,13 @@
 using namespace std;
 using namespace Procedure;
 
-Lisp_ptr whole_function_error(){
+static
+Lisp_ptr whole_function_error(const char* opname){
   ZsArgs wargs{1};
-  auto sym = wargs[0].get<Cons*>()->car().get<Symbol*>();
-  assert(sym);
-
   throw zs_error("eval error: '%s' -- cannot be used as operator!!\n",
-                      sym->name().c_str());
+                 opname);
 }
 
-Lisp_ptr whole_function_pass_through(){
-  ZsArgs wargs{1};
-  return wargs[0];
-}
 
 Lisp_ptr syntax_quote(){
   ZsArgs args{1};
@@ -535,6 +529,22 @@ Lisp_ptr syntax_quasiquote(){
   }else{
     UNEXP_DEFAULT();
   }
+}
+
+Lisp_ptr syntax_unquote(){
+  return whole_function_error("unquote");
+}
+
+Lisp_ptr syntax_unquote_splicing(){
+  return whole_function_error("unquote-splicing");
+}
+
+Lisp_ptr syntax_else(){
+  return whole_function_error("else");
+}
+
+Lisp_ptr syntax_arrow(){
+  return whole_function_error("=>");
 }
 
 Lisp_ptr syntax_define_syntax(){
