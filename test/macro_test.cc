@@ -34,5 +34,14 @@ int main(){
   check_e("y", "2");
   check_e("(sc-test-1 (list x y))", "(2 1)");
 
+  check_e_success("(define-syntax sc-test-2 (sc-macro-transformer"
+                  "(lambda (form env)"
+                  "  (make-syntactic-closure env () (cadr form)))))");
+  check_e("(sc-test-2 (list x y))", "(1 2)");
+  check_e_success("(swap! x y)");
+  check_e("x", "2");
+  check_e("y", "1");
+  check_e("(sc-test-2 (list x y))", "(2 1)");
+
   return RESULT;
 }

@@ -3,6 +3,7 @@
 #include "vm.hh"
 #include "builtin_util.hh"
 #include "procedure.hh"
+#include "s_closure.hh"
 #include "util.hh"
 
 using namespace std;
@@ -46,6 +47,24 @@ Lisp_ptr sc_macro_transformer(){
   return new IProcedure(iproc->get(), info,
                         iproc->arg_list(),
                         iproc->closure()->fork());
+}
+
+Lisp_ptr make_syntactic_closure(){
+  ZsArgs args{3};
+
+  Env* e = args[0].get<Env*>();
+  if(!e){
+    throw builtin_type_check_failed("make-syntactic-closure",
+                                    Ptr_tag::env, args[0]);
+  }
+
+  if(args[1].tag() != Ptr_tag::cons){
+    throw builtin_type_check_failed("make-syntactic-closure",
+                                    Ptr_tag::cons, args[1]);
+  }
+  Cons* c = args[1].get<Cons*>();
+
+  return new SyntacticClosure(e, c, args[2]);
 }
 
 Lisp_ptr gensym(){

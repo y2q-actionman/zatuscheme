@@ -12,6 +12,7 @@
 #include "printer.hh"
 #include "builtin_util.hh"
 #include "delay.hh"
+#include "s_closure.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -696,6 +697,28 @@ bool is_self_evaluating(Lisp_ptr p){
     && (tag != Ptr_tag::vm_op);
 }
 
+void vm_op_eval_sc(){
+  assert(vm.code[vm.code.size() - 1] == vm_op_eval_sc);
+  assert(vm.code[vm.code.size() - 2].tag() == Ptr_tag::syntactic_closure);
+  auto sc = vm.code[vm.code.size() - 2].get<SyntacticClosure*>();
+
+
+  ZsArgs args;
+
+  auto oldenv = vm.frame();
+
+  if(args.size() == 0){
+    vm.set_frame(sc->env());
+    vm.code[vm.code.size() - 2] = oldenv;
+    vm.code[vm.code.size() - 1] = vm_op_leave_frame;
+    vm.code.push_back(sc->expr());
+  }else{
+    // FIXME!
+    vm.code.pop_back();
+    vm.code.pop_back();
+  }
+}
+
 void eval(){
   try{
     while(!vm.code.empty()){
@@ -728,6 +751,20 @@ void eval(){
           vm.code.pop_back();
         }
         break;
+
+      case Ptr_tag::syntactic_closure: {
+        auto sc = p.get<SyntacticClosure*>();
+        assert(sc);
+
+        auto f_names = sc->free_names();
+
+        assert(vm.code.back() == p);
+        vm.code.insert(vm.code.end(), 
+                       {vm_op_eval_sc,
+                        f_names, {Ptr_tag::vm_argcount, 0},
+                        vm_op_arg_push, f_names->car()});
+        break;
+      }
 
         // self-evaluating
       case Ptr_tag::boolean: case Ptr_tag::character:

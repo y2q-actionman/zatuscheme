@@ -6,6 +6,8 @@
 Lisp_ptr traditional_transformer();
 Lisp_ptr sc_macro_transformer();
 
+Lisp_ptr make_syntactic_closure();
+
 Lisp_ptr gensym();
 Lisp_ptr exit_func();
 

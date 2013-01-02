@@ -6,3 +6,6 @@
 "    (display (eval (read) (interaction-environment)))"
 "    (newline)"
 "    (loop)))",
+
+"(define (close-syntax form env)"
+"  (make-syntactic-closure env () form))",
