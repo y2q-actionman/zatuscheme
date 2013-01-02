@@ -696,40 +696,6 @@ bool is_self_evaluating(Lisp_ptr p){
     && (tag != Ptr_tag::vm_op);
 }
 
-void vm_op_reset_symbol_eval(){
-  assert(vm.code.back() == vm_op_reset_symbol_eval);
-  vm.code.pop_back();
-  vm.symbol_eval = true;
-}
-
-void vm_op_eval_sc(){
-  assert(vm.code[vm.code.size() - 1] == vm_op_eval_sc);
-  assert(vm.code[vm.code.size() - 2].tag() == Ptr_tag::syntactic_closure);
-  auto sc = vm.code[vm.code.size() - 2].get<SyntacticClosure*>();
-
-  ZsArgs args;
-
-  auto oldenv = vm.frame();
-  Env* newenv;
-
-  if(args.size() == 0){
-    newenv = sc->env();
-  }else{
-    newenv = sc->env()->push();
-
-    for(auto i : args){
-      auto sym = i.get<Symbol*>();
-      assert(sym);
-      newenv->local_set(sym, sym);
-    }
-  }
-
-  vm.set_frame(newenv);
-  vm.code[vm.code.size() - 2] = oldenv;
-  vm.code[vm.code.size() - 1] = vm_op_leave_frame;
-  vm.code.push_back(sc->expr());
-}
-
 void eval(){
   try{
     while(!vm.code.empty()){
@@ -738,11 +704,7 @@ void eval(){
       switch(p.tag()){
       case Ptr_tag::symbol:
         vm.code.pop_back();
-        if(vm.symbol_eval){
-          vm.return_value[0] = vm.find(p.get<Symbol*>());
-        }else{
-          vm.return_value[0] = p;
-        }
+        vm.return_value[0] = vm.find(p.get<Symbol*>());
         break;
     
       case Ptr_tag::cons: {
@@ -771,14 +733,24 @@ void eval(){
         auto sc = p.get<SyntacticClosure*>();
         assert(sc);
 
-        auto f_names = sc->free_names();
+        auto oldenv = vm.frame();
+        Env* newenv;
 
-        vm.symbol_eval = false;
-        assert(vm.code.back() == p);
-        vm.code.insert(vm.code.end(), 
-                       {vm_op_eval_sc, vm_op_reset_symbol_eval,
-                        {f_names}, {Ptr_tag::vm_argcount, 0},
-                        vm_op_arg_push, f_names->car()});
+        if(!sc->free_names()){
+          newenv = sc->env();
+        }else{
+          newenv = sc->env()->push();
+          for(auto i : sc->free_names()){
+            auto sym = i.get<Symbol*>();
+            assert(sym);
+            newenv->local_set(sym, sym);
+          }
+        }
+
+        vm.set_frame(newenv);
+        vm.code.back() = oldenv;
+        vm.code.push_back(vm_op_leave_frame);
+        vm.code.push_back(sc->expr());
         break;
       }
 
@@ -1028,10 +1000,6 @@ const char* stringify(VMop op){
     return "save values and enter";
   }else if(op == vm_op_stack_splicing){
     return "splicing args";
-  }else if(op == vm_op_reset_symbol_eval){
-    return "reset symbol eval";
-  }else if(op == vm_op_eval_sc){
-    return "eval syntactic closure";
   }else{
     return "unknown vm-op";
   }
