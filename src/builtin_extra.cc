@@ -44,7 +44,8 @@ Lisp_ptr sc_macro_transformer(){
   info.leaving = Leaving::after_returning_op;
 
   return new IProcedure(iproc->get(), info,
-                        iproc->arg_list(), iproc->closure());
+                        iproc->arg_list(),
+                        iproc->closure()->fork());
 }
 
 Lisp_ptr gensym(){

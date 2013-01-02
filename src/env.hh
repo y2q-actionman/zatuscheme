@@ -24,6 +24,8 @@ public:
   Lisp_ptr traverse(Symbol*, Lisp_ptr);
   void local_set(Symbol*, Lisp_ptr);
   Env* push();
+
+  Env* fork() const;
   
   friend std::ostream& operator<<(std::ostream&, const Env&);
 

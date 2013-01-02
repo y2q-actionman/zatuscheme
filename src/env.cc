@@ -44,6 +44,16 @@ Env* Env::push(){
   return new Env{this};
 }
 
+Env* Env::fork() const{
+  auto ret = new Env(nullptr);
+
+  for(auto e = this; e; e = e->next_){
+    ret->map_.insert(begin(e->map_), end(e->map_));
+  }
+
+  return ret;
+}
+
 std::ostream& operator<<(std::ostream& f, const Env& env){
   f << "Env " << c_cast<void*>(&env)
     << " (next=" << c_cast<void*>(env.next_) << ")\n";
