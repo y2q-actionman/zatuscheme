@@ -8,7 +8,7 @@ Lisp_ptr sc_macro_transformer();
 
 Lisp_ptr make_syntactic_closure();
 
-Lisp_ptr identifier_p();
+Lisp_ptr proc_identifierp();
 
 Lisp_ptr gensym();
 Lisp_ptr exit_func();

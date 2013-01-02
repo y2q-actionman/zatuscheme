@@ -50,7 +50,8 @@ int main(){
 
   
   check_e("(identifier? 'a)", "#t");
-  check_e("(identifier? (make-syntactic-closure env '() 'a))", "#t");
+  check_e("(identifier? (make-syntactic-closure (null-environment 5) '() 'a))",
+          "#t");
   check_e("(identifier? \"a\")", "#f");
   check_e("(identifier? #\\a)", "#f");
   check_e("(identifier? 97)", "#f");

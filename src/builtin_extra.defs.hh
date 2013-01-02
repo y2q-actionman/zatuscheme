@@ -10,7 +10,7 @@
     make_syntactic_closure,
     {3}}},
 {"identifier?", {
-    identifier_p,
+    proc_identifierp,
     {1}}},
 {"gensym", {
     gensym,

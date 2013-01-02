@@ -27,4 +27,6 @@ private:
   Lisp_ptr expr_;
 };
 
+bool identifierp(Lisp_ptr);
+
 #endif // S_CLOSURE_HH

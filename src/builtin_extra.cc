@@ -67,17 +67,9 @@ Lisp_ptr make_syntactic_closure(){
   return new SyntacticClosure(e, c, args[2]);
 }
 
-Lisp_ptr identifier_p(){
+Lisp_ptr proc_identifierp(){
   ZsArgs args{1};
-
-  if(args[0].tag() == Ptr_tag::symbol){
-    return Lisp_ptr{true};
-  }else if(args[0].tag() == Ptr_tag::syntactic_closure){
-    auto sc = args[0].get<SyntacticClosure*>();
-    return Lisp_ptr{sc->is_alias()};
-  }else{
-    return Lisp_ptr{false};
-  }
+  return Lisp_ptr{identifierp(args[0])};
 }
 
 Lisp_ptr gensym(){
