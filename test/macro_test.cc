@@ -43,6 +43,12 @@ int main(){
   check_e("y", "1");
   check_e("(sc-test-2 (list x y))", "(2 1)");
 
+  check_e_success("(define sc-test-3"
+                  "  (make-syntactic-closure (interaction-environment) ()"
+                  "                          'x))");
+  check_e("sc-test-3", "x");
+
+
   check_e_success(
   "(define-syntax push"
   "  (sc-macro-transformer"

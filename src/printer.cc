@@ -153,6 +153,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     f << "#<SyntactinClosure (";
     print(f, sc->expr(), flag);
     f << ")>";
+    break;
   }
 
   case Ptr_tag::vm_argcount:

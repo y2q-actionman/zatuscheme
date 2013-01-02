@@ -198,7 +198,6 @@ void vm_op_call(){
   auto proc = vm.return_value[0];
 
   if(!is_procedure(proc)){
-    vm.code.pop_back();
     vm.stack.pop_back();
 
     throw zs_error("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
@@ -1029,6 +1028,10 @@ const char* stringify(VMop op){
     return "save values and enter";
   }else if(op == vm_op_stack_splicing){
     return "splicing args";
+  }else if(op == vm_op_reset_symbol_eval){
+    return "reset symbol eval";
+  }else if(op == vm_op_eval_sc){
+    return "eval syntactic closure";
   }else{
     return "unknown vm-op";
   }
