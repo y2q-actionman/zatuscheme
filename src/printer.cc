@@ -150,9 +150,12 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
 
   case Ptr_tag::syntactic_closure: {
     auto sc = p.get<SyntacticClosure*>();
-    f << "#<SyntactinClosure (";
+    f << "#<SyntactinClosure [";
     print(f, sc->expr(), flag);
-    f << ")>";
+    f << ']';
+    if(sc->expr().tag() == Ptr_tag::symbol)
+      f << " (alias)";
+    f << '>';
     break;
   }
 
