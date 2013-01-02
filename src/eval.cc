@@ -327,7 +327,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
 
   // variadic arg push
   if(info->max_args > info->required_args){
-    if(!arg_name.get<Symbol*>()){
+    if(!identifierp(arg_name)){
       throw zs_error("eval error: no arg name for variadic arg!\n");
     }
 
@@ -534,10 +534,11 @@ void vm_op_set_base(Fun fun){
   assert(vm.code.back().tag() == Ptr_tag::vm_op);
   vm.code.pop_back();
 
-  auto var = vm.code.back().get<Symbol*>();
-  if(!var){
-    throw zs_error("eval error: internal error occured (set!'s varname is dismissed)\n");
+  if(!identifierp(vm.code.back())){
+    throw builtin_identifier_check_failed("(set)", vm.code.back());
   }
+
+  auto var = vm.code.get<Symbol*>();
   vm.code.pop_back();
 
   fun(vm, var, vm.return_value[0]); 

@@ -18,9 +18,9 @@ zs_error builtin_argcount_failed(const char* name, int required, int max, int pa
                  name, required, max, passed);
 }
 
-zs_error builtin_identifier_check_failed(const char* name, Ptr_tag tag){
+zs_error builtin_identifier_check_failed(const char* name, Lisp_ptr p){
   return zs_error("eval error: %s: arg is not identifier! (%s)\n",
-                  name, stringify(tag));
+                  name, stringify(p.tag()));
 }
 
 // class ZsArgs

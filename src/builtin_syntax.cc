@@ -11,6 +11,7 @@
 #include "printer.hh"
 #include "delay.hh"
 #include "cons_util.hh"
+#include "s_closure.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -69,13 +70,7 @@ Lisp_ptr syntax_if(){
 
 Lisp_ptr syntax_set(){
   ZsArgs args{2};
-
-  Symbol* var = args[0].get<Symbol*>();
-  if(!var){
-    throw builtin_type_check_failed("set!", Ptr_tag::symbol, args[0]);
-  }
-
-  vm.return_value = {var, vm_op_set, args[1]};
+  vm.return_value = {args[0], vm_op_set, args[1]};
   return {};
 }
 
@@ -91,7 +86,7 @@ Lisp_ptr syntax_define(){
   if(first.tag() == Ptr_tag::symbol){
     return bind_cons_list_strict
       (p,
-       [&](Symbol* var, Lisp_ptr expr) -> Lisp_ptr {
+       [&](Lisp_ptr var, Lisp_ptr expr) -> Lisp_ptr {
         vm.code.insert(vm.code.end(), {var, vm_op_local_set, expr});
         return expr;
       });
@@ -101,7 +96,7 @@ Lisp_ptr syntax_define(){
     return
       bind_cons_list_strict
       (first,
-       [&](Symbol* var, ConsIter l_args) -> Lisp_ptr{
+       [&](Lisp_ptr var, ConsIter l_args) -> Lisp_ptr{
         auto value = lambda_internal(l_args.base(), code);
         vm.local_set(var, value);
         return value;
@@ -549,13 +544,12 @@ Lisp_ptr syntax_arrow(){
 Lisp_ptr syntax_define_syntax(){
   ZsArgs args{2};
 
-  auto var = args[0].get<Symbol*>();
-  if(!var){
-    throw builtin_type_check_failed("define-syntax", Ptr_tag::symbol, args[0]);
+  if(!identifier(args[0])){
+    throw builtin_identifier_check_failed("define-syntax", args[0]);
   }
 
   // TODO: check args[1] is a transformer.
-  vm.code.insert(vm.code.end(), {var, vm_op_local_set, args[1]});
+  vm.code.insert(vm.code.end(), {args[0], vm_op_local_set, args[1]});
   return Lisp_ptr{true};
 }
 
