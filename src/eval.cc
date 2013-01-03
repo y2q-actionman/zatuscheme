@@ -529,8 +529,13 @@ void vm_op_if(){
   }
 }
 
-template<typename Fun>
-void vm_op_set_base(Fun fun){
+/*
+  stack = (variable name)
+  ----
+  stack = ()
+  return-value is setted.
+*/
+void vm_op_set(){
   assert(vm.code.back().tag() == Ptr_tag::vm_op);
   vm.code.pop_back();
 
@@ -541,17 +546,7 @@ void vm_op_set_base(Fun fun){
   auto var = vm.code.back();
   vm.code.pop_back();
 
-  fun(vm, var.get<Symbol*>(), vm.return_value[0]); 
-}
-
-/*
-  stack = (variable name)
-  ----
-  stack = ()
-  return-value is setted.
-*/
-void vm_op_set(){
-  vm_op_set_base(mem_fn(&VM::set));
+  vm.set(var.get<Symbol*>(), vm.return_value[0]); 
 }
 
 /*
@@ -561,7 +556,17 @@ void vm_op_set(){
   return-value is setted.
 */
 void vm_op_local_set(){
-  vm_op_set_base(mem_fn(&VM::local_set));
+  assert(vm.code.back().tag() == Ptr_tag::vm_op);
+  vm.code.pop_back();
+
+  if(!identifierp(vm.code.back())){
+    throw builtin_identifier_check_failed("(set)", vm.code.back());
+  }
+
+  auto var = vm.code.back();
+  vm.code.pop_back();
+
+  vm.local_set(var.get<Symbol*>(), vm.return_value[0]); 
 }
 
 /*

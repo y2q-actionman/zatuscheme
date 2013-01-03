@@ -84,23 +84,21 @@ Lisp_ptr syntax_define(){
   auto first = rest->car();
 
   if(first.tag() == Ptr_tag::symbol){
-    return bind_cons_list_strict
+    bind_cons_list_strict
       (p,
-       [&](Lisp_ptr var, Lisp_ptr expr) -> Lisp_ptr {
+       [](Lisp_ptr var, Lisp_ptr expr){
         vm.code.insert(vm.code.end(), {var, vm_op_local_set, expr});
-        return expr;
       });
+    return {};
   }else if(first.tag() == Ptr_tag::cons){
     Lisp_ptr code = rest->cdr();
-
-    return
-      bind_cons_list_strict
+    bind_cons_list_strict
       (first,
-       [&](Lisp_ptr var, ConsIter l_args) -> Lisp_ptr{
+       [&](Lisp_ptr var, ConsIter l_args){
         auto value = lambda_internal(l_args.base(), code);
-        vm.local_set(var.get<Symbol*>(), value);
-        return value;
+        vm.code.insert(vm.code.end(), {var, vm_op_local_set, value});
       });
+    return {};
   }else{
     throw zs_error("eval error: informal define syntax!\n");
   }
