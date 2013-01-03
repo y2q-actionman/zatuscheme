@@ -18,8 +18,7 @@ public:
   Cons* free_names() const { return free_names_; }
   Lisp_ptr expr() const { return expr_; }
 
-  bool is_alias() const
-  { return expr_.tag() == Ptr_tag::symbol; }
+  bool is_alias() const;
 
 private:
   Env* env_;
@@ -28,5 +27,6 @@ private:
 };
 
 bool identifierp(Lisp_ptr);
+Symbol* identifier_symbol(Lisp_ptr);
 
 #endif // S_CLOSURE_HH

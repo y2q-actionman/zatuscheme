@@ -321,7 +321,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       break;
     }
    
-    vm.local_set(arg_name_cell->car().get<Symbol*>(), *i);
+    vm.local_set(identifier_symbol(arg_name_cell->car()), *i);
     arg_name = arg_name_cell->cdr();
   }
 
@@ -334,7 +334,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     auto var_argc = argc.get<int>() - static_cast<int>(std::distance(arg_start, i));
     vm.stack.erase(arg_start, i);
     vm.stack.push_back({Ptr_tag::vm_argcount, var_argc});
-    vm.local_set(arg_name.get<Symbol*>(), stack_to_list<false>(vm.stack));
+    vm.local_set(identifier_symbol(arg_name), stack_to_list<false>(vm.stack));
   }else{  // clean stack
     if(i != arg_end){
       throw zs_error("eval error: corrupted stack -- passed too much args!\n");
@@ -539,14 +539,18 @@ void vm_op_set(){
   assert(vm.code.back().tag() == Ptr_tag::vm_op);
   vm.code.pop_back();
 
-  if(!identifierp(vm.code.back())){
-    throw builtin_identifier_check_failed("(set)", vm.code.back());
-  }
-
   auto var = vm.code.back();
   vm.code.pop_back();
 
-  vm.set(var.get<Symbol*>(), vm.return_value[0]); 
+  if(auto sym = var.get<Symbol*>()){
+    vm.set(sym, vm.return_value[0]);
+  }else if(auto sc = var.get<SyntacticClosure*>()){
+    assert(sc->is_alias());
+    sc->env()->traverse(identifier_symbol(sc->expr()),
+                        vm.return_value[0]);
+  }else{
+    throw builtin_identifier_check_failed("(set)", vm.code.back());
+  }
 }
 
 /*
@@ -559,14 +563,14 @@ void vm_op_local_set(){
   assert(vm.code.back().tag() == Ptr_tag::vm_op);
   vm.code.pop_back();
 
-  if(!identifierp(vm.code.back())){
-    throw builtin_identifier_check_failed("(set)", vm.code.back());
-  }
-
   auto var = vm.code.back();
   vm.code.pop_back();
 
-  vm.local_set(var.get<Symbol*>(), vm.return_value[0]); 
+  if(!identifierp(var)){
+    throw builtin_identifier_check_failed("(local set)", var);
+  }
+
+  vm.local_set(identifier_symbol(var), vm.return_value[0]); 
 }
 
 /*
@@ -687,7 +691,7 @@ Lisp_ptr let_internal(Entering entering){
                              gl_syms.extract(), vm.frame());
 
   if(name){
-    vm.local_set(name.get<Symbol*>(), proc);
+    vm.local_set(identifier_symbol(name), proc);
   }
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
@@ -747,7 +751,7 @@ void eval(){
         }else{
           newenv = sc->env()->push();
           for(auto i : sc->free_names()){
-            auto sym = i.get<Symbol*>();
+            auto sym = identifier_symbol(i);
             assert(sym);
             newenv->local_set(sym, sym);
           }
