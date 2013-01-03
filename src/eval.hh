@@ -16,8 +16,6 @@ void vm_op_begin();
 
 Lisp_ptr let_internal(Procedure::Entering);
 
-bool is_self_evaluating(Lisp_ptr);
-
 
 // for internal direct 'goto'.
 void proc_enter_entrypoint(Lisp_ptr);

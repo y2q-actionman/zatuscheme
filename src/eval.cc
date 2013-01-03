@@ -707,13 +707,6 @@ Lisp_ptr let_internal(Entering entering){
   return {};
 }
 
-bool is_self_evaluating(Lisp_ptr p){
-  auto tag = p.tag();
-  return (tag != Ptr_tag::symbol)
-    && (tag != Ptr_tag::cons)
-    && (tag != Ptr_tag::vm_op);
-}
-
 void eval(){
   try{
     while(!vm.code.empty()){
