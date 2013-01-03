@@ -2,6 +2,7 @@
 #define S_CLOSURE_HH
 
 #include "lisp_ptr.hh"
+#include "vm.hh"
 
 class SyntacticClosure{
 public:
@@ -18,8 +19,6 @@ public:
   Cons* free_names() const { return free_names_; }
   Lisp_ptr expr() const { return expr_; }
 
-  bool is_alias() const;
-
 private:
   Env* env_;
   Cons* free_names_;
@@ -28,5 +27,6 @@ private:
 
 bool identifierp(Lisp_ptr);
 Symbol* identifier_symbol(Lisp_ptr);
+Env* identifier_env(Lisp_ptr, Env* default_env = vm.frame());
 
 #endif // S_CLOSURE_HH

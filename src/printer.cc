@@ -153,8 +153,8 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     f << "#<SyntactinClosure [";
     print(f, sc->expr(), flag);
     f << ']';
-    if(sc->is_alias())
-      f << " (alias)";
+    if(identifierp(p))
+      f << " (identifier)";
     f << '>';
     break;
   }

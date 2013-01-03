@@ -14,41 +14,35 @@ SyntacticClosure::SyntacticClosure(Env* e, Cons* f, Lisp_ptr ex)
 SyntacticClosure::~SyntacticClosure() = default;
 
 // checks recursively
-bool SyntacticClosure::is_alias() const{
-  auto tag = expr_.tag();
-
-  if(tag == Ptr_tag::symbol){
-    return true;
-  }else if(tag == Ptr_tag::syntactic_closure){
-    return expr_.get<SyntacticClosure*>()->is_alias();
-  }else{
-    return false;
-  }
-}
-
 bool identifierp(Lisp_ptr p){
   if(p.tag() == Ptr_tag::symbol){
     return true;
   }else if(p.tag() == Ptr_tag::syntactic_closure){
-    return p.get<SyntacticClosure*>()->is_alias();
+    return identifierp(p.get<SyntacticClosure*>()->expr());
   }else{
     return false;
   }
 }
 
 Symbol* identifier_symbol(Lisp_ptr p){
-  if(!identifierp(p)){
-    throw zs_error("eval internal error: not identifier value! (%s)",
-                   stringify(p.tag()));
-  }
-
   if(p.tag() == Ptr_tag::symbol){
     return p.get<Symbol*>();
   }else if(p.tag() == Ptr_tag::syntactic_closure){
-    auto sc = p.get<SyntacticClosure*>();
-    assert(sc->is_alias());
-    return sc->expr().get<Symbol*>();
+    return identifier_symbol(p.get<SyntacticClosure*>()->expr());
   }else{
-    UNEXP_DEFAULT();
+    throw zs_error("eval internal error: not identifier value! (%s)",
+                   stringify(p.tag()));
+  }
+}
+
+Env* identifier_env(Lisp_ptr p, Env* e){
+  if(p.tag() == Ptr_tag::symbol){
+    return e;
+  }else if(p.tag() == Ptr_tag::syntactic_closure){
+    auto sc = p.get<SyntacticClosure*>();
+    return identifier_env(sc->expr(), sc->env());
+  }else{
+    throw zs_error("eval internal error: not identifier value! (%s)",
+                   stringify(p.tag()));
   }
 }

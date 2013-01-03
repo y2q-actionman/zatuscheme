@@ -542,15 +542,13 @@ void vm_op_set(){
   auto var = vm.code.back();
   vm.code.pop_back();
 
-  if(auto sym = var.get<Symbol*>()){
-    vm.set(sym, vm.return_value[0]);
-  }else if(auto sc = var.get<SyntacticClosure*>()){
-    assert(sc->is_alias());
-    sc->env()->traverse(identifier_symbol(sc->expr()),
-                        vm.return_value[0]);
-  }else{
+  if(!identifierp(var)){
     throw builtin_identifier_check_failed("(set)", vm.code.back());
   }
+    
+  auto sym = identifier_symbol(var);
+  auto env = identifier_env(var);
+  env->traverse(sym, vm.return_value[0]);
 }
 
 /*
