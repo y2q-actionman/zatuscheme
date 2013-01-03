@@ -4,7 +4,7 @@
 int main(){
   zs_init();
 
-  // traditional macro (extension)
+  // traditional macro
   check_e_success("(define tmp-func (lambda (x) `(define ,x ',x)))");
   check_e("(tmp-func 'a)", "(define a (quote a))");
 
@@ -26,6 +26,8 @@ int main(){
   check_e("x", "2");
   check_e("y", "1");
 
+
+  // syntactic closure
   check_e_success("(define-syntax sc-test-1 (sc-macro-transformer"
                   "(lambda (form env) (cadr form))))");
   check_e("(sc-test-1 (list x y))", "(2 1)");
@@ -71,6 +73,8 @@ int main(){
   check_e("push-test-lis", "()");
   check_e_success("(push 1 push-test-lis)");
   check_e("push-test-lis", "(1)");
+  check_e_success("(push 2 push-test-lis)");
+  check_e("push-test-lis", "(2 1)");
 
   return RESULT;
 }
