@@ -9,6 +9,9 @@
 {"make-syntactic-closure", {
     make_syntactic_closure,
     {3}}},
+{"capture-syntactic-environment", {
+    capture_env,
+    {1}}},
 {"identifier?", {
     proc_identifierp,
     {1}}},

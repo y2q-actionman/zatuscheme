@@ -972,6 +972,29 @@ Lisp_ptr dynamic_wind(){
   return {};
 }
 
+Lisp_ptr capture_env(){
+  Lisp_ptr proc;
+  {
+    ZsArgs args{1};
+
+    if(!is_procedure(args[0])){
+      throw zs_error("eval error: first arg is not procedure (%s)\n",
+                     stringify(args[0].tag()));
+    }
+
+    auto info = get_procinfo(args[0]);
+    if(info->required_args != 1){
+      throw zs_error("eval error: first arg mush take 1 arg (%d)\n",
+                          info->required_args);
+    }
+    proc = args[0];
+  }
+
+  vm.stack.insert(vm.stack.end(), {vm.frame(), {Ptr_tag::vm_argcount, 1}});
+  proc_enter_entrypoint(proc); // direct jump to proc_enter()
+  return {};
+}
+
 const char* stringify(VMop op){
   if(op == vm_op_nop){
     return "NOP / arg bottom";
