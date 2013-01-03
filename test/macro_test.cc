@@ -48,7 +48,7 @@ int main(){
   check_e_success("(define sc-test-3"
                   "  (make-syntactic-closure (interaction-environment) '(x) 'x))");
   check_e_success("sc-test-3");
-  check_e("(eval sc-test-3 (null-environment 5))", "x");
+  check_e_undef("(eval sc-test-3 (null-environment 5))");
 
   
   check_e("(identifier? 'a)", "#t");
@@ -75,6 +75,29 @@ int main(){
   check_e("push-test-lis", "(1)");
   check_e_success("(push 2 push-test-lis)");
   check_e("push-test-lis", "(2 1)");
+
+
+  check_e_success(
+  "(define-syntax loop"
+  " (sc-macro-transformer"
+  "  (lambda (exp env)"
+  "   (let ((body (cdr exp)))"
+  "    `(call-with-current-continuation"
+  "      (lambda (exit)"
+  "        (let f ()"
+  "           ,@(map (lambda (exp)"
+  "                     (make-syntactic-closure env '(exit) exp))"
+  "                  body)"
+  "           (f))))))))");
+  check_e_success("loop");
+  check_e_success("(define loop-test-cnt 0)");
+  check_e("loop-test-cnt", "0");
+  with_expect_error([](){
+      eval_text("(loop (if (> loop-test-cnt 100) (exit)"
+                "        (set! loop-test-cnt (+ loop-test-cnt 1))))");
+        });
+  check_e("loop-test-cnt", "101");
+
 
   return RESULT;
 }

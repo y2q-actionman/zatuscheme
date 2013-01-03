@@ -211,7 +211,7 @@ void vm_op_call(){
     vm.stack.pop_back();
 
     throw zs_error("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
-                        stringify(proc.tag()));
+                   stringify(proc.tag()));
   }
 
   const ProcInfo* info = get_procinfo(proc);
@@ -752,7 +752,8 @@ void eval(){
         }else{
           newenv = sc->env()->push();
           for(auto i : sc->free_names()){
-            local_set_with_identifier(i, identifier_symbol(i), newenv);
+            auto val = vm.find(identifier_symbol(i));
+            local_set_with_identifier(i, val, newenv);
           }
         }
 
@@ -795,11 +796,18 @@ void eval(){
 
   if(!vm.code.empty()){
     cerr << "eval internal warning: VM code stack is broken!\n";
+    cerr << "VM dump...\n";
+    cerr << vm << endl;
     vm.code.clear();
   }
+
   if(!vm.stack.empty()){
     cerr << "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n";
     vm.stack.clear();
+  }
+
+  if(vm.return_value.empty()){
+    vm.return_value.resize(1);
   }
 }
 

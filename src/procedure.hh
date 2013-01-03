@@ -151,7 +151,7 @@ namespace Procedure {
     { return vm_; }
 
   private:
-    static constexpr ProcInfo cont_procinfo = ProcInfo{1, Variadic::t};
+    static constexpr ProcInfo cont_procinfo = ProcInfo{0, Variadic::t};
     const VM vm_;
   };
 
