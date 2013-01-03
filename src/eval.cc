@@ -20,11 +20,12 @@ using namespace Procedure;
 namespace {
 
 static
-void local_set_with_identifier(Lisp_ptr ident, Lisp_ptr value){
+void local_set_with_identifier(Lisp_ptr ident, Lisp_ptr value,
+                               Env* default_env = vm.frame()){
   auto sym = identifier_symbol(ident);
-  auto env = identifier_env(ident, vm.frame());
+  auto env = identifier_env(ident, default_env);
 
-  env->traverse(sym, value);
+  env->local_set(sym, value);
 }
 
 
@@ -330,8 +331,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       break;
     }
    
-    vm.local_set(identifier_symbol(arg_name_cell->car()), *i);
-    //local_set_with_identifier(arg_name_cell->car(), *i);
+    local_set_with_identifier(arg_name_cell->car(), *i);
     arg_name = arg_name_cell->cdr();
   }
 
@@ -344,8 +344,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     auto var_argc = argc.get<int>() - static_cast<int>(std::distance(arg_start, i));
     vm.stack.erase(arg_start, i);
     vm.stack.push_back({Ptr_tag::vm_argcount, var_argc});
-    vm.local_set(identifier_symbol(arg_name), stack_to_list<false>(vm.stack));
-    // local_set_with_identifier((arg_name), stack_to_list<false>(vm.stack));
+    local_set_with_identifier((arg_name), stack_to_list<false>(vm.stack));
   }else{  // clean stack
     if(i != arg_end){
       throw zs_error("eval error: corrupted stack -- passed too much args!\n");
@@ -579,8 +578,7 @@ void vm_op_local_set(){
     throw builtin_identifier_check_failed("(local set)", var);
   }
 
-  vm.local_set(identifier_symbol(var), vm.return_value[0]); 
-  // local_set_with_identifier((var), vm.return_value[0]); 
+  local_set_with_identifier((var), vm.return_value[0]); 
 }
 
 /*
@@ -701,8 +699,7 @@ Lisp_ptr let_internal(Entering entering){
                              gl_syms.extract(), vm.frame());
 
   if(name){
-    vm.local_set(identifier_symbol(name), proc);
-    // local_set_with_identifier(name, proc);
+    local_set_with_identifier(name, proc);
   }
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
@@ -762,10 +759,7 @@ void eval(){
         }else{
           newenv = sc->env()->push();
           for(auto i : sc->free_names()){
-            auto sym = identifier_symbol(i);
-            assert(sym);
-            newenv->local_set(sym, sym);
-            // local_set_with_identifier(i, identifier_symbol(i));
+            local_set_with_identifier(i, identifier_symbol(i), newenv);
           }
         }
 
