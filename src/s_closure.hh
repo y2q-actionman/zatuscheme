@@ -2,7 +2,6 @@
 #define S_CLOSURE_HH
 
 #include "lisp_ptr.hh"
-#include "vm.hh"
 
 class SyntacticClosure{
 public:
@@ -27,6 +26,6 @@ private:
 
 bool identifierp(Lisp_ptr);
 Symbol* identifier_symbol(Lisp_ptr);
-Env* identifier_env(Lisp_ptr, Env* default_env = vm.frame());
+Env* identifier_env(Lisp_ptr, Env* default_env);
 
 #endif // S_CLOSURE_HH

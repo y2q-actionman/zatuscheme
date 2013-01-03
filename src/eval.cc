@@ -19,6 +19,15 @@ using namespace Procedure;
 
 namespace {
 
+static
+void local_set_with_identifier(Lisp_ptr ident, Lisp_ptr value){
+  auto sym = identifier_symbol(ident);
+  auto env = identifier_env(ident, vm.frame());
+
+  env->traverse(sym, value);
+}
+
+
 void vm_op_proc_enter();
 
 /*
@@ -322,6 +331,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     }
    
     vm.local_set(identifier_symbol(arg_name_cell->car()), *i);
+    //local_set_with_identifier(arg_name_cell->car(), *i);
     arg_name = arg_name_cell->cdr();
   }
 
@@ -335,6 +345,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     vm.stack.erase(arg_start, i);
     vm.stack.push_back({Ptr_tag::vm_argcount, var_argc});
     vm.local_set(identifier_symbol(arg_name), stack_to_list<false>(vm.stack));
+    // local_set_with_identifier((arg_name), stack_to_list<false>(vm.stack));
   }else{  // clean stack
     if(i != arg_end){
       throw zs_error("eval error: corrupted stack -- passed too much args!\n");
@@ -547,7 +558,7 @@ void vm_op_set(){
   }
     
   auto sym = identifier_symbol(var);
-  auto env = identifier_env(var);
+  auto env = identifier_env(var, vm.frame());
   env->traverse(sym, vm.return_value[0]);
 }
 
@@ -569,6 +580,7 @@ void vm_op_local_set(){
   }
 
   vm.local_set(identifier_symbol(var), vm.return_value[0]); 
+  // local_set_with_identifier((var), vm.return_value[0]); 
 }
 
 /*
@@ -690,6 +702,7 @@ Lisp_ptr let_internal(Entering entering){
 
   if(name){
     vm.local_set(identifier_symbol(name), proc);
+    // local_set_with_identifier(name, proc);
   }
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
@@ -752,6 +765,7 @@ void eval(){
             auto sym = identifier_symbol(i);
             assert(sym);
             newenv->local_set(sym, sym);
+            // local_set_with_identifier(i, identifier_symbol(i));
           }
         }
 
