@@ -5,6 +5,7 @@
 #include "procedure.hh"
 #include "eval.hh"
 #include "util.hh"
+#include "delay.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -39,6 +40,28 @@ Lisp_ptr apply_func(){
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
   proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  return {};
+}
+
+Lisp_ptr func_force(){
+  auto arg = pick_args_1();     // used because no exceptions are done!
+  auto d = arg.get<Delay*>();
+  if(!d){
+    vm.return_value[0] = arg;
+    return {};
+  }
+  
+  if(d->forced()){
+    vm.return_value[0] = d->get();
+    return {};
+  }
+
+  auto oldenv = vm.frame();
+
+  vm.set_frame(d->env());
+  vm.stack.push_back(arg);
+  vm.code.insert(vm.code.end(),
+                 {vm_op_force, oldenv, vm_op_leave_frame, d->get()});
   return {};
 }
 

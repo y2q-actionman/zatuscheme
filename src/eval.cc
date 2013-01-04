@@ -831,28 +831,6 @@ void eval(){
 }
 
 
-Lisp_ptr func_force(){
-  auto arg = pick_args_1();     // used because no exceptions are done!
-  auto d = arg.get<Delay*>();
-  if(!d){
-    vm.return_value[0] = arg;
-    return {};
-  }
-  
-  if(d->forced()){
-    vm.return_value[0] = d->get();
-    return {};
-  }
-
-  auto oldenv = vm.frame();
-
-  vm.set_frame(d->env());
-  vm.stack.push_back(arg);
-  vm.code.insert(vm.code.end(),
-                 {vm_op_force, oldenv, vm_op_leave_frame, d->get()});
-  return {};
-}
-
 Lisp_ptr call_with_values(){
   Lisp_ptr procs[2];
   {

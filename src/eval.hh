@@ -13,6 +13,7 @@ void vm_op_if();
 void vm_op_set();
 void vm_op_local_set();
 void vm_op_begin();
+void vm_op_force();
 
 Lisp_ptr let_internal(Procedure::Entering);
 
@@ -24,7 +25,6 @@ void proc_enter_entrypoint(Lisp_ptr);
 void eval();
 
 // builtin funcs near evaluator
-Lisp_ptr func_force();
 Lisp_ptr call_with_values();
 Lisp_ptr call_cc();
 Lisp_ptr dynamic_wind();
