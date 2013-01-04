@@ -10,6 +10,7 @@ Lisp_ptr make_syntactic_closure();
 Lisp_ptr capture_env();
 
 Lisp_ptr proc_identifierp();
+Lisp_ptr proc_identifier_eq();
 
 Lisp_ptr gensym();
 Lisp_ptr exit_func();

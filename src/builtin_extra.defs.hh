@@ -15,6 +15,9 @@
 {"identifier?", {
     proc_identifierp,
     {1}}},
+{"identifier=?", {
+    proc_identifier_eq,
+    {4}}},
 {"gensym", {
     gensym,
     {0}}},

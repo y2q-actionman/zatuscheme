@@ -146,6 +146,32 @@ int main(){
   check_e("loop-until-test", "101");
   
 
+  check_e(
+  "(let-syntax"
+  " ((foo"
+  "   (sc-macro-transformer"
+  "    (lambda (form env)"
+  "     (capture-syntactic-environment"
+  "      (lambda (transformer-env)"
+  "       (identifier=? transformer-env 'x env 'x)))))))"
+  " (list (foo)"
+  "  (let ((x 3))"
+  "   (foo))))",
+  "(#t #f)");
+  
+  check_e(
+  "  (let-syntax ((bar foo))"
+  "   (let-syntax"
+  "    ((foo"
+  "      (sc-macro-transformer"
+  "       (lambda (form env)"
+  "        (capture-syntactic-environment"
+  "         (lambda (transformer-env)"
+  "          (identifier=? transformer-env 'foo"
+  "                                    env (cadr form))))))))"
+  "            (list (foo foo)"
+  "                  (foo bar))))",
+  "(#f #t)");
 
   return RESULT;
 }

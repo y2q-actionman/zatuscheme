@@ -6,6 +6,8 @@
 #include "s_closure.hh"
 #include "util.hh"
 #include "eval.hh"
+#include "env.hh"
+#include "builtin_equal.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -94,6 +96,29 @@ Lisp_ptr capture_env(){
 Lisp_ptr proc_identifierp(){
   ZsArgs args{1};
   return Lisp_ptr{identifierp(args[0])};
+}
+
+Lisp_ptr proc_identifier_eq(){
+  ZsArgs args{4};
+
+  auto ident1_env = args[0].get<Env*>();
+  if(!ident1_env){
+    throw builtin_type_check_failed("identifier=?", Ptr_tag::env, args[0]);
+  }
+
+  auto ident1_sym = identifier_symbol(args[1]);
+  
+  auto ident2_env = args[2].get<Env*>();
+  if(!ident2_env){
+    throw builtin_type_check_failed("identifier=?", Ptr_tag::env, args[2]);
+  }
+
+  auto ident2_sym = identifier_symbol(args[3]);
+
+  return Lisp_ptr{
+    eq_internal(ident1_env->traverse(ident1_sym, {}),
+                ident2_env->traverse(ident2_sym, {}))
+      };
 }
 
 Lisp_ptr gensym(){

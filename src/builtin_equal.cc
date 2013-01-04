@@ -11,8 +11,6 @@
 
 using namespace std;
 
-namespace {
-
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
 
@@ -53,8 +51,6 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
     return eqv_internal(a, b);
   }
 }
-
-} //namespace
 
 Lisp_ptr eq(){
   ZsArgs args{2};
