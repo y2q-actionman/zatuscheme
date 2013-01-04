@@ -29,8 +29,6 @@ void local_set_with_identifier(Lisp_ptr ident, Lisp_ptr value,
 }
 
 
-void vm_op_proc_enter();
-
 /*
   ret = some value
 */
@@ -485,8 +483,6 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   }
 }
 
-namespace {
- 
 /*
   code = (proc)
   ----
@@ -521,8 +517,6 @@ void vm_op_move_values(){
   vm.return_value.resize(1);
 }
  
-} // namespace
-
 /*
   leaves frame.
   no stack operations.
@@ -642,6 +636,13 @@ void vm_op_force(){
   }
 
   delay->force(vm.return_value[0]);
+}
+
+void vm_op_get_current_env(){
+  assert(vm.code.back() == vm_op_get_current_env);
+  vm.code.pop_back();
+  
+  vm.return_value[0] = vm.frame();
 }
 
 Lisp_ptr let_internal(Entering entering){
@@ -831,39 +832,6 @@ void eval(){
 }
 
 
-Lisp_ptr call_with_values(){
-  Lisp_ptr procs[2];
-  {
-    ZsArgs args{2};
-
-    if(!is_procedure(args[0])){
-      throw zs_error("call-with-values error: first arg is not procedure (%s)\n",
-                          stringify(args[0].tag()));
-    }
-
-    auto info = get_procinfo(args[0]);
-    if(info->required_args != 0){
-      throw zs_error("call-with-values error: first arg takes 1 or more args (%d)\n",
-                          info->required_args);
-    }    
-
-    if(!is_procedure(args[1])){
-      throw zs_error("call-with-values error: second arg is not procedure (%s)\n",
-                          stringify(args[1].tag()));
-    }
-    
-    std::copy(args.begin(), args.end(), procs);
-  }
-
-  // second proc call
-  vm.code.insert(vm.code.end(), {procs[1], vm_op_proc_enter, vm_op_move_values});
-
-  // first proc, calling with zero args.
-  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-  proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
-  return {};
-}
-
 Lisp_ptr call_cc(){
   Lisp_ptr proc;
   {
@@ -947,13 +915,6 @@ Lisp_ptr dynamic_wind(){
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
   proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
   return {};
-}
-
-void vm_op_get_current_env(){
-  assert(vm.code.back() == vm_op_get_current_env);
-  vm.code.pop_back();
-  
-  vm.return_value[0] = vm.frame();
 }
 
 const char* stringify(VMop op){

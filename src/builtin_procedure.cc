@@ -76,3 +76,36 @@ Lisp_ptr proc_values(){
 
   return {};
 }
+
+Lisp_ptr call_with_values(){
+  Lisp_ptr procs[2];
+  {
+    ZsArgs args{2};
+
+    if(!is_procedure(args[0])){
+      throw zs_error("call-with-values error: first arg is not procedure (%s)\n",
+                          stringify(args[0].tag()));
+    }
+
+    auto info = get_procinfo(args[0]);
+    if(info->required_args != 0){
+      throw zs_error("call-with-values error: first arg takes 1 or more args (%d)\n",
+                          info->required_args);
+    }    
+
+    if(!is_procedure(args[1])){
+      throw zs_error("call-with-values error: second arg is not procedure (%s)\n",
+                          stringify(args[1].tag()));
+    }
+    
+    std::copy(args.begin(), args.end(), procs);
+  }
+
+  // second proc call
+  vm.code.insert(vm.code.end(), {procs[1], vm_op_proc_enter, vm_op_move_values});
+
+  // first proc, calling with zero args.
+  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
+  return {};
+}

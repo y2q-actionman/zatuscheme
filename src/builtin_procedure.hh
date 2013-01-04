@@ -7,5 +7,6 @@ Lisp_ptr type_check_procedure();
 Lisp_ptr apply_func();
 Lisp_ptr func_force();
 Lisp_ptr proc_values();
+Lisp_ptr call_with_values();
 
 #endif // BUILTIN_PROCEDURE_HH
