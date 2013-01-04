@@ -8,5 +8,7 @@ Lisp_ptr apply_func();
 Lisp_ptr func_force();
 Lisp_ptr proc_values();
 Lisp_ptr call_with_values();
+Lisp_ptr call_cc();
+Lisp_ptr dynamic_wind();
 
 #endif // BUILTIN_PROCEDURE_HH
