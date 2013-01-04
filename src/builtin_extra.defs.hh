@@ -3,6 +3,9 @@
 {"traditional-transformer", {
     traditional_transformer,
     {1}}},
+{"gensym", {
+    gensym,
+    {0}}},
 {"sc-macro-transformer", {
     sc_macro_transformer,
     {1}}},
@@ -18,9 +21,9 @@
 {"identifier=?", {
     proc_identifier_eq,
     {4}}},
-{"gensym", {
-    gensym,
-    {0}}},
+{"make_synthetic_identifier", {
+    make_synthetic_identifier,
+    {1}}},
 {"exit", {
     exit_func,
     {0}}},

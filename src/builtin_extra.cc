@@ -28,6 +28,12 @@ Lisp_ptr traditional_transformer(){
                         iproc->arg_list(), iproc->closure());
 }
 
+Lisp_ptr gensym(){
+  static const string gensym_symname = {"(gensym)"};
+  ZsArgs args{0};
+  return {new Symbol(&gensym_symname)};
+}
+
 Lisp_ptr sc_macro_transformer(){
   ZsArgs args{1};
 
@@ -121,10 +127,16 @@ Lisp_ptr proc_identifier_eq(){
       };
 }
 
-Lisp_ptr gensym(){
-  static const string gensym_symname = {"(gensym)"};
-  ZsArgs args{0};
-  return {new Symbol(&gensym_symname)};
+Lisp_ptr make_synthetic_identifier(){
+  ZsArgs args{1};
+
+  if(!identifierp(args[0])){
+    throw zs_error("make-synthetic-identifier: passed value is not identifier (%s)\n",
+                   stringify(args[0].tag()));
+  }
+
+  return new SyntacticClosure(new Env(nullptr), nullptr,
+                              identifier_symbol(args[0]));
 }
 
 Lisp_ptr exit_func(){
