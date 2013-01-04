@@ -212,7 +212,6 @@ void whole_call(Lisp_ptr proc, const ProcInfo* info){
 */
 void vm_op_call(){
   assert(vm.code.back().get<VMop>() == vm_op_call);
-  vm.code.pop_back();
 
   auto proc = vm.return_value[0];
 
@@ -222,12 +221,12 @@ void vm_op_call(){
       auto first = proc.get<Cons*>()->car();
       if(identifierp(first)
          && identifier_symbol(first) == intern(vm.symtable(), "lambda")){
-        vm.code.push_back(vm_op_call);
         vm.code.push_back(proc);
         return;
       }
     }
 
+    vm.code.pop_back();
     vm.stack.pop_back();
     throw zs_error("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
                    stringify(proc.tag()));
@@ -237,12 +236,13 @@ void vm_op_call(){
 
   switch(info->returning){
   case Returning::pass:
+    vm.code.pop_back();
     break;
   case Returning::code:
-    vm.code.push_back(vm_op_macro_call);
+    vm.code.back() = vm_op_macro_call;
     break;
   case Returning::stack_splice:
-    vm.code.push_back(vm_op_stack_splicing);
+    vm.code.back() = vm_op_stack_splicing;
     break;
   default:
     UNEXP_DEFAULT();
