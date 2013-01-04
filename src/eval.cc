@@ -831,34 +831,6 @@ void eval(){
 }
 
 
-Lisp_ptr apply_func(){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
-
-  if(!is_procedure(args[0])){
-    throw zs_error("apply error: first arg is not procedure (%s)\n",
-                        stringify(args[0].tag()));
-  }
-
-  // simulating function_call()
-  int argc = 0;
-  for(auto i = std::next(args.begin()), e = args.end(); i != e; ++i){
-    if(i->tag() == Ptr_tag::cons){
-      for(auto p : *i){
-        vm.stack.push_back(p);
-        ++argc;
-      }
-    }else{
-      vm.stack.push_back(*i);
-      ++argc;
-    }
-  }
-  vm.stack.push_back({Ptr_tag::vm_argcount, argc});
-
-  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
-  return {};
-}
-
 Lisp_ptr func_force(){
   auto arg = pick_args_1();     // used because no exceptions are done!
   auto d = arg.get<Delay*>();

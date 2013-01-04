@@ -24,7 +24,6 @@ void proc_enter_entrypoint(Lisp_ptr);
 void eval();
 
 // builtin funcs near evaluator
-Lisp_ptr apply_func();
 Lisp_ptr func_force();
 Lisp_ptr call_with_values();
 Lisp_ptr call_cc();
