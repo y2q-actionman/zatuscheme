@@ -5,6 +5,7 @@
 #include "procedure.hh"
 #include "s_closure.hh"
 #include "util.hh"
+#include "eval.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -65,6 +66,29 @@ Lisp_ptr make_syntactic_closure(){
   Cons* c = args[1].get<Cons*>();
 
   return new SyntacticClosure(e, c, args[2]);
+}
+
+Lisp_ptr capture_env(){
+  ZsArgs args{1};
+
+  if(args[0].tag() != Ptr_tag::i_procedure){
+    throw zs_error("eval error: first arg is not procedure (%s)\n",
+                   stringify(args[0].tag()));
+  }
+
+  auto iproc = args[0].get<IProcedure*>();
+
+  assert(iproc && iproc->info());
+
+  if(iproc->info()->required_args != 1){
+    throw zs_error("eval error: first arg mush take 1 arg (%d)\n",
+                   iproc->info()->required_args);
+  }
+
+  auto ret =  make_cons_list
+    ({intern(vm.symtable(), "apply"), iproc, vm_op_get_current_env});
+
+  return ret;
 }
 
 Lisp_ptr proc_identifierp(){

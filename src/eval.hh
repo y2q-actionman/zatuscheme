@@ -29,7 +29,8 @@ Lisp_ptr func_force();
 Lisp_ptr call_with_values();
 Lisp_ptr call_cc();
 Lisp_ptr dynamic_wind();
-Lisp_ptr capture_env();
+
+void vm_op_get_current_env();
 
 // for debug
 const char* stringify(VMop);

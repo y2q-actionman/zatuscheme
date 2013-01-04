@@ -115,5 +115,37 @@ int main(){
   check_e("x", "1");
   check_e("(let1 x 100 x)", "100");
 
+
+  check_e_success(
+  "(define-syntax loop-until"
+  " (sc-macro-transformer"
+  "  (lambda (exp env)"
+  "   (let ((id (cadr exp))"
+  "         (init (caddr exp))"
+  "         (test (cadddr exp))"
+  "         (return (cadddr (cdr exp)))"
+  "         (step (cadddr (cddr exp)))"
+  "         (close"
+  "          (lambda (exp free)"
+  "           (make-syntactic-closure env free exp))))"
+  "       `(letrec ((loop"
+  "                  ,(capture-syntactic-environment"
+  "                    (lambda (env)"
+  "                     `(lambda (,id)"
+  "                       (,(make-syntactic-closure env '() `if)"
+  "                             ,(close test (list id))"
+  "                             ,(close return (list id))"
+  "                             (,(make-syntactic-closure env '() `loop)"
+  "                        ,(close step (list id)))))))))"
+  "       (loop ,(close init '())))))))");
+  check_e_success("(define loop-until-test 0)");
+  check_e("loop-until-test", "0");
+  check_e("(loop-until n 1 (> n 100)"
+          "(begin (set! loop-until-test n) 'done) (+ n 1))",
+          "done");
+  check_e("loop-until-test", "101");
+  
+
+
   return RESULT;
 }

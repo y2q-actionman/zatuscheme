@@ -88,6 +88,15 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
     assert(iproc);
 
     enter_frame(iproc);
+
+    // captures arguments
+    auto i = begin(iproc->arg_list());
+    for(; i ; ++i){
+      local_set_with_identifier(*i, Lisp_ptr{});
+    }
+    if(identifierp(i.base())){
+      local_set_with_identifier(i.base(), Lisp_ptr{});
+    }
   }
 
   auto args_head = args.get<Cons*>()->cdr(); // skips first symbol
@@ -208,8 +217,18 @@ void vm_op_call(){
   auto proc = vm.return_value[0];
 
   if(!is_procedure(proc)){
-    vm.stack.pop_back();
+    if(proc.tag() == Ptr_tag::cons){
+      // special treating for an unevaluated lambda expr.
+      auto first = proc.get<Cons*>()->car();
+      if(identifierp(first)
+         && identifier_symbol(first) == intern(vm.symtable(), "lambda")){
+        vm.code.push_back(vm_op_call);
+        vm.code.push_back(proc);
+        return;
+      }
+    }
 
+    vm.stack.pop_back();
     throw zs_error("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
                    stringify(proc.tag()));
   }
@@ -980,27 +999,11 @@ Lisp_ptr dynamic_wind(){
   return {};
 }
 
-Lisp_ptr capture_env(){
-  Lisp_ptr proc;
-  {
-    ZsArgs args{1};
-
-    if(!is_procedure(args[0])){
-      throw zs_error("eval error: first arg is not procedure (%s)\n",
-                     stringify(args[0].tag()));
-    }
-
-    auto info = get_procinfo(args[0]);
-    if(info->required_args != 1){
-      throw zs_error("eval error: first arg mush take 1 arg (%d)\n",
-                          info->required_args);
-    }
-    proc = args[0];
-  }
-
-  vm.stack.insert(vm.stack.end(), {vm.frame(), {Ptr_tag::vm_argcount, 1}});
-  proc_enter_entrypoint(proc); // direct jump to proc_enter()
-  return {};
+void vm_op_get_current_env(){
+  assert(vm.code.back() == vm_op_get_current_env);
+  vm.code.pop_back();
+  
+  vm.return_value[0] = vm.frame();
 }
 
 const char* stringify(VMop op){
@@ -1040,6 +1043,8 @@ const char* stringify(VMop op){
     return "save values and enter";
   }else if(op == vm_op_stack_splicing){
     return "splicing args";
+  }else if(op == vm_op_get_current_env){
+    return "get current env";
   }else{
     return "unknown vm-op";
   }
