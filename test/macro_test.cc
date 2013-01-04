@@ -98,6 +98,22 @@ int main(){
         });
   check_e("loop-test-cnt", "101");
 
+  
+  check_e_success(
+  "(define-syntax let1"
+  " (sc-macro-transformer"
+  "  (lambda (exp env)"
+  "   (let ((id (cadr exp))"
+  "         (init (caddr exp))"
+  "         (exp (cadddr exp)))"
+  "    `((lambda (,id)"
+  "       ,(make-syntactic-closure env (list id) exp))"
+  "      ,(make-syntactic-closure env '() init))))))");
+  check_e_success("(define x 1)");
+  check_e("x", "1");
+  check_e("(let1 x 100 x)", "100");
+  check_e("x", "1");
+  check_e("(let1 x 100 x)", "100");
 
   return RESULT;
 }
