@@ -202,6 +202,27 @@ void whole_call(Lisp_ptr proc, const ProcInfo* info){
   proc_enter_entrypoint(proc); // direct jump to proc_enter()
 }
 
+void whole_proc_env_call(Lisp_ptr proc, const ProcInfo* info){
+  auto iproc = proc.get<IProcedure*>();
+  if(!iproc){
+    throw builtin_type_check_failed("(whole-proc-env-call)", Ptr_tag::i_procedure, proc);
+  }
+
+  switch(info->required_args){
+  case 1:
+    vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+    break;
+  case 2:
+    vm.stack.push_back(iproc->closure());
+    vm.stack.push_back({Ptr_tag::vm_argcount, 2});
+    break;
+  default:
+    throw zs_error("eval error: 'whole' function must take one or two args\n");
+  }
+
+  proc_enter_entrypoint(proc); // direct jump to proc_enter()
+}
+
 /*
   ret = proc
   stack[0] = args
@@ -243,6 +264,8 @@ void vm_op_call(){
     return macro_call(proc);
   case Passing::whole:
     return whole_call(proc, info);
+  case Passing::whole_proc_env:
+    return whole_proc_env_call(proc, info);
   default:
     UNEXP_DEFAULT();
   }

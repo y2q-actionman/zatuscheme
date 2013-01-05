@@ -7,6 +7,7 @@ Lisp_ptr traditional_transformer();
 Lisp_ptr gensym();
 
 Lisp_ptr sc_macro_transformer();
+Lisp_ptr rsc_macro_transformer();
 
 Lisp_ptr make_syntactic_closure();
 Lisp_ptr capture_env();
