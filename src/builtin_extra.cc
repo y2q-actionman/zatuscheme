@@ -58,30 +58,6 @@ Lisp_ptr sc_macro_transformer(){
                         iproc->closure()->fork());
 }
 
-Lisp_ptr rsc_macro_transformer(){
-  ZsArgs args{1};
-
-  auto iproc = args[0].get<IProcedure*>();
-  if(!iproc){
-    throw zs_error("rsc-macro-transformer: error: called with a wrong type (%s)\n",
-                   stringify(args[0].tag()));
-  }
-
-  auto info = *iproc->info();
-  if(info.required_args != 2 || info.max_args != 2){
-    throw zs_error("rsc-macro-transformer: error: procedure must take exactly 2 args (%d-%d)\n",
-                   info.required_args, info.max_args);
-  }
-
-  info.passing = Passing::whole_proc_env;
-  info.returning = Returning::code;
-  info.leaving = Leaving::immediate;
-
-  return new IProcedure(iproc->get(), info,
-                        iproc->arg_list(),
-                        iproc->closure()->fork());
-}
-
 Lisp_ptr make_syntactic_closure(){
   ZsArgs args{3};
 

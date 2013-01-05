@@ -13,7 +13,7 @@ namespace Procedure {
   enum class Variadic : bool { f = false, t = true };
 
   enum class Passing : unsigned char{
-    eval, quote, whole, whole_proc_env
+    eval, quote, whole
   };
 
   enum class Returning : unsigned char{
