@@ -94,7 +94,9 @@ Lisp_ptr capture_env(){
   }
 
   auto ret =  make_cons_list
-    ({intern(vm.symtable(), "apply"), iproc, vm_op_get_current_env});
+    ({intern(vm.symtable(), "eval"),
+        make_cons_list({intern(vm.symtable(), "apply"), iproc, vm_op_get_current_env}),
+        vm_op_get_current_env});
 
   return ret;
 }

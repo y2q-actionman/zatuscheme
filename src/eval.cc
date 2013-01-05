@@ -214,16 +214,6 @@ void vm_op_call(){
   auto proc = vm.return_value[0];
 
   if(!is_procedure(proc)){
-    if(proc.tag() == Ptr_tag::cons){
-      // special treating for an unevaluated lambda expr.
-      auto first = proc.get<Cons*>()->car();
-      if(identifierp(first)
-         && identifier_symbol(first) == intern(vm.symtable(), "lambda")){
-        vm.code.push_back(proc);
-        return;
-      }
-    }
-
     vm.code.pop_back();
     vm.stack.pop_back();
     throw zs_error("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
