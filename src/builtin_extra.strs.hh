@@ -7,5 +7,13 @@
 "    (newline)"
 "    (loop)))",
 
+"(define (rsc-macro-transformer fun)"
+"  (sc-macro-transformer"
+"    (lambda (body usage-env)"
+"     (capture-syntactic-environment"
+"      (lambda (trans-env)"
+"       (make-syntactic-closure usage-env ()"
+"        (fun body trans-env)))))))",
+
 "(define (close-syntax form env)"
 "  (make-syntactic-closure env () form))",

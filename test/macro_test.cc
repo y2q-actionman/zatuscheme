@@ -62,6 +62,7 @@ int main(){
   check_e("(identifier? '#(a))", "#f");
 
 
+  // syntactic closure examples (from MIT-scheme documents)
   check_e_success(
   "(define-syntax push"
   "  (sc-macro-transformer"
@@ -97,6 +98,42 @@ int main(){
                 "        (set! loop-test-cnt (+ loop-test-cnt 1))))");
         });
   check_e("loop-test-cnt", "101");
+
+
+  check_e_success(
+  "(define-syntax push"
+  "  (rsc-macro-transformer"
+  "   (lambda (exp env)"
+  "     `(,(make-syntactic-closure env '() 'set!)"
+  "       ,(caddr exp)"
+  "       (,(make-syntactic-closure env '() 'cons)"
+  "        ,(cadr exp)"
+  "        ,(caddr exp))))))");
+  check_e_success("(set! push-test-lis ())");
+  check_e("push-test-lis", "()");
+  check_e_success("(push 1 push-test-lis)");
+  check_e("push-test-lis", "(1)");
+  check_e_success("(push 2 push-test-lis)");
+  check_e("push-test-lis", "(2 1)");
+
+  check_e_success(
+  "(define-syntax push"
+  "  (sc-macro-transformer"
+  "   (lambda (exp usage-env)"
+  "     (capture-syntactic-environment"
+  "      (lambda (env)"
+  "        (make-syntactic-closure usage-env '()"
+  "          `(,(make-syntactic-closure env '() 'set!)"
+  "            ,(caddr exp)"
+  "            (,(make-syntactic-closure env '() 'cons)"
+  "             ,(cadr exp)"
+  "             ,(caddr exp)))))))))");
+  check_e_success("(set! push-test-lis ())");
+  check_e("push-test-lis", "()");
+  check_e_success("(push 1 push-test-lis)");
+  check_e("push-test-lis", "(1)");
+  check_e_success("(push 2 push-test-lis)");
+  check_e("push-test-lis", "(2 1)");
 
   
   check_e_success(
