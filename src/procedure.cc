@@ -4,6 +4,7 @@
 #include "cons.hh"
 #include "cons_util.hh"
 #include "util.hh"
+#include "s_rules.hh"
 
 namespace Procedure{
 
@@ -62,6 +63,12 @@ const ProcInfo* get_procinfo(Lisp_ptr p){
 
     return cont->info();
   }
+  case Ptr_tag::syntax_rules: {
+    auto srule = p.get<SyntaxRules*>();
+    assert(srule);
+
+    return srule->info();
+  }
 
   case Ptr_tag::undefined: case Ptr_tag::boolean:
   case Ptr_tag::character: case Ptr_tag::cons:
@@ -90,6 +97,7 @@ Lisp_ptr get_arg_list(Lisp_ptr p){
   }
   case Ptr_tag::n_procedure:
   case Ptr_tag::continuation:
+  case Ptr_tag::syntax_rules:
     return Cons::NIL;
 
   case Ptr_tag::undefined: case Ptr_tag::boolean:

@@ -463,6 +463,8 @@ void proc_enter_entrypoint(Lisp_ptr proc){
     proc_enter_native(nfun);
   }else if(auto cont = proc.get<Continuation*>()){
     proc_enter_cont(cont);
+  }else if(auto srule = proc.get<SyntaxRules*>()){
+    throw zs_error("eval internal error: SyntaxRules is now implementing..\n");
   }else{
     throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
   }
@@ -793,6 +795,7 @@ void eval(){
       case Ptr_tag::env:
       case Ptr_tag::delay:
       case Ptr_tag::continuation:
+      case Ptr_tag::syntax_rules:
         vm.code.pop_back();
         vm.return_value = {p};
         break;

@@ -4,6 +4,10 @@
 
 using namespace std;
 
+namespace Procedure{
+
+constexpr ProcInfo SyntaxRules::sr_procinfo;
+
 SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
   : env_(e), literals_(), rules_(){
   for(auto i : lits){
@@ -22,3 +26,5 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
 }
 
 SyntaxRules::~SyntaxRules() = default;
+
+} // Procedure

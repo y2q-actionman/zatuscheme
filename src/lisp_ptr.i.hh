@@ -85,7 +85,7 @@ struct to_type<Ptr_tag, Ptr_tag::syntactic_closure>{
 
 template<>
 struct to_type<Ptr_tag, Ptr_tag::syntax_rules>{
-  typedef SyntaxRules* type;
+  typedef Procedure::SyntaxRules* type;
 };
 
 template<>
@@ -191,7 +191,7 @@ Ptr_tag to_tag<Ptr_tag, SyntacticClosure*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, SyntaxRules*>(){
+Ptr_tag to_tag<Ptr_tag, Procedure::SyntaxRules*>(){
   return Ptr_tag::syntax_rules;
 }
 

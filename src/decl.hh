@@ -14,6 +14,7 @@ namespace Procedure{
   class IProcedure;
   class NProcedure;
   class Continuation;
+  class SyntaxRules;
 }
 class Number;
 typedef std::string String;
@@ -23,7 +24,6 @@ typedef std::ostream OutputPort;
 class Env;
 class Delay;
 class SyntacticClosure;
-class SyntaxRules;
 typedef void(*VMop)();
 
 
