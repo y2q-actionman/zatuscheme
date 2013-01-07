@@ -1,12 +1,15 @@
+#include <cassert>
+
 #include "delay.hh"
 
 Delay::Delay(Lisp_ptr p, Env* e)
-  : expr_(p), forced_(false), env_(e){}
+  : expr_(p), env_(e){
+  assert(e);
+}
 
 Delay::~Delay() = default;
 
 void Delay::force(Lisp_ptr p){
   expr_ = p;
-  forced_ = true;
   env_ = nullptr;
 }

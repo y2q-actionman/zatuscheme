@@ -14,7 +14,7 @@ public:
   Delay& operator=(const Delay&) = delete;
   Delay& operator=(Delay&&) = delete;
 
-  bool forced() const { return forced_; }
+  bool forced() const { return (env_ == nullptr); }
   Lisp_ptr get() const { return expr_; }
   Env* env() const { return env_; }
 
@@ -22,7 +22,6 @@ public:
 
 private:
   Lisp_ptr expr_;
-  bool forced_;
   Env* env_;
 };
 
