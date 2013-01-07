@@ -20,6 +20,7 @@ enum class Ptr_tag {
     env,
     delay,
     syntactic_closure,
+    syntax_rules,
     vm_op,
     vm_argcount
     };

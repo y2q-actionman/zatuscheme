@@ -84,6 +84,11 @@ struct to_type<Ptr_tag, Ptr_tag::syntactic_closure>{
 };
 
 template<>
+struct to_type<Ptr_tag, Ptr_tag::syntax_rules>{
+  typedef SyntaxRules* type;
+};
+
+template<>
 struct to_type<Ptr_tag, Ptr_tag::vm_op>{
   typedef VMop type;
 };
@@ -182,6 +187,12 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, SyntacticClosure*>(){
   return Ptr_tag::syntactic_closure;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, SyntaxRules*>(){
+  return Ptr_tag::syntax_rules;
 }
 
 template<>

@@ -34,6 +34,8 @@ const char* stringify(Ptr_tag p){
     return "delay";
   case Ptr_tag::syntactic_closure:
     return "syntactic closure";
+  case Ptr_tag::syntax_rules:
+    return "syntax rules";
   case Ptr_tag::vm_op:
     return "VMop";
   case Ptr_tag::vm_argcount:
