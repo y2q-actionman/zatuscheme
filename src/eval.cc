@@ -35,7 +35,7 @@ void local_set_with_identifier(Lisp_ptr ident, Lisp_ptr value,
 void vm_op_arg_push(){
   assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_arg_push);
 
-  auto ret = vm.return_value[0];
+  auto ret = vm.return_value_1();
   auto& argc = vm.code[vm.code.size() - 2];
   auto& args = vm.code[vm.code.size() - 3];
 
@@ -111,13 +111,9 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
 */
 void vm_op_macro_call(){
   assert(vm.code.back().get<VMop>() == vm_op_macro_call);
-  vm.code.back() = vm.return_value[0];
-
-  if(vm.return_value.size() > 1){
-    vm.code.insert(vm.code.end(),
-                   next(vm.return_value.begin()), vm.return_value.end());
-    vm.return_value.resize(1);
-  }
+  vm.code.pop_back();
+  vm.code.insert(vm.code.end(),
+                 vm.return_value.begin(), vm.return_value.end());
 }  
 
 /*
@@ -143,7 +139,6 @@ void vm_op_stack_splicing(){
   // pushes return-value to vm.stack
   int argc = vm.return_value.size();
   vm.stack.insert(vm.stack.end(), vm.return_value.begin(), vm.return_value.end());
-  vm.return_value.resize(1);
 
   // formatting vm.code to 'splicing is processed'
   // see vm_op_arg_push()
@@ -211,7 +206,7 @@ void whole_call(Lisp_ptr proc, const ProcInfo* info){
 void vm_op_call(){
   assert(vm.code.back().get<VMop>() == vm_op_call);
 
-  auto proc = vm.return_value[0];
+  auto proc = vm.return_value_1();
 
   if(!is_procedure(proc)){
     vm.code.pop_back();
@@ -503,8 +498,6 @@ void vm_op_move_values(){
 
   vm.stack.insert(vm.stack.end(), vm.return_value.begin(), vm.return_value.end());
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
-
-  vm.return_value.resize(1);
 }
  
 /*
@@ -531,7 +524,7 @@ void vm_op_if(){
   assert(vm.code.back().get<VMop>() == vm_op_if);
   vm.code.pop_back();
 
-  auto test_result = vm.return_value[0];
+  auto test_result = vm.return_value_1();
 
   if(test_result.get<bool>()){
     auto conseq = vm.code.back();
@@ -561,7 +554,7 @@ void vm_op_set(){
     
   auto sym = identifier_symbol(var);
   auto env = identifier_env(var, vm.frame());
-  env->traverse(sym, vm.return_value[0]);
+  env->traverse(sym, vm.return_value_1());
 }
 
 /*
@@ -581,7 +574,7 @@ void vm_op_local_set(){
     throw builtin_identifier_check_failed("(local set)", var);
   }
 
-  local_set_with_identifier((var), vm.return_value[0]); 
+  local_set_with_identifier((var), vm.return_value_1()); 
 }
 
 /*
@@ -625,7 +618,7 @@ void vm_op_force(){
     throw zs_error("eval error: internal error occured ('force' found before not a delay)\n");
   }
 
-  delay->force(vm.return_value[0]);
+  delay->force(vm.return_value_1());
 }
 
 void vm_op_leave_winding(){
@@ -831,10 +824,6 @@ void eval(){
   if(!vm.stack.empty()){
     cerr << "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n";
     vm.stack.clear();
-  }
-
-  if(vm.return_value.empty()){
-    vm.return_value.resize(1);
   }
 }
 

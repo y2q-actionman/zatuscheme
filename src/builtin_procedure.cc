@@ -65,13 +65,7 @@ Lisp_ptr func_force(){
 
 Lisp_ptr proc_values(){
   vm.return_value.clear();
-
   stack_to_vector(vm.stack, vm.return_value);
-
-  if(vm.return_value.empty()){
-    vm.return_value.resize(1);
-  }
-
   return {};
 }
 

@@ -199,7 +199,7 @@ void load(InputPort* p){
 
     vm.code.push_back(form);
     eval();
-    if(!vm.return_value[0]){
+    if(!vm.return_value_1()){
       cerr << "load error: failed at evaluating a form. skipped.\n";
       cerr << "\tform: \n";
       print(cerr, form);

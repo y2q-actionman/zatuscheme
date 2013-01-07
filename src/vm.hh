@@ -36,6 +36,9 @@ public:
 
   SymTable& symtable(){ return *symtable_; }
 
+  Lisp_ptr return_value_1()
+  { return (return_value.empty()) ? Lisp_ptr{} : return_value[0]; }
+
   friend std::ostream& operator<<(std::ostream&, const VM&);
 
 public:
