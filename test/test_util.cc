@@ -8,6 +8,7 @@
 #include "eval.hh"
 #include "builtin_util.hh"
 #include "vm.hh"
+#include "builtin_equal.hh"
 
 using namespace std;
 
@@ -34,11 +35,6 @@ Lisp_ptr eval_text(const char* s){
   return ret;
 }
 
-bool eqv(Lisp_ptr a, Lisp_ptr b){
-  auto eqv_ret = zs_call({intern(vm.symtable(), "eqv?"), a, b});
-  return eqv_ret.get<bool>();
-}
-  
 Lisp_ptr zs_call(std::initializer_list<Lisp_ptr> args){
   vm.code.push_back(make_cons_list(args));
   eval();
@@ -191,7 +187,7 @@ bool check_er(const char* input, const char* expect){
   auto r = read_from_string(expect);
   assert(r);
 
-  auto ret = eqv(e, r);
+  auto ret = eqv_internal(e, r);
   if(!ret){
     cerr << "[failed] expected " << expect << ", but got ";
     print(cerr, e);

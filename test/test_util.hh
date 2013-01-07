@@ -8,8 +8,6 @@
 Lisp_ptr read_from_string(const char*);
 Lisp_ptr eval_text(const char*);
 
-bool eqv(Lisp_ptr, Lisp_ptr);
-
 Lisp_ptr zs_call(std::initializer_list<Lisp_ptr>);
 
 
