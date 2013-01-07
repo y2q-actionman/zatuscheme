@@ -20,3 +20,5 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
   }
   rules_.shrink_to_fit();
 }
+
+SyntaxRules::~SyntaxRules() = default;
