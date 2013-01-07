@@ -12,6 +12,7 @@
 #include "delay.hh"
 #include "cons_util.hh"
 #include "s_closure.hh"
+#include "s_rules.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -560,3 +561,19 @@ Lisp_ptr syntax_letrec_syntax(){
   // TODO: check each arg is a transformer.
   return let_internal(Entering::at_bind);
 }
+
+Lisp_ptr syntax_syntax_rules(){
+  ZsArgs args{2};
+
+  auto env = args[1].get<Env*>();
+  if(!env){
+    throw builtin_type_check_failed("syntax-rules", Ptr_tag::env, args[1]);
+  }
+
+  return bind_cons_list_strict
+    (args[0],
+     [&](Lisp_ptr, Lisp_ptr lits, ConsIter rest){
+      return new SyntaxRules(env, lits, rest.base());
+    });
+}
+    

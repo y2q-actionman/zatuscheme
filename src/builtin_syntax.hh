@@ -28,5 +28,6 @@ Lisp_ptr syntax_arrow();
 Lisp_ptr syntax_define_syntax();
 Lisp_ptr syntax_let_syntax();
 Lisp_ptr syntax_letrec_syntax();
+Lisp_ptr syntax_syntax_rules();
 
 #endif // BUILTIN_SYNTAX_HH

@@ -77,3 +77,7 @@
 {"letrec-syntax", {
     syntax_letrec_syntax,
     {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
+
+{"syntax-rules", {
+    syntax_syntax_rules,
+    {2, 2, Passing::whole}}},

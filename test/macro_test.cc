@@ -210,5 +210,13 @@ int main(){
   "                  (foo bar))))",
   "(#f #t)");
 
+
+  // syntax-rules
+  check_e_success(
+  "(define-syntax push"
+  "  (syntax-rules ()"
+  "    ((push item list)"
+  "     (set! list (cons item list)))))");
+
   return RESULT;
 }
