@@ -8,7 +8,7 @@
     {1, Variadic::t, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"force", {
     func_force,
-    {1, 1, Passing::eval, Returning::pass, MoveReturnValue::f}}},
+    {1}}},
 {"values", {
     proc_values,
     {0, Variadic::t, Passing::eval, Returning::pass, MoveReturnValue::f}}},

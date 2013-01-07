@@ -47,13 +47,11 @@ Lisp_ptr func_force(){
   auto arg = pick_args_1();     // used because no exceptions are done!
   auto d = arg.get<Delay*>();
   if(!d){
-    vm.return_value = {arg};
-    return {};
+    return arg;
   }
   
   if(d->forced()){
-    vm.return_value = {d->get()};
-    return {};
+    return d->get();
   }
 
   auto oldenv = vm.frame();
