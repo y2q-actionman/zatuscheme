@@ -28,6 +28,7 @@
 #include "procedure.hh"
 #include "reader.hh"
 #include "s_closure.hh"
+#include "s_rules.hh"
 #include "symbol.hh"
 #include "token.hh"
 #include "util.hh"

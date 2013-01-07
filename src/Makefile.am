@@ -21,6 +21,7 @@ libzs_a_SOURCES = zs.hh\
 		env.cc env.hh\
 		delay.cc delay.hh\
 		s_closure.cc s_closure.hh\
+		s_rules.cc s_rules.hh\
 		builtin_util.cc builtin_util.hh\
 		builtin.cc builtin.hh builtin.i.hh\
 		builtin_boolean.cc builtin_boolean.hh builtin_boolean.defs.hh\
