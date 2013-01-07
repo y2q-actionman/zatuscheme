@@ -265,7 +265,7 @@ void proc_enter_native(const NProcedure* fun){
   assert(info);
 
   if(info->move_ret == MoveReturnValue::t){
-    vm.return_value[0] = p;
+    vm.return_value = {p};
   }
 }
 
@@ -649,7 +649,7 @@ void vm_op_get_current_env(){
   assert(vm.code.back() == vm_op_get_current_env);
   vm.code.pop_back();
   
-  vm.return_value[0] = vm.frame();
+  vm.return_value = {vm.frame()};
 }
 
 Lisp_ptr let_internal(Entering entering){
@@ -742,14 +742,14 @@ void eval(){
       switch(p.tag()){
       case Ptr_tag::symbol:
         vm.code.pop_back();
-        vm.return_value[0] = vm.find(p.get<Symbol*>());
+        vm.return_value = {vm.find(p.get<Symbol*>())};
         break;
     
       case Ptr_tag::cons: {
         auto c = p.get<Cons*>();
         if(!c){
           vm.code.pop_back();
-          vm.return_value[0] = Cons::NIL;
+          vm.return_value = {Cons::NIL};
           break;
         }
 
@@ -801,7 +801,7 @@ void eval(){
       case Ptr_tag::delay:
       case Ptr_tag::continuation:
         vm.code.pop_back();
-        vm.return_value[0] = p;
+        vm.return_value = {p};
         break;
 
         // error
@@ -818,7 +818,7 @@ void eval(){
     }
   }catch(const std::exception& e){
     cerr << e.what() << endl;
-    vm.return_value[0] = {};
+    vm.return_value = {{}};
   }
 
   if(!vm.code.empty()){
