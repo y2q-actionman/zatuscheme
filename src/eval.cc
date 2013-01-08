@@ -13,6 +13,7 @@
 #include "builtin_util.hh"
 #include "delay.hh"
 #include "s_closure.hh"
+#include "s_rules.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -439,6 +440,18 @@ void proc_enter_cont(Continuation* c){
   }
 }
 
+void proc_enter_srule(SyntaxRules* srule){
+  ZsArgs args{2};
+
+  auto ret = srule->match(args[0], args[1].get<Env*>());
+  // cout << "match result env\n" << *ret.first << '\n';
+  // cout << "matched template\n";
+  // print(cout, ret.second);
+  // cout << endl;
+
+  vm.return_value = {{}};
+}
+
 } //namespace
 
 void proc_enter_entrypoint(Lisp_ptr proc){
@@ -464,7 +477,7 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   }else if(auto cont = proc.get<Continuation*>()){
     proc_enter_cont(cont);
   }else if(auto srule = proc.get<SyntaxRules*>()){
-    throw zs_error("eval internal error: SyntaxRules is now implementing..\n");
+    proc_enter_srule(srule);
   }else{
     throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
   }

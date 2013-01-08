@@ -31,7 +31,7 @@ public:
   friend std::ostream& operator<<(std::ostream&, const Env&);
 
   template<typename Fun>
-  void visit_map(Fun f){ f(map_); }
+  void visit_map(Fun f){ f(map_); } // TODO: expose the map?
 
 private:
   map_type map_;

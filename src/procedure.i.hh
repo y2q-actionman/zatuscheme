@@ -12,7 +12,8 @@ bool is_procedure(Lisp_ptr p){
   auto tag = p.tag();
   return (tag == Ptr_tag::i_procedure)
     || (tag == Ptr_tag::n_procedure)
-    || (tag == Ptr_tag::continuation);
+    || (tag == Ptr_tag::continuation)
+    || (tag == Ptr_tag::syntax_rules);
 }
 
 } // namespace Procedure

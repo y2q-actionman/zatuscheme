@@ -217,6 +217,9 @@ int main(){
   "  (syntax-rules ()"
   "    ((push item list)"
   "     (set! list (cons item list)))))");
+  check_e_success("(set! push-test-lis ())");
+  check_e("push-test-lis", "()");
+  check_e_success("(push 1 push-test-lis)");
 
   return RESULT;
 }
