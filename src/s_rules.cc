@@ -131,6 +131,9 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
       return true;
     }
   }else if(pattern.tag() == Ptr_tag::cons){
+    if(form.tag() != Ptr_tag::cons)
+      return false;
+
     if(nullp(pattern) && nullp(form)){
       return true;
     }
@@ -163,7 +166,7 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
         return true;
       }
 
-      if(f_i == f_e) break; // this check is delayed for checking the ellipsis.
+      if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
       if(!try_match_1(env, *p_i, *f_i, form_env, ignore_ident)){
         return false;
@@ -176,8 +179,46 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
     }else{
       return false;
     }
-  // }else if(form.tag() == Ptr_tag::vector){
-  //   ;
+  }else if(pattern.tag() == Ptr_tag::vector){
+    if(form.tag() != Ptr_tag::vector)
+      return false;
+
+    auto p_v = pattern.get<Vector*>();
+    auto f_v = form.get<Vector*>();
+
+    auto p_i = begin(*p_v), p_e = end(*p_v);
+    auto f_i = begin(*f_v), f_e = end(*f_v);
+
+    for(; p_i != p_e; ++p_i, ++f_i){
+      auto p_n = next(p_i);
+
+      // checks ellipsis
+      if(identifierp(*p_i)
+         && (p_n != p_e) && identifierp(*p_n) 
+         && identifier_symbol(*p_n) == ellipsis_sym){
+        if(p_i == begin(*p_v)){
+          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+        }
+
+        auto p_i_sym = identifier_symbol(*p_i);
+        check_duplicate(p_i_sym);
+        env->local_set(p_i_sym, new Vector(f_i, f_e));
+        return true;
+      }
+
+      if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
+
+      if(!try_match_1(env, *p_i, *f_i, form_env, ignore_ident)){
+        return false;
+      }
+    }
+
+    // checks length
+    if((p_i == p_e) && (f_i == f_e)){
+      return true;
+    }else{
+      return false;
+    }
   }else{
     return equal_internal(pattern, form);
   }
