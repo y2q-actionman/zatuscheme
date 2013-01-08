@@ -443,13 +443,22 @@ void proc_enter_cont(Continuation* c){
 void proc_enter_srule(SyntaxRules* srule){
   ZsArgs args{2};
 
-  auto ret = srule->match(args[0], args[1].get<Env*>());
-  // cout << "match result env\n" << *ret.first << '\n';
-  // cout << "matched template\n";
-  // print(cout, ret.second);
-  // cout << endl;
+  // TODO: merge below to 'after_returning_op' flag operation
+  auto ret_hook = vm.code.back();
+  assert(ret_hook.tag() == Ptr_tag::vm_op);
+  vm.code.pop_back();
 
-  vm.return_value = {{}};
+  // auto ret = srule->match(args[0], args[1].get<Env*>());
+  // cout << "match result env\n" << *ret.first << '\n';
+  // cout << "matched template\n" << ret.second << endl;
+
+  auto oldenv = vm.frame();
+  vm.set_frame(ret.first);
+  vm.return_value = {ret.second};
+  vm.code.insert(vm.code.end(),
+                 {oldenv, vm_op_leave_frame, ret_hook});
+
+  cout << vm << endl;
 }
 
 } //namespace
