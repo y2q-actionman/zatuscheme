@@ -3,6 +3,7 @@
 #include <ostream>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 #include "builtin_port.hh"
 #include "lisp_ptr.hh"
@@ -30,12 +31,12 @@ Lisp_ptr port_open_file(const char* name){
     throw builtin_type_check_failed(name, Ptr_tag::string, args[0]);
   }
 
-  IOType* p = new F_IOType(str->c_str());
+  unique_ptr<IOType> p{new F_IOType(str->c_str())};
   if(!*p){
     throw zs_error("native error: %s: failed at opening file\n", name);
   }
   
-  return {p};
+  return {p.release()};
 }  
 
 template<typename IOType, typename F_IOType>
