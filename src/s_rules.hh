@@ -32,7 +32,8 @@ private:
 
   typedef std::pair<Lisp_ptr, Lisp_ptr> Rule;
   bool try_match_1(Env* env, Lisp_ptr pattern, 
-                   Lisp_ptr form, Env* form_env) const;
+                   Lisp_ptr form, Env* form_env,
+                   Lisp_ptr ignore_ident) const;
 
   Env* env_;
   std::vector<Symbol*> literals_;

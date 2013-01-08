@@ -16,8 +16,21 @@ using namespace std;
 
 namespace {
 
-bool check_form(Lisp_ptr p){
-  return (p.tag() == Ptr_tag::cons && !nullp(p));
+Lisp_ptr pick_first(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::cons){
+    auto c = p.get<Cons*>();
+    if(!c) throw zs_error("syntax-rules: the pattern is empty list\n");
+
+    return c->car();
+  }else if(p.tag() == Ptr_tag::vector){
+    auto v = p.get<Vector*>();
+    assert(v);
+    if(v->empty()) throw zs_error("syntax-rules: the pattern is empty vector\n");
+
+    return (*v)[0];
+  }else{
+    throw zs_error("syntax-rules: informal pattern passed! (%s)\n", stringify(p.tag()));
+  }
 }
 
 } // namespace
@@ -37,15 +50,9 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
     bind_cons_list_strict
       (i,
        [&](Lisp_ptr pat, Lisp_ptr tmpl){
-        if(!check_form(pat)){
-          throw zs_error("syntax-rules: informal pattern passed! (%s)\n",
-                         stringify(pat.tag()));
-        }
-
-        if(!check_form(tmpl)){
-          throw zs_error("syntax-rules: informal template passed! (%s)\n",
-                         stringify(tmpl.tag()));
-        }
+        // checks forms
+        pick_first(pat);
+        pick_first(tmpl);
 
         rules_.push_back({pat, tmpl});
       });
@@ -56,25 +63,8 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
 SyntaxRules::~SyntaxRules() = default;
 
 std::pair<Env*, Lisp_ptr> SyntaxRules::match(Lisp_ptr form, Env* form_env) const{
-  if(!check_form(form)){
-    throw zs_error("syntax-rules: informal form passed! (%s)\n",
-                   stringify(form.tag()));
-  }
-
-  // ignore first match
-  // if(is_first){
-  //   auto p_next = pattern.get<Cons*>()->cdr();
-  //   if(p_next.tag() != Ptr_tag::cons){
-  //     throw zs_error("syntax-rules error: informal pattern appeared (dot paur)\n");
-  //   }
-
-  //   auto f_next = form.get<Cons*>()->cdr();
-  //   if(f_next.tag() != Ptr_tag::cons){
-  //     throw zs_error("syntax-rules error: informal form appeared (dot pair)\n");
-  //   }
-
-  //   return try_match_1(env, p_next, f_next, form_env, false);
-  // }
+  // check form
+  pick_first(form);
 
   static constexpr auto env_cleaner = [](Env* e){
     e->visit_map([](Env::map_type& map){
@@ -95,7 +85,8 @@ std::pair<Env*, Lisp_ptr> SyntaxRules::match(Lisp_ptr form, Env* form_env) const
   unique_ptr<Env, decltype(env_deleter)> env{env_->push(), env_deleter};
 
   for(auto i : rules_){
-    if(try_match_1(env.get(), i.first, form, form_env)){
+    auto ignore_ident = pick_first(i.first);
+    if(try_match_1(env.get(), i.first, form, form_env, ignore_ident)){
       return {env.release(), i.second};
     }else{
       env_cleaner(env.get());
@@ -106,7 +97,8 @@ std::pair<Env*, Lisp_ptr> SyntaxRules::match(Lisp_ptr form, Env* form_env) const
 }
 
 bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern, 
-                              Lisp_ptr form, Env* form_env) const{
+                              Lisp_ptr form, Env* form_env,
+                              Lisp_ptr ignore_ident) const{
   static Symbol* ellipsis_sym = intern(vm.symtable(), "...");
 
   static const auto check_duplicate = [env](Symbol* sym){
@@ -132,8 +124,10 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
                                          form_env, identifier_symbol(form));
     }else{
       // non-literal identifier
-      check_duplicate(p_sym);
-      env->local_set(p_sym, new SyntacticClosure(form_env, nullptr, form));
+      if(p_sym != identifier_symbol(ignore_ident)){
+        check_duplicate(p_sym);
+        env->local_set(p_sym, new SyntacticClosure(form_env, nullptr, form));
+      }
       return true;
     }
   }else if(pattern.tag() == Ptr_tag::cons){
@@ -171,14 +165,14 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
 
       if(f_i == f_e) break; // this check is delayed for checking the ellipsis.
 
-      if(!try_match_1(env, *p_i, *f_i, form_env)){
+      if(!try_match_1(env, *p_i, *f_i, form_env, ignore_ident)){
         return false;
       }
     }
 
     // checks length
     if((p_i == p_e) && (f_i == f_e)){
-      return try_match_1(env, p_i.base(), f_i.base(), form_env);
+      return try_match_1(env, p_i.base(), f_i.base(), form_env, ignore_ident);
     }else{
       return false;
     }
