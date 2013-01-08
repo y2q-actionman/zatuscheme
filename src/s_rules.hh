@@ -36,7 +36,7 @@ private:
                    Lisp_ptr ignore_ident) const;
 
   Env* env_;
-  std::vector<Symbol*> literals_;
+  std::vector<Lisp_ptr> literals_;
   std::vector<Rule> rules_;
 };
 

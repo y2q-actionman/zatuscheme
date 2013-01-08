@@ -42,7 +42,7 @@ constexpr ProcInfo SyntaxRules::sr_procinfo;
 SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
   : env_(e), literals_(), rules_(){
   for(auto i : lits){
-    literals_.push_back(identifier_symbol(i));
+    literals_.push_back(i);
   }
   literals_.shrink_to_fit();
 
@@ -115,16 +115,16 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
     
 
   if(identifierp(pattern)){
-    auto p_sym = identifier_symbol(pattern);
-    if(find(begin(literals_), end(literals_), p_sym) != end(literals_)){
+    if(find(begin(literals_), end(literals_), pattern) != end(literals_)){
       // literal identifier
       if(!identifierp(form)) return false;
 
-      return proc_identifier_eq_internal(this->env_, p_sym,
+      return proc_identifier_eq_internal(this->env_, identifier_symbol(pattern),
                                          form_env, identifier_symbol(form));
     }else{
       // non-literal identifier
-      if(p_sym != identifier_symbol(ignore_ident)){
+      if(pattern != ignore_ident){
+        auto p_sym = identifier_symbol(pattern);
         check_duplicate(p_sym);
         env->local_set(p_sym, new SyntacticClosure(form_env, nullptr, form));
       }
