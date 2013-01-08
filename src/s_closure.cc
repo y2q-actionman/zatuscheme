@@ -30,7 +30,7 @@ Symbol* identifier_symbol(Lisp_ptr p){
   }else if(p.tag() == Ptr_tag::syntactic_closure){
     return identifier_symbol(p.get<SyntacticClosure*>()->expr());
   }else{
-    throw zs_error("eval internal error: not identifier value! (%s)",
+    throw zs_error("eval internal error: not identifier! (%s)",
                    stringify(p.tag()));
   }
 }
@@ -42,7 +42,7 @@ Env* identifier_env(Lisp_ptr p, Env* e){
     auto sc = p.get<SyntacticClosure*>();
     return identifier_env(sc->expr(), sc->env());
   }else{
-    throw zs_error("eval internal error: not identifier value! (%s)",
+    throw zs_error("eval internal error: not identifier! (%s)",
                    stringify(p.tag()));
   }
 }

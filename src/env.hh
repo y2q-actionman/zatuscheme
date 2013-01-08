@@ -19,15 +19,19 @@ public:
   Env& operator=(const Env&) = delete;
   Env& operator=(Env&&) = delete;
 
-  // void steal(Env*);
-
   Lisp_ptr traverse(Symbol*, Lisp_ptr);
   void local_set(Symbol*, Lisp_ptr);
   Env* push();
 
   Env* fork() const;
   
+  // void clear();
+  // void clear_all();
+
   friend std::ostream& operator<<(std::ostream&, const Env&);
+
+  template<typename Fun>
+  void visit_map(Fun f){ f(map_); }
 
 private:
   map_type map_;

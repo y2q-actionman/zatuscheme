@@ -106,6 +106,12 @@ Lisp_ptr proc_identifierp(){
   return Lisp_ptr{identifierp(args[0])};
 }
 
+bool proc_identifier_eq_internal(Env* ident1_env, Symbol* ident1_sym,
+                                 Env* ident2_env, Symbol* ident2_sym){
+  return eq_internal(ident1_env->traverse(ident1_sym, {}),
+                     ident2_env->traverse(ident2_sym, {}));
+}
+
 Lisp_ptr proc_identifier_eq(){
   ZsArgs args{4};
 
@@ -123,10 +129,8 @@ Lisp_ptr proc_identifier_eq(){
 
   auto ident2_sym = identifier_symbol(args[3]);
 
-  return Lisp_ptr{
-    eq_internal(ident1_env->traverse(ident1_sym, {}),
-                ident2_env->traverse(ident2_sym, {}))
-      };
+  return 
+    Lisp_ptr{proc_identifier_eq_internal(ident1_env, ident1_sym, ident2_env, ident2_sym)};
 }
 
 Lisp_ptr make_synthetic_identifier(){

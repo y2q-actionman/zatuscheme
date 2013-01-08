@@ -54,6 +54,10 @@ Env* Env::fork() const{
   return ret;
 }
 
+// void Env::clear(){
+//   map_.clear();
+// }
+
 std::ostream& operator<<(std::ostream& f, const Env& env){
   f << "Env " << c_cast<void*>(&env)
     << " (next=" << c_cast<void*>(env.next_) << ")\n";
