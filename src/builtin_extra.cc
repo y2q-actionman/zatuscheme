@@ -108,8 +108,8 @@ Lisp_ptr proc_identifierp(){
 
 bool proc_identifier_eq_internal(Env* ident1_env, Symbol* ident1_sym,
                                  Env* ident2_env, Symbol* ident2_sym){
-  return eq_internal(ident1_env->traverse(ident1_sym, {}),
-                     ident2_env->traverse(ident2_sym, {}));
+  return eq_internal(ident1_env->find(ident1_sym),
+                     ident2_env->find(ident2_sym));
 }
 
 Lisp_ptr proc_identifier_eq(){

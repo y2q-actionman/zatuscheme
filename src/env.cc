@@ -15,22 +15,29 @@ Env::Env(Env* e)
 Env::~Env(){
 }
 
-Lisp_ptr Env::traverse(Symbol* s, Lisp_ptr p){
-  Lisp_ptr old = {};
-
+Lisp_ptr Env::find(Symbol* s){
   for(Env* e = this; e; e = e->next_){
     auto ei = e->map_.find(s);
     if(ei != e->map_.end()){
-      old = ei->second;
-      if(p){
-        e->map_.erase(ei);
-        e->map_.insert({s, p});
-      }
-      break;
+      return ei->second;
     }
   }
 
-  return old;
+  return {};
+}
+
+Lisp_ptr Env::set(Symbol* s, Lisp_ptr p){
+  for(Env* e = this; e; e = e->next_){
+    auto ei = e->map_.find(s);
+    if(ei != e->map_.end()){
+      auto old = ei->second;
+      e->map_.erase(ei);
+      e->map_.insert({s, p});
+      return old;
+    }
+  }
+
+  return {};
 }
 
 void Env::local_set(Symbol* s, Lisp_ptr p){

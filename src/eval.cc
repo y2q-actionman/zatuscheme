@@ -579,7 +579,7 @@ void vm_op_set(){
     
   auto sym = identifier_symbol(var);
   auto env = identifier_env(var, vm.frame());
-  env->traverse(sym, vm.return_value_1());
+  env->set(sym, vm.return_value_1());
 }
 
 /*

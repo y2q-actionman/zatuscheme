@@ -19,7 +19,8 @@ public:
   Env& operator=(const Env&) = delete;
   Env& operator=(Env&&) = delete;
 
-  Lisp_ptr traverse(Symbol*, Lisp_ptr);
+  Lisp_ptr find(Symbol*);
+  Lisp_ptr set(Symbol*, Lisp_ptr);
   void local_set(Symbol*, Lisp_ptr);
   Env* push();
 

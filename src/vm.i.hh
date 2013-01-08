@@ -7,12 +7,12 @@
 
 inline
 Lisp_ptr VM::find(Symbol* s){
-  return frame()->traverse(s, Lisp_ptr{});
+  return frame()->find(s);
 }
 
 inline
 void VM::set(Symbol* s, Lisp_ptr p){
-  frame()->traverse(s, p);
+  frame()->set(s, p);
 }
 
 inline
