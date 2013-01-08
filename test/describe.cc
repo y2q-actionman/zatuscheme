@@ -8,9 +8,9 @@ std::ostream& operator<<(std::ostream& o, Ptr_tag t){
   return (o << stringify(t));
 }
 
-std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
-  return (o << "[" << p.tag() << "] " << p.get<void*>());
-}
+// std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
+//   return (o << "[" << p.tag() << "] " << p.get<void*>());
+// }
 
 std::ostream& operator<<(std::ostream& o, Number::Type t){
   return (o << stringify(t));

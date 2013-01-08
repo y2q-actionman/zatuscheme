@@ -5,7 +5,7 @@
 #include <iosfwd>
 
 std::ostream& operator<<(std::ostream&, Ptr_tag);
-std::ostream& operator<<(std::ostream&, Lisp_ptr);
+// std::ostream& operator<<(std::ostream&, Lisp_ptr);
 
 std::ostream& operator<<(std::ostream&, Number::Type);
 std::ostream& operator<<(std::ostream&, const Number&);

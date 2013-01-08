@@ -8,4 +8,12 @@ enum class print_human_readable{ f, t };
 void print(std::ostream&, Lisp_ptr,
            print_human_readable flag = print_human_readable::f);
 
+
+// for debug;
+inline
+std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
+  print(o, p);
+  return o;
+}
+
 #endif //PRINTER_HH
