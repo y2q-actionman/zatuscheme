@@ -30,6 +30,8 @@ int main(){
   check_e("(fun2 100)", "101");
 
   // testing defined variables
+  eval_text("(define (hoge) (define (fuga n) (* n 2)) fuga)");
+  check_e("((hoge) 100)", "200");
 
   // testing various syntaxes
 
