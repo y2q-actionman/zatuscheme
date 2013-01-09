@@ -566,10 +566,26 @@ void vm_op_set(){
   if(!identifierp(var)){
     throw builtin_identifier_check_failed("(set)", vm.code.back());
   }
-    
-  auto sym = identifier_symbol(var);
-  auto env = identifier_env(var, vm.frame());
-  env->set(sym, vm.return_value_1());
+
+  auto val = vm.return_value_1();
+
+  if(var.tag() == Ptr_tag::symbol){
+    vm.frame()->set(var, val);
+  }else if(var.tag() == Ptr_tag::syntactic_closure){
+    if(vm.frame()->find(var)){
+      // bound alias
+      vm.frame()->set(var, val);
+    }else{
+      // not-bound syntactic closure
+      auto sc = var.get<SyntacticClosure*>();
+      assert(sc);
+
+      sc->env()->set(sc->expr(), val);
+    }
+  }else{
+    UNEXP_DEFAULT();
+  }
+
 }
 
 /*
@@ -776,6 +792,15 @@ void eval(){
         break;
 
       case Ptr_tag::syntactic_closure: {
+        // bound alias
+        if(identifierp(p)){
+          if(auto val = vm.frame()->find(p)){
+            vm.code.pop_back();
+            vm.return_value = {val};
+          }
+        }
+
+        // not-bound syntax closure
         auto sc = p.get<SyntacticClosure*>();
         assert(sc);
 
