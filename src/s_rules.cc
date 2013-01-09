@@ -10,6 +10,7 @@
 #include "zs_error.hh"
 #include "builtin_equal.hh"
 #include "builtin_extra.hh"
+#include "builtin_util.hh"
 #include "printer.hh"
 
 using namespace std;
@@ -42,6 +43,9 @@ constexpr ProcInfo SyntaxRules::sr_procinfo;
 SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
   : env_(e), literals_(), rules_(){
   for(auto i : lits){
+    if(!identifierp(i))
+      throw builtin_identifier_check_failed("syntax-rules", i);
+
     literals_.push_back(i);
   }
   literals_.shrink_to_fit();
@@ -99,13 +103,15 @@ std::pair<Env*, Lisp_ptr> SyntaxRules::match(Lisp_ptr form, Env* form_env) const
 bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern, 
                               Lisp_ptr form, Env* form_env,
                               Lisp_ptr ignore_ident) const{
-  static Symbol* ellipsis_sym = intern(vm.symtable(), "...");
+  static const auto ellipsis_sym = intern(vm.symtable(), "...");
 
-  static const auto check_duplicate = [env](Symbol* sym){
-    env->visit_map([sym](const Env::map_type& map){
-        if(map.find(sym) != map.end()){
+  static const auto check_duplicate = [env](Lisp_ptr ident){
+    assert(identifierp(ident));
+
+    env->visit_map([&ident](const Env::map_type& map){
+        if(map.find(ident) != map.end()){
           throw zs_error("syntax-rules error: duplicated pattern variable! (%s)\n",
-                         sym->name().c_str());
+                         identifier_symbol(ident)->name().c_str());
         }
       });
   };
@@ -119,14 +125,12 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
       // literal identifier
       if(!identifierp(form)) return false;
 
-      return identifier_eq(this->env_, identifier_symbol(pattern),
-                           form_env, identifier_symbol(form));
+      return identifier_eq(this->env_, pattern, form_env, form);
     }else{
       // non-literal identifier
       if(pattern != ignore_ident){
-        auto p_sym = identifier_symbol(pattern);
-        check_duplicate(p_sym);
-        env->local_set(p_sym, new SyntacticClosure(form_env, nullptr, form));
+        check_duplicate(pattern);
+        env->local_set(pattern, new SyntacticClosure(form_env, nullptr, form));
       }
       return true;
     }
@@ -160,9 +164,8 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
           throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
         }
 
-        auto p_i_sym = identifier_symbol(*p_i);
-        check_duplicate(p_i_sym);
-        env->local_set(p_i_sym, f_i.base());
+        check_duplicate(*p_i);
+        env->local_set(*p_i, f_i.base());
         return true;
       }
 
@@ -200,9 +203,8 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
 
-        auto p_i_sym = identifier_symbol(*p_i);
-        check_duplicate(p_i_sym);
-        env->local_set(p_i_sym, new Vector(f_i, f_e));
+        check_duplicate(*p_i);
+        env->local_set(*p_i, new Vector(f_i, f_e));
         return true;
       }
 
