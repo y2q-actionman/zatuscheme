@@ -698,7 +698,7 @@ Lisp_ptr let_internal(Entering entering){
     arg_c = arg.get<Cons*>();
 
     // checks named let
-    if(arg_c->car().tag() == Ptr_tag::symbol){
+    if(identifierp(arg_c->car())){
       name = arg_c->car();
 
       arg = arg_c->cdr();

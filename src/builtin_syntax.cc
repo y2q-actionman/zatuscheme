@@ -89,7 +89,7 @@ Lisp_ptr syntax_define(){
   // extracting
   auto first = rest->car();
 
-  if(first.tag() == Ptr_tag::symbol){
+  if(identifierp(first)){
     bind_cons_list_strict
       (p,
        [](Lisp_ptr var, Lisp_ptr expr){
