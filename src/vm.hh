@@ -30,10 +30,6 @@ public:
   void set_frame(Env* e){ frame_ = e; }
   Env* frame() const { return frame_; }
 
-  Lisp_ptr find(Symbol*);
-  void set(Symbol*, Lisp_ptr);
-  void local_set(Symbol*, Lisp_ptr);
-
   SymTable& symtable(){ return *symtable_; }
 
   Lisp_ptr return_value_1()

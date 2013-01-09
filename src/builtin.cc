@@ -55,7 +55,7 @@ Lisp_ptr env_pick_2(const char* name){
                         name, ver);
   }
 
-  return vm.find(intern(vm.symtable(), name));
+  return vm.frame()->find(intern(vm.symtable(), name));
 }
 
 Lisp_ptr env_r5rs(){
@@ -68,7 +68,7 @@ Lisp_ptr env_null(){
 
 Lisp_ptr env_interactive(){
   ZsArgs args{0};
-  return vm.find(intern(vm.symtable(), interaction_env_symname));
+  return vm.frame()->find(intern(vm.symtable(), interaction_env_symname));
 }
   
 
@@ -156,17 +156,20 @@ static const char* builtin_extra_strs[] = {
 
 void install_builtin(){
   static constexpr auto install_builtin_native = [](const BuiltinFunc& bf){
-    vm.local_set(intern(vm.symtable(), bf.name), {&bf.func});
+    vm.frame()->local_set(intern(vm.symtable(), bf.name), {&bf.func});
   };    
   static constexpr auto install_builtin_string = [](const char* s){
     stringstream ss({s}, ios_base::in);
     load(&ss);
   };    
+  static constexpr auto install_builtin_symbol = [](const char* name, Lisp_ptr value){
+    vm.frame()->local_set(intern(vm.symtable(), name), value);
+  };    
 
   // null-environment
   for_each(std::begin(builtin_syntax_funcs), std::end(builtin_syntax_funcs),
            install_builtin_native);
-  vm.local_set(intern(vm.symtable(), null_env_symname), vm.frame());
+  install_builtin_symbol(null_env_symname, vm.frame());
 
   // r5rs-environment
   vm.set_frame(vm.frame()->push());
@@ -174,9 +177,9 @@ void install_builtin(){
            install_builtin_native);
   for_each(std::begin(builtin_strs), std::end(builtin_strs),
            install_builtin_string);
-  vm.local_set(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME), &std::cin);
-  vm.local_set(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
-  vm.local_set(intern(vm.symtable(), r5rs_env_symname), vm.frame());
+  install_builtin_symbol(CURRENT_INPUT_PORT_SYMNAME, &std::cin);
+  install_builtin_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
+  install_builtin_symbol(r5rs_env_symname, vm.frame());
 
   // interaction-environment
   vm.set_frame(vm.frame()->push());
@@ -184,7 +187,7 @@ void install_builtin(){
            install_builtin_native);
   for_each(std::begin(builtin_extra_strs), std::end(builtin_extra_strs),
            install_builtin_string);
-  vm.local_set(intern(vm.symtable(), interaction_env_symname), vm.frame());
+  install_builtin_symbol(interaction_env_symname, vm.frame());
 }
 
 void load(InputPort* p){

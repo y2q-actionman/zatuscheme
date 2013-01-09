@@ -760,7 +760,7 @@ void eval(){
       switch(p.tag()){
       case Ptr_tag::symbol:
         vm.code.pop_back();
-        vm.return_value = {vm.find(p.get<Symbol*>())};
+        vm.return_value = {vm.frame()->find(p.get<Symbol*>())};
         break;
     
       case Ptr_tag::cons: {
@@ -797,7 +797,7 @@ void eval(){
         }else{
           newenv = sc->env()->push();
           for(auto i : sc->free_names()){
-            auto val = vm.find(identifier_symbol(i));
+            auto val = vm.frame()->find(identifier_symbol(i));
             local_set_with_identifier(i, val, newenv);
           }
         }
