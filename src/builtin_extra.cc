@@ -150,7 +150,7 @@ Lisp_ptr exit_func(){
   return {};
 }
 
-Lisp_ptr eq_hashcode_func(){
+Lisp_ptr eq_hash_func(){
   ZsArgs args{1}; 
 
   auto h = std::hash<Lisp_ptr>()(args[0]);

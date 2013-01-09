@@ -30,7 +30,8 @@ check_PROGRAMS = token_test\
 		builtin_syntax_test\
 		builtin_vector_test\
 		delay_test\
-		macro_test
+		macro_test\
+		extra_test
 
 TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(test_envs)

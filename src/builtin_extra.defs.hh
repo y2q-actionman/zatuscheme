@@ -27,6 +27,6 @@
 {"exit", {
     exit_func,
     {0}}},
-{"eq-hashcode", {
-    eq_hashcode_func,
+{"eq-hash", {
+    eq_hash_func,
     {1}}},
