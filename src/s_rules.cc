@@ -1,7 +1,6 @@
 #include <memory>
 #include <algorithm>
 #include <iterator>
-// #include <iostream>
 
 #include "s_rules.hh"
 #include "s_closure.hh"
@@ -12,6 +11,9 @@
 #include "builtin_extra.hh"
 #include "builtin_util.hh"
 #include "printer.hh"
+
+// #include <iostream>
+// #include "env.hh"
 
 using namespace std;
 
@@ -56,7 +58,6 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
        [&](Lisp_ptr pat, Lisp_ptr tmpl){
         // checks forms
         pick_first(pat);
-        pick_first(tmpl);
 
         rules_.push_back({pat, tmpl});
       });
@@ -106,8 +107,10 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
   static const auto check_duplicate = [env](Lisp_ptr ident){
     assert(identifierp(ident));
 
-    env->visit_map([&ident](const Env::map_type& map){
+    env->visit_map([&](const Env::map_type& map){
         if(map.find(ident) != map.end()){
+          // cout << "### env: " << env << endl;
+          // cout << ident << " = " << map.find(ident)->second << endl;
           throw zs_error("syntax-rules error: duplicated pattern variable! (%s)\n",
                          identifier_symbol(ident)->name().c_str());
         }
