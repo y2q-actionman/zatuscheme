@@ -1,6 +1,7 @@
 #include "s_closure.hh"
 #include "cons_util.hh"
 #include "zs_error.hh"
+#include "env.hh"
 
 SyntacticClosure::SyntacticClosure(Env* e, Cons* f, Lisp_ptr ex)
   : env_(e), free_names_(f), expr_(ex){
@@ -45,4 +46,9 @@ Env* identifier_env(Lisp_ptr p, Env* e){
     throw zs_error("eval internal error: not identifier! (%s)",
                    stringify(p.tag()));
   }
+}
+
+bool identifier_eq(Env* ident1_env, Symbol* ident1_sym,
+                   Env* ident2_env, Symbol* ident2_sym){
+  return (ident1_env->find(ident1_sym) == ident2_env->find(ident2_sym));
 }

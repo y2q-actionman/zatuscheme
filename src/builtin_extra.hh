@@ -3,8 +3,6 @@
 
 #include "decl.hh"
 
-bool proc_identifier_eq_internal(Env*, Symbol*, Env*, Symbol*);
-
 Lisp_ptr traditional_transformer();
 Lisp_ptr gensym();
 

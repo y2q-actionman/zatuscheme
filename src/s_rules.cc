@@ -119,8 +119,8 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
       // literal identifier
       if(!identifierp(form)) return false;
 
-      return proc_identifier_eq_internal(this->env_, identifier_symbol(pattern),
-                                         form_env, identifier_symbol(form));
+      return identifier_eq(this->env_, identifier_symbol(pattern),
+                           form_env, identifier_symbol(form));
     }else{
       // non-literal identifier
       if(pattern != ignore_ident){
