@@ -115,17 +115,21 @@ Lisp_ptr proc_identifier_eq(){
     throw builtin_type_check_failed("identifier=?", Ptr_tag::env, args[0]);
   }
 
-  auto ident1_sym = identifier_symbol(args[1]);
+  if(!identifierp(args[1])){
+    throw builtin_identifier_check_failed("identifier=?", args[1]);
+  }
   
   auto ident2_env = args[2].get<Env*>();
   if(!ident2_env){
     throw builtin_type_check_failed("identifier=?", Ptr_tag::env, args[2]);
   }
 
-  auto ident2_sym = identifier_symbol(args[3]);
+  if(!identifierp(args[3])){
+    throw builtin_identifier_check_failed("identifier=?", args[3]);
+  }
 
   return 
-    Lisp_ptr{identifier_eq(ident1_env, ident1_sym, ident2_env, ident2_sym)};
+    Lisp_ptr{identifier_eq(ident1_env, args[1], ident2_env, args[3])};
 }
 
 Lisp_ptr make_synthetic_identifier(){
@@ -136,8 +140,7 @@ Lisp_ptr make_synthetic_identifier(){
                    stringify(args[0].tag()));
   }
 
-  return new SyntacticClosure(new Env(nullptr), nullptr,
-                              identifier_symbol(args[0]));
+  return new SyntacticClosure(new Env(nullptr), nullptr, args[0]);
 }
 
 Lisp_ptr exit_func(){

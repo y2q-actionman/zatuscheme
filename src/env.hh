@@ -5,10 +5,11 @@
 #include <iosfwd>
 
 #include "lisp_ptr.hh"
+#include "hasher.hh"
 
 class Env {
 public:
-  typedef std::unordered_map<Symbol*, Lisp_ptr> map_type;
+  typedef std::unordered_map<Lisp_ptr, Lisp_ptr> map_type;
 
   Env(const Env&) = delete;
   Env(Env&&) = delete;
@@ -19,9 +20,9 @@ public:
   Env& operator=(const Env&) = delete;
   Env& operator=(Env&&) = delete;
 
-  Lisp_ptr find(Symbol*);
-  Lisp_ptr set(Symbol*, Lisp_ptr);
-  void local_set(Symbol*, Lisp_ptr);
+  Lisp_ptr find(Lisp_ptr);
+  Lisp_ptr set(Lisp_ptr, Lisp_ptr);
+  void local_set(Lisp_ptr, Lisp_ptr);
   Env* push();
 
   Env* fork() const;

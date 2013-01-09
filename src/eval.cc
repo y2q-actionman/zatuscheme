@@ -20,16 +20,6 @@ using namespace Procedure;
 
 namespace {
 
-static
-void local_set_with_identifier(Lisp_ptr ident, Lisp_ptr value,
-                               Env* default_env = vm.frame()){
-  auto sym = identifier_symbol(ident);
-  auto env = identifier_env(ident, default_env);
-
-  env->local_set(sym, value);
-}
-
-
 /*
   ret = some value
 */
@@ -91,10 +81,10 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
     // captures arguments
     auto i = begin(iproc->arg_list());
     for(; i ; ++i){
-      local_set_with_identifier(*i, Lisp_ptr{});
+      vm.frame()->local_set(*i, Lisp_ptr{});
     }
     if(identifierp(i.base())){
-      local_set_with_identifier(i.base(), Lisp_ptr{});
+      vm.frame()->local_set(i.base(), Lisp_ptr{});
     }
   }
 
@@ -334,7 +324,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       break;
     }
    
-    local_set_with_identifier(arg_name_cell->car(), *i);
+    vm.frame()->local_set(arg_name_cell->car(), *i);
     arg_name = arg_name_cell->cdr();
   }
 
@@ -347,7 +337,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     auto var_argc = argc.get<int>() - static_cast<int>(std::distance(arg_start, i));
     vm.stack.erase(arg_start, i);
     vm.stack.push_back({Ptr_tag::vm_argcount, var_argc});
-    local_set_with_identifier((arg_name), stack_to_list<false>(vm.stack));
+    vm.frame()->local_set(arg_name, stack_to_list<false>(vm.stack));
   }else{  // clean stack
     if(i != arg_end){
       throw zs_error("eval error: corrupted stack -- passed too much args!\n");
@@ -599,7 +589,7 @@ void vm_op_local_set(){
     throw builtin_identifier_check_failed("(local set)", var);
   }
 
-  local_set_with_identifier((var), vm.return_value_1()); 
+  vm.frame()->local_set(var, vm.return_value_1()); 
 }
 
 /*
@@ -744,7 +734,7 @@ Lisp_ptr let_internal(Entering entering){
                              gl_syms.extract(), vm.frame());
 
   if(name){
-    local_set_with_identifier(name, proc);
+    vm.frame()->local_set(name, proc);
   }
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
@@ -760,7 +750,7 @@ void eval(){
       switch(p.tag()){
       case Ptr_tag::symbol:
         vm.code.pop_back();
-        vm.return_value = {vm.frame()->find(p.get<Symbol*>())};
+        vm.return_value = {vm.frame()->find(p)};
         break;
     
       case Ptr_tag::cons: {
@@ -797,8 +787,8 @@ void eval(){
         }else{
           newenv = sc->env()->push();
           for(auto i : sc->free_names()){
-            auto val = vm.frame()->find(identifier_symbol(i));
-            local_set_with_identifier(i, val, newenv);
+            auto val = vm.frame()->find(i);
+            newenv->local_set(i, val);
           }
         }
 

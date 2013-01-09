@@ -48,7 +48,7 @@ Env* identifier_env(Lisp_ptr p, Env* e){
   }
 }
 
-bool identifier_eq(Env* ident1_env, Symbol* ident1_sym,
-                   Env* ident2_env, Symbol* ident2_sym){
-  return (ident1_env->find(ident1_sym) == ident2_env->find(ident2_sym));
+bool identifier_eq(Env* ident1_env, Lisp_ptr ident1,
+                   Env* ident2_env, Lisp_ptr ident2){
+  return (ident1_env->find(ident1) == ident2_env->find(ident2));
 }

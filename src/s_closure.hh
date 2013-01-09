@@ -28,6 +28,6 @@ bool identifierp(Lisp_ptr);
 Symbol* identifier_symbol(Lisp_ptr);
 Env* identifier_env(Lisp_ptr, Env* default_env);
 
-bool identifier_eq(Env*, Symbol*, Env*, Symbol*);
+bool identifier_eq(Env*, Lisp_ptr, Env*, Lisp_ptr);
 
 #endif // S_CLOSURE_HH
