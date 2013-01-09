@@ -16,5 +16,6 @@ Lisp_ptr proc_identifier_eq();
 Lisp_ptr make_synthetic_identifier();
 
 Lisp_ptr exit_func();
+Lisp_ptr eq_hashcode_func();
 
 #endif // BUILTIN_EXTRA_HH

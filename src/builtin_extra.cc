@@ -7,6 +7,8 @@
 #include "util.hh"
 #include "eval.hh"
 #include "env.hh"
+#include "hasher.hh"
+#include "number.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -146,4 +148,12 @@ Lisp_ptr exit_func(){
   vm.stack.clear();
   vm.code.clear();
   return {};
+}
+
+Lisp_ptr eq_hashcode_func(){
+  ZsArgs args{1}; 
+
+  auto h = std::hash<Lisp_ptr>()(args[0]);
+
+  return new Number{static_cast<Number::integer_type>(h)};
 }
