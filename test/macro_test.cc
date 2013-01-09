@@ -211,7 +211,7 @@ int main(){
   "(#f #t)");
 
 
-  // syntax-rules
+  // syntax-rules from R5RS
   check_e_success(
   "(define-syntax push"
   "  (syntax-rules ()"
@@ -220,6 +220,25 @@ int main(){
   check_e_success("(set! push-test-lis ())");
   check_e("push-test-lis", "()");
   check_e_success("(push 1 push-test-lis)");
+  check_e("push-test-lis", "(1)");
+  check_e_success("(push 2 push-test-lis)");
+  check_e("push-test-lis", "(2 1)");
+
+  
+  check_e_success(
+  "(define-syntax and"
+  "  (syntax-rules ()"
+  "    ((and) #t)"
+  "    ((and test) test)"
+  "    ((and test1 test2 ...)"
+  "     (if test1 (and test2 ...) #f))))");
+  check_e_success("and");
+  check_e("(and)", "#t");
+  check_e("(and 1)", "1");
+  // check_e("(and 1 2)", "2");
+  // check_e("(and #f 2)", "#f");
+  // check_e("(and 1 #f 3)", "#f");
+  // check_e("(and #t #t 3)", "3");
 
   return RESULT;
 }
