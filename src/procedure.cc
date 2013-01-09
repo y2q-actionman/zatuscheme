@@ -4,6 +4,7 @@
 #include "cons.hh"
 #include "cons_util.hh"
 #include "util.hh"
+#include "s_closure.hh"
 #include "s_rules.hh"
 
 namespace Procedure{
@@ -14,7 +15,7 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
 
   do_list(args,
           [&](Cons* c) -> bool {
-            if(c->car().tag() != Ptr_tag::symbol){
+            if(!identifierp(c->car())){
               return false;
             }
             ++argc;
@@ -24,8 +25,8 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
             if(nullp(last)){
               return;
             }else{
-              if(last.tag() != Ptr_tag::symbol){
-                throw zs_error("eval error: informal lambda list! (including non-symbol)\n");
+              if(!identifierp(last)){
+                throw zs_error("eval error: informal lambda list! (including non-identifier)\n");
               }
               v = Variadic::t;
             }
