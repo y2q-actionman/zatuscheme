@@ -11,24 +11,11 @@
 
 using namespace std;
 
-bool eq_internal(Lisp_ptr a, Lisp_ptr b){
-  if(a.tag() != b.tag()) return false;
-
-  if(a.tag() == Ptr_tag::boolean){
-    return a.get<bool>() == b.get<bool>();
-  }else if(a.tag() == Ptr_tag::character){
-     // this can be moved into eqv? in R5RS, but char is contained in Lisp_ptr.
-    return a.get<char>() == b.get<char>();
-  }else{
-    return a.get<void*>() == b.get<void*>();
-  }
-}
-
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() == Ptr_tag::number && b.tag() == Ptr_tag::number){
     return eqv(*a.get<Number*>(), *b.get<Number*>());
   }else{
-    return eq_internal(a, b);
+    return (a == b);
   }
 }
 
@@ -54,7 +41,7 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
 
 Lisp_ptr eq(){
   ZsArgs args{2};
-  return Lisp_ptr{eq_internal(args[0], args[1])};
+  return Lisp_ptr{args[0] == args[1]};
 }
 
 Lisp_ptr eqv(){

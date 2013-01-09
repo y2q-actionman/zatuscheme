@@ -75,6 +75,7 @@ private:
   lisp_ptr_u u_;
 };
 
+// compares with 'eq?' semantics
 bool operator==(Lisp_ptr, Lisp_ptr);
 bool operator!=(Lisp_ptr, Lisp_ptr);
 
