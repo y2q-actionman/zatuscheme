@@ -27,7 +27,12 @@ Lisp_ptr whole_function_error(const char* opname){
 
 Lisp_ptr syntax_quote(){
   ZsArgs args{1};
-  return args[0];
+
+  if(args[0].tag() == Ptr_tag::syntactic_closure){
+    return args[0].get<SyntacticClosure*>()->expr();
+  }else{
+    return args[0];
+  }
 }
 
 
