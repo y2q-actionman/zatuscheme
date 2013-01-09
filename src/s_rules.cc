@@ -103,8 +103,6 @@ std::pair<Env*, Lisp_ptr> SyntaxRules::match(Lisp_ptr form, Env* form_env) const
 bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern, 
                               Lisp_ptr form, Env* form_env,
                               Lisp_ptr ignore_ident) const{
-  static const auto ellipsis_sym = intern(vm.symtable(), "...");
-
   static const auto check_duplicate = [env](Lisp_ptr ident){
     assert(identifierp(ident));
 
@@ -119,6 +117,7 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
   // cout << __func__ << endl;
   // cout << "pattern " << pattern << ", form " << form << endl;
     
+  const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(pattern)){
     if(find(begin(literals_), end(literals_), pattern) != end(literals_)){
