@@ -56,10 +56,10 @@
     {1, Variadic::f, Passing::whole, Returning::code}}},
 {"unquote", {
     syntax_unquote,
-    {1, Variadic::f, Passing::whole}}},
+    {1}}},
 {"unquote-splicing", {
     syntax_unquote_splicing,
-    {1, Variadic::f, Passing::whole}}},
+    {1, Variadic::f, Passing::eval, Returning::stack_splice, MoveReturnValue::f}}},
 
 {"else", {
     syntax_else,

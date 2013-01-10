@@ -436,17 +436,6 @@ Lisp_ptr syntax_delay(){
   return {new Delay(wargs[0], vm.frame())};
 }
 
-static
-Lisp_ptr function_splicing(){
-  ZsArgs args{1};
-  if(args[0].tag() != Ptr_tag::cons){
-    builtin_type_check_failed("unquote-splicing", Ptr_tag::cons, args[0]);
-  }
-
-  vm.return_value.assign(begin(args[0]), end(args[0]));
-  return {};
-}
-
 Lisp_ptr syntax_quasiquote(){
   ZsArgs wargs{1};
 
@@ -469,21 +458,14 @@ Lisp_ptr syntax_quasiquote(){
   const auto unquote_sym = intern(vm.symtable(), "unquote");
   const auto unquote_splicing_sym = intern(vm.symtable(), "unquote-splicing");
 
-  static const Procedure::NProcedure splicing_nproc{
-    function_splicing,
-    {1, Variadic::f, Passing::eval, Returning::stack_splice, MoveReturnValue::f}
-  };
-
   GrowList gl;
 
   const auto qq_elem = [&](Lisp_ptr p){
     if(auto l = p.get<Cons*>()){
       if(auto l_first_sym = l->car().get<Symbol*>()){
-        if(l_first_sym == unquote_sym){
-          gl.push(l->cdr().get<Cons*>()->car());
-          return;
-        }else if(l_first_sym == unquote_splicing_sym){
-          gl.push(push_cons_list(&splicing_nproc, l->cdr()));
+        if(l_first_sym == unquote_sym
+           || l_first_sym == unquote_splicing_sym){
+          gl.push(l);
           return;
         }
       }
@@ -499,10 +481,9 @@ Lisp_ptr syntax_quasiquote(){
 
     // check unquote -- like `,x
     if(auto first_sym = arg.get<Cons*>()->car().get<Symbol*>()){
-      if(first_sym == unquote_sym){
-        return arg.get<Cons*>()->cdr().get<Cons*>()->car();
-      }else if(first_sym == unquote_splicing_sym){
-        throw zs_error("quasiquote error: unquote-splicing is not supported out of list");
+      if(first_sym == unquote_sym
+         || first_sym == unquote_splicing_sym){
+        return arg;
       }
     }
 
@@ -530,11 +511,18 @@ Lisp_ptr syntax_quasiquote(){
 }
 
 Lisp_ptr syntax_unquote(){
-  return whole_function_error("unquote");
+  ZsArgs args{1};
+  return args[0];
 }
 
 Lisp_ptr syntax_unquote_splicing(){
-  return whole_function_error("unquote-splicing");
+  ZsArgs args{1};
+  if(args[0].tag() != Ptr_tag::cons){
+    builtin_type_check_failed("unquote-splicing", Ptr_tag::cons, args[0]);
+  }
+
+  vm.return_value.assign(begin(args[0]), end(args[0]));
+  return {};
 }
 
 Lisp_ptr syntax_else(){
