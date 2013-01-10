@@ -109,23 +109,25 @@ void vm_op_macro_call(){
 
 /*
   return = an, an-1, ...
-  code = (this), <VMop>, argcount[b], args(b)
+  code = (this), <VMop arg push>, argcount[b], args(b)
   stack = bn, bn-1, ...
   ---
   return = {}
-  code = (this), <VMop>, argcount[a+b], args(b)
+  code = (this), <VMop arg push>, argcount[a+b], args(b)
   stack = bn, bn-1, ..., an, an-1, ...
 */
 void vm_op_stack_splicing(){
   assert(vm.code.back() == vm_op_stack_splicing);
 
   auto& op = vm.code[vm.code.size() - 2];
-  if(op.tag() != Ptr_tag::vm_op){
-    throw zs_error("eval error: unquote-splicing: called in invalid context!\n");
-  }
-
   auto& outer_argc = vm.code[vm.code.size() - 3];
   auto& outer_args = vm.code[vm.code.size() - 4];
+
+  if(op.tag() != Ptr_tag::vm_op
+     || outer_argc.tag() != Ptr_tag::vm_argcount){
+    vm.code.pop_back();
+    throw zs_error("eval error: unquote-splicing: called in invalid context!\n");
+  }
 
   // pushes return-value to vm.stack
   int argc = vm.return_value.size();
