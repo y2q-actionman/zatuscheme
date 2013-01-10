@@ -85,7 +85,7 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p){
 
 constexpr ProcInfo SyntaxRules::sr_procinfo;
 
-SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
+SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
   : env_(e), literals_(), rules_(){
   for(auto i : lits){
     if(!identifierp(i))
@@ -95,7 +95,7 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
   }
   literals_.shrink_to_fit();
 
-  for(auto i : rules){
+  for(auto i : rls){
     bind_cons_list_strict
       (i,
        [&](Lisp_ptr pat, Lisp_ptr tmpl){
@@ -108,40 +108,10 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
 
 SyntaxRules::~SyntaxRules() = default;
 
-std::pair<Env*, Lisp_ptr> SyntaxRules::match(Lisp_ptr form, Env* form_env) const{
-  static constexpr auto env_cleaner = [](Env* e){
-    e->visit_map([](Env::map_type& map){
-        for(auto i : map){
-          if(auto sc = i.second.get<SyntacticClosure*>()){
-            delete sc;
-          }
-        }
-        map.clear();
-      });
-  };
-
-  static constexpr auto env_deleter = [&](Env* e){
-    env_cleaner(e);
-    delete e; 
-  };
-
-  unique_ptr<Env, decltype(env_deleter)> env{env_->push(), env_deleter};
-
-  for(auto i : rules_){
-    auto ignore_ident = pick_first(i.first);
-    if(try_match_1(env.get(), i.first, form, form_env, ignore_ident)){
-      return {env.release(), i.second};
-    }else{
-      env_cleaner(env.get());
-    }
-  }
-
-  throw zs_error("syntax-rules error: no matching pattern found!\n");
-}
-
-bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern, 
-                              Lisp_ptr form, Env* form_env,
-                              Lisp_ptr ignore_ident) const{
+static
+bool try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident,
+                 Env* env, Lisp_ptr pattern, 
+                 Env* form_env, Lisp_ptr form){
 
   // cout << __func__ << endl;
   // cout << "pattern " << pattern << ", form " << form << endl;
@@ -149,11 +119,11 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(pattern)){
-    if(find(begin(literals_), end(literals_), pattern) != end(literals_)){
+    if(find(begin(sr.literals()), end(sr.literals()), pattern) != end(sr.literals())){
       // literal identifier
       if(!identifierp(form)) return false;
 
-      return identifier_eq(this->env_, pattern, form_env, form);
+      return identifier_eq(env, pattern, form_env, form);
     }else{
       // non-literal identifier
       if(pattern != ignore_ident){
@@ -197,14 +167,14 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
-      if(!try_match_1(env, *p_i, *f_i, form_env, ignore_ident)){
+      if(!try_match_1(sr, ignore_ident, env, *p_i, form_env, *f_i)){
         return false;
       }
     }
 
     // checks length
     if((p_i == p_e) && (f_i == f_e)){
-      return try_match_1(env, p_i.base(), f_i.base(), form_env, ignore_ident);
+      return try_match_1(sr, ignore_ident, env, p_i.base(), form_env, f_i.base());
     }else{
       return false;
     }
@@ -235,7 +205,7 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
-      if(!try_match_1(env, *p_i, *f_i, form_env, ignore_ident)){
+      if(!try_match_1(sr, ignore_ident, env, *p_i, form_env, *f_i)){
         return false;
       }
     }
@@ -249,6 +219,37 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
   }else{
     return equal_internal(pattern, form);
   }
+}
+
+std::pair<Env*, Lisp_ptr> match(const SyntaxRules& sr, Lisp_ptr form, Env* form_env){
+  static constexpr auto env_cleaner = [](Env* e){
+    e->visit_map([](Env::map_type& map){
+        for(auto i : map){
+          if(auto sc = i.second.get<SyntacticClosure*>()){
+            delete sc;
+          }
+        }
+        map.clear();
+      });
+  };
+
+  static constexpr auto env_deleter = [&](Env* e){
+    env_cleaner(e);
+    delete e; 
+  };
+
+  unique_ptr<Env, decltype(env_deleter)> env{sr.env()->push(), env_deleter};
+
+  for(auto i : sr.rules()){
+    auto ignore_ident = pick_first(i.first);
+    if(try_match_1(sr, ignore_ident, env.get(), i.first, form_env, form)){
+      return {env.release(), i.second};
+    }else{
+      env_cleaner(env.get());
+    }
+  }
+
+  throw zs_error("syntax-rules error: no matching pattern found!\n");
 }
 
 } // Procedure

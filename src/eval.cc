@@ -438,7 +438,7 @@ void proc_enter_srule(SyntaxRules* srule){
   assert(ret_hook.tag() == Ptr_tag::vm_op);
   vm.code.pop_back();
 
-  auto ret = srule->match(args[0], args[1].get<Env*>());
+  auto ret = match(*srule, args[0], args[1].get<Env*>());
 
   // cout << "match result env\n" << *ret.first << '\n';
   // cout << "matched template\n" << ret.second << endl;
