@@ -1,6 +1,7 @@
 #include <memory>
 #include <algorithm>
 #include <iterator>
+#include <unordered_set>
 
 #include "s_rules.hh"
 #include "s_closure.hh"
@@ -16,6 +17,8 @@
 // #include "env.hh"
 
 using namespace std;
+
+namespace Procedure{
 
 namespace {
 
@@ -36,9 +39,49 @@ Lisp_ptr pick_first(Lisp_ptr p){
   }
 }
 
+void check_pattern(const SyntaxRules& sr, Lisp_ptr p,
+                   unordered_set<Lisp_ptr> tab){
+  if(identifierp(p)){
+    if(find(begin(sr.literals()), end(sr.literals()), p) != end(sr.literals())){
+      // literal identifier
+      return;
+    }
+      
+    // pattern variable
+    if(tab.find(p) != tab.end()){
+      throw zs_error("syntax-rules error: duplicated pattern variable! (%s)\n",
+                     identifier_symbol(p)->name().c_str());
+    }
+    tab.insert(p);
+    return;
+  }else if(p.tag() == Ptr_tag::cons){
+    if(nullp(p)) return;
+
+    auto i = begin(p);
+
+    for(; i; ++i){
+      check_pattern(sr, *i, tab);
+    }
+
+    check_pattern(sr, i.base(), tab);
+  }else if(p.tag() == Ptr_tag::vector){
+    auto v = p.get<Vector*>();
+
+    for(auto i : *v){
+      check_pattern(sr, i, tab);
+    }
+  }else{
+    return;
+  }
+}
+
+void check_pattern(const SyntaxRules& sr, Lisp_ptr p){
+  pick_first(p);
+  check_pattern(sr, p, {});
+}
+
 } // namespace
 
-namespace Procedure{
 
 constexpr ProcInfo SyntaxRules::sr_procinfo;
 
@@ -56,9 +99,7 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
     bind_cons_list_strict
       (i,
        [&](Lisp_ptr pat, Lisp_ptr tmpl){
-        // checks forms
-        pick_first(pat);
-
+        check_pattern(*this, pat);
         rules_.push_back({pat, tmpl});
       });
   }
@@ -68,9 +109,6 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rules)
 SyntaxRules::~SyntaxRules() = default;
 
 std::pair<Env*, Lisp_ptr> SyntaxRules::match(Lisp_ptr form, Env* form_env) const{
-  // check form
-  pick_first(form);
-
   static constexpr auto env_cleaner = [](Env* e){
     e->visit_map([](Env::map_type& map){
         for(auto i : map){
@@ -104,18 +142,6 @@ std::pair<Env*, Lisp_ptr> SyntaxRules::match(Lisp_ptr form, Env* form_env) const
 bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern, 
                               Lisp_ptr form, Env* form_env,
                               Lisp_ptr ignore_ident) const{
-  static const auto check_duplicate = [env](Lisp_ptr ident){
-    assert(identifierp(ident));
-
-    env->visit_map([&](const Env::map_type& map){
-        if(map.find(ident) != map.end()){
-          // cout << "### env: " << env << endl;
-          // cout << ident << " = " << map.find(ident)->second << endl;
-          throw zs_error("syntax-rules error: duplicated pattern variable! (%s)\n",
-                         identifier_symbol(ident)->name().c_str());
-        }
-      });
-  };
 
   // cout << __func__ << endl;
   // cout << "pattern " << pattern << ", form " << form << endl;
@@ -131,7 +157,6 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
     }else{
       // non-literal identifier
       if(pattern != ignore_ident){
-        check_duplicate(pattern);
         env->local_set(pattern, new SyntacticClosure(form_env, nullptr, form));
       }
       return true;
@@ -147,7 +172,7 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
     auto p_i = begin(pattern), p_e = end(pattern);
     auto f_i = begin(form), f_e = end(form);
 
-    for(; p_i != p_e; ++p_i, (f_i ? ++f_i : f_i)){
+    for(; p_i && (p_i != p_e); ++p_i, (f_i ? ++f_i : f_i)){
       auto p_n = next(p_i);
 
       // checks ellipsis
@@ -166,7 +191,6 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
           throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
         }
 
-        check_duplicate(*p_i);
         env->local_set(*p_i, f_i.base());
         return true;
       }
@@ -205,7 +229,6 @@ bool SyntaxRules::try_match_1(Env* env, Lisp_ptr pattern,
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
 
-        check_duplicate(*p_i);
         env->local_set(*p_i, new Vector(f_i, f_e));
         return true;
       }

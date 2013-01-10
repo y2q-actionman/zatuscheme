@@ -23,6 +23,9 @@ public:
   const ProcInfo* info() const
   { return &sr_procinfo; }
 
+  const std::vector<Lisp_ptr>& literals() const
+  { return literals_; }
+
   std::pair<Env*, Lisp_ptr> match(Lisp_ptr, Env*) const;
 
 private:
