@@ -233,7 +233,7 @@ std::pair<Env*, Lisp_ptr> match(const SyntaxRules& sr, Lisp_ptr form, Env* form_
       });
   };
 
-  static constexpr auto env_deleter = [&](Env* e){
+  static constexpr auto env_deleter = [env_cleaner](Env* e){
     env_cleaner(e);
     delete e; 
   };
