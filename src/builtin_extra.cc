@@ -9,6 +9,7 @@
 #include "env.hh"
 #include "hasher.hh"
 #include "number.hh"
+#include "builtin.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -95,8 +96,8 @@ Lisp_ptr capture_env(){
   }
 
   auto ret =  make_cons_list
-    ({intern(vm.symtable(), "eval"),
-        make_cons_list({intern(vm.symtable(), "apply"), iproc, vm_op_get_current_env}),
+    ({find_builtin_nproc("eval"),
+        make_cons_list({find_builtin_nproc("apply"), iproc, vm_op_get_current_env}),
         vm_op_get_current_env});
 
   return ret;

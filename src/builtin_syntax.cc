@@ -13,6 +13,7 @@
 #include "cons_util.hh"
 #include "s_closure.hh"
 #include "s_rules.hh"
+#include "builtin.hh"
 
 using namespace std;
 using namespace Procedure;
@@ -131,15 +132,12 @@ Lisp_ptr syntax_let(){
 static
 Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
   if(nullp(bindings)){
-    const auto begin_sym = intern(vm.symtable(), "begin");
-    return new Cons(begin_sym, body);
+    return new Cons(find_builtin_nproc("begin"), body);
   }else{
-    const auto let_sym = intern(vm.symtable(), "let");
-
     return bind_cons_list_strict
       (bindings,
        [&](Lisp_ptr b_first, ConsIter b_rest) -> Lisp_ptr {
-        return make_cons_list({let_sym,
+        return make_cons_list({find_builtin_nproc("let"),
                                make_cons_list({b_first}),
                                let_star_expand(b_rest.base(), body)});
       });
@@ -190,10 +188,10 @@ Lisp_ptr or_expand(Cons* c){
     return c->car();
   }
 
-  const auto if_sym = intern(vm.symtable(), "if");
   auto else_clause = or_expand(c->cdr().get<Cons*>());
 
-  return make_cons_list({if_sym,
+  return make_cons_list
+    ({find_builtin_nproc("if"),
         c->car(),
         vm_op_nop,
         else_clause});
@@ -205,10 +203,10 @@ Lisp_ptr and_expand(Cons* c){
     return c->car();
   }
 
-  const auto if_sym = intern(vm.symtable(), "if");
   auto then_clause = and_expand(c->cdr().get<Cons*>());
 
-  return make_cons_list({if_sym,
+  return make_cons_list
+    ({find_builtin_nproc("if"),
         c->car(),
         then_clause,
         vm_op_nop});
@@ -245,7 +243,7 @@ Lisp_ptr cond_expand(Cons* head){
         }
       }
       
-      then_form = push_cons_list(intern(vm.symtable(), "begin"), last);
+      then_form = push_cons_list(find_builtin_nproc("begin"), last);
     });
 
   if(auto sym = test_form.get<Symbol*>()){
@@ -254,10 +252,10 @@ Lisp_ptr cond_expand(Cons* head){
     }
   }
 
-  const auto if_sym = intern(vm.symtable(), "if");
   auto else_form = cond_expand(head->cdr().get<Cons*>());
 
-  return make_cons_list({if_sym,
+  return make_cons_list
+    ({find_builtin_nproc("if"),
         test_form,
         then_form,
         else_form});
@@ -297,17 +295,16 @@ Lisp_ptr syntax_cond(){
 
 static
 Lisp_ptr case_keys_expand(Symbol* sym, Cons* keys){
-  const auto eqv_sym = intern(vm.symtable(), "eqv?");
-  auto eqv_expr = make_cons_list({eqv_sym, sym, keys->car()});
+  auto eqv_expr = make_cons_list({find_builtin_nproc("eqv?"), sym, keys->car()});
 
   if(!keys->cdr() || nullp(keys->cdr())){
     return eqv_expr;
   }
 
-  const auto if_sym = intern(vm.symtable(), "if");
   auto else_clause = case_keys_expand(sym, keys->cdr().get<Cons*>());
 
-  return make_cons_list({if_sym,
+  return make_cons_list
+    ({find_builtin_nproc("if"),
         eqv_expr,
         Lisp_ptr(true),
         else_clause});
@@ -363,11 +360,11 @@ Lisp_ptr syntax_case(){
   auto key_sym = new Symbol(new string("case_key_symbol"));
 
   return
-    make_cons_list({intern(vm.symtable(), "let"),
+    make_cons_list({find_builtin_nproc("let"),
           make_cons_list({
               make_cons_list({key_sym, key})
                 }),
-          new Cons(intern(vm.symtable(), "cond"),
+          new Cons(find_builtin_nproc("cond"),
                    case_expand(key_sym, clauses))
           });
 }
@@ -410,7 +407,7 @@ Lisp_ptr syntax_do(){
   // creates loop body
   GrowList gw;
 
-  gw.push(intern(vm.symtable(), "begin"));
+  gw.push(find_builtin_nproc("begin"));
   for(auto p : commands){
     gw.push(p);
   }
@@ -419,13 +416,13 @@ Lisp_ptr syntax_do(){
   // creates 'named let' style loop
   return
     make_cons_list({
-        intern(vm.symtable(), "let"),
+        find_builtin_nproc("let"),
         loop_sym,
         init_binds.extract(),
         make_cons_list({
-            intern(vm.symtable(), "if"),
+            find_builtin_nproc("if"),
             end_test,
-            push_cons_list(intern(vm.symtable(), "begin"), end_exprs),
+            push_cons_list(find_builtin_nproc("begin"), end_exprs),
             gw.extract(),
             })
         });
@@ -449,8 +446,7 @@ Lisp_ptr syntax_quasiquote(){
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
-    const auto quote_sym = intern(vm.symtable(), "quote");
-    return make_cons_list({quote_sym, arg});
+    return make_cons_list({find_builtin_nproc("quote"), arg});
   }
 
 
@@ -497,14 +493,14 @@ Lisp_ptr syntax_quasiquote(){
               qq_elem(last);
             });
 
-    return push_cons_list(intern(vm.symtable(), "list*"), gl.extract());
+    return push_cons_list(find_builtin_nproc("list*"), gl.extract());
   }else if(arg.tag() == Ptr_tag::vector){
     auto v = arg.get<Vector*>();
     for(auto i = begin(*v); i != end(*v); ++i){
       qq_elem(*i);
     }
 
-    return push_cons_list(intern(vm.symtable(), "vector"), gl.extract());
+    return push_cons_list(find_builtin_nproc("vector"), gl.extract());
   }else{
     UNEXP_DEFAULT();
   }
