@@ -207,6 +207,22 @@ const Procedure::NProcedure* find_builtin_nproc(const char* name){
   return nullptr;
 }
 
+const char* find_builtin_nproc_name(const Procedure::NProcedure* nproc){
+  const auto find_func
+    = [nproc](const BuiltinFunc& bf){ return nproc == &bf.func; };
+
+  auto i = find_if(begin(builtin_syntax_funcs), end(builtin_syntax_funcs), find_func);
+  if(i != end(builtin_syntax_funcs)) return i->name;
+
+  i = find_if(begin(builtin_funcs), end(builtin_funcs), find_func);
+  if(i != end(builtin_funcs)) return i->name;
+
+  i = find_if(begin(builtin_extra_funcs), end(builtin_extra_funcs), find_func);
+  if(i != end(builtin_extra_funcs)) return i->name;
+
+  return "(unknown native procedure)";
+}
+
 void load(InputPort* p){
   while(1){
     auto form = read(*p);

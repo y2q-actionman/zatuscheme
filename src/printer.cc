@@ -12,6 +12,7 @@
 #include "vm.hh"
 #include "eval.hh"
 #include "s_closure.hh"
+#include "builtin.hh"
 
 using namespace std;
 
@@ -167,8 +168,13 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     f << "#<VMop " << stringify(p.get<VMop>()) << ">";
     break;
 
-  case Ptr_tag::i_procedure:
   case Ptr_tag::n_procedure:
+    f << "#<NativeProcedure ["
+      << find_builtin_nproc_name(p.get<const Procedure::NProcedure*>())
+      << "]>";
+    break;
+
+  case Ptr_tag::i_procedure:
   case Ptr_tag::continuation:
   case Ptr_tag::input_port:
   case Ptr_tag::output_port:
