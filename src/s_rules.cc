@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iterator>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "s_rules.hh"
 #include "s_closure.hh"
@@ -12,6 +13,7 @@
 #include "builtin_extra.hh"
 #include "builtin_util.hh"
 #include "printer.hh"
+#include "hasher.hh"
 
 // #include <iostream>
 // #include "env.hh"
@@ -109,8 +111,8 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
 SyntaxRules::~SyntaxRules() = default;
 
 static
-bool try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident,
-                 Env* env, Lisp_ptr pattern, 
+bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& result,
+                 const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
                  Env* form_env, Lisp_ptr form){
 
   // cout << __func__ << endl;
@@ -123,11 +125,11 @@ bool try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident,
       // literal identifier
       if(!identifierp(form)) return false;
 
-      return identifier_eq(env, pattern, form_env, form);
+      return identifier_eq(sr.env(), pattern, form_env, form);
     }else{
       // non-literal identifier
       if(pattern != ignore_ident){
-        env->local_set(pattern, new SyntacticClosure(form_env, nullptr, form));
+        result.insert({pattern, new SyntacticClosure(form_env, nullptr, form)});
       }
       return true;
     }
@@ -161,20 +163,20 @@ bool try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident,
           throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
         }
 
-        env->local_set(*p_i, f_i.base());
+        result.insert({*p_i, f_i.base()});
         return true;
       }
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
-      if(!try_match_1(sr, ignore_ident, env, *p_i, form_env, *f_i)){
+      if(!try_match_1(result, sr, ignore_ident, *p_i, form_env, *f_i)){
         return false;
       }
     }
 
     // checks length
     if((p_i == p_e) && (f_i == f_e)){
-      return try_match_1(sr, ignore_ident, env, p_i.base(), form_env, f_i.base());
+      return try_match_1(result, sr, ignore_ident, p_i.base(), form_env, f_i.base());
     }else{
       return false;
     }
@@ -199,13 +201,13 @@ bool try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident,
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
 
-        env->local_set(*p_i, new Vector(f_i, f_e));
+        result.insert({*p_i, new Vector(f_i, f_e)});
         return true;
       }
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
-      if(!try_match_1(sr, ignore_ident, env, *p_i, form_env, *f_i)){
+      if(!try_match_1(result, sr, ignore_ident, *p_i, form_env, *f_i)){
         return false;
       }
     }
@@ -222,28 +224,22 @@ bool try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident,
 }
 
 std::pair<Env*, Lisp_ptr> match(const SyntaxRules& sr, Lisp_ptr form, Env* form_env){
-  static constexpr auto env_cleaner = [](Env* e){
-    for(auto i : e->internal_map()){
-      if(auto sc = i.second.get<SyntacticClosure*>()){
-        delete sc;
-      }
-    }
-    e->internal_map().clear();
-  };
-
-  static constexpr auto env_deleter = [env_cleaner](Env* e){
-    env_cleaner(e);
-    delete e; 
-  };
-
-  unique_ptr<Env, decltype(env_deleter)> env{sr.env()->push(), env_deleter};
+  Env::map_type ret_map;
 
   for(auto i : sr.rules()){
     auto ignore_ident = pick_first(i.first);
-    if(try_match_1(sr, ignore_ident, env.get(), i.first, form_env, form)){
-      return {env.release(), i.second};
+    if(try_match_1(ret_map, sr, ignore_ident, i.first, form_env, form)){
+      auto ret_env = sr.env()->push();
+      ret_env->internal_map() = ret_map;
+      return {ret_env, i.second};
     }else{
-      env_cleaner(env.get());
+      // cleaning map
+      for(auto e : ret_map){
+        if(auto sc = e.second.get<SyntacticClosure*>()){
+          delete sc;
+        }
+      }
+      ret_map.clear();
     }
   }
 
