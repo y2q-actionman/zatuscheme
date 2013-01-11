@@ -106,7 +106,6 @@ Lisp_ptr load_func(){
 } //namespace
 
 static const BuiltinFunc builtin_syntax_funcs[] = {
-#include "builtin_equal.defs.hh"
 #include "builtin_syntax.defs.hh"
 };
 
@@ -132,6 +131,7 @@ static const BuiltinFunc builtin_funcs[] = {
 #include "builtin_boolean.defs.hh"
 #include "builtin_char.defs.hh"
 #include "builtin_cons.defs.hh"
+#include "builtin_equal.defs.hh"
 #include "builtin_numeric.defs.hh"
 #include "builtin_port.defs.hh"
 #include "builtin_procedure.defs.hh"
