@@ -2,6 +2,7 @@
 #include <istream>
 #include <iostream>
 #include <algorithm>
+#include <cstring>
 
 #include "builtin.hh"
 #include "zs_error.hh"
@@ -188,6 +189,22 @@ void install_builtin(){
   for_each(std::begin(builtin_extra_strs), std::end(builtin_extra_strs),
            install_builtin_string);
   install_builtin_symbol(interaction_env_symname, vm.frame());
+}
+
+const Procedure::NProcedure* find_builtin_nproc(const char* name){
+  const auto find_func
+    = [name](const BuiltinFunc& bf){ return strcmp(name, bf.name) == 0; };
+
+  auto i = find_if(begin(builtin_syntax_funcs), end(builtin_syntax_funcs), find_func);
+  if(i != end(builtin_syntax_funcs)) return &(i->func);
+
+  i = find_if(begin(builtin_funcs), end(builtin_funcs), find_func);
+  if(i != end(builtin_funcs)) return &(i->func);
+
+  i = find_if(begin(builtin_extra_funcs), end(builtin_extra_funcs), find_func);
+  if(i != end(builtin_extra_funcs)) return &(i->func);
+
+  return nullptr;
 }
 
 void load(InputPort* p){

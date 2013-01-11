@@ -7,4 +7,6 @@ void install_builtin();
 
 void load(InputPort*);
 
+const Procedure::NProcedure* find_builtin_nproc(const char*);
+
 #endif // BUILTIN_HH
