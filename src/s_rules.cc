@@ -223,12 +223,103 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& result,
   }
 }
 
+Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
+                const SyntaxRules& sr, Lisp_ptr tmpl){
+  const auto ellipsis_sym = intern(vm.symtable(), "...");
+
+  if(identifierp(tmpl)){
+    auto m_ret = match_obj.find(tmpl);
+    if(m_ret != match_obj.end()){
+      return m_ret->second;
+    }else{
+      return sr.env()->find(tmpl);
+    }
+  }else if(tmpl.tag() == Ptr_tag::cons){
+    if(nullp(tmpl)) return tmpl;
+
+    GrowList gl;
+    auto t_i = begin(tmpl);
+
+    for(; t_i; ++t_i){
+      auto t_n = next(t_i);
+
+      // check ellipsis
+      if(identifierp(*t_i)
+         && (t_n) && identifierp(*t_n)
+         && identifier_symbol(*t_n) == ellipsis_sym){
+        auto m_ret = match_obj.find(*t_i);
+        
+        if(m_ret == match_obj.end()){
+          throw zs_error("syntax-rules error: invalid template: followed by '...', but not bound by pattern\n");
+        }
+
+        if(auto m_ret_lis = m_ret->second.get<Cons*>()){
+          // this can be replaced directly?
+          for(auto i : m_ret_lis){
+            gl.push(i);
+          }
+        }else if(auto m_ret_vec = m_ret->second.get<Vector*>()){
+          for(auto i : *m_ret_vec){
+            gl.push(i);
+          }
+        }else{
+          throw zs_error("syntax-rules error: invalid template: not sequence type\n");
+        }
+
+        ++t_i;
+      }else{
+        gl.push(expand(match_obj, sr, *t_i));
+      }
+    }
+
+    return gl.extract_with_tail(expand(match_obj, sr, t_i.base()));
+  }else if(tmpl.tag() == Ptr_tag::vector){
+    auto t_vec = tmpl.get<Vector*>();
+
+    Vector vec;
+
+    for(auto t_i = begin(*t_vec), t_e = end(*t_vec); t_i != t_e; ++t_i){
+      auto t_n = next(t_i);
+
+      // check ellipsis
+      if(identifierp(*t_i)
+         && (t_n != t_e) && identifierp(*t_n)
+         && identifier_symbol(*t_n) == ellipsis_sym){
+        auto m_ret = match_obj.find(*t_i);
+        
+        if(m_ret == match_obj.end()){
+          throw zs_error("syntax-rules error: invalid template: followed by '...', but not bound by pattern\n");
+        }
+
+        if(auto m_ret_lis = m_ret->second.get<Cons*>()){
+          vec.insert(vec.end(), begin(m_ret_lis), end(m_ret_lis));
+        }else if(auto m_ret_vec = m_ret->second.get<Vector*>()){
+          vec.insert(vec.end(), begin(*m_ret_vec), end(*m_ret_vec));
+        }else{
+          throw zs_error("syntax-rules error: invalid template: not sequence type\n");
+        }
+
+        ++t_i;
+      }else{
+        vec.push_back(expand(match_obj, sr, *t_i));
+      }
+    }
+
+    return new Vector(move(vec));
+  }else{
+    return tmpl;
+  }
+}
+
 std::pair<Env*, Lisp_ptr> match(const SyntaxRules& sr, Lisp_ptr form, Env* form_env){
   Env::map_type ret_map;
 
   for(auto i : sr.rules()){
     auto ignore_ident = pick_first(i.first);
     if(try_match_1(ret_map, sr, ignore_ident, i.first, form_env, form)){
+      // auto tmp = expand(ret_map, sr, i.second);
+      // cout << "expand: " << i.second << " -> " << tmp << endl;
+
       auto ret_env = sr.env()->push();
       ret_env->internal_map() = ret_map;
       return {ret_env, i.second};
