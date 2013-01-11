@@ -223,14 +223,12 @@ bool try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident,
 
 std::pair<Env*, Lisp_ptr> match(const SyntaxRules& sr, Lisp_ptr form, Env* form_env){
   static constexpr auto env_cleaner = [](Env* e){
-    e->visit_map([](Env::map_type& map){
-        for(auto i : map){
-          if(auto sc = i.second.get<SyntacticClosure*>()){
-            delete sc;
-          }
-        }
-        map.clear();
-      });
+    for(auto i : e->internal_map()){
+      if(auto sc = i.second.get<SyntacticClosure*>()){
+        delete sc;
+      }
+    }
+    e->internal_map().clear();
   };
 
   static constexpr auto env_deleter = [env_cleaner](Env* e){

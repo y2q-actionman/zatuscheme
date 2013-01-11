@@ -32,8 +32,8 @@ public:
 
   friend std::ostream& operator<<(std::ostream&, const Env&);
 
-  template<typename Fun>
-  void visit_map(Fun f){ f(map_); } // TODO: expose the map?
+  map_type& internal_map() // TODO: remove this!
+  { return map_; }
 
 private:
   map_type map_;
