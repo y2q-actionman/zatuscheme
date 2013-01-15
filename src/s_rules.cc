@@ -156,7 +156,7 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
       if(identifierp(*p_i)
          && (p_n != p_e) && identifierp(*p_n) 
          && identifier_symbol(*p_n) == ellipsis_sym){
-        if(p_i == begin(pattern)){
+        if(*p_i == ignore_ident){
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
 
@@ -202,7 +202,7 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
       if(identifierp(*p_i)
          && (p_n != p_e) && identifierp(*p_n) 
          && identifier_symbol(*p_n) == ellipsis_sym){
-        if(p_i == begin(*p_v)){
+        if(*p_i == ignore_ident){
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
 

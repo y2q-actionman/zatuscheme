@@ -258,6 +258,29 @@ int main(){
   check_e("(cond ((eqv? 1 2) xxx) ((eqv? 2 3) yyy) (else 3))", "3");
   check_e("(cond ((eqv? 1 2)) ((eqv? 2 3) fuga) ((+ 5 7)))", "12");
 
+  check_e_success(
+  "(define-syntax case"
+  "  (syntax-rules (else)"
+  "    ((case (key ...)"
+  "       clauses ...)"
+  "     (let ((atom-key (key ...)))"
+  "       (case atom-key clauses ...)))"
+  "    ((case key"
+  "       (else result1 result2 ...))"
+  "     (begin result1 result2 ...))"
+  "    ((case key"
+  "       ((atoms ...) result1 result2 ...))"
+  "     (if (memv key '(atoms ...))"
+  "         (begin result1 result2 ...)))"
+  "    ((case key"
+  "       ((atoms ...) result1 result2 ...)"
+  "       clause clauses ...)"
+  "     (if (memv key '(atoms ...))"
+  "         (begin result1 result2 ...)"
+  "         (case key clause clauses ...)))))");
+  check_e_success("case");
+  check_e("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
+  check_e("(case a ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
 
   check_e_success(
   "(define-syntax and"
