@@ -40,33 +40,24 @@ VM& VM::operator=(const VM& other){
 std::ostream& operator<<(std::ostream& f, const VM& v){
   f << "--- [code] ---\n";
   for(auto i = v.code.rbegin(), e = v.code.rend(); i != e; ++i){
-    print(f, *i);
-    f << '\n';
+    f << *i << '\n';
   }
 
   f << "--- [stack] ---\n";
   for(auto i = v.stack.rbegin(), e = v.stack.rend(); i != e; ++i){
-    print(f, *i);
-    f << '\n';
+    f << *i << '\n';
   }
 
   f << "--- [return value] ---\n";
   f << '[' << v.return_value.size() << "] ";
   for(auto i = v.return_value.begin(), e = v.return_value.end(); i != e; ++i){
-    print(f, *i);
-    if(next(i) != e) f << ", ";
+    f << '\t' << *i << '\n';
   }
 
   if(!v.extent.empty()){
     f << "--- [extent] ---\n";
     for(auto i = v.extent.begin(), e = v.extent.end(); i != e; ++i){
-      print(f, i->thunk);
-      f << ": ";
-
-      print(f, i->before);
-      f << ", ";
-      print(f, i->after);
-      f << "\n";
+      f << i->thunk << ": " << i->before << ", " << i->after << "\n";
     }
   }
 
