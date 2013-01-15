@@ -127,8 +127,12 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
   if(identifierp(pattern)){
     if(find(begin(sr.literals()), end(sr.literals()), pattern) != end(sr.literals())){
       // literal identifier
+      // if(!identifierp(form))
+      //   cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
       if(!identifierp(form)) return false;
 
+      // if(!identifier_eq(sr.env(), pattern, form_env, form))
+      //   cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
       return identifier_eq(sr.env(), pattern, form_env, form);
     }else{
       // non-literal identifier
@@ -139,6 +143,7 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
     }
   }else if(pattern.tag() == Ptr_tag::cons){
     if(form.tag() != Ptr_tag::cons){
+      // cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
       return false;
     }
 
@@ -146,48 +151,64 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
       return true;
     }
 
-    auto p_i = begin(pattern), p_e = end(pattern);
-    auto f_i = begin(form), f_e = end(form);
+    auto p_i = begin(pattern);
+    auto f_i = begin(form);
 
-    for(; p_i && (p_i != p_e); ++p_i, (f_i ? ++f_i : f_i)){
-      auto p_n = next(p_i);
-
+    for(; p_i; ++p_i, (f_i ? ++f_i : f_i)){
       // checks ellipsis
-      if(identifierp(*p_i)
-         && (p_n != p_e) && identifierp(*p_n) 
-         && identifier_symbol(*p_n) == ellipsis_sym){
-        if(*p_i == ignore_ident){
-          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
-        }
+      auto p_n = next(p_i);
+      if((p_n) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
+        if(identifierp(*p_i)){
+          // like: (A B C ...)
+          if(*p_i == ignore_ident){
+            throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+          }
 
-        if(!nullp(p_e.base())){
-          throw zs_error("syntax-rules error: '...' is appeared in a inproper list pattern!\n");
-        }
+          auto p_e = p_i;
+          while(p_e) ++p_e;
 
-        if(!nullp(f_e.base())){
-          throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
-        }
+          if(!nullp(p_e.base())){
+            throw zs_error("syntax-rules error: '...' is appeared in a inproper list pattern!\n");
+          }
 
-        match_obj.insert({*p_i, f_i.base()});
-        return true;
+          auto f_e = f_i;
+          while(f_e) ++f_e;
+
+          if(!nullp(f_e.base())){
+            throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
+          }
+
+          match_obj.insert({*p_i, f_i.base()});
+          return true;
+        }else{
+          // like: ((A B C) ...)
+          throw zs_error("syntax-rules error: ellipsis pattern is under implementing...\n");
+        }
       }
 
-      if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
+      if(!f_i) break; // this check is delayed to here, for checking the ellipsis.
 
       if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i)){
+        // cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
         return false;
       }
     }
 
     // checks length
-    if((p_i == p_e) && (f_i == f_e)){
-      return try_match_1(match_obj, sr, ignore_ident, p_i.base(), form_env, f_i.base());
+    if((p_i.base().tag() == Ptr_tag::cons) && (f_i.base().tag() == Ptr_tag::cons)){
+      // cout << "\treached @ " << __LINE__ << endl;
+      // cout << "\t\t pat = " << p_i.base() << ", form = " << f_i.base() << endl;
+      return (nullp(p_i.base()) && nullp(f_i.base()));
     }else{
-      return false;
+      // dotted list case
+      // cout << __func__ << "\treached @ " << __LINE__ << endl;
+      return try_match_1(match_obj, sr, ignore_ident, p_i.base(), form_env, f_i.base());
     }
   }else if(pattern.tag() == Ptr_tag::vector){
-    if(form.tag() != Ptr_tag::vector)
+    if(form.tag() != Ptr_tag::vector){
+      // cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
       return false;
+    }
 
     auto p_v = pattern.get<Vector*>();
     auto f_v = form.get<Vector*>();
@@ -196,23 +217,28 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
     auto f_i = begin(*f_v), f_e = end(*f_v);
 
     for(; p_i != p_e; ++p_i, ++f_i){
+      // checks ellipsis
       auto p_n = next(p_i);
 
-      // checks ellipsis
-      if(identifierp(*p_i)
-         && (p_n != p_e) && identifierp(*p_n) 
-         && identifier_symbol(*p_n) == ellipsis_sym){
-        if(*p_i == ignore_ident){
-          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
-        }
+      if((p_n != p_e) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
+        if(identifierp(*p_i)){
+          // like: (A B C ...)
+          if(*p_i == ignore_ident){
+            throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+          }
 
-        match_obj.insert({*p_i, new Vector(f_i, f_e)});
-        return true;
+          match_obj.insert({*p_i, new Vector(f_i, f_e)});
+          return true;
+        }else{
+          // like: ((A B C) ...)
+          throw zs_error("syntax-rules error: ellipsis pattern is under implementing...\n");
+        }
       }
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
       if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i)){
+        // cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
         return false;
       }
     }
@@ -221,9 +247,11 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
     if((p_i == p_e) && (f_i == f_e)){
       return true;
     }else{
+      // cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
       return false;
     }
   }else{
+    // cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
     return equal_internal(pattern, form);
   }
 }
@@ -330,11 +358,13 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     auto pat = i.get<Cons*>()->car();
     auto tmpl = i.get<Cons*>()->cdr().get<Cons*>()->car();
 
+    // cout << "## trying: pattern = " << pat << endl;
+
     auto ignore_ident = pick_first(pat);
     if(try_match_1(match_obj, *this, ignore_ident, pat, form_env, form)){
       // cout << "## matched!: pattern = " << pat << '\n';
       // for(auto ii : match_obj){
-      //   cout << '\t' << ii.first << " = " << ii.second << '\n';
+      //   cout << '\t' << ii.first << " = " << ii.second << '\n' << endl;;
       // }
 
       return expand(match_obj, tmpl);
