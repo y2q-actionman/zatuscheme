@@ -15,9 +15,6 @@
 #include "printer.hh"
 #include "hasher.hh"
 
-#include <iostream>
-#include "env.hh"
-
 using namespace std;
 
 namespace Procedure{
@@ -88,7 +85,7 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p){
 constexpr ProcInfo SyntaxRules::sr_procinfo;
 
 SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
-  : env_(e), literals_(lits), rules_(){
+  : env_(e), literals_(lits), rules_(rls){
   for(auto i : lits){
     if(!identifierp(i))
       throw builtin_identifier_check_failed("syntax-rules", i);
@@ -98,23 +95,19 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
     bind_cons_list_strict
       (i,
        [&](Lisp_ptr pat, Lisp_ptr tmpl){
+        (void)tmpl;
         check_pattern(*this, pat);
-        rules_.push_back({pat, tmpl});
       });
   }
-  rules_.shrink_to_fit();
 }
 
 SyntaxRules::~SyntaxRules() = default;
 
 static
-bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& result,
+bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
                  const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
                  Env* form_env, Lisp_ptr form){
 
-  // cout << __func__ << endl;
-  // cout << "pattern " << pattern << ", form " << form << endl;
-    
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(pattern)){
@@ -126,7 +119,7 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& result,
     }else{
       // non-literal identifier
       if(pattern != ignore_ident){
-        result.insert({pattern, new SyntacticClosure(form_env, nullptr, form)});
+        match_obj.insert({pattern, new SyntacticClosure(form_env, nullptr, form)});
       }
       return true;
     }
@@ -160,20 +153,20 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& result,
           throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
         }
 
-        result.insert({*p_i, f_i.base()});
+        match_obj.insert({*p_i, f_i.base()});
         return true;
       }
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
-      if(!try_match_1(result, sr, ignore_ident, *p_i, form_env, *f_i)){
+      if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i)){
         return false;
       }
     }
 
     // checks length
     if((p_i == p_e) && (f_i == f_e)){
-      return try_match_1(result, sr, ignore_ident, p_i.base(), form_env, f_i.base());
+      return try_match_1(match_obj, sr, ignore_ident, p_i.base(), form_env, f_i.base());
     }else{
       return false;
     }
@@ -198,13 +191,13 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& result,
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
 
-        result.insert({*p_i, new Vector(f_i, f_e)});
+        match_obj.insert({*p_i, new Vector(f_i, f_e)});
         return true;
       }
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
-      if(!try_match_1(result, sr, ignore_ident, *p_i, form_env, *f_i)){
+      if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i)){
         return false;
       }
     }
@@ -310,23 +303,23 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
 }
 
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
-  Env::map_type ret_map;
+  std::unordered_map<Lisp_ptr, Lisp_ptr> match_obj;
 
   for(auto i : this->rules()){
-    auto ignore_ident = pick_first(i.first);
-    if(try_match_1(ret_map, *this, ignore_ident, i.first, form_env, form)){
-      auto tmp = expand(ret_map, i.second);
-      cout << "expand: " << i.second << " -> " << tmp << endl;
+    auto pat = i.get<Cons*>()->car();
+    auto tmpl = i.get<Cons*>()->cdr().get<Cons*>()->car();
 
-      return tmp;
+    auto ignore_ident = pick_first(pat);
+    if(try_match_1(match_obj, *this, ignore_ident, pat, form_env, form)){
+      return expand(match_obj, tmpl);
     }else{
       // cleaning map
-      for(auto e : ret_map){
+      for(auto e : match_obj){
         if(auto sc = e.second.get<SyntacticClosure*>()){
           delete sc;
         }
       }
-      ret_map.clear();
+      match_obj.clear();
     }
   }
 

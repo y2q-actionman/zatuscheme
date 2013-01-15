@@ -11,8 +11,6 @@ namespace Procedure{
 
 class SyntaxRules{
 public:
-  typedef std::pair<Lisp_ptr, Lisp_ptr> Rule;
-
   SyntaxRules(Env*, Lisp_ptr lits, Lisp_ptr rules);
   SyntaxRules(const SyntaxRules&) = delete;
   SyntaxRules(SyntaxRules&&) = delete;
@@ -31,7 +29,7 @@ public:
   const Lisp_ptr& literals() const
   { return literals_; }
 
-  const std::vector<Rule>& rules() const
+  const Lisp_ptr& rules() const
   { return rules_; }
 
   Lisp_ptr apply(Lisp_ptr, Env*) const;
@@ -43,7 +41,7 @@ private:
 
   Env* const env_;
   const Lisp_ptr literals_;
-  std::vector<Rule> rules_;
+  const Lisp_ptr rules_;
 };
 
 
