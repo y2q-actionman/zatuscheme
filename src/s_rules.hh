@@ -34,6 +34,8 @@ public:
   const std::vector<Rule>& rules() const
   { return rules_; }
 
+  Lisp_ptr apply(Lisp_ptr, Env*) const;
+
 private:
   static constexpr ProcInfo sr_procinfo
   = ProcInfo{2, 2, Passing::whole, Returning::code, MoveReturnValue::f,
@@ -44,7 +46,6 @@ private:
   std::vector<Rule> rules_;
 };
 
-std::pair<Env*, Lisp_ptr> match(const SyntaxRules&, Lisp_ptr, Env*);
 
 } // namespace Procedure
 

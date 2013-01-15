@@ -235,10 +235,10 @@ int main(){
   check_e_success("and");
   check_e("(and)", "#t");
   check_e("(and 1)", "1");
-  // check_e("(and 1 2)", "2");
-  // check_e("(and #f 2)", "#f");
-  // check_e("(and 1 #f 3)", "#f");
-  // check_e("(and #t #t 3)", "3");
+  check_e("(and 1 2)", "2");
+  check_e("(and #f 2)", "#f");
+  check_e("(and 1 #f 3)", "#f");
+  check_e("(and #t #t 3)", "3");
 
   return RESULT;
 }

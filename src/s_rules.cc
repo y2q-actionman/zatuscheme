@@ -223,8 +223,9 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& result,
   }
 }
 
+static
 Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
-                const SyntaxRules& sr, Lisp_ptr tmpl){
+                Lisp_ptr tmpl){
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(tmpl)){
@@ -232,7 +233,7 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
     if(m_ret != match_obj.end()){
       return m_ret->second;
     }else{
-      return sr.env()->find(tmpl);
+      return tmpl;
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
     if(nullp(tmpl)) return tmpl;
@@ -268,11 +269,11 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
 
         ++t_i;
       }else{
-        gl.push(expand(match_obj, sr, *t_i));
+        gl.push(expand(match_obj, *t_i));
       }
     }
 
-    return gl.extract_with_tail(expand(match_obj, sr, t_i.base()));
+    return gl.extract_with_tail(expand(match_obj, t_i.base()));
   }else if(tmpl.tag() == Ptr_tag::vector){
     auto t_vec = tmpl.get<Vector*>();
 
@@ -301,7 +302,7 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
 
         ++t_i;
       }else{
-        vec.push_back(expand(match_obj, sr, *t_i));
+        vec.push_back(expand(match_obj, *t_i));
       }
     }
 
@@ -311,18 +312,16 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
   }
 }
 
-std::pair<Env*, Lisp_ptr> match(const SyntaxRules& sr, Lisp_ptr form, Env* form_env){
+Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
   Env::map_type ret_map;
 
-  for(auto i : sr.rules()){
+  for(auto i : this->rules()){
     auto ignore_ident = pick_first(i.first);
-    if(try_match_1(ret_map, sr, ignore_ident, i.first, form_env, form)){
-      // auto tmp = expand(ret_map, sr, i.second);
-      // cout << "expand: " << i.second << " -> " << tmp << endl;
+    if(try_match_1(ret_map, *this, ignore_ident, i.first, form_env, form)){
+      auto tmp = expand(ret_map, i.second);
+      cout << "expand: " << i.second << " -> " << tmp << endl;
 
-      auto ret_env = sr.env()->push();
-      ret_env->internal_map() = ret_map;
-      return {ret_env, i.second};
+      return tmp;
     }else{
       // cleaning map
       for(auto e : ret_map){

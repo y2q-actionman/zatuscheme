@@ -440,18 +440,13 @@ void proc_enter_srule(SyntaxRules* srule){
   assert(ret_hook.tag() == Ptr_tag::vm_op);
   vm.code.pop_back();
 
-  auto ret = match(*srule, args[0], args[1].get<Env*>());
-
-  // cout << "match result env\n" << *ret.first << '\n';
-  // cout << "matched template\n" << ret.second << endl;
+  auto code = srule->apply(args[0], args[1].get<Env*>());
 
   auto oldenv = vm.frame();
-  vm.set_frame(ret.first);
-  vm.return_value = {ret.second};
+  vm.set_frame(srule->env());
+  vm.return_value = {code};
   vm.code.insert(vm.code.end(),
                  {oldenv, vm_op_leave_frame, ret_hook});
-
-  // cout << vm << endl;
 }
 
 } //namespace
