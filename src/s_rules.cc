@@ -15,8 +15,8 @@
 #include "printer.hh"
 #include "hasher.hh"
 
-// #include <iostream>
-// #include "env.hh"
+#include <iostream>
+#include "env.hh"
 
 using namespace std;
 
@@ -88,14 +88,11 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p){
 constexpr ProcInfo SyntaxRules::sr_procinfo;
 
 SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
-  : env_(e), literals_(), rules_(){
+  : env_(e), literals_(lits), rules_(){
   for(auto i : lits){
     if(!identifierp(i))
       throw builtin_identifier_check_failed("syntax-rules", i);
-
-    literals_.push_back(i);
   }
-  literals_.shrink_to_fit();
 
   for(auto i : rls){
     bind_cons_list_strict

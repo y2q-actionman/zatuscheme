@@ -28,7 +28,7 @@ public:
   Env* env() const
   { return env_; }
 
-  const std::vector<Lisp_ptr>& literals() const
+  const Lisp_ptr& literals() const
   { return literals_; }
 
   const std::vector<Rule>& rules() const
@@ -41,8 +41,8 @@ private:
   = ProcInfo{2, 2, Passing::whole, Returning::code, MoveReturnValue::f,
              Entering::at_jump, Leaving::after_returning_op};
 
-  Env* env_;
-  std::vector<Lisp_ptr> literals_;
+  Env* const env_;
+  const Lisp_ptr literals_;
   std::vector<Rule> rules_;
 };
 
