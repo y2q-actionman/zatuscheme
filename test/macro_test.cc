@@ -297,5 +297,39 @@ int main(){
   check_e("(and 1 #f 3)", "#f");
   check_e("(and #t #t 3)", "3");
 
+  check_e_success(
+  "(define-syntax or"
+  "  (syntax-rules ()"
+  "    ((or) #f)"
+  "    ((or test) test)"
+  "    ((or test1 test2 ...)"
+  "     (let ((x test1))"
+  "       (if x x (or test2 ...))))))");
+  check_e_success("or");
+  check_e("(or)", "#f");
+  check_e("(or 1)", "1");
+  check_e("(or #f 2)", "2");
+  check_e("(or #f #f 3)", "3");
+  check_e("(or 1 #f 3)", "1");
+  check_e("(or #f 2 #f 4)", "2");
+
+  check_e_success(
+  "(define-syntax let"
+  "  (syntax-rules ()"
+  "    ((let ((name val) ...) body1 body2 ...)"
+  "     ((lambda (name ...) body1 body2 ...)"
+  "      val ...))"
+  "    ((let tag ((name val) ...) body1 body2 ...)"
+  "     ((letrec ((tag (lambda (name ...)"
+  "                      body1 body2 ...)))"
+  "        tag)"
+  "      val ...))))");
+  check_e("(let ((x 1) (y 2) (z 3)) x)", "1");
+  check_e("(let ((x 1) (y 2) (z 3)) y)", "2");
+  check_e("(let ((x 1) (y 2) (z 3)) z)", "3");
+  check_e("(let ((x 1)) (let ((x 2)) x))", "2");
+  check_e("(let ((x 1)) (let ((x 2)) x) x)", "1");
+
+
   return RESULT;
 }
