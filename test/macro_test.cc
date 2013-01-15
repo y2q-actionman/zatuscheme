@@ -211,7 +211,7 @@ int main(){
   "(#f #t)");
 
 
-  // syntax-rules from R5RS
+  // syntax-rules
   check_e_success(
   "(define-syntax push"
   "  (syntax-rules ()"
@@ -225,6 +225,40 @@ int main(){
   check_e("push-test-lis", "(2 1)");
 
   
+  // syntax-rules examples from R5RS
+  check_e_success(
+  "(define-syntax cond"
+  "  (syntax-rules (else =>)"
+  "    ((cond (else result1 result2 ...))"
+  "     (begin result1 result2 ...))"
+  "    ((cond (test => result))"
+  "     (let ((temp test))"
+  "       (if temp (result temp))))"
+  "    ((cond (test => result) clause1 clause2 ...)"
+  "     (let ((temp test))"
+  "       (if temp"
+  "           (result temp)"
+  "           (cond clause1 clause2 ...))))"
+  "    ((cond (test)) test)"
+  "    ((cond (test) clause1 clause2 ...)"
+  "     (let ((temp test))"
+  "       (if temp"
+  "           temp"
+  "           (cond clause1 clause2 ...))))"
+  "    ((cond (test result1 result2 ...))"
+  "     (if test (begin result1 result2 ...)))"
+  "    ((cond (test result1 result2 ...)"
+  "           clause1 clause2 ...)"
+  "     (if test"
+  "         (begin result1 result2 ...)"
+  "         (cond clause1 clause2 ...)))))");
+  check_e_success("cond");
+  check_e("(cond ((eqv? 1 1) 1))", "1");
+  check_e("(cond ((eqv? 1 2) xxx) ((eqv? 2 3) yyy) ((eqv? 3 3) 3))", "3");
+  check_e("(cond ((eqv? 1 2) xxx) ((eqv? 2 3) yyy) (else 3))", "3");
+  check_e("(cond ((eqv? 1 2)) ((eqv? 2 3) fuga) ((+ 5 7)))", "12");
+
+
   check_e_success(
   "(define-syntax and"
   "  (syntax-rules ()"

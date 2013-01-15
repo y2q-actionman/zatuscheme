@@ -12,7 +12,7 @@ void print(std::ostream&, Lisp_ptr,
 // for debug;
 inline
 std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
-  print(o, p);
+  print(o, p, print_human_readable::t);
   return o;
 }
 

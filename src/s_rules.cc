@@ -15,6 +15,8 @@
 #include "printer.hh"
 #include "hasher.hh"
 
+// #include <iostream>
+
 using namespace std;
 
 namespace Procedure{
@@ -108,6 +110,18 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
                  const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
                  Env* form_env, Lisp_ptr form){
 
+  // cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
+  // for(auto ii : match_obj){
+  //   cout << '\t' << ii.first << " = " << ii.second << '\n';
+  // }
+
+  if(form.tag() == Ptr_tag::syntactic_closure){
+    // destruct syntactic closure
+    auto sc = form.get<SyntacticClosure*>();
+
+    return try_match_1(match_obj, sr, ignore_ident, pattern, sc->env(), sc->expr());
+  }
+
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(pattern)){
@@ -124,8 +138,9 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
       return true;
     }
   }else if(pattern.tag() == Ptr_tag::cons){
-    if(form.tag() != Ptr_tag::cons)
+    if(form.tag() != Ptr_tag::cons){
       return false;
+    }
 
     if(nullp(pattern) && nullp(form)){
       return true;
@@ -216,6 +231,8 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
 static
 Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
                 Lisp_ptr tmpl){
+  // cout << __func__ << " arg = " << tmpl << endl;
+
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(tmpl)){
@@ -244,12 +261,13 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
           throw zs_error("syntax-rules error: invalid template: followed by '...', but not bound by pattern\n");
         }
 
-        if(auto m_ret_lis = m_ret->second.get<Cons*>()){
+        if(m_ret->second.tag() == Ptr_tag::cons){
           // this can be replaced directly?
-          for(auto i : m_ret_lis){
+          for(auto i : m_ret->second){
             gl.push(i);
           }
-        }else if(auto m_ret_vec = m_ret->second.get<Vector*>()){
+        }else if(m_ret->second.tag() == Ptr_tag::vector){
+          auto m_ret_vec = m_ret->second.get<Vector*>();
           for(auto i : *m_ret_vec){
             gl.push(i);
           }
@@ -282,9 +300,10 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
           throw zs_error("syntax-rules error: invalid template: followed by '...', but not bound by pattern\n");
         }
 
-        if(auto m_ret_lis = m_ret->second.get<Cons*>()){
-          vec.insert(vec.end(), begin(m_ret_lis), end(m_ret_lis));
-        }else if(auto m_ret_vec = m_ret->second.get<Vector*>()){
+        if(m_ret->second.tag() == Ptr_tag::cons){
+          vec.insert(vec.end(), begin(m_ret->second), end(m_ret->second));
+        }else if(m_ret->second.tag() == Ptr_tag::vector){
+          auto m_ret_vec = m_ret->second.get<Vector*>();
           vec.insert(vec.end(), begin(*m_ret_vec), end(*m_ret_vec));
         }else{
           throw zs_error("syntax-rules error: invalid template: not sequence type\n");
@@ -305,12 +324,19 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
   std::unordered_map<Lisp_ptr, Lisp_ptr> match_obj;
 
+  // cout << "## " << __func__ << ": form = " << form << endl;
+
   for(auto i : this->rules()){
     auto pat = i.get<Cons*>()->car();
     auto tmpl = i.get<Cons*>()->cdr().get<Cons*>()->car();
 
     auto ignore_ident = pick_first(pat);
     if(try_match_1(match_obj, *this, ignore_ident, pat, form_env, form)){
+      // cout << "## matched!: pattern = " << pat << '\n';
+      // for(auto ii : match_obj){
+      //   cout << '\t' << ii.first << " = " << ii.second << '\n';
+      // }
+
       return expand(match_obj, tmpl);
     }else{
       // cleaning map
@@ -323,6 +349,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     }
   }
 
+  // cout << "## no match: form = " << form << endl;
   throw zs_error("syntax-rules error: no matching pattern found!\n");
 }
 
