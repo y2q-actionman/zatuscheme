@@ -157,6 +157,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     print(f, sc->expr(), flag);
     if(flag == print_human_readable::t){
       f << ']';
+      f << " @ " << sc->env();
       if(identifierp(p))
         f << " (alias)";
       f << '>';
