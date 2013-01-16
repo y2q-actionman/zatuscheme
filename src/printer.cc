@@ -18,14 +18,14 @@ using namespace std;
 
 namespace {
 
-void print_vector(ostream& f, const Vector* v){
+void print_vector(ostream& f, const Vector* v, print_human_readable flag){
   auto i = v->begin();
   const auto e = v->end();
 
   f.write("#(", 2);
 
   while(i != e){
-    print(f, *i);
+    print(f, *i, flag);
     ++i;
     if(i != e)
       f.put(' ');
@@ -34,21 +34,21 @@ void print_vector(ostream& f, const Vector* v){
   f.put(')');
 }
 
-void print_list(ostream& f, Lisp_ptr l){
+void print_list(ostream& f, Lisp_ptr l, print_human_readable flag){
   assert(l.tag() == Ptr_tag::cons);
 
   f.put('(');
 
   do_list(l,
-          [&f](Cons* cell) -> bool{
-            print(f, cell->car());
+          [&](Cons* cell) -> bool{
+            print(f, cell->car(), flag);
             if(cell->cdr().get<Cons*>()) f.put(' ');
             return true;
           },
-          [&f](Lisp_ptr dot_cdr){
+          [&](Lisp_ptr dot_cdr){
             if(!nullp(dot_cdr)){
               f.write(" . ", 3);
-              print(f, dot_cdr);
+              print(f, dot_cdr, flag);
             }
           });
 
@@ -112,7 +112,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     break;
 
   case Ptr_tag::cons:
-    print_list(f, p);
+    print_list(f, p, flag);
     break;
 
   case Ptr_tag::symbol: {
@@ -134,7 +134,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     break;
 
   case Ptr_tag::vector:
-    print_vector(f, p.get<Vector*>());
+    print_vector(f, p.get<Vector*>(), flag);
     break;
 
   case Ptr_tag::delay: {
@@ -158,7 +158,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     if(flag == print_human_readable::t){
       f << ']';
       if(identifierp(p))
-        f << " (identifier)";
+        f << " (alias)";
       f << '>';
     }
     break;
