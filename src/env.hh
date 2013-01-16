@@ -6,10 +6,13 @@
 
 #include "lisp_ptr.hh"
 #include "hasher.hh"
+#include "builtin_equal.hh"
 
 class Env {
 public:
-  typedef std::unordered_map<Lisp_ptr, Lisp_ptr> map_type;
+  typedef std::unordered_map<Lisp_ptr, Lisp_ptr,
+                             std::hash<Lisp_ptr>, eq_obj<Lisp_ptr> >
+    map_type;
 
   Env(const Env&) = delete;
   Env(Env&&) = delete;

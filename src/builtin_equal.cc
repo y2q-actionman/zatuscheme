@@ -11,11 +11,45 @@
 
 using namespace std;
 
+bool eq_internal(Lisp_ptr a, Lisp_ptr b){
+  if(a.tag() != b.tag()) return false;
+
+  switch(a.tag()){
+  case Ptr_tag::undefined:
+    return true;
+  case Ptr_tag::boolean:
+    return a.get<bool>() == b.get<bool>();
+  case Ptr_tag::character:
+     // this can be moved into eqv? in R5RS, but char is contained in Lisp_ptr.
+    return a.get<char>() == b.get<char>();
+  case Ptr_tag::cons:
+  case Ptr_tag::symbol:
+  case Ptr_tag::i_procedure:
+  case Ptr_tag::n_procedure:
+  case Ptr_tag::continuation:
+  case Ptr_tag::number:
+  case Ptr_tag::string:
+  case Ptr_tag::vector:
+  case Ptr_tag::input_port:
+  case Ptr_tag::output_port:
+  case Ptr_tag::env:
+  case Ptr_tag::delay:
+  case Ptr_tag::syntactic_closure:
+  case Ptr_tag::syntax_rules:
+  case Ptr_tag::vm_op:
+    return a.get<void*>() == b.get<void*>();
+  case Ptr_tag::vm_argcount:
+    return a.get<int>() == b.get<int>();
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() == Ptr_tag::number && b.tag() == Ptr_tag::number){
     return eqv(*a.get<Number*>(), *b.get<Number*>());
   }else{
-    return (a == b);
+    return eq_internal(a, b);
   }
 }
 
@@ -41,7 +75,7 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
 
 Lisp_ptr eq(){
   ZsArgs args{2};
-  return Lisp_ptr{args[0] == args[1]};
+  return Lisp_ptr{eq_internal(args[0], args[1])};
 }
 
 Lisp_ptr eqv(){

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <type_traits>
 #include "zs_error.hh"
+#include "builtin_equal.hh"
 
 inline
 bool nullp(Lisp_ptr p){
@@ -266,12 +267,12 @@ Lisp_ptr GrowList::extract_with_tail(Lisp_ptr p){
 // ConsIter class
 inline
 bool operator==(const ConsIter& i1, const ConsIter& i2){
-  return i1.base() == i2.base();
+  return eq_internal(i1.base(), i2.base());
 }
 
 inline
 bool operator!=(const ConsIter& i1, const ConsIter& i2){
-  return i1.base() != i2.base();
+  return !eq_internal(i1.base(), i2.base());
 }
 
 // cons_list_to_array (deprecated)

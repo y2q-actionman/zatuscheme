@@ -117,7 +117,7 @@ void vm_op_macro_call(){
   stack = bn, bn-1, ..., an, an-1, ...
 */
 void vm_op_stack_splicing(){
-  assert(vm.code.back() == vm_op_stack_splicing);
+  assert(vm.code.back().get<VMop>() == vm_op_stack_splicing);
 
   auto& op = vm.code[vm.code.size() - 2];
   auto& outer_argc = vm.code[vm.code.size() - 3];
@@ -406,7 +406,7 @@ static unsigned get_wind_index(const VM& va, const VM& vb){
   unsigned w = 0;
   while((w < va.extent.size())
         && (w < vb.extent.size())
-        && (va.extent[w].thunk == vb.extent[w].thunk)){
+        && eq_internal(va.extent[w].thunk, vb.extent[w].thunk)){
     ++w;
   }
   return w;
@@ -717,7 +717,7 @@ void vm_op_save_values_and_enter(){
 }
 
 void vm_op_get_current_env(){
-  assert(vm.code.back() == vm_op_get_current_env);
+  assert(vm.code.back().get<VMop>() == vm_op_get_current_env);
   vm.code.pop_back();
   
   vm.return_value = {vm.frame()};
@@ -844,6 +844,7 @@ void eval(){
           if(auto val = vm.frame()->find(p)){
             vm.code.pop_back();
             vm.return_value = {val};
+            break;
           }
         }
 

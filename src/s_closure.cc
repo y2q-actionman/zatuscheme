@@ -2,6 +2,7 @@
 #include "cons_util.hh"
 #include "zs_error.hh"
 #include "env.hh"
+#include "builtin_equal.hh"
 
 SyntacticClosure::SyntacticClosure(Env* e, Cons* f, Lisp_ptr ex)
   : env_(e), free_names_(f), expr_(ex){
@@ -50,5 +51,5 @@ Env* identifier_env(Lisp_ptr p, Env* e){
 
 bool identifier_eq(Env* ident1_env, Lisp_ptr ident1,
                    Env* ident2_env, Lisp_ptr ident2){
-  return (ident1_env->find(ident1) == ident2_env->find(ident2));
+  return eq_internal(ident1_env->find(ident1), ident2_env->find(ident2));
 }

@@ -3,9 +3,17 @@
 
 #include "decl.hh"
 
-// eq? is same as 'operator==(Lisp_ptr, Lisp_ptr)'.
-bool eqv_internal(Lisp_ptr a, Lisp_ptr b);
-bool equal_internal(Lisp_ptr a, Lisp_ptr b);
+bool eq_internal(Lisp_ptr, Lisp_ptr);
+bool eqv_internal(Lisp_ptr, Lisp_ptr);
+bool equal_internal(Lisp_ptr, Lisp_ptr);
+
+template<typename T>
+struct eq_obj {
+  bool operator()(const T& a, const T& b) const{
+    return eq_internal(a, b);
+  }
+};
+    
 
 Lisp_ptr eq();
 Lisp_ptr eqv();

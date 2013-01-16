@@ -24,7 +24,7 @@ void free_cons_list(Lisp_ptr p){
 // GrowList class
 void GrowList::push(Lisp_ptr p){
   assert(head && next);
-  assert(*next == Cons::NIL);
+  assert(nullp(*next));
 
   auto newc = new Cons(p, Cons::NIL);
   

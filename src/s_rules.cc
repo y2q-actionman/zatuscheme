@@ -20,6 +20,9 @@
 
 using namespace std;
 
+typedef std::unordered_map<Lisp_ptr, Lisp_ptr, std::hash<Lisp_ptr>, eq_obj<Lisp_ptr> > MatchObj;
+typedef std::unordered_set<Lisp_ptr, std::hash<Lisp_ptr>, eq_obj<Lisp_ptr> > MatchSet;
+
 namespace Procedure{
 
 namespace {
@@ -41,12 +44,13 @@ Lisp_ptr pick_first(Lisp_ptr p){
   }
 }
 
-void check_pattern(const SyntaxRules& sr, Lisp_ptr p,
-                   unordered_set<Lisp_ptr> tab){
+void check_pattern(const SyntaxRules& sr, Lisp_ptr p, MatchSet tab){
   if(identifierp(p)){
-    if(find(begin(sr.literals()), end(sr.literals()), p) != end(sr.literals())){
-      // literal identifier
-      return;
+    for(auto l : sr.literals()){
+      if(eq_internal(l, p)){
+        // literal identifier
+        return;
+      }
     }
       
     // pattern variable
@@ -107,18 +111,19 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
 SyntaxRules::~SyntaxRules() = default;
 
 static
-void ensure_binding(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
+void ensure_binding(MatchObj& match_obj,
                     const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern){
   if(identifierp(pattern)){
-    if(find(begin(sr.literals()), end(sr.literals()), pattern) != end(sr.literals())){
-      return;
-    }else{
-      // non-literal identifier
-      if(pattern != ignore_ident){
-        match_obj.insert({pattern, new Vector()});
+    for(auto l : sr.literals()){
+      if(eq_internal(l, pattern)){
+        return; // literal identifier
       }
-      return;
     }
+    // non-literal identifier
+    if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
+      match_obj.insert({pattern, new Vector()});
+    }
+    return;
   }else if(pattern.tag() == Ptr_tag::cons){
     if(nullp(pattern)){
       return;
@@ -152,7 +157,7 @@ void ensure_binding(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
 }
 
 static
-bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
+bool try_match_1(MatchObj& match_obj,
                  const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
                  Env* form_env, Lisp_ptr form,
                  bool insert_by_push){
@@ -172,31 +177,33 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(pattern)){
-    if(find(begin(sr.literals()), end(sr.literals()), pattern) != end(sr.literals())){
-      // literal identifier
-      // if(!identifierp(form))
-      //   cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
-      if(!identifierp(form)) return false;
+    for(auto l : sr.literals()){
+      if(eq_internal(l, pattern)){
+        // literal identifier
+        // if(!identifierp(form))
+        //   cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
+        if(!identifierp(form)) return false;
 
-      // if(!identifier_eq(sr.env(), pattern, form_env, form))
-      //   cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
-      return identifier_eq(sr.env(), pattern, form_env, form);
-    }else{
-      // non-literal identifier
-      if(pattern != ignore_ident){
-        auto val = 
-          (is_self_evaluating(form)) ? form : new SyntacticClosure(form_env, nullptr, form);
-
-        if(insert_by_push){
-          auto place = match_obj.find(pattern);
-          assert(place->second.tag() == Ptr_tag::vector);
-          place->second.get<Vector*>()->push_back(val);
-        }else{
-          match_obj.insert({pattern, val});
-        }
+        // if(!identifier_eq(sr.env(), pattern, form_env, form))
+        //   cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
+        return identifier_eq(sr.env(), pattern, form_env, form);
       }
-      return true;
     }
+
+    // non-literal identifier
+    if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
+      auto val = 
+        (is_self_evaluating(form)) ? form : new SyntacticClosure(form_env, nullptr, form);
+
+      if(insert_by_push){
+        auto place = match_obj.find(pattern);
+        assert(place->second.tag() == Ptr_tag::vector);
+        place->second.get<Vector*>()->push_back(val);
+      }else{
+        match_obj.insert({pattern, val});
+      }
+    }
+    return true;
   }else if(pattern.tag() == Ptr_tag::cons){
     if(form.tag() != Ptr_tag::cons){
       // cout << __func__ << "\tcheck failed @ " << __LINE__ << endl;
@@ -214,7 +221,7 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
       // checks ellipsis
       auto p_n = next(p_i);
       if((p_n) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
-        if(*p_i == ignore_ident){
+        if(eq_internal(*p_i, ignore_ident)){
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
 
@@ -278,7 +285,7 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
       if((p_n != p_e) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
         if(identifierp(*p_i)){
           // like: (A B C ...)
-          if(*p_i == ignore_ident){
+          if(eq_internal(*p_i, ignore_ident)){
             throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
           }
 
@@ -312,8 +319,7 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
 }
 
 static
-Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
-                Lisp_ptr tmpl){
+Lisp_ptr expand(MatchObj& match_obj, Lisp_ptr tmpl){
   // cout << __func__ << " arg = " << tmpl << endl;
   // for(auto ii : match_obj){
   //   cout << '\t' << ii.first << " = " << ii.second << '\n';
@@ -409,7 +415,7 @@ Lisp_ptr expand(const std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
 }
 
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
-  std::unordered_map<Lisp_ptr, Lisp_ptr> match_obj;
+  MatchObj match_obj;
 
   // cout << "## " << __func__ << ": form = " << form << endl;
 
