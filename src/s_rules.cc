@@ -3,6 +3,7 @@
 #include <iterator>
 #include <unordered_set>
 #include <unordered_map>
+#include <utility>
 
 #include "s_rules.hh"
 #include "s_closure.hh"
@@ -309,12 +310,11 @@ bool try_match_1(MatchObj& match_obj,
 }
 
 static
-Lisp_ptr expand(MatchObj& match_obj, Lisp_ptr tmpl){
+pair<Lisp_ptr, bool> expand(const MatchObj& match_obj, Lisp_ptr tmpl,
+                            int pick_depth, bool pick_limit_ok){
 #ifndef NDEBUG
-  cout << __func__ << " arg = " << tmpl << endl;
-  for(auto ii : match_obj){
-    cout << '\t' << ii.first << " = " << ii.second << '\n';
-  }
+  cout << __func__ << " arg = " << tmpl
+       << ", depth = " << pick_depth << ", flag = " << pick_limit_ok << '\n';
 #endif
 
   const auto ellipsis_sym = intern(vm.symtable(), "...");
@@ -322,12 +322,23 @@ Lisp_ptr expand(MatchObj& match_obj, Lisp_ptr tmpl){
   if(identifierp(tmpl)){
     auto m_ret = match_obj.find(tmpl);
     if(m_ret != match_obj.end()){
-      return m_ret->second;
+      if(pick_depth < 0){
+        return {m_ret->second, pick_limit_ok};
+      }else{
+        assert(m_ret->second.tag() == Ptr_tag::vector);
+        auto m_vec = m_ret->second.get<Vector*>();
+
+        if(pick_depth < static_cast<signed>(m_vec->size())){
+          return {(*m_vec)[pick_depth], true};
+        }else{
+          return {{}, false};
+        }
+      }
     }else{
-      return tmpl;
+      return {tmpl, pick_limit_ok};
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
-    if(nullp(tmpl)) return tmpl;
+    if(nullp(tmpl)) return {tmpl, pick_limit_ok};
 
     GrowList gl;
     auto t_i = begin(tmpl);
@@ -336,65 +347,64 @@ Lisp_ptr expand(MatchObj& match_obj, Lisp_ptr tmpl){
       auto t_n = next(t_i);
 
       // check ellipsis
-      if(identifierp(*t_i)
-         && (t_n) && identifierp(*t_n)
-         && identifier_symbol(*t_n) == ellipsis_sym){
-        auto m_ret = match_obj.find(*t_i);
-        
-        if(m_ret == match_obj.end()){
-          throw zs_error("syntax-rules error: invalid template: followed by '...', but not bound by pattern\n");
-        }
-
-        if(m_ret->second.tag() == Ptr_tag::vector){
-          auto m_ret_vec = m_ret->second.get<Vector*>();
-          for(auto i : *m_ret_vec){
-            gl.push(i);
-          }
-        }else{
-          throw zs_error("syntax-rules error: invalid template: matched pattern variable is not followed by ...\n");
+      if((t_n) && identifierp(*t_n) && identifier_symbol(*t_n) == ellipsis_sym){
+        int depth = 0;
+        while(1){
+          auto ex = expand(match_obj, *t_i, depth, true);
+          if(!ex.second) break;
+          gl.push(ex.first);
+          ++depth;
         }
 
         ++t_i;
       }else{
-        gl.push(expand(match_obj, *t_i));
+        auto ex = expand(match_obj, *t_i, pick_depth, pick_limit_ok);
+        if(!ex.second && (pick_depth >= 0)){
+          return {{}, false};
+        }
+        gl.push(ex.first);
       }
     }
 
-    return gl.extract_with_tail(expand(match_obj, t_i.base()));
-  }else if(tmpl.tag() == Ptr_tag::vector){
-    auto t_vec = tmpl.get<Vector*>();
+    auto ex = expand(match_obj, t_i.base(), pick_depth, pick_limit_ok);
+    if(!ex.second && (pick_depth >= 0)){
+      return {{}, false};
+    }      
+    return {gl.extract_with_tail(ex.first), pick_limit_ok};
+  // }else if(tmpl.tag() == Ptr_tag::vector){
+  //   auto t_vec = tmpl.get<Vector*>();
 
-    Vector vec;
+  //   Vector vec;
 
-    for(auto t_i = begin(*t_vec), t_e = end(*t_vec); t_i != t_e; ++t_i){
-      auto t_n = next(t_i);
+  //   for(auto t_i = begin(*t_vec), t_e = end(*t_vec); t_i != t_e; ++t_i){
+  //     auto t_n = next(t_i);
 
-      // check ellipsis
-      if(identifierp(*t_i)
-         && (t_n != t_e) && identifierp(*t_n)
-         && identifier_symbol(*t_n) == ellipsis_sym){
-        auto m_ret = match_obj.find(*t_i);
+  //     // check ellipsis
+  //     if(identifierp(*t_i)
+  //        && (t_n != t_e) && identifierp(*t_n)
+  //        && identifier_symbol(*t_n) == ellipsis_sym){
+  //       auto m_ret = match_obj.find(*t_i);
         
-        if(m_ret == match_obj.end()){
-          throw zs_error("syntax-rules error: invalid template: followed by '...', but not bound by pattern\n");
-        }
+  //       if(m_ret == match_obj.end()){
+  //         throw zs_error("syntax-rules error: invalid template: followed by '...', but not bound by pattern\n");
+  //       }
 
-        if(m_ret->second.tag() == Ptr_tag::vector){
-          auto m_ret_vec = m_ret->second.get<Vector*>();
-          vec.insert(vec.end(), begin(*m_ret_vec), end(*m_ret_vec));
-        }else{
-          throw zs_error("syntax-rules error: invalid template: matched pattern variable is not followed by ...\n");
-        }
+  //       if(m_ret->second.tag() == Ptr_tag::vector){
+  //         auto m_ret_vec = m_ret->second.get<Vector*>();
+  //         vec.insert(vec.end(), begin(*m_ret_vec), end(*m_ret_vec));
+  //       }else{
+  //         throw zs_error("syntax-rules error: invalid template: matched pattern variable is not followed by ...\n");
+  //       }
 
-        ++t_i;
-      }else{
-        vec.push_back(expand(match_obj, *t_i));
-      }
-    }
+  //       ++t_i;
+  //     }else{
+  //       vec.push_back(expand(match_obj, *t_i, pick_depth));
+  //     }
+  //   }
 
-    return new Vector(move(vec));
+  //   return new Vector(move(vec));
   }else{
-    return tmpl;
+    return {tmpl, pick_limit_ok};
   }
 }
 
@@ -402,7 +412,8 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
   MatchObj match_obj;
 
 #ifndef NDEBUG
-  cout << "## " << __func__ << ": form = " << form << endl;
+  cout << "## " << __func__ << ": form = " << form
+       << ", env = " << form_env << ", frame=" << vm.frame() << endl;
 #endif
 
   for(auto i : this->rules()){
@@ -424,12 +435,12 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
       }
 #endif
 
-      auto ex = expand(match_obj, tmpl);
+      auto ex = expand(match_obj, tmpl, -1, false);
 #ifndef NDEBUG
-      cout << "## expand = " << ex << '\n';
-      cout << endl;
+      cout << "## expand = " << ex.first << '\n';
+      cout << *vm.frame() << endl;
 #endif
-      return ex;
+      return ex.first;
     }else{
       // cleaning map
       for(auto e : match_obj){
