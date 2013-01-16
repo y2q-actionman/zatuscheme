@@ -27,13 +27,7 @@ public:
 
   Env* fork() const;
   
-  // void clear();
-  // void clear_all();
-
   friend std::ostream& operator<<(std::ostream&, const Env&);
-
-  map_type& internal_map() // TODO: remove this!
-  { return map_; }
 
 private:
   map_type map_;
