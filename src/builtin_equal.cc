@@ -8,6 +8,7 @@
 #include "printer.hh"
 #include "vm.hh"
 #include "cons.hh"
+#include "s_closure.hh"
 
 using namespace std;
 
@@ -45,6 +46,16 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   }
 }
 
+bool eq_id_internal(Lisp_ptr a, Lisp_ptr b){
+  if(a.tag() == Ptr_tag::syntactic_closure
+     && b.tag() == Ptr_tag::syntactic_closure){
+    auto sc_a = a.get<SyntacticClosure*>();
+    auto sc_b = b.get<SyntacticClosure*>();
+    return (sc_a->env() == sc_b->env()) && eq_internal(sc_a->expr(), sc_b->expr());
+  }else{
+    return eq_internal(a, b);
+  }
+}
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() == Ptr_tag::number && b.tag() == Ptr_tag::number){
     return eqv(*a.get<Number*>(), *b.get<Number*>());

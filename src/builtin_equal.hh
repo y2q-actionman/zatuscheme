@@ -4,13 +4,14 @@
 #include "decl.hh"
 
 bool eq_internal(Lisp_ptr, Lisp_ptr);
+bool eq_id_internal(Lisp_ptr, Lisp_ptr);
 bool eqv_internal(Lisp_ptr, Lisp_ptr);
 bool equal_internal(Lisp_ptr, Lisp_ptr);
 
 template<typename T>
-struct eq_obj {
+struct eq_id_obj {
   bool operator()(const T& a, const T& b) const{
-    return eq_internal(a, b);
+    return eq_id_internal(a, b);
   }
 };
     
