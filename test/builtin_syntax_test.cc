@@ -19,7 +19,7 @@ int main(){
   check_e("(or 1 #f 3)", "1");
   check_e("(or #f 2 #f 4)", "2");
 
-  //check_e("(let () 100)", "100");
+  check_e("(let () 100)", "100");
   //check_e("(let (x) x)", "()");
   check_e("(let ((x 1) (y 2) (z 3)) x)", "1");
   check_e("(let ((x 1) (y 2) (z 3)) y)", "2");
