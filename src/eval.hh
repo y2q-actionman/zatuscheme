@@ -24,6 +24,8 @@ void vm_op_get_current_env();
 // main loop
 void eval();
 
+bool is_self_evaluating(Lisp_ptr);
+
 // builtin funcs near evaluator
 Lisp_ptr let_internal(Procedure::Entering);
 

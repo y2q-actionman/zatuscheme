@@ -14,6 +14,7 @@
 #include "builtin_util.hh"
 #include "printer.hh"
 #include "hasher.hh"
+#include "eval.hh"
 
 // #include <iostream>
 
@@ -183,7 +184,9 @@ bool try_match_1(std::unordered_map<Lisp_ptr, Lisp_ptr>& match_obj,
     }else{
       // non-literal identifier
       if(pattern != ignore_ident){
-        auto val = new SyntacticClosure(form_env, nullptr, form);
+        auto val = 
+          (is_self_evaluating(form)) ? form : new SyntacticClosure(form_env, nullptr, form);
+
         if(insert_by_push){
           auto place = match_obj.find(pattern);
           assert(place->second.tag() == Ptr_tag::vector);
