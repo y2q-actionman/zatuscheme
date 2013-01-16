@@ -330,6 +330,23 @@ int main(){
   check_e("(let ((x 1)) (let ((x 2)) x))", "2");
   check_e("(let ((x 1)) (let ((x 2)) x) x)", "1");
 
+  check_e_success(
+  "(define-syntax let*"
+  "  (syntax-rules ()"
+  "    ((let* () body1 body2 ...)"
+  "     (let () body1 body2 ...))"
+  "    ((let* ((name1 val1) (name2 val2) ...)"
+  "       body1 body2 ...)"
+  "     (let ((name1 val1))"
+  "       (let* ((name2 val2) ...)"
+  "         body1 body2 ...)))))");
+  check_e("(let* ((x 1)) x)", "1");
+  check_e("(let* ((x 1) (y x)) y)", "1");
+  check_e("(let* ((x 1) (y x) (z y)) z)", "1");
+  check_e("(let* ((x 1)) (let ((x 2)) x))", "2");
+  check_e("(let* ((x 1)) (let ((x 2)) x) x)", "1");
+
+
 
   return RESULT;
 }
