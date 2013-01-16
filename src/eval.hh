@@ -31,5 +31,6 @@ Lisp_ptr let_internal(Procedure::Entering);
 
 // for debug
 const char* stringify(VMop);
+extern bool dump_mode;
 
 #endif // EVAL_HH

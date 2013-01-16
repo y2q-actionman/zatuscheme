@@ -18,6 +18,8 @@
 using namespace std;
 using namespace Procedure;
 
+bool dump_mode = false;
+
 namespace {
 
 /*
@@ -808,6 +810,8 @@ Lisp_ptr let_internal(Entering entering){
 void eval(){
   try{
     while(!vm.code.empty()){
+      if(dump_mode) cout << vm << endl;
+
       auto p = vm.code.back();
 
       switch(p.tag()){
