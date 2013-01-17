@@ -175,7 +175,7 @@ bool try_match_1(MatchObj& match_obj,
   if(form.tag() == Ptr_tag::syntactic_closure){
     // destruct syntactic closure
     auto sc = form.get<SyntacticClosure*>();
-    return try_match_1(match_obj, sr, ignore_ident, pattern, sc->env(), sc->expr(), insert_by_push);
+    return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, sc->expr(), insert_by_push);
   }
 
   const auto ellipsis_sym = intern(vm.symtable(), "...");
