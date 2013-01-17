@@ -189,6 +189,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     break;
 
   default:
-    UNEXP_DEFAULT();
+    f << "#<UNKNOWN TYPE " << static_cast<int>(p.tag()) << " " << p.get<void*>() << ">";
+    break;
   }
 }
