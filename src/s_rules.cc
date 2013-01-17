@@ -175,7 +175,30 @@ bool try_match_1(MatchObj& match_obj,
   if(form.tag() == Ptr_tag::syntactic_closure){
     // destruct syntactic closure
     auto sc = form.get<SyntacticClosure*>();
-    return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, sc->expr(), insert_by_push);
+
+    if((form_env == sc->env()) || !identifierp(sc)){
+      // unwrap simply
+      return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, sc->expr(), insert_by_push);
+    }else{
+      // reduces 'alias to alias'
+      if(auto alias_value = form_env->find(form)){
+#ifndef NDEBUG
+          cout << "@@@ reduced alias @@@" << '\n';
+          cout << "\talias\t" << form << '\n';
+          cout << "\tvalue\t" << alias_value << '\n';
+          cout << "\t\t in " << form_env << '\n';
+#endif
+        return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, alias_value, insert_by_push);
+      }else{
+#ifndef NDEBUG
+          cout << "@@@ reduced alias (fail) @@@" << '\n';
+          cout << "\talias\t" << form << '\n';
+          cout << "\tvalue\t" << alias_value << '\n';
+          cout << "\t\t in " << form_env << '\n';
+#endif
+        return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, sc->expr(), insert_by_push);
+      }
+    }
   }
 
   const auto ellipsis_sym = intern(vm.symtable(), "...");
@@ -445,7 +468,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
       // cleaning map
       for(auto e : match_obj){
         if(auto sc = e.second.get<SyntacticClosure*>()){
-          delete sc;
+          if(sc->env() == form_env) delete sc;
         }
       }
       match_obj.clear();
