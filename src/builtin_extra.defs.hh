@@ -21,7 +21,7 @@
 {"identifier=?", {
     proc_identifier_eq,
     {4}}},
-{"make_synthetic_identifier", {
+{"make-synthetic-identifier", {
     make_synthetic_identifier,
     {1}}},
 {"exit", {
