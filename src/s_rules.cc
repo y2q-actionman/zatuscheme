@@ -167,9 +167,9 @@ bool try_match_1(MatchObj& match_obj,
 
 #ifndef NDEBUG
   cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
-  for(auto ii : match_obj){
-    cout << '\t' << ii.first << " = " << ii.second << '\n';
-  }
+  // for(auto ii : match_obj){
+  //   cout << '\t' << ii.first << " = " << ii.second << '\n';
+  // }
 #endif
 
   if(form.tag() == Ptr_tag::syntactic_closure){
