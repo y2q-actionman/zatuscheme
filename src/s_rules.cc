@@ -89,6 +89,27 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p){
   check_pattern(sr, p, {});
 }
 
+Lisp_ptr close_to_pattern_variable(Env* form_env, Lisp_ptr form){
+  if(is_self_evaluating(form)){
+    return form;
+  }else if(form.tag() == Ptr_tag::symbol){
+    return new SyntacticClosure(form_env, nullptr, form);
+  }else if(form.tag() == Ptr_tag::cons){
+    GrowList gl;
+    for(auto i : form){
+      gl.push(close_to_pattern_variable(form_env, i));
+    }
+    return gl.extract();
+  }else if(form.tag() == Ptr_tag::vm_op){
+    UNEXP_DEFAULT();
+  }else if(form.tag() == Ptr_tag::syntactic_closure){
+    return form;
+  }else{
+    UNEXP_DEFAULT();
+  }
+}
+
+
 } // namespace
 
 
@@ -166,39 +187,24 @@ bool try_match_1(MatchObj& match_obj,
                  bool insert_by_push){
 
 #ifndef NDEBUG
-  cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
+  // cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
   // for(auto ii : match_obj){
   //   cout << '\t' << ii.first << " = " << ii.second << '\n';
   // }
 #endif
 
+  // TODO: merge this part to 'close_to_pattern_variable()'
   if(form.tag() == Ptr_tag::syntactic_closure){
     // destruct syntactic closure
     auto sc = form.get<SyntacticClosure*>();
 
-    if((form_env == sc->env()) || !identifierp(sc)){
-      // unwrap simply
-      return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, sc->expr(), insert_by_push);
-    }else{
-      // reduces 'alias to alias'
-      if(auto alias_value = form_env->find(form)){
-#ifndef NDEBUG
-          cout << "@@@ reduced alias @@@" << '\n';
-          cout << "\talias\t" << form << '\n';
-          cout << "\tvalue\t" << alias_value << '\n';
-          cout << "\t\t in " << form_env << '\n';
-#endif
-        return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, alias_value, insert_by_push);
-      }else{
-#ifndef NDEBUG
-          cout << "@@@ reduced alias (fail) @@@" << '\n';
-          cout << "\talias\t" << form << '\n';
-          cout << "\tvalue\t" << alias_value << '\n';
-          cout << "\t\t in " << form_env << '\n';
-#endif
-        return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, sc->expr(), insert_by_push);
-      }
+    if((form_env != sc->env()) && !identifierp(sc)){
+      // adds 'alias to alias' entry to metchobj
+      match_obj.insert({new SyntacticClosure(form_env, nullptr, sc->expr()), form});
     }
+
+    // unwrap simply
+    return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, sc->expr(), insert_by_push);
   }
 
   const auto ellipsis_sym = intern(vm.symtable(), "...");
@@ -215,8 +221,7 @@ bool try_match_1(MatchObj& match_obj,
 
     // non-literal identifier
     if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
-      auto val = 
-        (is_self_evaluating(form)) ? form : new SyntacticClosure(form_env, nullptr, form);
+      auto val = close_to_pattern_variable(form_env, form);
 
       if(insert_by_push){
         auto place = match_obj.find(pattern);
@@ -336,8 +341,8 @@ static
 pair<Lisp_ptr, bool> expand(const MatchObj& match_obj, Lisp_ptr tmpl,
                             int pick_depth, bool pick_limit_ok){
 #ifndef NDEBUG
-  cout << __func__ << " arg = " << tmpl
-       << ", depth = " << pick_depth << ", flag = " << pick_limit_ok << '\n';
+//   cout << __func__ << " arg = " << tmpl
+//        << ", depth = " << pick_depth << ", flag = " << pick_limit_ok << '\n';
 #endif
 
   const auto ellipsis_sym = intern(vm.symtable(), "...");
@@ -435,8 +440,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
   MatchObj match_obj;
 
 #ifndef NDEBUG
-  cout << "## " << __func__ << ": form = " << form
-       << ", env = " << form_env << ", frame=" << vm.frame() << endl;
+  cout << "## " << __func__ << ": form = " << form << ", env = " << form_env << '\n';
 #endif
 
   for(auto i : this->rules()){
@@ -444,7 +448,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     auto tmpl = i.get<Cons*>()->cdr().get<Cons*>()->car();
 
 #ifndef NDEBUG
-    cout << "## trying: pattern = " << pat << endl;
+    cout << "## trying: pattern = " << pat << '\n';
 #endif
 
     auto ignore_ident = pick_first(pat);
@@ -461,7 +465,8 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
       auto ex = expand(match_obj, tmpl, -1, false);
 #ifndef NDEBUG
       cout << "## expand = " << ex.first << '\n';
-      cout << *vm.frame() << endl;
+      // cout << *vm.frame() << '\n';
+      cout << endl;
 #endif
       return ex.first;
     }else{
