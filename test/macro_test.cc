@@ -385,6 +385,26 @@ int main(){
           "  (even? 88))",
           "#t");
 
+  check_e_success(
+  "(define-syntax begin"
+  "  (syntax-rules ()"
+  "    ((begin exp ...)"
+  "     ((lambda () exp ...)))))");
+  check_e("(begin 1)", "1");
+  check_e("(begin 1 2)", "2");
+  check_e("(begin 1 2 3)", "3");
+
+  check_e_success(
+  "(define-syntax begin"
+  "  (syntax-rules ()"
+  "    ((begin exp)"
+  "     exp)"
+  "    ((begin exp1 exp2 ...)"
+  "     (let ((x exp1))"
+  "       (begin exp2 ...)))))");
+  check_e("(begin 1)", "1");
+  check_e("(begin 1 2)", "2");
+  check_e("(begin 1 2 3)", "3");
 
 
   return RESULT;
