@@ -8,7 +8,7 @@
 namespace std{
   template<> struct hash<Lisp_ptr>{
     size_t operator()(const Lisp_ptr& p) const{
-      return eq_id_hash(p);
+      return eq_hash(p);
     }
   };
 }

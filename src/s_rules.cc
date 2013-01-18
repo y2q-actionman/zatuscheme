@@ -23,8 +23,8 @@
 
 using namespace std;
 
-typedef std::unordered_map<Lisp_ptr, Lisp_ptr, std::hash<Lisp_ptr>, eq_id_obj<Lisp_ptr> > MatchObj;
-typedef std::unordered_set<Lisp_ptr, std::hash<Lisp_ptr>, eq_id_obj<Lisp_ptr> > MatchSet;
+typedef std::unordered_map<Lisp_ptr, Lisp_ptr, std::hash<Lisp_ptr>, eq_obj<Lisp_ptr> > MatchObj;
+typedef std::unordered_set<Lisp_ptr, std::hash<Lisp_ptr>, eq_obj<Lisp_ptr> > MatchSet;
 
 namespace Procedure{
 

@@ -8,7 +8,7 @@
 // 'eq?' semantics
 size_t eq_hash(const Lisp_ptr&);
 
-size_t eq_id_hash(const Lisp_ptr&);
+// size_t eq_id_hash(const Lisp_ptr&);
 
 // for std::hash interface (eq-id-hash)
 namespace std{
