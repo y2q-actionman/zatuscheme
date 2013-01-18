@@ -362,7 +362,7 @@ int main(){
   "       body ...)"
   "     (let ((var1 <undefined>) ...)"
   "       (let ((temp1 init1) ...)"
-  "         (define var1 temp1)" // in R5RS: (set! var1 temp1)
+  "         (set! var1 temp1)"
   "         ..."
   "         body ...)))"
   "    ((letrec \"generate_temp_names\""
