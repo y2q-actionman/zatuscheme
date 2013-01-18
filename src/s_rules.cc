@@ -184,13 +184,19 @@ Lisp_ptr close_to_pattern_variable(MatchObj& match_obj, const SyntaxRules& sr,
 
     if((form_env != sc->env()) && identifierp(sc)){
       auto new_alias = new SyntacticClosure(form_env, nullptr, sc->expr());
+      
+      if(auto bind_in_syntax_env = sc->env()->find(sc->expr())){
+        new_alias->env()->local_set(sc->expr(), bind_in_syntax_env);
+      }
+      if(auto bind_in_usage_env = form_env->find(sc)){
+        new_alias->env()->local_set(sc->expr(), bind_in_usage_env);
+      }
 #ifndef NDEBUG
       cout << __func__ << ": alias to alias: " << form << " -> " << Lisp_ptr{new_alias} << '\n';
       cout << "\tform in syntax env = " << sc->env()->find(sc->expr()) << '\n';
       cout << "\tform in usage env = " << form_env->find(sc) << '\n';
       cout << "\tnew alias in syntax env = " << new_alias->env()->find(sc->expr()) << '\n';
       cout << "\tnew alias in usage env = " << form_env->find(new_alias) << '\n'; // should be 'undefined'
-      match_obj.insert({new_alias, form});
 #endif
       return {new_alias};
     }else{

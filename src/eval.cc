@@ -492,7 +492,8 @@ void proc_enter_srule(SyntaxRules* srule){
   assert(ret_hook.tag() == Ptr_tag::vm_op);
   vm.code.pop_back();
 
-  auto code = srule->apply(args[0], args[1].get<Env*>());
+  auto code = srule->apply(args[0], args[1].get<Env*>()->push());
+  // TODO: reduces env if syntax-rules doesn't change the passed env.
 
   auto oldenv = vm.frame();
   vm.set_frame(srule->env());
