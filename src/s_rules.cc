@@ -466,8 +466,9 @@ pair<Lisp_ptr, bool> expand(const MatchObj& match_obj, Lisp_ptr tmpl,
   }
 }
 
-Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
+Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
   MatchObj match_obj;
+  Env* form_env = orig_form_env->push(); // TODO: stop leak when exception.
 
 #ifndef NDEBUG
   cout << "## " << __func__ << ": form = " << form << ", env = " << form_env << '\n';
