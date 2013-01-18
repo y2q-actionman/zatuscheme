@@ -346,6 +346,45 @@ int main(){
   check_e("(let* ((x 1)) (let ((x 2)) x))", "2");
   check_e("(let* ((x 1)) (let ((x 2)) x) x)", "1");
 
+  check_e_success(
+  "(define-syntax letrec"
+  "  (syntax-rules ()"
+  "    ((letrec ((var1 init1) ...) body ...)"
+  "     (letrec \"generate_temp_names\""
+  "       (var1 ...)"
+  "       ()"
+  "       ((var1 init1) ...)"
+  "       body ...))"
+  "    ((letrec \"generate_temp_names\""
+  "       ()"
+  "       (temp1 ...)"
+  "       ((var1 init1) ...)"
+  "       body ...)"
+  "     (let ((var1 <undefined>) ...)"
+  "       (let ((temp1 init1) ...)"
+  "         (define var1 temp1)" // in R5RS: (set! var1 temp1)
+  "         ..."
+  "         body ...)))"
+  "    ((letrec \"generate_temp_names\""
+  "       (x y ...)"
+  "       (temp ...)"
+  "       ((var1 init1) ...)"
+  "       body ...)"
+  "     (letrec \"generate_temp_names\""
+  "       (y ...)"
+  "       (newtemp temp ...)"
+  "       ((var1 init1) ...)"
+  "       body ...))))");
+  check_e("(letrec ((x 1)) x)", "1");
+  check_e("(letrec ((x 1) (y 2)) y)", "2");
+  check_e("(letrec ((x 1) (y 2) (z 3)) z)", "3");
+  check_e("(letrec ((x 1)) (let ((x 2)) x))", "2");
+  check_e("(letrec ((x 1)) (let ((x 2)) x) x)", "1");
+  check_e("(letrec ((even? (lambda (n) (if (zero? n) #t (odd? (- n 1)))))"
+          "         (odd?  (lambda (n) (if (zero? n) #f (even? (- n 1))))))"
+          "  (even? 88))",
+          "#t");
+
 
 
   return RESULT;
