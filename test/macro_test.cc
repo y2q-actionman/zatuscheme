@@ -406,6 +406,32 @@ int main(){
   check_e("(begin 1 2)", "2");
   check_e("(begin 1 2 3)", "3");
 
+  check_e_success(
+  "(define-syntax do"
+  "  (syntax-rules ()"
+  "    ((do ((var init step ...) ...)"
+  "         (test expr ...)"
+  "         command ...)"
+  "     (letrec"
+  "       ((loop"
+  "         (lambda (var ...)"
+  "           (if test"
+  "               (begin"
+  "                 <undefined>" // in R5RS, (if #f #f)
+  "                 expr ...)"
+  "               (begin"
+  "                 command"
+  "                 ..."
+  "                 (loop (do \"step\" var step ...)"
+  "                       ...))))))"
+  "       (loop init ...)))"
+  "    ((do \"step\" x)"
+  "     x)"
+  "    ((do \"step\" x y)"
+  "     y)))");
+  check_e("(do ((vec (make-vector 5)) (i 0 (+ i 1))) ((= i 5) vec) (vector-set! vec i i))",
+          "#(0 1 2 3 4)");
+
 
   return RESULT;
 }
