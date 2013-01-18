@@ -157,7 +157,7 @@ Lisp_ptr exit_func(){
 Lisp_ptr eq_hash_func(){
   ZsArgs args{1}; 
 
-  auto h = std::hash<Lisp_ptr>()(args[0]);
+  auto h = eq_hash(args[0]);
 
   return new Number{static_cast<Number::integer_type>(h)};
 }

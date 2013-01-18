@@ -23,8 +23,9 @@
 
 using namespace std;
 
-typedef std::unordered_map<Lisp_ptr, Lisp_ptr, std::hash<Lisp_ptr>, eq_obj<Lisp_ptr> > MatchObj;
-typedef std::unordered_set<Lisp_ptr, std::hash<Lisp_ptr>, eq_obj<Lisp_ptr> > MatchSet;
+typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> MatchObj;
+typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;
+typedef std::unordered_set<Lisp_ptr, eq_id_hash_obj, eq_id_obj> ExpandSet;
 
 namespace Procedure{
 
@@ -160,7 +161,8 @@ void ensure_binding(MatchObj& match_obj,
 }
 
 static
-Lisp_ptr close_to_pattern_variable(MatchObj& match_obj, const SyntaxRules& sr,
+Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
+                                   const MatchObj& match_obj, const SyntaxRules& sr,
                                    Env* form_env, Lisp_ptr form){
   if(is_self_evaluating(form)){
     return form;
@@ -170,11 +172,20 @@ Lisp_ptr close_to_pattern_variable(MatchObj& match_obj, const SyntaxRules& sr,
         return form;
       }
     }
-    return new SyntacticClosure(form_env, nullptr, form);
+
+    auto new_sc = new SyntacticClosure(form_env, nullptr, form);
+    auto iter = expand_obj.find(new_sc);
+    if(iter == expand_obj.end()){
+      expand_obj.insert(new_sc);
+      return new_sc;
+    }else{
+      delete new_sc;
+      return *iter;
+    }
   }else if(form.tag() == Ptr_tag::cons){
     GrowList gl;
     for(auto i : form){
-      gl.push(close_to_pattern_variable(match_obj, sr, form_env, i));
+      gl.push(close_to_pattern_variable(expand_obj, match_obj, sr, form_env, i));
     }
     return gl.extract();
   }else if(form.tag() == Ptr_tag::vm_op){
@@ -371,7 +382,8 @@ bool try_match_1(MatchObj& match_obj,
 }
 
 static
-pair<Lisp_ptr, bool> expand(MatchObj& match_obj, 
+pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
+                            const MatchObj& match_obj, 
                             const SyntaxRules& sr,
                             Lisp_ptr tmpl,
                             int pick_depth, bool pick_limit_ok){
@@ -398,7 +410,7 @@ pair<Lisp_ptr, bool> expand(MatchObj& match_obj,
         }
       }
     }else{
-      return {close_to_pattern_variable(match_obj, sr, sr.env(), tmpl), pick_limit_ok};
+      return {close_to_pattern_variable(expand_obj, match_obj, sr, sr.env(), tmpl), pick_limit_ok};
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
     if(nullp(tmpl)) return {tmpl, pick_limit_ok};
@@ -413,7 +425,7 @@ pair<Lisp_ptr, bool> expand(MatchObj& match_obj,
       if((t_n) && identifierp(*t_n) && identifier_symbol(*t_n) == ellipsis_sym){
         int depth = 0;
         while(1){
-          auto ex = expand(match_obj, sr, *t_i, depth, true);
+          auto ex = expand(expand_obj, match_obj, sr, *t_i, depth, true);
           if(!ex.second) break;
           gl.push(ex.first);
           ++depth;
@@ -421,7 +433,7 @@ pair<Lisp_ptr, bool> expand(MatchObj& match_obj,
 
         ++t_i;
       }else{
-        auto ex = expand(match_obj, sr, *t_i, pick_depth, pick_limit_ok);
+        auto ex = expand(expand_obj, match_obj, sr, *t_i, pick_depth, pick_limit_ok);
         if(!ex.second && (pick_depth >= 0)){
           return {{}, false};
         }
@@ -429,7 +441,7 @@ pair<Lisp_ptr, bool> expand(MatchObj& match_obj,
       }
     }
 
-    auto ex = expand(match_obj, sr, t_i.base(), pick_depth, pick_limit_ok);
+    auto ex = expand(expand_obj, match_obj, sr, t_i.base(), pick_depth, pick_limit_ok);
     if(!ex.second && (pick_depth >= 0)){
       return {{}, false};
     }      
@@ -461,7 +473,7 @@ pair<Lisp_ptr, bool> expand(MatchObj& match_obj,
 
   //       ++t_i;
   //     }else{
-  //       vec.push_back(expand(match_obj, *t_i, pick_depth));
+  //       vec.push_back(expand(expand_obj, match_obj, *t_i, pick_depth));
   //     }
   //   }
 
@@ -499,8 +511,9 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
         cout << '\t' << ii.first << " = " << ii.second << '\n';
       }
 #endif
-
-      auto ex = expand(match_obj, *this, tmpl, -1, false);
+      
+      ExpandSet expand_obj;
+      auto ex = expand(expand_obj, match_obj, *this, tmpl, -1, false);
 #ifndef NDEBUG
       cout << "## expand = " << ex.first << '\n';
       cout << endl;

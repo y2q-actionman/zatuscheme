@@ -7,13 +7,12 @@
 
 // 'eq?' semantics
 size_t eq_hash(const Lisp_ptr&);
+size_t eq_id_hash(const Lisp_ptr&);
 
-// size_t eq_id_hash(const Lisp_ptr&);
+// function object
+struct eq_hash_obj;
+struct eq_id_hash_obj;
 
-// for std::hash interface (eq-id-hash)
-namespace std{
-  template<> struct hash<Lisp_ptr>;
-}
 
 #include "hasher.i.hh"
 
