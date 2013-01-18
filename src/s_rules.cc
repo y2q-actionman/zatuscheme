@@ -117,6 +117,8 @@ SyntaxRules::~SyntaxRules() = default;
 static
 void ensure_binding(MatchObj& match_obj,
                     const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern){
+  const auto ellipsis_sym = intern(vm.symtable(), "...");
+
   if(identifierp(pattern)){
     for(auto l : sr.literals()){
       if(eq_internal(l, pattern)){
@@ -136,6 +138,12 @@ void ensure_binding(MatchObj& match_obj,
     auto p_i = begin(pattern);
 
     for(; p_i; ++p_i){
+      // checks ellipsis
+      auto p_n = next(p_i);
+      if((p_n) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
+        break;
+      }
+      
       ensure_binding(match_obj, sr, ignore_ident, *p_i);
     }
 
