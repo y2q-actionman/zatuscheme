@@ -37,7 +37,8 @@ public:
 private:
   static constexpr ProcInfo sr_procinfo
   = ProcInfo{2, 2, Passing::whole, Returning::code, MoveReturnValue::f,
-             Entering::at_jump, Leaving::after_returning_op};
+             // Entering::at_jump, Leaving::after_returning_op};
+  };
 
   Env* const env_;
   const Lisp_ptr literals_;
