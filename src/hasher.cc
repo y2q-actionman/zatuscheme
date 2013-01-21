@@ -32,6 +32,7 @@ size_t eq_hash(const Lisp_ptr& p){
   case Ptr_tag::delay:
   case Ptr_tag::syntactic_closure:
   case Ptr_tag::syntax_rules:
+  case Ptr_tag::eq_hash_map:
   case Ptr_tag::vm_op:
     val_hash = hash<void*>()(p.get<void*>());
     break;

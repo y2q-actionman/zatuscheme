@@ -3,29 +3,6 @@
 
 #include "decl.hh"
 
-enum class Ptr_tag {
-  undefined = 0,
-    boolean,
-    character,
-    cons,
-    symbol,
-    i_procedure,
-    n_procedure,
-    continuation,
-    number,
-    string,
-    vector,
-    input_port,
-    output_port,
-    env,
-    delay,
-    syntactic_closure,
-    syntax_rules,
-    vm_op,
-    vm_argcount
-    };
-    
-
 class Lisp_ptr {
 public:
   constexpr Lisp_ptr() : tag_(Ptr_tag::undefined), u_(){}

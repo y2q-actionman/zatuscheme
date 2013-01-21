@@ -185,6 +185,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
   case Ptr_tag::output_port:
   case Ptr_tag::env:
   case Ptr_tag::syntax_rules:
+  case Ptr_tag::eq_hash_map:
     f << "#<" << stringify(p.tag()) << " " << p.get<void*>() << ">";
     break;
 

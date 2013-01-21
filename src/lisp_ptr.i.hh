@@ -89,6 +89,11 @@ struct to_type<Ptr_tag, Ptr_tag::syntax_rules>{
 };
 
 template<>
+struct to_type<Ptr_tag, Ptr_tag::eq_hash_map>{
+  typedef EqHashMap* type;
+};
+
+template<>
 struct to_type<Ptr_tag, Ptr_tag::vm_op>{
   typedef VMop type;
 };
@@ -193,6 +198,12 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, Procedure::SyntaxRules*>(){
   return Ptr_tag::syntax_rules;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, EqHashMap*>(){
+  return Ptr_tag::eq_hash_map;
 }
 
 template<>

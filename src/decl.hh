@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iosfwd>
+#include <unordered_map>
 
 // typedefs & declarations
 class Lisp_ptr;
@@ -24,8 +25,35 @@ typedef std::ostream OutputPort;
 class Env;
 class Delay;
 class SyntacticClosure;
+class eq_hash_obj; // for EqHashMap
+class eq_obj; // for EqHashMap
+typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> EqHashMap;
 typedef void(*VMop)();
 
+
+// Type tag
+enum class Ptr_tag {
+  undefined = 0,
+    boolean,
+    character,
+    cons,
+    symbol,
+    i_procedure,
+    n_procedure,
+    continuation,
+    number,
+    string,
+    vector,
+    input_port,
+    output_port,
+    env,
+    delay,
+    syntactic_closure,
+    syntax_rules,
+    eq_hash_map,
+    vm_op,
+    vm_argcount
+    };
 
 
 // declares generic facilities.
