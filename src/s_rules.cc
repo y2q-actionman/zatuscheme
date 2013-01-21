@@ -23,7 +23,6 @@
 
 using namespace std;
 
-typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> MatchObj;
 typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;
 typedef std::unordered_set<Lisp_ptr, eq_id_hash_obj, eq_id_obj> ExpandSet;
 
@@ -115,7 +114,7 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
 SyntaxRules::~SyntaxRules() = default;
 
 static
-void ensure_binding(MatchObj& match_obj,
+void ensure_binding(EqHashMap& match_obj,
                     const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern){
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
@@ -170,7 +169,7 @@ void ensure_binding(MatchObj& match_obj,
 
 static
 Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
-                                   const MatchObj& match_obj, const SyntaxRules& sr,
+                                   const EqHashMap& match_obj, const SyntaxRules& sr,
                                    Env* form_env, Lisp_ptr form){
   if(is_self_evaluating(form)){
     return form;
@@ -231,7 +230,7 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
 
 
 static
-bool try_match_1(MatchObj& match_obj,
+bool try_match_1(EqHashMap& match_obj,
                  const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
                  Env* form_env, Lisp_ptr form,
                  bool insert_by_push){
@@ -391,7 +390,7 @@ bool try_match_1(MatchObj& match_obj,
 
 static
 pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
-                            const MatchObj& match_obj, 
+                            const EqHashMap& match_obj, 
                             const SyntaxRules& sr,
                             Lisp_ptr tmpl,
                             int pick_depth, bool pick_limit_ok){
@@ -492,7 +491,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
 }
 
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
-  MatchObj match_obj;
+  EqHashMap match_obj;
   Env* form_env = orig_form_env->push(); // TODO: stop leak when exception.
 
 #ifndef NDEBUG
