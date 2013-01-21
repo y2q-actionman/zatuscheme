@@ -168,68 +168,6 @@ void ensure_binding(EqHashMap& match_obj,
 }
 
 static
-Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
-                                   const EqHashMap& match_obj, const SyntaxRules& sr,
-                                   Env* form_env, Lisp_ptr form){
-  if(is_self_evaluating(form)){
-    return form;
-  }else if(form.tag() == Ptr_tag::symbol){
-    for(auto l : sr.literals()){
-      if(eq_internal(l, form)){
-        return form;
-      }
-    }
-
-    auto new_sc = new SyntacticClosure(form_env, nullptr, form);
-    auto iter = expand_obj.find(new_sc);
-    if(iter == expand_obj.end()){
-      expand_obj.insert(new_sc);
-      return new_sc;
-    }else{
-      delete new_sc;
-      return *iter;
-    }
-  }else if(form.tag() == Ptr_tag::cons){
-    GrowList gl;
-    for(auto i : form){
-      gl.push(close_to_pattern_variable(expand_obj, match_obj, sr, form_env, i));
-    }
-    return gl.extract();
-  }else if(form.tag() == Ptr_tag::vm_op){
-    UNEXP_DEFAULT();
-  }else if(form.tag() == Ptr_tag::syntactic_closure){
-//     if(identifierp(sc)){
-//       auto new_alias = new SyntacticClosure(form_env, nullptr, sc->expr());
-      
-//       if(auto bind_in_syntax_env = sc->env()->find(sc->expr())){
-//         new_alias->env()->local_set(sc->expr(), bind_in_syntax_env);
-//       }
-//       if(auto bind_in_usage_env = form_env->find(sc)){
-//         new_alias->env()->local_set(sc->expr(), bind_in_usage_env);
-//       }
-#ifndef NDEBUG
-    if(dump_mode){
-      auto sc = form.get<SyntacticClosure*>();
-
-      // cout << __func__ << ": alias to alias: " << form << " -> " << Lisp_ptr{new_alias} << '\n';
-      cout << "\t" << form << " in syntax env = " << sc->env()->find(sc->expr()) << '\n';
-      // cout << "\t" << form << " in syntax env (?) = " << sc->env()->find(sc) << '\n';
-      cout << "\t" << form << " in usage env = " << form_env->find(sc) << '\n';
-      // cout << "\tnew alias in syntax env = " << new_alias->env()->find(sc->expr()) << '\n';
-      // cout << "\tnew alias in usage env = " << form_env->find(new_alias) << '\n'; // should be 'undefined'
-    }
-#endif
-//       return {new_alias};
-//     }else{
-      return form;
-    // }
-  }else{
-    UNEXP_DEFAULT();
-  }
-}
-
-
-static
 bool try_match_1(EqHashMap& match_obj,
                  const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
                  Env* form_env, Lisp_ptr form,
@@ -385,6 +323,68 @@ bool try_match_1(EqHashMap& match_obj,
     }
   }else{
     return equal_internal(pattern, form);
+  }
+}
+
+
+static
+Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
+                                   const EqHashMap& match_obj, const SyntaxRules& sr,
+                                   Env* form_env, Lisp_ptr form){
+  if(is_self_evaluating(form)){
+    return form;
+  }else if(form.tag() == Ptr_tag::symbol){
+    for(auto l : sr.literals()){
+      if(eq_internal(l, form)){
+        return form;
+      }
+    }
+
+    auto new_sc = new SyntacticClosure(form_env, nullptr, form);
+    auto iter = expand_obj.find(new_sc);
+    if(iter == expand_obj.end()){
+      expand_obj.insert(new_sc);
+      return new_sc;
+    }else{
+      delete new_sc;
+      return *iter;
+    }
+  }else if(form.tag() == Ptr_tag::cons){
+    GrowList gl;
+    for(auto i : form){
+      gl.push(close_to_pattern_variable(expand_obj, match_obj, sr, form_env, i));
+    }
+    return gl.extract();
+  }else if(form.tag() == Ptr_tag::vm_op){
+    UNEXP_DEFAULT();
+  }else if(form.tag() == Ptr_tag::syntactic_closure){
+//     if(identifierp(sc)){
+//       auto new_alias = new SyntacticClosure(form_env, nullptr, sc->expr());
+      
+//       if(auto bind_in_syntax_env = sc->env()->find(sc->expr())){
+//         new_alias->env()->local_set(sc->expr(), bind_in_syntax_env);
+//       }
+//       if(auto bind_in_usage_env = form_env->find(sc)){
+//         new_alias->env()->local_set(sc->expr(), bind_in_usage_env);
+//       }
+#ifndef NDEBUG
+    if(dump_mode){
+      auto sc = form.get<SyntacticClosure*>();
+
+      // cout << __func__ << ": alias to alias: " << form << " -> " << Lisp_ptr{new_alias} << '\n';
+      cout << "\t" << form << " in syntax env = " << sc->env()->find(sc->expr()) << '\n';
+      // cout << "\t" << form << " in syntax env (?) = " << sc->env()->find(sc) << '\n';
+      cout << "\t" << form << " in usage env = " << form_env->find(sc) << '\n';
+      // cout << "\tnew alias in syntax env = " << new_alias->env()->find(sc->expr()) << '\n';
+      // cout << "\tnew alias in usage env = " << form_env->find(new_alias) << '\n'; // should be 'undefined'
+    }
+#endif
+//       return {new_alias};
+//     }else{
+      return form;
+    // }
+  }else{
+    UNEXP_DEFAULT();
   }
 }
 
