@@ -1,5 +1,6 @@
-*.o
+# emacs
 *~
+TAGS
 
 # autotools
 *.log
@@ -22,5 +23,7 @@ install-sh
 missing
 
 # binaries
+*.o
 *.a
 *_test
+zatuscheme
