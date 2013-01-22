@@ -168,10 +168,10 @@ void ensure_binding(EqHashMap& match_obj,
 }
 
 static
-bool try_match_1(EqHashMap& match_obj,
-                 const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
-                 Env* form_env, Lisp_ptr form,
-                 bool insert_by_push){
+pair<EqHashMap, bool>
+try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
+            Env* form_env, Lisp_ptr form,
+            bool insert_by_push){
 
 #ifndef NDEBUG
   // cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
@@ -202,33 +202,40 @@ bool try_match_1(EqHashMap& match_obj,
     for(auto l : sr.literals()){
       if(eq_internal(l, pattern)){
         // literal identifier
-        if(!identifierp(form)) return false;
+        if(!identifierp(form)
+           || !identifier_eq(sr.env(), pattern, form_env, form)){
+          return {{}, false};
+        }
 
-        return identifier_eq(sr.env(), pattern, form_env, form);
+        return {{}, true};
       }
     }
 
     // non-literal identifier
+    EqHashMap match_obj;
+
     if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
       // auto val = close_to_pattern_variable(match_obj, sr, form_env, form);
 
-      if(insert_by_push){
-        auto place = match_obj.find(pattern);
-        assert(place->second.tag() == Ptr_tag::vector);
-        place->second.get<Vector*>()->push_back(form);
-      }else{
+      // if(insert_by_push){
+      //   auto place = match_obj.find(pattern);
+      //   assert(place->second.tag() == Ptr_tag::vector);
+      //   place->second.get<Vector*>()->push_back(form);
+      // }else{
         match_obj.insert({pattern, form});
-      }
+      // }
     }
-    return true;
+    return {match_obj, true};
   }else if(pattern.tag() == Ptr_tag::cons){
     if(form.tag() != Ptr_tag::cons){
-      return false;
+      return {{}, false};
     }
 
     if(nullp(pattern) && nullp(form)){
-      return true;
+      return {{}, true};
     }
+
+    EqHashMap match_obj;
 
     auto p_i = begin(pattern);
     auto f_i = begin(form);
@@ -237,92 +244,103 @@ bool try_match_1(EqHashMap& match_obj,
       // checks ellipsis
       auto p_n = next(p_i);
       if((p_n) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
-        if(eq_internal(*p_i, ignore_ident)){
-          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
-        }
+        throw zs_error("sorry, ellipsis is  implementing now...\n");
 
-        auto p_e = p_i;
-        while(p_e) ++p_e;
+        // if(eq_internal(*p_i, ignore_ident)){
+        //   throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+        // }
 
-        if(!nullp(p_e.base())){
-          throw zs_error("syntax-rules error: '...' is appeared in a inproper list pattern!\n");
-        }
+        // auto p_e = p_i;
+        // while(p_e) ++p_e;
 
-        // accumulating...
-        ensure_binding(match_obj, sr, ignore_ident, *p_i);
-        for(; f_i; ++f_i){
-          if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, true)){
-            return false;
-          }
-        }
+        // if(!nullp(p_e.base())){
+        //   throw zs_error("syntax-rules error: '...' is appeared in a inproper list pattern!\n");
+        // }
 
-        if(!nullp(f_i.base())){
-          throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
-        }
+        // // accumulating...
+        // ensure_binding(match_obj, sr, ignore_ident, *p_i);
+        // for(; f_i; ++f_i){
+        //   if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, true)){
+        //     return false;
+        //   }
+        // }
 
-        return true;
+        // if(!nullp(f_i.base())){
+        //   throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
+        // }
+
+        // return true;
       }
 
       if(!f_i) break; // this check is delayed to here, for checking the ellipsis.
 
-      if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, insert_by_push)){
-        return false;
+      auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i, insert_by_push);
+      if(!m.second){
+        return {{}, false};
       }
+
+      match_obj.insert(begin(m.first), end(m.first));
     }
 
     // checks length
     if((p_i.base().tag() == Ptr_tag::cons) && (f_i.base().tag() == Ptr_tag::cons)){
-      return (nullp(p_i.base()) && nullp(f_i.base()));
+      // proper list
+      return {match_obj, (nullp(p_i.base()) && nullp(f_i.base()))};
     }else{
-      // dotted list case
-      return try_match_1(match_obj, sr, ignore_ident, p_i.base(), form_env, f_i.base(), insert_by_push);
-    }
-  }else if(pattern.tag() == Ptr_tag::vector){
-    if(form.tag() != Ptr_tag::vector){
-      return false;
-    }
-
-    auto p_v = pattern.get<Vector*>();
-    auto f_v = form.get<Vector*>();
-
-    auto p_i = begin(*p_v), p_e = end(*p_v);
-    auto f_i = begin(*f_v), f_e = end(*f_v);
-
-    for(; p_i != p_e; ++p_i, ++f_i){
-      // checks ellipsis
-      auto p_n = next(p_i);
-
-      if((p_n != p_e) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
-        if(eq_internal(*p_i, ignore_ident)){
-          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
-        }
-
-        // accumulating...
-        ensure_binding(match_obj, sr, ignore_ident, *p_i);
-        for(; f_i != f_e; ++f_i){
-          if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, true)){
-            return false;
-          }
-        }
-
-        return true;
+      // dotted list
+      auto m = try_match_1(sr, ignore_ident, p_i.base(), form_env, f_i.base(), insert_by_push);
+      if(!m.second){
+        return {{}, false};
       }
-
-      if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
-
-      if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, insert_by_push)){
-        return false;
-      }
+      match_obj.insert(begin(m.first), end(m.first));
+      return {match_obj, true};
     }
+  // }else if(pattern.tag() == Ptr_tag::vector){
+  //   if(form.tag() != Ptr_tag::vector){
+  //     return false;
+  //   }
 
-    // checks length
-    if((p_i == p_e) && (f_i == f_e)){
-      return true;
-    }else{
-      return false;
-    }
+  //   auto p_v = pattern.get<Vector*>();
+  //   auto f_v = form.get<Vector*>();
+
+  //   auto p_i = begin(*p_v), p_e = end(*p_v);
+  //   auto f_i = begin(*f_v), f_e = end(*f_v);
+
+  //   for(; p_i != p_e; ++p_i, ++f_i){
+  //     // checks ellipsis
+  //     auto p_n = next(p_i);
+
+  //     if((p_n != p_e) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
+  //       if(eq_internal(*p_i, ignore_ident)){
+  //         throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+  //       }
+
+  //       // accumulating...
+  //       ensure_binding(match_obj, sr, ignore_ident, *p_i);
+  //       for(; f_i != f_e; ++f_i){
+  //         if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, true)){
+  //           return false;
+  //         }
+  //       }
+
+  //       return true;
+  //     }
+
+  //     if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
+
+  //     if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, insert_by_push)){
+  //       return false;
+  //     }
+  //   }
+
+  //   // checks length
+  //   if((p_i == p_e) && (f_i == f_e)){
+  //     return true;
+  //   }else{
+  //     return false;
+  //   }
   }else{
-    return equal_internal(pattern, form);
+    return {{}, equal_internal(pattern, form)};
   }
 }
 
@@ -430,15 +448,17 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
 
       // check ellipsis
       if((t_n) && identifierp(*t_n) && identifier_symbol(*t_n) == ellipsis_sym){
-        int depth = 0;
-        while(1){
-          auto ex = expand(expand_obj, match_obj, sr, *t_i, depth, true);
-          if(!ex.second) break;
-          gl.push(ex.first);
-          ++depth;
-        }
+        throw zs_error("sorry, ellipsis is  implementing now...\n");
 
-        ++t_i;
+        // int depth = 0;
+        // while(1){
+        //   auto ex = expand(expand_obj, match_obj, sr, *t_i, depth, true);
+        //   if(!ex.second) break;
+        //   gl.push(ex.first);
+        //   ++depth;
+        // }
+
+        // ++t_i;
       }else{
         auto ex = expand(expand_obj, match_obj, sr, *t_i, pick_depth, pick_limit_ok);
         if(!ex.second && (pick_depth >= 0)){
@@ -491,7 +511,6 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
 }
 
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
-  EqHashMap match_obj;
   Env* form_env = orig_form_env->push(); // TODO: stop leak when exception.
 
 #ifndef NDEBUG
@@ -509,18 +528,19 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
 #endif
 
     auto ignore_ident = pick_first(pat);
-    if(try_match_1(match_obj, *this, ignore_ident, pat, form_env, form, false)){
+    auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form, false);
+    if(match_ret.second){
 #ifndef NDEBUG
       cout << "## matched!:\tpattern = " << pat << '\n';
       cout << "## \t\ttemplate = " << tmpl << '\n';
       cout << "## \t\tform = " << form << '\n';
-      for(auto ii : match_obj){
+      for(auto ii : match_ret.first){
         cout << '\t' << ii.first << " = " << ii.second << '\n';
       }
 #endif
       
       ExpandSet expand_obj;
-      auto ex = expand(expand_obj, match_obj, *this, tmpl, -1, false);
+      auto ex = expand(expand_obj, match_ret.first, *this, tmpl, -1, false);
 #ifndef NDEBUG
       cout << "## expand = " << ex.first << '\n';
       cout << endl;
@@ -533,7 +553,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
       //     if(sc->env() == form_env) delete sc;
       //   }
       // }
-      match_obj.clear();
+      // match_obj.clear();
     }
   }
 
