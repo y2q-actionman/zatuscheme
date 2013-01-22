@@ -113,9 +113,11 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
 
 SyntaxRules::~SyntaxRules() = default;
 
+template<typename DefaultGen>
 static
 void ensure_binding(EqHashMap& match_obj,
-                    const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern){
+                    const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
+                    const DefaultGen& default_gen_func){
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(pattern)){
@@ -126,7 +128,7 @@ void ensure_binding(EqHashMap& match_obj,
     }
     // non-literal identifier
     if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
-      match_obj.insert({pattern, new Vector()});
+      match_obj.insert({pattern, default_gen_func()});
     }
     return;
   }else if(pattern.tag() == Ptr_tag::cons){
@@ -142,7 +144,7 @@ void ensure_binding(EqHashMap& match_obj,
         return;
       }
       
-      ensure_binding(match_obj, sr, ignore_ident, *p_i);
+      ensure_binding(match_obj, sr, ignore_ident, *p_i, default_gen_func);
     }
 
     // checks length
@@ -150,7 +152,7 @@ void ensure_binding(EqHashMap& match_obj,
       return;
     }else{
       // dotted list case
-      ensure_binding(match_obj, sr, ignore_ident, p_i.base());
+      ensure_binding(match_obj, sr, ignore_ident, p_i.base(), default_gen_func);
       return;
     }
   }else if(pattern.tag() == Ptr_tag::vector){
@@ -158,7 +160,7 @@ void ensure_binding(EqHashMap& match_obj,
     auto p_i = begin(*p_v), p_e = end(*p_v);
 
     for(; p_i != p_e; ++p_i){
-      ensure_binding(match_obj, sr, ignore_ident, *p_i);
+      ensure_binding(match_obj, sr, ignore_ident, *p_i, default_gen_func);
     }
   }else{
     return;
@@ -174,9 +176,6 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
 #ifndef NDEBUG
   // cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
-  // for(auto ii : match_obj){
-  //   cout << '\t' << ii.first << " = " << ii.second << '\n';
-  // }
 #endif
 
   // TODO: merge this part to 'close_to_pattern_variable()'
@@ -255,7 +254,10 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         }
 
         // accumulating...
-        ensure_binding(match_obj, sr, ignore_ident, *p_i);
+        EqHashMap acc_map;
+        ensure_binding(acc_map, sr, ignore_ident, *p_i,
+                       [](){ return new Vector(); });
+
         for(; f_i; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i, true);
           if(!m.second){
@@ -263,7 +265,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
           }
 
           for(auto i : m.first){
-            auto place = match_obj.find(i.first);
+            auto place = acc_map.find(i.first);
             assert(place->second.tag() == Ptr_tag::vector);
             place->second.get<Vector*>()->push_back(i.second);
           }
@@ -272,6 +274,10 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         if(!nullp(f_i.base())){
           throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
         }
+
+        match_obj.insert(begin(acc_map), end(acc_map));
+
+        // match_obj.insert({pattern, new EqHashMap(acc_map)});
 
         return {match_obj, true};
       }
