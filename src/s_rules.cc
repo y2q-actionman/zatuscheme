@@ -138,9 +138,8 @@ void ensure_binding(EqHashMap& match_obj,
 
     for(; p_i; ++p_i){
       // checks ellipsis
-      auto p_n = next(p_i);
-      if((p_n) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
-        break;
+      if(identifierp(*p_i) && identifier_symbol(*p_i) == ellipsis_sym){
+        return;
       }
       
       ensure_binding(match_obj, sr, ignore_ident, *p_i);
@@ -244,32 +243,37 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       // checks ellipsis
       auto p_n = next(p_i);
       if((p_n) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
-        throw zs_error("sorry, ellipsis is  implementing now...\n");
+        if(eq_internal(*p_i, ignore_ident)){
+          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+        }
 
-        // if(eq_internal(*p_i, ignore_ident)){
-        //   throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
-        // }
+        auto p_e = p_i;
+        while(p_e) ++p_e;
 
-        // auto p_e = p_i;
-        // while(p_e) ++p_e;
+        if(!nullp(p_e.base())){
+          throw zs_error("syntax-rules error: '...' is appeared in a inproper list pattern!\n");
+        }
 
-        // if(!nullp(p_e.base())){
-        //   throw zs_error("syntax-rules error: '...' is appeared in a inproper list pattern!\n");
-        // }
+        // accumulating...
+        ensure_binding(match_obj, sr, ignore_ident, *p_i);
+        for(; f_i; ++f_i){
+          auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i, true);
+          if(!m.second){
+            return {{}, false};
+          }
 
-        // // accumulating...
-        // ensure_binding(match_obj, sr, ignore_ident, *p_i);
-        // for(; f_i; ++f_i){
-        //   if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, true)){
-        //     return false;
-        //   }
-        // }
+          for(auto i : m.first){
+            auto place = match_obj.find(i.first);
+            assert(place->second.tag() == Ptr_tag::vector);
+            place->second.get<Vector*>()->push_back(i.second);
+          }
+        }
 
-        // if(!nullp(f_i.base())){
-        //   throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
-        // }
+        if(!nullp(f_i.base())){
+          throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
+        }
 
-        // return true;
+        return {match_obj, true};
       }
 
       if(!f_i) break; // this check is delayed to here, for checking the ellipsis.
@@ -448,17 +452,15 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
 
       // check ellipsis
       if((t_n) && identifierp(*t_n) && identifier_symbol(*t_n) == ellipsis_sym){
-        throw zs_error("sorry, ellipsis is  implementing now...\n");
+        int depth = 0;
+        while(1){
+          auto ex = expand(expand_obj, match_obj, sr, *t_i, depth, true);
+          if(!ex.second) break;
+          gl.push(ex.first);
+          ++depth;
+        }
 
-        // int depth = 0;
-        // while(1){
-        //   auto ex = expand(expand_obj, match_obj, sr, *t_i, depth, true);
-        //   if(!ex.second) break;
-        //   gl.push(ex.first);
-        //   ++depth;
-        // }
-
-        // ++t_i;
+        ++t_i;
       }else{
         auto ex = expand(expand_obj, match_obj, sr, *t_i, pick_depth, pick_limit_ok);
         if(!ex.second && (pick_depth >= 0)){
