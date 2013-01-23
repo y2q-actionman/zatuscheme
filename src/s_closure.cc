@@ -36,18 +36,6 @@ Symbol* identifier_symbol(Lisp_ptr p){
   }
 }
 
-Env* identifier_env(Lisp_ptr p, Env* e){
-  if(p.tag() == Ptr_tag::symbol){
-    return e;
-  }else if(p.tag() == Ptr_tag::syntactic_closure){
-    auto sc = p.get<SyntacticClosure*>();
-    return identifier_env(sc->expr(), sc->env());
-  }else{
-    throw zs_error("eval internal error: not identifier! (%s)",
-                   stringify(p.tag()));
-  }
-}
-
 bool identifier_eq(Env* ident1_env, Lisp_ptr ident1,
                    Env* ident2_env, Lisp_ptr ident2){
   return eq_internal(ident1_env->find(ident1), ident2_env->find(ident2));
