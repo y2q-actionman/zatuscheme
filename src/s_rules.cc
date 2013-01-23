@@ -53,12 +53,6 @@ void push_tail_cons_list(Lisp_ptr* p, Lisp_ptr value){
   }
 }
 
-Lisp_ptr nthcdr_cons_list(Lisp_ptr p, unsigned n){
-  ConsIter ci = begin(p);
-  std::advance(ci, n);
-  return ci.base();
-}
-
 Lisp_ptr pick_first(Lisp_ptr p){
   if(p.tag() == Ptr_tag::cons){
     auto c = p.get<Cons*>();
@@ -401,9 +395,12 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
         continue;
       }
     }else if(i.second.tag() == Ptr_tag::cons){
-      auto nth = nthcdr_cons_list(i.second, pick_depth);
-      if(!nullp(nth)){
-        ret.insert({i.first, nth.get<Cons*>()->car()});
+      ConsIter ci = begin(i.second);
+      std::advance(ci, pick_depth);
+      auto nthcdr = ci.base();
+
+      if(!nullp(nthcdr)){
+        ret.insert({i.first, nthcdr.get<Cons*>()->car()});
         continue;
       }
     }
