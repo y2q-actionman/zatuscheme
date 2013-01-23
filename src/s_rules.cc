@@ -200,9 +200,7 @@ void ensure_binding(EqHashMap& match_obj,
 static
 pair<EqHashMap, bool>
 try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
-            Env* form_env, Lisp_ptr form,
-            bool insert_by_push){
-
+            Env* form_env, Lisp_ptr form){
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(pattern)){
@@ -260,7 +258,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
                        [](){ return Cons::NIL; });
 
         for(; f_i; ++f_i){
-          auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i, true);
+          auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
           if(!m.second){
             return {{}, false};
           }
@@ -282,7 +280,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
       if(!f_i) break; // this check is delayed to here, for checking the ellipsis.
 
-      auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i, insert_by_push);
+      auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
       if(!m.second){
         return {{}, false};
       }
@@ -296,7 +294,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       return {match_obj, (nullp(p_i.base()) && nullp(f_i.base()))};
     }else{
       // dotted list
-      auto m = try_match_1(sr, ignore_ident, p_i.base(), form_env, f_i.base(), insert_by_push);
+      auto m = try_match_1(sr, ignore_ident, p_i.base(), form_env, f_i.base());
       if(!m.second){
         return {{}, false};
       }
@@ -336,7 +334,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
   //     if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
-  //     if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, insert_by_push)){
+  //     if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i)){
   //       return false;
   //     }
   //   }
@@ -421,7 +419,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
                             const EqHashMap& match_obj, 
                             const SyntaxRules& sr,
                             Lisp_ptr tmpl,
-                            int pick_depth, bool pick_limit_ok){
+                            bool pick_limit_ok){
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(tmpl)){
@@ -449,7 +447,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
         int depth = 0;
         while(1){
           auto emap = remake_matchobj(match_obj, depth);
-          auto ex = expand(expand_obj, emap, sr, *t_i, depth, true);
+          auto ex = expand(expand_obj, emap, sr, *t_i, true);
           if(!ex.second){
             break;
           }
@@ -460,16 +458,16 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
 
         ++t_i;
       }else{
-        auto ex = expand(expand_obj, match_obj, sr, *t_i, pick_depth, true);
-        if(!ex.second && (pick_depth >= 0)){
+        auto ex = expand(expand_obj, match_obj, sr, *t_i, true);
+        if(!ex.second){
           return {{}, false};
         }
         gl.push(ex.first);
       }
     }
 
-    auto ex = expand(expand_obj, match_obj, sr, t_i.base(), pick_depth, true);
-    if(!ex.second && (pick_depth >= 0)){
+    auto ex = expand(expand_obj, match_obj, sr, t_i.base(), true);
+    if(!ex.second){
       return {{}, false};
     }
 
@@ -502,7 +500,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
 
   //       ++t_i;
   //     }else{
-  //       vec.push_back(expand(expand_obj, match_obj, *t_i, pick_depth));
+  //       vec.push_back(expand(expand_obj, match_obj, *t_i));
   //     }
   //   }
 
@@ -530,7 +528,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
 #endif
 
     auto ignore_ident = pick_first(pat);
-    auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form, false);
+    auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form);
     if(match_ret.second){
 #ifndef NDEBUG
       cout << "## matched!:\tpattern = " << pat << '\n';
@@ -542,7 +540,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
 #endif
       
       ExpandSet expand_obj;
-      auto ex = expand(expand_obj, match_ret.first, *this, tmpl, -1, false);
+      auto ex = expand(expand_obj, match_ret.first, *this, tmpl, false);
 #ifndef NDEBUG
       cout << "## expand = " << ex.first << '\n';
       cout << endl;
