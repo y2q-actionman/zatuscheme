@@ -238,16 +238,12 @@ Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
 
 
 // nth family
-template<>
-constexpr
-Lisp_ptr nth_cons_list<0u>(Lisp_ptr p){
-  return p.get<Cons*>()->car();
-}
-
 template<unsigned n>
 constexpr
 Lisp_ptr nth_cons_list(Lisp_ptr p){
-  return nth_cons_list<n-1>(p.get<Cons*>()->cdr());
+  // This cast is for telling a type to the compiler. 
+  return static_cast<Lisp_ptr>(nthcdr_cons_list<n>(p))
+    .get<Cons*>()->car();
 }
 
 template<>
