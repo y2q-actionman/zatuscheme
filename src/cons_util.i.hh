@@ -237,6 +237,32 @@ Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
 }
 
 
+// nth family
+template<>
+constexpr
+Lisp_ptr nth_cons_list<0u>(Lisp_ptr p){
+  return p.get<Cons*>()->car();
+}
+
+template<unsigned n>
+constexpr
+Lisp_ptr nth_cons_list(Lisp_ptr p){
+  return nth_cons_list<n-1>(p.get<Cons*>()->cdr());
+}
+
+template<>
+constexpr
+Lisp_ptr nthcdr_cons_list<0u>(Lisp_ptr p){
+  return p;
+}
+
+template<unsigned n>
+constexpr
+Lisp_ptr nthcdr_cons_list(Lisp_ptr p){
+  return nthcdr_cons_list<n-1>(p.get<Cons*>()->cdr());
+}
+
+
 // GrowList class
 inline
 void GrowList::invalidate(){

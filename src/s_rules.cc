@@ -519,8 +519,8 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
 #endif
 
   for(auto i : this->rules()){
-    auto pat = i.get<Cons*>()->car();
-    auto tmpl = i.get<Cons*>()->cdr().get<Cons*>()->car();
+    auto pat = nth_cons_list<0>(i);
+    auto tmpl = nth_cons_list<1>(i);
 
 #ifndef NDEBUG
     cout << "## trying: pattern = " << pat << '\n';

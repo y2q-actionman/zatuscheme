@@ -36,6 +36,15 @@ Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr>);
 Lisp_ptr push_cons_list(Lisp_ptr, Lisp_ptr);
 
 
+template<unsigned>
+constexpr
+Lisp_ptr nth_cons_list(Lisp_ptr);
+
+template<unsigned>
+constexpr
+Lisp_ptr nthcdr_cons_list(Lisp_ptr);
+
+
 class GrowList {
   Lisp_ptr head;
   Lisp_ptr* next;
