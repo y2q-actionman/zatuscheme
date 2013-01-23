@@ -203,9 +203,9 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
             Env* form_env, Lisp_ptr form,
             bool insert_by_push){
 
-#ifndef NDEBUG
-  // cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
-#endif
+// #ifndef NDEBUG
+//   cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
+// #endif
 
   // TODO: merge this part to 'close_to_pattern_variable()'
   // if(form.tag() == Ptr_tag::syntactic_closure){
@@ -446,48 +446,86 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
 }
 
 static
+EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
+  EqHashMap ret;
+
+  for(auto i : match_obj){
+    if(i.second.tag() == Ptr_tag::vector){
+      auto v = i.second.get<Vector*>();
+
+      if(pick_depth < static_cast<signed>(v->size())){
+        ret.insert({i.first, (*v)[pick_depth]});
+        continue;
+      }
+    }else if(i.second.tag() == Ptr_tag::cons){
+      auto nth = nthcdr_cons_list(i.second, pick_depth);
+      if(!nullp(nth)){
+        ret.insert({i.first, nth.get<Cons*>()->car()});
+        continue;
+      }
+    }
+
+    ret.insert({i.first, {}});
+  }
+
+  return ret;
+}
+
+static
 pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
                             const EqHashMap& match_obj, 
                             const SyntaxRules& sr,
                             Lisp_ptr tmpl,
                             int pick_depth, bool pick_limit_ok){
-// #ifndef NDEBUG
-//   cout << __func__ << " arg = " << tmpl
-//        << ", depth = " << pick_depth << ", flag = " << pick_limit_ok << '\n';
-// #endif
+#ifndef NDEBUG
+  cout << __func__ << " arg = " << tmpl
+       << ", depth = " << pick_depth << ", flag = " << pick_limit_ok << '\n';
+  for(auto ii : match_obj){
+    cout << "\t" << ii.first << " = " << ii.second << '\n';
+  }
+#endif
 
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(tmpl)){
     auto m_ret = match_obj.find(tmpl);
     if(m_ret != match_obj.end()){
-      if(pick_depth < 0){
+      if(m_ret->second){
         return {m_ret->second, pick_limit_ok};
       }else{
-        if(m_ret->second.tag() == Ptr_tag::vector){
-          auto m_vec = m_ret->second.get<Vector*>();
-
-          if(pick_depth < static_cast<signed>(m_vec->size())){
-            return {(*m_vec)[pick_depth], true};
-          }else{
-            return {{}, false};
-          }
-        }else if(m_ret->second.tag() == Ptr_tag::cons){
-          auto nthval = nthcdr_cons_list(m_ret->second, pick_depth);
-          if(!nullp(nthval)){
-            return {nthval.get<Cons*>()->car(), true};
-          }else{
-            return {{}, false};
-          }
-        }else{
-          UNEXP_DEFAULT();
-        }
+        return {{}, false};
       }
+      // if(pick_depth < 0){
+      // return {m_ret->second, pick_limit_ok};
+      // }else{
+      //   if(m_ret->second.tag() == Ptr_tag::vector){
+      //     auto m_vec = m_ret->second.get<Vector*>();
+
+      //     if(pick_depth < static_cast<signed>(m_vec->size())){
+      //       return {(*m_vec)[pick_depth], true};
+      //     }else{
+      //       return {{}, false};
+      //     }
+      //   }else if(m_ret->second.tag() == Ptr_tag::cons){
+      //     auto nthval = nthcdr_cons_list(m_ret->second, pick_depth);
+      //     if(!nullp(nthval)){
+      //       return {nthval.get<Cons*>()->car(), true};
+      //     }else{
+      //       return {{}, false};
+      //     }
+      //   }else{
+      //     UNEXP_DEFAULT();
+      //   }
+      // }
     }else{
       return {close_to_pattern_variable(expand_obj, match_obj, sr, sr.env(), tmpl), pick_limit_ok};
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
     if(nullp(tmpl)) return {tmpl, pick_limit_ok};
+
+#ifndef NDEBUG
+    cout << "@@ expanding!:\t" << tmpl << '\n';
+#endif
 
     GrowList gl;
     auto t_i = begin(tmpl);
@@ -499,15 +537,29 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
       if((t_n) && identifierp(*t_n) && identifier_symbol(*t_n) == ellipsis_sym){
         int depth = 0;
         while(1){
-          auto ex = expand(expand_obj, match_obj, sr, *t_i, depth, true);
-          if(!ex.second) break;
+          auto emap = remake_matchobj(match_obj, depth);
+          if(emap.empty()){
+#ifndef NDEBUG
+    cout << "@@ map exhausted!:\t" << tmpl << '\n';
+#endif
+            break;
+          }
+
+          auto ex = expand(expand_obj, emap, sr, *t_i, depth, true);
+          if(!ex.second){
+#ifndef NDEBUG
+    cout << "@@ match missed!:\t" << tmpl << '\n';
+#endif
+            break;
+          }
+
           gl.push(ex.first);
           ++depth;
         }
 
         ++t_i;
       }else{
-        auto ex = expand(expand_obj, match_obj, sr, *t_i, pick_depth, pick_limit_ok);
+        auto ex = expand(expand_obj, match_obj, sr, *t_i, pick_depth, true);
         if(!ex.second && (pick_depth >= 0)){
           return {{}, false};
         }
@@ -515,11 +567,16 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
       }
     }
 
-    auto ex = expand(expand_obj, match_obj, sr, t_i.base(), pick_depth, pick_limit_ok);
+    auto ex = expand(expand_obj, match_obj, sr, t_i.base(), pick_depth, true);
     if(!ex.second && (pick_depth >= 0)){
       return {{}, false};
-    }      
-    return {gl.extract_with_tail(ex.first), pick_limit_ok};
+    }
+
+    auto l = gl.extract_with_tail(ex.first);
+#ifndef NDEBUG
+    cout << "@@ expanded!:\t" << tmpl << " -> " << l << '\n';
+#endif
+    return {l, pick_limit_ok};
   // }else if(tmpl.tag() == Ptr_tag::vector){
   //   auto t_vec = tmpl.get<Vector*>();
 
