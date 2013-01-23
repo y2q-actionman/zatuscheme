@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <type_traits>
 #include "zs_error.hh"
-#include "builtin_equal.hh"
+#include "equality.hh"
 
 inline
 bool nullp(Lisp_ptr p){

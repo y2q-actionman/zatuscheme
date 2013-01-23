@@ -10,7 +10,6 @@
 #include "cons_util.hh"
 #include "env.hh"
 #include "zs_error.hh"
-#include "builtin_equal.hh"
 #include "builtin_extra.hh"
 #include "builtin_util.hh"
 #include "printer.hh"

@@ -6,7 +6,6 @@
 
 #include "lisp_ptr.hh"
 #include "equality.hh"
-#include "builtin_equal.hh"
 
 class Env {
 public:

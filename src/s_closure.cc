@@ -2,7 +2,6 @@
 #include "cons_util.hh"
 #include "zs_error.hh"
 #include "env.hh"
-#include "builtin_equal.hh"
 
 SyntacticClosure::SyntacticClosure(Env* e, Cons* f, Lisp_ptr ex)
   : env_(e), free_names_(f), expr_(ex){

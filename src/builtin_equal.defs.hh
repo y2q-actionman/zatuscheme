@@ -1,11 +1,11 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"eq?", {
-    eq,
+    eq_proc,
     {2}}},
 {"eqv?", {
-    eqv,
+    eqv_proc,
     {2}}},
 {"equal?", {
-    equal,
+    equal_proc,
     {2}}},
