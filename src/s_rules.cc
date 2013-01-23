@@ -203,26 +203,6 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
             Env* form_env, Lisp_ptr form,
             bool insert_by_push){
 
-// #ifndef NDEBUG
-//   cout << __func__ << "\tpattern = " << pattern << "\n\t\tform = " << form << endl;
-// #endif
-
-  // TODO: merge this part to 'close_to_pattern_variable()'
-  // if(form.tag() == Ptr_tag::syntactic_closure){
-  //   // destruct syntactic closure
-  //   auto sc = form.get<SyntacticClosure*>();
-
-// #ifndef NDEBUG
-//     if((form_env != sc->env()) && identifierp(sc)){
-//       unique_ptr<SyntacticClosure> new_alias{new SyntacticClosure(form_env, nullptr, sc->expr())};
-//       cout << __func__ << "\talias to alias: " << Lisp_ptr{new_alias.get()} << " = " << form << '\n';
-//     }
-// #endif
-
-  //   // unwrap simply
-  //   return try_match_1(match_obj, sr, ignore_ident, pattern, form_env, sc->expr(), insert_by_push);
-  // }
-
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(pattern)){
@@ -242,15 +222,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     EqHashMap match_obj;
 
     if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
-      // auto val = close_to_pattern_variable(match_obj, sr, form_env, form);
-
-      // if(insert_by_push){
-      //   auto place = match_obj.find(pattern);
-      //   assert(place->second.tag() == Ptr_tag::vector);
-      //   place->second.get<Vector*>()->push_back(form);
-      // }else{
-        match_obj.insert({pattern, form});
-      // }
+      match_obj.insert({pattern, form});
     }
     return {match_obj, true};
   }else if(pattern.tag() == Ptr_tag::cons){
@@ -305,9 +277,6 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         }
 
         match_obj.insert(begin(acc_map), end(acc_map));
-
-        // match_obj.insert({pattern, new EqHashMap(acc_map)});
-
         return {match_obj, true};
       }
 
@@ -415,31 +384,7 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
   }else if(form.tag() == Ptr_tag::vm_op){
     UNEXP_DEFAULT();
   }else if(form.tag() == Ptr_tag::syntactic_closure){
-//     if(identifierp(sc)){
-//       auto new_alias = new SyntacticClosure(form_env, nullptr, sc->expr());
-      
-//       if(auto bind_in_syntax_env = sc->env()->find(sc->expr())){
-//         new_alias->env()->local_set(sc->expr(), bind_in_syntax_env);
-//       }
-//       if(auto bind_in_usage_env = form_env->find(sc)){
-//         new_alias->env()->local_set(sc->expr(), bind_in_usage_env);
-//       }
-#ifndef NDEBUG
-    if(dump_mode){
-      auto sc = form.get<SyntacticClosure*>();
-
-      // cout << __func__ << ": alias to alias: " << form << " -> " << Lisp_ptr{new_alias} << '\n';
-      cout << "\t" << form << " in syntax env = " << sc->env()->find(sc->expr()) << '\n';
-      // cout << "\t" << form << " in syntax env (?) = " << sc->env()->find(sc) << '\n';
-      cout << "\t" << form << " in usage env = " << form_env->find(sc) << '\n';
-      // cout << "\tnew alias in syntax env = " << new_alias->env()->find(sc->expr()) << '\n';
-      // cout << "\tnew alias in usage env = " << form_env->find(new_alias) << '\n'; // should be 'undefined'
-    }
-#endif
-//       return {new_alias};
-//     }else{
-      return form;
-    // }
+    return form;
   }else{
     UNEXP_DEFAULT();
   }
@@ -477,14 +422,6 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
                             const SyntaxRules& sr,
                             Lisp_ptr tmpl,
                             int pick_depth, bool pick_limit_ok){
-#ifndef NDEBUG
-  cout << __func__ << " arg = " << tmpl
-       << ", depth = " << pick_depth << ", flag = " << pick_limit_ok << '\n';
-  for(auto ii : match_obj){
-    cout << "\t" << ii.first << " = " << ii.second << '\n';
-  }
-#endif
-
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
   if(identifierp(tmpl)){
@@ -495,37 +432,11 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
       }else{
         return {{}, false};
       }
-      // if(pick_depth < 0){
-      // return {m_ret->second, pick_limit_ok};
-      // }else{
-      //   if(m_ret->second.tag() == Ptr_tag::vector){
-      //     auto m_vec = m_ret->second.get<Vector*>();
-
-      //     if(pick_depth < static_cast<signed>(m_vec->size())){
-      //       return {(*m_vec)[pick_depth], true};
-      //     }else{
-      //       return {{}, false};
-      //     }
-      //   }else if(m_ret->second.tag() == Ptr_tag::cons){
-      //     auto nthval = nthcdr_cons_list(m_ret->second, pick_depth);
-      //     if(!nullp(nthval)){
-      //       return {nthval.get<Cons*>()->car(), true};
-      //     }else{
-      //       return {{}, false};
-      //     }
-      //   }else{
-      //     UNEXP_DEFAULT();
-      //   }
-      // }
     }else{
       return {close_to_pattern_variable(expand_obj, match_obj, sr, sr.env(), tmpl), pick_limit_ok};
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
     if(nullp(tmpl)) return {tmpl, pick_limit_ok};
-
-#ifndef NDEBUG
-    cout << "@@ expanding!:\t" << tmpl << '\n';
-#endif
 
     GrowList gl;
     auto t_i = begin(tmpl);
@@ -538,18 +449,8 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
         int depth = 0;
         while(1){
           auto emap = remake_matchobj(match_obj, depth);
-          if(emap.empty()){
-#ifndef NDEBUG
-    cout << "@@ map exhausted!:\t" << tmpl << '\n';
-#endif
-            break;
-          }
-
           auto ex = expand(expand_obj, emap, sr, *t_i, depth, true);
           if(!ex.second){
-#ifndef NDEBUG
-    cout << "@@ match missed!:\t" << tmpl << '\n';
-#endif
             break;
           }
 
@@ -573,9 +474,6 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
     }
 
     auto l = gl.extract_with_tail(ex.first);
-#ifndef NDEBUG
-    cout << "@@ expanded!:\t" << tmpl << " -> " << l << '\n';
-#endif
     return {l, pick_limit_ok};
   // }else if(tmpl.tag() == Ptr_tag::vector){
   //   auto t_vec = tmpl.get<Vector*>();
@@ -651,13 +549,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
 #endif
       return ex.first;
     }else{
-      // cleaning map
-      // for(auto e : match_obj){
-      //   if(auto sc = e.second.get<SyntacticClosure*>()){
-      //     if(sc->env() == form_env) delete sc;
-      //   }
-      // }
-      // match_obj.clear();
+      // cleaning map ?
     }
   }
 
