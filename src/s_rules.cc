@@ -511,9 +511,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
   }
 }
 
-Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
-  Env* form_env = orig_form_env->push(); // TODO: stop leak when exception.
-
+Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
 #ifndef NDEBUG
   cout << "## " << __func__ << ": form = " << form << ", env = " << form_env << '\n';
   // if(dump_mode)
