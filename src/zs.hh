@@ -20,6 +20,7 @@
 #include "decl.hh"
 #include "delay.hh"
 #include "env.hh"
+#include "equality.hh"
 #include "eval.hh"
 #include "lisp_ptr.hh"
 #include "number.hh"

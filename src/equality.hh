@@ -1,5 +1,5 @@
-#ifndef HASHER_HH
-#define HASHER_HH
+#ifndef EQUALITY_HH
+#define EQUALITY_HH
 
 #include <functional>
 #include <cstddef>
@@ -14,6 +14,6 @@ struct eq_hash_obj;
 struct eq_id_hash_obj;
 
 
-#include "hasher.i.hh"
+#include "equality.i.hh"
 
-#endif // HASHER_HH
+#endif // EQUALITY_HH

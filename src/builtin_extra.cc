@@ -7,7 +7,7 @@
 #include "util.hh"
 #include "eval.hh"
 #include "env.hh"
-#include "hasher.hh"
+#include "equality.hh"
 #include "number.hh"
 #include "builtin.hh"
 

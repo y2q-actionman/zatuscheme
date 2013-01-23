@@ -1,4 +1,4 @@
-#include "hasher.hh"
+#include "equality.hh"
 #include "zs_error.hh"
 #include "s_closure.hh"
 

@@ -1,7 +1,7 @@
-#ifndef HASHER_I_HH
-#define HASHER_I_HH
+#ifndef EQUALITY_I_HH
+#define EQUALITY_I_HH
 
-#ifndef HASHER_HH
+#ifndef EQUALITY_HH
 #error "Please include via parent file"
 #endif
 
@@ -17,4 +17,4 @@ struct eq_id_hash_obj{
   }
 };
 
-#endif // HASHER_I_HH
+#endif // EQUALITY_I_HH

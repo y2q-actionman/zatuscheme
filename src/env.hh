@@ -5,7 +5,7 @@
 #include <iosfwd>
 
 #include "lisp_ptr.hh"
-#include "hasher.hh"
+#include "equality.hh"
 #include "builtin_equal.hh"
 
 class Env {

@@ -14,7 +14,7 @@
 #include "builtin_extra.hh"
 #include "builtin_util.hh"
 #include "printer.hh"
-#include "hasher.hh"
+#include "equality.hh"
 #include "eval.hh"
 
 #ifndef NDEBUG
