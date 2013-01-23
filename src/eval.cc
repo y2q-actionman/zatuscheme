@@ -36,16 +36,15 @@ void vm_op_arg_push(){
     vm.stack.push_back(argc);
     vm.code.erase(vm.code.end() - 3, vm.code.end());
   }else{
-    auto args_c = args.get<Cons*>();
-    // auto arg1 = args_c->car(); // the EXPR just evaled.
-    auto args_rest = args_c->cdr();
+    // auto arg1 = nth_cons_list<0>(args); // the EXPR just evaled.
+    auto args_rest = nthcdr_cons_list<1>(args);
     
     vm.stack.push_back(ret);
 
     args = args_rest;
     argc = {Ptr_tag::vm_argcount, argc.get<int>() + 1};
     // vm.code[vm.code.size() - 1] = vm_op_begin;
-    vm.code.push_back(args_rest.get<Cons*>()->car());
+    vm.code.push_back(nth_cons_list<0>(args_rest));
   }
 }
 
@@ -90,11 +89,11 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
     }
   }
 
-  auto args_head = args.get<Cons*>()->cdr(); // skips first symbol
+  auto args_head = nthcdr_cons_list<1>(args); // skips first symbol
 
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter,
         args_head, {Ptr_tag::vm_argcount, 0},
-        vm_op_arg_push, args_head.get<Cons*>()->car()});
+        vm_op_arg_push, nth_cons_list<0>(args_head)});
 }
 
 /*
@@ -137,13 +136,8 @@ void vm_op_stack_splicing(){
 
   // formatting vm.code to 'splicing is processed'
   // see vm_op_arg_push()
-  Lisp_ptr outer_next_args;
-  bind_cons_list_loose
-    (outer_args,
-     [&](Lisp_ptr, ConsIter i){
-      outer_next_args = i.base();
-    });
-  auto outer_next_arg1 = outer_next_args.get<Cons*>()->car();
+  auto outer_next_args = nthcdr_cons_list<1>(outer_args);
+  auto outer_next_arg1 = nth_cons_list<0>(outer_next_args);
 
   outer_argc = {Ptr_tag::vm_argcount, outer_argc.get<int>() + argc};
   outer_args = outer_next_args;
@@ -161,7 +155,7 @@ void macro_call(Lisp_ptr proc){
   vm.stack.pop_back();
 
   int argc = 0;
-  for(auto p : args.get<Cons*>()->cdr()){
+  for(auto p : nthcdr_cons_list<1>(args)){
     vm.stack.push_back(p);
     ++argc;
   }
@@ -774,15 +768,14 @@ Lisp_ptr let_internal(Entering entering){
                             stringify(bind.tag()));
       }
 
-      auto c = bind.get<Cons*>();
-      if(!c){
+      if(nullp(bind)){
         throw zs_error("eval error: null found in let binding.\n");
       }
                  
       ++len;
 
-      gl_syms.push(c->car());
-      gl_vals.push(c->cdr().get<Cons*>()->car());
+      gl_syms.push(nth_cons_list<0>(bind));
+      gl_vals.push(nth_cons_list<1>(bind));
     }
   }
 
