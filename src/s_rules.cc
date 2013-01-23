@@ -347,7 +347,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
 static
 Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
-                                   const EqHashMap& match_obj, const SyntaxRules& sr,
+                                   const SyntaxRules& sr,
                                    Env* form_env, Lisp_ptr form){
   if(is_self_evaluating(form)){
     return form;
@@ -370,11 +370,16 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
   }else if(form.tag() == Ptr_tag::cons){
     GrowList gl;
     for(auto i : form){
-      gl.push(close_to_pattern_variable(expand_obj, match_obj, sr, form_env, i));
+      gl.push(close_to_pattern_variable(expand_obj, sr, form_env, i));
     }
     return gl.extract();
-  }else if(form.tag() == Ptr_tag::vm_op){
-    UNEXP_DEFAULT();
+  }else if(form.tag() == Ptr_tag::vector){
+    auto v = form.get<Vector*>();
+    Vector* ret = new Vector();
+    for(auto i : *v){
+      ret->push_back(close_to_pattern_variable(expand_obj, sr, form_env, i));
+    }
+    return {ret};
   }else if(form.tag() == Ptr_tag::syntactic_closure){
     return form;
   }else{
@@ -428,7 +433,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
         return {{}, false};
       }
     }else{
-      return {close_to_pattern_variable(expand_obj, match_obj, sr, sr.env(), tmpl), pick_limit_ok};
+      return {close_to_pattern_variable(expand_obj, sr, sr.env(), tmpl), pick_limit_ok};
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
     if(nullp(tmpl)) return {tmpl, pick_limit_ok};
