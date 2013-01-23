@@ -14,7 +14,6 @@
 #include "reader.hh"
 #include "printer.hh"
 #include "vm.hh"
-#include "port.hh"
 
 #include "builtin_boolean.hh"
 #include "builtin_char.hh"

@@ -24,7 +24,6 @@
 #include "eval.hh"
 #include "lisp_ptr.hh"
 #include "number.hh"
-#include "port.hh"
 #include "printer.hh"
 #include "procedure.hh"
 #include "reader.hh"

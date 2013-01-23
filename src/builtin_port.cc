@@ -7,7 +7,6 @@
 
 #include "builtin_port.hh"
 #include "lisp_ptr.hh"
-#include "port.hh"
 #include "reader.hh"
 #include "printer.hh"
 #include "zs_error.hh"
