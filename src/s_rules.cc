@@ -30,6 +30,35 @@ namespace Procedure{
 
 namespace {
 
+void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
+  if(p.tag() != Ptr_tag::cons)
+    throw zs_error("internal %s: the passed list is a dotted list!\n", __func__);
+
+  auto c = p.get<Cons*>();
+  if(!c)
+    throw zs_error("internal %s: the passed list is an empty list!\n", __func__);
+
+  if(nullp(c->cdr())){
+    c->rplacd(make_cons_list({value}));
+  }else{
+    push_tail_cons_list_nl(c->cdr(), value);
+  }
+}
+
+void push_tail_cons_list(Lisp_ptr* p, Lisp_ptr value){
+  if(nullp(*p)){
+    *p = make_cons_list({value});
+  }else{
+    push_tail_cons_list_nl(*p, value);
+  }
+}
+
+Lisp_ptr nthcdr_cons_list(Lisp_ptr p, unsigned n){
+  ConsIter ci = begin(p);
+  std::advance(ci, n);
+  return ci.base();
+}
+
 Lisp_ptr pick_first(Lisp_ptr p){
   if(p.tag() == Ptr_tag::cons){
     auto c = p.get<Cons*>();
@@ -256,7 +285,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         // accumulating...
         EqHashMap acc_map;
         ensure_binding(acc_map, sr, ignore_ident, *p_i,
-                       [](){ return new Vector(); });
+                       [](){ return Cons::NIL; });
 
         for(; f_i; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i, true);
@@ -266,8 +295,8 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
           for(auto i : m.first){
             auto place = acc_map.find(i.first);
-            assert(place->second.tag() == Ptr_tag::vector);
-            place->second.get<Vector*>()->push_back(i.second);
+            assert(place->second.tag() == Ptr_tag::cons);
+            push_tail_cons_list(&place->second, i.second);
           }
         }
 
@@ -422,10 +451,10 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
                             const SyntaxRules& sr,
                             Lisp_ptr tmpl,
                             int pick_depth, bool pick_limit_ok){
-#ifndef NDEBUG
+// #ifndef NDEBUG
 //   cout << __func__ << " arg = " << tmpl
 //        << ", depth = " << pick_depth << ", flag = " << pick_limit_ok << '\n';
-#endif
+// #endif
 
   const auto ellipsis_sym = intern(vm.symtable(), "...");
 
@@ -435,13 +464,23 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
       if(pick_depth < 0){
         return {m_ret->second, pick_limit_ok};
       }else{
-        assert(m_ret->second.tag() == Ptr_tag::vector);
-        auto m_vec = m_ret->second.get<Vector*>();
+        if(m_ret->second.tag() == Ptr_tag::vector){
+          auto m_vec = m_ret->second.get<Vector*>();
 
-        if(pick_depth < static_cast<signed>(m_vec->size())){
-          return {(*m_vec)[pick_depth], true};
+          if(pick_depth < static_cast<signed>(m_vec->size())){
+            return {(*m_vec)[pick_depth], true};
+          }else{
+            return {{}, false};
+          }
+        }else if(m_ret->second.tag() == Ptr_tag::cons){
+          auto nthval = nthcdr_cons_list(m_ret->second, pick_depth);
+          if(!nullp(nthval)){
+            return {nthval.get<Cons*>()->car(), true};
+          }else{
+            return {{}, false};
+          }
         }else{
-          return {{}, false};
+          UNEXP_DEFAULT();
         }
       }
     }else{
@@ -543,7 +582,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* orig_form_env) const{
       cout << "## \t\ttemplate = " << tmpl << '\n';
       cout << "## \t\tform = " << form << '\n';
       for(auto ii : match_ret.first){
-        cout << '\t' << ii.first << " = " << ii.second << '\n';
+        cout << "## env\t" << ii.first << " = " << ii.second << '\n';
       }
 #endif
       
