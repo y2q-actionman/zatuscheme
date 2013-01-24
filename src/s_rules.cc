@@ -107,6 +107,13 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p){
   check_pattern(sr, p, {});
 }
 
+bool is_ellipsis(Lisp_ptr p){
+  if(!identifierp(p)) return false;
+
+  auto sym = identifier_symbol(p);
+  return sym->name() == "...";
+}
+
 } // namespace
 
 
@@ -136,8 +143,6 @@ static
 void ensure_binding(EqHashMap& match_obj,
                     const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
                     const DefaultGen& default_gen_func){
-  const auto ellipsis_sym = intern(vm.symtable(), "...");
-
   if(identifierp(pattern)){
     for(auto l : sr.literals()){
       if(eq_internal(l, pattern)){
@@ -158,7 +163,7 @@ void ensure_binding(EqHashMap& match_obj,
 
     for(; p_i; ++p_i){
       // checks ellipsis
-      if(identifierp(*p_i) && identifier_symbol(*p_i) == ellipsis_sym){
+      if(is_ellipsis(*p_i)){
         return;
       }
       
@@ -190,8 +195,6 @@ static
 pair<EqHashMap, bool>
 try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
             Env* form_env, Lisp_ptr form){
-  const auto ellipsis_sym = intern(vm.symtable(), "...");
-
   if(identifierp(pattern)){
     for(auto l : sr.literals()){
       if(eq_internal(l, pattern)){
@@ -229,7 +232,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     for(; p_i; ++p_i, (f_i ? ++f_i : f_i)){
       // checks ellipsis
       auto p_n = next(p_i);
-      if((p_n) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
+      if((p_n) && is_ellipsis(*p_n)){
         if(eq_internal(*p_i, ignore_ident)){
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
@@ -306,7 +309,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     for(; p_i != p_e; ++p_i, ++f_i){
       // checks ellipsis
       auto p_n = next(p_i);
-      if((p_n != p_e) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
+      if((p_n != p_e) && is_ellipsis(*p_n)){
         if(eq_internal(*p_i, ignore_ident)){
           throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
         }
@@ -432,8 +435,6 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_ctx,
                             const SyntaxRules& sr,
                             Lisp_ptr tmpl,
                             bool pick_limit_ok){
-  const auto ellipsis_sym = intern(vm.symtable(), "...");
-
   if(identifierp(tmpl)){
     auto m_ret = match_obj.find(tmpl);
     if(m_ret != match_obj.end()){
@@ -455,7 +456,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_ctx,
       auto t_n = next(t_i);
 
       // check ellipsis
-      if((t_n) && identifierp(*t_n) && identifier_symbol(*t_n) == ellipsis_sym){
+      if((t_n) && is_ellipsis(*t_n)){
         int depth = 0;
         while(1){
           auto emap = remake_matchobj(match_obj, depth);
@@ -494,7 +495,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_ctx,
       auto t_n = next(t_i);
 
       // check ellipsis
-      if((t_n != t_e) && identifierp(*t_n) && identifier_symbol(*t_n) == ellipsis_sym){
+      if((t_n != t_e) && is_ellipsis(*t_n)){
         int depth = 0;
         while(1){
           auto emap = remake_matchobj(match_obj, depth);
