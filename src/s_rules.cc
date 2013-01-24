@@ -40,6 +40,15 @@ void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
   }
 }
 
+bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
+  for(auto l : sr.literals()){
+    if(eq_internal(l, p)){
+      return true;
+    }
+  }
+  return false;
+}
+
 void push_tail_cons_list(Lisp_ptr* p, Lisp_ptr value){
   if(nullp(*p)){
     *p = make_cons_list({value});
@@ -67,11 +76,9 @@ Lisp_ptr pick_first(Lisp_ptr p){
 
 void check_pattern(const SyntaxRules& sr, Lisp_ptr p, MatchSet tab){
   if(identifierp(p)){
-    for(auto l : sr.literals()){
-      if(eq_internal(l, p)){
-        // literal identifier
-        return;
-      }
+    if(is_literal_identifier(sr, p)){
+      // literal identifier
+      return;
     }
       
     // pattern variable
@@ -144,11 +151,10 @@ void ensure_binding(EqHashMap& match_obj,
                     const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
                     const DefaultGen& default_gen_func){
   if(identifierp(pattern)){
-    for(auto l : sr.literals()){
-      if(eq_internal(l, pattern)){
-        return; // literal identifier
-      }
+    if(is_literal_identifier(sr, pattern)){
+      return; // literal identifier
     }
+
     // non-literal identifier
     if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
       match_obj.insert({pattern, default_gen_func()});
@@ -196,16 +202,9 @@ pair<EqHashMap, bool>
 try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
             Env* form_env, Lisp_ptr form){
   if(identifierp(pattern)){
-    for(auto l : sr.literals()){
-      if(eq_internal(l, pattern)){
-        // literal identifier
-        if(!identifierp(form)
-           || !identifier_eq(sr.env(), pattern, form_env, form)){
-          return {{}, false};
-        }
-
-        return {{}, true};
-      }
+    if(is_literal_identifier(sr, pattern)){
+      // literal identifier
+      return {{}, (identifierp(form) && identifier_eq(sr.env(), pattern, form_env, form))};
     }
 
     // non-literal identifier
@@ -365,10 +364,8 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_ctx,
   if(is_self_evaluating(form)){
     return form;
   }else if(form.tag() == Ptr_tag::symbol){
-    for(auto l : sr.literals()){
-      if(eq_internal(l, form)){
-        return form;
-      }
+    if(is_literal_identifier(sr, form)){
+      return form;
     }
 
     auto new_sc = new SyntacticClosure(form_env, nullptr, form);
