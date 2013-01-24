@@ -60,15 +60,6 @@ zs_error builtin_argcount_failed(const char*, int required, int max, int passed)
 zs_error builtin_identifier_check_failed(const char*, Lisp_ptr);
 
 
-// builtin func struct
-struct BuiltinFunc {
-  const char* name;
-  const Procedure::NProcedure func;
-
-  constexpr BuiltinFunc(const char* n, const Procedure::NProcedure& f)
-    : name(n), func(f){};
-};
-
 // type check predicate
 template <Ptr_tag p>
 Lisp_ptr type_check_pred(){

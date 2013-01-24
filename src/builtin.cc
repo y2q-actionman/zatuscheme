@@ -169,7 +169,7 @@ void install_builtin(){
   // null-environment
   for_each(std::begin(builtin_syntax_funcs), std::end(builtin_syntax_funcs),
            install_builtin_native);
-  install_builtin_symbol(null_env_symname, vm.frame());
+  auto null_env = vm.frame();
 
   // r5rs-environment
   vm.set_frame(vm.frame()->push());
@@ -179,6 +179,7 @@ void install_builtin(){
            install_builtin_string);
   install_builtin_symbol(CURRENT_INPUT_PORT_SYMNAME, &std::cin);
   install_builtin_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
+  install_builtin_symbol(null_env_symname, null_env);
   install_builtin_symbol(r5rs_env_symname, vm.frame());
 
   // interaction-environment
