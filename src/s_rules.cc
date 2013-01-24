@@ -16,10 +16,6 @@
 #include "equality.hh"
 #include "eval.hh"
 
-#ifndef NDEBUG
-#include <iostream>
-#endif
-
 using namespace std;
 
 typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;
@@ -294,50 +290,65 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       match_obj.insert(begin(m.first), end(m.first));
       return {match_obj, true};
     }
-  // }else if(pattern.tag() == Ptr_tag::vector){
-  //   if(form.tag() != Ptr_tag::vector){
-  //     return false;
-  //   }
+  }else if(pattern.tag() == Ptr_tag::vector){
+    if(form.tag() != Ptr_tag::vector){
+      return {{}, false};
+    }
 
-  //   auto p_v = pattern.get<Vector*>();
-  //   auto f_v = form.get<Vector*>();
+    EqHashMap match_obj;
 
-  //   auto p_i = begin(*p_v), p_e = end(*p_v);
-  //   auto f_i = begin(*f_v), f_e = end(*f_v);
+    auto p_v = pattern.get<Vector*>();
+    auto f_v = form.get<Vector*>();
 
-  //   for(; p_i != p_e; ++p_i, ++f_i){
-  //     // checks ellipsis
-  //     auto p_n = next(p_i);
+    auto p_i = begin(*p_v), p_e = end(*p_v);
+    auto f_i = begin(*f_v), f_e = end(*f_v);
 
-  //     if((p_n != p_e) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
-  //       if(eq_internal(*p_i, ignore_ident)){
-  //         throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
-  //       }
+    for(; p_i != p_e; ++p_i, ++f_i){
+      // checks ellipsis
+      auto p_n = next(p_i);
+      if((p_n != p_e) && identifierp(*p_n) && identifier_symbol(*p_n) == ellipsis_sym){
+        if(eq_internal(*p_i, ignore_ident)){
+          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+        }
 
-  //       // accumulating...
-  //       ensure_binding(match_obj, sr, ignore_ident, *p_i);
-  //       for(; f_i != f_e; ++f_i){
-  //         if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i, true)){
-  //           return false;
-  //         }
-  //       }
+        // accumulating...
+        EqHashMap acc_map;
+        ensure_binding(match_obj, sr, ignore_ident, *p_i,
+                       [](){ return new Vector(); });
 
-  //       return true;
-  //     }
+        for(; f_i != f_e; ++f_i){
+          auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
+          if(!m.second){
+            return {{}, false};
+          }
 
-  //     if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
+          for(auto i : m.first){
+            auto place = acc_map.find(i.first);
+            assert(place->second.tag() == Ptr_tag::vector);
+            place->second.get<Vector*>()->push_back(i.second);
+          }
+        }
 
-  //     if(!try_match_1(match_obj, sr, ignore_ident, *p_i, form_env, *f_i)){
-  //       return false;
-  //     }
-  //   }
+        match_obj.insert(begin(acc_map), end(acc_map));
+        return {match_obj, true};
+      }
 
-  //   // checks length
-  //   if((p_i == p_e) && (f_i == f_e)){
-  //     return true;
-  //   }else{
-  //     return false;
-  //   }
+      if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
+
+      auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
+      if(!m.second){
+        return {{}, false};
+      }
+
+      match_obj.insert(begin(m.first), end(m.first));
+    }
+
+    // checks length
+    if((p_i == p_e) && (f_i == f_e)){
+      return {match_obj, true};
+    }else{
+      return {match_obj, false};
+    }
   }else{
     return {{}, equal_internal(pattern, form)};
   }
@@ -345,7 +356,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
 
 static
-Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
+Lisp_ptr close_to_pattern_variable(ExpandSet& expand_ctx,
                                    const SyntaxRules& sr,
                                    Env* form_env, Lisp_ptr form){
   if(is_self_evaluating(form)){
@@ -358,9 +369,9 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
     }
 
     auto new_sc = new SyntacticClosure(form_env, nullptr, form);
-    auto iter = expand_obj.find(new_sc);
-    if(iter == expand_obj.end()){
-      expand_obj.insert(new_sc);
+    auto iter = expand_ctx.find(new_sc);
+    if(iter == expand_ctx.end()){
+      expand_ctx.insert(new_sc);
       return new_sc;
     }else{
       delete new_sc;
@@ -369,14 +380,14 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_obj,
   }else if(form.tag() == Ptr_tag::cons){
     GrowList gl;
     for(auto i : form){
-      gl.push(close_to_pattern_variable(expand_obj, sr, form_env, i));
+      gl.push(close_to_pattern_variable(expand_ctx, sr, form_env, i));
     }
     return gl.extract();
   }else if(form.tag() == Ptr_tag::vector){
     auto v = form.get<Vector*>();
     Vector* ret = new Vector();
     for(auto i : *v){
-      ret->push_back(close_to_pattern_variable(expand_obj, sr, form_env, i));
+      ret->push_back(close_to_pattern_variable(expand_ctx, sr, form_env, i));
     }
     return {ret};
   }else if(form.tag() == Ptr_tag::syntactic_closure){
@@ -416,7 +427,7 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
 }
 
 static
-pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
+pair<Lisp_ptr, bool> expand(ExpandSet& expand_ctx,
                             const EqHashMap& match_obj, 
                             const SyntaxRules& sr,
                             Lisp_ptr tmpl,
@@ -432,7 +443,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
         return {{}, false};
       }
     }else{
-      return {close_to_pattern_variable(expand_obj, sr, sr.env(), tmpl), pick_limit_ok};
+      return {close_to_pattern_variable(expand_ctx, sr, sr.env(), tmpl), pick_limit_ok};
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
     if(nullp(tmpl)) return {tmpl, pick_limit_ok};
@@ -448,7 +459,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
         int depth = 0;
         while(1){
           auto emap = remake_matchobj(match_obj, depth);
-          auto ex = expand(expand_obj, emap, sr, *t_i, true);
+          auto ex = expand(expand_ctx, emap, sr, *t_i, true);
           if(!ex.second){
             break;
           }
@@ -459,7 +470,7 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
 
         ++t_i;
       }else{
-        auto ex = expand(expand_obj, match_obj, sr, *t_i, true);
+        auto ex = expand(expand_ctx, match_obj, sr, *t_i, true);
         if(!ex.second){
           return {{}, false};
         }
@@ -467,92 +478,67 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_obj,
       }
     }
 
-    auto ex = expand(expand_obj, match_obj, sr, t_i.base(), true);
+    auto ex = expand(expand_ctx, match_obj, sr, t_i.base(), true);
     if(!ex.second){
       return {{}, false};
     }
 
     auto l = gl.extract_with_tail(ex.first);
     return {l, pick_limit_ok};
-  // }else if(tmpl.tag() == Ptr_tag::vector){
-  //   auto t_vec = tmpl.get<Vector*>();
+  }else if(tmpl.tag() == Ptr_tag::vector){
+    auto t_vec = tmpl.get<Vector*>();
 
-  //   Vector vec;
+    Vector vec;
 
-  //   for(auto t_i = begin(*t_vec), t_e = end(*t_vec); t_i != t_e; ++t_i){
-  //     auto t_n = next(t_i);
+    for(auto t_i = begin(*t_vec), t_e = end(*t_vec); t_i != t_e; ++t_i){
+      auto t_n = next(t_i);
 
-  //     // check ellipsis
-  //     if(identifierp(*t_i)
-  //        && (t_n != t_e) && identifierp(*t_n)
-  //        && identifier_symbol(*t_n) == ellipsis_sym){
-  //       auto m_ret = match_obj.find(*t_i);
-        
-  //       if(m_ret == match_obj.end()){
-  //         throw zs_error("syntax-rules error: invalid template: followed by '...', but not bound by pattern\n");
-  //       }
+      // check ellipsis
+      if((t_n != t_e) && identifierp(*t_n) && identifier_symbol(*t_n) == ellipsis_sym){
+        int depth = 0;
+        while(1){
+          auto emap = remake_matchobj(match_obj, depth);
+          auto ex = expand(expand_ctx, emap, sr, *t_i, true);
+          if(!ex.second){
+            break;
+          }
 
-  //       if(m_ret->second.tag() == Ptr_tag::vector){
-  //         auto m_ret_vec = m_ret->second.get<Vector*>();
-  //         vec.insert(vec.end(), begin(*m_ret_vec), end(*m_ret_vec));
-  //       }else{
-  //         throw zs_error("syntax-rules error: invalid template: matched pattern variable is not followed by ...\n");
-  //       }
+          vec.push_back(ex.first);
+          ++depth;
+        }
 
-  //       ++t_i;
-  //     }else{
-  //       vec.push_back(expand(expand_obj, match_obj, *t_i));
-  //     }
-  //   }
+        ++t_i;
+      }else{
+        auto ex = expand(expand_ctx, match_obj, sr, *t_i, true);
+        if(!ex.second){
+          return {{}, false};
+        }
+        vec.push_back(ex.first);
+      }
+    }
 
-  //   return new Vector(move(vec));
+    return {new Vector(move(vec)), pick_limit_ok};
   }else{
     return {tmpl, pick_limit_ok};
   }
 }
 
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
-#ifndef NDEBUG
-  cout << "## " << __func__ << ": form = " << form << ", env = " << form_env << '\n';
-  // if(dump_mode)
-  //   cout << *vm.frame();
-#endif
-
   for(auto i : this->rules()){
     auto pat = nth_cons_list<0>(i);
     auto tmpl = nth_cons_list<1>(i);
-
-#ifndef NDEBUG
-    cout << "## trying: pattern = " << pat << '\n';
-#endif
-
     auto ignore_ident = pick_first(pat);
+
     auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form);
     if(match_ret.second){
-#ifndef NDEBUG
-      cout << "## matched!:\tpattern = " << pat << '\n';
-      cout << "## \t\ttemplate = " << tmpl << '\n';
-      cout << "## \t\tform = " << form << '\n';
-      for(auto ii : match_ret.first){
-        cout << "## env\t" << ii.first << " = " << ii.second << '\n';
-      }
-#endif
-      
-      ExpandSet expand_obj;
-      auto ex = expand(expand_obj, match_ret.first, *this, tmpl, false);
-#ifndef NDEBUG
-      cout << "## expand = " << ex.first << '\n';
-      cout << endl;
-#endif
+      ExpandSet expand_ctx;
+      auto ex = expand(expand_ctx, match_ret.first, *this, tmpl, false);
       return ex.first;
     }else{
       // cleaning map ?
     }
   }
 
-#ifndef NDEBUG
-  cout << "## no match: form = " << form << endl;
-#endif
   throw zs_error("syntax-rules error: no matching pattern found!\n");
 }
 
