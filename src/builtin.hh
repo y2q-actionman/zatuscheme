@@ -11,11 +11,12 @@ const Procedure::NProcedure* find_builtin_nproc(const char*);
 const char* find_builtin_nproc_name(const Procedure::NProcedure*);
 
 // builtin func struct
-struct BuiltinFunc {
+struct BuiltinNProc {
   const char* name;
   const Procedure::NProcedure func;
 
-  constexpr BuiltinFunc(const char* n, const Procedure::NProcedure& f)
+  // this constructor is required for static initialization
+  constexpr BuiltinNProc(const char* n, const Procedure::NProcedure& f)
     : name(n), func(f){};
 };
 

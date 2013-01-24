@@ -104,11 +104,11 @@ Lisp_ptr load_func(){
 
 } //namespace
 
-static const BuiltinFunc builtin_syntax_funcs[] = {
+static const BuiltinNProc builtin_syntax_funcs[] = {
 #include "builtin_syntax.defs.hh"
 };
 
-static const BuiltinFunc builtin_funcs[] = {
+static const BuiltinNProc builtin_funcs[] = {
   {"eval", {
       eval_func,
       {2, 2, Passing::eval, Returning::code, MoveReturnValue::f}}},
@@ -145,7 +145,7 @@ static const char* builtin_strs[] = {
 #include "builtin_port.strs.hh"
 };
 
-static const BuiltinFunc builtin_extra_funcs[] = {
+static const BuiltinNProc builtin_extra_funcs[] = {
 #include "builtin_extra.defs.hh"
 };
 
@@ -155,7 +155,7 @@ static const char* builtin_extra_strs[] = {
 
 
 void install_builtin(){
-  static constexpr auto install_builtin_native = [](const BuiltinFunc& bf){
+  static constexpr auto install_builtin_native = [](const BuiltinNProc& bf){
     vm.frame()->local_set(intern(vm.symtable(), bf.name), {&bf.func});
   };    
   static constexpr auto install_builtin_string = [](const char* s){
@@ -193,7 +193,7 @@ void install_builtin(){
 
 const Procedure::NProcedure* find_builtin_nproc(const char* name){
   const auto find_func
-    = [name](const BuiltinFunc& bf){ return strcmp(name, bf.name) == 0; };
+    = [name](const BuiltinNProc& bf){ return strcmp(name, bf.name) == 0; };
 
   auto i = find_if(begin(builtin_syntax_funcs), end(builtin_syntax_funcs), find_func);
   if(i != end(builtin_syntax_funcs)) return &(i->func);
@@ -209,7 +209,7 @@ const Procedure::NProcedure* find_builtin_nproc(const char* name){
 
 const char* find_builtin_nproc_name(const Procedure::NProcedure* nproc){
   const auto find_func
-    = [nproc](const BuiltinFunc& bf){ return nproc == &bf.func; };
+    = [nproc](const BuiltinNProc& bf){ return nproc == &bf.func; };
 
   auto i = find_if(begin(builtin_syntax_funcs), end(builtin_syntax_funcs), find_func);
   if(i != end(builtin_syntax_funcs)) return i->name;
