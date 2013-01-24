@@ -232,14 +232,7 @@ void vm_op_call(){
   }
 }
 
-void vm_op_jump_native_func(){
-  assert(vm.code.back().get<VMop>() == vm_op_jump_native_func);
-  vm.code.pop_back();
-
-  auto fun = vm.code.back().get<const NProcedure*>();
-  assert(fun);
-  vm.code.pop_back();
-
+void proc_enter_native(const NProcedure* fun){
   auto native_func = fun->get();
   assert(native_func);
 
@@ -251,56 +244,6 @@ void vm_op_jump_native_func(){
   if(info->move_ret == MoveReturnValue::t){
     vm.return_value = {p};
   }
-}
-
-/*
-  stack = (arg1, arg2, ..., <argcount>)
-  code = (<vm_op_force_arg>, <vm_argcount n>)
-  ret  = forced value
-  ----
-  forces arg[n] with ret value.
-*/
-void vm_op_force_arg(){
-  // cout << "in " << __func__ << endl;
-  // cout << vm << endl;
-
-  assert(vm.code.back().get<VMop>() == vm_op_force_arg);
-  vm.code.pop_back();
-
-  assert(vm.code.back().tag() == Ptr_tag::vm_argcount);
-  auto index = vm.code.back().get<int>();
-  vm.code.pop_back();
-
-  assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
-  auto argc = vm.stack.back().get<int>();
-
-  vm.stack[vm.stack.size() - (argc + 1) + index] = vm.return_value_1();
-
-  // cout << "out " << __func__ << endl;
-  // cout << vm << endl;
-}
-
-/*
-  stack = (arg1, arg2, ..., <argcount>)
-*/
-void proc_enter_native(const NProcedure* fun){
-  // check 'force' is required
-  assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
-  auto argc = vm.stack.back().get<int>();
-
-  vm.code.push_back(fun);
-  vm.code.push_back(vm_op_jump_native_func);
-
-  // should add 'use-implicit-forcing-or-not' flag
-
-  // for(auto i = 0; i < argc; ++i){
-  //   auto& target = vm.stack[vm.stack.size() - (argc + 1) + i];
-  //   if(target.tag() == Ptr_tag::delay
-  //      || target.tag() == Ptr_tag::syntactic_closure){
-  //     vm.code.insert(vm.code.end(),
-  //                    { {Ptr_tag::vm_argcount, i}, vm_op_force_arg, target});
-  //   }
-  // }
 }
 
 /*
@@ -983,10 +926,6 @@ const char* stringify(VMop op){
     return "splicing args";
   }else if(op == vm_op_get_current_env){
     return "get current env";
-  }else if(op == vm_op_force_arg){
-    return "force args";
-  }else if(op == vm_op_jump_native_func){
-    return "jump native func";
   }else{
     return "unknown vm-op";
   }
