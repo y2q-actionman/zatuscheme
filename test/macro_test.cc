@@ -216,7 +216,7 @@ int main(){
   // syntactic closure examples, from comp.lang.scheme
   // https://groups.google.com/forum/?fromgroups=#!topic/comp.lang.scheme/JXXH-_DjwtY
   check_e_success(
-  "(define-syntax push"
+  "(define-syntax push!"
   "  (sc-macro-transformer"
   "   (lambda (exp env)"
   "     (let ((item"
@@ -225,9 +225,8 @@ int main(){
   "            (make-syntactic-closure env '() (caddr exp))))"
   "       `(set! ,list (cons ,item ,list))))))");
   eval_text("(define stack '())");
-  eval_text("(push 1 stack)");
+  eval_text("(push! 1 stack)");
   check_e("stack", "(1)");
-
 
   check_e_success(
   "(define-syntax swap!"
@@ -250,7 +249,129 @@ int main(){
   "  set!)",
   "1");
 
+  check_e_success(
+  "(define-syntax aif"
+  "   (sc-macro-transformer"
+  "     (lambda (form usage-env)"
+  "       (let ((condition (make-syntactic-closure usage-env '()"
+  "                                                (cadr form)))"
+  "             (consequent (make-syntactic-closure usage-env '(it)"
+  "                                                 (caddr form)))"
+  "             (alternative (make-syntactic-closure usage-env '()"
+  "                                                  (cadddr form))))"
+  "         `(let ((it ,condition))"
+  "            (if it"
+  "                ,consequent"
+  "                ,alternative))))))");
+  check_e(
+  "(aif (assv 'a '((1 . 2) (a . b)))"
+  "     (cdr it)"
+  "     'nothing)",
+  "b");
+  check_e(
+  "(let ((it 1))"
+  "  (aif (assv 'a '((1 . 2) (a . b)))"
+  "       it"
+  "       'nothing))",
+  "1");
 
+  check_e_success(
+  "(define-syntax let1"
+  "  (sc-macro-transformer"
+  "   (lambda (form usage-env)"
+  "     (let ((id (cadr form))"
+  "           (init (caddr form))"
+  "           (exp (cadddr form)))"
+  "       `((lambda (,id)"
+  "           ,(make-syntactic-closure usage-env (list id)"
+  "                                    exp))"
+  "         ,(make-syntactic-closure usage-env '()"
+  "                                  init))))))");
+  check_e("(let1 x 2 (+ x 5))", "7");
+
+
+  // check_e_success(
+  // "(define-syntax loop-until"
+  // "  (sc-macro-transformer"
+  // "   (lambda (exp env)"
+  // "     (let ((id (cadr exp))"
+  // "           (init (caddr exp))"
+  // "           (test (cadddr exp))"
+  // "           (return (cadddr (cdr exp)))"
+  // "           (step (cadddr (cddr exp)))"
+  // "           (close"
+  // "            (lambda (exp free)"
+  // "              (make-syntactic-closure env free exp))))"
+  // "       `(letrec ((loop"
+  // "                  (lambda (,(close id '()))"
+  // "                    (if"
+  // "                     ,(close test '())"
+  // "                     ,(close return '())"
+  // "                     (loop ,(close step '()))))))"
+  // "          (loop ,(close init '())))))))");
+
+  eval_text("(define result ())");
+  eval_text("(loop-until x 1 (> x 10) x (begin (push! x result) (+ x 1)))");
+  check_e("result", "(11 10 9 8 7 6 5 4 3 2 1)");
+
+  eval_text("(define result ())");
+  eval_text("(loop-until if 1 (> if 10) if (begin (push! if result) (+ if 1)))");
+  check_e("result", "(11 10 9 8 7 6 5 4 3 2 1)");
+
+  eval_text("(define result ())");
+  eval_text("(loop-until loop 1 (> loop 10) loop (begin (push! loop result) (+ loop 1)))");
+  check_e("result", "(11 10 9 8 7 6 5 4 3 2 1)");
+
+
+  check_e_success(
+  "(define-syntax loop"
+  "  (sc-macro-transformer"
+  "   (lambda (exp env)"
+  "     (let ((body (cdr exp)))"
+  "       `(call-with-current-continuation"
+  "         (lambda (exit)"
+  "           (let f ()"
+  "             ,@(map (lambda (exp)"
+  "                       (make-syntactic-closure env '(exit)"
+  "                                               exp))"
+  "                     body)"
+  "             (f))))))))");
+
+  eval_text("(define loop-result ())");
+  eval_text(
+  "(let ((x 1))"
+  "  (loop (push! x loop-result)"
+  "        (if (> x 10)"
+  "            (exit x)"
+  "            (set! x (+ x 1)))))");
+  check_e("loop-result", "(11 10 9 8 7 6 5 4 3 2 1)");
+
+  check_e_undef(
+  "(let ((x 1)"
+  "      (exit 2))"
+  "  (loop (push! x loop-result)"
+  "        (if (> x 10)"
+  "            (exit x)"
+  "            (set! x (+ x 1)))))");
+
+
+  check_e_success(
+  "(define-syntax push"
+  "  (sc-macro-transformer"
+  "   (lambda (exp usage-env)"
+  "     (capture-syntactic-environment"
+  "      (lambda (transformer-env)"
+  "        (let ((setter"
+  "               (make-syntactic-closure transformer-env '() 'set!))"
+  "              (item"
+  "               (make-syntactic-closure usage-env '() (cadr exp)))"
+  "              (list"
+  "               (make-syntactic-closure usage-env '() (caddr exp))))"
+  "          `(,setter ,list (cons ,item ,list))))))))");
+  eval_text("(define stack '())");
+  eval_text("(let ((set! #f))"
+            "  (push 1 stack))");
+  check_e("stack", "(1)");
 
 
 
