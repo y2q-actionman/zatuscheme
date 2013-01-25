@@ -54,7 +54,7 @@ int main(){
   check_e("(cond ((eqv? 1 2)) ((eqv? 2 3) fuga) ((+ 5 7)))", "12");
 
   check_e("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
-  check_e("(case a ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
+  check_e("(case 'some-symbol ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
 
   check_e("(eval 1 (null-environment 5))", "1");
   check_e("(eval (+ 1 3) (scheme-report-environment 5))", "4");

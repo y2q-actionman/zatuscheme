@@ -4,7 +4,8 @@
 int main(){
   zs_init();
 
-  // traditional macro
+  // ==== traditional macro ==== 
+
   check_e_success("(define tmp-func (lambda (x) `(define ,x ',x)))");
   check_e("(tmp-func 'a)", "(define a (quote a))");
 
@@ -27,7 +28,8 @@ int main(){
   check_e("y", "1");
 
 
-  // syntactic closure
+  // ==== syntactic closure ====
+
   check_e_success("(define-syntax sc-test-1 (sc-macro-transformer"
                   "(lambda (form env) (cadr form))))");
   check_e("(sc-test-1 (list x y))", "(2 1)");
@@ -211,7 +213,49 @@ int main(){
   "(#f #t)");
 
 
-  // syntax-rules
+  // syntactic closure examples, from comp.lang.scheme
+  // https://groups.google.com/forum/?fromgroups=#!topic/comp.lang.scheme/JXXH-_DjwtY
+  check_e_success(
+  "(define-syntax push"
+  "  (sc-macro-transformer"
+  "   (lambda (exp env)"
+  "     (let ((item"
+  "            (make-syntactic-closure env '() (cadr exp)))"
+  "           (list"
+  "            (make-syntactic-closure env '() (caddr exp))))"
+  "       `(set! ,list (cons ,item ,list))))))");
+  eval_text("(define stack '())");
+  eval_text("(push 1 stack)");
+  check_e("stack", "(1)");
+
+
+  check_e_success(
+  "(define-syntax swap!"
+  "   (sc-macro-transformer"
+  "     (lambda (form usage-env)"
+  "       (let ((a (make-syntactic-closure usage-env '() (cadr form)))"
+  "             (b (make-syntactic-closure usage-env '() (caddr form))))"
+  "         `(let ((VALUE ,a))"
+  "            (set! ,a ,b)"
+  "            (set! ,b VALUE))))))");
+  eval_text("(define a 1)");
+  eval_text("(define b 2)");
+  eval_text("(swap! a b)");
+  check_e("a", "2");
+  check_e("b", "1");
+
+  check_e(
+  "(let ((set! 5))"
+  "  (swap! set! b)"
+  "  set!)",
+  "1");
+
+
+
+
+
+  // ==== syntax-rules ====
+
   check_e_success(
   "(define-syntax push"
   "  (syntax-rules ()"
@@ -280,7 +324,7 @@ int main(){
   "         (case key clause clauses ...)))))");
   check_e_success("case");
   check_e("(case 1 ((1 3 5) 'odd) ((2 4 6) 'even))", "odd");
-  check_e("(case a ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
+  check_e("(case 'some-symbol ((1 3 5) 'odd) ((2 4 6) 'even) (else 'wakaran))", "wakaran");
 
   check_e_success(
   "(define-syntax and"
