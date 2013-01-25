@@ -3,6 +3,7 @@
 
 #include <string>
 #include <exception>
+#include "decl.hh"
 
 void
 __attribute__((noreturn))// [[noreturn]]
@@ -18,6 +19,9 @@ unexp_conversion(const char*, int, const char*);
 
 
 class zs_error : public std::exception{
+protected:
+  explicit zs_error();
+
 public:
   explicit zs_error(const std::string&);
   explicit zs_error(std::string&&);
@@ -36,6 +40,23 @@ public:
 
 private:
   std::string str_;
+};
+
+
+class zs_error_arg1 : public zs_error{
+public:
+  explicit zs_error_arg1(const char*, Lisp_ptr, const char*, ...)
+    __attribute__ ((format (printf, 4, 5)))
+    ;
+  zs_error_arg1(const zs_error_arg1&);
+  zs_error_arg1(zs_error_arg1&&);
+
+  virtual ~zs_error_arg1() noexcept;
+
+  zs_error_arg1& operator=(const zs_error_arg1&) noexcept;
+  zs_error_arg1& operator=(zs_error_arg1&&) noexcept;
+
+  using zs_error::what;
 };
 
 #endif // ZS_ERROR_HH
