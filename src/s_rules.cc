@@ -25,6 +25,15 @@ namespace Procedure{
 
 namespace {
 
+bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
+  for(auto l : sr.literals()){
+    if(eq_internal(l, p)){
+      return true;
+    }
+  }
+  return false;
+}
+
 void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
   if(p.tag() != Ptr_tag::cons)
     throw zs_error("internal %s: the passed list is a dotted list!\n", __func__);
@@ -38,15 +47,6 @@ void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
   }else{
     push_tail_cons_list_nl(c->cdr(), value);
   }
-}
-
-bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
-  for(auto l : sr.literals()){
-    if(eq_internal(l, p)){
-      return true;
-    }
-  }
-  return false;
 }
 
 void push_tail_cons_list(Lisp_ptr* p, Lisp_ptr value){
@@ -194,17 +194,22 @@ void ensure_binding(EqHashMap& match_obj,
   }else{
     return;
   }
-  
 }
 
+struct try_match_failed{};
+
 static
-pair<EqHashMap, bool>
+EqHashMap
 try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
             Env* form_env, Lisp_ptr form){
   if(identifierp(pattern)){
     if(is_literal_identifier(sr, pattern)){
       // literal identifier
-      return {{}, (identifierp(form) && identifier_eq(sr.env(), pattern, form_env, form))};
+      if(identifierp(form) && identifier_eq(sr.env(), pattern, form_env, form)){
+        return {};
+      }else{
+        throw try_match_failed();
+      }
     }
 
     // non-literal identifier
@@ -213,14 +218,14 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
       match_obj.insert({pattern, form});
     }
-    return {match_obj, true};
+    return match_obj;
   }else if(pattern.tag() == Ptr_tag::cons){
     if(form.tag() != Ptr_tag::cons){
-      return {{}, false};
+      throw try_match_failed();
     }
 
     if(nullp(pattern) && nullp(form)){
-      return {{}, true};
+      return {};
     }
 
     EqHashMap match_obj;
@@ -250,11 +255,8 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
         for(; f_i; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-          if(!m.second){
-            return {{}, false};
-          }
 
-          for(auto i : m.first){
+          for(auto i : m){
             auto place = acc_map.find(i.first);
             assert(place->second.tag() == Ptr_tag::cons);
             push_tail_cons_list(&place->second, i.second);
@@ -266,35 +268,32 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         }
 
         match_obj.insert(begin(acc_map), end(acc_map));
-        return {match_obj, true};
+        return match_obj;
       }
 
       if(!f_i) break; // this check is delayed to here, for checking the ellipsis.
 
       auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-      if(!m.second){
-        return {{}, false};
-      }
-
-      match_obj.insert(begin(m.first), end(m.first));
+      match_obj.insert(begin(m), end(m));
     }
 
     // checks length
     if((p_i.base().tag() == Ptr_tag::cons) && (f_i.base().tag() == Ptr_tag::cons)){
       // proper list
-      return {match_obj, (nullp(p_i.base()) && nullp(f_i.base()))};
+      if(nullp(p_i.base()) && nullp(f_i.base())){
+        return match_obj;
+      }else{
+        throw try_match_failed();
+      }
     }else{
       // dotted list
       auto m = try_match_1(sr, ignore_ident, p_i.base(), form_env, f_i.base());
-      if(!m.second){
-        return {{}, false};
-      }
-      match_obj.insert(begin(m.first), end(m.first));
-      return {match_obj, true};
+      match_obj.insert(begin(m), end(m));
+      return match_obj;
     }
   }else if(pattern.tag() == Ptr_tag::vector){
     if(form.tag() != Ptr_tag::vector){
-      return {{}, false};
+      throw try_match_failed();
     }
 
     EqHashMap match_obj;
@@ -320,11 +319,8 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
         for(; f_i != f_e; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-          if(!m.second){
-            return {{}, false};
-          }
 
-          for(auto i : m.first){
+          for(auto i : m){
             auto place = acc_map.find(i.first);
             assert(place->second.tag() == Ptr_tag::vector);
             place->second.get<Vector*>()->push_back(i.second);
@@ -332,27 +328,27 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         }
 
         match_obj.insert(begin(acc_map), end(acc_map));
-        return {match_obj, true};
+        return match_obj;
       }
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
       auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-      if(!m.second){
-        return {{}, false};
-      }
-
-      match_obj.insert(begin(m.first), end(m.first));
+      match_obj.insert(begin(m), end(m));
     }
 
     // checks length
     if((p_i == p_e) && (f_i == f_e)){
-      return {match_obj, true};
+      return match_obj;
     }else{
-      return {match_obj, false};
+      throw try_match_failed();
     }
   }else{
-    return {{}, equal_internal(pattern, form)};
+    if(equal_internal(pattern, form)){
+      return {};
+    }else{
+      throw try_match_failed();
+    }
   }
 }
 
@@ -527,13 +523,14 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     auto tmpl = nth_cons_list<1>(i);
     auto ignore_ident = pick_first(pat);
 
-    auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form);
-    if(match_ret.second){
+    try{
+      auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form);
+
       ExpandSet expand_ctx;
-      auto ex = expand(expand_ctx, match_ret.first, *this, tmpl, false);
+      auto ex = expand(expand_ctx, match_ret, *this, tmpl, false);
       return ex.first;
-    }else{
-      // cleaning map ?
+    }catch(const try_match_failed& e){
+      ;
     }
   }
 
