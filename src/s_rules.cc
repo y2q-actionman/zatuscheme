@@ -422,25 +422,26 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
   return ret;
 }
 
+struct expand_failed {};
+
 static
-pair<Lisp_ptr, bool> expand(ExpandSet& expand_ctx,
-                            const EqHashMap& match_obj, 
-                            const SyntaxRules& sr,
-                            Lisp_ptr tmpl,
-                            bool pick_limit_ok){
+Lisp_ptr expand(ExpandSet& expand_ctx,
+                const EqHashMap& match_obj, 
+                const SyntaxRules& sr,
+                Lisp_ptr tmpl){
   if(identifierp(tmpl)){
     auto m_ret = match_obj.find(tmpl);
     if(m_ret != match_obj.end()){
       if(m_ret->second){
-        return {m_ret->second, pick_limit_ok};
+        return m_ret->second;
       }else{
-        return {{}, false};
+        throw expand_failed();
       }
     }else{
-      return {close_to_pattern_variable(expand_ctx, sr, sr.env(), tmpl), pick_limit_ok};
+      return close_to_pattern_variable(expand_ctx, sr, sr.env(), tmpl);
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
-    if(nullp(tmpl)) return {tmpl, pick_limit_ok};
+    if(nullp(tmpl)) return tmpl;
 
     GrowList gl;
     auto t_i = begin(tmpl);
@@ -453,32 +454,24 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_ctx,
         int depth = 0;
         while(1){
           auto emap = remake_matchobj(match_obj, depth);
-          auto ex = expand(expand_ctx, emap, sr, *t_i, true);
-          if(!ex.second){
+          try{
+            auto ex = expand(expand_ctx, emap, sr, *t_i);
+            gl.push(ex);
+            ++depth;
+          }catch(const expand_failed& e){
             break;
           }
-
-          gl.push(ex.first);
-          ++depth;
         }
 
         ++t_i;
       }else{
-        auto ex = expand(expand_ctx, match_obj, sr, *t_i, true);
-        if(!ex.second){
-          return {{}, false};
-        }
-        gl.push(ex.first);
+        auto ex = expand(expand_ctx, match_obj, sr, *t_i);
+        gl.push(ex);
       }
     }
 
-    auto ex = expand(expand_ctx, match_obj, sr, t_i.base(), true);
-    if(!ex.second){
-      return {{}, false};
-    }
-
-    auto l = gl.extract_with_tail(ex.first);
-    return {l, pick_limit_ok};
+    auto ex = expand(expand_ctx, match_obj, sr, t_i.base());
+    return gl.extract_with_tail(ex);
   }else if(tmpl.tag() == Ptr_tag::vector){
     auto t_vec = tmpl.get<Vector*>();
 
@@ -492,28 +485,25 @@ pair<Lisp_ptr, bool> expand(ExpandSet& expand_ctx,
         int depth = 0;
         while(1){
           auto emap = remake_matchobj(match_obj, depth);
-          auto ex = expand(expand_ctx, emap, sr, *t_i, true);
-          if(!ex.second){
+          try{
+            auto ex = expand(expand_ctx, emap, sr, *t_i);
+            vec.push_back(ex);
+            ++depth;
+          }catch(const expand_failed& e){
             break;
           }
-
-          vec.push_back(ex.first);
-          ++depth;
         }
 
         ++t_i;
       }else{
-        auto ex = expand(expand_ctx, match_obj, sr, *t_i, true);
-        if(!ex.second){
-          return {{}, false};
-        }
-        vec.push_back(ex.first);
+        auto ex = expand(expand_ctx, match_obj, sr, *t_i);
+        vec.push_back(ex);
       }
     }
 
-    return {new Vector(move(vec)), pick_limit_ok};
+    return new Vector(move(vec));
   }else{
-    return {tmpl, pick_limit_ok};
+    return tmpl;
   }
 }
 
@@ -527,10 +517,11 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
       auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form);
 
       ExpandSet expand_ctx;
-      auto ex = expand(expand_ctx, match_ret, *this, tmpl, false);
-      return ex.first;
+      return expand(expand_ctx, match_ret, *this, tmpl);
     }catch(const try_match_failed& e){
-      ;
+      continue;
+    }catch(const expand_failed& e){
+      throw zs_error("syntax-rules error: expand failed!\n");
     }
   }
 
