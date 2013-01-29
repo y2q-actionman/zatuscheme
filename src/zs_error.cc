@@ -7,19 +7,9 @@
 #include "lisp_ptr.hh"
 #include "printer.hh"
 
+static const size_t ERROR_MESSAGE_LENGTH = 256;
+
 using namespace std;
-
-namespace {
-
-string vsnprintf_string(const char* fmt, va_list ap){
-  char tmp[256];
-
-  auto len = vsnprintf(tmp, sizeof(tmp), fmt, ap);
-
-  return {tmp, len};
-}
-
-}
 
 void unexp_default(const char* f, int l){
   throw zs_error("unexpected default case! (file=%s, line=%d)\n", f, l);
@@ -35,10 +25,10 @@ zs_error::zs_error() : str_(){}
 zs_error::zs_error(const std::string& s) : str_(s){}
 zs_error::zs_error(std::string&& s) : str_(std::move(s)){}
 
-zs_error::zs_error(const char* fmt, ...) : str_(){
+zs_error::zs_error(const char* fmt, ...) : str_(ERROR_MESSAGE_LENGTH, '\0'){
   va_list ap;
   va_start(ap, fmt);
-  str_ = vsnprintf_string(fmt, ap);
+  vsnprintf(&(str_[0]), sizeof(str_), fmt, ap);
   va_end(ap);
 }
 
@@ -62,12 +52,16 @@ zs_error_arg1::zs_error_arg1(const char* name, Lisp_ptr p, const char* fmt, ...)
 
   ss << name << ": ";
 
+  char tmp[256];
   va_list ap;
   va_start(ap, fmt);
-  ss << vsnprintf_string(fmt, ap);
+  vsnprintf(tmp, sizeof(tmp), fmt, ap);
+  ss << tmp;
   va_end(ap);
 
   ss << "\n\targ: " << p << '\n';
+
+  str_ = ss.str(); // dirty!
 }
 
 zs_error_arg1::zs_error_arg1(const zs_error_arg1&) = default;

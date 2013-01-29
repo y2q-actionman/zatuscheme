@@ -38,7 +38,7 @@ public:
 
   virtual const char* what() const noexcept; // override
 
-private:
+protected:
   std::string str_;
 };
 
