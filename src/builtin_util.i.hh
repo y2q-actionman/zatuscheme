@@ -62,17 +62,17 @@ void stack_to_vector(StackT& st, VectorT& v){
   st.erase(arg_start, arg_end);
 }
 
-template<int size>
-std::array<Lisp_ptr, size> pick_args(){
-  ZsArgs args;
+// template<int size>
+// std::array<Lisp_ptr, size> pick_args(){
+//   ZsArgs args;
   
-  if(args.size() != size){
-    throw builtin_argcount_failed("", size, size, args.size());
-  }
+//   if(args.size() != size){
+//     throw builtin_argcount_failed("", size, size, args.size());
+//   }
 
-  auto ret = std::array<Lisp_ptr, size>();
-  std::copy(args.begin(), args.end(), ret.begin());
-  return ret;
-}
+//   auto ret = std::array<Lisp_ptr, size>();
+//   std::copy(args.begin(), args.end(), ret.begin());
+//   return ret;
+// }
 
 #endif //BUILTIN_UTIL_I_HH

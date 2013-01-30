@@ -2,10 +2,10 @@
 
 #include "builtin_util.hh"
 
-Lisp_ptr pick_args_1(){
-  auto arg1 = pick_args<1>();
-  return arg1[0];
-}
+// Lisp_ptr pick_args_1(){
+//   auto arg1 = pick_args<1>();
+//   return arg1[0];
+// }
 
 zs_error builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
   return zs_error("native func: %s: arg is not %s! (%s)\n",

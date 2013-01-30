@@ -14,10 +14,11 @@ template<typename StackT, typename VectorT>
 void stack_to_vector(StackT&, VectorT&);
 
 // VM::stack accessor
-template<int i>
-std::array<Lisp_ptr, i> pick_args();
 
-Lisp_ptr pick_args_1();
+// template<int i>
+// std::array<Lisp_ptr, i> pick_args();
+
+// Lisp_ptr pick_args_1();
 
 class ZsArgs{
 public:
