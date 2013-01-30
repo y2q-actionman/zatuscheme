@@ -36,6 +36,4 @@ private:
   Env* next_;
 };
 
-#include "env.i.hh"
-
 #endif // ENV_HH

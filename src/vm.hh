@@ -51,6 +51,4 @@ private:
 
 extern VM vm;
 
-#include "vm.i.hh"
-
 #endif //VM_HH

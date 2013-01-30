@@ -42,6 +42,4 @@ private:
   // add pointer to symbol table?
 };
 
-#include "symbol.i.hh"
-
 #endif // SYMBOL_HH

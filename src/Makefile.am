@@ -12,7 +12,7 @@ libzs_a_SOURCES = zs.hh\
 		lisp_ptr.cc lisp_ptr.hh lisp_ptr.i.hh\
 		cons.cc cons.hh cons.i.hh\
 		cons_util.cc cons_util.hh cons_util.i.hh\
-		symbol.cc symbol.hh symbol.i.hh\
+		symbol.cc symbol.hh\
 		reader.cc reader.hh\
 		printer.cc printer.hh\
 		eval.cc eval.hh\
@@ -36,7 +36,7 @@ libzs_a_SOURCES = zs.hh\
 		builtin_symbol.cc builtin_symbol.hh builtin_symbol.defs.hh\
 		builtin_syntax.cc builtin_syntax.hh builtin_syntax.defs.hh\
 		builtin_vector.cc builtin_vector.hh builtin_vector.defs.hh\
-		vm.cc vm.hh vm.i.hh\
+		vm.cc vm.hh\
 		zs.cc zs.hh
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
 
