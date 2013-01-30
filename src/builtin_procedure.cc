@@ -44,20 +44,23 @@ Lisp_ptr apply_func(){
 }
 
 Lisp_ptr func_force(){
-  auto arg = pick_args_1();     // used because no exceptions are done!
-  auto d = arg.get<Delay*>();
+  ZsArgs args{1};
+
+  auto d = args[0].get<Delay*>();
   if(!d){
-    return arg;
+    return args[0];
   }
   
   if(d->forced()){
     return d->get();
   }
 
-  auto oldenv = vm.frame();
+  // evaluates Delay's contents
+  args.~ZsArgs();
 
+  auto oldenv = vm.frame();
   vm.set_frame(d->env());
-  vm.stack.push_back(arg);
+  vm.stack.push_back(d);
   vm.code.insert(vm.code.end(),
                  {vm_op_force, oldenv, vm_op_leave_frame, d->get()});
   return {};
