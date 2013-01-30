@@ -16,7 +16,7 @@ libzs_a_SOURCES = zs.hh\
 		reader.cc reader.hh\
 		printer.cc printer.hh\
 		eval.cc eval.hh\
-		procedure.cc procedure.hh procedure.i.hh\
+		procedure.cc procedure.hh\
 		env.cc env.hh\
 		delay.cc delay.hh\
 		s_closure.cc s_closure.hh\

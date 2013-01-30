@@ -155,11 +155,12 @@ namespace Procedure {
     const VM vm_;
   };
 
-  inline bool is_procedure(Lisp_ptr);
   const ProcInfo* get_procinfo(Lisp_ptr);
 
-} // namespace Procedure
+  inline bool is_procedure(Lisp_ptr p){
+    return !!get_procinfo(p);
+  }
 
-#include "procedure.i.hh"
+} // namespace Procedure
 
 #endif //PROCEDURE_HH
