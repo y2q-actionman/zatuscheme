@@ -22,6 +22,11 @@ bool dump_mode = false;
 
 namespace {
 
+static
+void local_set_with_identifier(Env* e, Lisp_ptr ident, Lisp_ptr value){
+  e->local_set(ident, value);
+}
+
 /*
   ret = some value
 */
@@ -82,10 +87,10 @@ void function_call(Lisp_ptr proc, const ProcInfo* info){
     // captures arguments
     auto i = begin(iproc->arg_list());
     for(; i ; ++i){
-      vm.frame()->local_set(*i, Lisp_ptr{});
+      local_set_with_identifier(vm.frame(), *i, Lisp_ptr{});
     }
     if(identifierp(i.base())){
-      vm.frame()->local_set(i.base(), Lisp_ptr{});
+      local_set_with_identifier(vm.frame(), i.base(), Lisp_ptr{});
     }
   }
 
@@ -315,7 +320,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       break;
     }
    
-    vm.frame()->local_set(arg_name_cell->car(), *i);
+    local_set_with_identifier(vm.frame(), arg_name_cell->car(), *i);
     arg_name = arg_name_cell->cdr();
   }
 
@@ -328,7 +333,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     auto var_argc = argc.get<int>() - static_cast<int>(std::distance(arg_start, i));
     vm.stack.erase(arg_start, i);
     vm.stack.push_back({Ptr_tag::vm_argcount, var_argc});
-    vm.frame()->local_set(arg_name, stack_to_list<false>(vm.stack));
+    local_set_with_identifier(vm.frame(), arg_name, stack_to_list<false>(vm.stack));
   }else{  // clean stack
     if(i != arg_end){
       throw zs_error("eval error: corrupted stack -- passed too much args!\n");
@@ -591,7 +596,7 @@ void vm_op_local_set(){
     throw builtin_identifier_check_failed("(local set)", var);
   }
 
-  vm.frame()->local_set(var, vm.return_value_1()); 
+  local_set_with_identifier(vm.frame(), var, vm.return_value_1()); 
 }
 
 /*
@@ -735,7 +740,7 @@ Lisp_ptr let_internal(Entering entering){
                              gl_syms.extract(), vm.frame());
 
   if(name){
-    vm.frame()->local_set(name, proc);
+    local_set_with_identifier(vm.frame(), name, proc);
   }
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
@@ -801,7 +806,7 @@ void eval(){
           newenv = sc->env()->push();
           for(auto i : sc->free_names()){
             auto val = vm.frame()->find(i);
-            newenv->local_set(i, val);
+            local_set_with_identifier(newenv, i, val);
           }
         }
 
