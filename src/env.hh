@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <iosfwd>
+#include <vector>
 
 #include "lisp_ptr.hh"
 #include "equality.hh"
@@ -34,6 +35,18 @@ public:
 private:
   map_type map_;
   Env* next_;
+  
+
+  struct ForeignBind {
+    Env* env;
+    Lisp_ptr old_value;
+    Lisp_ptr new_value;
+
+    constexpr ForeignBind()
+      : env(nullptr), old_value(), new_value(){}
+  };
+
+  std::vector<ForeignBind> foreign_binds_;
 };
 
 #endif // ENV_HH
