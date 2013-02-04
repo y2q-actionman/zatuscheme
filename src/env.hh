@@ -29,6 +29,9 @@ public:
   Env* push();
 
   Env* fork() const;
+
+  void foreign_binds_clear();
+  void foreign_binds_apply();
   
   friend std::ostream& operator<<(std::ostream&, const Env&);
 
@@ -38,12 +41,13 @@ private:
   
 
   struct ForeignBind {
+    Symbol* name;
     Env* env;
     Lisp_ptr old_value;
     Lisp_ptr new_value;
 
     constexpr ForeignBind()
-      : env(nullptr), old_value(), new_value(){}
+      : name(nullptr), env(nullptr), old_value(), new_value(){}
   };
 
   std::vector<ForeignBind> foreign_binds_;
