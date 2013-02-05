@@ -273,7 +273,7 @@ int main(){
   "  (aif (assv 'a '((1 . 2) (a . b)))"
   "       it"
   "       'nothing))",
-  "(a . b)");                   // I think this binding should be closed in aif.
+  "(a . b)");  // I think binding 'it' should be closed in aif.
 
   check_e_success(
   "(define-syntax let1"
@@ -346,13 +346,14 @@ int main(){
   "            (set! x (+ x 1)))))");
   check_e("loop-result", "(11 10 9 8 7 6 5 4 3 2 1)");
 
-  check_e_undef(
+  check_e(
   "(let ((x 1)"
   "      (exit 2))"
   "  (loop (push! x loop-result)"
   "        (if (> x 10)"
   "            (exit x)"
-  "            (set! x (+ x 1)))))");
+  "            (set! x (+ x 1)))))",
+  "11");  // I think binding 'exit' should be closed in aif.
 
 
   check_e_success(
