@@ -27,7 +27,7 @@ public:
   VM& operator=(const VM&);
   VM& operator=(VM&&) = delete;
 
-  void set_frame(Env*);
+  void set_frame(Env* e){ frame_ = e; }
   Env* frame() const { return frame_; }
 
   SymTable& symtable(){ return *symtable_; }

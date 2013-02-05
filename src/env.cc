@@ -61,25 +61,6 @@ Env* Env::fork() const{
   return ret;
 }
 
-void Env::foreign_binds_clear(){
-  for(auto i : foreign_binds_){
-    auto v = i.env->map_.find(i.name);
-    if(v != i.env->map_.end() && eq_internal(v->second, i.new_value)){
-      v->second = i.old_value;
-    }
-  }
-}
-
-// TODO: merges with foreign_binds_clear()'s logic
-void Env::foreign_binds_apply(){
-  for(auto i : foreign_binds_){
-    auto v = i.env->map_.find(i.name);
-    if(v != i.env->map_.end() && eq_internal(v->second, i.old_value)){
-      v->second = i.new_value;
-    }
-  }
-}
-
 std::ostream& operator<<(std::ostream& f, const Env& env){
   f << "Env " << c_cast<void*>(&env)
     << " (next=" << c_cast<void*>(env.next_) << ")\n";

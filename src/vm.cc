@@ -36,11 +36,6 @@ VM& VM::operator=(const VM& other){
   return *this;
 }
 
-void VM::set_frame(Env* e){
-  frame_->foreign_binds_clear();
-  frame_ = e;
-  frame_->foreign_binds_apply();
-}
 
 std::ostream& operator<<(std::ostream& f, const VM& v){
   f << "--- [code] ---\n";
