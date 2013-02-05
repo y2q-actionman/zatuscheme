@@ -26,7 +26,7 @@ Lisp_ptr Env::find(Lisp_ptr s){
   return {};
 }
 
-Lisp_ptr Env::set(Symbol* s, Lisp_ptr p){
+Lisp_ptr Env::set(Lisp_ptr s, Lisp_ptr p){
   for(Env* e = this; e; e = e->next_){
     auto ei = e->map_.find(s);
     if(ei != e->map_.end()){

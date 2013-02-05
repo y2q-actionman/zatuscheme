@@ -24,7 +24,7 @@ public:
   Env& operator=(Env&&) = delete;
 
   Lisp_ptr find(Lisp_ptr);
-  Lisp_ptr set(Symbol*, Lisp_ptr);
+  Lisp_ptr set(Lisp_ptr, Lisp_ptr);
   void local_set(Lisp_ptr, Lisp_ptr);
   Env* push();
 

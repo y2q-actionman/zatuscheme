@@ -561,10 +561,18 @@ void vm_op_set(){
   auto val = vm.return_value_1();
 
   if(var.tag() == Ptr_tag::symbol){
-    vm.frame()->set(var.get<Symbol*>(), val);
+    vm.frame()->set(var, val);
   }else if(var.tag() == Ptr_tag::syntactic_closure){
-    auto sc = var.get<SyntacticClosure*>();
-    sc->env()->set(identifier_symbol(sc), val);
+    if(vm.frame()->find(var)){
+      // bound alias
+      vm.frame()->set(var, val);
+    }else{
+      // not-bound syntactic closure
+      auto sc = var.get<SyntacticClosure*>();
+      assert(sc);
+
+      sc->env()->set(sc->expr(), val);
+    }
   }else{
     UNEXP_DEFAULT();
   }
