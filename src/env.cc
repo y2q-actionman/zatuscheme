@@ -9,7 +9,7 @@
 using namespace std;
 
 Env::Env(Env* e)
-  : map_(), next_(e), foreign_binds_(){
+  : map_(), next_(e){
 }
 
 Env::~Env(){
