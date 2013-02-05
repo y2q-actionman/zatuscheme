@@ -429,18 +429,8 @@ void proc_enter_cont(Continuation* c){
 void proc_enter_srule(SyntaxRules* srule){
   ZsArgs args{2};
 
-  // // TODO: merge below to 'after_returning_op' flag operation
-  // auto ret_hook = vm.code.back();
-  // assert(ret_hook.tag() == Ptr_tag::vm_op);
-  // vm.code.pop_back();
-
   auto code = srule->apply(args[0], args[1].get<Env*>());
-
-  auto oldenv = vm.frame();
-  vm.set_frame(srule->env());
   vm.return_value = {code};
-  vm.code.insert(vm.code.end(),
-                 {oldenv, vm_op_leave_frame});
 }
 
 } //namespace
