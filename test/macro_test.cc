@@ -290,37 +290,6 @@ int main(){
   check_e("(let1 x 2 (+ x 5))", "7");
 
 
-  // check_e_success(
-  // "(define-syntax loop-until"
-  // "  (sc-macro-transformer"
-  // "   (lambda (exp env)"
-  // "     (let ((id (cadr exp))"
-  // "           (init (caddr exp))"
-  // "           (test (cadddr exp))"
-  // "           (return (cadddr (cdr exp)))"
-  // "           (step (cadddr (cddr exp)))"
-  // "           (close"
-  // "            (lambda (exp free)"
-  // "              (make-syntactic-closure env free exp))))"
-  // "       `(letrec ((loop"
-  // "                  (lambda (,(close id '()))"
-  // "                    (if"
-  // "                     ,(close test '())"
-  // "                     ,(close return '())"
-  // "                     (loop ,(close step '()))))))"
-  // "          (loop ,(close init '())))))))");
-
-  eval_text("(define result ())");
-  eval_text("(loop-until x 1 (> x 10) x (begin (push! x result) (+ x 1)))");
-  check_e("result", "(11 10 9 8 7 6 5 4 3 2 1)");
-
-  eval_text("(define result ())");
-  eval_text("(loop-until if 1 (> if 10) if (begin (push! if result) (+ if 1)))");
-  check_e("result", "(11 10 9 8 7 6 5 4 3 2 1)");
-
-  eval_text("(define result ())");
-  eval_text("(loop-until loop 1 (> loop 10) loop (begin (push! loop result) (+ loop 1)))");
-  check_e("result", "(11 10 9 8 7 6 5 4 3 2 1)");
 
 
   check_e_success(
