@@ -273,7 +273,7 @@ int main(){
   "  (aif (assv 'a '((1 . 2) (a . b)))"
   "       it"
   "       'nothing))",
-  "1");
+  "(a . b)");                   // I think this binding should be closed in aif.
 
   check_e_success(
   "(define-syntax let1"
