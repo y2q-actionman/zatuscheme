@@ -7,7 +7,7 @@
 #include "describe.hh"
 
 using namespace std;
-using namespace Procedure;
+using namespace ProcFlag;
 
 typedef decltype(parse_func_arg({})) ArgT;
 

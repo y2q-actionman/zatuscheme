@@ -7,7 +7,7 @@
 #include "s_closure.hh"
 #include "s_rules.hh"
 
-namespace Procedure{
+using namespace ProcFlag;
 
 std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
   int argc = 0;
@@ -39,7 +39,7 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
 
 constexpr ProcInfo Continuation::cont_procinfo;
 
-Continuation::Continuation(const VM& vm) : vm_(vm){}
+Continuation::Continuation(const VM& v) : vm_(v){}
 
 Continuation::~Continuation() = default;
 
@@ -88,5 +88,3 @@ const ProcInfo* get_procinfo(Lisp_ptr p){
     UNEXP_DEFAULT();
   }
 }
-
-} // namespace Procedure

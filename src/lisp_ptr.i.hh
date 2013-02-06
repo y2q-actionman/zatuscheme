@@ -30,17 +30,17 @@ struct to_type<Ptr_tag, Ptr_tag::symbol>{
 
 template<>
 struct to_type<Ptr_tag, Ptr_tag::i_procedure>{
-  typedef Procedure::IProcedure* type;
+  typedef IProcedure* type;
 };
 
 template<>
 struct to_type<Ptr_tag, Ptr_tag::n_procedure>{
-  typedef const Procedure::IProcedure* type;
+  typedef const NProcedure* type;
 };
 
 template<>
 struct to_type<Ptr_tag, Ptr_tag::continuation>{
-  typedef const Procedure::Continuation* type;
+  typedef const Continuation* type;
 };
 
 template<>
@@ -85,7 +85,7 @@ struct to_type<Ptr_tag, Ptr_tag::syntactic_closure>{
 
 template<>
 struct to_type<Ptr_tag, Ptr_tag::syntax_rules>{
-  typedef Procedure::SyntaxRules* type;
+  typedef SyntaxRules* type;
 };
 
 template<>
@@ -130,19 +130,19 @@ Ptr_tag to_tag<Ptr_tag, Symbol*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Procedure::IProcedure*>(){
+Ptr_tag to_tag<Ptr_tag, IProcedure*>(){
   return Ptr_tag::i_procedure;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, const Procedure::NProcedure*>(){
+Ptr_tag to_tag<Ptr_tag, const NProcedure*>(){
   return Ptr_tag::n_procedure;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Procedure::Continuation*>(){
+Ptr_tag to_tag<Ptr_tag, Continuation*>(){
   return Ptr_tag::continuation;
 }
 
@@ -196,7 +196,7 @@ Ptr_tag to_tag<Ptr_tag, SyntacticClosure*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Procedure::SyntaxRules*>(){
+Ptr_tag to_tag<Ptr_tag, SyntaxRules*>(){
   return Ptr_tag::syntax_rules;
 }
 

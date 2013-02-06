@@ -7,16 +7,16 @@
 void install_builtin();
 
 // finding NProcedure with name
-const Procedure::NProcedure* find_builtin_nproc(const char*);
-const char* find_builtin_nproc_name(const Procedure::NProcedure*);
+const NProcedure* find_builtin_nproc(const char*);
+const char* find_builtin_nproc_name(const NProcedure*);
 
 // builtin func struct
 struct BuiltinNProc {
   const char* name;
-  const Procedure::NProcedure func;
+  const NProcedure func;
 
   // this constructor is required for static initialization
-  constexpr BuiltinNProc(const char* n, const Procedure::NProcedure& f)
+  constexpr BuiltinNProc(const char* n, const NProcedure& f)
     : name(n), func(f){};
 };
 

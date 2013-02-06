@@ -16,7 +16,7 @@
 #include "builtin.hh"
 
 using namespace std;
-using namespace Procedure;
+using namespace ProcFlag;
 
 static
 Lisp_ptr whole_function_error(const char* opname){

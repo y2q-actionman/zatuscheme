@@ -7,8 +7,6 @@
 #include <vector>
 #include <utility>
 
-namespace Procedure{
-
 class SyntaxRules{
 public:
   SyntaxRules(Env*, Lisp_ptr lits, Lisp_ptr rules);
@@ -36,7 +34,7 @@ public:
 
 private:
   static constexpr ProcInfo sr_procinfo
-  = ProcInfo{2, 2, Passing::whole, Returning::code, MoveReturnValue::f,
+  = ProcInfo{2, 2, ProcFlag::Passing::whole, ProcFlag::Returning::code, ProcFlag::MoveReturnValue::f,
              // Entering::at_jump, Leaving::after_returning_op};
   };
 
@@ -44,8 +42,5 @@ private:
   const Lisp_ptr literals_;
   const Lisp_ptr rules_;
 };
-
-
-} // namespace Procedure
 
 #endif // S_RULES_HH

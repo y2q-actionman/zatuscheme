@@ -21,8 +21,6 @@ using namespace std;
 typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;
 typedef std::unordered_set<Lisp_ptr, eq_id_hash_obj, eq_id_obj> ExpandSet;
 
-namespace Procedure{
-
 namespace {
 
 bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
@@ -527,5 +525,3 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
 
   throw zs_error("syntax-rules error: no matching pattern found!\n");
 }
-
-} // Procedure

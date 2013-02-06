@@ -7,9 +7,9 @@
 #include "env.hh"
 #include "vm.hh"
 
-namespace Procedure {
-  typedef Lisp_ptr(*NativeFunc)();
+typedef Lisp_ptr(*NativeFunc)();
 
+namespace ProcFlag {
   enum class Variadic : bool { f = false, t = true };
 
   enum class Passing : unsigned char{
@@ -29,138 +29,137 @@ namespace Procedure {
   enum class Leaving : unsigned char {
     immediate, after_returning_op
   };
+}
 
-  struct ProcInfo {
-    int required_args;
-    int max_args;
-    Passing passing;
-    Returning returning;
-    MoveReturnValue move_ret;
-    Entering entering;
-    Leaving leaving;
+struct ProcInfo {
+  int required_args;
+  int max_args;
+  ProcFlag::Passing passing;
+  ProcFlag::Returning returning;
+  ProcFlag::MoveReturnValue move_ret;
+  ProcFlag::Entering entering;
+  ProcFlag::Leaving leaving;
 
-    constexpr ProcInfo(int rargs,
-                       int margs,
-                       Passing p = Passing::eval,
-                       Returning r = Returning::pass,
-                       MoveReturnValue m = MoveReturnValue::t,
-                       Entering e = Entering::at_jump,
-                       Leaving l = Leaving::immediate)
-      : required_args(rargs),
-        max_args(margs),
-        passing(p),
-        returning(r),
-        move_ret(m),
-        entering(e),
-        leaving(l){}
+  constexpr ProcInfo(int rargs,
+                     int margs,
+                     ProcFlag::Passing p = ProcFlag::Passing::eval,
+                     ProcFlag::Returning r = ProcFlag::Returning::pass,
+                     ProcFlag::MoveReturnValue m = ProcFlag::MoveReturnValue::t,
+                     ProcFlag::Entering e = ProcFlag::Entering::at_jump,
+                     ProcFlag::Leaving l = ProcFlag::Leaving::immediate)
+    : required_args(rargs),
+      max_args(margs),
+      passing(p),
+      returning(r),
+      move_ret(m),
+      entering(e),
+      leaving(l){}
 
-    // TODO: use delegating constructor
-    constexpr ProcInfo(int rargs,
-                       Variadic v = Variadic::f,
-                       Passing p = Passing::eval,
-                       Returning r = Returning::pass,
-                       MoveReturnValue m = MoveReturnValue::t,
-                       Entering e = Entering::at_jump,
-                       Leaving l = Leaving::immediate)
-      : required_args(rargs),
-        max_args((v == Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
-        passing(p),
-        returning(r),
-        move_ret(m),
-        entering(e),
-        leaving(l){}
-  };
+  // TODO: use delegating constructor
+  constexpr ProcInfo(int rargs,
+                     ProcFlag::Variadic v = ProcFlag::Variadic::f,
+                     ProcFlag::Passing p = ProcFlag::Passing::eval,
+                     ProcFlag::Returning r = ProcFlag::Returning::pass,
+                     ProcFlag::MoveReturnValue m = ProcFlag::MoveReturnValue::t,
+                     ProcFlag::Entering e = ProcFlag::Entering::at_jump,
+                     ProcFlag::Leaving l = ProcFlag::Leaving::immediate)
+    : required_args(rargs),
+      max_args((v == ProcFlag::Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
+      passing(p),
+      returning(r),
+      move_ret(m),
+      entering(e),
+      leaving(l){}
+};
 
-  // static_assert(sizeof(ProcInfo) == (sizeof(int) + sizeof(int) + sizeof(int)),
-  //               "ProcInfo became too big!!");
+// static_assert(sizeof(ProcInfo) == (sizeof(int) + sizeof(int) + sizeof(int)),
+//               "ProcInfo became too big!!");
 
-  std::pair<int, Variadic> parse_func_arg(Lisp_ptr);
+std::pair<int, ProcFlag::Variadic> parse_func_arg(Lisp_ptr);
 
-  class IProcedure{
-  public:
-    IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr al, Env* e)
-      : info_(pi), code_(code), arg_list_(al),  env_(e){}
+class IProcedure{
+public:
+  IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr al, Env* e)
+    : info_(pi), code_(code), arg_list_(al),  env_(e){}
 
-    IProcedure(const IProcedure&) = default;
-    IProcedure(IProcedure&&) = default;
+  IProcedure(const IProcedure&) = default;
+  IProcedure(IProcedure&&) = default;
 
-    ~IProcedure(){}
+  ~IProcedure(){}
   
-    IProcedure& operator=(const IProcedure&) = default;
-    IProcedure& operator=(IProcedure&&) = default;
+  IProcedure& operator=(const IProcedure&) = default;
+  IProcedure& operator=(IProcedure&&) = default;
 
-    const ProcInfo* info() const
-    { return &info_; }
+  const ProcInfo* info() const
+  { return &info_; }
 
-    Lisp_ptr arg_list() const
-    { return arg_list_; }
+  Lisp_ptr arg_list() const
+  { return arg_list_; }
 
-    Lisp_ptr get() const
-    { return code_; }
+  Lisp_ptr get() const
+  { return code_; }
 
-    Env* closure() const
-    { return env_; }
+  Env* closure() const
+  { return env_; }
   
-  private:
-    ProcInfo info_;
-    Lisp_ptr code_;
-    Lisp_ptr arg_list_;
-    Env* env_;
-  };
+private:
+  ProcInfo info_;
+  Lisp_ptr code_;
+  Lisp_ptr arg_list_;
+  Env* env_;
+};
 
-  class NProcedure{
-  public:
-    constexpr NProcedure(NativeFunc f, const ProcInfo& pi)
-      : info_(pi), n_func_(f){}
+class NProcedure{
+public:
+  constexpr NProcedure(NativeFunc f, const ProcInfo& pi)
+    : info_(pi), n_func_(f){}
 
-    NProcedure(const NProcedure&) = default;
-    NProcedure(NProcedure&&) = default;
+  NProcedure(const NProcedure&) = default;
+  NProcedure(NProcedure&&) = default;
 
-    ~NProcedure() = default;
+  ~NProcedure() = default;
   
-    NProcedure& operator=(const NProcedure&) = default;
-    NProcedure& operator=(NProcedure&&) = default;
+  NProcedure& operator=(const NProcedure&) = default;
+  NProcedure& operator=(NProcedure&&) = default;
 
-    const ProcInfo* info() const
-    { return &info_; }
+  const ProcInfo* info() const
+  { return &info_; }
 
-    NativeFunc get() const
-    { return n_func_; }
+  NativeFunc get() const
+  { return n_func_; }
 
-  private:
-    const ProcInfo info_;
-    const NativeFunc n_func_;
-  };
+private:
+  const ProcInfo info_;
+  const NativeFunc n_func_;
+};
 
-  class Continuation{
-  public:
-    Continuation(const VM&);
+class Continuation{
+public:
+  Continuation(const VM&);
 
-    Continuation(const Continuation&) = delete;
-    Continuation(Continuation&&) = delete;
+  Continuation(const Continuation&) = delete;
+  Continuation(Continuation&&) = delete;
 
-    ~Continuation();
+  ~Continuation();
   
-    Continuation& operator=(const Continuation&) = delete;
-    Continuation& operator=(Continuation&&) = delete;
+  Continuation& operator=(const Continuation&) = delete;
+  Continuation& operator=(Continuation&&) = delete;
 
-    const ProcInfo* info() const
-    { return &cont_procinfo; }
+  const ProcInfo* info() const
+  { return &cont_procinfo; }
 
-    const VM& get() const
-    { return vm_; }
+  const VM& get() const
+  { return vm_; }
 
-  private:
-    static constexpr ProcInfo cont_procinfo = ProcInfo{0, Variadic::t};
-    const VM vm_;
-  };
+private:
+  static constexpr ProcInfo cont_procinfo = ProcInfo{0, ProcFlag::Variadic::t};
+  const VM vm_;
+};
 
-  const ProcInfo* get_procinfo(Lisp_ptr);
+const ProcInfo* get_procinfo(Lisp_ptr);
 
-  inline bool is_procedure(Lisp_ptr p){
-    return !!get_procinfo(p);
-  }
-
-} // namespace Procedure
+inline bool is_procedure(Lisp_ptr p){
+  return !!get_procinfo(p);
+}
 
 #endif //PROCEDURE_HH

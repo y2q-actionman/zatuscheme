@@ -12,7 +12,7 @@
 #include "builtin.hh"
 
 using namespace std;
-using namespace Procedure;
+using namespace ProcFlag;
 
 Lisp_ptr traditional_transformer(){
   ZsArgs args{1};

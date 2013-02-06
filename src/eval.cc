@@ -16,7 +16,7 @@
 #include "s_rules.hh"
 
 using namespace std;
-using namespace Procedure;
+using namespace ProcFlag;
 
 bool dump_mode = false;
 

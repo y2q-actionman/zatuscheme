@@ -29,7 +29,7 @@
 #include "builtin_vector.hh"
 
 using namespace std;
-using namespace Procedure;
+using namespace ProcFlag;
 
 namespace {
 
@@ -191,7 +191,7 @@ void install_builtin(){
   install_builtin_symbol(interaction_env_symname, vm.frame());
 }
 
-const Procedure::NProcedure* find_builtin_nproc(const char* name){
+const NProcedure* find_builtin_nproc(const char* name){
   const auto find_func
     = [name](const BuiltinNProc& bf){ return strcmp(name, bf.name) == 0; };
 
@@ -207,7 +207,7 @@ const Procedure::NProcedure* find_builtin_nproc(const char* name){
   return nullptr;
 }
 
-const char* find_builtin_nproc_name(const Procedure::NProcedure* nproc){
+const char* find_builtin_nproc_name(const NProcedure* nproc){
   const auto find_func
     = [nproc](const BuiltinNProc& bf){ return nproc == &bf.func; };
 

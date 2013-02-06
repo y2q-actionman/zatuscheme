@@ -2,7 +2,6 @@
 #include "test_util.hh"
 
 using namespace std;
-using namespace Procedure;
 
 int main(){
   // boolean

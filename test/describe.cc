@@ -23,11 +23,11 @@ std::ostream& operator<<(std::ostream& o, const Number& n){
   return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const Procedure::ProcInfo& info){
+std::ostream& operator<<(std::ostream& o, const ProcInfo& info){
   return (o << "[required_args=" << info.required_args << ", max_args=" << info.max_args << "]");
 }
 
-std::ostream& operator<<(std::ostream& o, Procedure::Variadic v){
+std::ostream& operator<<(std::ostream& o, ProcFlag::Variadic v){
   return (o << boolalpha << static_cast<bool>(v) << noboolalpha);
 }
 

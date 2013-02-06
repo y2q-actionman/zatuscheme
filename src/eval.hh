@@ -27,7 +27,7 @@ void eval();
 bool is_self_evaluating(Lisp_ptr);
 
 // builtin funcs near evaluator
-Lisp_ptr let_internal(Procedure::Entering);
+Lisp_ptr let_internal(ProcFlag::Entering);
 
 // for debug
 const char* stringify(VMop);

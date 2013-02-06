@@ -175,7 +175,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
 
   case Ptr_tag::n_procedure:
     f << "#<NativeProcedure ["
-      << find_builtin_nproc_name(p.get<const Procedure::NProcedure*>())
+      << find_builtin_nproc_name(p.get<const NProcedure*>())
       << "]>";
     break;
 

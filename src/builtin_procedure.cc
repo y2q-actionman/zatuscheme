@@ -8,7 +8,6 @@
 #include "delay.hh"
 
 using namespace std;
-using namespace Procedure;
 
 Lisp_ptr type_check_procedure(){
   ZsArgs args{1};

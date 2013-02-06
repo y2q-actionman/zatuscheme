@@ -11,12 +11,9 @@ class Lisp_ptr;
 
 class Cons;
 class Symbol;
-namespace Procedure{
-  class IProcedure;
-  class NProcedure;
-  class Continuation;
-  class SyntaxRules;
-}
+class IProcedure;
+class NProcedure;
+class Continuation;
 class Number;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
@@ -25,6 +22,7 @@ typedef std::ostream OutputPort;
 class Env;
 class Delay;
 class SyntacticClosure;
+class SyntaxRules;
 class eq_hash_obj; // for EqHashMap
 class eq_obj; // for EqHashMap
 typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> EqHashMap;
