@@ -155,7 +155,7 @@ void ensure_binding(EqHashMap& match_obj,
     }
 
     // non-literal identifier
-    if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
+    if(!eq_internal(ignore_ident, pattern)){
       match_obj.insert({pattern, default_gen_func()});
     }
     return;
@@ -214,7 +214,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     // non-literal identifier
     EqHashMap match_obj;
 
-    if(!identifier_eq(sr.env(), ignore_ident, sr.env(), pattern)){
+    if(!eq_internal(ignore_ident, pattern)){
       match_obj.insert({pattern, form});
     }
     return match_obj;
