@@ -434,13 +434,7 @@ Lisp_ptr syntax_delay(){
 Lisp_ptr syntax_quasiquote(){
   ZsArgs wargs{1};
 
-  Lisp_ptr arg;
-
-  bind_cons_list_strict
-    (wargs[0],
-     [&](Lisp_ptr, Lisp_ptr expr){
-      arg = expr;
-    });
+  auto arg = nth_cons_list<1>(wargs[0]);
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
@@ -455,11 +449,11 @@ Lisp_ptr syntax_quasiquote(){
   GrowList gl;
 
   const auto qq_elem = [&](Lisp_ptr p){
-    if(auto l = p.get<Cons*>()){
-      if(auto l_first_sym = l->car().get<Symbol*>()){
+    if(p.tag() == Ptr_tag::cons){
+      if(auto l_first_sym = nth_cons_list<0>(p).get<Symbol*>()){
         if(l_first_sym == unquote_sym
            || l_first_sym == unquote_splicing_sym){
-          gl.push(l);
+          gl.push(p);
           return;
         }
       }
@@ -474,7 +468,7 @@ Lisp_ptr syntax_quasiquote(){
     }
 
     // check unquote -- like `,x
-    if(auto first_sym = arg.get<Cons*>()->car().get<Symbol*>()){
+    if(auto first_sym = nth_cons_list<0>(arg).get<Symbol*>()){
       if(first_sym == unquote_sym
          || first_sym == unquote_splicing_sym){
         return arg;
