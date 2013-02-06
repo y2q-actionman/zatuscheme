@@ -20,6 +20,16 @@ struct BuiltinNProc {
     : name(n), func(f){};
 };
 
+struct BuiltinIProc {
+  const char* name;
+  const char* arg_list;
+  const char* body;
+
+  // this constructor is required for static initialization
+  constexpr BuiltinIProc(const char* n, const char* a, const char* b)
+    : name(n), arg_list(a), body(b){};
+};
+
 // LOAD from C++ world
 void load(InputPort*);
 
