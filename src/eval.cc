@@ -817,7 +817,6 @@ void eval(){
       case Ptr_tag::delay:
       case Ptr_tag::continuation:
       case Ptr_tag::syntax_rules:
-      case Ptr_tag::eq_hash_map:
         vm.code.pop_back();
         vm.return_value = {p};
         break;
@@ -873,7 +872,6 @@ bool is_self_evaluating(Lisp_ptr p){
   case Ptr_tag::delay:
   case Ptr_tag::continuation:
   case Ptr_tag::syntax_rules:
-  case Ptr_tag::eq_hash_map:
   case Ptr_tag::undefined:
   case Ptr_tag::vm_argcount:
     return true;

@@ -37,8 +37,6 @@ const char* stringify(Ptr_tag p){
     return "syntactic closure";
   case Ptr_tag::syntax_rules:
     return "syntax rules";
-  case Ptr_tag::eq_hash_map:
-    return "eq hash map";
   case Ptr_tag::vm_op:
     return "VMop";
   case Ptr_tag::vm_argcount:

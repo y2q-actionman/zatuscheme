@@ -79,7 +79,6 @@ const ProcInfo* get_procinfo(Lisp_ptr p){
   case Ptr_tag::env:
   case Ptr_tag::delay:
   case Ptr_tag::syntactic_closure:
-  case Ptr_tag::eq_hash_map:
   case Ptr_tag::vm_op:
   case Ptr_tag::vm_argcount:
     return nullptr;

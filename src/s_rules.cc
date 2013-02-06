@@ -18,6 +18,7 @@
 
 using namespace std;
 
+typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> EqHashMap;
 typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;
 typedef std::unordered_set<Lisp_ptr, eq_id_hash_obj, eq_id_obj> ExpandSet;
 

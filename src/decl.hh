@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include <iosfwd>
-#include <unordered_map>
 
 // typedefs & declarations
 class Lisp_ptr;
@@ -23,9 +22,6 @@ class Env;
 class Delay;
 class SyntacticClosure;
 class SyntaxRules;
-class eq_hash_obj; // for EqHashMap
-class eq_obj; // for EqHashMap
-typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> EqHashMap;
 typedef void(*VMop)();
 
 
@@ -48,7 +44,6 @@ enum class Ptr_tag {
     delay,
     syntactic_closure,
     syntax_rules,
-    eq_hash_map,
     vm_op,
     vm_argcount
     };
