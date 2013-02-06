@@ -114,15 +114,13 @@ Lisp_ptr syntax_define(){
 Lisp_ptr syntax_begin(){
   ZsArgs wargs{1};
 
-  return bind_cons_list_strict
-    (wargs[0],
-     [](Lisp_ptr, ConsIter body) -> Lisp_ptr{
-      if(!body){
-        throw zs_error("eval error: begin has no exprs.\n");
-      }
-      vm.return_value = {body.base(), vm_op_begin};
-      return {};
-    });
+  auto body = nthcdr_cons_list<1>(wargs[0]);
+  if(!body || nullp(body)){
+    throw zs_error("eval error: begin has no exprs.\n");
+  }
+  
+  vm.return_value = {body, vm_op_begin};
+  return {};
 }
 
 Lisp_ptr syntax_let(){
