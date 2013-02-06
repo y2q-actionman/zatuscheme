@@ -52,8 +52,6 @@ private:
   lisp_ptr_u u_;
 };
 
-const char* stringify(Ptr_tag);
-
 #include "lisp_ptr.i.hh"
 
 #endif // LISP_PTR_HH

@@ -4,7 +4,7 @@ AM_CXXFLAGS = $(warning_flags)
 
 noinst_LIBRARIES = libzs.a
 libzs_a_SOURCES = zs.hh\
-		decl.hh\
+		decl.hh decl.cc decl.i.hh\
 		util.cc util.hh util.i.hh\
 		zs_error.cc zs_error.hh\
 		token.cc token.hh token.i.hh\

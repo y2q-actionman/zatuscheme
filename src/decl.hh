@@ -48,6 +48,8 @@ enum class Ptr_tag {
     vm_argcount
     };
 
+const char* stringify(Ptr_tag);
+
 
 // declares generic facilities.
 
@@ -66,6 +68,8 @@ enum_type to_tag();
 
 // provided by overload
 //   template<typename Enum_type>
-//   const char* stringify(Ennum_type);
+//   const char* stringify(Enum_type);
+
+#include "decl.i.hh"
 
 #endif // DECL_HH
