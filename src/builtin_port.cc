@@ -65,7 +65,9 @@ Lisp_ptr port_input_call(const char* name, Fun&& fun){
   switch(args.size()){
   case 0:
     p = vm.frame()->find(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME)).get<InputPort*>();
-    assert(p);
+    if(!p){
+      throw zs_error("%s: internal variable '"CURRENT_INPUT_PORT_SYMNAME"' is broken!\n", name);
+    }
     break;
   case 1:
     p = args[0].get<InputPort*>();
@@ -89,7 +91,9 @@ Lisp_ptr port_output_call(const char* name, Fun&& fun){
   switch(args.size()){
   case 1:
     p = vm.frame()->find(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME)).get<OutputPort*>();
-    assert(p);
+    if(!p){
+      throw zs_error("%s: internal variable '"CURRENT_OUTPUT_PORT_SYMNAME"' is broken!\n", name);
+    }
     break;
   case 2:
     p = args[1].get<OutputPort*>();
