@@ -161,3 +161,15 @@ Lisp_ptr eq_hash_func(){
 
   return new Number{static_cast<Number::integer_type>(h)};
 }
+
+Lisp_ptr transcript_on(){
+  ZsArgs args{0}; 
+  dump_mode = true;
+  return Lisp_ptr{true};
+}
+
+Lisp_ptr transcript_off(){
+  ZsArgs args{0}; 
+  dump_mode = false;
+  return Lisp_ptr{true};
+}

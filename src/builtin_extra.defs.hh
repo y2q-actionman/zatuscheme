@@ -30,3 +30,9 @@
 {"eq-hash", {
     eq_hash_func,
     {1}}},
+{"transcript-on", {
+    transcript_on,
+    {0}}},
+{"transcript-off", {
+    transcript_off,
+    {0}}},

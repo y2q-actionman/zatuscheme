@@ -359,6 +359,14 @@ int main(){
   check_e_success("(push 2 push-test-lis)");
   check_e("push-test-lis", "(2 1)");
 
+  check_e_success(
+  "(define-syntax foo"
+  "  (syntax-rules ()"
+  "    ((_ a ...)"
+  "     (list 'a ...))))");
+  check_e("(foo 100)", "(100)");
+  check_e("(foo 1 2)", "(1 2)");
+
   
   // syntax-rules examples from R5RS
   check_e_success(
