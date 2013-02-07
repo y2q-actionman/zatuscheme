@@ -164,11 +164,19 @@ void install_builtin(){
   };    
   static constexpr auto install_builtin_iproc = [](const BuiltinIProc& bi){
     istringstream arg_list_s{bi.arg_list};
-    istringstream body_s{bi.body};
-
     auto arg_list_r = read(arg_list_s);
     auto argi = parse_func_arg(arg_list_r);
-    auto iproc = new IProcedure(read(body_s), {argi.first, argi.second}, arg_list_r, vm.frame());
+
+    istringstream body_s{bi.body};
+    GrowList gl;
+    while(body_s){
+      auto body_r = read(body_s);
+      if(!body_r) break;
+      gl.push(body_r);
+    }
+    auto code = gl.extract();
+
+    auto iproc = new IProcedure(code, {argi.first, argi.second}, arg_list_r, vm.frame());
 
     vm.frame()->local_set(intern(vm.symtable(), bi.name), iproc);
   };    
