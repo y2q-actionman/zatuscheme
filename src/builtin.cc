@@ -86,6 +86,28 @@ Lisp_ptr eval_func(){
 }
 
 
+void load_internal(const string& str){
+  istringstream ss{str};
+  while(ss){
+    auto form = read(ss);
+    if(!form){
+      if(!ss){
+        // cerr << "load error: failed at reading a form. abandoned.\n";
+      }
+      break;
+    }
+
+    vm.code.push_back(form);
+    eval();
+    if(!vm.return_value_1()){
+      cerr << "load error: failed at evaluating a form. skipped.\n";
+      cerr << "\tform: \n";
+      print(cerr, form);
+      continue;
+    }
+  }
+}
+
 Lisp_ptr load_func(){
   ZsArgs args{1};
   auto str = args[0].get<String*>();
@@ -93,12 +115,7 @@ Lisp_ptr load_func(){
     throw builtin_type_check_failed("load", Ptr_tag::string, args[0]);
   }
 
-  stringstream f(*str, ios_base::in);
-  if(!f){
-    throw zs_error("load error: failed at opening file\n");
-  }
-
-  load(&f);
+  load_internal(*str);
   return Lisp_ptr{true};
 }
 
@@ -159,8 +176,7 @@ void install_builtin(){
     vm.frame()->local_set(intern(vm.symtable(), bf.name), {&bf.func});
   };    
   static constexpr auto install_builtin_string = [](const char* s){
-    stringstream ss({s}, ios_base::in);
-    load(&ss);
+    load_internal(s);
   };    
   static constexpr auto install_builtin_symbol = [](const char* name, Lisp_ptr value){
     vm.frame()->local_set(intern(vm.symtable(), name), value);
@@ -221,25 +237,4 @@ const char* find_builtin_nproc_name(const NProcedure* nproc){
   if(i != end(builtin_extra_funcs)) return i->name;
 
   return "(unknown native procedure)";
-}
-
-void load(InputPort* p){
-  while(1){
-    auto form = read(*p);
-    if(!form){
-      if(!*p){
-        // cerr << "load error: failed at reading a form. abandoned.\n";
-      }
-      break;
-    }
-
-    vm.code.push_back(form);
-    eval();
-    if(!vm.return_value_1()){
-      cerr << "load error: failed at evaluating a form. skipped.\n";
-      cerr << "\tform: \n";
-      print(cerr, form);
-      continue;
-    }
-  }
 }

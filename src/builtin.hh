@@ -20,7 +20,4 @@ struct BuiltinNProc {
     : name(n), func(f){};
 };
 
-// LOAD from C++ world
-void load(InputPort*);
-
 #endif // BUILTIN_HH
