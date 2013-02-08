@@ -356,9 +356,8 @@ static
 Lisp_ptr close_to_pattern_variable(ExpandSet& expand_ctx,
                                    const SyntaxRules& sr,
                                    Env* form_env, Lisp_ptr form){
-  if(is_self_evaluating(form)){
-    return form;
-  }else if(form.tag() == Ptr_tag::symbol){
+  assert(identifierp(form));
+  if(form.tag() == Ptr_tag::symbol){
     if(is_literal_identifier(sr, form)){
       return form;
     }
@@ -372,19 +371,6 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_ctx,
       delete new_sc;
       return *iter;
     }
-  }else if(form.tag() == Ptr_tag::cons){
-    GrowList gl;
-    for(auto i : form){
-      gl.push(close_to_pattern_variable(expand_ctx, sr, form_env, i));
-    }
-    return gl.extract();
-  }else if(form.tag() == Ptr_tag::vector){
-    auto v = form.get<Vector*>();
-    Vector* ret = new Vector();
-    for(auto i : *v){
-      ret->push_back(close_to_pattern_variable(expand_ctx, sr, form_env, i));
-    }
-    return {ret};
   }else if(form.tag() == Ptr_tag::syntactic_closure){
     return form;
   }else{
