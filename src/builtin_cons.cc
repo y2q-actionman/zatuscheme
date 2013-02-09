@@ -53,30 +53,6 @@ Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
   return fun(c, args[1]);
 }
 
-Cons* cons_list_tail_base(const char* name){
-  ZsArgs args{2};
-  if(args[0].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed(name, args[0]);
-  }
-  
-  auto num = args[1].get<Number*>();
-  if(!num || num->type() != Number::Type::integer){
-    throw zs_error("native func: %s: passed radix is not number (%s).\n",
-                        name, stringify(args[1].tag()));
-  }
-  auto nth = num->get<Number::integer_type>();
-
-  for(auto i = begin(args[0]), e = end(args[0]); i != e; ++i){
-    if(nth <= 0){
-      return i.base().get<Cons*>();
-    }
-    --nth;
-  }
-
-  throw zs_error("native func: %s: passed list is shorter than expected (%ld).\n",
-                      name, num->get<Number::integer_type>());
-}
-
 } // namespace
 
 
@@ -196,7 +172,27 @@ Lisp_ptr cons_reverse(){
 }
 
 Lisp_ptr cons_list_tail(){
-  return cons_list_tail_base("list-tail");
+  ZsArgs args{2};
+  if(args[0].tag() != Ptr_tag::cons){
+    throw cons_type_check_failed("list-tail", args[0]);
+  }
+  
+  auto num = args[1].get<Number*>();
+  if(!num || num->type() != Number::Type::integer){
+    throw zs_error("native func: list-tail: passed radix is not number (%s).\n",
+                   stringify(args[1].tag()));
+  }
+  auto nth = num->get<Number::integer_type>();
+
+  for(auto i = begin(args[0]), e = end(args[0]); i != e; ++i){
+    if(nth <= 0){
+      return i.base();
+    }
+    --nth;
+  }
+
+  throw zs_error("native func: list-tail: passed list is shorter than expected (%ld).\n",
+                 num->get<Number::integer_type>());
 }
 
 template <typename Func>
