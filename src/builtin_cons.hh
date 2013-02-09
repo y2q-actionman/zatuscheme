@@ -17,7 +17,6 @@ Lisp_ptr cons_length();
 Lisp_ptr cons_append();
 Lisp_ptr cons_reverse();
 Lisp_ptr cons_list_tail();
-Lisp_ptr cons_list_ref();
 Lisp_ptr cons_memq();
 Lisp_ptr cons_memv();
 Lisp_ptr cons_member();

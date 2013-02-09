@@ -1,5 +1,7 @@
 // This file is intended to be included into an array of 'const char*'
 
+"(define (list-ref lis num) (car (list-tail lis num)))",
+
 "(define (caar x) (car (car x)))",
 "(define (cadr x) (car (cdr x)))",
 "(define (cdar x) (cdr (car x)))",

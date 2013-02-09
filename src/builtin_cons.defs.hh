@@ -51,9 +51,6 @@
 {"list-tail", {
     cons_list_tail,
     {2}}},
-{"list-ref", {
-    cons_list_ref,
-    {2}}},
 
 {"memq", {
     cons_memq,

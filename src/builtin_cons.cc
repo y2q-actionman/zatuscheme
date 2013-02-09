@@ -199,11 +199,6 @@ Lisp_ptr cons_list_tail(){
   return cons_list_tail_base("list-tail");
 }
 
-Lisp_ptr cons_list_ref(){
-  auto c = cons_list_tail_base("list-ref");
-  return c->car();
-}
-
 template <typename Func>
 Lisp_ptr cons_mem_funcs(const char* name, Func fun){
   ZsArgs args{2};
