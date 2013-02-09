@@ -1,5 +1,15 @@
 // This file is intended to be included into an array of 'const char*'
 
+"(define-syntax let*"
+"  (syntax-rules ()"
+"    ((let* () body1 body2 ...)"
+"     (let () body1 body2 ...))"
+"    ((let* ((name1 val1) (name2 val2) ...)"
+"       body1 body2 ...)"
+"     (let ((name1 val1))"
+"       (let* ((name2 val2) ...)"
+"         body1 body2 ...)))))",
+
 "(define-syntax cond"
 "  (syntax-rules (else =>)"
 "    ((cond (else result1 result2 ...))"

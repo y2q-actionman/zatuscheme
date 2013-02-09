@@ -12,7 +12,6 @@ Lisp_ptr syntax_set();
 Lisp_ptr syntax_define();
 Lisp_ptr syntax_begin();
 Lisp_ptr syntax_let();
-Lisp_ptr syntax_let_star();
 Lisp_ptr syntax_letrec();
 Lisp_ptr syntax_do();
 Lisp_ptr syntax_delay();

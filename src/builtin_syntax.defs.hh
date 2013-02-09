@@ -22,9 +22,6 @@
 {"let", {
     syntax_let,
     {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
-{"let*", {
-    syntax_let_star,
-    {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
 {"letrec", {
     syntax_letrec,
     {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},

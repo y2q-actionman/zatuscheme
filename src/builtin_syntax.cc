@@ -127,41 +127,6 @@ Lisp_ptr syntax_let(){
   return let_internal(Entering::at_jump);
 }
 
-static
-Lisp_ptr let_star_expand(Lisp_ptr bindings, Lisp_ptr body){
-  if(nullp(bindings)){
-    return new Cons(find_builtin_nproc("begin"), body);
-  }else{
-    return bind_cons_list_strict
-      (bindings,
-       [&](Lisp_ptr b_first, ConsIter b_rest) -> Lisp_ptr {
-        return make_cons_list({find_builtin_nproc("let"),
-                               make_cons_list({b_first}),
-                               let_star_expand(b_rest.base(), body)});
-      });
-  }
-}
-
-Lisp_ptr syntax_let_star(){
-  Lisp_ptr bindings, body;
-
-  {
-    ZsArgs wargs{1};
-
-    bind_cons_list_strict
-      (wargs[0],
-       [&](Lisp_ptr, Lisp_ptr bindings1, ConsIter body1){
-        bindings = bindings1;
-        body = body1.base();
-      });
-  }
-
-  vm.stack.insert(vm.stack.end(),
-                  {let_star_expand(bindings, body), {Ptr_tag::vm_argcount, 1}});
-
-  return let_internal(Entering::at_jump);
-}
-
 Lisp_ptr syntax_letrec(){
   // This heavyly depends on the implementation.
   //
