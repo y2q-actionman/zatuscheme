@@ -125,6 +125,10 @@ static const BuiltinNProc builtin_syntax_funcs[] = {
 #include "builtin_syntax.defs.hh"
 };
 
+static const char* builtin_syntax_strs[] = {
+#include "builtin_syntax.strs.hh"
+};
+
 static const BuiltinNProc builtin_funcs[] = {
   {"eval", {
       eval_func,
@@ -185,6 +189,8 @@ void install_builtin(){
   // null-environment
   for_each(std::begin(builtin_syntax_funcs), std::end(builtin_syntax_funcs),
            install_builtin_native);
+  for_each(std::begin(builtin_syntax_strs), std::end(builtin_syntax_strs),
+           install_builtin_string);
   auto null_env = vm.frame();
 
   // r5rs-environment

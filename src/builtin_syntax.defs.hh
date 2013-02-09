@@ -29,20 +29,6 @@
     syntax_letrec,
     {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
 
-{"cond", {
-    syntax_cond,
-    {1, Variadic::f, Passing::whole, Returning::code}}},
-{"and", {
-    syntax_and,
-    {1, Variadic::f, Passing::whole, Returning::code}}},
-{"or", {
-    syntax_or,
-    {1, Variadic::f, Passing::whole, Returning::code}}},
-
-{"case", {
-    syntax_case,
-    {1, Variadic::f, Passing::whole, Returning::code}}},
-
 {"do", {
     syntax_do,
     {1, Variadic::f, Passing::whole, Returning::code}}},
@@ -81,3 +67,9 @@
 {"syntax-rules", {
     syntax_syntax_rules,
     {2, 2, Passing::whole}}},
+
+// for cond
+{"memv", {
+    cons_memv,
+    {2}}},
+
