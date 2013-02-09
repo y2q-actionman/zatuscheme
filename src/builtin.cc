@@ -227,7 +227,7 @@ const NProcedure* find_builtin_nproc(const char* name){
   i = find_if(begin(builtin_extra_funcs), end(builtin_extra_funcs), find_func);
   if(i != end(builtin_extra_funcs)) return &(i->func);
 
-  return nullptr;
+  throw zs_error("internal error: native function '%s' is not registered!", name);
 }
 
 const char* find_builtin_nproc_name(const NProcedure* nproc){
