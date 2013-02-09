@@ -31,17 +31,6 @@
 "(define (cdddar x) (cdr (cddar x)))",
 "(define (cddddr x) (cdr (cdddr x)))",
 
-#define MEM_FUNCS(name, equal_op)               \
-  "(define ("name" obj list)"                   \
-  "  (if (null? list) #f"                       \
-  "    (if ("equal_op" obj (car list)) list"    \
-  "        ("name" obj (cdr list)))))"
-
-MEM_FUNCS("memq", "eq?"),
-MEM_FUNCS("memv", "eqv?"),
-MEM_FUNCS("member", "equal?"),
-#undef MEM_FUNCS
-
 #define ASS_FUNCS(name, equal_op)                       \
   "(define ("name" obj alist)"                          \
   "  (if (null? alist) #f"                              \

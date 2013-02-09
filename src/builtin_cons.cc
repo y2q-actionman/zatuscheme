@@ -10,6 +10,7 @@
 #include "number.hh"
 #include "printer.hh"
 #include "zs_error.hh"
+#include "equality.hh"
 
 using namespace std;
 
@@ -202,3 +203,32 @@ Lisp_ptr cons_list_ref(){
   auto c = cons_list_tail_base("list-ref");
   return c->car();
 }
+
+template <typename Func>
+Lisp_ptr cons_mem_funcs(const char* name, Func fun){
+  ZsArgs args{2};
+
+  if(args[1].tag() != Ptr_tag::cons){
+    throw cons_type_check_failed(name, args[1]);
+  }
+
+  for(auto i = begin(args[1]), e = end(args[1]); i != e; ++i){
+    if(fun(args[0], *i))
+      return i.base();
+  }
+
+  return Lisp_ptr{false};
+}
+
+Lisp_ptr cons_memq(){
+  return cons_mem_funcs("memq", eq_internal);
+}
+
+Lisp_ptr cons_memv(){
+  return cons_mem_funcs("memv", eqv_internal);
+}
+
+Lisp_ptr cons_member(){
+  return cons_mem_funcs("member", equal_internal);
+}
+

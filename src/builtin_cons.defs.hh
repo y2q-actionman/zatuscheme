@@ -54,3 +54,14 @@
 {"list-ref", {
     cons_list_ref,
     {2}}},
+
+{"memq", {
+    cons_memq,
+    {2}}},
+{"memv", {
+    cons_memv,
+    {2}}},
+{"member", {
+    cons_member,
+    {2}}},
+
