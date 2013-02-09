@@ -145,65 +145,6 @@ Lisp_ptr syntax_letrec(){
   return let_internal(Entering::at_bind);
 }
 
-Lisp_ptr syntax_do(){
-  ZsArgs wargs{1};
-
-  Lisp_ptr vars, end_test, end_exprs,  commands;
-
-  bind_cons_list_strict
-    (wargs[0],
-     [&](Lisp_ptr, Lisp_ptr vars1, Lisp_ptr ends, ConsIter commands1) -> void{
-      vars = vars1;
-
-      auto end_c = ends.get<Cons*>();
-      end_test = end_c->car();
-      end_exprs = end_c->cdr();
-
-      commands = commands1.base();
-    });
-
-  // TODO: collect this by garbage collector!
-  auto loop_sym = new Symbol(new string("do_loop_symbol"));
-
-  // extract vars
-  GrowList init_binds;
-  GrowList steps;
-
-  for(auto p : vars){
-    bind_cons_list_loose
-      (p,
-       [&](Lisp_ptr v, Lisp_ptr i, Lisp_ptr s) -> void{
-        if(!s) s = v;
-
-        init_binds.push(make_cons_list({v, i}));
-        steps.push(s);
-      });
-  }
-
-  // creates loop body
-  GrowList gw;
-
-  gw.push(find_builtin_nproc("begin"));
-  for(auto p : commands){
-    gw.push(p);
-  }
-  gw.push(push_cons_list(loop_sym, steps.extract()));
-
-  // creates 'named let' style loop
-  return
-    make_cons_list({
-        find_builtin_nproc("let"),
-        loop_sym,
-        init_binds.extract(),
-        make_cons_list({
-            find_builtin_nproc("if"),
-            end_test,
-            push_cons_list(find_builtin_nproc("begin"), end_exprs),
-            gw.extract(),
-            })
-        });
-}
-
 Lisp_ptr syntax_delay(){
   ZsArgs wargs{1};
   return {new Delay(wargs[0], vm.frame())};

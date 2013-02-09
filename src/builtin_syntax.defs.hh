@@ -26,10 +26,6 @@
     syntax_letrec,
     {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
 
-{"do", {
-    syntax_do,
-    {1, Variadic::f, Passing::whole, Returning::code}}},
-
 {"delay", {
     syntax_delay,
     {1, Variadic::f, Passing::quote, Returning::code}}},
