@@ -4,8 +4,3 @@
 #include "builtin_util.hh"
 
 using namespace std;
-
-Lisp_ptr not_func(){
-  ZsArgs args{1};
-  return Lisp_ptr{!args[0].get<bool>()};
-}

@@ -3,6 +3,4 @@
 
 #include "decl.hh"
 
-Lisp_ptr not_func();
-
 #endif // BUILTIN_BOOLEAN_HH

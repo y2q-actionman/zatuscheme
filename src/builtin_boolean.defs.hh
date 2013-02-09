@@ -3,6 +3,3 @@
 {"boolean?", {
     type_check_pred<Ptr_tag::boolean>, 
     {1}}},
-{"not", {
-    not_func,
-    {1}}},
