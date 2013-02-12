@@ -59,4 +59,9 @@ public:
   using zs_error::what;
 };
 
+// builtin type checking
+zs_error builtin_type_check_failed(const char*, Ptr_tag, Lisp_ptr);
+zs_error builtin_argcount_failed(const char*, int required, int max, int passed);
+zs_error builtin_identifier_check_failed(const char*, Lisp_ptr);
+
 #endif // ZS_ERROR_HH

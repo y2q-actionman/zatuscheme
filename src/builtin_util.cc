@@ -7,22 +7,6 @@
 //   return arg1[0];
 // }
 
-zs_error builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
-  return zs_error("native func: %s: arg is not %s! (%s)\n",
-                  func_name, stringify(tag), stringify(p.tag()));
-}
-
-zs_error builtin_argcount_failed(const char* name, int required, int max, int passed){
-  throw zs_error("eval error: %s: number of passed args is mismatched!!"
-                 " (acceptable %d-%d args, passed %d)\n",
-                 name, required, max, passed);
-}
-
-zs_error builtin_identifier_check_failed(const char* name, Lisp_ptr p){
-  return zs_error("eval error: %s: arg is not identifier! (%s)\n",
-                  name, stringify(p.tag()));
-}
-
 // class ZsArgs
 ZsArgs::ZsArgs()
   : size_(vm.stack.back().get<int>()),
