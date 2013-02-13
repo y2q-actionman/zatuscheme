@@ -14,6 +14,7 @@
 #include "delay.hh"
 #include "s_closure.hh"
 #include "s_rules.hh"
+#include "builtin.hh"
 
 using namespace std;
 using namespace ProcFlag;
@@ -241,10 +242,20 @@ void proc_enter_native(const NProcedure* fun){
   auto native_func = fun->get();
   assert(native_func);
 
-  auto p = native_func();
-
   auto info = fun->info();
   assert(info);
+
+  assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
+  auto argc = vm.stack.back().get<int>();
+
+  if(!((info->required_args <= argc) && (argc <= info->max_args))){
+    throw builtin_argcount_failed(find_builtin_nproc_name(fun),
+                                  info->required_args, info->max_args,
+                                  argc);
+  }
+
+
+  auto p = native_func();
 
   if(info->move_ret == MoveReturnValue::t){
     vm.return_value = {p};
