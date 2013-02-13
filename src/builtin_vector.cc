@@ -47,7 +47,7 @@ Lisp_ptr vector_vector(){
 }
 
 Lisp_ptr vector_length(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto v = args[0].get<Vector*>();
   if(!v){
@@ -58,7 +58,7 @@ Lisp_ptr vector_length(){
 }
 
 Lisp_ptr vector_ref(){
-  ZsArgs args{2};
+  ZsArgs args;
 
   auto v = args[0].get<Vector*>();
   if(!v){
@@ -85,7 +85,7 @@ Lisp_ptr vector_ref(){
 }
 
 Lisp_ptr vector_set(){
-  ZsArgs args{3};
+  ZsArgs args;
 
   auto v = args[0].get<Vector*>();
   if(!v){
@@ -113,7 +113,7 @@ Lisp_ptr vector_set(){
 }
 
 Lisp_ptr vector_to_list(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto v = args[0].get<Vector*>();
   if(!v){
@@ -124,7 +124,7 @@ Lisp_ptr vector_to_list(){
 }
 
 Lisp_ptr vector_from_list(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   if(args[0].tag() != Ptr_tag::cons){
     throw builtin_type_check_failed("list->vector", Ptr_tag::cons, args[0]);
@@ -134,7 +134,7 @@ Lisp_ptr vector_from_list(){
 }
 
 Lisp_ptr vector_fill(){
-  ZsArgs args{2};
+  ZsArgs args;
 
   auto v = args[0].get<Vector*>();
   if(!v){

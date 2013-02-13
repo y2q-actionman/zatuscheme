@@ -119,7 +119,7 @@
 
 {"rationalize", {
     number_rationalize,
-    {1}}},
+    {2}}},
 
 {"exp", {
     number_exp,

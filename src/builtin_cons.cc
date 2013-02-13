@@ -24,7 +24,7 @@ zs_error cons_type_check_failed(const char* func_name, Lisp_ptr p){
 template<typename Fun>
 inline
 Lisp_ptr cons_carcdr(const char* name, Fun&& fun){
-  ZsArgs args{1};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed(name, args[0]);
   }
@@ -40,7 +40,7 @@ Lisp_ptr cons_carcdr(const char* name, Fun&& fun){
 template<typename Fun>
 inline
 Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
-  ZsArgs args{2};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed(name, args[0]);
   }
@@ -57,12 +57,12 @@ Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
 
 
 Lisp_ptr type_check_pair(){
-  ZsArgs args{1};
+  ZsArgs args;
   return Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
 }
 
 Lisp_ptr cons_cons(){
-  ZsArgs args{2};
+  ZsArgs args;
   return {new Cons(args[0], args[1])};
 }
 
@@ -93,12 +93,12 @@ Lisp_ptr cons_set_cdr(){
 
 
 Lisp_ptr cons_nullp(){
-  ZsArgs args{1};
+  ZsArgs args;
   return Lisp_ptr{nullp(args[0])};
 }
 
 Lisp_ptr cons_listp(){
-  ZsArgs args{1};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed("list?", args[0]);
   }
@@ -130,7 +130,7 @@ Lisp_ptr cons_list_star(){
 }
 
 Lisp_ptr cons_length(){
-  ZsArgs args{1};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed("list?", args[0]);
   }
@@ -157,7 +157,7 @@ Lisp_ptr cons_append(){
 }
 
 Lisp_ptr cons_reverse(){
-  ZsArgs args{1};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed("reverse", args[0]);
   }
@@ -172,7 +172,7 @@ Lisp_ptr cons_reverse(){
 }
 
 Lisp_ptr cons_list_tail(){
-  ZsArgs args{2};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed("list-tail", args[0]);
   }
@@ -197,7 +197,7 @@ Lisp_ptr cons_list_tail(){
 
 template <typename Func>
 Lisp_ptr cons_mem_funcs(const char* name, Func fun){
-  ZsArgs args{2};
+  ZsArgs args;
 
   if(args[1].tag() != Ptr_tag::cons){
     throw cons_type_check_failed(name, args[1]);
@@ -222,4 +222,3 @@ Lisp_ptr cons_memv(){
 Lisp_ptr cons_member(){
   return cons_mem_funcs("member", equal_internal);
 }
-

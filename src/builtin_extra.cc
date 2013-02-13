@@ -15,7 +15,7 @@ using namespace std;
 using namespace ProcFlag;
 
 Lisp_ptr traditional_transformer(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
@@ -32,12 +32,12 @@ Lisp_ptr traditional_transformer(){
 
 Lisp_ptr gensym(){
   static const string gensym_symname = {"(gensym)"};
-  ZsArgs args{0};
+  ZsArgs args;
   return {new Symbol(&gensym_symname)};
 }
 
 Lisp_ptr sc_macro_transformer(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
@@ -61,7 +61,7 @@ Lisp_ptr sc_macro_transformer(){
 }
 
 Lisp_ptr make_syntactic_closure(){
-  ZsArgs args{3};
+  ZsArgs args;
 
   Env* e = args[0].get<Env*>();
   if(!e){
@@ -79,7 +79,7 @@ Lisp_ptr make_syntactic_closure(){
 }
 
 Lisp_ptr capture_env(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   if(args[0].tag() != Ptr_tag::i_procedure){
     throw zs_error("eval error: first arg is not procedure (%s)\n",
@@ -104,12 +104,12 @@ Lisp_ptr capture_env(){
 }
 
 Lisp_ptr proc_identifierp(){
-  ZsArgs args{1};
+  ZsArgs args;
   return Lisp_ptr{identifierp(args[0])};
 }
 
 Lisp_ptr proc_identifier_eq(){
-  ZsArgs args{4};
+  ZsArgs args;
 
   auto ident1_env = args[0].get<Env*>();
   if(!ident1_env){
@@ -134,7 +134,7 @@ Lisp_ptr proc_identifier_eq(){
 }
 
 Lisp_ptr make_synthetic_identifier(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   if(!identifierp(args[0])){
     throw zs_error("make-synthetic-identifier: passed value is not identifier (%s)\n",
@@ -146,7 +146,7 @@ Lisp_ptr make_synthetic_identifier(){
 
 Lisp_ptr exit_func(){
   {
-    ZsArgs args{0}; 
+    ZsArgs args; 
   }
   // cerr << "exiting..\n";
   vm.stack.clear();
@@ -155,7 +155,7 @@ Lisp_ptr exit_func(){
 }
 
 Lisp_ptr eq_hash_func(){
-  ZsArgs args{1}; 
+  ZsArgs args; 
 
   auto h = eq_hash(args[0]);
 
@@ -163,13 +163,13 @@ Lisp_ptr eq_hash_func(){
 }
 
 Lisp_ptr transcript_on(){
-  ZsArgs args{0}; 
+  ZsArgs args; 
   dump_mode = true;
   return Lisp_ptr{true};
 }
 
 Lisp_ptr transcript_off(){
-  ZsArgs args{0}; 
+  ZsArgs args; 
   dump_mode = false;
   return Lisp_ptr{true};
 }

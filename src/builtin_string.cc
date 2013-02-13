@@ -24,7 +24,7 @@ zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
 
 template<typename Fun>
 Lisp_ptr string_compare(const char* name, Fun&& fun){
-  ZsArgs args{2};
+  ZsArgs args;
   String* str[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -93,7 +93,7 @@ Lisp_ptr string_string(){
 }
   
 Lisp_ptr string_length(){
-  ZsArgs args{1};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-length", args[0]);
@@ -103,7 +103,7 @@ Lisp_ptr string_length(){
 }
 
 Lisp_ptr string_ref(){
-  ZsArgs args{2};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-ref", args[0]);
@@ -129,7 +129,7 @@ Lisp_ptr string_ref(){
 }
 
 Lisp_ptr string_set(){
-  ZsArgs args{3};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-set!", args[0]);
@@ -203,7 +203,7 @@ Lisp_ptr string_ci_greater_eq(){
 
 
 Lisp_ptr string_substr(){
-  ZsArgs args{3};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("substring", args[0]);
@@ -252,7 +252,7 @@ Lisp_ptr string_append(){
 }
 
 Lisp_ptr string_to_list(){
-  ZsArgs args{1};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string->list", args[0]);
@@ -262,7 +262,7 @@ Lisp_ptr string_to_list(){
 }
 
 Lisp_ptr string_from_list(){
-  ZsArgs args{1};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::cons){
     throw builtin_type_check_failed("list->string", Ptr_tag::cons, args[0]);
   }
@@ -281,7 +281,7 @@ Lisp_ptr string_from_list(){
 }
 
 Lisp_ptr string_copy(){
-  ZsArgs args{1};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-copy", args[0]);
@@ -291,7 +291,7 @@ Lisp_ptr string_copy(){
 }
 
 Lisp_ptr string_fill(){
-  ZsArgs args{2};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-fill!", args[0]);

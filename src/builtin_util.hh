@@ -58,7 +58,7 @@ private:
 // type check predicate
 template <Ptr_tag p>
 Lisp_ptr type_check_pred(){
-  ZsArgs args{1};
+  ZsArgs args;
   return Lisp_ptr{args[0].tag() == p};
 }
 

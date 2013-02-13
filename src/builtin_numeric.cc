@@ -30,7 +30,7 @@ zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
 
 template<typename Fun>
 inline Lisp_ptr number_pred(Fun&& fun){
-  ZsArgs args{1};
+  ZsArgs args;
   auto num = args[0].get<Number*>();
   if(!num){
     return Lisp_ptr{false};
@@ -261,7 +261,7 @@ struct binary_accum{
 template<typename Fun>
 inline
 Lisp_ptr number_divop(const char* name, Fun&& fun){
-  ZsArgs args{2};
+  ZsArgs args;
   Number* n[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -299,7 +299,7 @@ T gcd(T m, T n){
 template<typename Fun>
 inline
 Lisp_ptr number_rounding(const char* name, Fun&& fun){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){
@@ -322,7 +322,7 @@ Lisp_ptr number_rounding(const char* name, Fun&& fun){
 template<typename Fun>
 inline
 Lisp_ptr number_unary_op(const char* name, Fun&& fun){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){
@@ -400,7 +400,7 @@ struct sqrt_fun{
 template<typename RFun, typename CFun>
 inline
 Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
-  ZsArgs args{2};
+  ZsArgs args;
   Number* n[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -433,7 +433,7 @@ Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
 template<typename Fun>
 inline
 Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){
@@ -453,7 +453,7 @@ Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
 
 template<typename Fun>
 Lisp_ptr number_i_e(const char* name, Fun&& fun){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){
@@ -655,7 +655,7 @@ Lisp_ptr number_divide(){
 }
 
 Lisp_ptr number_abs(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){
@@ -749,7 +749,7 @@ Lisp_ptr number_lcm(){
 }
 
 Lisp_ptr number_numerator(){
-  ZsArgs args{1};
+  ZsArgs args;
   auto num = args[0].get<Number*>();
   if(!num){
     throw number_type_check_failed("numerator", args[0]);
@@ -759,7 +759,7 @@ Lisp_ptr number_numerator(){
 }
 
 Lisp_ptr number_denominator(){
-  ZsArgs args{1};
+  ZsArgs args;
   auto num = args[0].get<Number*>();
   if(!num){
     throw number_type_check_failed("denominator", args[0]);
@@ -787,7 +787,7 @@ Lisp_ptr number_round(){
 
 
 Lisp_ptr number_rationalize(){
-  ZsArgs args{2};
+  ZsArgs args;
   Number* n[2];
 
   for(auto i = 0; i < 2; ++i){

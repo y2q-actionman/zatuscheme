@@ -24,7 +24,7 @@ zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
 
 template<typename IOType, typename F_IOType>
 Lisp_ptr port_open_file(const char* name){
-  ZsArgs args{1};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw builtin_type_check_failed(name, Ptr_tag::string, args[0]);
@@ -40,7 +40,7 @@ Lisp_ptr port_open_file(const char* name){
 
 template<typename IOType, typename F_IOType>
 Lisp_ptr port_close(const char* name){
-  ZsArgs args{1};
+  ZsArgs args;
   auto p = args[0].get<IOType*>();
   if(!p){
     throw port_type_check_failed<IOType>(name, args[0]);
@@ -143,7 +143,7 @@ Lisp_ptr port_peek_char(){
 }
 
 Lisp_ptr port_eof_p(){
-  ZsArgs args{1};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::character){
     return Lisp_ptr{false};
   }

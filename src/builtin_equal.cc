@@ -6,16 +6,16 @@
 using namespace std;
 
 Lisp_ptr eq_proc(){
-  ZsArgs args{2};
+  ZsArgs args;
   return Lisp_ptr{eq_internal(args[0], args[1])};
 }
 
 Lisp_ptr eqv_proc(){
-  ZsArgs args{2};
+  ZsArgs args;
   return Lisp_ptr{eqv_internal(args[0], args[1])};
 }
 
 Lisp_ptr equal_proc(){
-  ZsArgs args{2};
+  ZsArgs args;
   return Lisp_ptr{equal_internal(args[0], args[1])};
 }

@@ -8,7 +8,7 @@
 using namespace std;
 
 Lisp_ptr sym_to_string(){
-  ZsArgs args{1};
+  ZsArgs args;
   auto sym = args[0].get<Symbol*>();
   if(!sym){
     throw zs_error("native func: symbol->string: arg is not symbol! (%s)\n",
@@ -20,7 +20,7 @@ Lisp_ptr sym_to_string(){
 }
 
 Lisp_ptr sym_from_string(){
-  ZsArgs args{1};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw zs_error("native func: string->symbol: arg is not string! (%s)\n",

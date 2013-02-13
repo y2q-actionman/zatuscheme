@@ -19,7 +19,7 @@ zs_error char_type_check_failed(const char* func_name, Lisp_ptr p){
 
 template<typename Fun>
 Lisp_ptr char_compare(const char* name, Fun&& fun){
-  ZsArgs args{2};
+  ZsArgs args;
   char c[2];
 
   for(auto i = 0; i < 2; ++i){
@@ -42,7 +42,7 @@ struct ci_comparator{
 
 template<typename Fun>
 Lisp_ptr char_pred(Fun&& fun){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto c = args[0].get<char>();
   if(!c){
@@ -54,7 +54,7 @@ Lisp_ptr char_pred(Fun&& fun){
 
 template<typename Fun>
 Lisp_ptr char_conversion(const char* name, Fun&& fun){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto c = args[0].get<char>();
   if(!c){
@@ -138,7 +138,7 @@ Lisp_ptr char_to_int(){
 }
 
 Lisp_ptr char_from_int(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto n = args[0].get<Number*>();
   if(!n){

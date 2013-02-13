@@ -10,7 +10,7 @@
 using namespace std;
 
 Lisp_ptr type_check_procedure(){
-  ZsArgs args{1};
+  ZsArgs args;
   return Lisp_ptr{is_procedure(args[0])};
 }
 
@@ -43,7 +43,7 @@ Lisp_ptr apply_func(){
 }
 
 Lisp_ptr func_force(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto d = args[0].get<Delay*>();
   if(!d){
@@ -74,7 +74,7 @@ Lisp_ptr proc_values(){
 Lisp_ptr call_with_values(){
   Lisp_ptr procs[2];
   {
-    ZsArgs args{2};
+    ZsArgs args;
 
     if(!is_procedure(args[0])){
       throw zs_error("call-with-values error: first arg is not procedure (%s)\n",
@@ -107,7 +107,7 @@ Lisp_ptr call_with_values(){
 Lisp_ptr call_cc(){
   Lisp_ptr proc;
   {
-    ZsArgs args{1};
+    ZsArgs args;
 
     if(!is_procedure(args[0])){
       throw zs_error("call/cc error: first arg is not procedure (%s)\n",
@@ -131,7 +131,7 @@ Lisp_ptr call_cc(){
 Lisp_ptr dynamic_wind(){
   Lisp_ptr procs[3];
   {
-    ZsArgs args{3};
+    ZsArgs args;
     auto procs_i = begin(procs);
 
     for(auto p : args){
