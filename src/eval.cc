@@ -422,9 +422,11 @@ void proc_enter_cont(Continuation* c){
   // finds dynamic-winds for processing..
   const auto wind_index = get_wind_index(vm, next_vm);
 
-  // saves old return values
-  auto ret_values = new std::vector<Lisp_ptr>();
-  stack_to_vector(vm.stack, *ret_values);
+  // saves arguments .
+  // They become return-values of the passed continuation.
+  ZsArgs args;
+  auto ret_values = new std::vector<Lisp_ptr>(begin(args), end(args));
+  args.~ZsArgs();
 
   vm.code.insert(vm.code.end(), {ret_values, c, vm_op_replace_vm});
 

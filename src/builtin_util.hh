@@ -9,8 +9,8 @@
 template<bool dot_list, typename StackT>
 Lisp_ptr stack_to_list(StackT&);
 
-template<typename StackT, typename VectorT>
-void stack_to_vector(StackT&, VectorT&);
+// template<typename StackT, typename VectorT>
+// void stack_to_vector(StackT&, VectorT&);
 
 // VM::stack accessor
 

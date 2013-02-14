@@ -47,6 +47,7 @@ Lisp_ptr stack_to_list(StackT& st){
   return ret;
 }
 
+/*
 template<typename StackT, typename VectorT>
 void stack_to_vector(StackT& st, VectorT& v){
   Lisp_ptr argc = st.back();
@@ -61,6 +62,7 @@ void stack_to_vector(StackT& st, VectorT& v){
 
   st.erase(arg_start, arg_end);
 }
+*/
 
 // template<int size>
 // std::array<Lisp_ptr, size> pick_args(){
