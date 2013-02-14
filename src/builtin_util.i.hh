@@ -15,6 +15,7 @@
 #include "cons_util.hh"
 #include "vm.hh"
 
+/*
 template<bool dot_list, typename StackT>
 Lisp_ptr stack_to_list(StackT& st){
   Lisp_ptr argc = st.back();
@@ -46,6 +47,7 @@ Lisp_ptr stack_to_list(StackT& st){
 
   return ret;
 }
+*/
 
 /*
 template<typename StackT, typename VectorT>

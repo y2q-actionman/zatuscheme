@@ -127,7 +127,14 @@ Lisp_ptr cons_list(){
 }
 
 Lisp_ptr cons_list_star(){
-  return stack_to_list<true>(vm.stack);
+  ZsArgs args;
+  GrowList gl;
+
+  for(auto i = 0; i < args.size() - 1; ++i){
+    gl.push(args[i]);
+  }
+
+  return gl.extract_with_tail(args[args.size() - 1]);
 }
 
 Lisp_ptr cons_length(){
