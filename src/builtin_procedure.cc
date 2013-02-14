@@ -15,30 +15,34 @@ Lisp_ptr type_check_procedure(){
 }
 
 Lisp_ptr apply_func(){
-  std::vector<Lisp_ptr> args;
-  stack_to_vector(vm.stack, args);
+  ZsArgs args;
 
-  if(!is_procedure(args[0])){
+  auto proc = args[0];
+  if(!is_procedure(proc)){
     throw zs_error("apply error: first arg is not procedure (%s)\n",
-                        stringify(args[0].tag()));
+                   stringify(proc.tag()));
   }
+
+  std::vector<Lisp_ptr> a_args(next(begin(args)), end(args));
+  
+  args.~ZsArgs();
 
   // simulating function_call()
   int argc = 0;
-  for(auto i = std::next(args.begin()), e = args.end(); i != e; ++i){
-    if(i->tag() == Ptr_tag::cons){
-      for(auto p : *i){
+  for(auto i : a_args){
+    if(i.tag() == Ptr_tag::cons){
+      for(auto p : i){
         vm.stack.push_back(p);
         ++argc;
       }
     }else{
-      vm.stack.push_back(*i);
+      vm.stack.push_back(i);
       ++argc;
     }
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
-  proc_enter_entrypoint(args[0]); // direct jump to proc_enter()
+  proc_enter_entrypoint(proc); // direct jump to proc_enter()
   return {};
 }
 
@@ -66,8 +70,8 @@ Lisp_ptr func_force(){
 }
 
 Lisp_ptr proc_values(){
-  vm.return_value.clear();
-  stack_to_vector(vm.stack, vm.return_value);
+  ZsArgs args;
+  vm.return_value.assign(begin(args), end(args));
   return {};
 }
 
