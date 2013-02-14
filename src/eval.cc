@@ -341,16 +341,16 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       throw zs_error("eval error: no arg name for variadic arg!\n");
     }
 
-    auto var_argc = argc.get<int>() - static_cast<int>(std::distance(arg_start, i));
-    vm.stack.erase(arg_start, i);
-    vm.stack.push_back({Ptr_tag::vm_argcount, var_argc});
-    local_set_with_identifier(vm.frame(), arg_name, stack_to_list<false>(vm.stack));
-  }else{  // clean stack
+    auto var_args = make_cons_list(i, arg_end);
+    local_set_with_identifier(vm.frame(), arg_name, var_args);
+  }else{
     if(i != arg_end){
       throw zs_error("eval error: corrupted stack -- passed too much args!\n");
     }
-    vm.stack.erase(arg_start, arg_end);
   }
+
+  // cleaning stack
+  vm.stack.erase(arg_start, arg_end);
 
   // set up lambda body code
   vm.code.insert(vm.code.end(), {fun->get(), vm_op_begin});

@@ -122,7 +122,8 @@ Lisp_ptr cons_listp(){
 }
 
 Lisp_ptr cons_list(){
-  return stack_to_list<false>(vm.stack);
+  ZsArgs args;
+  return make_cons_list(begin(args), end(args));
 }
 
 Lisp_ptr cons_list_star(){
