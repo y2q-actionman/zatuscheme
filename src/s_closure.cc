@@ -31,8 +31,8 @@ Symbol* identifier_symbol(Lisp_ptr p){
   }else if(p.tag() == Ptr_tag::syntactic_closure){
     return identifier_symbol(p.get<SyntacticClosure*>()->expr());
   }else{
-    throw zs_error("eval internal error: not identifier! (%s)",
-                   stringify(p.tag()));
+    throw zs_error(printf_string("eval internal error: not identifier! (%s)",
+                                 stringify(p.tag())));
   }
 }
 

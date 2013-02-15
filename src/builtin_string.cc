@@ -18,8 +18,8 @@ using namespace std;
 namespace {
 
 zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error("native func: %s: arg is not %s! (%s)\n",
-                       func_name, stringify(Ptr_tag::string), stringify(p.tag()));
+  return zs_error(printf_string("native func: %s: arg is not %s! (%s)\n",
+                                func_name, stringify(Ptr_tag::string), stringify(p.tag())));
 }
 
 template<typename Fun>
@@ -56,8 +56,8 @@ Lisp_ptr string_make(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error("native func: make-string: arg's number is not %s! (%s)\n",
-                        stringify(Number::Type::integer), stringify(num->type()));
+    throw zs_error(printf_string("native func: make-string: arg's number is not %s! (%s)\n",
+                                 stringify(Number::Type::integer), stringify(num->type())));
   }
   auto char_count = num->get<Number::integer_type>();
 
@@ -115,14 +115,14 @@ Lisp_ptr string_ref(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error("native func: string-ref: arg's number is not %s! (%s)\n",
-                        stringify(Number::Type::integer), stringify(num->type()));
+    throw zs_error(printf_string("native func: string-ref: arg's number is not %s! (%s)\n",
+                                 stringify(Number::Type::integer), stringify(num->type())));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw zs_error("native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
-                        str->length(), ind);
+    throw zs_error(printf_string("native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
+                                 str->length(), ind));
   }
 
   return Lisp_ptr{(*str)[ind]};
@@ -141,14 +141,14 @@ Lisp_ptr string_set(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error("native func: string-set!: arg's number is not %s! (%s)\n",
-                        stringify(Number::Type::integer), stringify(num->type()));
+    throw zs_error(printf_string("native func: string-set!: arg's number is not %s! (%s)\n",
+                                 stringify(Number::Type::integer), stringify(num->type())));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw zs_error("native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
-                        str->length(), ind);
+    throw zs_error(printf_string("native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
+                                 str->length(), ind));
   }
 
   auto ch = args[2].get<char>();
@@ -218,16 +218,16 @@ Lisp_ptr string_substr(){
     }
 
     if(n->type() != Number::Type::integer){
-      throw zs_error("native func: substring: arg's number is not %s! (%s)\n",
-                          stringify(Number::Type::integer), stringify(n->type()));
+      throw zs_error(printf_string("native func: substring: arg's number is not %s! (%s)\n",
+                                   stringify(Number::Type::integer), stringify(n->type())));
     }
     ind[i-1] = n->get<Number::integer_type>();
   }
 
 
   if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= static_cast<signed>(str->length()))){
-    throw zs_error("native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
-                        str->length(), ind[0], ind[1]);
+    throw zs_error(printf_string("native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
+                                 str->length(), ind[0], ind[1]));
   }
 
   return {new String(str->substr(ind[0], ind[1] - ind[0]))};

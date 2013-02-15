@@ -21,8 +21,8 @@ using namespace ProcFlag;
 static
 Lisp_ptr whole_function_error(const char* opname){
   ZsArgs wargs{1};
-  throw zs_error("eval error: '%s' -- cannot be used as operator!!\n",
-                 opname);
+  throw zs_error(printf_string("eval error: '%s' -- cannot be used as operator!!\n",
+                               opname));
 }
 
 

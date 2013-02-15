@@ -11,8 +11,8 @@ using namespace std;
 namespace {
 
 zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error("native func: %s: arg is not %s! (%s)\n",
-                       func_name, stringify(Ptr_tag::vector), stringify(p.tag()));
+  return zs_error(printf_string("native func: %s: arg is not %s! (%s)\n",
+                                func_name, stringify(Ptr_tag::vector), stringify(p.tag())));
 }
 
 } // namespace
@@ -26,8 +26,8 @@ Lisp_ptr vector_make(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error("native func: make-vector: arg's number is not %s! (%s)\n",
-                        stringify(Number::Type::integer), stringify(num->type()));
+    throw zs_error(printf_string("native func: make-vector: arg's number is not %s! (%s)\n",
+                                 stringify(Number::Type::integer), stringify(num->type())));
   }
   auto count = num->get<Number::integer_type>();
 
@@ -71,14 +71,14 @@ Lisp_ptr vector_ref(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error("native func: vector-ref: arg's number is not %s! (%s)\n",
-                        stringify(Number::Type::integer), stringify(num->type()));
+    throw zs_error(printf_string("native func: vector-ref: arg's number is not %s! (%s)\n",
+                                 stringify(Number::Type::integer), stringify(num->type())));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
-    throw zs_error("native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
-                        v->size(), ind);
+    throw zs_error(printf_string("native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
+                                 v->size(), ind));
   }
 
   return (*v)[ind];
@@ -98,14 +98,14 @@ Lisp_ptr vector_set(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error("native func: vector-set!: arg's number is not %s! (%s)\n",
-                        stringify(Number::Type::integer), stringify(num->type()));
+    throw zs_error(printf_string("native func: vector-set!: arg's number is not %s! (%s)\n",
+                                 stringify(Number::Type::integer), stringify(num->type())));
   }
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
-    throw zs_error("native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
-                        v->size(), ind);
+    throw zs_error(printf_string("native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
+                                 v->size(), ind));
   }
 
   (*v)[ind] = args[2];

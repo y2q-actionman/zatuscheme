@@ -46,13 +46,13 @@ Lisp_ptr env_pick_2(const char* name){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error("native func: %s: passed number is not exact integer\n", name);
+    throw zs_error(printf_string("native func: %s: passed number is not exact integer\n", name));
   }
 
   auto ver = num->get<Number::integer_type>();
   if(ver != 5l){
-    throw zs_error("native func: %s: passed number is not 5 (supplied %ld)\n",
-                        name, ver);
+    throw zs_error(printf_string("native func: %s: passed number is not 5 (supplied %ld)\n",
+                                 name, ver));
   }
 
   return vm.frame()->find(intern(vm.symtable(), name));
@@ -227,7 +227,7 @@ const NProcedure* find_builtin_nproc(const char* name){
   i = find_if(begin(builtin_extra_funcs), end(builtin_extra_funcs), find_func);
   if(i != end(builtin_extra_funcs)) return &(i->func);
 
-  throw zs_error("internal error: native function '%s' is not registered!", name);
+  throw zs_error(printf_string("internal error: native function '%s' is not registered!", name));
 }
 
 const char* find_builtin_nproc_name(const NProcedure* nproc){

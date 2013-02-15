@@ -19,8 +19,8 @@ Lisp_ptr traditional_transformer(){
 
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw zs_error("traditional-transformer: error: called with a wrong type (%s)\n",
-                   stringify(args[0].tag()));
+    throw zs_error(printf_string("traditional-transformer: error: called with a wrong type (%s)\n",
+                                 stringify(args[0].tag())));
   }
   auto info = *iproc->info();
   info.passing = Passing::quote;
@@ -41,14 +41,14 @@ Lisp_ptr sc_macro_transformer(){
 
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw zs_error("sc-macro-transformer: error: called with a wrong type (%s)\n",
-                   stringify(args[0].tag()));
+    throw zs_error(printf_string("sc-macro-transformer: error: called with a wrong type (%s)\n",
+                                 stringify(args[0].tag())));
   }
 
   auto info = *iproc->info();
   if(info.required_args != 2 || info.max_args != 2){
-    throw zs_error("sc-macro-transformer: error: procedure must take exactly 2 args (%d-%d)\n",
-                   info.required_args, info.max_args);
+    throw zs_error(printf_string("sc-macro-transformer: error: procedure must take exactly 2 args (%d-%d)\n",
+                                 info.required_args, info.max_args));
   }
 
   info.passing = Passing::whole;
@@ -82,8 +82,8 @@ Lisp_ptr capture_env(){
   ZsArgs args;
 
   if(args[0].tag() != Ptr_tag::i_procedure){
-    throw zs_error("eval error: first arg is not procedure (%s)\n",
-                   stringify(args[0].tag()));
+    throw zs_error(printf_string("eval error: first arg is not procedure (%s)\n",
+                                 stringify(args[0].tag())));
   }
 
   auto iproc = args[0].get<IProcedure*>();
@@ -91,8 +91,8 @@ Lisp_ptr capture_env(){
   assert(iproc && iproc->info());
 
   if(iproc->info()->required_args != 1){
-    throw zs_error("eval error: first arg mush take 1 arg (%d)\n",
-                   iproc->info()->required_args);
+    throw zs_error(printf_string("eval error: first arg mush take 1 arg (%d)\n",
+                                 iproc->info()->required_args));
   }
 
   auto ret =  make_cons_list
@@ -137,8 +137,8 @@ Lisp_ptr make_synthetic_identifier(){
   ZsArgs args;
 
   if(!identifierp(args[0])){
-    throw zs_error("make-synthetic-identifier: passed value is not identifier (%s)\n",
-                   stringify(args[0].tag()));
+    throw zs_error(printf_string("make-synthetic-identifier: passed value is not identifier (%s)\n",
+                                 stringify(args[0].tag())));
   }
 
   return new SyntacticClosure(new Env(nullptr), nullptr, args[0]);

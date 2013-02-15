@@ -35,11 +35,11 @@ bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
 
 void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
   if(p.tag() != Ptr_tag::cons)
-    throw zs_error("internal %s: the passed list is a dotted list!\n", __func__);
+    throw zs_error(printf_string("internal %s: the passed list is a dotted list!\n", __func__));
 
   auto c = p.get<Cons*>();
   if(!c)
-    throw zs_error("internal %s: the passed list is an empty list!\n", __func__);
+    throw zs_error(printf_string("internal %s: the passed list is an empty list!\n", __func__));
 
   if(nullp(c->cdr())){
     c->rplacd(make_cons_list({value}));
@@ -69,7 +69,7 @@ Lisp_ptr pick_first(Lisp_ptr p){
 
     return (*v)[0];
   }else{
-    throw zs_error("syntax-rules: informal pattern passed! (%s)\n", stringify(p.tag()));
+    throw zs_error(printf_string("syntax-rules: informal pattern passed! (%s)\n", stringify(p.tag())));
   }
 }
 
@@ -82,8 +82,8 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p, MatchSet tab){
       
     // pattern variable
     if(tab.find(p) != tab.end()){
-      throw zs_error("syntax-rules error: duplicated pattern variable! (%s)\n",
-                     identifier_symbol(p)->name().c_str());
+      throw zs_error(printf_string("syntax-rules error: duplicated pattern variable! (%s)\n",
+                                   identifier_symbol(p)->name().c_str()));
     }
     tab.insert(p);
     return;

@@ -67,8 +67,8 @@ ConsIter ConsIter::operator++(int){
 
 
 static zs_error make_cons_iter_error(Lisp_ptr p){
-  return zs_error("cons list error: dot-list appeared for a proper-list procedure (%s appeared)\n",
-                       stringify(p.tag()));
+  return zs_error(printf_string("cons list error: dot-list appeared for a proper-list procedure (%s appeared)\n",
+                                stringify(p.tag())));
 }
 
 ConsIter begin(Lisp_ptr p){
