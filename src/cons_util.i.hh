@@ -58,33 +58,6 @@ auto do_list_2(Lisp_ptr lis1, Lisp_ptr lis2, MainFun&& m_fun, LastFun&& l_fun)
   return l_fun(p1, p2);
 }
 
-// bind_cons_list first version. uses number of functions
-/*
-template<int len, typename Fun1, typename... FunRest>
-inline
-int bind_cons_list_i(Lisp_ptr p, Fun1&& f, FunRest&&... fr){
-  auto c = p.get<Cons*>();
-  if(!c) return len;
-
-  auto next = c->cdr();
-  f(c);
-
-  return bind_cons_list_i<len + 1>(next, fr...);
-}
-
-template<int len>
-inline
-int bind_cons_list_i(Lisp_ptr p){
-  return (nullp(p)) ? len : len+1;
-}
-
-template<typename... Fun>
-inline
-int bind_cons_list(Lisp_ptr p, Fun&&... f){
-  return bind_cons_list_i<0>(p, f...);
-}
-*/
-
 // experimental third version
 template<typename T>
 inline
@@ -296,27 +269,5 @@ inline
 bool operator!=(const ConsIter& i1, const ConsIter& i2){
   return !eq_internal(i1.base(), i2.base());
 }
-
-// cons_list_to_array (deprecated)
-/*
-template<int size>
-std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr p){
-  std::array<Lisp_ptr, size> ret;
-  int i = 0;
-
-  for(auto it = begin(p), e_it = end(p); it != e_it; ++it){
-    if(i >= size)
-      throw zs_error("passed list is longer than expected size (%d)\n", size);
-
-    ret[i] = *it;
-    ++i;
-  }
-  
-  if(i != size)
-    throw zs_error("passed list is shorter than expected size (%d)\n", size);
-
-  return ret;
-}
-*/
 
 #endif //CONS_UTIL_I_HH

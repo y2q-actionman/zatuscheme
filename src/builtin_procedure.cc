@@ -6,6 +6,9 @@
 #include "eval.hh"
 #include "util.hh"
 #include "delay.hh"
+#include "builtin_util.hh"
+#include "zs_error.hh"
+#include "cons_util.hh"
 
 using namespace std;
 

@@ -12,6 +12,7 @@
 #include "number.hh"
 #include "eval.hh"
 #include "zs_error.hh"
+#include "cons_util.hh"
 
 using namespace std;
 

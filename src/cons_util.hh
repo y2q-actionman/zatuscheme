@@ -3,7 +3,6 @@
 
 #include <initializer_list>
 #include <iterator>
-// #include <array>
 #include "cons.hh"
 
 inline bool nullp(Lisp_ptr);
@@ -15,10 +14,6 @@ auto do_list(Lisp_ptr p, MainFun&&, LastFun&& lf)
 template<typename MainFun, typename LastFun>
 auto do_list_2(Lisp_ptr p, Lisp_ptr q, MainFun&&, LastFun&& lf)
   -> decltype(lf(p, q));
-
-//Old style version
-// template<typename... Fun>
-// int bind_cons_list(Lisp_ptr, Fun&&...);
 
 //these are defined in ".i.hh"
 // template<typename Fun>
@@ -108,9 +103,6 @@ bool operator!=(const ConsIter&, const ConsIter&);
 ConsIter begin(Lisp_ptr);
 ConsIter end(Lisp_ptr);
   
-// template<int size>
-// std::array<Lisp_ptr, size> cons_list_to_array(Lisp_ptr);
-
 #include "cons_util.i.hh"
 
 #endif //CONS_UTIL_HH

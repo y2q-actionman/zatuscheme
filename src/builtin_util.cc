@@ -1,11 +1,7 @@
 #include <exception>
 
 #include "builtin_util.hh"
-
-// Lisp_ptr pick_args_1(){
-//   auto arg1 = pick_args<1>();
-//   return arg1[0];
-// }
+#include "zs_error.hh"
 
 // class ZsArgs
 ZsArgs::ZsArgs()

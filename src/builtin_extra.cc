@@ -10,6 +10,8 @@
 #include "equality.hh"
 #include "number.hh"
 #include "builtin.hh"
+#include "zs_error.hh"
+#include "cons_util.hh"
 
 using namespace std;
 using namespace ProcFlag;

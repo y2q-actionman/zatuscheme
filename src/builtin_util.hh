@@ -6,19 +6,6 @@
 #include "vm.hh"
 #include "procedure.hh"
 
-// template<bool dot_list, typename StackT>
-// Lisp_ptr stack_to_list(StackT&);
-
-// template<typename StackT, typename VectorT>
-// void stack_to_vector(StackT&, VectorT&);
-
-// VM::stack accessor
-
-// template<int i>
-// std::array<Lisp_ptr, i> pick_args();
-
-// Lisp_ptr pick_args_1();
-
 class ZsArgs{
 public:
   typedef decltype(vm.stack.end()) IterType;

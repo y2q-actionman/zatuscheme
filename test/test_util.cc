@@ -9,6 +9,7 @@
 #include "builtin_util.hh"
 #include "vm.hh"
 #include "builtin_equal.hh"
+#include "cons_util.hh"
 
 using namespace std;
 
