@@ -32,7 +32,7 @@ protected:
   std::string str_;
 };
 
-
+/*
 class zs_error_arg1 : public zs_error{
 public:
   zs_error_arg1(const std::string&, const char*, Lisp_ptr);
@@ -51,7 +51,7 @@ private:
   const char* context_;
   Lisp_ptr arg_;
 };
-
+*/
 
 // error functions
 

@@ -39,7 +39,7 @@ const char* zs_error::what() const noexcept{
   return str_.c_str();
 }
 
-
+/*
 // class zs_error_arg1
 zs_error_arg1::zs_error_arg1(const std::string& estr, const char* context, Lisp_ptr p)
   : zs_error(estr), context_(context), arg_(p){}
@@ -54,7 +54,7 @@ zs_error_arg1::~zs_error_arg1() noexcept = default;
 
 zs_error_arg1& zs_error_arg1::operator=(const zs_error_arg1&) noexcept = default;
 zs_error_arg1& zs_error_arg1::operator=(zs_error_arg1&&) noexcept = default;
-
+*/
 
 // error functions
 void unexp_default(const char* f, int l){
