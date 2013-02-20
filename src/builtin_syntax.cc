@@ -214,7 +214,7 @@ Lisp_ptr syntax_unquote(){
 Lisp_ptr syntax_unquote_splicing(){
   ZsArgs args{1};
   if(args[0].tag() != Ptr_tag::cons){
-    builtin_type_check_failed("unquote-splicing", Ptr_tag::cons, args[0]);
+    throw builtin_type_check_failed("unquote-splicing", Ptr_tag::cons, args[0]);
   }
 
   vm.return_value.assign(begin(args[0]), end(args[0]));
