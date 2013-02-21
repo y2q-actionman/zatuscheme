@@ -96,7 +96,7 @@ Lisp_ptr read_la(istream& f, Token&& tok){
     return Lisp_ptr(new Number(tok.move<Number>()));
 
   case Token::Type::character:
-    return (tok.get<char>() == EOF) ? Lisp_ptr{} : Lisp_ptr{tok.move<char>()};
+    return Lisp_ptr{tok.move<char>()};
 
   case Token::Type::string:
     return Lisp_ptr(new String(tok.move<string>()));
@@ -146,7 +146,13 @@ Lisp_ptr read_la(istream& f, Token&& tok){
     }
 
   case Token::Type::uninitialized:
-    return Lisp_ptr{};
+    // Checking "f.peek() == EOF" is needed because tokenize() may do 'unget(EOF)'
+    // TODO: remove all 'unget(EOF)' occurance.
+    if(f.eof() || f.peek() == EOF){
+      return Lisp_ptr{static_cast<char>(EOF)};
+    }else{
+      Lisp_ptr{};
+    }
 
   default:
     UNEXP_DEFAULT();

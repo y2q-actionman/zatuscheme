@@ -3,9 +3,12 @@
 "(define (read-eval-print-loop)"
 "  (let loop ()"
 "    (display \">> \")"
-"    (display (eval (read) (interaction-environment)))"
-"    (newline)"
-"    (loop)))",
+"    (let ((r (read)))"
+"      (if (eof-object? r) #t"
+"        (begin"
+"          (display (eval r (interaction-environment)))"
+"          (newline)"
+"          (loop))))))",
 
 "(define (rsc-macro-transformer fun)"
 "  (sc-macro-transformer"
