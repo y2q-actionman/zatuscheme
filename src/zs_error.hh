@@ -3,6 +3,8 @@
 
 #include <string>
 #include <exception>
+#include <initializer_list>
+#include <array>
 #include "decl.hh"
 #include "lisp_ptr.hh"
 
@@ -32,11 +34,14 @@ protected:
   std::string str_;
 };
 
-/*
 class zs_error_arg1 : public zs_error{
 public:
-  zs_error_arg1(const std::string&, const char*, Lisp_ptr);
-  zs_error_arg1(std::string&&, const char*, Lisp_ptr);
+  static const size_t ARGS_SIZE = 3;
+
+  zs_error_arg1(const char*, const std::string&,
+                std::initializer_list<Lisp_ptr>);
+  zs_error_arg1(const char*, const std::string&);
+  // zs_error_arg1(std::string&&, const char*, Lisp_ptr);
   zs_error_arg1(const zs_error_arg1&);
   zs_error_arg1(zs_error_arg1&&);
 
@@ -45,13 +50,14 @@ public:
   zs_error_arg1& operator=(const zs_error_arg1&) noexcept;
   zs_error_arg1& operator=(zs_error_arg1&&) noexcept;
 
-  using zs_error::what;
+  using zs_error::what; // override
 
 private:
   const char* context_;
-  Lisp_ptr arg_;
+  std::string body_;
+  std::array<Lisp_ptr, ARGS_SIZE> args_;
 };
-*/
+
 
 // error functions
 
