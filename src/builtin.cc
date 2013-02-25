@@ -46,13 +46,12 @@ Lisp_ptr env_pick_2(const char* name){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: %s: passed number is not exact integer\n", name));
+    throw zs_error_arg1(name, "passed number is not exact integer", {args[0]});
   }
 
   auto ver = num->get<Number::integer_type>();
   if(ver != 5l){
-    throw zs_error(printf_string("native func: %s: passed number is not 5 (supplied %ld)\n",
-                                 name, ver));
+    throw zs_error_arg1(name, "passed number is not 5", {args[0]});
   }
 
   return vm.frame()->find(intern(vm.symtable(), name));

@@ -17,8 +17,9 @@ using namespace std;
 namespace {
 
 zs_error cons_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error(printf_string("native func: %s: arg is not %s! (%s)\n",
-                                func_name, stringify(Ptr_tag::cons), stringify(p.tag())));
+  return zs_error_arg1(func_name,
+                       printf_string("arg is not %s!", stringify(Ptr_tag::cons)),
+                       {p});
 }
 
 template<typename Fun>
@@ -31,7 +32,7 @@ Lisp_ptr cons_carcdr(const char* name, Fun&& fun){
 
   auto c = args[0].get<Cons*>();
   if(!c){
-    throw zs_error(printf_string("native func: %s: arg is null list!\n", name));
+    throw zs_error_arg1(name, "arg is null list!");
   }
     
   return fun(c);
@@ -47,7 +48,7 @@ Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
   
   auto c = args[0].get<Cons*>();
   if(!c){
-    throw zs_error(printf_string("native func: %s: arg is null list!\n", name));
+    throw zs_error_arg1(name, "arg is null list!");
   }
   
   return fun(c, args[1]);
@@ -187,8 +188,7 @@ Lisp_ptr cons_list_tail(){
   
   auto num = args[1].get<Number*>();
   if(!num || num->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: list-tail: passed radix is not number (%s).\n",
-                                 stringify(args[1].tag())));
+    throw zs_error_arg1("list-tail", "passed radix is not number", {args[1]});
   }
   auto nth = num->get<Number::integer_type>();
 
@@ -199,8 +199,7 @@ Lisp_ptr cons_list_tail(){
     --nth;
   }
 
-  throw zs_error(printf_string("native func: list-tail: passed list is shorter than expected (%ld).\n",
-                               num->get<Number::integer_type>()));
+  throw zs_error_arg1("list-tail", "passed list is shorter than specified", {args[0], args[1]});
 }
 
 template <typename Func>

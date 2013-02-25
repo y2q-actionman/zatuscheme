@@ -13,8 +13,9 @@ using namespace std;
 namespace {
 
 zs_error char_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error(printf_string("native func: %s: arg is not %s! (%s)\n",
-                                func_name, stringify(Ptr_tag::character), stringify(p.tag())));
+  return zs_error_arg1(func_name,
+                       printf_string("arg is not %s!", stringify(Ptr_tag::character)),
+                       {p});
 }
 
 template<typename Fun>
@@ -145,8 +146,7 @@ Lisp_ptr char_from_int(){
     throw builtin_type_check_failed("integer->char", Ptr_tag::number, args[0]);
   }
   if(n->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: integer->char: passed arg is not exact integer! (%s)",
-                                 stringify(n->type())));
+    throw zs_error_arg1("integer->char", "passed arg is not exact integer!", {args[0]});
   }
 
   return Lisp_ptr{static_cast<char>(n->get<Number::integer_type>())};
