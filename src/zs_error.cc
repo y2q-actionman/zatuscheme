@@ -87,15 +87,6 @@ zs_error_arg1& zs_error_arg1::operator=(zs_error_arg1&&) noexcept = default;
 
 
 // error functions
-void unexp_default(const char* f, int l){
-  throw zs_error(printf_string("unexpected default case! (file=%s, line=%d)\n", f, l));
-}
-
-void unexp_conversion(const char* f, int l, const char* to){
-  throw zs_error(printf_string("unexpected conversion to %s! (file=%s, line=%d)\n",
-                               to, f, l));
-}
-
 zs_error builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
   return zs_error_arg1(func_name,
                        printf_string("arg is not %s!", stringify(tag)),

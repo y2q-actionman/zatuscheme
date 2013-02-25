@@ -5,6 +5,7 @@
 #include <exception>
 #include <initializer_list>
 #include <array>
+#include <cstdlib>
 #include "decl.hh"
 #include "lisp_ptr.hh"
 
@@ -61,18 +62,15 @@ private:
 
 // error functions
 
-void unexp_default(const char*, int)
-__attribute__((noreturn))// [[noreturn]]
-  ;
+#define UNEXP_DEFAULT() do{\
+    assert(((void)"unexpected default case!", 0));      \
+    abort();\
+  }while(0)
 
-#define UNEXP_DEFAULT() unexp_default(__FILE__, __LINE__)
-
-void unexp_conversion(const char*, int, const char*)
-__attribute__((noreturn))// [[noreturn]]
-  ;
-
-#define UNEXP_CONVERSION(to) unexp_conversion(__FILE__, __LINE__, (to))
-
+#define UNEXP_CONVERSION(to) do{\
+    assert(((void)"unexpected conversion to "to"!", 0));\
+    abort();\
+  }while(0)
 
 zs_error builtin_type_check_failed(const char*, Ptr_tag, Lisp_ptr);
 zs_error builtin_argcount_failed(const char*, int required, int max, int passed);
