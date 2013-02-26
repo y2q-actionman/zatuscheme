@@ -12,8 +12,9 @@ using namespace std;
 namespace {
 
 zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error(printf_string("native func: %s: arg is not %s! (%s)\n",
-                                func_name, stringify(Ptr_tag::vector), stringify(p.tag())));
+  return zs_error_arg1(func_name,
+                       printf_string("arg is not %s!", stringify(Ptr_tag::vector)),
+                       {p});
 }
 
 } // namespace
@@ -78,8 +79,9 @@ Lisp_ptr vector_ref(){
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
-    throw zs_error(printf_string("native func: vector-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
-                                 v->size(), ind));
+    throw zs_error_arg1("vector-ref",
+                        printf_string("index is out-of-bound ([0, %ld), supplied %ld",
+                                      v->size(), ind));
   }
 
   return (*v)[ind];
@@ -105,8 +107,9 @@ Lisp_ptr vector_set(){
   auto ind = num->get<Number::integer_type>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
-    throw zs_error(printf_string("native func: vector-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
-                                 v->size(), ind));
+    throw zs_error_arg1("vector-set!",
+                        printf_string("index is out-of-bound ([0, %ld), supplied %ld",
+                                      v->size(), ind));
   }
 
   (*v)[ind] = args[2];

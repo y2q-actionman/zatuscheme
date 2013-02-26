@@ -19,8 +19,9 @@ using namespace std;
 namespace {
 
 zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error(printf_string("native func: %s: arg is not %s! (%s)\n",
-                                func_name, stringify(Ptr_tag::string), stringify(p.tag())));
+  return zs_error_arg1(func_name,
+                       printf_string("arg is not %s!", stringify(Ptr_tag::string)),
+                       {p});
 }
 
 template<typename Fun>

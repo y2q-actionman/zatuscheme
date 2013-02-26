@@ -21,8 +21,7 @@ using namespace ProcFlag;
 static
 Lisp_ptr whole_function_error(const char* opname){
   ZsArgs wargs{1};
-  throw zs_error(printf_string("eval error: '%s' -- cannot be used as operator!!\n",
-                               opname));
+  throw zs_error_arg1(opname, "cannot be used as operator!!");
 }
 
 
@@ -41,10 +40,10 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
-    throw zs_error("eval error: lambda has invalid args!\n");
+    throw zs_error_arg1("lambda", "invalid args!", {args});
   }
   if(!code){
-    throw zs_error("eval error: lambda has invalid body!\n");
+    throw zs_error_arg1("lambda", "invalid body!");
   }
   
   return new IProcedure(code, 
@@ -107,7 +106,7 @@ Lisp_ptr syntax_define(){
       });
     return {};
   }else{
-    throw zs_error("eval error: informal define syntax!\n");
+    throw zs_error_arg1("define", "informal syntax!");
   }
 }
 
@@ -116,7 +115,7 @@ Lisp_ptr syntax_begin(){
 
   auto body = nthcdr_cons_list<1>(wargs[0]);
   if(!body || nullp(body)){
-    throw zs_error("eval error: begin has no exprs.\n");
+    throw zs_error_arg1("begin", "has no exprs.");
   }
   
   vm.return_value = {body, vm_op_begin};

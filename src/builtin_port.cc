@@ -18,8 +18,9 @@ namespace {
 
 template<typename T>
 zs_error port_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error(printf_string("native func: %s: arg is not %s! (%s)\n",
-                                func_name, stringify(to_tag<Ptr_tag, T*>()), stringify(p.tag())));
+  return zs_error_arg1(func_name,
+                       printf_string("arg is not %s!", stringify(to_tag<Ptr_tag, T*>())),
+                       {p});
 }
 
 template<typename IOType, typename F_IOType>
@@ -32,7 +33,7 @@ Lisp_ptr port_open_file(const char* name){
 
   unique_ptr<IOType> p{new F_IOType(str->c_str())};
   if(!*p){
-    throw zs_error(printf_string("native error: %s: failed at opening file\n", name));
+    throw zs_error_arg1(name, "failed at opening file");
   }
   
   return {p.release()};
@@ -66,7 +67,7 @@ Lisp_ptr port_input_call(const char* name, Fun&& fun){
   case 0:
     p = vm.frame()->find(intern(vm.symtable(), CURRENT_INPUT_PORT_SYMNAME)).get<InputPort*>();
     if(!p){
-      throw zs_error(printf_string("%s: internal variable '"CURRENT_INPUT_PORT_SYMNAME"' is broken!\n", name));
+      throw zs_error_arg1(name, "internal variable '"CURRENT_INPUT_PORT_SYMNAME"' is broken!");
     }
     break;
   case 1:
@@ -92,7 +93,7 @@ Lisp_ptr port_output_call(const char* name, Fun&& fun){
   case 1:
     p = vm.frame()->find(intern(vm.symtable(), CURRENT_OUTPUT_PORT_SYMNAME)).get<OutputPort*>();
     if(!p){
-      throw zs_error(printf_string("%s: internal variable '"CURRENT_OUTPUT_PORT_SYMNAME"' is broken!\n", name));
+      throw zs_error_arg1(name, "internal variable '"CURRENT_OUTPUT_PORT_SYMNAME"' is broken!");
     }
     break;
   case 2:

@@ -22,8 +22,7 @@ Lisp_ptr apply_func(){
 
   auto proc = args[0];
   if(!is_procedure(proc)){
-    throw zs_error(printf_string("apply error: first arg is not procedure (%s)\n",
-                                 stringify(proc.tag())));
+    throw zs_error_arg1("apply", "first arg is not procedure", {proc});
   }
 
   std::vector<Lisp_ptr> a_args(next(begin(args)), end(args));
@@ -84,19 +83,18 @@ Lisp_ptr call_with_values(){
     ZsArgs args;
 
     if(!is_procedure(args[0])){
-      throw zs_error(printf_string("call-with-values error: first arg is not procedure (%s)\n",
-                                   stringify(args[0].tag())));
+      throw zs_error_arg1("call-with-values", "first arg is not procedure", {args[0]});
     }
 
     auto info = get_procinfo(args[0]);
     if(info->required_args != 0){
-      throw zs_error(printf_string("call-with-values error: first arg takes 1 or more args (%d)\n",
-                                   info->required_args));
+      throw zs_error_arg1("call-with-values",
+                          printf_string("first arg takes 1 or more args (takes %d)",
+                                        info->required_args));
     }    
 
     if(!is_procedure(args[1])){
-      throw zs_error(printf_string("call-with-values error: second arg is not procedure (%s)\n",
-                                   stringify(args[1].tag())));
+      throw zs_error_arg1("call-with-values", "second arg is not procedure", {args[1]});
     }
     
     std::copy(args.begin(), args.end(), procs);
@@ -117,14 +115,14 @@ Lisp_ptr call_cc(){
     ZsArgs args;
 
     if(!is_procedure(args[0])){
-      throw zs_error(printf_string("call/cc error: first arg is not procedure (%s)\n",
-                                   stringify(args[0].tag())));
+      throw zs_error_arg1("call/cc", "first arg is not procedure", {args[0]});
     }
 
     auto info = get_procinfo(args[0]);
     if(info->required_args != 1){
-      throw zs_error(printf_string("call/cc error: first arg mush take 1 arg (%d)\n",
-                                   info->required_args));
+      throw zs_error_arg1("call/cc",
+                          printf_string("first arg mush take 1 arg (takes %d)",
+                                        info->required_args));
     }
     proc = args[0];
   }
@@ -143,14 +141,14 @@ Lisp_ptr dynamic_wind(){
 
     for(auto p : args){
       if(!is_procedure(p)){
-        throw zs_error(printf_string("error: dynamic-wind: arg is not procedure (%s)\n",
-                                     stringify(p.tag())));
+        throw zs_error_arg1("dynamic-wind", "arg is not procedure", {p});
       }
 
       auto info = get_procinfo(p);
       if(info->required_args != 0){
-        throw zs_error(printf_string("error: dynamic-wind: first arg mush take 0 arg (%d)\n",
-                                     info->required_args));
+        throw zs_error_arg1("dynamic-wind",
+                            printf_string("first arg mush take 0 arg (%d)",
+                                          info->required_args));
       }
 
       *procs_i = p;
