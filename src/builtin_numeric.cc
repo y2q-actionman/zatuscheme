@@ -24,8 +24,9 @@ using namespace std;
 namespace {
 
 zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error(printf_string("native func: %s: arg is not %s! (%s)\n",
-                                func_name, stringify(Ptr_tag::number), stringify(p.tag())));
+  return zs_error_arg1(func_name,
+                       printf_string("arg is not %s!", stringify(Ptr_tag::number)),
+                       {p});
 }
 
 template<typename Fun>
@@ -254,7 +255,7 @@ struct binary_accum{
     }
 
     // ???
-    throw zs_error("native func: +-*/: failed at numeric conversion!\n");
+    throw zs_error_arg1("+-*/", "failed at numeric conversion!");
   }
 };
 
@@ -270,8 +271,7 @@ Lisp_ptr number_divop(const char* name, Fun&& fun){
       throw number_type_check_failed(name, args[i]);
     }
     if(n[i]->type() != Number::Type::integer){
-      throw zs_error(printf_string("native func: %s: not integer type (%s)",
-                                   name, stringify(n[i]->type())));
+      throw zs_error_arg1(name, "not integer type", {n[i]});
     }
   }
   
@@ -721,7 +721,7 @@ Lisp_ptr number_gcd(){
                            [](Number& n1, const Number& n2) -> bool {
                              if(n1.type() != Number::Type::integer
                                 || n2.type() != Number::Type::integer){
-                               throw zs_error("native func: gcd: not integer passed.\n");
+                               throw zs_error_arg1("gcd", "passed one is not integer.");
                              }
 
                              auto i1 = n1.get<Number::integer_type>();
@@ -737,7 +737,7 @@ Lisp_ptr number_lcm(){
                            [](Number& n1, const Number& n2) -> bool {
                              if(n1.type() != Number::Type::integer
                                 || n2.type() != Number::Type::integer){
-                               throw zs_error("native func: gcd: not integer passed.\n");
+                               throw zs_error_arg1("lcm", "passed one is not integer.");
                              }
 
                              auto i1 = n1.get<Number::integer_type>();
@@ -950,8 +950,7 @@ Lisp_ptr number_from_string(){
 
   auto str = args[0].get<String*>();
   if(!str){
-    throw zs_error(printf_string("native func: string->number: passed arg is not string (%s).\n",
-                                 stringify(args[0].tag())));
+    throw zs_error_arg1("string->number", "passed arg is not string", {args[0]});
   }
 
   int radix;
@@ -963,12 +962,10 @@ Lisp_ptr number_from_string(){
   case 2: {
     auto num = args[1].get<Number*>();
     if(!num){
-      throw zs_error(printf_string("native func: string->number: passed radix is not number (%s).\n",
-                                   stringify(args[1].tag())));
+      throw zs_error_arg1("string->number", "passed radix is not number", {args[1]});
     }
     if(num->type() != Number::Type::integer){
-      throw zs_error(printf_string("native func: string->number: passed radix is not number (%s).\n",
-                                   stringify(args[1].tag())));
+      throw zs_error_arg1("string->number", "passed radix is not integer", {args[1]});
     }
     radix = num->get<Number::integer_type>();
     break;
@@ -986,8 +983,7 @@ Lisp_ptr number_to_string(){
 
   auto n = args[0].get<Number*>();
   if(!n){
-    throw zs_error(printf_string("native func: number->string: passed arg is not number (%s).\n",
-                                 stringify(args[0].tag())));
+    throw zs_error_arg1("number->string", "passed arg is not number", {args[0]});
   }
 
   int radix;
@@ -999,12 +995,10 @@ Lisp_ptr number_to_string(){
   case 2: {
     auto num = args[1].get<Number*>();
     if(!num){
-      throw zs_error(printf_string("native func: number->string: passed radix is not number (%s).\n",
-                                   stringify(args[1].tag())));
+      throw zs_error_arg1("number->string", "passed radix is not number", {args[1]});
     }
     if(num->type() != Number::Type::integer){
-      throw zs_error(printf_string("native func: number->string: passed radix is not number (%s).\n",
-                                   stringify(args[1].tag())));
+      throw zs_error_arg1("number->string", "passed radix is not integer", {args[1]});
     }
     radix = num->get<Number::integer_type>();
     break;

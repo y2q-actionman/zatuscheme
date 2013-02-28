@@ -58,8 +58,9 @@ Lisp_ptr string_make(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: make-string: arg's number is not %s! (%s)\n",
-                                 stringify(Number::Type::integer), stringify(num->type())));
+    throw zs_error_arg1("make-string",
+                        printf_string("arg's number is not %s", stringify(Number::Type::integer)),
+                        {num});
   }
   auto char_count = num->get<Number::integer_type>();
 
@@ -117,7 +118,7 @@ Lisp_ptr string_ref(){
   }
 
   if(num->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: string-ref: arg's number is not %s! (%s)\n",
+    throw zs_error(printf_string("string-ref: arg's number is not %s! (%s)\n",
                                  stringify(Number::Type::integer), stringify(num->type())));
   }
   auto ind = num->get<Number::integer_type>();
