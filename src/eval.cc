@@ -133,7 +133,7 @@ void vm_op_stack_splicing(){
   if(op.tag() != Ptr_tag::vm_op
      || outer_argc.tag() != Ptr_tag::vm_argcount){
     vm.code.pop_back();
-    throw zs_error("eval error: unquote-splicing: called in invalid context!\n");
+    throw zs_error("eval internal error: stack-splicing operater is called in invalid context!\n");
   }
 
   // pushes return-value to vm.stack
@@ -186,7 +186,7 @@ void whole_call(Lisp_ptr proc, const ProcInfo* info){
     vm.stack.push_back({Ptr_tag::vm_argcount, 2});
     break;
   default:
-    throw zs_error("eval error: 'whole' function must take one or two args\n");
+    throw zs_error("eval internal error: 'whole' function must take one or two args\n");
   }
 
   proc_enter_entrypoint(proc); // direct jump to proc_enter()
@@ -206,8 +206,7 @@ void vm_op_call(){
   if(!is_procedure(proc)){
     vm.code.pop_back();
     vm.stack.pop_back();
-    throw zs_error(printf_string("eval error: (# # ...)'s first element is not procedure (got: %s)\n",
-                                 stringify(proc.tag())));
+    throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});
   }
 
   const ProcInfo* info = get_procinfo(proc);
@@ -636,11 +635,12 @@ void vm_op_force(){
   assert(vm.code.back().get<VMop>() == vm_op_force);
   vm.code.pop_back();
 
-  auto delay = vm.stack.back().get<Delay*>();
+  auto arg = vm.stack.back();
   vm.stack.pop_back();
 
+  auto delay = arg.get<Delay*>();
   if(!delay){
-    throw zs_error("eval error: internal error occured ('force' found before not a delay)\n");
+    throw zs_error_arg1("force internal error", "'force' found strange DELAY object", {arg});
   }
 
   delay->force(vm.return_value_1());
@@ -686,8 +686,7 @@ Lisp_ptr let_internal(Entering entering){
 
     auto arg = arg_c->cdr();
     if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-      throw zs_error(printf_string("eval error: informal LET syntax -- (LET . <%s>).\n",
-                                   (nullp(arg)) ? "nil" : stringify(arg.tag())));
+      throw zs_error_arg1("let", "informal syntax -- (LET . <...>)", {arg});
     }
     arg_c = arg.get<Cons*>();
 
@@ -697,8 +696,7 @@ Lisp_ptr let_internal(Entering entering){
 
       arg = arg_c->cdr();
       if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-        throw zs_error(printf_string("eval error: informal LET syntax -- (LET <name> . <%s>).\n",
-                                     (nullp(arg)) ? "nil" : stringify(arg.tag())));
+        throw zs_error_arg1("let", "informal syntax -- (LET <name> . <...>)", {arg});
       }
     
       arg_c = arg.get<Cons*>();
@@ -709,20 +707,15 @@ Lisp_ptr let_internal(Entering entering){
     body = arg_c->cdr();
 
     if(body.tag() != Ptr_tag::cons || nullp(body)){
-      throw zs_error("eval error: informal syntax for LET's body!.\n");
+      throw zs_error_arg1("let", "informal body", {body});
     }
 
     // parses binding list
     for(auto bind : binds){
-      if(bind.tag() != Ptr_tag::cons){
-        throw zs_error(printf_string("eval error: informal object (%s) found in let binding.\n",
-                                     stringify(bind.tag())));
+      if(bind.tag() != Ptr_tag::cons || nullp(bind)){
+        throw zs_error_arg1("let", "informal object found in let binding", {bind});
       }
 
-      if(nullp(bind)){
-        throw zs_error("eval error: null found in let binding.\n");
-      }
-                 
       ++len;
 
       gl_syms.push(nth_cons_list<0>(bind));

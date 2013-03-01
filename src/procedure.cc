@@ -26,7 +26,7 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
               return;
             }else{
               if(!identifierp(last)){
-                throw zs_error("eval error: informal lambda list! (including non-identifier)\n");
+                throw zs_error_arg1("eval error", "informal lambda list!", {args});
               }
               v = Variadic::t;
             }

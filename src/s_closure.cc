@@ -7,7 +7,7 @@ SyntacticClosure::SyntacticClosure(Env* e, Cons* f, Lisp_ptr ex)
   : env_(e), free_names_(f), expr_(ex){
   for(auto i : Lisp_ptr{f}){
     if(!identifierp(i)){
-      throw zs_error("syntactic closure error: free-list has a non-identifier value\n");
+      throw zs_error_arg1("syntactic closure", "free-list has a non-identifier value", {i});
     }
   }
 }
@@ -31,8 +31,7 @@ Symbol* identifier_symbol(Lisp_ptr p){
   }else if(p.tag() == Ptr_tag::syntactic_closure){
     return identifier_symbol(p.get<SyntacticClosure*>()->expr());
   }else{
-    throw zs_error(printf_string("eval internal error: not identifier! (%s)",
-                                 stringify(p.tag())));
+    throw zs_error_arg1("idenitifier-symbol internal", "not identifier", {p});
   }
 }
 

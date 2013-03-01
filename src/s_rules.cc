@@ -59,17 +59,17 @@ void push_tail_cons_list(Lisp_ptr* p, Lisp_ptr value){
 Lisp_ptr pick_first(Lisp_ptr p){
   if(p.tag() == Ptr_tag::cons){
     auto c = p.get<Cons*>();
-    if(!c) throw zs_error("syntax-rules: the pattern is empty list\n");
+    if(!c) throw zs_error_arg1("syntax-rules", "the pattern is empty list");
 
     return c->car();
   }else if(p.tag() == Ptr_tag::vector){
     auto v = p.get<Vector*>();
     assert(v);
-    if(v->empty()) throw zs_error("syntax-rules: the pattern is empty vector\n");
+    if(v->empty()) throw zs_error_arg1("syntax-rules", "the pattern is empty vector");
 
     return (*v)[0];
   }else{
-    throw zs_error(printf_string("syntax-rules: informal pattern passed! (%s)\n", stringify(p.tag())));
+    throw zs_error_arg1("syntax-rules", "informal pattern passed!", {p});
   }
 }
 
@@ -82,8 +82,7 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p, MatchSet tab){
       
     // pattern variable
     if(tab.find(p) != tab.end()){
-      throw zs_error(printf_string("syntax-rules error: duplicated pattern variable! (%s)\n",
-                                   identifier_symbol(p)->name().c_str()));
+      throw zs_error_arg1("syntax-rules", "duplicated pattern variable!", {p});
     }
     tab.insert(p);
     return;
@@ -237,14 +236,14 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       auto p_n = next(p_i);
       if((p_n) && is_ellipsis(*p_n)){
         if(eq_internal(*p_i, ignore_ident)){
-          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+          throw zs_error_arg1("syntax-rules", "'...' is appeared following the first identifier");
         }
 
         auto p_e = p_i;
         while(p_e) ++p_e;
 
         if(!nullp(p_e.base())){
-          throw zs_error("syntax-rules error: '...' is appeared in a inproper list pattern!\n");
+          throw zs_error_arg1("syntax-rules", "'...' is appeared in a inproper list pattern");
         }
 
         // accumulating...
@@ -263,7 +262,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         }
 
         if(!nullp(f_i.base())){
-          throw zs_error("syntax-rules error: '...' is used for a inproper list form!\n");
+          throw zs_error_arg1("syntax-rules", "'...' is used for a inproper list form");
         }
 
         match_obj.insert(begin(acc_map), end(acc_map));
@@ -308,7 +307,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       auto p_n = next(p_i);
       if((p_n != p_e) && is_ellipsis(*p_n)){
         if(eq_internal(*p_i, ignore_ident)){
-          throw zs_error("syntax-rules error: '...' is appeared following the first identifier.\n");
+          throw zs_error_arg1("syntax-rules", "'...' is appeared following the first identifier");
         }
 
         // accumulating...
@@ -506,9 +505,9 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     }catch(const try_match_failed& e){
       continue;
     }catch(const expand_failed& e){
-      throw zs_error("syntax-rules error: expand failed!\n");
+      throw zs_error_arg1("syntax-rules", "expand failed!", {form});
     }
   }
 
-  throw zs_error("syntax-rules error: no matching pattern found!\n");
+  throw zs_error_arg1("syntax-rules", "no matching pattern found!", {form});
 }
