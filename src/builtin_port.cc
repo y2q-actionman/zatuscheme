@@ -109,6 +109,24 @@ Lisp_ptr port_output_call(const char* name, Fun&& fun){
   return Lisp_ptr{fun(args[0], p)};
 }
 
+bool stream_ready(std::istream* is){
+  auto avails = is->rdbuf()->in_avail();
+
+  if(avails > 0){
+    return true;
+  }else if(avails < 0){ // EOF case
+    return true;
+  }else{
+#ifdef __GLIBCXX__
+    // under implementation..
+    return false;
+#else
+#warning "char-ready? may be broken"
+    return false;
+#endif
+  }
+}
+
 } //namespace
 
 Lisp_ptr port_open_file_i(){
@@ -180,3 +198,8 @@ Lisp_ptr port_write_char(){
                             return c;
                           });
 }
+
+Lisp_ptr port_char_ready(){
+  return port_input_call("char-ready?", stream_ready);
+}
+
