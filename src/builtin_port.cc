@@ -2,8 +2,18 @@
 #include <istream>
 #include <ostream>
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <memory>
+
+#ifdef __GLIBCXX__
+# include <ext/stdio_filebuf.h>
+# include <ext/stdio_sync_filebuf.h>
+#endif
+
+#include <poll.h>
+#include <errno.h>
+#include <cstring>
 
 #include "builtin_port.hh"
 #include "lisp_ptr.hh"
@@ -109,22 +119,52 @@ Lisp_ptr port_output_call(const char* name, Fun&& fun){
   return Lisp_ptr{fun(args[0], p)};
 }
 
-bool stream_ready(std::istream* is){
-  auto avails = is->rdbuf()->in_avail();
 
-  if(avails > 0){
-    return true;
-  }else if(avails < 0){ // EOF case
-    return true;
+// for char-ready?
+
+bool fd_ready(int fd){
+  struct pollfd fds[1] = {
+    { fd, POLLIN, 0}
+  };
+
+  auto ret = poll(fds, sizeof(fds)/sizeof(fds[0]), 0);
+  assert(ret <= 1);
+
+  if(ret == -1){
+    auto eno = errno;
+    throw zs_error_arg1("char-ready?",
+                        printf_string("calling poll(2) failed: %s", strerror(eno)));
+  }else if(ret == 0){
+    return false;
   }else{
-#ifdef __GLIBCXX__
-    // under implementation..
-    return false;
-#else
-#warning "char-ready? may be broken"
-    return false;
-#endif
+    return (fds[0].revents & POLLIN) != 0;
   }
+}
+
+bool stream_ready(istream* is){
+  auto buf = is->rdbuf();
+
+  if(buf->in_avail() != 0){
+    // readable (> 0) or EOF (== -1)
+    return true;
+  }
+
+  if(dynamic_cast<stringbuf*>(buf)){
+    return false;
+  }
+
+#ifdef __GLIBCXX__
+  if(dynamic_cast<__gnu_cxx::stdio_sync_filebuf<char>*>(buf)){
+    return false;
+  }
+
+  if(auto sbuf = dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(buf)){
+    return fd_ready(sbuf->fd());
+  }
+#endif
+
+  cerr << "char-ready? is not properly implemented." << endl;
+  return false;
 }
 
 } //namespace

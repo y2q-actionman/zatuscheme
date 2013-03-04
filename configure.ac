@@ -21,14 +21,11 @@ CXXFLAGS="${CXXFLAGS} -std=c++0x"
 # Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
-AC_C_INLINE
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_FUNC_STRERROR_R
-AC_FUNC_STRTOD
-AC_CHECK_FUNCS([floor pow sqrt strcasecmp strspn strtol])
+AC_CHECK_FUNCS([floor pow sqrt strcasecmp strerror])
+AC_CHECK_FUNCS([poll])
 
 AC_CONFIG_FILES([Makefile src/Makefile test/Makefile])
 AC_OUTPUT

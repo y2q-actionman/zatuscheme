@@ -20,4 +20,6 @@ Lisp_ptr port_write();
 Lisp_ptr port_display();
 Lisp_ptr port_write_char();
 
+Lisp_ptr port_char_ready();
+
 #endif // BUILTIN_PORT_HH

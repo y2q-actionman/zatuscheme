@@ -44,3 +44,7 @@
 {"write-char", {
     port_write_char,
     {1, 2}}},
+
+{"char-ready?", {
+    port_char_ready,
+    {0, 1}}},
