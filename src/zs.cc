@@ -19,6 +19,7 @@ static void term_handle(){
 }
 
 void zs_init(){
+  std::ios::sync_with_stdio(false);
   std::set_terminate(term_handle);
   install_builtin();
 }
