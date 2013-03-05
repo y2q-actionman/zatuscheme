@@ -4,16 +4,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <memory>
-
-#ifdef __GLIBCXX__
-# include <ext/stdio_filebuf.h>
-# include <ext/stdio_sync_filebuf.h>
-#endif
-
-#include <poll.h>
-#include <errno.h>
-#include <cstring>
 
 #include "builtin_port.hh"
 #include "lisp_ptr.hh"
@@ -120,76 +110,39 @@ Lisp_ptr port_output_call(const char* name, Fun&& fun){
 }
 
 
-// for char-ready?
-
-bool fd_ready(int fd){
-  struct pollfd fds[1] = {
-    { fd, POLLIN, 0}
-  };
-
-  auto ret = poll(fds, sizeof(fds)/sizeof(fds[0]), 0);
-  assert(ret <= 1);
-
-  if(ret == -1){
-    auto eno = errno;
-    throw zs_error_arg1("char-ready?",
-                        printf_string("calling poll(2) failed: %s", strerror(eno)));
-  }else if(ret == 0){
-    return false;
-  }else{
-    return (fds[0].revents & POLLIN) != 0;
-  }
-}
-
 bool stream_ready(istream* is){
-  if(!*is) return true;  // EOF
-  
-  auto buf = is->rdbuf();
+  // in_avail() can return 'the number of bytes available
+  // without blocking'
+  auto avails = is->rdbuf()->in_avail();
 
-  if(buf->in_avail() != 0){
-    // readable (> 0) or EOF (== -1)
-    return true;
-  }
+  if(avails > 0){
+    return true; // readable
+  }else if(avails < 0){
+    return true; // error (EOF)
+  }else{
+    // This extra EOF check is required in libstdc++,
+    // because a fstream reached EOF returns 0.
+    if(!*is) return true;
 
-  if(dynamic_cast<stringbuf*>(buf)){
+    // We can check that 'fd points the file's end'.
+    // Though, the operation for getting position (seekoff())
+    // may block. SO COMPLICATED.
+    //
+    // In libstdc++, we can see whether the stream 
+    // can be blocked or not by getting the type 
+    // of stream by dynamic_cast.
+    //
+    // - If 'stringbuf', no chars shall not be available.
+    // - If 'stdio_filebuf<>' or 'stdio_sync_filebuf<>',
+    //   the stream may std::cin. we can check via the
+    //   file descripter (from 'stdio_sync_filebuf<>::fd()'
+    //   or 'fileno(stdio_sync_filebuf<>.file())'.
+    // - Otherwise, the type is guaranteed to 'filebuf'.
+    //   We can assume the stream is seekable, so 'seekoff()'
+    //   can be used.
+
     return false;
   }
-
-  if(dynamic_cast<filebuf*>(buf)){
-#ifdef __GLIBCXX__
-    if(auto sbuf = dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(buf)){
-      return fd_ready(sbuf->fd());
-    }
-
-    if(auto ssbuf = dynamic_cast<__gnu_cxx::stdio_sync_filebuf<char>*>(buf)){
-      return fd_ready(fileno(ssbuf->file()));
-    }
-
-    // We should check that 'fd points the file's end'
-    // Though, this check is danger, since 'seekoff()' may block.
-    // We depends the std::cin uses 'stdio_filebuf<>'
-
-    auto cur_pos = buf->pubseekoff(0, ios_base::cur, ios_base::in);
-    if(cur_pos == -1) return true;
-
-    auto end_pos = buf->pubseekoff(0, ios_base::end, ios_base::in);
-    if(end_pos == -1) return true;
-
-    if(cur_pos == end_pos){
-      return true;
-    }else{
-      buf->pubseekpos(cur_pos, ios_base::in);
-      return false;
-    }
-#else
-# warning "char-ready? is not properly implemented on this platform."
-    return false;
-#endif
-  }
-
-  throw zs_error_arg1("internal error",
-                      printf_string("unsupported port buffering type. (%s)",
-                                    typeid(*buf).name()));
 }
 
 } //namespace
