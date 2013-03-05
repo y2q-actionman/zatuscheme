@@ -133,6 +133,7 @@ bool stream_ready(istream* is){
     // of stream by dynamic_cast.
     //
     // - If 'stringbuf', no chars shall not be available.
+    //   We can immediately return 'false'.
     // - If 'stdio_filebuf<>' or 'stdio_sync_filebuf<>',
     //   the stream may std::cin. we can check via the
     //   file descripter (from 'stdio_sync_filebuf<>::fd()'
