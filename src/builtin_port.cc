@@ -142,6 +142,8 @@ bool fd_ready(int fd){
 }
 
 bool stream_ready(istream* is){
+  if(!*is) return true;  // EOF
+  
   auto buf = is->rdbuf();
 
   if(buf->in_avail() != 0){
@@ -153,18 +155,41 @@ bool stream_ready(istream* is){
     return false;
   }
 
+  if(dynamic_cast<filebuf*>(buf)){
 #ifdef __GLIBCXX__
-  if(dynamic_cast<__gnu_cxx::stdio_sync_filebuf<char>*>(buf)){
+    if(auto sbuf = dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(buf)){
+      return fd_ready(sbuf->fd());
+    }
+
+    if(auto ssbuf = dynamic_cast<__gnu_cxx::stdio_sync_filebuf<char>*>(buf)){
+      return fd_ready(fileno(ssbuf->file()));
+    }
+
+    // We should check that 'fd points the file's end'
+    // Though, this check is danger, since 'seekoff()' may block.
+    // We depends the std::cin uses 'stdio_filebuf<>'
+
+    auto cur_pos = buf->pubseekoff(0, ios_base::cur, ios_base::in);
+    if(cur_pos == -1) return true;
+
+    auto end_pos = buf->pubseekoff(0, ios_base::end, ios_base::in);
+    if(end_pos == -1) return true;
+
+    if(cur_pos == end_pos){
+      return true;
+    }else{
+      buf->pubseekpos(cur_pos, ios_base::in);
+      return false;
+    }
+#else
+# warning "char-ready? is not properly implemented on this platform."
     return false;
-  }
-
-  if(auto sbuf = dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(buf)){
-    return fd_ready(sbuf->fd());
-  }
 #endif
+  }
 
-  cerr << "char-ready? is not properly implemented." << endl;
-  return false;
+  throw zs_error_arg1("internal error",
+                      printf_string("unsupported port buffering type. (%s)",
+                                    typeid(*buf).name()));
 }
 
 } //namespace

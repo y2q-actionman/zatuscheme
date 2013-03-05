@@ -25,6 +25,7 @@ check_PROGRAMS = token_test\
 		builtin_equal_test\
 		builtin_numeric_test\
 		builtin_port_test\
+		builtin_char_ready_test\
 		builtin_string_test\
 		builtin_symbol_test\
 		builtin_syntax_test\
