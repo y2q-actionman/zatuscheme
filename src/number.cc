@@ -487,6 +487,17 @@ void print(ostream& f, const Number& n, int radix){
   }
 }
 
+// for migration..
+void print(std::ostream& os, Lisp_ptr p, int radix){
+  if(p.tag() == Ptr_tag::integer){
+    print(os, Number(static_cast<long>(p.get<int>())), radix);
+  }else{
+    auto n = p.get<Number*>();
+    assert(n);
+    print(os, *n, radix);
+  }
+}
+
 Number to_exact(const Number& n){
   switch(n.type()){
   case Number::Type::complex:

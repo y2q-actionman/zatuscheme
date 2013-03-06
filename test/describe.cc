@@ -18,7 +18,7 @@ std::ostream& operator<<(std::ostream& o, Number::Type t){
 
 std::ostream& operator<<(std::ostream& o, const Number& n){
   o << "Number: " << n.type() << "(";
-  print(o, n);
+  print(o, n, 10);
   o << ')';
   return o;
 }

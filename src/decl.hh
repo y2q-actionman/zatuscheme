@@ -36,6 +36,7 @@ enum class Ptr_tag {
     n_procedure,
     continuation,
     number,
+    integer,
     string,
     vector,
     input_port,

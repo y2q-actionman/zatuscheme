@@ -38,6 +38,7 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   case Ptr_tag::syntax_rules:
   case Ptr_tag::vm_op:
     return a.get<void*>() == b.get<void*>();
+  case Ptr_tag::integer:
   case Ptr_tag::vm_argcount:
     return a.get<int>() == b.get<int>();
   default:
@@ -114,6 +115,7 @@ size_t eq_hash(const Lisp_ptr& p){
   case Ptr_tag::vm_op:
     val_hash = hash<void*>()(p.get<void*>());
     break;
+  case Ptr_tag::integer:
   case Ptr_tag::vm_argcount:
     val_hash = hash<int>()(p.get<int>());
     break;

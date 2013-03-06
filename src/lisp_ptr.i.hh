@@ -48,14 +48,16 @@ char Lisp_ptr::get<char>() const {
 template<>
 inline constexpr
 VMop Lisp_ptr::get<VMop>() const {
-  return (tag() == to_tag<Ptr_tag, VMop>()
-     ? u_.f_ : nullptr);
+  return (tag() == to_tag<Ptr_tag, VMop>())
+     ? u_.f_ : nullptr;
 }
 
 template<>
 inline constexpr
 int Lisp_ptr::get<int>() const {
-  return (tag() == Ptr_tag::vm_argcount ? u_.i_ : 0);
+  return (tag() == Ptr_tag::integer
+          || tag() == Ptr_tag::vm_argcount)
+    ? u_.i_ : 0;
 }
 
 template<>

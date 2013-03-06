@@ -21,6 +21,8 @@ const char* stringify(Ptr_tag p){
     return "continuation";
   case Ptr_tag::number:
     return "number";
+  case Ptr_tag::integer:
+    return "integer";
   case Ptr_tag::string:
     return "string";
   case Ptr_tag::vector:

@@ -47,6 +47,11 @@ struct to_type<Ptr_tag, Ptr_tag::number>{
 };
 
 template<>
+struct to_type<Ptr_tag, Ptr_tag::integer>{
+  typedef int type;
+};
+
+template<>
 struct to_type<Ptr_tag, Ptr_tag::string>{
   typedef String* type;
 };

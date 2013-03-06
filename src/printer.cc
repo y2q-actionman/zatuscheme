@@ -126,7 +126,11 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
   }
 
   case Ptr_tag::number:
-    print(f, *p.get<Number*>());
+    print(f, *p.get<Number*>(), 10);
+    break;
+
+  case Ptr_tag::integer:
+    print(f, p, 10);
     break;
 
   case Ptr_tag::string:
