@@ -23,6 +23,10 @@ const char* stringify(Ptr_tag p){
     return "number";
   case Ptr_tag::integer:
     return "integer";
+  case Ptr_tag::real:
+    return "real";
+  case Ptr_tag::complex:
+    return "complex";
   case Ptr_tag::string:
     return "string";
   case Ptr_tag::vector:

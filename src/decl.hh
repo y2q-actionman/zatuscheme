@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iosfwd>
+#include <complex>
 
 // typedefs & declarations
 class Lisp_ptr;
@@ -37,6 +38,8 @@ enum class Ptr_tag {
     continuation,
     number,
     integer,
+    real,
+    complex,
     string,
     vector,
     input_port,

@@ -133,6 +133,14 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
     print(f, p, 10);
     break;
 
+  case Ptr_tag::real:
+    print(f, p, 10);
+    break;
+
+  case Ptr_tag::complex:
+    print(f, p, 10);
+    break;
+
   case Ptr_tag::string:
     print_string(f, p.get<String*>()->c_str(), flag);
     break;

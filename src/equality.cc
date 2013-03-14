@@ -22,12 +22,17 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   case Ptr_tag::character:
      // this can be moved into eqv? in R5RS, but char is contained in Lisp_ptr.
     return a.get<char>() == b.get<char>();
+  case Ptr_tag::integer:
+  case Ptr_tag::vm_argcount:
+    return a.get<int>() == b.get<int>();
   case Ptr_tag::cons:
   case Ptr_tag::symbol:
   case Ptr_tag::i_procedure:
   case Ptr_tag::n_procedure:
   case Ptr_tag::continuation:
   case Ptr_tag::number:
+  case Ptr_tag::real:
+  case Ptr_tag::complex:
   case Ptr_tag::string:
   case Ptr_tag::vector:
   case Ptr_tag::input_port:
@@ -38,9 +43,6 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   case Ptr_tag::syntax_rules:
   case Ptr_tag::vm_op:
     return a.get<void*>() == b.get<void*>();
-  case Ptr_tag::integer:
-  case Ptr_tag::vm_argcount:
-    return a.get<int>() == b.get<int>();
   default:
     UNEXP_DEFAULT();
   }
@@ -57,8 +59,16 @@ bool eq_id_internal(Lisp_ptr a, Lisp_ptr b){
   }
 }
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
-  if(a.tag() == Ptr_tag::number && b.tag() == Ptr_tag::number){
+  if(a.tag() != b.tag()) return false;
+  
+  if(a.tag() == Ptr_tag::number){
     return eqv(*a.get<Number*>(), *b.get<Number*>());
+  }else if(a.tag() == Ptr_tag::real){
+    typedef to_type<Ptr_tag, Ptr_tag::real>::type RealT;
+    return *a.get<RealT>() == *b.get<RealT>();
+  }else if(a.tag() == Ptr_tag::complex){
+    typedef to_type<Ptr_tag, Ptr_tag::complex>::type ComplexT;
+    return *a.get<ComplexT>() == *b.get<ComplexT>();
   }else{
     return eq_internal(a, b);
   }
@@ -98,12 +108,18 @@ size_t eq_hash(const Lisp_ptr& p){
   case Ptr_tag::character:
     val_hash = hash<char>()(p.get<char>());
     break;
+  case Ptr_tag::integer:
+  case Ptr_tag::vm_argcount:
+    val_hash = hash<int>()(p.get<int>());
+    break;
   case Ptr_tag::cons:
   case Ptr_tag::symbol:
   case Ptr_tag::i_procedure:
   case Ptr_tag::n_procedure:
   case Ptr_tag::continuation:
   case Ptr_tag::number:
+  case Ptr_tag::real:
+  case Ptr_tag::complex:
   case Ptr_tag::string:
   case Ptr_tag::vector:
   case Ptr_tag::input_port:
@@ -114,10 +130,6 @@ size_t eq_hash(const Lisp_ptr& p){
   case Ptr_tag::syntax_rules:
   case Ptr_tag::vm_op:
     val_hash = hash<void*>()(p.get<void*>());
-    break;
-  case Ptr_tag::integer:
-  case Ptr_tag::vm_argcount:
-    val_hash = hash<int>()(p.get<int>());
     break;
   default:
     UNEXP_DEFAULT();

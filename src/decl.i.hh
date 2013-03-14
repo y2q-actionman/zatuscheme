@@ -52,6 +52,16 @@ struct to_type<Ptr_tag, Ptr_tag::integer>{
 };
 
 template<>
+struct to_type<Ptr_tag, Ptr_tag::real>{
+  typedef double* type;
+};
+
+template<>
+struct to_type<Ptr_tag, Ptr_tag::complex>{
+  typedef std::complex<double>* type;
+};
+
+template<>
 struct to_type<Ptr_tag, Ptr_tag::string>{
   typedef String* type;
 };
@@ -152,9 +162,21 @@ Ptr_tag to_tag<Ptr_tag, Number*>(){
 
 template<>
 inline constexpr
+Ptr_tag to_tag<Ptr_tag, double*>(){
+  return Ptr_tag::real;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, std::complex<double>*>(){
+  return Ptr_tag::complex;
+}
+
+template<>
+inline constexpr
 Ptr_tag to_tag<Ptr_tag, String*>(){
-    return Ptr_tag::string;
-  }
+  return Ptr_tag::string;
+}
 
 template<>
 inline constexpr

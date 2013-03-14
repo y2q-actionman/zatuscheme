@@ -818,6 +818,8 @@ void eval(){
       case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
       case Ptr_tag::number:
       case Ptr_tag::integer:
+      case Ptr_tag::real:
+      case Ptr_tag::complex:
       case Ptr_tag::string: case Ptr_tag::vector:
       case Ptr_tag::input_port: case Ptr_tag::output_port:
       case Ptr_tag::env:
@@ -872,6 +874,8 @@ bool is_self_evaluating(Lisp_ptr p){
   case Ptr_tag::n_procedure:
   case Ptr_tag::number:
   case Ptr_tag::integer:
+  case Ptr_tag::real:
+  case Ptr_tag::complex:
   case Ptr_tag::string:
   case Ptr_tag::vector:
   case Ptr_tag::input_port:
