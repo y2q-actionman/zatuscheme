@@ -66,7 +66,6 @@ Number to_inexact(const Number&);
 bool eqv(const Number&, const Number&);
 
 void print(std::ostream&, const Number&, int radix);
-void print(std::ostream&, Lisp_ptr, int radix);
 
 const char* stringify(Number::Type);
 

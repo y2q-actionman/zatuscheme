@@ -18,6 +18,47 @@ using namespace std;
 
 namespace {
 
+void print_binary(ostream& f, int i){
+  std::string tmp;
+
+  while(i > 0){
+    auto b = i % 2;
+    tmp.push_back(b ? '1' : '0');
+    i /= 2;
+  }
+
+  std::copy(tmp.rbegin(), tmp.rend(), ostreambuf_iterator<char>(f));
+}
+
+void print_integer(ostream& f, int i, int radix){
+  if(radix == 10){
+    f << i;
+  }else{
+    auto is_minus = (i < 0);
+    auto u = std::abs(i);
+
+    switch(radix){
+    case 8:
+      f << "#o";
+      if(is_minus) f << '-';
+      f << oct << u << dec;
+      break;
+    case 16:
+      f << "#x";
+      if(is_minus) f << '-';
+      f << hex << u << dec;
+      break;
+    case 2:
+      f << "#b";
+      if(is_minus) f << '-';
+      print_binary(f, u);
+      break;
+    default:
+      UNEXP_DEFAULT();
+    }
+  }
+}
+
 void print_vector(ostream& f, const Vector* v, print_human_readable flag){
   auto i = v->begin();
   const auto e = v->end();
@@ -97,7 +138,7 @@ void print_string(ostream& f, const char* str, print_human_readable flag){
 
 } // namespace
 
-void print(ostream& f, Lisp_ptr p, print_human_readable flag){
+void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
   switch(p.tag()){
   case Ptr_tag::undefined:
     f << "#<undefined>";
@@ -126,19 +167,21 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag){
   }
 
   case Ptr_tag::number:
-    print(f, *p.get<Number*>(), 10);
+    print(f, *p.get<Number*>(), radix);
     break;
 
   case Ptr_tag::integer:
-    print(f, p, 10);
+    print_integer(f, p.get<int>(), radix);
     break;
 
   case Ptr_tag::real:
-    print(f, p, 10);
+    f << *p.get<double*>();
     break;
 
-  case Ptr_tag::complex:
-    print(f, p, 10);
+  case Ptr_tag::complex: {
+    auto z = p.get<std::complex<double>*>();
+    f << z->real() << showpos << z->imag() << noshowpos;
+  }
     break;
 
   case Ptr_tag::string:

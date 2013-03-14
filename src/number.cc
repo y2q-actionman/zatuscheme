@@ -8,6 +8,7 @@
 
 #include "number.hh"
 #include "zs_error.hh"
+#include "printer.hh"
 
 using namespace std;
 
@@ -426,18 +427,7 @@ bool eqv(const Number& n, const Number& m){
   }
 }
 
-static void print_binary(ostream& f, unsigned long l){
-  std::string tmp;
-
-  while(l > 0){
-    auto b = l % 2;
-    tmp.push_back(b ? '1' : '0');
-    l /= 2;
-  }
-
-  std::copy(tmp.rbegin(), tmp.rend(), ostreambuf_iterator<char>(f));
-}
-
+// only compatibility. only a bridge to normal printer()
 void print(ostream& f, const Number& n, int radix){
   switch(n.type()){
   case Number::Type::uninitialized:
@@ -445,56 +435,21 @@ void print(ostream& f, const Number& n, int radix){
     break;
   case Number::Type::complex: {
     auto z = n.get<Number::complex_type>();
-    f << z.real() << showpos << z.imag() << noshowpos;
+    print(f, &z);
   }
     break;
-  case Number::Type::real:
-    f << n.get<Number::real_type>();
+  case Number::Type::real: {
+    auto r = n.get<Number::real_type>();
+    print(f, &r);
     break;
+  }
   case Number::Type::integer: {
     auto i = n.get<Number::integer_type>();
-
-    if(radix == 10){
-      f << i;
-    }else{
-      auto is_minus = (i < 0);
-      auto u = std::abs(i);
-
-      switch(radix){
-      case 8:
-        f << "#o";
-        if(is_minus) f << '-';
-        f << oct << u << dec;
-        break;
-      case 16:
-        f << "#x";
-        if(is_minus) f << '-';
-        f << hex << u << dec;
-        break;
-      case 2:
-        f << "#b";
-        if(is_minus) f << '-';
-        print_binary(f, u);
-        break;
-      default:
-        UNEXP_DEFAULT();
-      }
-    }
+    print(f, {Ptr_tag::integer, static_cast<int>(i)});
     break;
   }
   default:
     UNEXP_DEFAULT();
-  }
-}
-
-// for migration..
-void print(std::ostream& os, Lisp_ptr p, int radix){
-  if(p.tag() == Ptr_tag::integer){
-    print(os, Number(static_cast<long>(p.get<int>())), radix);
-  }else{
-    auto n = p.get<Number*>();
-    assert(n);
-    print(os, *n, radix);
   }
 }
 

@@ -6,8 +6,8 @@
 enum class print_human_readable{ f, t };
 
 void print(std::ostream&, Lisp_ptr,
-           print_human_readable flag = print_human_readable::f);
-
+           print_human_readable flag = print_human_readable::f,
+           int radix = 10);
 
 // for debug;
 inline
