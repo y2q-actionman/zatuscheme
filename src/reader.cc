@@ -92,8 +92,20 @@ Lisp_ptr read_la(istream& f, Token&& tok){
   case Token::Type::boolean:
     return Lisp_ptr(tok.move<bool>());
 
-  case Token::Type::number:
-    return Lisp_ptr(new Number(tok.move<Number>()));
+  case Token::Type::number: {
+    auto n = tok.get<Number>();
+    switch(n.type()){
+    case Number::Type::uninitialized:
+      return Lisp_ptr();
+    case Number::Type::integer:
+      // TODO: use upper integer type!
+      return Lisp_ptr(new Number(tok.move<Number>()));
+    case Number::Type::real:
+      return {new double(n.get<double>())};
+    case Number::Type::complex:
+      return {new complex<double>(n.get<complex<double> >())};
+    }
+  }
 
   case Token::Type::character:
     return Lisp_ptr{tok.move<char>()};
