@@ -2,7 +2,6 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "builtin_util.hh"
-#include "number.hh"
 #include "eval.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
@@ -22,16 +21,10 @@ zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
 Lisp_ptr vector_make(){
   ZsArgs args;
 
-  auto num = args[0].get<Number*>();
-  if(!num){
+  if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("make-vector", Ptr_tag::number, args[0]);
   }
-
-  if(num->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: make-vector: arg's number is not %s! (%s)\n",
-                                 stringify(Number::Type::integer), stringify(num->type())));
-  }
-  auto count = num->get<Number::integer_type>();
+  auto count = args[0].get<int>();
 
   switch(args.size()){
   case 1:
@@ -56,7 +49,9 @@ Lisp_ptr vector_length(){
     throw vector_type_check_failed("vector-length", args[0]);
   }
 
-  return {new Number(static_cast<Number::integer_type>(v->size()))};
+  // TODO: add range check, and remove cast
+  return Lisp_ptr{Ptr_tag::integer,
+      static_cast<int>(v->size())};
 }
 
 Lisp_ptr vector_ref(){
@@ -67,20 +62,14 @@ Lisp_ptr vector_ref(){
     throw vector_type_check_failed("vector-ref", args[0]);
   }
 
-  auto num = args[1].get<Number*>();
-  if(!num){
+  if(args[1].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("vector-ref", Ptr_tag::number, args[1]);
   }
-
-  if(num->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: vector-ref: arg's number is not %s! (%s)\n",
-                                 stringify(Number::Type::integer), stringify(num->type())));
-  }
-  auto ind = num->get<Number::integer_type>();
+  auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
     throw zs_error_arg1("vector-ref",
-                        printf_string("index is out-of-bound ([0, %ld), supplied %ld",
+                        printf_string("index is out-of-bound ([0, %ld), supplied %d",
                                       v->size(), ind));
   }
 
@@ -95,20 +84,14 @@ Lisp_ptr vector_set(){
     throw vector_type_check_failed("vector-set!", args[0]);
   }
 
-  auto num = args[1].get<Number*>();
-  if(!num){
+  if(args[1].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("vector-set!", Ptr_tag::number, args[1]);
   }
-
-  if(num->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: vector-set!: arg's number is not %s! (%s)\n",
-                                 stringify(Number::Type::integer), stringify(num->type())));
-  }
-  auto ind = num->get<Number::integer_type>();
+  auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
     throw zs_error_arg1("vector-set!",
-                        printf_string("index is out-of-bound ([0, %ld), supplied %ld",
+                        printf_string("index is out-of-bound ([0, %ld), supplied %d",
                                       v->size(), ind));
   }
 
