@@ -99,7 +99,7 @@ Lisp_ptr read_la(istream& f, Token&& tok){
       return Lisp_ptr();
     case Number::Type::integer:
       // TODO: use upper integer type!
-      return Lisp_ptr(new Number(tok.move<Number>()));
+      return Lisp_ptr(Ptr_tag::integer, n.get<long>());
     case Number::Type::real:
       return {new double(n.get<double>())};
     case Number::Type::complex:

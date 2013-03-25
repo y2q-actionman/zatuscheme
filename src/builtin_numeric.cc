@@ -577,9 +577,34 @@ Lisp_ptr number_min(){
   return number_accumulate("min", Number(), minmax_accum<std::less>());
 }
 
-
+/*
 Lisp_ptr number_plus(){
   return number_accumulate("+", Number(0l), binary_accum<std::plus>());
+}
+*/
+
+// TODO: make other ops!
+Lisp_ptr number_plus(){
+  ZsArgs args;
+  int init = 0;
+
+  for(auto i = begin(args), e = end(args); i != e; ++i){
+    switch(i->tag()){
+    case Ptr_tag::integer:
+      init += i->get<int>();
+      break;
+    case Ptr_tag::real:
+      init += static_cast<int>(*i->get<double*>());
+      break;
+    case Ptr_tag::complex:
+      // init += ...
+      break;
+    default:
+      throw number_type_check_failed("+", *i);
+    }
+  }
+
+  return Lisp_ptr{Ptr_tag::integer, init};
 }
 
 Lisp_ptr number_multiple(){

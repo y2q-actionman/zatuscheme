@@ -88,7 +88,7 @@ int main(){
   check_e("(char-lower-case? #\\space)", "#f");
 
   check_e("(char=? #\\a (integer->char (char->integer #\\a)))", "#t");
-  check_e("(= 100 (char->integer (integer->char 100)))", "#t");
+  check_e("(char->integer (integer->char 100))", "100");
 
   check_e("(char-ci=? #\\a #\\A)", "#t");
   check_e("(char=? #\\a (char-downcase #\\A))", "#t");

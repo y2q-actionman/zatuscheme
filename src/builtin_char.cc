@@ -5,7 +5,6 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "builtin_util.hh"
-#include "number.hh"
 #include "zs_error.hh"
 
 using namespace std;
@@ -134,22 +133,18 @@ Lisp_ptr char_islower(){
 Lisp_ptr char_to_int(){
   return char_conversion("char->integer",
                          [](char c){
-                           return new Number(static_cast<Number::integer_type>(c));
+                           return Lisp_ptr(Ptr_tag::integer, c);
                          });
 }
 
 Lisp_ptr char_from_int(){
   ZsArgs args;
 
-  auto n = args[0].get<Number*>();
-  if(!n){
-    throw builtin_type_check_failed("integer->char", Ptr_tag::number, args[0]);
-  }
-  if(n->type() != Number::Type::integer){
-    throw zs_error_arg1("integer->char", "passed arg is not exact integer!", {args[0]});
+  if(args[0].tag() != Ptr_tag::integer){
+    throw builtin_type_check_failed("integer->char", Ptr_tag::integer, args[0]);
   }
 
-  return Lisp_ptr{static_cast<char>(n->get<Number::integer_type>())};
+  return Lisp_ptr{static_cast<char>(args[0].get<int>())};
 }
 
 Lisp_ptr char_toupper(){
