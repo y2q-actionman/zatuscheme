@@ -7,7 +7,6 @@
 #include "builtin_util.hh"
 #include "cons.hh"
 #include "cons_util.hh"
-#include "number.hh"
 #include "printer.hh"
 #include "zs_error.hh"
 #include "equality.hh"
@@ -144,7 +143,9 @@ Lisp_ptr cons_length(){
     throw cons_type_check_failed("list?", args[0]);
   }
 
-  return {new Number(std::distance(begin(args[0]), end(args[0])))};
+  // TODO: add range check, and remove cast.
+  return Lisp_ptr{Ptr_tag::integer,
+      static_cast<int>(std::distance(begin(args[0]), end(args[0])))};
 }
 
 Lisp_ptr cons_append(){
@@ -185,12 +186,11 @@ Lisp_ptr cons_list_tail(){
   if(args[0].tag() != Ptr_tag::cons){
     throw cons_type_check_failed("list-tail", args[0]);
   }
-  
-  auto num = args[1].get<Number*>();
-  if(!num || num->type() != Number::Type::integer){
+
+  if(args[1].tag() != Ptr_tag::integer){
     throw zs_error_arg1("list-tail", "passed radix is not number", {args[1]});
   }
-  auto nth = num->get<Number::integer_type>();
+  auto nth = args[1].get<int>();
 
   for(auto i = begin(args[0]), e = end(args[0]); i != e; ++i){
     if(nth <= 0){

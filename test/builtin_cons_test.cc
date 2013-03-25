@@ -115,7 +115,7 @@ int main(){
   check_e("(memq 'a '(b c d))", "#f");
   check_e("(memq (list 'a) '(b (a) c))", "#f");
   check_e("(member (list 'a) '(b (a) c))", "((a) c)");
-  check_e("(memq 101 '(100 101 102))", "#f"); // unspecified
+  check_e("(memq 101 '(100 101 102))", "(101 102)"); // unspecified
   check_e("(memv 101 '(100 101 102))", "(101 102)");
 
 
@@ -125,7 +125,7 @@ int main(){
   check_e("(assq 'd e)", "#f");
   check_e("(assq (list 'a) '(((a)) ((b)) ((c))))", "#f");
   check_e("(assoc (list 'a) '(((a)) ((b)) ((c))))", "((a))");
-  check_e("(assq 5 '((2 3) (5 7) (11 13)))", "#f"); // unspecified
+  check_e("(assq 5 '((2 3) (5 7) (11 13)))", "(5 7)"); // unspecified
   check_e("(assv 5 '((2 3) (5 7) (11 13)))", "(5 7)");
 
   return RESULT;
