@@ -44,7 +44,7 @@ int main(){
   check_e("(eq? \"a\" \"a\")", "#f"); // unspecified
   check_e("(eq? \"\" \"\")", "#f"); // unspecified
   check_e("(eq? '() '())", "#t");
-  check_e("(eq? 2 2)", "#f"); // unspecified
+  check_e("(eq? 2 2)", "#t"); // unspecified
   check_e("(eq? #\\A #\\A)", "#t"); // unspecified
   check_e("(eq? car car)", "#t");
   check_e("(let ((n (+ 2 3))) (eq? n n))", "#t"); // unspecified
