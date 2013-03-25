@@ -9,7 +9,6 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "builtin_util.hh"
-#include "number.hh"
 #include "eval.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
@@ -52,17 +51,10 @@ struct ci_compare{
 Lisp_ptr string_make(){
   ZsArgs args;
 
-  auto num = args[0].get<Number*>();
-  if(!num){
+  if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("make-string", Ptr_tag::number, args[0]);
   }
-
-  if(num->type() != Number::Type::integer){
-    throw zs_error_arg1("make-string",
-                        printf_string("arg's number is not %s", stringify(Number::Type::integer)),
-                        {num});
-  }
-  auto char_count = num->get<Number::integer_type>();
+  auto char_count = args[0].get<int>();
 
   switch(args.size()){
   case 1:
@@ -102,7 +94,9 @@ Lisp_ptr string_length(){
     throw string_type_check_failed("string-length", args[0]);
   }
 
-  return {new Number(static_cast<Number::integer_type>(str->length()))};
+  // TODO: add range check, and remove cast
+  return Lisp_ptr{Ptr_tag::integer,
+      static_cast<int>(str->length())};
 }
 
 Lisp_ptr string_ref(){
@@ -112,19 +106,13 @@ Lisp_ptr string_ref(){
     throw string_type_check_failed("string-ref", args[0]);
   }
 
-  auto num = args[1].get<Number*>();
-  if(!num){
+  if(args[1].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("string-ref", Ptr_tag::number, args[1]);
   }
-
-  if(num->type() != Number::Type::integer){
-    throw zs_error(printf_string("string-ref: arg's number is not %s! (%s)\n",
-                                 stringify(Number::Type::integer), stringify(num->type())));
-  }
-  auto ind = num->get<Number::integer_type>();
+  auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw zs_error(printf_string("native func: string-ref: index is out-of-bound ([0, %ld), supplied %ld\n",
+    throw zs_error(printf_string("native func: string-ref: index is out-of-bound ([0, %ld), supplied %d\n",
                                  str->length(), ind));
   }
 
@@ -138,19 +126,13 @@ Lisp_ptr string_set(){
     throw string_type_check_failed("string-set!", args[0]);
   }
 
-  auto num = args[1].get<Number*>();
-  if(!num){
+  if(args[1].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("string-set!", Ptr_tag::number, args[1]);
   }
-
-  if(num->type() != Number::Type::integer){
-    throw zs_error(printf_string("native func: string-set!: arg's number is not %s! (%s)\n",
-                                 stringify(Number::Type::integer), stringify(num->type())));
-  }
-  auto ind = num->get<Number::integer_type>();
+  auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw zs_error(printf_string("native func: string-set!: index is out-of-bound ([0, %ld), supplied %ld\n",
+    throw zs_error(printf_string("native func: string-set!: index is out-of-bound ([0, %ld), supplied %d\n",
                                  str->length(), ind));
   }
 
@@ -212,24 +194,17 @@ Lisp_ptr string_substr(){
     throw string_type_check_failed("substring", args[0]);
   }
 
-  Number::integer_type ind[2];
+  int ind[2];
 
   for(int i = 1; i < 3; ++i){
-    auto n = args[i].get<Number*>();
-    if(!n){
+    if(args[i].tag() != Ptr_tag::integer){
       throw builtin_type_check_failed("substring", Ptr_tag::number, args[i]);
     }
-
-    if(n->type() != Number::Type::integer){
-      throw zs_error(printf_string("native func: substring: arg's number is not %s! (%s)\n",
-                                   stringify(Number::Type::integer), stringify(n->type())));
-    }
-    ind[i-1] = n->get<Number::integer_type>();
+    ind[i-1] = args[i].get<int>();
   }
 
-
   if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= static_cast<signed>(str->length()))){
-    throw zs_error(printf_string("native func: substring: index is out-of-bound ([0, %ld), supplied [%ld, %ld)\n",
+    throw zs_error(printf_string("native func: substring: index is out-of-bound ([0, %ld), supplied [%d, %d)\n",
                                  str->length(), ind[0], ind[1]));
   }
 
