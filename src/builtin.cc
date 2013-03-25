@@ -6,7 +6,6 @@
 
 #include "builtin.hh"
 #include "zs_error.hh"
-#include "number.hh"
 #include "procedure.hh"
 #include "lisp_ptr.hh"
 #include "eval.hh"
@@ -40,17 +39,13 @@ static const char interaction_env_symname[] = "interaction-env-value";
 static
 Lisp_ptr env_pick_2(const char* name){
   ZsArgs args{1};
-  auto num = args[0].get<Number*>();
-  if(!num){
+
+  if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed(name, Ptr_tag::number, args[0]);
   }
 
-  if(num->type() != Number::Type::integer){
-    throw zs_error_arg1(name, "passed number is not exact integer", {args[0]});
-  }
-
-  auto ver = num->get<Number::integer_type>();
-  if(ver != 5l){
+  auto ver = args[0].get<int>();
+  if(ver != 5){
     throw zs_error_arg1(name, "passed number is not 5", {args[0]});
   }
 
