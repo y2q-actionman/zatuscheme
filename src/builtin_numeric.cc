@@ -32,12 +32,15 @@ zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
 template<typename Fun>
 inline Lisp_ptr number_pred(Fun&& fun){
   ZsArgs args;
-  auto num = args[0].get<Number*>();
-  if(!num){
+  auto tag = args[0].tag();
+
+  if(tag == Ptr_tag::integer
+     || tag == Ptr_tag::real
+     || tag == Ptr_tag::complex){
+    return Lisp_ptr{fun(args[0], tag)};
+  }else{
     return Lisp_ptr{false};
   }
-
-  return Lisp_ptr{fun(num)};
 }
 
 
@@ -97,38 +100,35 @@ inline Lisp_ptr number_compare(const char* name, Fun&& fun){
 
 template<template <typename> class Fun>
 struct pos_neg_pred{
-  inline bool operator()(Number* num){
-    switch(num->type()){
-    case Number::Type::complex:
-      return false;
-    case Number::Type::real: {
-      static constexpr Fun<Number::real_type> fun;
-      return fun(num->get<Number::real_type>(), 0);
-    }
-    case Number::Type::integer: {
-      static constexpr Fun<Number::integer_type> fun;
-      return fun(num->get<Number::integer_type>(), 0);
-    }
-    case Number::Type::uninitialized:
-    default:
+  inline bool operator()(Lisp_ptr p, Ptr_tag tag){
+    if(tag == Ptr_tag::complex){
+      static constexpr Fun<double> fun;
+      auto c = p.get<complex<double>*>();
+      return (c->imag() == 0) && fun(c->real(), 0);
+    }else if(tag == Ptr_tag::real){
+      static constexpr Fun<double> fun;
+      return fun(*p.get<double*>(), 0);
+    }else if(tag == Ptr_tag::integer){
+      static constexpr Fun<int> fun;
+      return fun(p.get<int>(), 0);
+    }else{
       UNEXP_DEFAULT();
     }
   }
 };
 
+
 template<template <typename> class Fun>
 struct even_odd_pred{
-  inline bool operator()(Number* num){
-    static constexpr Fun<Number::integer_type> fun;
-
-    switch(num->type()){
-    case Number::Type::complex:
-    case Number::Type::real:
+  inline bool operator()(Lisp_ptr p, Ptr_tag tag){
+    if(tag == Ptr_tag::complex){
       return false;
-    case Number::Type::integer:
-      return fun(num->get<Number::integer_type>() % 2, 0);
-    case Number::Type::uninitialized:
-    default:
+    }else if(tag == Ptr_tag::real){
+      return false;
+    }else if(tag == Ptr_tag::integer){
+      static constexpr Fun<int> fun;
+      return fun(p.get<int>() % 2, 0);
+    }else{
       UNEXP_DEFAULT();
     }
   }
@@ -466,42 +466,45 @@ Lisp_ptr number_i_e(const char* name, Fun&& fun){
 } // namespace
 
 
+Lisp_ptr numberp(){
+  return number_pred([](Lisp_ptr, Ptr_tag){ return true; });
+}
+
 Lisp_ptr complexp(){
-  return number_pred([](Number* n){
-      return n->type() >= Number::Type::integer;
+  return number_pred([](Lisp_ptr, Ptr_tag){ 
+      // now, all number is complex.
+      return true;
     });
 }
 
 Lisp_ptr realp(){
-  return number_pred([](Number* n){
-      return n->type() >= Number::Type::integer
-        && n->type() <= Number::Type::real;
+  return number_pred([](Lisp_ptr, Ptr_tag tag){
+      return (tag == Ptr_tag::real || tag == Ptr_tag::integer);
     });
 }
 
 Lisp_ptr rationalp(){
-  return number_pred([](Number* n){
-      return n->type() >= Number::Type::integer
-        && n->type() < Number::Type::real;
+  return number_pred([](Lisp_ptr, Ptr_tag tag){
+      // now, rational type does not exist.
+      return (tag == Ptr_tag::integer);
     });
 }
 
 Lisp_ptr integerp(){
-  return number_pred([](Number* n){
-      return n->type() == Number::Type::integer;
+  return number_pred([](Lisp_ptr, Ptr_tag tag){
+      return (tag == Ptr_tag::integer);
     });
 }
 
 Lisp_ptr exactp(){
-  return number_pred([](Number* n){
-      return n->type() == Number::Type::integer;
+  return number_pred([](Lisp_ptr, Ptr_tag tag){
+      return (tag == Ptr_tag::integer);
     });
 }
 
 Lisp_ptr inexactp(){
-  return number_pred([](Number* n){
-      return n->type() == Number::Type::complex
-        || n->type() == Number::Type::real;
+  return number_pred([](Lisp_ptr, Ptr_tag tag){
+      return (tag == Ptr_tag::complex || tag == Ptr_tag::real);
     });
 }
 
@@ -535,21 +538,7 @@ Lisp_ptr number_greater_eq(){
 
 
 Lisp_ptr zerop(){
-  return number_pred([](Number* num) -> bool {
-      switch(num->type()){
-      case Number::Type::complex: {
-        auto c = num->get<Number::complex_type>();
-        return (c.real() == 0 && c.imag() == 0);
-      }
-      case Number::Type::real:
-        return num->get<Number::real_type>() == 0;
-      case Number::Type::integer:
-        return num->get<Number::integer_type>() == 0;
-      case Number::Type::uninitialized:
-      default:
-        UNEXP_DEFAULT();
-      }
-    });
+  return number_pred(pos_neg_pred<std::equal_to>());
 }
 
 Lisp_ptr positivep(){

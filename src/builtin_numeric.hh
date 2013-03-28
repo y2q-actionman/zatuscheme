@@ -3,6 +3,7 @@
 
 #include "decl.hh"
 
+Lisp_ptr numberp();
 Lisp_ptr complexp();
 Lisp_ptr realp();
 Lisp_ptr rationalp();

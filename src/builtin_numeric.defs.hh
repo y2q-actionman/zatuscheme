@@ -1,7 +1,7 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"number?", {
-    type_check_pred<Ptr_tag::number>,
+    numberp,
     {1}}},
 
 {"complex?", {
