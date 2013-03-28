@@ -18,6 +18,7 @@
 #include "eval.hh"
 #include "builtin_util.hh"
 #include "printer.hh"
+#include "equality.hh"
 
 using namespace std;
 
@@ -30,6 +31,55 @@ bool is_numeric_type(Lisp_ptr p){
 
 namespace {
 
+bool is_integer_type(Lisp_ptr p){
+  return (p.tag() == Ptr_tag::integer);
+}
+
+bool is_rational_type(Lisp_ptr p){
+  return (false) // TODO: add rational!
+    || is_integer_type(p);
+}
+
+bool is_real_type(Lisp_ptr p){
+  return (p.tag() == Ptr_tag::real)
+    || is_rational_type(p);
+}
+
+bool is_complex_type(Lisp_ptr p){
+  return (p.tag() == Ptr_tag::complex)
+    || is_real_type(p);
+}
+
+template<typename T> T coerce(Lisp_ptr);
+
+template<>
+int coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::integer){
+    return p.get<int>();
+  }else{
+    UNEXP_DEFAULT();
+  }
+}
+
+template<>
+double coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::real){
+    return *(p.get<double*>());
+  }else{
+    return static_cast<double>(coerce<int>(p));
+  }
+}
+
+template<>
+std::complex<double> coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::complex){
+    return *(p.get<complex<double>*>());
+  }else{
+    return complex<double>(coerce<double>(p), 0);
+  }
+}
+
+
 zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
   return zs_error_arg1(func_name,
                        printf_string("arg is not %s!", stringify(Ptr_tag::number)),
@@ -41,7 +91,7 @@ inline Lisp_ptr number_pred(Fun&& fun){
   ZsArgs args;
 
   if(is_numeric_type(args[0])){
-    return Lisp_ptr{fun(args[0], args[0].tag())};
+    return Lisp_ptr{fun(args[0])};
   }else{
     return Lisp_ptr{false};
   }
@@ -58,16 +108,19 @@ struct complex_found{
 template<template <typename> class Fun,
          class ComplexComparator = complex_found>
 struct number_comparator {
-  inline bool operator()(const Number* n1, const Number* n2){
-    if(n1->type() == Number::Type::integer && n2->type() == Number::Type::integer){
-      static const Fun<Number::integer_type> fun;
-      return fun(n1->get<Number::integer_type>(), n2->get<Number::integer_type>());
-    }else if(n1->type() <= Number::Type::real && n2->type() <= Number::Type::real){
-      static const Fun<Number::real_type> fun;
-      return fun(n1->coerce<Number::real_type>(), n2->coerce<Number::real_type>());
-    }else{
+  inline bool operator()(Lisp_ptr p1, Lisp_ptr p2){
+    if(is_integer_type(p1) && is_integer_type(p2)){
+      static const Fun<int> fun;
+      return fun(coerce<int>(p1), coerce<int>(p2));
+    }else if(is_real_type(p1) && is_real_type(p2)){
+      static const Fun<double> fun;
+      return fun(coerce<double>(p1), coerce<double>(p2));
+    }else if(is_complex_type(p1) && is_complex_type(p2)){
       static const ComplexComparator fun;
-      return fun(n1->coerce<Number::complex_type>(), n2->coerce<Number::complex_type>());
+      return fun(coerce<std::complex<double> >(p1),
+                 coerce<std::complex<double> >(p2));
+    }else{
+      UNEXP_DEFAULT();
     }
   }
 };
@@ -80,22 +133,18 @@ inline Lisp_ptr number_compare(const char* name, Fun&& fun){
   auto i1 = begin(args);
   const auto e = end(args);
 
-  auto n1 = i1->get<Number*>();
-  if(!n1 || n1->type() < Number::Type::integer){
+  if(!is_numeric_type(*i1)){
     throw number_type_check_failed(name, *i1);
   }
                               
   for(auto i2 = next(i1); i2 != e; i1 = i2, ++i2){
-    auto n2 = i2->get<Number*>();
-    if(!n2 || n2->type() < Number::Type::integer){
+    if(!is_numeric_type(*i2)){
       throw number_type_check_failed(name, *i2);
     }
 
-    if(!fun(n1, n2)){
+    if(!fun(*i1, *i2)){
       return Lisp_ptr{false};
     }
-
-    n1 = n2;
   }
 
   return Lisp_ptr{true};
@@ -104,17 +153,17 @@ inline Lisp_ptr number_compare(const char* name, Fun&& fun){
 
 template<template <typename> class Fun>
 struct pos_neg_pred{
-  inline bool operator()(Lisp_ptr p, Ptr_tag tag){
-    if(tag == Ptr_tag::complex){
+  inline bool operator()(Lisp_ptr p){
+    if(is_integer_type(p)){
+      static const Fun<int> fun;
+      return fun(coerce<int>(p), 0);
+    }else if(is_real_type(p)){
+      static const Fun<double> fun;
+      return fun(coerce<double>(p), 0);
+    }else if(is_complex_type(p)){
       static constexpr Fun<double> fun;
-      auto c = p.get<complex<double>*>();
-      return (c->imag() == 0) && fun(c->real(), 0);
-    }else if(tag == Ptr_tag::real){
-      static constexpr Fun<double> fun;
-      return fun(*p.get<double*>(), 0);
-    }else if(tag == Ptr_tag::integer){
-      static constexpr Fun<int> fun;
-      return fun(p.get<int>(), 0);
+      auto c = coerce<complex<double> >(p);
+      return (c.imag() == 0) && fun(c.real(), 0);
     }else{
       UNEXP_DEFAULT();
     }
@@ -124,16 +173,12 @@ struct pos_neg_pred{
 
 template<template <typename> class Fun>
 struct even_odd_pred{
-  inline bool operator()(Lisp_ptr p, Ptr_tag tag){
-    if(tag == Ptr_tag::complex){
-      return false;
-    }else if(tag == Ptr_tag::real){
-      return false;
-    }else if(tag == Ptr_tag::integer){
-      static constexpr Fun<int> fun;
-      return fun(p.get<int>() % 2, 0);
+  inline bool operator()(Lisp_ptr p){
+    if(is_integer_type(p)){
+      static const Fun<int> fun;
+      return fun(coerce<int>(p), 0);
     }else{
-      UNEXP_DEFAULT();
+      return false;
     }
   }
 };
@@ -471,52 +516,47 @@ Lisp_ptr number_i_e(const char* name, Fun&& fun){
 
 
 Lisp_ptr numberp(){
-  return number_pred([](Lisp_ptr, Ptr_tag){ return true; });
+  ZsArgs args;
+  return Lisp_ptr{is_numeric_type(args[0])};
 }
 
 Lisp_ptr complexp(){
-  return number_pred([](Lisp_ptr, Ptr_tag){ 
-      // now, all number is complex.
-      return true;
-    });
+  ZsArgs args;
+  return Lisp_ptr{is_complex_type(args[0])};
 }
 
 Lisp_ptr realp(){
-  return number_pred([](Lisp_ptr, Ptr_tag tag){
-      return (tag == Ptr_tag::real || tag == Ptr_tag::integer);
-    });
+  ZsArgs args;
+  return Lisp_ptr{is_real_type(args[0])};
 }
 
 Lisp_ptr rationalp(){
-  return number_pred([](Lisp_ptr, Ptr_tag tag){
-      // now, rational type does not exist.
-      return (tag == Ptr_tag::integer);
-    });
+  ZsArgs args;
+  return Lisp_ptr{is_rational_type(args[0])};
 }
 
 Lisp_ptr integerp(){
-  return number_pred([](Lisp_ptr, Ptr_tag tag){
-      return (tag == Ptr_tag::integer);
-    });
+  ZsArgs args;
+  return Lisp_ptr{is_integer_type(args[0])};
 }
 
 Lisp_ptr exactp(){
-  return number_pred([](Lisp_ptr, Ptr_tag tag){
-      return (tag == Ptr_tag::integer);
+  return number_pred([](Lisp_ptr p){
+      return (p.tag() == Ptr_tag::integer);
     });
 }
 
 Lisp_ptr inexactp(){
-  return number_pred([](Lisp_ptr, Ptr_tag tag){
-      return (tag == Ptr_tag::complex || tag == Ptr_tag::real);
+  return number_pred([](Lisp_ptr p){
+      return (p.tag() == Ptr_tag::complex || p.tag() == Ptr_tag::real);
     });
 }
 
 
 Lisp_ptr number_equal(){
   return number_compare("=",
-                        [](const Number* n1, const Number* n2){
-                          return eqv(*n1, *n2);
+                        [](Lisp_ptr p, Lisp_ptr q){
+                          return eqv_internal(p, q);
                         });
 }
 
