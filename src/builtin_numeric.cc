@@ -21,6 +21,13 @@
 
 using namespace std;
 
+bool is_numeric_type(Lisp_ptr p){
+  auto tag = p.tag();
+  return (tag == Ptr_tag::integer
+          || tag == Ptr_tag::real
+          || tag == Ptr_tag::complex);
+}
+
 namespace {
 
 zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
@@ -32,12 +39,9 @@ zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
 template<typename Fun>
 inline Lisp_ptr number_pred(Fun&& fun){
   ZsArgs args;
-  auto tag = args[0].tag();
 
-  if(tag == Ptr_tag::integer
-     || tag == Ptr_tag::real
-     || tag == Ptr_tag::complex){
-    return Lisp_ptr{fun(args[0], tag)};
+  if(is_numeric_type(args[0])){
+    return Lisp_ptr{fun(args[0], args[0].tag())};
   }else{
     return Lisp_ptr{false};
   }
@@ -578,18 +582,18 @@ Lisp_ptr number_plus(){
   int init = 0;
 
   for(auto i = begin(args), e = end(args); i != e; ++i){
-    switch(i->tag()){
-    case Ptr_tag::integer:
-      init += i->get<int>();
-      break;
-    case Ptr_tag::real:
-      init += static_cast<int>(*i->get<double*>());
-      break;
-    case Ptr_tag::complex:
-      // init += ...
-      break;
-    default:
+    if(!is_numeric_type(*i)){
       throw number_type_check_failed("+", *i);
+    }
+
+    if(i->tag() == Ptr_tag::integer){
+      init += i->get<int>();
+    }else if(i->tag() == Ptr_tag::real){
+      init += static_cast<int>(*i->get<double*>());
+    }else if(i->tag() == Ptr_tag::complex){
+      // init += ...
+    }else{
+      UNEXP_DEFAULT();
     }
   }
 
