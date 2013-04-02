@@ -154,14 +154,6 @@ Lisp_ptr exit_func(){
   return {};
 }
 
-Lisp_ptr eq_hash_func(){
-  ZsArgs args; 
-
-  auto h = eq_hash(args[0]);
-
-  return new Number{static_cast<Number::integer_type>(h)};
-}
-
 Lisp_ptr transcript_on(){
   ZsArgs args; 
   dump_mode = true;

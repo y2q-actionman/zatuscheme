@@ -27,9 +27,6 @@
 {"exit", {
     exit_func,
     {0}}},
-{"eq-hash", {
-    eq_hash_func,
-    {1}}},
 {"transcript-on", {
     transcript_on,
     {0}}},
