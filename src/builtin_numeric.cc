@@ -278,20 +278,15 @@ template<typename Fun>
 inline
 Lisp_ptr number_divop(const char* name, Fun&& fun){
   ZsArgs args;
-  Number* n[2];
 
   for(auto i = 0; i < 2; ++i){
-    n[i] = args[i].get<Number*>();
-    if(!n[i]){
-      throw number_type_check_failed(name, args[i]);
-    }
-    if(n[i]->type() != Number::Type::integer){
-      throw zs_error_arg1(name, "not integer type", {n[i]});
+    if(!is_integer_type(args[i])){
+      throw zs_error_arg1(name, "not integer type", {args[i]});
     }
   }
   
-  return {new Number{fun(n[0]->get<Number::integer_type>(),
-                         n[1]->get<Number::integer_type>())}};
+  return Lisp_ptr{Ptr_tag::integer,
+      fun(coerce<int>(args[0]), coerce<int>(args[1]))};
 }
 
 template<typename T>
@@ -655,12 +650,12 @@ Lisp_ptr number_abs(){
 
 
 Lisp_ptr number_quot(){
-  return number_divop("quotient", std::divides<Number::integer_type>());
+  return number_divop("quotient", std::divides<int>());
 }
 
 Lisp_ptr number_rem(){
   return number_divop("remainder",
-                      [](Number::integer_type i1, Number::integer_type i2) -> Number::integer_type{
+                      [](int i1, int i2) -> int{
                         auto q = i1 / i2;
                         return i1 - (q * i2);
                       });
@@ -668,7 +663,7 @@ Lisp_ptr number_rem(){
 
 Lisp_ptr number_mod(){
   return number_divop("modulo", 
-                      [](Number::integer_type i1, Number::integer_type i2) -> Number::integer_type{
+                      [](int i1, int i2) -> int{
                         auto m = i1 % i2;
 
                         if((m < 0 && i2 > 0) || (m > 0 && i2 < 0)){
