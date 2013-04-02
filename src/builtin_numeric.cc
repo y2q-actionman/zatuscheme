@@ -100,13 +100,16 @@ inline Lisp_ptr number_pred(Fun&& fun){
 
 struct complex_found{
   static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
-  Lisp_ptr operator()(const Number::complex_type&, const Number::complex_type&) const{
+  template<typename CmpT>
+  Lisp_ptr operator()(const CmpT&, const CmpT&) const{
     throw zs_error(msg);
   }
 };
 
+  // TODO: delete this! dirty!
 struct complex_cmp{
-  bool operator()(const Number::complex_type&, const Number::complex_type&) const{
+  template<typename CmpT>
+  bool operator()(const CmpT&, const CmpT&) const{
     throw zs_error(complex_found::msg);
   }
 };
@@ -182,7 +185,7 @@ struct even_odd_pred{
   inline bool operator()(Lisp_ptr p){
     if(is_integer_type(p)){
       static const Fun<int> fun;
-      return fun(coerce<int>(p), 0);
+      return fun(coerce<int>(p) % 2, 0);
     }else{
       return false;
     }
@@ -432,32 +435,15 @@ inline
 Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
   ZsArgs args;
 
-  auto n = args[0].get<Number*>();
-  if(!n){
+  if(!is_numeric_type(args[0])){
     throw number_type_check_failed(name, args[0]);
   }
 
-  switch(n->type()){
-  case Number::Type::integer:
-  case Number::Type::real:
-  case Number::Type::complex:
-    return {new Number(fun(n->coerce<Number::complex_type>()))};
-  case Number::Type::uninitialized:
-  default:
+  if(is_complex_type(args[0])){
+    return {new complex<double>(fun(coerce<complex<double> >(args[0])))};
+  }else{
     UNEXP_DEFAULT();
   }
-}
-
-template<typename Fun>
-Lisp_ptr number_i_e(const char* name, Fun&& fun){
-  ZsArgs args;
-
-  auto n = args[0].get<Number*>();
-  if(!n){
-    throw number_type_check_failed(name, args[0]);
-  }
-
-  return {new Number(fun(*n))};
 }
 
 } // namespace
@@ -840,39 +826,68 @@ Lisp_ptr number_polar(){
 
 Lisp_ptr number_real(){
   return number_unary_op_complex("real-part",
-                                 [](const Number::complex_type& z){
+                                 [](const complex<double>& z){
                                    return z.real();
                                  });
 }
 
 Lisp_ptr number_imag(){
   return number_unary_op_complex("imag-part",
-                                 [](const Number::complex_type& z){
+                                 [](const complex<double>& z){
                                    return z.imag();
                                  });
 }
 
 Lisp_ptr number_mag(){
   return number_unary_op_complex("magnitude",
-                                 [](const Number::complex_type& z){
+                                 [](const complex<double>& z){
                                    return std::abs(z);
                                  });
 }
 
 Lisp_ptr number_angle(){
   return number_unary_op_complex("angle",
-                                 [](const Number::complex_type& z){
+                                 [](const complex<double>& z){
                                    return arg(z);
                                  });
 }
 
 
 Lisp_ptr number_i_to_e(){
-  return number_i_e("inexact->exact", to_exact);
+  ZsArgs args;
+
+  if(!is_numeric_type(args[0])){
+    throw number_type_check_failed("inexact->exact", args[0]);
+  }
+    
+  if(is_integer_type(args[0])){
+    return args[0];
+  }else if(is_real_type(args[0])){
+    return {Ptr_tag::integer, static_cast<int>(coerce<double>(args[0]))};
+  }else if(is_complex_type(args[0])){
+    // MEMO: add complex<int> type??
+    throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
+  }else{
+    UNEXP_DEFAULT();
+  }
 }
 
 Lisp_ptr number_e_to_i(){
-  return number_i_e("exact->inexact", to_inexact);
+  ZsArgs args;
+
+  if(!is_numeric_type(args[0])){
+    throw number_type_check_failed("exact->inexact", args[0]);
+  }
+    
+  if(is_integer_type(args[0])){
+    return {new double(static_cast<double>(coerce<int>(args[0])))};
+  }else if(is_real_type(args[0])){
+    return args[0];
+  }else if(is_complex_type(args[0])){
+    return args[0];
+  }else{
+    UNEXP_DEFAULT();
+  }
 }
 
 
