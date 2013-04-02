@@ -311,20 +311,17 @@ inline
 Lisp_ptr number_rounding(const char* name, Fun&& fun){
   ZsArgs args;
 
-  auto n = args[0].get<Number*>();
-  if(!n){
+  if(!is_numeric_type(args[0])){
     throw number_type_check_failed(name, args[0]);
   }
 
-  switch(n->type()){
-  case Number::Type::integer:
-    return {n};
-  case Number::Type::real:
-    return {new Number(fun(n->get<Number::real_type>()))};
-  case Number::Type::complex:
+  if(is_integer_type(args[0])){
+    return args[0];
+  }else if(is_real_type(args[0])){
+    return Lisp_ptr{new double(fun(coerce<double>(args[0])))};
+  }else if(is_complex_type(args[0])){
     throw zs_error(complex_found::msg);
-  case Number::Type::uninitialized:
-  default:
+  }else{
     UNEXP_DEFAULT();
   }
 }
@@ -721,19 +718,19 @@ Lisp_ptr number_denominator(){
 
 
 Lisp_ptr number_floor(){
-  return number_rounding("floor", [](Number::real_type d){ return std::floor(d); });
+  return number_rounding("floor", [](double d){ return std::floor(d); });
 }
 
 Lisp_ptr number_ceil(){
-  return number_rounding("ceiling", [](Number::real_type d){ return std::ceil(d); });
+  return number_rounding("ceiling", [](double d){ return std::ceil(d); });
 }
 
 Lisp_ptr number_trunc(){
-  return number_rounding("truncate", [](Number::real_type d){ return std::trunc(d); });
+  return number_rounding("truncate", [](double d){ return std::trunc(d); });
 }
 
 Lisp_ptr number_round(){
-  return number_rounding("round", [](Number::real_type d){ return std::round(d); });
+  return number_rounding("round", [](double d){ return std::round(d); });
 }
 
 
