@@ -100,13 +100,19 @@ inline Lisp_ptr number_pred(Fun&& fun){
 
 struct complex_found{
   static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
-  bool operator()(const Number::complex_type&, const Number::complex_type&) const{
+  Lisp_ptr operator()(const Number::complex_type&, const Number::complex_type&) const{
     throw zs_error(msg);
   }
 };
 
+struct complex_cmp{
+  bool operator()(const Number::complex_type&, const Number::complex_type&) const{
+    throw zs_error(complex_found::msg);
+  }
+};
+
 template<template <typename> class Fun,
-         class ComplexComparator = complex_found>
+         class ComplexComparator = complex_cmp>
 struct number_comparator {
   inline bool operator()(Lisp_ptr p1, Lisp_ptr p2){
     if(is_integer_type(p1) && is_integer_type(p2)){
@@ -404,33 +410,21 @@ template<typename RFun, typename CFun>
 inline
 Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
   ZsArgs args;
-  Number* n[2];
 
   for(auto i = 0; i < 2; ++i){
-    n[i] = args[i].get<Number*>();
-    if(!n[i]){
+    if(!is_numeric_type(args[i])){
       throw number_type_check_failed(name, args[i]);
     }
   }
   
-  if(n[0]->type() == Number::Type::uninitialized
-     || n[1]->type() == Number::Type::uninitialized){
+  if(is_real_type(args[0]) && is_real_type(args[1])){
+    return rfun(coerce<double>(args[0]), coerce<double>(args[1]));
+  }else if(is_complex_type(args[0]) && is_complex_type(args[1])){
+    return cfun(coerce<complex<double> >(args[0]),
+                coerce<complex<double> >(args[1]));
+  }else{
     UNEXP_DEFAULT();
   }
-
-  if(n[0]->type() <= Number::Type::real
-     || n[1]->type() <= Number::Type::real){
-    return {new Number(rfun(n[0]->coerce<Number::real_type>(),
-                            n[1]->coerce<Number::real_type>()))};
-  }
-
-  if(n[0]->type() <= Number::Type::complex
-     || n[1]->type() <= Number::Type::complex){
-    return Lisp_ptr{cfun(n[0]->coerce<Number::complex_type>(),
-                         n[1]->coerce<Number::complex_type>())};
-  }
-
-  UNEXP_DEFAULT();
 }
 
 template<typename Fun>
@@ -819,26 +813,26 @@ Lisp_ptr number_sqrt(){
 
 Lisp_ptr number_expt(){
   return number_binary_op("expt",
-                          [](Number::real_type n1, Number::real_type n2){
-                            return std::pow(n1, n2);
+                          [](double n1, double n2) -> Lisp_ptr{
+                            return {new double(std::pow(n1, n2))};
                           },
-                          [](const Number::complex_type& n1, const Number::complex_type& n2){
-                            return Lisp_ptr{new Number(std::pow(n1, n2))};
+                          [](const complex<double>& n1, const complex<double>& n2) -> Lisp_ptr{
+                            return {new complex<double>(std::pow(n1, n2))};
                           });
 }
 
 Lisp_ptr number_rect(){
   return number_binary_op("make-rectangular",
-                          [](Number::real_type n1, Number::real_type n2){
-                            return Number::complex_type(n1, n2);
+                          [](double n1, double n2) -> Lisp_ptr{
+                            return {new complex<double>(n1, n2)};
                           },
                           complex_found());
 }
 
 Lisp_ptr number_polar(){
   return number_binary_op("make-polar",
-                          [](Number::real_type n1, Number::real_type n2){
-                            return polar(n1, n2);
+                          [](double n1, double n2) -> Lisp_ptr{
+                            return {new complex<double>(polar(n1, n2))};
                           },
                           complex_found());
 }
