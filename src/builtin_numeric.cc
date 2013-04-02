@@ -641,35 +641,18 @@ Lisp_ptr number_divide(){
 Lisp_ptr number_abs(){
   ZsArgs args;
 
-  auto n = args[0].get<Number*>();
-  if(!n){
+  if(!is_numeric_type(args[0])){
     throw number_type_check_failed("abs", args[0]);
   }
 
-  switch(n->type()){
-  case Number::Type::integer: {
-    auto i = n->get<Number::integer_type>();
-    if(i >= 0){
-      return n;
-    }else{
-      static constexpr auto imin = numeric_limits<Number::integer_type>::min();
-      if(i == imin){
-        cerr << "warning: integer operation fallen into float\n";
-        return new Number(-static_cast<Number::real_type>(imin));
-      }else{
-        return new Number(-i);
-      }
-    }
-  }
-  case Number::Type::real: {
-    auto d = n->get<Number::real_type>();
-    return {(d >= 0) ? n : new Number(-d)};
-  }
-  case Number::Type::complex: {
+  if(is_integer_type(args[0])){
+    // TODO: add INT_MIN check
+    return Lisp_ptr{Ptr_tag::integer, abs(coerce<int>(args[0]))};
+  }else if(is_real_type(args[0])){
+    return Lisp_ptr{new double(fabs(coerce<double>(args[0])))};
+  }else if(is_complex_type(args[0])){
     throw zs_error(complex_found::msg);
-  }
-  case Number::Type::uninitialized:
-  default:
+  }else{
     UNEXP_DEFAULT();
   }
 }
@@ -729,8 +712,7 @@ Lisp_ptr number_lcm(){
 
 Lisp_ptr number_numerator(){
   ZsArgs args;
-  auto num = args[0].get<Number*>();
-  if(!num){
+  if(!is_numeric_type(args[0])){
     throw number_type_check_failed("numerator", args[0]);
   }
 
@@ -739,8 +721,7 @@ Lisp_ptr number_numerator(){
 
 Lisp_ptr number_denominator(){
   ZsArgs args;
-  auto num = args[0].get<Number*>();
-  if(!num){
+  if(!is_numeric_type(args[0])){
     throw number_type_check_failed("denominator", args[0]);
   }
 
