@@ -736,11 +736,9 @@ Lisp_ptr number_round(){
 
 Lisp_ptr number_rationalize(){
   ZsArgs args;
-  Number* n[2];
 
   for(auto i = 0; i < 2; ++i){
-    n[i] = args[i].get<Number*>();
-    if(!n[i]){
+    if(!is_numeric_type(args[i])){
       throw number_type_check_failed("rationalize", args[i]);
     }
   }
@@ -780,40 +778,31 @@ Lisp_ptr number_acos(){
 Lisp_ptr number_atan(){
   ZsArgs args;
 
-  auto n1 = args[0].get<Number*>();
-  if(!n1){
+  if(is_numeric_type(args[0])){
     throw number_type_check_failed("atan", args[0]);
   }
 
   switch(args.size()){
   case 1:  // std::atan()
-    switch(n1->type()){
-    case Number::Type::integer:
-    case Number::Type::real:
-      return {new Number(std::atan(n1->coerce<Number::real_type>()))};
-    case Number::Type::complex: {
-      return {new Number(std::atan(n1->get<Number::complex_type>()))};
-    }
-    case Number::Type::uninitialized:
-    default:
+    if(is_real_type(args[0])){
+      return {new double(std::atan(coerce<double>(args[0])))};
+    }else if(is_complex_type(args[0])){
+      return {new complex<double>(std::atan(coerce<complex<double> >(args[0])))};
+    }else{
       UNEXP_DEFAULT();
     }
 
   case 2: {// std::atan2()
-    auto n2 = args[1].get<Number*>();
-    if(!n2){
+    if(is_numeric_type(args[1])){
       throw number_type_check_failed("atan", args[1]);
     }
 
-    switch(n2->type()){
-    case Number::Type::integer:
-    case Number::Type::real:
-      return {new Number(std::atan2(n1->coerce<Number::real_type>(),
-                                    n2->coerce<Number::real_type>()))};
-    case Number::Type::complex:
+    if(is_real_type(args[0]) && is_real_type(args[1])){
+      return {new double(std::atan2(coerce<double>(args[0]),
+                                    coerce<double>(args[2])))};
+    }else if(is_complex_type(args[0]) && is_complex_type(args[1])){
       throw zs_error("native func: (atan <complex> <complex>) is not implemented.\n");
-    case Number::Type::uninitialized:
-    default:
+    }else{
       UNEXP_DEFAULT();
     }
   }
