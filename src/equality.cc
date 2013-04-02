@@ -2,7 +2,6 @@
 
 #include "equality.hh"
 #include "util.hh"
-#include "number.hh"
 #include "printer.hh"
 #include "cons.hh"
 #include "cons_util.hh"
@@ -61,9 +60,7 @@ bool eq_id_internal(Lisp_ptr a, Lisp_ptr b){
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
   
-  if(a.tag() == Ptr_tag::number){
-    return eqv(*a.get<Number*>(), *b.get<Number*>());
-  }else if(a.tag() == Ptr_tag::real){
+  if(a.tag() == Ptr_tag::real){
     typedef to_type<Ptr_tag, Ptr_tag::real>::type RealT;
     return *a.get<RealT>() == *b.get<RealT>();
   }else if(a.tag() == Ptr_tag::complex){
