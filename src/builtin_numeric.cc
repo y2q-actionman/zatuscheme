@@ -186,125 +186,91 @@ struct even_odd_pred{
 
 template<typename Fun, typename Iter>
 inline
-Lisp_ptr number_accumulate(const char* name, Number&& init, Fun&& fun,
+Lisp_ptr number_accumulate(const char* name, Lisp_ptr init, const Fun& fun,
                            const Iter& args_begin, const Iter& args_end){
-  for(auto i = args_begin, e = args_end;
-      i != e; ++i){
-    auto n = i->get<Number*>();
-    if(!n){
+  auto acc = init;
+
+  for(auto i = args_begin, e = args_end; i != e; ++i){
+    if(!is_numeric_type(*i)){
       throw number_type_check_failed(name, *i);
     }
 
-    if(!fun(init, *n)){ // assumed 'uncaught_exception' context
+    acc = fun(acc, *i);
+    if(!acc){ // assumed 'uncaught_exception' context
       return {};
     }
   }
 
-  return {new Number(init)};
+  return acc;
 }
 
 template<class Fun>
 inline
-Lisp_ptr number_accumulate(const char* name, Number&& init, Fun&& fun){
+Lisp_ptr number_accumulate(const char* name, Lisp_ptr init, const Fun& fun){
   ZsArgs args;
-  return number_accumulate(name, move(init), move(fun),
-                           args.begin(), args.end());
+  return number_accumulate(name, init, fun, args.begin(), args.end());
 }
 
 
 template<template <typename> class Cmp>
 struct minmax_accum{
-  inline bool operator()(Number& n1, const Number& n2){
-    if(n1.type() == Number::Type::uninitialized){
-      n1 = n2;
-      return true;
+  inline Lisp_ptr operator()(Lisp_ptr n1, Lisp_ptr n2) const{
+    if(!is_numeric_type(n1)){
+      throw number_type_check_failed("min/max", n1);
     }
 
-    if(n2.type() == Number::Type::uninitialized){
-      return true;
+    if(!is_numeric_type(n2)){
+      throw number_type_check_failed("mix/max", n2);
     }
 
-    if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-      static constexpr Cmp<Number::integer_type> cmp;
-
-      if(cmp(n2.get<Number::integer_type>(), n1.get<Number::integer_type>()))
-        n1 = n2;
-      return true;
-    }
-
-    if(n1.type() <= Number::Type::real && n2.type() <= Number::Type::real){
-      static constexpr Cmp<Number::real_type> cmp;
-
-      if(cmp(n2.coerce<Number::real_type>(), n1.coerce<Number::real_type>())){
-        n1 = Number{n2.coerce<Number::real_type>()};
-      }else if(n1.type() != Number::Type::real){
-        n1 = Number{n1.coerce<Number::real_type>()};
+    if(is_integer_type(n1) && is_integer_type(n2)){
+      static const Cmp<int> cmp;
+      if(cmp(coerce<int>(n1), coerce<int>(n2))){
+        return n1;
+      }else{
+        return n2;
       }
-      return true;
+    }else if(is_real_type(n1) && is_real_type(n2)){
+      static const Cmp<double> cmp;
+      if(cmp(coerce<double>(n1), coerce<double>(n2))){
+        return n1;
+      }else{
+        return n2;
+      }
+    }else if(is_complex_type(n1) && is_complex_type(n2)){
+      throw zs_error(complex_found::msg);
+    }else{
+      UNEXP_DEFAULT();
     }
-
-    throw zs_error(complex_found::msg);
   }
 };    
 
 template<template <typename> class Op>
 struct binary_accum{
-  inline bool operator()(Number& n1, const Number& n2){
-    if(n1.type() == Number::Type::uninitialized){
-      n1 = n2;
-      return true;
+  inline Lisp_ptr operator()(Lisp_ptr n1, Lisp_ptr n2) const{
+    if(!is_numeric_type(n1)){
+      throw number_type_check_failed("(binary numeric)", n1);
     }
 
-    if(n2.type() == Number::Type::uninitialized){
-      return true;
+    if(!is_numeric_type(n2)){
+      throw number_type_check_failed("(binary numeric)", n2);
     }
 
-    // n1 type <= n2 type
-    if(n1.type() == Number::Type::integer && n2.type() == Number::Type::integer){
-      // static constexpr auto imax = numeric_limits<Number::integer_type>::max();
-      // static constexpr auto imin = numeric_limits<Number::integer_type>::min();
-      static constexpr Op<Number::integer_type> op;
 
-      long long tmp = op(n1.get<Number::integer_type>(), n2.get<Number::integer_type>());
-      // if(tmp > imax || tmp < imin){
-      //   cerr << "integer operation fallen into float\n";
-      //   n1 = Number{static_cast<Number::real_type>(tmp)};
-      // }else{
-        n1.get<Number::integer_type>() = static_cast<Number::integer_type>(tmp);
-      // }
-
-      return true;
-    }
-
-    if(n1.type() == Number::Type::real && n2.type() <= Number::Type::real){
-      static constexpr Op<Number::real_type> op;
-      n1.get<Number::real_type>() = 
-        op(n1.get<Number::real_type>(), n2.coerce<Number::real_type>());
-      return true;
-    }
-
-    if(n1.type() == Number::Type::complex && n2.type() <= Number::Type::complex){
-      static constexpr Op<Number::complex_type> op;
-      n1.get<Number::complex_type>() = 
-        op(n1.get<Number::complex_type>(), n2.coerce<Number::complex_type>());
-      return true;
-    }
-
-    // n1 type > n2 type
-    if(n1.type() < Number::Type::real && n2.type() == Number::Type::real){
-      static constexpr Op<Number::real_type> op;
-      n1 = Number{op(n1.coerce<Number::real_type>(), n2.get<Number::real_type>())};
-      return true;
-    }
-
-    if(n1.type() < Number::Type::complex && n2.type() == Number::Type::complex){
-      static constexpr Op<Number::complex_type> op;
-      n1 = Number{op(n1.coerce<Number::complex_type>(), n2.get<Number::complex_type>())};
-      return true;
-    }
-
-    // ???
-    throw zs_error_arg1("+-*/", "failed at numeric conversion!");
+    if(is_integer_type(n1) && is_integer_type(n2)){
+      // TODO: add limit check
+      static constexpr Op<int> op;
+      return Lisp_ptr{Ptr_tag::integer, op(coerce<int>(n1), coerce<int>(n2))};
+    }else if(is_real_type(n1) && is_real_type(n2)){
+      static constexpr Op<double> op;
+      return Lisp_ptr{new double(op(coerce<double>(n1), coerce<double>(n2)))};
+    }else if(is_complex_type(n1) && is_complex_type(n2)){
+      static constexpr Op<complex<double> > op;
+      return Lisp_ptr{new complex<double>(op(coerce<complex<double> >(n1),
+                                             coerce<complex<double> >(n2)))};
+    }else{
+      UNEXP_DEFAULT();
+    }      
   }
 };
 
@@ -603,79 +569,47 @@ Lisp_ptr evenp(){
 
 
 Lisp_ptr number_max(){
-  return number_accumulate("max", Number(), minmax_accum<std::greater>());
+  ZsArgs args;
+  return number_accumulate("max", args[0], minmax_accum<std::greater>(),
+                           next(begin(args)), end(args));
 }
 
 Lisp_ptr number_min(){
-  return number_accumulate("min", Number(), minmax_accum<std::less>());
-}
-
-/*
-Lisp_ptr number_plus(){
-  return number_accumulate("+", Number(0l), binary_accum<std::plus>());
-}
-*/
-
-// TODO: make other ops!
-Lisp_ptr number_plus(){
   ZsArgs args;
-  int init = 0;
+  return number_accumulate("min", args[0], minmax_accum<std::less>(),
+                           next(begin(args)), end(args));
+}
 
-  for(auto i = begin(args), e = end(args); i != e; ++i){
-    if(!is_numeric_type(*i)){
-      throw number_type_check_failed("+", *i);
-    }
-
-    if(i->tag() == Ptr_tag::integer){
-      init += i->get<int>();
-    }else if(i->tag() == Ptr_tag::real){
-      init += static_cast<int>(*i->get<double*>());
-    }else if(i->tag() == Ptr_tag::complex){
-      // init += ...
-    }else{
-      UNEXP_DEFAULT();
-    }
-  }
-
-  return Lisp_ptr{Ptr_tag::integer, init};
+Lisp_ptr number_plus(){
+  return number_accumulate("+", Lisp_ptr{Ptr_tag::integer, 0}, binary_accum<std::plus>());
 }
 
 Lisp_ptr number_multiple(){
-  return number_accumulate("*", Number(1l), binary_accum<std::multiplies>());
+  return number_accumulate("*", Lisp_ptr{Ptr_tag::integer, 1}, binary_accum<std::multiplies>());
 }
 
 Lisp_ptr number_minus(){
   ZsArgs args;
 
-  auto n = args[0].get<Number*>();
-  if(!n){
+  if(!is_numeric_type(args[0])){
     throw number_type_check_failed("-", args[0]);
   }
 
   if(args.size() == 1){
-    switch(n->type()){
-    case Number::Type::integer: {
-      static constexpr auto imin = numeric_limits<Number::integer_type>::min();
-      auto i = n->get<Number::integer_type>();
-      if(i == imin){
-        cerr << "warning: integer operation fallen into float\n";
-        return {new Number(-static_cast<Number::real_type>(imin))};
-      }else{
-        return {new Number(-i)};
-      }
-    }
-    case Number::Type::real:
-      return {new Number(-n->get<Number::real_type>())};
-    case Number::Type::complex: {
-      auto c = n->get<Number::complex_type>();
-      return {new Number(Number::complex_type(-c.real(), -c.imag()))};
-    }
-    case Number::Type::uninitialized:
-    default:
+    if(is_integer_type(args[0])){
+      // TODO: add limit check
+      return Lisp_ptr{Ptr_tag::integer, -coerce<int>(args[0])};
+    }else if(is_real_type(args[0])){
+      auto f = coerce<double>(args[0]);
+      return Lisp_ptr{new double(-f)};
+    }else if(is_complex_type(args[0])){
+      auto c = coerce<complex<double> >(args[0]);
+      return Lisp_ptr{new complex<double>(-c)};
+    }else{
       UNEXP_DEFAULT();
     }
   }else{
-    return number_accumulate("-", Number(*n), binary_accum<std::minus>(),
+    return number_accumulate("-", args[0], binary_accum<std::minus>(),
                              next(args.begin()), args.end());
   }
 }
@@ -683,32 +617,24 @@ Lisp_ptr number_minus(){
 Lisp_ptr number_divide(){
   ZsArgs args;
 
-  auto n = args[0].get<Number*>();
-  if(!n){
+  if(!is_numeric_type(args[0])){
     throw number_type_check_failed("/", args[0]);
   }
 
   if(args.size() == 1){
-    switch(n->type()){
-    case Number::Type::integer:
-      return {new Number(1.0 / n->get<Number::integer_type>())};
-    case Number::Type::real:
-      return {new Number(1.0 / n->get<Number::real_type>())};
-    case Number::Type::complex: {
-      auto c = n->get<Number::complex_type>();
-      return {new Number(1.0 / c)};
-    }
-    case Number::Type::uninitialized:
-    default:
+    if(is_integer_type(args[0])){
+      // TODO: add type check
+      return Lisp_ptr{new double(1.0 / coerce<int>(args[0]))};
+    }else if(is_real_type(args[0])){
+      return Lisp_ptr{new double(1.0 / coerce<double>(args[0]))};
+    }else if(is_complex_type(args[0])){
+      return Lisp_ptr{new complex<double>(1.0 / coerce<complex<double> >(args[0]))};
+    }else{
       UNEXP_DEFAULT();
     }
   }else{
-    return number_accumulate("/", 
-                             n->type() == Number::Type::integer
-                             ? Number(n->coerce<Number::real_type>()) : Number(*n),                    
-                             binary_accum<std::divides>(),
-                             next(args.begin()),
-                             args.end());
+    return number_accumulate("/", args[0], binary_accum<std::divides>(),
+                             next(args.begin()), args.end());
   }
 }
 
@@ -775,34 +701,29 @@ Lisp_ptr number_mod(){
 }
 
 Lisp_ptr number_gcd(){
-  return number_accumulate("gcd", Number(0l),
-                           [](Number& n1, const Number& n2) -> bool {
-                             if(n1.type() != Number::Type::integer
-                                || n2.type() != Number::Type::integer){
+  return number_accumulate("gcd", Lisp_ptr(Ptr_tag::integer, 0),
+                           [](Lisp_ptr n1, Lisp_ptr n2) -> Lisp_ptr {
+                             if(!is_integer_type(n1) || !is_integer_type(n2)){
                                throw zs_error_arg1("gcd", "passed one is not integer.");
                              }
 
-                             auto i1 = n1.get<Number::integer_type>();
-                             auto i2 = n2.get<Number::integer_type>();
-
-                             n1 = Number{gcd(i1, i2)};
-                             return true;
+                             return Lisp_ptr{Ptr_tag::integer,
+                                 gcd(coerce<int>(n1), coerce<int>(n2))};
                            });
 }
 
 Lisp_ptr number_lcm(){
-  return number_accumulate("lcm", Number(1l),
-                           [](Number& n1, const Number& n2) -> bool {
-                             if(n1.type() != Number::Type::integer
-                                || n2.type() != Number::Type::integer){
+  return number_accumulate("lcm", Lisp_ptr(Ptr_tag::integer, 1),
+                           [](Lisp_ptr n1, Lisp_ptr n2) -> Lisp_ptr {
+                             if(!is_integer_type(n1) || !is_integer_type(n2)){
                                throw zs_error_arg1("lcm", "passed one is not integer.");
                              }
 
-                             auto i1 = n1.get<Number::integer_type>();
-                             auto i2 = n2.get<Number::integer_type>();
+                             auto i1 = coerce<int>(n1);
+                             auto i2 = coerce<int>(n2);
 
-                             n1 = Number{abs(i1 * i2 / gcd(i1, i2))};
-                             return true;
+                             return Lisp_ptr{Ptr_tag::integer,
+                                 abs(i1 * i2 / gcd(i1, i2))};
                            });
 }
 
