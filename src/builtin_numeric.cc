@@ -339,19 +339,15 @@ inline
 Lisp_ptr number_unary_op(const char* name, Fun&& fun){
   ZsArgs args;
 
-  auto n = args[0].get<Number*>();
-  if(!n){
+  if(!is_numeric_type(args[0])){
     throw number_type_check_failed(name, args[0]);
   }
 
-  switch(n->type()){
-  case Number::Type::integer:
-  case Number::Type::real:
-    return {new Number(fun(n->coerce<Number::real_type>()))};
-  case Number::Type::complex:
-    return {new Number(fun(n->get<Number::complex_type>()))};
-  case Number::Type::uninitialized:
-  default:
+  if(is_real_type(args[0])){
+    return {new double(fun(coerce<double>(args[0])))};
+  }else if(is_complex_type(args[0])){
+    return {new complex<double>(fun(coerce<complex<double> >(args[0])))};
+  }else{
     UNEXP_DEFAULT();
   }
 }
@@ -920,14 +916,10 @@ Lisp_ptr number_from_string(){
     radix = 10;
     break;
   case 2: {
-    auto num = args[1].get<Number*>();
-    if(!num){
-      throw zs_error_arg1("string->number", "passed radix is not number", {args[1]});
-    }
-    if(num->type() != Number::Type::integer){
+    if(!is_integer_type(args[1])){
       throw zs_error_arg1("string->number", "passed radix is not integer", {args[1]});
     }
-    radix = num->get<Number::integer_type>();
+    radix = coerce<int>(args[1]);
     break;
   }
   default:
@@ -935,14 +927,30 @@ Lisp_ptr number_from_string(){
   }
 
   istringstream iss(*str);
-  return {new Number{parse_number(iss, radix)}};
+
+  // TODO: remove number type?
+  auto n = parse_number(iss, radix);
+
+  // copy from [reader.cc]
+  switch(n.type()){
+  case Number::Type::uninitialized:
+    return Lisp_ptr();
+  case Number::Type::integer:
+    // TODO: use upper integer type!
+    return Lisp_ptr(Ptr_tag::integer, n.get<long>());
+  case Number::Type::real:
+    return {new double(n.get<double>())};
+  case Number::Type::complex:
+    return {new complex<double>(n.get<complex<double> >())};
+  default:
+    UNEXP_DEFAULT();
+  }
 }
 
 Lisp_ptr number_to_string(){
   ZsArgs args;
 
-  auto n = args[0].get<Number*>();
-  if(!n){
+  if(!is_numeric_type(args[0])){
     throw zs_error_arg1("number->string", "passed arg is not number", {args[0]});
   }
 
@@ -953,14 +961,10 @@ Lisp_ptr number_to_string(){
     radix = 10;
     break;
   case 2: {
-    auto num = args[1].get<Number*>();
-    if(!num){
+    if(!is_integer_type(args[1])){
       throw zs_error_arg1("number->string", "passed radix is not number", {args[1]});
     }
-    if(num->type() != Number::Type::integer){
-      throw zs_error_arg1("number->string", "passed radix is not integer", {args[1]});
-    }
-    radix = num->get<Number::integer_type>();
+    radix = coerce<int>(args[1]);
     break;
   }
   default:
@@ -968,7 +972,7 @@ Lisp_ptr number_to_string(){
   }
 
   ostringstream oss;
-  print(oss, *n, radix);
+  print(oss, args[0], print_human_readable::f, radix);
 
   return {new String(oss.str())};
 }
