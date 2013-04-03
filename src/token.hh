@@ -32,7 +32,7 @@ public:
 
   constexpr Token()
     : type_(Type::uninitialized),
-      radix_(10), ex_(Exactness::unspecified){}
+      ex_(Exactness::unspecified){}
 
   // TODO: move these constructors into private
   Token(const std::string&, Type);
@@ -43,10 +43,10 @@ public:
   explicit constexpr Token(char);
   explicit constexpr Token(Notation);
   // numerics
-  constexpr Token(int, Exactness, int);
-  constexpr Token(double, Exactness, int);
-  Token(const Complex&, Exactness, int);
-  Token(Complex&&, Exactness, int);
+  constexpr Token(int, Exactness);
+  constexpr Token(double, Exactness);
+  Token(const Complex&, Exactness);
+  Token(Complex&&, Exactness);
 
   Token(const Token&);
   Token(Token&&);
@@ -89,7 +89,6 @@ private:
   };
 
   // numeric flags
-  int radix_;
   Exactness ex_;
 
   template<typename T> void init_from_other(T other);
@@ -97,6 +96,9 @@ private:
 };
 
 Token tokenize(std::istream&);
+
+// 'radix == 0' means 10 or the specified value of prefix.
+Token tokenize_number(std::istream&, int radix = 0);
 
 const char* stringify(Token::Notation);
 const char* stringify(Token::Type);
