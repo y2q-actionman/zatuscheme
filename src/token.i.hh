@@ -216,4 +216,8 @@ Token::Notation Token::move<Token::Notation>(){
   return not_;
 }
 
+template <> int Token::coerce() const;
+template <> double Token::coerce() const;
+template <> Complex Token::coerce() const;
+
 #endif // TOKEN_I_HH

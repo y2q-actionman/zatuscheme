@@ -62,7 +62,7 @@ void fail_message(Token::Type t, istream& f, const Pos& b_pos,
   string buf;
   std::getline(f, buf);
 
-  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t)
+  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t) << "'"
        << ", expected str='" << expect << "'\n"
        << "\tgotten token: " << tok << '\n';
 
@@ -135,15 +135,15 @@ void check(const string& input, const char* expect, Token::Type t){
 #define check_ident(a, b) check(a, b, Token::Type::identifier)
 #define check_string(a, b) check(a, b, Token::Type::string)
 
-inline
-bool operator==(const Number& n1, const Number& n2){
-  return eqv(n1, n2);
-}
+// inline
+// bool operator==(const Number& n1, const Number& n2){
+//   return eqv(n1, n2);
+// }
 
-inline
-bool operator!=(const Number& n1, const Number& n2){
-  return !eqv(n1, n2);
-}
+// inline
+// bool operator!=(const Number& n1, const Number& n2){
+//   return !eqv(n1, n2);
+// }
 
 #define N Token::Notation
 
@@ -178,8 +178,8 @@ int main(){
   check("#f", false);
 
   // number
-  check("+1", Number{1l});
-  check("#x16", Number{0x16l});
+  check("+1", 1);
+  check("#x16", 0x16);
   
   // character
   check("#\\");
@@ -220,7 +220,7 @@ int main(){
     check_ident(ss, "...");
 
     check_ident(ss, "f");
-    check(ss, Number{11l});
+    check(ss, 11);
     check(ss, N::quasiquote);
     check(ss, N::l_paren);
     check(ss, N::comma);

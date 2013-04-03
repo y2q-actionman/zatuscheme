@@ -40,12 +40,13 @@ public:
   explicit Token(const Number&);
   explicit Token(Number&&);
   explicit constexpr Token(bool);
-  explicit constexpr Token(int);
-  explicit constexpr Token(double);
-  explicit Token(const Complex&);
-  explicit Token(Complex&&);
   explicit constexpr Token(char);
   explicit constexpr Token(Notation);
+  // numerics
+  constexpr Token(int, Exactness, int);
+  constexpr Token(double, Exactness, int);
+  Token(const Complex&, Exactness, int);
+  Token(Complex&&, Exactness, int);
 
   Token(const Token&);
   Token(Token&&);
@@ -67,6 +68,12 @@ public:
 
   explicit operator bool() const
   { return type() != Type::uninitialized; }
+
+  // numeric interface
+  template <typename T> T coerce() const;
+  
+  Exactness exactness() const
+  { return ex_; }
 
 private:
   Type type_;

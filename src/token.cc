@@ -1,4 +1,13 @@
 #include <istream>
+
+// #include <utility>
+// #include <cstdlib>
+// #include <cstring>
+// #include <iterator>
+// #include <istream>
+// #include <ostream>
+#include <stdexcept>
+
 #include "token.hh"
 #include "zs_error.hh"
 
@@ -30,24 +39,24 @@ Token::Token(bool b)
     radix_(10), ex_(Exactness::unspecified){}
 
 inline constexpr
-Token::Token(int i)
+Token::Token(int i, Exactness ex, int radix)
   : type_(Type::integer), i_(i),
-    radix_(10), ex_(Exactness::unspecified){}
+    radix_(radix), ex_(ex){}
 
 inline constexpr
-Token::Token(double d)
+Token::Token(double d, Exactness ex, int radix)
   : type_(Type::real), d_(d),
-    radix_(10), ex_(Exactness::unspecified){}
+    radix_(radix), ex_(ex){}
 
 inline
-Token::Token(const Complex& z)
+Token::Token(const Complex& z, Exactness ex, int radix)
   : type_(Type::complex), z_(z),
-    radix_(10), ex_(Exactness::unspecified){}
+    radix_(radix), ex_(ex){}
 
 inline
-Token::Token(Complex&& z)
+Token::Token(Complex&& z, Exactness ex, int radix)
   : type_(Type::complex), z_(std::move(z)),
-    radix_(10), ex_(Exactness::unspecified){}
+    radix_(radix), ex_(ex){}
 
 inline constexpr
 Token::Token(char c)
@@ -207,6 +216,49 @@ Token::~Token(){
   type_ = Type::uninitialized;
 }
 
+template <>
+int Token::coerce() const{
+  switch(type_){
+  case Type::real:
+    return static_cast<int>(d_);
+  case Type::integer:
+    return i_;
+  case Type::complex:
+  case Type::uninitialized:
+  default:
+    UNEXP_CONVERSION("integer");
+  }
+}
+
+template <>
+double Token::coerce() const{
+  switch(type_){
+  case Type::real:
+    return d_;
+  case Type::integer:
+    return static_cast<double>(i_);
+  case Type::complex:
+  case Type::uninitialized:
+  default:
+    UNEXP_CONVERSION("real");
+  }
+}
+
+template <>
+Complex Token::coerce() const{
+  switch(type_){
+  case Type::complex:
+    return z_;
+  case Type::real:
+    return Complex{d_};
+  case Type::integer:
+    return Complex{static_cast<double>(i_)};
+  case Type::uninitialized:
+  default:
+    UNEXP_CONVERSION("complex");
+  }
+}
+
 //
 // tokenizer funcs
 //
@@ -330,8 +382,363 @@ Token tokenize_string(istream& f){
   throw zs_error("reader error: not ended string!\n");
 }
 
-Token tokenize_number(istream& f){
-  return Token{parse_number(f)};
+  // number parsers
+
+struct PrefixValue {
+  int radix;
+  Token::Exactness ex;
+};
+
+PrefixValue parse_number_prefix(istream& f){
+  int r = 10;
+  Token::Exactness e = Token::Exactness::unspecified;
+  bool r_appeared = false, e_appeared = false;
+
+  for(int loop = 0; loop < 2; ++loop){
+    auto c = f.get();
+
+    if(c != '#'){
+      f.unget();
+      return {r, e};
+    }
+
+    switch(c = f.get()){
+    case 'i': case 'e':
+      if(e_appeared){
+        throw zs_error(printf_string("reader error: duplicated number prefix appeared (%c)\n", c));
+      }
+      e_appeared = true;
+      e = (c == 'i') ? Token::Exactness::inexact 
+        : Token::Exactness::exact;
+      break;
+    case 'b': case 'o': case 'd': case 'x':
+      if(r_appeared){
+        throw zs_error(printf_string("reader error: duplicated number prefix appeared (%c)\n", c));
+      }
+      r_appeared = true;
+      r = (c == 'b') ? 2
+        : (c == 'o') ? 8
+        : (c == 'x') ? 16
+        : 10;
+      break;
+    default:
+      throw zs_error(printf_string("reader error: unknown number prefix '%c' appeared!\n", c));
+    }
+  }  
+  
+  return {r, e};
+}
+
+inline
+bool is_number_char(int radix, int c){
+  switch(radix){
+  case 16:
+    return isxdigit(c);
+
+  case 10:
+    return isdigit(c);
+
+  case 8:
+    switch(c){
+    case '0': case '1':
+    case '2': case '3': case '4':
+    case '5': case '6': case '7':
+      return true;
+    default:
+      return false;
+    }
+
+  case 2:
+    switch(c){
+    case '0': case '1':
+      return true;
+    default:
+      return false;
+    }
+    
+  default:
+    UNEXP_DEFAULT();
+  }
+}
+
+int eat_sharp(istream& f, string& o){
+  decltype(f.get()) c;
+  int sharps = 0;
+
+  while((c = f.get()) == '#'){
+    o.push_back('0');
+    ++sharps;
+  }
+  f.unget();
+
+  return sharps;
+}
+
+
+pair<string, Token::Exactness> collect_integer_digits(int radix, istream& f){
+  decltype(f.get()) c;
+  string s;
+
+  while(is_number_char(radix, c = f.get()))
+    s.push_back(c);
+  f.unget();
+
+  Token::Exactness e;
+
+  if(eat_sharp(f, s) > 0){
+    e = Token::Exactness::inexact;
+  }else{
+    e = Token::Exactness::exact;
+  }
+
+  return {s, e};
+}
+  
+
+int zs_stoi(int radix, const string& s){
+  try{
+    return std::stoi(s, nullptr, radix);
+  }catch(const std::logic_error& err){
+    throw zs_error(printf_string("reader error: reading integer failed: %s\n", err.what()));
+  }
+}
+
+inline
+bool check_decimal_suffix(int c){
+  switch(c){
+  case 'e': case 's': case 'f': case 'd': case 'l':
+    return true;
+  default:
+    return false;
+  }
+}
+
+double zs_stof(istream& f, string s){
+  decltype(f.get()) c;
+
+  // treating dot char
+  bool dot_start = false;
+  int sharps_before_dot = 0;
+
+  if(s.empty()){
+    if(f.peek() == '.'){
+      dot_start = true;
+    }else{
+      throw zs_error("reader error: no chars found for floating point number.\n");
+    }
+  }else{
+    sharps_before_dot = eat_sharp(f, s);
+  }
+
+  if(f.get() != '.'){
+    f.unget();
+    goto end; // 1. no frac part
+  }
+  s.push_back('.');
+    
+  if(sharps_before_dot > 0){
+    eat_sharp(f, s);
+    goto end; // 4. only sharps after dot
+  }
+
+  // treating fractional part
+  {
+    bool digits_after_dot = false;
+
+    while(isdigit(c = f.get())){
+      digits_after_dot = true;
+      s.push_back(c);
+    }
+    f.unget();
+
+    if(dot_start && !digits_after_dot){
+      throw zs_error("reader error: a number starting with dot should have digits after it.\n");
+    }
+
+    eat_sharp(f, s);
+  }
+  
+ end:
+  // treating exporational part
+  if(check_decimal_suffix(f.peek())){
+    f.ignore(1);
+    s.push_back('e');
+
+    switch(f.peek()){
+    case '+': case '-':
+      s.push_back(f.get());
+      break;
+    default:
+      break;
+    }
+
+    {
+      bool exp_digits = false;
+
+      while(isdigit(c = f.get())){
+        exp_digits = true;
+        s.push_back(c);
+      }
+      f.unget();
+
+      if(!exp_digits){
+        throw zs_error("reader error: no number on exporational part\n");
+      }
+    }
+  }
+
+  try{
+    return std::stod(s, nullptr);
+  }catch(const std::logic_error& err){
+    throw zs_error(printf_string("reader error: reading floating point number failed: %s\n", err.what()));
+  }
+}
+
+Token parse_real_number(int radix, istream& f){
+  int sign = 1;
+
+  switch(f.peek()){
+  case '+':
+    f.ignore(1);
+    sign = 1;
+    break;
+  case '-':
+    f.ignore(1);
+    sign = -1;
+    break;
+  default:
+    break;
+  }
+
+  auto digit_chars = collect_integer_digits(radix, f);
+  auto c = f.peek();
+
+  if((c == '.') || (!digit_chars.first.empty() && check_decimal_suffix(c))){
+    if(radix != 10){
+      throw zs_error(printf_string("reader error: non-decimal float is not supported. (radix %d)\n", radix));
+    }
+
+    // decimal float
+    auto d = zs_stof(f, move(digit_chars.first));
+      
+    return {d * sign, Token::Exactness::inexact, radix};
+  }
+
+  if(digit_chars.first.empty()){
+    throw zs_error("reader error: failed at reading a number's integer part\n");
+  }
+
+  auto u1 = zs_stoi(radix, digit_chars.first);
+
+  if(c == '/'){
+    f.ignore(1);
+
+    // rational
+    auto digit_chars_2 = collect_integer_digits(radix, f);
+    if(digit_chars_2.first.empty()){
+      throw zs_error("reader error: failed at reading a rational number's denominator\n");
+    }
+
+    auto u2 = zs_stoi(radix, digit_chars_2.first);
+
+    return {sign * static_cast<double>(u1) / static_cast<double>(u2),
+        Token::Exactness::inexact, radix};
+  }
+
+  // FIXME: inexact or super-big integer can be fall into float.
+  return {sign * u1, digit_chars.second, radix};
+}
+
+Token parse_complex(int radix, istream& f){
+  const auto first_char = f.peek();
+
+  // treating +i, -i. (dirty part!)
+  if(first_char == '+' || first_char == '-'){
+    f.get();
+    if(f.peek() == 'i'){
+      f.ignore(1);
+      return {Complex(0, (first_char == '+') ? 1 : -1),
+          Token::Exactness::inexact, radix};
+    }
+    f.unget();
+  }
+
+  // has real part
+  auto real = parse_real_number(radix, f);
+
+  switch(auto c = f.get()){
+  case '@': {// polar literal
+    auto deg = parse_real_number(radix, f);
+        
+    return {polar(real.coerce<double>(), deg.coerce<double>()),
+        Token::Exactness::inexact, radix};
+  }
+  case '+': case '-': {
+    const int sign = (c == '+') ? 1 : -1;
+
+    if(f.peek() == 'i'){
+      f.ignore(1);
+      return {Complex(real.coerce<double>(), sign),
+          Token::Exactness::inexact, radix};
+    }
+    
+    auto imag = parse_real_number(radix, f);
+    if(f.get() != 'i'){
+      throw zs_error("reader error: failed at reading a complex number's imaginary part.\n");
+    }
+
+    return {Complex(real.coerce<double>(), imag.coerce<double>() * sign),
+        Token::Exactness::inexact, radix};
+  }
+  case 'i':
+    if(first_char == '+' || first_char == '-'){
+      return {Complex(0, real.coerce<double>()),
+          Token::Exactness::inexact, radix};
+    }else{
+      throw zs_error("reader error: failed at reading a complex number. ('i' appeared alone.)\n");
+    }
+  default:
+    f.unget();
+    return real;
+  }
+}
+
+Token tokenize_number(istream& f, int radix = 10){
+  const auto prefix_info = parse_number_prefix(f);
+
+  if(!radix){
+    radix = prefix_info.radix;
+  }
+
+  const auto r = parse_complex(radix, f);
+
+  switch(r.exactness()){
+  case Token::Exactness::unspecified:
+    return r;
+  case Token::Exactness::exact:
+    switch(r.type()){
+    case Token::Type::integer:
+      return r;
+    case Token::Type::real:
+      return Token{static_cast<int>(r.get<double>()), Token::Exactness::exact, radix};
+    case Token::Type::complex:
+      throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
+    default:
+      UNEXP_DEFAULT();
+    }
+  case Token::Exactness::inexact:
+    switch(r.type()){
+    case Token::Type::integer:
+      return Token{static_cast<double>(r.get<int>()), Token::Exactness::inexact, radix};
+    case Token::Type::real:
+    case Token::Type::complex:
+      return r;
+    default:
+      UNEXP_DEFAULT();
+    }
+  default:
+    return {};
+  }
 }
 
 } // namespace
