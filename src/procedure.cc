@@ -73,7 +73,7 @@ const ProcInfo* get_procinfo(Lisp_ptr p){
 
   case Ptr_tag::undefined: case Ptr_tag::boolean:
   case Ptr_tag::character: case Ptr_tag::cons:
-  case Ptr_tag::symbol:    case Ptr_tag::number:
+  case Ptr_tag::symbol:
   case Ptr_tag::integer:
   case Ptr_tag::real:
   case Ptr_tag::complex:

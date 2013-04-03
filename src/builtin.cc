@@ -41,7 +41,7 @@ Lisp_ptr env_pick_2(const char* name){
   ZsArgs args{1};
 
   if(args[0].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed(name, Ptr_tag::number, args[0]);
+    throw builtin_type_check_failed(name, Ptr_tag::integer, args[0]);
   }
 
   auto ver = args[0].get<int>();

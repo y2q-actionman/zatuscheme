@@ -22,7 +22,7 @@ Lisp_ptr vector_make(){
   ZsArgs args;
 
   if(args[0].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed("make-vector", Ptr_tag::number, args[0]);
+    throw builtin_type_check_failed("make-vector", Ptr_tag::integer, args[0]);
   }
   auto count = args[0].get<int>();
 
@@ -63,7 +63,7 @@ Lisp_ptr vector_ref(){
   }
 
   if(args[1].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed("vector-ref", Ptr_tag::number, args[1]);
+    throw builtin_type_check_failed("vector-ref", Ptr_tag::integer, args[1]);
   }
   auto ind = args[1].get<int>();
 
@@ -85,7 +85,7 @@ Lisp_ptr vector_set(){
   }
 
   if(args[1].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed("vector-set!", Ptr_tag::number, args[1]);
+    throw builtin_type_check_failed("vector-set!", Ptr_tag::integer, args[1]);
   }
   auto ind = args[1].get<int>();
 

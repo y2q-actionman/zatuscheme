@@ -1,11 +1,7 @@
 #include <istream>
 
-// #include <utility>
-// #include <cstdlib>
-// #include <cstring>
-// #include <iterator>
-// #include <istream>
-// #include <ostream>
+#include <cstdlib>
+#include <cstring>
 #include <stdexcept>
 
 #include "token.hh"
@@ -42,10 +38,6 @@ void Token::init_from_other(T other){
 
   case Type::complex:
     new (&this->z_) Complex(std::move(other.z_));
-    break;
-
-  case Type::number:
-    new (&this->num_) Number(std::move(other.num_));
     break;
 
   case Type::character:
@@ -95,15 +87,6 @@ Token& Token::assign_from_other(T other){
       break;
     }
 
-  case Type::number:
-    if(other.type_ == Type::number){
-      this->num_ = std::move(other.num_);
-      return *this;
-    }else{
-      num_.~Number();
-      break;
-    }
-
   case Type::uninitialized:
   case Type::boolean:
   case Type::integer:
@@ -137,10 +120,6 @@ Token::~Token(){
 
   case Type::complex:
     z_.~Complex();
-    break;
-
-  case Type::number:
-    num_.~Number();
     break;
 
   case Type::uninitialized:
@@ -843,8 +822,6 @@ const char* stringify(Token::Type t){
     return "real";
   case Token::Type::complex:
     return "complex";
-  case Token::Type::number:
-    return "number";
   case Token::Type::character:
     return "character";
   case Token::Type::notation:

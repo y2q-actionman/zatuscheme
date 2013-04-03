@@ -8,7 +8,6 @@
 #include "eval.hh"
 #include "env.hh"
 #include "equality.hh"
-#include "number.hh"
 #include "builtin.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"

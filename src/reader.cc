@@ -8,7 +8,6 @@
 #include "zs_error.hh"
 #include "lisp_ptr.hh"
 #include "token.hh"
-#include "number.hh"
 #include "cons.hh"
 #include "cons_util.hh"
 #include "symbol.hh"
@@ -91,21 +90,6 @@ Lisp_ptr read_la(istream& f, Token&& tok){
     // simple datum
   case Token::Type::boolean:
     return Lisp_ptr(tok.move<bool>());
-
-  case Token::Type::number: {
-    auto n = tok.get<Number>();
-    switch(n.type()){
-    case Number::Type::uninitialized:
-      return Lisp_ptr();
-    case Number::Type::integer:
-      // TODO: use upper integer type!
-      return Lisp_ptr(Ptr_tag::integer, n.get<long>());
-    case Number::Type::real:
-      return {new double(n.get<double>())};
-    case Number::Type::complex:
-      return {new Complex(n.get<Complex>())};
-    }
-  }
 
   case Token::Type::integer:
     return Lisp_ptr(Ptr_tag::integer, tok.get<int>());

@@ -13,12 +13,12 @@
 #include "vm.hh"
 #include "builtin.hh"
 #include "zs_error.hh"
-#include "number.hh"
 #include "lisp_ptr.hh"
 #include "eval.hh"
 #include "builtin_util.hh"
 #include "printer.hh"
 #include "equality.hh"
+#include "token.hh"
 
 using namespace std;
 
@@ -82,7 +82,7 @@ Complex coerce(Lisp_ptr p){
 
 zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
   return zs_error_arg1(func_name,
-                       printf_string("arg is not %s!", stringify(Ptr_tag::number)),
+                       "arg is not number!",
                        {p});
 }
 
@@ -918,22 +918,16 @@ Lisp_ptr number_from_string(){
 
   istringstream iss(*str);
 
-  // TODO: remove number type?
-  auto n = parse_number(iss, radix);
+  auto t = tokenize_number(iss, radix);
 
-  // copy from [reader.cc]
-  switch(n.type()){
-  case Number::Type::uninitialized:
-    return Lisp_ptr();
-  case Number::Type::integer:
-    // TODO: use upper integer type!
-    return Lisp_ptr(Ptr_tag::integer, n.get<long>());
-  case Number::Type::real:
-    return {new double(n.get<double>())};
-  case Number::Type::complex:
-    return {new Complex(n.get<Complex>())};
-  default:
-    UNEXP_DEFAULT();
+  if(t.type() == Token::Type::integer){
+    return Lisp_ptr(Ptr_tag::integer, t.get<int>());
+  }else if(t.type() == Token::Type::real){
+    return {new double(t.get<double>())};
+  }else if(t.type() == Token::Type::complex){
+    return {new Complex(t.get<Complex>())};
+  }else{
+    throw zs_error_arg1("string->number", "string cannot be read as number", {args[0]});
   }
 }
 

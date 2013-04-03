@@ -52,7 +52,7 @@ Lisp_ptr string_make(){
   ZsArgs args;
 
   if(args[0].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed("make-string", Ptr_tag::number, args[0]);
+    throw builtin_type_check_failed("make-string", Ptr_tag::integer, args[0]);
   }
   auto char_count = args[0].get<int>();
 
@@ -107,7 +107,7 @@ Lisp_ptr string_ref(){
   }
 
   if(args[1].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed("string-ref", Ptr_tag::number, args[1]);
+    throw builtin_type_check_failed("string-ref", Ptr_tag::integer, args[1]);
   }
   auto ind = args[1].get<int>();
 
@@ -127,7 +127,7 @@ Lisp_ptr string_set(){
   }
 
   if(args[1].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed("string-set!", Ptr_tag::number, args[1]);
+    throw builtin_type_check_failed("string-set!", Ptr_tag::integer, args[1]);
   }
   auto ind = args[1].get<int>();
 
@@ -198,7 +198,7 @@ Lisp_ptr string_substr(){
 
   for(int i = 1; i < 3; ++i){
     if(args[i].tag() != Ptr_tag::integer){
-      throw builtin_type_check_failed("substring", Ptr_tag::number, args[i]);
+      throw builtin_type_check_failed("substring", Ptr_tag::integer, args[i]);
     }
     ind[i-1] = args[i].get<int>();
   }

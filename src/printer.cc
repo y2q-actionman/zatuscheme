@@ -6,7 +6,6 @@
 #include "symbol.hh"
 #include "cons.hh"
 #include "cons_util.hh"
-#include "number.hh"
 #include "util.hh"
 #include "delay.hh"
 #include "vm.hh"
@@ -165,10 +164,6 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
     }
     break;
   }
-
-  case Ptr_tag::number:
-    print(f, *p.get<Number*>(), radix);
-    break;
 
   case Ptr_tag::integer:
     print_integer(f, p.get<int>(), radix);

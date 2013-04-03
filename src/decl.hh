@@ -14,7 +14,6 @@ class Symbol;
 class IProcedure;
 class NProcedure;
 class Continuation;
-class Number;
 typedef std::complex<double> Complex;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
@@ -37,7 +36,6 @@ enum class Ptr_tag {
     i_procedure,
     n_procedure,
     continuation,
-    number,
     integer,
     real,
     complex,

@@ -42,11 +42,6 @@ struct to_type<Ptr_tag, Ptr_tag::continuation>{
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::number>{
-  typedef Number* type;
-};
-
-template<>
 struct to_type<Ptr_tag, Ptr_tag::integer>{
   typedef int type;
 };
@@ -152,12 +147,6 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, Continuation*>(){
   return Ptr_tag::continuation;
-}
-
-template<>
-inline constexpr
-Ptr_tag to_tag<Ptr_tag, Number*>(){
-  return Ptr_tag::number;
 }
 
 template<>

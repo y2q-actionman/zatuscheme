@@ -19,8 +19,6 @@ const char* stringify(Ptr_tag p){
     return "native procedure";
   case Ptr_tag::continuation:
     return "continuation";
-  case Ptr_tag::number:
-    return "number";
   case Ptr_tag::integer:
     return "integer";
   case Ptr_tag::real:

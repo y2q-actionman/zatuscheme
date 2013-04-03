@@ -135,16 +135,6 @@ void check(const string& input, const char* expect, Token::Type t){
 #define check_ident(a, b) check(a, b, Token::Type::identifier)
 #define check_string(a, b) check(a, b, Token::Type::string)
 
-// inline
-// bool operator==(const Number& n1, const Number& n2){
-//   return eqv(n1, n2);
-// }
-
-// inline
-// bool operator!=(const Number& n1, const Number& n2){
-//   return !eqv(n1, n2);
-// }
-
 #define N Token::Notation
 
 int main(){

@@ -19,11 +19,6 @@ struct to_type<Token::Type, Token::Type::boolean>{
 };
 
 template<>
-struct to_type<Token::Type, Token::Type::number>{
-  typedef Number type;
-};
-
-template<>
 struct to_type<Token::Type, Token::Type::integer>{
   typedef int type;
 };
@@ -58,12 +53,6 @@ struct to_type<Token::Type, Token::Type::notation>{
 template<>
 inline constexpr
 Token::Type to_tag<Token::Type, std::string>() = delete;
-
-template<>
-inline constexpr
-Token::Type to_tag<Token::Type, Number>(){
-  return Token::Type::number;
-}
 
 template<>
 inline constexpr
@@ -113,16 +102,6 @@ Token::Token(std::string&& s, Type t)
   : type_(t), str_(std::move(s)),
     ex_(Exactness::unspecified){}
 
-inline
-Token::Token(const Number& n)
-  : type_(Type::number), num_(n),
-    ex_(Exactness::unspecified){}
-
-inline
-Token::Token(Number&& n)
-  : type_(Type::number), num_(std::move(n)),
-    ex_(Exactness::unspecified){}
-
 inline constexpr
 Token::Token(bool b)
   : type_(Type::boolean), b_(b),
@@ -163,13 +142,6 @@ inline
 const std::string& Token::get<std::string>() const{
   assert(type_ == Type::identifier || type_ == Type::string);
   return str_;
-}
-
-template<>
-inline
-const Number& Token::get<Number>() const{
-  assert(type_ == Type::number);
-  return num_;
 }
 
 template<>
@@ -220,13 +192,6 @@ inline
 std::string&& Token::move<std::string>(){
   assert(type_ == Type::identifier || type_ == Type::string);
   return std::move(str_);
-}
-
-template<>
-inline
-Number&& Token::move<Number>(){
-  assert(type_ == Type::number);
-  return std::move(num_);
 }
 
 template<>
