@@ -103,6 +103,61 @@ Token::Type to_tag<Token::Type, Token::Notation>(){
 
 
 // Token definitions
+inline
+Token::Token(const std::string& s, Type t)
+  : type_(t), str_(s),
+    ex_(Exactness::unspecified){}
+
+inline
+Token::Token(std::string&& s, Type t)
+  : type_(t), str_(std::move(s)),
+    ex_(Exactness::unspecified){}
+
+inline
+Token::Token(const Number& n)
+  : type_(Type::number), num_(n),
+    ex_(Exactness::unspecified){}
+
+inline
+Token::Token(Number&& n)
+  : type_(Type::number), num_(std::move(n)),
+    ex_(Exactness::unspecified){}
+
+inline constexpr
+Token::Token(bool b)
+  : type_(Type::boolean), b_(b),
+    ex_(Exactness::unspecified){}
+
+inline constexpr
+Token::Token(int i, Exactness ex)
+  : type_(Type::integer), i_(i),
+    ex_(ex){}
+
+inline constexpr
+Token::Token(double d, Exactness ex)
+  : type_(Type::real), d_(d),
+    ex_(ex){}
+
+inline
+Token::Token(const Complex& z, Exactness ex)
+  : type_(Type::complex), z_(z),
+    ex_(ex){}
+
+inline
+Token::Token(Complex&& z, Exactness ex)
+  : type_(Type::complex), z_(std::move(z)),
+    ex_(ex){}
+
+inline constexpr
+Token::Token(char c)
+  : type_(Type::character), c_(c),
+    ex_(Exactness::unspecified){}
+
+inline constexpr
+Token::Token(Notation n)
+  : type_(Type::notation), not_(n),
+    ex_(Exactness::unspecified){}
+
 template<>
 inline
 const std::string& Token::get<std::string>() const{

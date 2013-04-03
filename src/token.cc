@@ -13,61 +13,6 @@
 
 using namespace std;
 
-inline
-Token::Token(const std::string& s, Type t)
-  : type_(t), str_(s),
-    ex_(Exactness::unspecified){}
-
-inline
-Token::Token(std::string&& s, Type t)
-  : type_(t), str_(std::move(s)),
-    ex_(Exactness::unspecified){}
-
-inline
-Token::Token(const Number& n)
-  : type_(Type::number), num_(n),
-    ex_(Exactness::unspecified){}
-
-inline
-Token::Token(Number&& n)
-  : type_(Type::number), num_(std::move(n)),
-    ex_(Exactness::unspecified){}
-
-inline constexpr
-Token::Token(bool b)
-  : type_(Type::boolean), b_(b),
-    ex_(Exactness::unspecified){}
-
-inline constexpr
-Token::Token(int i, Exactness ex)
-  : type_(Type::integer), i_(i),
-    ex_(ex){}
-
-inline constexpr
-Token::Token(double d, Exactness ex)
-  : type_(Type::real), d_(d),
-    ex_(ex){}
-
-inline
-Token::Token(const Complex& z, Exactness ex)
-  : type_(Type::complex), z_(z),
-    ex_(ex){}
-
-inline
-Token::Token(Complex&& z, Exactness ex)
-  : type_(Type::complex), z_(std::move(z)),
-    ex_(ex){}
-
-inline constexpr
-Token::Token(char c)
-  : type_(Type::character), c_(c),
-    ex_(Exactness::unspecified){}
-
-inline constexpr
-Token::Token(Notation n)
-  : type_(Type::notation), not_(n),
-    ex_(Exactness::unspecified){}
-
 template<typename T>
 inline
 void Token::init_from_other(T other){
@@ -711,11 +656,15 @@ Token tokenize_number(istream& f, int radix){
   }
 
   const auto r = parse_complex(radix, f);
+  if(!r){
+    // TODO: add context information.
+    throw zs_error("parser error: cannot be read as number.\n");
+  }
 
-  switch(r.exactness()){
-  case Token::Exactness::unspecified:
+  if(prefix_info.ex == Token::Exactness::unspecified
+     || prefix_info.ex == r.exactness()){
     return r;
-  case Token::Exactness::exact:
+  }else if(prefix_info.ex == Token::Exactness::exact){
     switch(r.type()){
     case Token::Type::integer:
       return r;
@@ -726,7 +675,8 @@ Token tokenize_number(istream& f, int radix){
     default:
       UNEXP_DEFAULT();
     }
-  case Token::Exactness::inexact:
+  }else{    
+    assert(prefix_info.ex == Token::Exactness::inexact);
     switch(r.type()){
     case Token::Type::integer:
       return Token{static_cast<double>(r.get<int>()), Token::Exactness::inexact};
@@ -736,8 +686,6 @@ Token tokenize_number(istream& f, int radix){
     default:
       UNEXP_DEFAULT();
     }
-  default:
-    return {};
   }
 }
 

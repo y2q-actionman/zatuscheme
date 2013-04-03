@@ -34,7 +34,6 @@ public:
     : type_(Type::uninitialized),
       ex_(Exactness::unspecified){}
 
-  // TODO: move these constructors into private
   Token(const std::string&, Type);
   Token(std::string&&, Type);
   explicit Token(const Number&);

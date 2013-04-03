@@ -1,5 +1,5 @@
 #include "describe.hh"
-#include "number.hh"
+// #include "number.hh"
 #include <ostream>
 
 using namespace std;
@@ -12,6 +12,7 @@ std::ostream& operator<<(std::ostream& o, Ptr_tag t){
 //   return (o << "[" << p.tag() << "] " << p.get<void*>());
 // }
 
+/*
 std::ostream& operator<<(std::ostream& o, Number::Type t){
   return (o << stringify(t));
 }
@@ -22,6 +23,7 @@ std::ostream& operator<<(std::ostream& o, const Number& n){
   o << ')';
   return o;
 }
+*/
 
 std::ostream& operator<<(std::ostream& o, const ProcInfo& info){
   return (o << "[required_args=" << info.required_args << ", max_args=" << info.max_args << "]");
@@ -53,8 +55,19 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
   case Token::Type::boolean:
     o << boolalpha << tok.get<bool>() << noboolalpha;
     break;
+    /*
   case Token::Type::number:
     o << tok.get<Number>();
+    break;
+    */
+  case Token::Type::integer:
+    o << tok.get<int>();
+    break;
+  case Token::Type::real:
+    o << tok.get<double>();
+    break;
+  case Token::Type::complex:
+    o << tok.get<Complex>();
     break;
   case Token::Type::character:
     o << tok.get<char>();

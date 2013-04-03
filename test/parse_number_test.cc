@@ -1,20 +1,18 @@
-#include <string>
-#include <cstdlib>
-#include <sstream>
-#include <iostream>
-
-#include "number.hh"
+#include "zs.hh"
 #include "describe.hh"
 #include "test_util.hh"
 
 using namespace std;
 
 template<typename T>
-void fail_message(Number::Type t, istream& i, 
-                  const Number& n, T expect){
+void fail_message(Token::Type t, istream& i, 
+                  const Token& n, T expect){
   RESULT = EXIT_FAILURE;
 
   string buf;
+
+  i.clear();
+  i.seekg(0, ios_base::beg);
   std::getline(i, buf);
 
   cerr << "[failed] input='" << buf << "', expect type='" << stringify(t) << "'"
@@ -23,14 +21,12 @@ void fail_message(Number::Type t, istream& i,
 }
 
 void check(const char* input){
-  static constexpr auto type = Number::Type::uninitialized;
-
   stringstream ss(input);
 
   with_expect_error([&]() -> void {
-      const Number n = parse_number(ss);
-      if(n.type() != type){
-        fail_message(type, ss, n, "(uninitialized)");
+      auto n = tokenize_number(ss);
+      if(!n){
+        fail_message(Token::Type::uninitialized, ss, n, "(uninitialized)");
         return;
       }
     });
@@ -38,11 +34,11 @@ void check(const char* input){
 
 template<typename T>
 void check(const char* input, const T& expect){
-  static constexpr auto type = to_tag<Number::Type, T>();
+  static constexpr auto type = to_tag<Token::Type, T>();
 
   stringstream ss(input);
 
-  const Number n = parse_number(ss);
+  auto n = tokenize_number(ss);
   if(n.type() != type || n.get<T>() != expect){
     fail_message(type, ss, n, expect);
     return;
@@ -51,9 +47,27 @@ void check(const char* input, const T& expect){
 
 
 // printing test
-void check(const Number& n, int radix, const char* expect){
+void check(int i, int radix, const char* expect){
+  Token t{i, Token::Exactness::unspecified};
+
   stringstream ss;
-  print(ss, n, radix);
+
+  switch(t.type()){
+  case Token::Type::integer:
+    print(ss, {Ptr_tag::integer, t.get<int>()},
+          print_human_readable::f, radix);
+    break;
+  case Token::Type::real:
+    print(ss, {new double(t.get<double>())},
+          print_human_readable::f, radix);
+    break;
+  case Token::Type::complex:
+    print(ss, {new Complex(t.get<Complex>())},
+          print_human_readable::f, radix);
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
 
   auto evaled = ss.str();
 
@@ -69,17 +83,17 @@ int main(){
   check(".");
 
   // int
-  check("100", 100l);
-  check("-100", -100l);
-  check("1##", 100l);
+  check("100", 100);
+  check("-100", -100);
+  check("1##", 100);
 
-  check("#b10", 2l);
-  check("#b-10", -2l);
-  check("#o10", 8l);
-  check("#o-10", -8l);
-  check("#x10", 16l);
-  check("#x-10", -16l);
-  check("#x9abcdef", 0x9abcdefl);
+  check("#b10", 2);
+  check("#b-10", -2);
+  check("#o10", 8);
+  check("#o-10", -8);
+  check("#x10", 16);
+  check("#x-10", -16);
+  check("#x9abcdef", 0x9abcdef);
 
   // float
   check("-1.1", -1.1);
@@ -98,38 +112,38 @@ int main(){
   check("#d1.0", 1.0);
 
   // complex
-  check("1.0+1i", Number::complex_type(1, 1));
-  check("-2.5+0.0i", Number::complex_type(-2.5, 0));
+  check("1.0+1i", Complex(1, 1));
+  check("-2.5+0.0i", Complex(-2.5, 0));
   check("1.0@3", polar(1.0, 3.0));
   check("1.0i");
-  check("+1.0i", Number::complex_type(0, 1.0));
-  check("+1i", Number::complex_type(0, 1));
-  check("+i", Number::complex_type(0, 1));
+  check("+1.0i", Complex(0, 1.0));
+  check("+1i", Complex(0, 1));
+  check("+i", Complex(0, 1));
 
   // prefix
-  check("#e1", 1l);
+  check("#e1", 1);
   check("#i1", 1.0);
-  check("#e1.0", 1l);
+  check("#e1.0", 1);
   check("#i1.0", 1.0);
   check("#e1.0i");
-  check("#i-1.0i", Number::complex_type(0, -1.0));
+  check("#i-1.0i", Complex(0, -1.0));
 
-  check("#o#e10", 8l);
+  check("#o#e10", 8);
   check("#i#x10", 16.0);
 
   check("#x#x10");
   check("#i#e1");
 
   // printing test
-  check(Number(100l), 10, "100");
-  check(Number(100l), 8, "#o144");
-  check(Number(100l), 16, "#x64");
-  check(Number(100l), 2, "#b1100100");
+  check(100, 10, "100");
+  check(100, 8, "#o144");
+  check(100, 16, "#x64");
+  check(100, 2, "#b1100100");
 
-  check(Number(-100l), 10, "-100");
-  check(Number(-100l), 8, "#o-144");
-  check(Number(-100l), 16, "#x-64");
-  check(Number(-100l), 2, "#b-1100100");
+  check(-100, 10, "-100");
+  check(-100, 8, "#o-144");
+  check(-100, 16, "#x-64");
+  check(-100, 2, "#b-1100100");
 
   return RESULT;
 }
