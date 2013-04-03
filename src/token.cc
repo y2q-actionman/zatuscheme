@@ -25,6 +25,22 @@ Token::Token(bool b)
   : type_(Type::boolean), b_(b){}
 
 inline constexpr
+Token::Token(int i)
+  : type_(Type::integer), i_(i){}
+
+inline constexpr
+Token::Token(double d)
+  : type_(Type::real), d_(d){}
+
+inline
+Token::Token(const Complex& z)
+  : type_(Type::complex), z_(z){}
+
+inline
+Token::Token(Complex&& z)
+  : type_(Type::complex), z_(std::move(z)){}
+
+inline constexpr
 Token::Token(char c)
   : type_(Type::character), c_(c){}
 
@@ -48,6 +64,18 @@ void Token::init_from_other(T other){
 
   case Type::boolean:
     this->b_ = other.b_;
+    break;
+
+  case Type::integer:
+    this->i_ = other.i_;
+    break;
+
+  case Type::real:
+    this->d_ = other.d_;
+    break;
+
+  case Type::complex:
+    new (&this->z_) Complex(std::move(other.z_));
     break;
 
   case Type::number:
@@ -90,6 +118,15 @@ Token& Token::assign_from_other(T other){
       break;
     }
 
+  case Type::complex:
+    if(other.type_ == Type::complex){
+      this->z_ = std::move(other.z_);
+      return *this;
+    }else{
+      z_.~Complex();
+      break;
+    }
+
   case Type::number:
     if(other.type_ == Type::number){
       this->num_ = std::move(other.num_);
@@ -101,6 +138,8 @@ Token& Token::assign_from_other(T other){
 
   case Type::uninitialized:
   case Type::boolean:
+  case Type::integer:
+  case Type::real:
   case Type::character:
   case Type::notation:
     break;
@@ -128,12 +167,18 @@ Token::~Token(){
     str_.~string();
     break;
 
+  case Type::complex:
+    z_.~Complex();
+    break;
+
   case Type::number:
     num_.~Number();
     break;
 
   case Type::uninitialized:
   case Type::boolean:
+  case Type::integer:
+  case Type::real:
   case Type::character:
   case Type::notation:
     break;
@@ -423,6 +468,12 @@ const char* stringify(Token::Type t){
     return "string";
   case Token::Type::boolean:
     return "boolean";
+  case Token::Type::integer:
+    return "integer";
+  case Token::Type::real:
+    return "real";
+  case Token::Type::complex:
+    return "complex";
   case Token::Type::number:
     return "number";
   case Token::Type::character:

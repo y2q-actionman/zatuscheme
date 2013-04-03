@@ -5,6 +5,7 @@
 #include <iosfwd>
 
 #include "number.hh"
+#include "decl.hh"
 #include "util.hh"
 
 class Token {
@@ -12,6 +13,7 @@ public:
   enum class Type {
     uninitialized = 0,
       identifier, boolean, number,
+      integer, real, complex,
       character, string, notation
       };
 
@@ -33,6 +35,10 @@ public:
   explicit Token(const Number&);
   explicit Token(Number&&);
   explicit constexpr Token(bool);
+  explicit constexpr Token(int);
+  explicit constexpr Token(double);
+  explicit Token(const Complex&);
+  explicit Token(Complex&&);
   explicit constexpr Token(char);
   explicit constexpr Token(Notation);
 
@@ -63,6 +69,9 @@ private:
     std::string str_;
     Number num_;
     bool b_;
+    int i_;
+    double d_;
+    Complex z_;
     char c_;
     Notation not_;
   };

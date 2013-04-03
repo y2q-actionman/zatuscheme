@@ -6,8 +6,6 @@
 #endif
 
 #include <cassert>
-#include "decl.hh"
-#include "util.hh"
 
 // Type mapping
 template<>
@@ -23,6 +21,21 @@ struct to_type<Token::Type, Token::Type::boolean>{
 template<>
 struct to_type<Token::Type, Token::Type::number>{
   typedef Number type;
+};
+
+template<>
+struct to_type<Token::Type, Token::Type::integer>{
+  typedef int type;
+};
+
+template<>
+struct to_type<Token::Type, Token::Type::real>{
+  typedef double type;
+};
+
+template<>
+struct to_type<Token::Type, Token::Type::complex>{
+  typedef Complex type;
 };
 
 template<>
@@ -60,6 +73,24 @@ Token::Type to_tag<Token::Type, bool>(){
 
 template<>
 inline constexpr
+Token::Type to_tag<Token::Type, int>(){
+  return Token::Type::integer;
+}
+
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, double>(){
+  return Token::Type::real;
+}
+
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, Complex>(){
+  return Token::Type::complex;
+}
+
+template<>
+inline constexpr
 Token::Type to_tag<Token::Type, char>(){
   return Token::Type::character;
 }
@@ -91,6 +122,27 @@ inline
 bool Token::get<bool>() const{
   assert(type_ == Type::boolean);
   return b_;
+}
+
+template<>
+inline
+int Token::get<int>() const{
+  assert(type_ == Type::integer);
+  return i_;
+}
+
+template<>
+inline
+double Token::get<double>() const{
+  assert(type_ == Type::real);
+  return d_;
+}
+
+template<>
+inline
+const Complex& Token::get<Complex>() const{
+  assert(type_ == Type::complex);
+  return z_;
 }
 
 template<>
@@ -134,6 +186,27 @@ inline
 char Token::move<char>(){
   assert(type_ == Type::character);
   return c_;
+}
+
+template<>
+inline
+int Token::move<int>(){
+  assert(type_ == Type::integer);
+  return b_;
+}
+
+template<>
+inline
+double Token::move<double>(){
+  assert(type_ == Type::real);
+  return d_;
+}
+
+template<>
+inline
+Complex&& Token::move<Complex>(){
+  assert(type_ == Type::complex);
+  return std::move(z_);
 }
 
 template<>
