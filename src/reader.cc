@@ -107,6 +107,15 @@ Lisp_ptr read_la(istream& f, Token&& tok){
     }
   }
 
+  case Token::Type::integer:
+    return Lisp_ptr(Ptr_tag::integer, tok.get<int>());
+
+  case Token::Type::real:
+    return {new double(tok.get<double>())};
+
+  case Token::Type::complex:
+    return {new Complex(tok.get<Complex>())};
+
   case Token::Type::character:
     return Lisp_ptr{tok.move<char>()};
 

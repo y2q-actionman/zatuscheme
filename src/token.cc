@@ -6,52 +6,65 @@ using namespace std;
 
 inline
 Token::Token(const std::string& s, Type t)
-  : type_(t), str_(s){}
+  : type_(t), str_(s),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline
 Token::Token(std::string&& s, Type t)
-  : type_(t), str_(std::move(s)){}
+  : type_(t), str_(std::move(s)),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline
 Token::Token(const Number& n)
-  : type_(Type::number), num_(n){}
+  : type_(Type::number), num_(n),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline
 Token::Token(Number&& n)
-  : type_(Type::number), num_(std::move(n)){}
+  : type_(Type::number), num_(std::move(n)),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline constexpr
 Token::Token(bool b)
-  : type_(Type::boolean), b_(b){}
+  : type_(Type::boolean), b_(b),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline constexpr
 Token::Token(int i)
-  : type_(Type::integer), i_(i){}
+  : type_(Type::integer), i_(i),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline constexpr
 Token::Token(double d)
-  : type_(Type::real), d_(d){}
+  : type_(Type::real), d_(d),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline
 Token::Token(const Complex& z)
-  : type_(Type::complex), z_(z){}
+  : type_(Type::complex), z_(z),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline
 Token::Token(Complex&& z)
-  : type_(Type::complex), z_(std::move(z)){}
+  : type_(Type::complex), z_(std::move(z)),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline constexpr
 Token::Token(char c)
-  : type_(Type::character), c_(c){}
+  : type_(Type::character), c_(c),
+    radix_(10), ex_(Exactness::unspecified){}
 
 inline constexpr
 Token::Token(Notation n)
-  : type_(Type::notation), not_(n){}
+  : type_(Type::notation), not_(n),
+    radix_(10), ex_(Exactness::unspecified){}
 
 template<typename T>
 inline
 void Token::init_from_other(T other){
   type_ = other.type_;
+  radix_ = other.radix_;
+  ex_ = other.ex_;
 
   switch(other.type_){
   case Type::uninitialized:
@@ -106,6 +119,9 @@ Token::Token(Token&& other){
 template<typename T>
 inline
 Token& Token::assign_from_other(T other){
+  radix_ = other.radix_;
+  ex_ = other.ex_;
+
   switch(this->type_){
   case Type::identifier:
   case Type::string:

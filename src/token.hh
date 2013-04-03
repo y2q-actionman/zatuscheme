@@ -25,9 +25,14 @@ public:
       bar
       };
 
+  enum class Exactness{
+    unspecified, exact, inexact
+      };
+
 
   constexpr Token()
-    : type_(Type::uninitialized){}
+    : type_(Type::uninitialized),
+      radix_(10), ex_(Exactness::unspecified){}
 
   // TODO: move these constructors into private
   Token(const std::string&, Type);
@@ -75,6 +80,10 @@ private:
     char c_;
     Notation not_;
   };
+
+  // numeric flags
+  int radix_;
+  Exactness ex_;
 
   template<typename T> void init_from_other(T other);
   template<typename T> Token& assign_from_other(T other);
