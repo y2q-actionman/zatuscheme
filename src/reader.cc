@@ -103,7 +103,7 @@ Lisp_ptr read_la(istream& f, Token&& tok){
     case Number::Type::real:
       return {new double(n.get<double>())};
     case Number::Type::complex:
-      return {new complex<double>(n.get<complex<double> >())};
+      return {new Complex(n.get<Complex>())};
     }
   }
 

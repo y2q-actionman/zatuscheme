@@ -71,11 +71,11 @@ double coerce(Lisp_ptr p){
 }
 
 template<>
-std::complex<double> coerce(Lisp_ptr p){
+Complex coerce(Lisp_ptr p){
   if(p.tag() == Ptr_tag::complex){
-    return *(p.get<complex<double>*>());
+    return *(p.get<Complex*>());
   }else{
-    return complex<double>(coerce<double>(p), 0);
+    return Complex(coerce<double>(p), 0);
   }
 }
 
@@ -126,8 +126,8 @@ struct number_comparator {
       return fun(coerce<double>(p1), coerce<double>(p2));
     }else if(is_complex_type(p1) && is_complex_type(p2)){
       static const ComplexComparator fun;
-      return fun(coerce<std::complex<double> >(p1),
-                 coerce<std::complex<double> >(p2));
+      return fun(coerce<Complex>(p1),
+                 coerce<Complex>(p2));
     }else{
       UNEXP_DEFAULT();
     }
@@ -171,7 +171,7 @@ struct pos_neg_pred{
       return fun(coerce<double>(p), 0);
     }else if(is_complex_type(p)){
       static constexpr Fun<double> fun;
-      auto c = coerce<complex<double> >(p);
+      auto c = coerce<Complex>(p);
       return (c.imag() == 0) && fun(c.real(), 0);
     }else{
       UNEXP_DEFAULT();
@@ -274,9 +274,9 @@ struct binary_accum{
       static constexpr Op<double> op;
       return Lisp_ptr{new double(op(coerce<double>(n1), coerce<double>(n2)))};
     }else if(is_complex_type(n1) && is_complex_type(n2)){
-      static constexpr Op<complex<double> > op;
-      return Lisp_ptr{new complex<double>(op(coerce<complex<double> >(n1),
-                                             coerce<complex<double> >(n2)))};
+      static constexpr Op<Complex> op;
+      return Lisp_ptr{new Complex(op(coerce<Complex>(n1),
+                                             coerce<Complex>(n2)))};
     }else{
       UNEXP_DEFAULT();
     }      
@@ -347,7 +347,7 @@ Lisp_ptr number_unary_op(const char* name, Fun&& fun){
   if(is_real_type(args[0])){
     return {new double(fun(coerce<double>(args[0])))};
   }else if(is_complex_type(args[0])){
-    return {new complex<double>(fun(coerce<complex<double> >(args[0])))};
+    return {new Complex(fun(coerce<Complex>(args[0])))};
   }else{
     UNEXP_DEFAULT();
   }
@@ -423,8 +423,8 @@ Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
   if(is_real_type(args[0]) && is_real_type(args[1])){
     return rfun(coerce<double>(args[0]), coerce<double>(args[1]));
   }else if(is_complex_type(args[0]) && is_complex_type(args[1])){
-    return cfun(coerce<complex<double> >(args[0]),
-                coerce<complex<double> >(args[1]));
+    return cfun(coerce<Complex>(args[0]),
+                coerce<Complex>(args[1]));
   }else{
     UNEXP_DEFAULT();
   }
@@ -440,7 +440,7 @@ Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
   }
 
   if(is_complex_type(args[0])){
-    return {new complex<double>(fun(coerce<complex<double> >(args[0])))};
+    return {new Complex(fun(coerce<Complex>(args[0])))};
   }else{
     UNEXP_DEFAULT();
   }
@@ -571,8 +571,8 @@ Lisp_ptr number_minus(){
       auto f = coerce<double>(args[0]);
       return Lisp_ptr{new double(-f)};
     }else if(is_complex_type(args[0])){
-      auto c = coerce<complex<double> >(args[0]);
-      return Lisp_ptr{new complex<double>(-c)};
+      auto c = coerce<Complex>(args[0]);
+      return Lisp_ptr{new Complex(-c)};
     }else{
       UNEXP_DEFAULT();
     }
@@ -596,7 +596,7 @@ Lisp_ptr number_divide(){
     }else if(is_real_type(args[0])){
       return Lisp_ptr{new double(1.0 / coerce<double>(args[0]))};
     }else if(is_complex_type(args[0])){
-      return Lisp_ptr{new complex<double>(1.0 / coerce<complex<double> >(args[0]))};
+      return Lisp_ptr{new Complex(1.0 / coerce<Complex>(args[0]))};
     }else{
       UNEXP_DEFAULT();
     }
@@ -767,7 +767,7 @@ Lisp_ptr number_atan(){
     if(is_real_type(args[0])){
       return {new double(std::atan(coerce<double>(args[0])))};
     }else if(is_complex_type(args[0])){
-      return {new complex<double>(std::atan(coerce<complex<double> >(args[0])))};
+      return {new Complex(std::atan(coerce<Complex>(args[0])))};
     }else{
       UNEXP_DEFAULT();
     }
@@ -802,15 +802,15 @@ Lisp_ptr number_expt(){
                           [](double n1, double n2) -> Lisp_ptr{
                             return {new double(std::pow(n1, n2))};
                           },
-                          [](const complex<double>& n1, const complex<double>& n2) -> Lisp_ptr{
-                            return {new complex<double>(std::pow(n1, n2))};
+                          [](const Complex& n1, const Complex& n2) -> Lisp_ptr{
+                            return {new Complex(std::pow(n1, n2))};
                           });
 }
 
 Lisp_ptr number_rect(){
   return number_binary_op("make-rectangular",
                           [](double n1, double n2) -> Lisp_ptr{
-                            return {new complex<double>(n1, n2)};
+                            return {new Complex(n1, n2)};
                           },
                           complex_found());
 }
@@ -818,7 +818,7 @@ Lisp_ptr number_rect(){
 Lisp_ptr number_polar(){
   return number_binary_op("make-polar",
                           [](double n1, double n2) -> Lisp_ptr{
-                            return {new complex<double>(polar(n1, n2))};
+                            return {new Complex(polar(n1, n2))};
                           },
                           complex_found());
 }
@@ -826,28 +826,28 @@ Lisp_ptr number_polar(){
 
 Lisp_ptr number_real(){
   return number_unary_op_complex("real-part",
-                                 [](const complex<double>& z){
+                                 [](const Complex& z){
                                    return z.real();
                                  });
 }
 
 Lisp_ptr number_imag(){
   return number_unary_op_complex("imag-part",
-                                 [](const complex<double>& z){
+                                 [](const Complex& z){
                                    return z.imag();
                                  });
 }
 
 Lisp_ptr number_mag(){
   return number_unary_op_complex("magnitude",
-                                 [](const complex<double>& z){
+                                 [](const Complex& z){
                                    return std::abs(z);
                                  });
 }
 
 Lisp_ptr number_angle(){
   return number_unary_op_complex("angle",
-                                 [](const complex<double>& z){
+                                 [](const Complex& z){
                                    return arg(z);
                                  });
 }
@@ -931,7 +931,7 @@ Lisp_ptr number_from_string(){
   case Number::Type::real:
     return {new double(n.get<double>())};
   case Number::Type::complex:
-    return {new complex<double>(n.get<complex<double> >())};
+    return {new Complex(n.get<Complex>())};
   default:
     UNEXP_DEFAULT();
   }

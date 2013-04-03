@@ -15,6 +15,7 @@ class IProcedure;
 class NProcedure;
 class Continuation;
 class Number;
+typedef std::complex<double> Complex;
 typedef std::string String;
 typedef std::vector<Lisp_ptr> Vector;
 typedef std::istream InputPort;

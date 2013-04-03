@@ -58,7 +58,7 @@ struct to_type<Ptr_tag, Ptr_tag::real>{
 
 template<>
 struct to_type<Ptr_tag, Ptr_tag::complex>{
-  typedef std::complex<double>* type;
+  typedef Complex* type;
 };
 
 template<>
@@ -168,7 +168,7 @@ Ptr_tag to_tag<Ptr_tag, double*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, std::complex<double>*>(){
+Ptr_tag to_tag<Ptr_tag, Complex*>(){
   return Ptr_tag::complex;
 }
 
