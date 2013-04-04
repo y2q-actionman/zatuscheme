@@ -201,13 +201,9 @@ struct pos_neg_pred{
 
 template<template <typename> class Fun>
 struct even_odd_pred{
-  inline bool operator()(Lisp_ptr p){
-    if(is_integer_type(p)){
-      static const Fun<int> fun;
-      return fun(coerce<int>(p) % 2, 0);
-    }else{
-      return false;
-    }
+  Lisp_ptr operator()(int i) const{
+    static const Fun<int> fun;
+    return Lisp_ptr{fun(i % 2, 0)};
   }
 };
 
@@ -369,6 +365,13 @@ struct pass_through{
   }
 };
 
+struct fall_false{
+  template<typename T>
+  Lisp_ptr operator()(T) const{
+    return Lisp_ptr{false};
+  }
+};
+
 template<
   typename IFun, typename RFun, typename CFun
   >
@@ -487,11 +490,19 @@ Lisp_ptr negativep(){
 }
 
 Lisp_ptr oddp(){
-  return number_pred(even_odd_pred<std::not_equal_to>());
+  return number_unary("oddp",
+                      even_odd_pred<std::not_equal_to>(),
+                      fall_false(),
+                      fall_false(),
+                      true);
 }
 
 Lisp_ptr evenp(){
-  return number_pred(even_odd_pred<std::equal_to>());
+  return number_unary("evenp",
+                      even_odd_pred<std::equal_to>(),
+                      fall_false(),
+                      fall_false(),
+                      true);
 }
 
 
