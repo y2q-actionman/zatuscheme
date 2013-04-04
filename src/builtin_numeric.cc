@@ -354,80 +354,6 @@ Lisp_ptr number_rounding(const char* name, Fun&& fun){
   }
 }
 
-template<typename Fun>
-inline
-Lisp_ptr number_unary_op(const char* name, Fun&& fun){
-  ZsArgs args;
-
-  if(!is_numeric_type(args[0])){
-    throw number_type_check_failed(name, args[0]);
-  }
-
-  if(is_real_type(args[0])){
-    return {new double(fun(coerce<double>(args[0])))};
-  }else if(is_complex_type(args[0])){
-    return {new Complex(fun(coerce<Complex>(args[0])))};
-  }else{
-    UNEXP_DEFAULT();
-  }
-}
-
-struct exp_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::exp(t1);
-  }
-};
-
-struct log_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::log(t1);
-  }
-};
-
-struct sin_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::sin(t1);
-  }
-};
-
-struct cos_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::cos(t1);
-  }
-};
-
-struct tan_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::tan(t1);
-  }
-};
-
-struct asin_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::asin(t1);
-  }
-};
-
-struct acos_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::acos(t1);
-  }
-};
-
-struct sqrt_fun{
-  template<typename T>
-  inline T operator()(const T& t1) const{
-    return std::sqrt(t1);
-  }
-};
-
 template<typename RFun, typename CFun>
 inline
 Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
@@ -449,22 +375,6 @@ Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
   }
 }
 
-template<typename Fun>
-inline
-Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
-  ZsArgs args;
-
-  if(!is_numeric_type(args[0])){
-    throw number_type_check_failed(name, args[0]);
-  }
-
-  if(is_complex_type(args[0])){
-    return {new Complex(fun(coerce<Complex>(args[0])))};
-  }else{
-    UNEXP_DEFAULT();
-  }
-}
-
 
 struct inacceptable_number_type{
   Lisp_ptr operator()(int) const{
@@ -480,35 +390,36 @@ struct inacceptable_number_type{
   }
 };
 
-
 template<
   typename IFun, typename RFun, typename CFun
   >
 inline
 Lisp_ptr number_unary(const char* name, const IFun& ifun,
                       const RFun& rfun, const CFun& cfun,
-                      Lisp_ptr fail_value = Lisp_ptr()){
+                      bool no_except = false){
+  static const auto no_except_value = Lisp_ptr{false};
+
   ZsArgs args;
   auto arg1 = args[0];
-  Lisp_ptr ret;
+
 
   if(!is_numeric_type(arg1)){
-    if(fail_value){
-      return fail_value;
+    if(no_except){
+      return no_except_value;
     }else{
       throw number_type_check_failed(name, arg1);
     }
   }
 
-  if(is_numeric_type(arg1)){
+  if(is_integer_type(arg1)){
     return ifun(coerce<int>(arg1));
   }else if(is_real_type(arg1)){
     return rfun(coerce<double>(arg1));
   }else if(is_complex_type(arg1)){
     return cfun(coerce<Complex>(arg1));
   }else{
-    if(fail_value){
-      return fail_value;
+    if(no_except){
+      return no_except_value;
     }else{
       UNEXP_DEFAULT();
     }
@@ -798,33 +709,51 @@ Lisp_ptr number_rationalize(){
 
 Lisp_ptr number_exp(){
   return number_unary("exp",
-                      [](int i){ return Lisp_ptr{new double(std::exp(i))};},
-                      [](double d){ return Lisp_ptr{new double(std::exp(d))};},
-                      [](Complex z){ return Lisp_ptr{new Complex(std::exp(z))};});
+                      [](int i){ return wrap_number(std::exp(i));},
+                      [](double d){ return wrap_number(std::exp(d));},
+                      [](Complex z){ return wrap_number(std::exp(z));});
 }
 
 Lisp_ptr number_log(){
-  return number_unary_op("log", log_fun());
+  return number_unary("log",
+                      [](int i){ return wrap_number(std::log(i));},
+                      [](double d){ return wrap_number(std::log(d));},
+                      [](Complex z){ return wrap_number(std::log(z));});
 }
 
 Lisp_ptr number_sin(){
-  return number_unary_op("sin", sin_fun());
+  return number_unary("sin",
+                      [](int i){ return wrap_number(std::sin(i));},
+                      [](double d){ return wrap_number(std::sin(d));},
+                      [](Complex z){ return wrap_number(std::sin(z));});
 }
 
 Lisp_ptr number_cos(){
-  return number_unary_op("cos", cos_fun());
+  return number_unary("cos",
+                      [](int i){ return wrap_number(std::cos(i));},
+                      [](double d){ return wrap_number(std::cos(d));},
+                      [](Complex z){ return wrap_number(std::cos(z));});
 }
 
 Lisp_ptr number_tan(){
-  return number_unary_op("tan", tan_fun());
+  return number_unary("tan",
+                      [](int i){ return wrap_number(std::tan(i));},
+                      [](double d){ return wrap_number(std::tan(d));},
+                      [](Complex z){ return wrap_number(std::tan(z));});
 }
 
 Lisp_ptr number_asin(){
-  return number_unary_op("asin", asin_fun());
+  return number_unary("asin",
+                      [](int i){ return wrap_number(std::asin(i));},
+                      [](double d){ return wrap_number(std::asin(d));},
+                      [](Complex z){ return wrap_number(std::asin(z));});
 }
 
 Lisp_ptr number_acos(){
-  return number_unary_op("acos", acos_fun());
+  return number_unary("acos",
+                      [](int i){ return wrap_number(std::acos(i));},
+                      [](double d){ return wrap_number(std::acos(d));},
+                      [](Complex z){ return wrap_number(std::acos(z));});
 }
 
 Lisp_ptr number_atan(){
@@ -865,7 +794,10 @@ Lisp_ptr number_atan(){
 }
 
 Lisp_ptr number_sqrt(){
-  return number_unary_op("sqrt", sqrt_fun());
+  return number_unary("sqrt",
+                      [](int i){ return wrap_number(std::sqrt(i));},
+                      [](double d){ return wrap_number(std::sqrt(d));},
+                      [](Complex z){ return wrap_number(std::sqrt(z));});
 }
 
 
@@ -897,31 +829,31 @@ Lisp_ptr number_polar(){
 
 
 Lisp_ptr number_real(){
-  return number_unary_op_complex("real-part",
-                                 [](const Complex& z){
-                                   return z.real();
-                                 });
+  return number_unary("real-part",
+                      inacceptable_number_type(),
+                      inacceptable_number_type(),
+                      [](Complex z){ return wrap_number(z.real());});
 }
 
 Lisp_ptr number_imag(){
-  return number_unary_op_complex("imag-part",
-                                 [](const Complex& z){
-                                   return z.imag();
-                                 });
+  return number_unary("imag-part",
+                      inacceptable_number_type(),
+                      inacceptable_number_type(),
+                      [](Complex z){ return wrap_number(z.imag());});
 }
 
 Lisp_ptr number_mag(){
-  return number_unary_op_complex("magnitude",
-                                 [](const Complex& z){
-                                   return std::abs(z);
-                                 });
+  return number_unary("magnitude",
+                      inacceptable_number_type(),
+                      inacceptable_number_type(),
+                      [](Complex z){ return wrap_number(std::abs(z));});
 }
 
 Lisp_ptr number_angle(){
-  return number_unary_op_complex("angle",
-                                 [](const Complex& z){
-                                   return arg(z);
-                                 });
+  return number_unary("angle",
+                      inacceptable_number_type(),
+                      inacceptable_number_type(),
+                      [](Complex z){ return wrap_number(arg(z));});
 }
 
 
