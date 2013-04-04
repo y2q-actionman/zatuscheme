@@ -185,7 +185,7 @@ int main(){
   check_e("(quotient 13 -4)", "-3");
   check_e("(modulo 13 -4)", "-3");
   check_e("(remainder 13 -4)", "1");
-  check_e("(quotient 13 -4)", "3");
+  check_e("(quotient -13 -4)", "3");
   check_e("(modulo -13 -4)", "-1");
   check_e("(remainder -13 -4)", "-1");
 
@@ -196,9 +196,9 @@ int main(){
   check_e("(lcm)", "1");
 
   // rational
-  check_e("(numarator (/ 6 4))", "3");
-  check_e("(denominator (/ 6 4))", "2");
-  check_e("(denominator (exact->inexact (/ 6 4)))", "2.0");
+  // check_e("(numarator (/ 6 4))", "3");
+  // check_e("(denominator (/ 6 4))", "2");
+  // check_e("(denominator (exact->inexact (/ 6 4)))", "2.0");
 
   // inexact
   check_e("(floor -4.3)", "-5");
@@ -213,8 +213,8 @@ int main(){
   check_e("(round 7)", "7");
 
   // rationalize
-  check_e("(rationalize (inexact->exact .3) 1/10)", "1/3");
-  check_e("(rationalize .3 1/10)", "#i1/3");
+  // check_e("(rationalize (inexact->exact .3) 1/10)", "1/3");
+  // check_e("(rationalize .3 1/10)", "#i1/3");
   
   // real
   // check_e("(exp 2)", "");

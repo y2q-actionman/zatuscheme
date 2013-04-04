@@ -701,8 +701,15 @@ Token tokenize(istream& f){
 
   case '.': {
     int dots = 1;
-    decltype(f.get()) c2;
+    auto c2 = f.peek();
 
+    // checks number like '.1'
+    if(is_number_char(10, c2)){
+      f.unget();
+      return tokenize_number(f);
+    }      
+
+    // '.' or '...' below
     while((c2 = f.get()) == '.'){
       ++dots;
     }

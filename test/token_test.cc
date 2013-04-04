@@ -193,7 +193,7 @@ int main(){
 
   // consecutive access
   {
-    char teststr[] = "(a . b)#(c 'd) e ...;comment\nf +11 `(,x ,@y \"ho()ge\")";
+    char teststr[] = "(a . b)#(c 'd) e ...;comment\nf +11 .3 `(,x ,@y \"ho()ge\")";
     stringstream ss(teststr);
 
     check(ss, N::l_paren);
@@ -211,6 +211,7 @@ int main(){
 
     check_ident(ss, "f");
     check(ss, 11);
+    check(ss, 0.3);
     check(ss, N::quasiquote);
     check(ss, N::l_paren);
     check(ss, N::comma);
