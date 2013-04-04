@@ -102,16 +102,132 @@ Lisp_ptr wrap_number(const Complex& z){
   return {new Complex(z)};
 }
 
+
+template<typename T>
+T gcd(T m, T n){
+  if(m < 0) m = -m;
+  if(n < 0) n = -n;
+
+  if(m < n)
+    std::swap(m, n);
+
+  while(n > 0){
+    auto mod = m % n;
+    m = n;
+    n = mod;
+  }
+
+  return m;
+}
+
+
 //
-// function objects
+// implementation utilities
 //
+
+template<
+  typename IFun, typename RFun, typename CFun
+  >
+inline
+Lisp_ptr number_unary(const char* name, const IFun& ifun,
+                      const RFun& rfun, const CFun& cfun,
+                      bool no_except = false){
+  static const auto no_except_value = Lisp_ptr{false};
+
+  ZsArgs args;
+  auto arg1 = args[0];
+
+
+  if(!is_numeric_type(arg1)){
+    if(no_except){
+      return no_except_value;
+    }else{
+      throw number_type_check_failed(name, arg1);
+    }
+  }
+
+  if(is_integer_type(arg1)){
+    return ifun(coerce<int>(arg1));
+  }else if(is_real_type(arg1)){
+    return rfun(coerce<double>(arg1));
+  }else if(is_complex_type(arg1)){
+    return cfun(coerce<Complex>(arg1));
+  }else{
+    if(no_except){
+      return no_except_value;
+    }else{
+      UNEXP_DEFAULT();
+    }
+  }
+}
+
+
+struct inacceptable_number_type{
+  Lisp_ptr operator()(int) const{
+    throw zs_error("number error: cannot accept type: integer\n");
+  }
+
+  Lisp_ptr operator()(double) const{
+    throw zs_error("number error: cannot accept type: real\n");
+  }
+
+  Lisp_ptr operator()(Complex) const{
+    throw zs_error("number error: cannot accept type: complex\n");
+  }
+
+  template<typename T>
+  Lisp_ptr operator()(T t, T) const{
+    return operator()(t);
+  }
+};
+
+struct pass_through{
+  template<typename T>
+  Lisp_ptr operator()(T t) const{
+    return wrap_number(t);
+  }
+};
+
+struct fall_false{
+  template<typename T>
+  Lisp_ptr operator()(T) const{
+    return Lisp_ptr{false};
+  }
+};
+
+
+template<template <typename> class Fun>
+struct pos_neg_pred{
+  Lisp_ptr operator()(int i) const{
+    static const Fun<int> fun;
+    return Lisp_ptr{fun(i, 0)};
+  }
+
+  Lisp_ptr operator()(double d) const{
+    static const Fun<double> fun;
+    return Lisp_ptr{fun(d, 0)};
+  }
+
+  Lisp_ptr operator()(Complex z) const{
+    static const Fun<Complex> fun;
+    return Lisp_ptr{fun(z, 0)};
+  }
+};
+
+
+template<template <typename> class Fun>
+struct even_odd_pred{
+  Lisp_ptr operator()(int i) const{
+    static const Fun<int> fun;
+    return Lisp_ptr{fun(i % 2, 0)};
+  }
+};
+
+
+// ==== shoudld be rewrite below ==
 
 struct complex_found{
   static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
-  template<typename CmpT>
-  Lisp_ptr operator()(const CmpT&, const CmpT&) const{
-    throw zs_error(msg);
-  }
 };
 
   // TODO: delete this! dirty!
@@ -166,34 +282,6 @@ inline Lisp_ptr number_compare(const char* name, Fun&& fun){
 
   return Lisp_ptr{true};
 }
-
-
-template<template <typename> class Fun>
-struct pos_neg_pred{
-  Lisp_ptr operator()(int i) const{
-    static const Fun<int> fun;
-    return Lisp_ptr{fun(i, 0)};
-  }
-
-  Lisp_ptr operator()(double d) const{
-    static const Fun<double> fun;
-    return Lisp_ptr{fun(d, 0)};
-  }
-
-  Lisp_ptr operator()(Complex z) const{
-    static const Fun<Complex> fun;
-    return Lisp_ptr{fun(z, 0)};
-  }
-};
-
-
-template<template <typename> class Fun>
-struct even_odd_pred{
-  Lisp_ptr operator()(int i) const{
-    static const Fun<int> fun;
-    return Lisp_ptr{fun(i % 2, 0)};
-  }
-};
 
 
 template<typename Fun, typename Iter>
@@ -293,23 +381,6 @@ Lisp_ptr number_divop(const char* name, Fun&& fun){
       fun(coerce<int>(args[0]), coerce<int>(args[1]))};
 }
 
-template<typename T>
-T gcd(T m, T n){
-  if(m < 0) m = -m;
-  if(n < 0) n = -n;
-
-  if(m < n)
-    std::swap(m, n);
-
-  while(n > 0){
-    auto mod = m % n;
-    m = n;
-    n = mod;
-  }
-
-  return m;
-}
-
 template<typename RFun, typename CFun>
 inline
 Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
@@ -328,71 +399,6 @@ Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
                 coerce<Complex>(args[1]));
   }else{
     UNEXP_DEFAULT();
-  }
-}
-
-
-struct inacceptable_number_type{
-  Lisp_ptr operator()(int) const{
-    throw zs_error("number error: cannot accept type: integer\n");
-  }
-
-  Lisp_ptr operator()(double) const{
-    throw zs_error("number error: cannot accept type: real\n");
-  }
-
-  Lisp_ptr operator()(Complex) const{
-    throw zs_error("number error: cannot accept type: complex\n");
-  }
-};
-
-struct pass_through{
-  template<typename T>
-  Lisp_ptr operator()(T t) const{
-    return wrap_number(t);
-  }
-};
-
-struct fall_false{
-  template<typename T>
-  Lisp_ptr operator()(T) const{
-    return Lisp_ptr{false};
-  }
-};
-
-template<
-  typename IFun, typename RFun, typename CFun
-  >
-inline
-Lisp_ptr number_unary(const char* name, const IFun& ifun,
-                      const RFun& rfun, const CFun& cfun,
-                      bool no_except = false){
-  static const auto no_except_value = Lisp_ptr{false};
-
-  ZsArgs args;
-  auto arg1 = args[0];
-
-
-  if(!is_numeric_type(arg1)){
-    if(no_except){
-      return no_except_value;
-    }else{
-      throw number_type_check_failed(name, arg1);
-    }
-  }
-
-  if(is_integer_type(arg1)){
-    return ifun(coerce<int>(arg1));
-  }else if(is_real_type(arg1)){
-    return rfun(coerce<double>(arg1));
-  }else if(is_complex_type(arg1)){
-    return cfun(coerce<Complex>(arg1));
-  }else{
-    if(no_except){
-      return no_except_value;
-    }else{
-      UNEXP_DEFAULT();
-    }
   }
 }
 
@@ -793,27 +799,27 @@ Lisp_ptr number_sqrt(){
 Lisp_ptr number_expt(){
   return number_binary_op("expt",
                           [](double n1, double n2) -> Lisp_ptr{
-                            return {new double(std::pow(n1, n2))};
+                            return wrap_number(std::pow(n1, n2));
                           },
                           [](const Complex& n1, const Complex& n2) -> Lisp_ptr{
-                            return {new Complex(std::pow(n1, n2))};
+                            return wrap_number(std::pow(n1, n2));
                           });
 }
 
 Lisp_ptr number_rect(){
   return number_binary_op("make-rectangular",
                           [](double n1, double n2) -> Lisp_ptr{
-                            return {new Complex(n1, n2)};
+                            return wrap_number(Complex(n1, n2));
                           },
-                          complex_found());
+                          inacceptable_number_type());
 }
 
 Lisp_ptr number_polar(){
   return number_binary_op("make-polar",
                           [](double n1, double n2) -> Lisp_ptr{
-                            return {new Complex(polar(n1, n2))};
+                            return wrap_number(polar(n1, n2));
                           },
-                          complex_found());
+                          inacceptable_number_type());
 }
 
 
