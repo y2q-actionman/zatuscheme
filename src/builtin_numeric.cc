@@ -240,38 +240,30 @@ Lisp_ptr number_accumulate(const char* name, Lisp_ptr init, const Fun& fun){
 }
 
 
-template<template <typename> class Cmp>
-struct minmax_accum{
-  inline Lisp_ptr operator()(Lisp_ptr n1, Lisp_ptr n2) const{
-    if(!is_numeric_type(n1)){
-      throw number_type_check_failed("min/max", n1);
-    }
-
-    if(!is_numeric_type(n2)){
-      throw number_type_check_failed("mix/max", n2);
-    }
-
-    if(is_integer_type(n1) && is_integer_type(n2)){
-      static const Cmp<int> cmp;
-      if(cmp(coerce<int>(n1), coerce<int>(n2))){
-        return n1;
-      }else{
-        return n2;
-      }
-    }else if(is_real_type(n1) && is_real_type(n2)){
-      static const Cmp<double> cmp;
-      if(cmp(coerce<double>(n1), coerce<double>(n2))){
-        return n1;
-      }else{
-        return n2;
-      }
-    }else if(is_complex_type(n1) && is_complex_type(n2)){
-      throw zs_error(complex_found::msg);
-    }else{
-      UNEXP_DEFAULT();
-    }
+template<typename T>
+struct zs_max{
+  T operator()(const T& t1, const T& t2) const{
+    return std::max(t1, t2);
   }
-};    
+};
+
+template<>
+Complex zs_max<Complex>::operator()(const Complex&, const Complex&) const{
+  throw zs_error(complex_found::msg);
+}
+
+template<typename T>
+struct zs_min{
+  T operator()(const T& t1, const T& t2) const{
+    return std::min(t1, t2);
+  }
+};
+
+template<>
+Complex zs_min<Complex>::operator()(const Complex&, const Complex&) const{
+  throw zs_error(complex_found::msg);
+}
+
 
 template<template <typename> class Op>
 struct binary_accum{
@@ -505,13 +497,13 @@ Lisp_ptr evenp(){
 
 Lisp_ptr number_max(){
   ZsArgs args;
-  return number_accumulate("max", args[0], minmax_accum<std::greater>(),
+  return number_accumulate("max", args[0], binary_accum<zs_max>(),
                            next(begin(args)), end(args));
 }
 
 Lisp_ptr number_min(){
   ZsArgs args;
-  return number_accumulate("min", args[0], minmax_accum<std::less>(),
+  return number_accumulate("min", args[0], binary_accum<zs_min>(),
                            next(begin(args)), end(args));
 }
 
