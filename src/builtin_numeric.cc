@@ -393,21 +393,6 @@ struct binary_accum{
   }
 };
 
-template<typename Fun>
-inline
-Lisp_ptr number_divop(const char* name, Fun&& fun){
-  ZsArgs args;
-
-  for(auto i = 0; i < 2; ++i){
-    if(!is_integer_type(args[i])){
-      throw zs_error_arg1(name, "not integer type", {args[i]});
-    }
-  }
-  
-  return Lisp_ptr{Ptr_tag::integer,
-      fun(coerce<int>(args[0]), coerce<int>(args[1]))};
-}
-
 } // namespace
 
 
@@ -596,28 +581,35 @@ Lisp_ptr number_abs(){
 
 
 Lisp_ptr number_quot(){
-  return number_divop("quotient", std::divides<int>());
+  return number_binary("quotient",
+                       [](int i1, int i2){ return wrap_number(i1 / i2); },
+                       inacceptable_number_type(),
+                       inacceptable_number_type());
 }
 
 Lisp_ptr number_rem(){
-  return number_divop("remainder",
-                      [](int i1, int i2) -> int{
-                        auto q = i1 / i2;
-                        return i1 - (q * i2);
-                      });
+  return number_binary("remainder",
+                       [](int i1, int i2) -> Lisp_ptr {
+                         auto q = i1 / i2;
+                         return wrap_number(i1 - (q * i2));
+                       },
+                       inacceptable_number_type(),
+                       inacceptable_number_type());
 }
 
 Lisp_ptr number_mod(){
-  return number_divop("modulo", 
-                      [](int i1, int i2) -> int{
-                        auto m = i1 % i2;
+  return number_binary("modulo", 
+                       [](int i1, int i2) -> Lisp_ptr{
+                         auto m = i1 % i2;
 
-                        if((m < 0 && i2 > 0) || (m > 0 && i2 < 0)){
-                          return m + i2;
-                        }else{
-                          return m;
-                        }
-                      });
+                         if((m < 0 && i2 > 0) || (m > 0 && i2 < 0)){
+                           return wrap_number(m + i2);
+                         }else{
+                           return wrap_number(m);
+                         }
+                       },
+                       inacceptable_number_type(),
+                       inacceptable_number_type());
 }
 
 Lisp_ptr number_gcd(){
