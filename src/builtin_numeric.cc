@@ -161,6 +161,33 @@ Lisp_ptr number_unary(const char* name, const IFun& ifun,
   }
 }
 
+template<
+  typename IFun, typename RFun, typename CFun
+  >
+Lisp_ptr number_binary(const char* name, const IFun& ifun,
+                       const RFun& rfun, const CFun& cfun){
+  ZsArgs args;
+
+  for(auto i = 0; i < 2; ++i){
+    if(!is_numeric_type(args[i])){
+      throw number_type_check_failed(name, args[i]);
+    }
+  }
+  
+  if(is_integer_type(args[0]) && is_integer_type(args[1])){
+    return ifun(coerce<int>(args[0]),
+                coerce<int>(args[1]));
+  }else if(is_real_type(args[0]) && is_real_type(args[1])){
+    return rfun(coerce<double>(args[0]),
+                coerce<double>(args[1]));
+  }else if(is_complex_type(args[0]) && is_complex_type(args[1])){
+    return cfun(coerce<Complex>(args[0]),
+                coerce<Complex>(args[1]));
+  }else{
+    UNEXP_DEFAULT();
+  }
+}
+
 
 struct inacceptable_number_type{
   Lisp_ptr operator()(int) const{
@@ -379,27 +406,6 @@ Lisp_ptr number_divop(const char* name, Fun&& fun){
   
   return Lisp_ptr{Ptr_tag::integer,
       fun(coerce<int>(args[0]), coerce<int>(args[1]))};
-}
-
-template<typename RFun, typename CFun>
-inline
-Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
-  ZsArgs args;
-
-  for(auto i = 0; i < 2; ++i){
-    if(!is_numeric_type(args[i])){
-      throw number_type_check_failed(name, args[i]);
-    }
-  }
-  
-  if(is_real_type(args[0]) && is_real_type(args[1])){
-    return rfun(coerce<double>(args[0]), coerce<double>(args[1]));
-  }else if(is_complex_type(args[0]) && is_complex_type(args[1])){
-    return cfun(coerce<Complex>(args[0]),
-                coerce<Complex>(args[1]));
-  }else{
-    UNEXP_DEFAULT();
-  }
 }
 
 } // namespace
@@ -797,29 +803,39 @@ Lisp_ptr number_sqrt(){
 
 
 Lisp_ptr number_expt(){
-  return number_binary_op("expt",
-                          [](double n1, double n2) -> Lisp_ptr{
-                            return wrap_number(std::pow(n1, n2));
-                          },
-                          [](const Complex& n1, const Complex& n2) -> Lisp_ptr{
-                            return wrap_number(std::pow(n1, n2));
-                          });
+  return number_binary("expt",
+                       [](int i1, int i2){
+                         return wrap_number(std::pow(i1, i2));
+                       },
+                       [](double n1, double n2){
+                         return wrap_number(std::pow(n1, n2));
+                       },
+                       [](Complex z1, Complex z2){
+                         return wrap_number(std::pow(z1, z2));
+                       });
 }
 
 Lisp_ptr number_rect(){
-  return number_binary_op("make-rectangular",
-                          [](double n1, double n2) -> Lisp_ptr{
-                            return wrap_number(Complex(n1, n2));
-                          },
-                          inacceptable_number_type());
+  return number_binary("make-rectangular",
+                       [](int i1, int i2){
+                         return wrap_number(Complex(i1, i2));
+                       },
+                       [](double n1, double n2){
+                         return wrap_number(Complex(n1, n2));
+                       },
+                       inacceptable_number_type());
 }
 
 Lisp_ptr number_polar(){
-  return number_binary_op("make-polar",
-                          [](double n1, double n2) -> Lisp_ptr{
-                            return wrap_number(polar(n1, n2));
-                          },
-                          inacceptable_number_type());
+  return number_binary("make-polar",
+                       [](int i1, int i2){
+                         return wrap_number(polar(static_cast<double>(i1),
+                                                  static_cast<double>(i2)));
+                       },
+                       [](double n1, double n2){
+                         return wrap_number(polar(n1, n2));
+                       },
+                       inacceptable_number_type());
 }
 
 
