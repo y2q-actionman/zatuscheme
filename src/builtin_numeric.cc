@@ -334,26 +334,6 @@ T gcd(T m, T n){
   return m;
 }
 
-template<typename Fun>
-inline
-Lisp_ptr number_rounding(const char* name, Fun&& fun){
-  ZsArgs args;
-
-  if(!is_numeric_type(args[0])){
-    throw number_type_check_failed(name, args[0]);
-  }
-
-  if(is_integer_type(args[0])){
-    return args[0];
-  }else if(is_real_type(args[0])){
-    return Lisp_ptr{new double(fun(coerce<double>(args[0])))};
-  }else if(is_complex_type(args[0])){
-    throw zs_error(complex_found::msg);
-  }else{
-    UNEXP_DEFAULT();
-  }
-}
-
 template<typename RFun, typename CFun>
 inline
 Lisp_ptr number_binary_op(const char* name, RFun&& rfun, CFun&& cfun){
@@ -387,6 +367,13 @@ struct inacceptable_number_type{
 
   Lisp_ptr operator()(Complex) const{
     throw zs_error("number error: cannot accept type: complex\n");
+  }
+};
+
+struct pass_through{
+  template<typename T>
+  Lisp_ptr operator()(T t) const{
+    return wrap_number(t);
   }
 };
 
@@ -678,19 +665,31 @@ Lisp_ptr number_denominator(){
 
 
 Lisp_ptr number_floor(){
-  return number_rounding("floor", [](double d){ return std::floor(d); });
+  return number_unary("floor",
+                      pass_through(),
+                      [](double d){ return wrap_number(std::floor(d));},
+                      inacceptable_number_type());
 }
 
 Lisp_ptr number_ceil(){
-  return number_rounding("ceiling", [](double d){ return std::ceil(d); });
+  return number_unary("ceiling",
+                      pass_through(),
+                      [](double d){ return wrap_number(std::ceil(d));},
+                      inacceptable_number_type());
 }
 
 Lisp_ptr number_trunc(){
-  return number_rounding("truncate", [](double d){ return std::trunc(d); });
+  return number_unary("truncate",
+                      pass_through(),
+                      [](double d){ return wrap_number(std::trunc(d));},
+                      inacceptable_number_type());
 }
 
 Lisp_ptr number_round(){
-  return number_rounding("round", [](double d){ return std::round(d); });
+  return number_unary("round",
+                      pass_through(),
+                      [](double d){ return wrap_number(std::round(d));},
+                      inacceptable_number_type());
 }
 
 
@@ -860,7 +859,7 @@ Lisp_ptr number_angle(){
 Lisp_ptr number_i_to_e(){
   // MEMO: add complex<int> type??
   return number_unary("inexact->exact",
-                      [](int i){ return wrap_number(i);},
+                      pass_through(),
                       [](double d){ return wrap_number(static_cast<int>(d));},
                       inacceptable_number_type());
 }
@@ -868,8 +867,8 @@ Lisp_ptr number_i_to_e(){
 Lisp_ptr number_e_to_i(){
   return number_unary("exact->inexact",
                       [](int i){ return wrap_number(static_cast<double>(i));},
-                      [](double d){ return wrap_number(d);},
-                      [](Complex z){ return wrap_number(z);});
+                      pass_through(),
+                      pass_through());
 }
 
 
