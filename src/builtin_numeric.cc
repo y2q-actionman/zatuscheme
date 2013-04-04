@@ -446,6 +446,56 @@ Lisp_ptr number_unary_op_complex(const char* name, Fun&& fun){
   }
 }
 
+
+struct inacceptable_number_type{
+  Lisp_ptr operator()(int) const{
+    throw zs_error("number error: cannot accept type: integer\n");
+  }
+
+  Lisp_ptr operator()(double) const{
+    throw zs_error("number error: cannot accept type: real\n");
+  }
+
+  Lisp_ptr operator()(Complex) const{
+    throw zs_error("number error: cannot accept type: complex\n");
+  }
+};
+
+
+template<
+  typename IFun, typename RFun, typename CFun
+  >
+inline
+Lisp_ptr number_unary(const char* name, const IFun& ifun,
+                      const RFun& rfun, const CFun& cfun,
+                      Lisp_ptr fail_value = Lisp_ptr()){
+  ZsArgs args;
+  auto arg1 = args[0];
+  Lisp_ptr ret;
+
+  if(!is_numeric_type(arg1)){
+    if(fail_value){
+      return fail_value;
+    }else{
+      throw number_type_check_failed(name, arg1);
+    }
+  }
+
+  if(is_numeric_type(arg1)){
+    return ifun(coerce<int>(arg1));
+  }else if(is_real_type(arg1)){
+    return rfun(coerce<double>(arg1));
+  }else if(is_complex_type(arg1)){
+    return cfun(coerce<Complex>(arg1));
+  }else{
+    if(fail_value){
+      return fail_value;
+    }else{
+      UNEXP_DEFAULT();
+    }
+  }
+}
+
 } // namespace
 
 
@@ -728,7 +778,10 @@ Lisp_ptr number_rationalize(){
 
 
 Lisp_ptr number_exp(){
-  return number_unary_op("exp", exp_fun());
+  return number_unary("exp",
+                      [](int i){ return Lisp_ptr{new double(std::exp(i))};},
+                      [](double d){ return Lisp_ptr{new double(std::exp(d))};},
+                      [](Complex z){ return Lisp_ptr{new Complex(std::exp(z))};});
 }
 
 Lisp_ptr number_log(){

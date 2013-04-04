@@ -190,6 +190,14 @@ int main(){
   // exact
   check_e("(round 7)", "7");
 
+  // rational
+  // check_e("(numarator (/ 7 2))", "7");
+  // check_e("(denominator (/ 7 2))", "2");
+  // check_e("(rationalize (/ 7 2))", "7/2");
+  
+  // real
+  // check_e("(exp 2 3)", "8.0");
+
   // reader/writer
   check_e("(string->number \"7\")", "7");
   check_e("(string->number \"10\" 8)", "8");
