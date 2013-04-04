@@ -19,8 +19,17 @@
 #include "printer.hh"
 #include "equality.hh"
 #include "token.hh"
+#include "util.hh"
 
 using namespace std;
+
+namespace {
+
+zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
+  return zs_error_arg1(func_name,
+                       "arg is not number!",
+                       {p});
+}
 
 bool is_numeric_type(Lisp_ptr p){
   auto tag = p.tag();
@@ -28,8 +37,6 @@ bool is_numeric_type(Lisp_ptr p){
           || tag == Ptr_tag::real
           || tag == Ptr_tag::complex);
 }
-
-namespace {
 
 bool is_integer_type(Lisp_ptr p){
   return (p.tag() == Ptr_tag::integer);
@@ -49,6 +56,10 @@ bool is_complex_type(Lisp_ptr p){
   return (p.tag() == Ptr_tag::complex)
     || is_real_type(p);
 }
+
+//
+// utilities
+//
 
 template<typename T> T coerce(Lisp_ptr);
 
@@ -79,12 +90,21 @@ Complex coerce(Lisp_ptr p){
   }
 }
 
-
-zs_error number_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error_arg1(func_name,
-                       "arg is not number!",
-                       {p});
+Lisp_ptr wrap_number(int i){
+  return {Ptr_tag::integer, i};
 }
+
+Lisp_ptr wrap_number(double d){
+  return {new double(d)};
+}
+
+Lisp_ptr wrap_number(const Complex& z){
+  return {new Complex(z)};
+}
+
+//
+// function objects
+//
 
 template<typename Fun>
 inline Lisp_ptr number_pred(Fun&& fun){
@@ -96,7 +116,6 @@ inline Lisp_ptr number_pred(Fun&& fun){
     return Lisp_ptr{false};
   }
 }
-
 
 struct complex_found{
   static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
