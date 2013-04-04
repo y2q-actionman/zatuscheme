@@ -106,17 +106,6 @@ Lisp_ptr wrap_number(const Complex& z){
 // function objects
 //
 
-template<typename Fun>
-inline Lisp_ptr number_pred(Fun&& fun){
-  ZsArgs args;
-
-  if(is_numeric_type(args[0])){
-    return Lisp_ptr{fun(args[0])};
-  }else{
-    return Lisp_ptr{false};
-  }
-}
-
 struct complex_found{
   static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
   template<typename CmpT>
@@ -181,20 +170,19 @@ inline Lisp_ptr number_compare(const char* name, Fun&& fun){
 
 template<template <typename> class Fun>
 struct pos_neg_pred{
-  inline bool operator()(Lisp_ptr p){
-    if(is_integer_type(p)){
-      static const Fun<int> fun;
-      return fun(coerce<int>(p), 0);
-    }else if(is_real_type(p)){
-      static const Fun<double> fun;
-      return fun(coerce<double>(p), 0);
-    }else if(is_complex_type(p)){
-      static constexpr Fun<double> fun;
-      auto c = coerce<Complex>(p);
-      return (c.imag() == 0) && fun(c.real(), 0);
-    }else{
-      UNEXP_DEFAULT();
-    }
+  Lisp_ptr operator()(int i) const{
+    static const Fun<int> fun;
+    return Lisp_ptr{fun(i, 0)};
+  }
+
+  Lisp_ptr operator()(double d) const{
+    static const Fun<double> fun;
+    return Lisp_ptr{fun(d, 0)};
+  }
+
+  Lisp_ptr operator()(Complex z) const{
+    static const Fun<Complex> fun;
+    return Lisp_ptr{fun(z, 0)};
   }
 };
 
@@ -437,15 +425,14 @@ Lisp_ptr integerp(){
 }
 
 Lisp_ptr exactp(){
-  return number_pred([](Lisp_ptr p){
-      return (p.tag() == Ptr_tag::integer);
-    });
+  ZsArgs args;
+  return Lisp_ptr{args[0].tag() == Ptr_tag::integer};
 }
 
 Lisp_ptr inexactp(){
-  return number_pred([](Lisp_ptr p){
-      return (p.tag() == Ptr_tag::complex || p.tag() == Ptr_tag::real);
-    });
+  ZsArgs args;
+  return Lisp_ptr{args[0].tag() == Ptr_tag::complex
+                  || args[0].tag() == Ptr_tag::real};
 }
 
 
@@ -478,19 +465,31 @@ Lisp_ptr number_greater_eq(){
 
 
 Lisp_ptr zerop(){
-  return number_pred(pos_neg_pred<std::equal_to>());
+  return number_unary("zero?",
+                      pos_neg_pred<std::equal_to>(),
+                      pos_neg_pred<std::equal_to>(),
+                      pos_neg_pred<std::equal_to>(),
+                      true);
 }
 
 Lisp_ptr positivep(){
-  return number_pred(pos_neg_pred<std::greater>());
+  return number_unary("positive?",
+                      pos_neg_pred<std::greater>(),
+                      pos_neg_pred<std::greater>(),
+                      fall_false(),
+                      true);
 }
 
 Lisp_ptr negativep(){
-  return number_pred(pos_neg_pred<std::less>());
+  return number_unary("negative?",
+                      pos_neg_pred<std::less>(),
+                      pos_neg_pred<std::less>(),
+                      fall_false(),
+                      true);
 }
 
 Lisp_ptr oddp(){
-  return number_unary("oddp",
+  return number_unary("odd?",
                       even_odd_pred<std::not_equal_to>(),
                       fall_false(),
                       fall_false(),
@@ -498,7 +497,7 @@ Lisp_ptr oddp(){
 }
 
 Lisp_ptr evenp(){
-  return number_unary("evenp",
+  return number_unary("even?",
                       even_odd_pred<std::equal_to>(),
                       fall_false(),
                       fall_false(),
