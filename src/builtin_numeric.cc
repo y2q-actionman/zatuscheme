@@ -125,18 +125,12 @@ T gcd(T m, T n){
 // implementation utilities
 //
 
-template<
-  typename IFun, typename RFun, typename CFun
-  >
-inline
-Lisp_ptr number_unary(const char* name, const IFun& ifun,
+template<typename IFun, typename RFun, typename CFun>
+Lisp_ptr number_unary(Lisp_ptr arg1,
+                      const char* name, const IFun& ifun,
                       const RFun& rfun, const CFun& cfun,
                       bool no_except = false){
   static const auto no_except_value = Lisp_ptr{false};
-
-  ZsArgs args;
-  auto arg1 = args[0];
-
 
   if(!is_numeric_type(arg1)){
     if(no_except){
@@ -161,31 +155,47 @@ Lisp_ptr number_unary(const char* name, const IFun& ifun,
   }
 }
 
-template<
-  typename IFun, typename RFun, typename CFun
-  >
-Lisp_ptr number_binary(const char* name, const IFun& ifun,
-                       const RFun& rfun, const CFun& cfun){
+template<typename IFun, typename RFun, typename CFun>
+inline
+Lisp_ptr number_unary(const char* name, const IFun& ifun,
+                      const RFun& rfun, const CFun& cfun,
+                      bool no_except = false){
   ZsArgs args;
+  return number_unary(args[0], name, ifun, rfun, cfun, no_except);
+}
 
-  for(auto i = 0; i < 2; ++i){
-    if(!is_numeric_type(args[i])){
-      throw number_type_check_failed(name, args[i]);
-    }
+
+template<typename IFun, typename RFun, typename CFun>
+Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
+                       const char* name, const IFun& ifun,
+                       const RFun& rfun, const CFun& cfun){
+  if(!is_numeric_type(arg1)){
+    throw number_type_check_failed(name, arg1);
+  }
+
+  if(!is_numeric_type(arg2)){
+    throw number_type_check_failed(name, arg2);
   }
   
-  if(is_integer_type(args[0]) && is_integer_type(args[1])){
-    return ifun(coerce<int>(args[0]),
-                coerce<int>(args[1]));
-  }else if(is_real_type(args[0]) && is_real_type(args[1])){
-    return rfun(coerce<double>(args[0]),
-                coerce<double>(args[1]));
-  }else if(is_complex_type(args[0]) && is_complex_type(args[1])){
-    return cfun(coerce<Complex>(args[0]),
-                coerce<Complex>(args[1]));
+  if(is_integer_type(arg1) && is_integer_type(arg2)){
+    return ifun(coerce<int>(arg1),
+                coerce<int>(arg2));
+  }else if(is_real_type(arg1) && is_real_type(arg2)){
+    return rfun(coerce<double>(arg1),
+                coerce<double>(arg2));
+  }else if(is_complex_type(arg1) && is_complex_type(arg2)){
+    return cfun(coerce<Complex>(arg1),
+                coerce<Complex>(arg2));
   }else{
     UNEXP_DEFAULT();
   }
+}
+
+template<typename IFun, typename RFun, typename CFun>
+Lisp_ptr number_binary(const char* name, const IFun& ifun,
+                       const RFun& rfun, const CFun& cfun){
+  ZsArgs args;
+  return number_binary(args[0], args[1], name, ifun, rfun, cfun);
 }
 
 
@@ -530,18 +540,10 @@ Lisp_ptr number_minus(){
   }
 
   if(args.size() == 1){
-    if(is_integer_type(args[0])){
-      // TODO: add limit check
-      return Lisp_ptr{Ptr_tag::integer, -coerce<int>(args[0])};
-    }else if(is_real_type(args[0])){
-      auto f = coerce<double>(args[0]);
-      return Lisp_ptr{new double(-f)};
-    }else if(is_complex_type(args[0])){
-      auto c = coerce<Complex>(args[0]);
-      return Lisp_ptr{new Complex(-c)};
-    }else{
-      UNEXP_DEFAULT();
-    }
+    return number_unary(args[0], "-",
+                        [](int i){ return wrap_number(-i); },
+                        [](double d){ return wrap_number(-d); },
+                        [](Complex z){ return wrap_number(-z); });
   }else{
     return number_accumulate("-", args[0], binary_accum<std::minus>(),
                              next(args.begin()), args.end());
@@ -556,16 +558,13 @@ Lisp_ptr number_divide(){
   }
 
   if(args.size() == 1){
-    if(is_integer_type(args[0])){
-      // TODO: add type check
-      return Lisp_ptr{new double(1.0 / coerce<int>(args[0]))};
-    }else if(is_real_type(args[0])){
-      return Lisp_ptr{new double(1.0 / coerce<double>(args[0]))};
-    }else if(is_complex_type(args[0])){
-      return Lisp_ptr{new Complex(1.0 / coerce<Complex>(args[0]))};
-    }else{
-      UNEXP_DEFAULT();
-    }
+    return number_unary(args[0], "/",
+                        [](int i){
+                          // TODO: add type check, for integer v.s. integer
+                          return wrap_number(1.0 / i);
+                        },
+                        [](double d){ return wrap_number(1.0 / d); },
+                        [](Complex z){ return wrap_number(1.0 / z); });
   }else{
     return number_accumulate("/", args[0], binary_accum<std::divides>(),
                              next(args.begin()), args.end());
@@ -752,35 +751,21 @@ Lisp_ptr number_acos(){
 Lisp_ptr number_atan(){
   ZsArgs args;
 
-  if(is_numeric_type(args[0])){
-    throw number_type_check_failed("atan", args[0]);
-  }
-
   switch(args.size()){
   case 1:  // std::atan()
-    if(is_real_type(args[0])){
-      return {new double(std::atan(coerce<double>(args[0])))};
-    }else if(is_complex_type(args[0])){
-      return {new Complex(std::atan(coerce<Complex>(args[0])))};
-    }else{
-      UNEXP_DEFAULT();
-    }
-
-  case 2: {// std::atan2()
-    if(is_numeric_type(args[1])){
-      throw number_type_check_failed("atan", args[1]);
-    }
-
-    if(is_real_type(args[0]) && is_real_type(args[1])){
-      return {new double(std::atan2(coerce<double>(args[0]),
-                                    coerce<double>(args[2])))};
-    }else if(is_complex_type(args[0]) && is_complex_type(args[1])){
-      throw zs_error("native func: (atan <complex> <complex>) is not implemented.\n");
-    }else{
-      UNEXP_DEFAULT();
-    }
-  }
-
+    return number_unary(args[0], "atan",
+                        [](int i){ return wrap_number(std::atan(i)); },
+                        [](double d){ return wrap_number(std::atan(d)); },
+                        [](Complex z){ return wrap_number(std::atan(z)); });
+  case 2: // std::atan2()
+    return number_binary(args[0], args[1], "atan",
+                         [](int i1, int i2){
+                           return wrap_number(std::atan2(i1, i2));
+                         },
+                         [](double d1, double d2){
+                           return wrap_number(std::atan2(d1, d2));
+                         },
+                         inacceptable_number_type());
   default:
     throw builtin_argcount_failed("atan", 1, 2, args.size());
   }
