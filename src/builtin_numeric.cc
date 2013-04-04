@@ -574,22 +574,10 @@ Lisp_ptr number_divide(){
 }
 
 Lisp_ptr number_abs(){
-  ZsArgs args;
-
-  if(!is_numeric_type(args[0])){
-    throw number_type_check_failed("abs", args[0]);
-  }
-
-  if(is_integer_type(args[0])){
-    // TODO: add INT_MIN check
-    return Lisp_ptr{Ptr_tag::integer, abs(coerce<int>(args[0]))};
-  }else if(is_real_type(args[0])){
-    return Lisp_ptr{new double(fabs(coerce<double>(args[0])))};
-  }else if(is_complex_type(args[0])){
-    throw zs_error(complex_found::msg);
-  }else{
-    UNEXP_DEFAULT();
-  }
+  return number_unary("abs",
+                      [](int i){ return wrap_number(std::abs(i));},
+                      [](double d){ return wrap_number(std::abs(d));},
+                      inacceptable_number_type());
 }
 
 
