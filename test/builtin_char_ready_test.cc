@@ -19,7 +19,7 @@ int main(){
   check_e("(char-ready? tmpf)", "#t");
   check_e("(read-char tmpf)", "#\\a");
 
-  // edge case. fd points the end-of-file.
+  // edge case. fd points the end-of-file, just.
   // check_e("(char-ready? tmpf)", "#t");
 
   check_e("(eof-object? (read-char tmpf))", "#t");

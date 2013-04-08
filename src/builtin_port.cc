@@ -120,11 +120,12 @@ bool stream_ready(istream* is){
   }else if(avails < 0){
     return true; // error (EOF)
   }else{
-    // This extra EOF check is required in libstdc++,
+    // These extra check is required in libstdc++,
     // because a fstream reached EOF returns 0.
-    if(!*is) return true;
+    if(is->eof() || is->bad() || is->fail())
+      return true;
 
-    // We can check that 'fd points the file's end'.
+    // We can check that 'fd points the file's end, just'.
     // Though, the operation for getting position (seekoff())
     // may block. SO COMPLICATED.
     //
