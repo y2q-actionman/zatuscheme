@@ -199,6 +199,30 @@ Lisp_ptr number_binary(const char* name, const IFun& ifun,
 }
 
 
+template<typename IFun, typename RFun, typename CFun, typename Iter>
+Lisp_ptr number_fold(const Iter& args_begin, const Iter& args_end,
+                     Lisp_ptr init,
+                     const char* name, const IFun& ifun,
+                     const RFun& rfun, const CFun& cfun){
+  auto acc = init;
+
+  for(auto i = args_begin, e = args_end; i != e; ++i){
+    acc = number_binary(acc, *i, name, ifun, rfun, cfun);
+  }
+
+  return acc;
+}
+
+template<typename IFun, typename RFun, typename CFun>
+Lisp_ptr number_fold(Lisp_ptr init,
+                     const char* name, const IFun& ifun,
+                     const RFun& rfun, const CFun& cfun){
+  ZsArgs args;
+  return number_fold(begin(args), end(args), init,
+                     name, ifun, rfun, cfun);
+}
+
+
 struct inacceptable_number_type{
   Lisp_ptr operator()(int) const{
     throw zs_error("number error: cannot accept type: integer\n");
@@ -320,89 +344,6 @@ inline Lisp_ptr number_compare(const char* name, Fun&& fun){
   return Lisp_ptr{true};
 }
 
-
-template<typename Fun, typename Iter>
-inline
-Lisp_ptr number_accumulate(const char* name, Lisp_ptr init, const Fun& fun,
-                           const Iter& args_begin, const Iter& args_end){
-  auto acc = init;
-
-  for(auto i = args_begin, e = args_end; i != e; ++i){
-    if(!is_numeric_type(*i)){
-      throw number_type_check_failed(name, *i);
-    }
-
-    acc = fun(acc, *i);
-    if(!acc){ // assumed 'uncaught_exception' context
-      return {};
-    }
-  }
-
-  return acc;
-}
-
-template<class Fun>
-inline
-Lisp_ptr number_accumulate(const char* name, Lisp_ptr init, const Fun& fun){
-  ZsArgs args;
-  return number_accumulate(name, init, fun, args.begin(), args.end());
-}
-
-
-template<typename T>
-struct zs_max{
-  T operator()(const T& t1, const T& t2) const{
-    return std::max(t1, t2);
-  }
-};
-
-template<>
-Complex zs_max<Complex>::operator()(const Complex&, const Complex&) const{
-  throw zs_error(complex_found::msg);
-}
-
-template<typename T>
-struct zs_min{
-  T operator()(const T& t1, const T& t2) const{
-    return std::min(t1, t2);
-  }
-};
-
-template<>
-Complex zs_min<Complex>::operator()(const Complex&, const Complex&) const{
-  throw zs_error(complex_found::msg);
-}
-
-
-template<template <typename> class Op>
-struct binary_accum{
-  inline Lisp_ptr operator()(Lisp_ptr n1, Lisp_ptr n2) const{
-    if(!is_numeric_type(n1)){
-      throw number_type_check_failed("(binary numeric)", n1);
-    }
-
-    if(!is_numeric_type(n2)){
-      throw number_type_check_failed("(binary numeric)", n2);
-    }
-
-
-    if(is_integer_type(n1) && is_integer_type(n2)){
-      // TODO: add limit check
-      static constexpr Op<int> op;
-      return Lisp_ptr{Ptr_tag::integer, op(coerce<int>(n1), coerce<int>(n2))};
-    }else if(is_real_type(n1) && is_real_type(n2)){
-      static constexpr Op<double> op;
-      return Lisp_ptr{new double(op(coerce<double>(n1), coerce<double>(n2)))};
-    }else if(is_complex_type(n1) && is_complex_type(n2)){
-      static constexpr Op<Complex> op;
-      return Lisp_ptr{new Complex(op(coerce<Complex>(n1),
-                                             coerce<Complex>(n2)))};
-    }else{
-      UNEXP_DEFAULT();
-    }      
-  }
-};
-
 } // namespace
 
 
@@ -514,22 +455,34 @@ Lisp_ptr evenp(){
 
 Lisp_ptr number_max(){
   ZsArgs args;
-  return number_accumulate("max", args[0], binary_accum<zs_max>(),
-                           next(begin(args)), end(args));
+  return number_fold(next(args.begin()), args.end(),
+                     args[0], "max",
+                     [](int i1, int i2){ return wrap_number(max(i1, i2)); },
+                     [](double d1, double d2){ return wrap_number(max(d1, d2)); },
+                     inacceptable_number_type());
 }
 
 Lisp_ptr number_min(){
   ZsArgs args;
-  return number_accumulate("min", args[0], binary_accum<zs_min>(),
-                           next(begin(args)), end(args));
+  return number_fold(next(args.begin()), args.end(),
+                     args[0], "min",
+                     [](int i1, int i2){ return wrap_number(min(i1, i2)); },
+                     [](double d1, double d2){ return wrap_number(min(d1, d2)); },
+                     inacceptable_number_type());
 }
 
 Lisp_ptr number_plus(){
-  return number_accumulate("+", Lisp_ptr{Ptr_tag::integer, 0}, binary_accum<std::plus>());
+  return number_fold(Lisp_ptr{Ptr_tag::integer, 0}, "+",
+                     [](int i1, int i2){ return wrap_number(i1 + i2); },
+                     [](double d1, double d2){ return wrap_number(d1 + d2); },
+                     [](Complex z1, Complex z2){ return wrap_number(z1 + z2); });
 }
 
 Lisp_ptr number_multiple(){
-  return number_accumulate("*", Lisp_ptr{Ptr_tag::integer, 1}, binary_accum<std::multiplies>());
+  return number_fold(Lisp_ptr{Ptr_tag::integer, 1}, "*",
+                     [](int i1, int i2){ return wrap_number(i1 * i2); },
+                     [](double d1, double d2){ return wrap_number(d1 * d2); },
+                     [](Complex z1, Complex z2){ return wrap_number(z1 * z2); });
 }
 
 Lisp_ptr number_minus(){
@@ -545,8 +498,11 @@ Lisp_ptr number_minus(){
                         [](double d){ return wrap_number(-d); },
                         [](Complex z){ return wrap_number(-z); });
   }else{
-    return number_accumulate("-", args[0], binary_accum<std::minus>(),
-                             next(args.begin()), args.end());
+    return number_fold(next(args.begin()), args.end(),
+                       args[0], "-",
+                       [](int i1, int i2){ return wrap_number(i1 - i2); },
+                       [](double d1, double d2){ return wrap_number(d1 - d2); },
+                       [](Complex z1, Complex z2){ return wrap_number(z1 - z2); });
   }
 }
 
@@ -560,14 +516,22 @@ Lisp_ptr number_divide(){
   if(args.size() == 1){
     return number_unary(args[0], "/",
                         [](int i){
-                          // TODO: add type check, for integer v.s. integer
-                          return wrap_number(1.0 / i);
+                          return wrap_number((i == 1) // integer appears only if '1 / 1'
+                                             ? 1
+                                             : (1.0 / i));
                         },
                         [](double d){ return wrap_number(1.0 / d); },
                         [](Complex z){ return wrap_number(1.0 / z); });
   }else{
-    return number_accumulate("/", args[0], binary_accum<std::divides>(),
-                             next(args.begin()), args.end());
+    return number_fold(next(args.begin()), args.end(),
+                       args[0], "/",
+                       [](int i1, int i2){ 
+                         return wrap_number((i1 % i2)
+                                            ? static_cast<double>(i1) / i2
+                                            : i1 / i2);
+                       },
+                       [](double d1, double d2){ return wrap_number(d1 / d2); },
+                       [](Complex z1, Complex z2){ return wrap_number(z1 / z2); });
   }
 }
 
@@ -612,30 +576,21 @@ Lisp_ptr number_mod(){
 }
 
 Lisp_ptr number_gcd(){
-  return number_accumulate("gcd", Lisp_ptr(Ptr_tag::integer, 0),
-                           [](Lisp_ptr n1, Lisp_ptr n2) -> Lisp_ptr {
-                             if(!is_integer_type(n1) || !is_integer_type(n2)){
-                               throw zs_error_arg1("gcd", "passed one is not integer.");
-                             }
-
-                             return Lisp_ptr{Ptr_tag::integer,
-                                 gcd(coerce<int>(n1), coerce<int>(n2))};
-                           });
+  return number_fold(Lisp_ptr{Ptr_tag::integer, 0}, "gcd",
+                     [](int i1, int i2){
+                       return wrap_number(gcd(i1, i2));
+                     },
+                     inacceptable_number_type(),
+                     inacceptable_number_type());
 }
 
 Lisp_ptr number_lcm(){
-  return number_accumulate("lcm", Lisp_ptr(Ptr_tag::integer, 1),
-                           [](Lisp_ptr n1, Lisp_ptr n2) -> Lisp_ptr {
-                             if(!is_integer_type(n1) || !is_integer_type(n2)){
-                               throw zs_error_arg1("lcm", "passed one is not integer.");
-                             }
-
-                             auto i1 = coerce<int>(n1);
-                             auto i2 = coerce<int>(n2);
-
-                             return Lisp_ptr{Ptr_tag::integer,
-                                 abs(i1 * i2 / gcd(i1, i2))};
-                           });
+  return number_fold(Lisp_ptr{Ptr_tag::integer, 1}, "lcm",
+                     [](int i1, int i2){
+                       return wrap_number(abs(i1 * i2 / gcd(i1, i2)));
+                     },
+                     inacceptable_number_type(),
+                     inacceptable_number_type());
 }
 
 Lisp_ptr number_numerator(){
