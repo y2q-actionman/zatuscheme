@@ -1,13 +1,9 @@
-#include <iterator>
-#include <vector>
-#include <functional>
-#include <algorithm>
-#include <numeric>
-#include <cstdlib>
+#include <iterator>             // next, prev
+#include <algorithm>            // max, min
+#include <cstdlib>              // abs
 #include <cmath>
-#include <limits>
-#include <iostream>
 #include <sstream>
+// #include <limits> // numeric_limits
 
 #include "builtin_numeric.hh"
 #include "vm.hh"
