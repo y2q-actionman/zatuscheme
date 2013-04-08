@@ -3,6 +3,7 @@
 #include <cstdlib>              // abs
 #include <cmath>
 #include <sstream>
+#include <functional>
 // #include <limits> // numeric_limits
 
 #include "builtin_numeric.hh"
@@ -101,6 +102,10 @@ Lisp_ptr wrap_number(const Complex& z){
 
 Lisp_ptr wrap_number(bool){
   UNEXP_DEFAULT();
+}
+
+Lisp_ptr wrap_number(Lisp_ptr p){
+  return p;
 }
 
 
@@ -319,36 +324,36 @@ Lisp_ptr inexactp(){
 
 Lisp_ptr number_equal(){
   return number_all_2("=",
-                      [](int i1, int i2){ return (i1 == i2); },
-                      [](double d1, double d2){ return (d1 == d2); },
-                      [](Complex z1, Complex z2){ return (z1 == z2); });
+                      equal_to<int>(),
+                      equal_to<double>(),
+                      equal_to<Complex>());
 }
 
 Lisp_ptr number_less(){
   return number_all_2("<",
-                      [](int i1, int i2){ return (i1 < i2); },
-                      [](double d1, double d2){ return (d1 < d2); },
+                      less<int>(),
+                      less<double>(),
                       inacceptable_number_type());
 }
 
 Lisp_ptr number_greater(){
   return number_all_2(">",
-                      [](int i1, int i2){ return (i1 > i2); },
-                      [](double d1, double d2){ return (d1 > d2); },
+                      greater<int>(),
+                      greater<double>(),
                       inacceptable_number_type());
 }
   
 Lisp_ptr number_less_eq(){
   return number_all_2("<=",
-                      [](int i1, int i2){ return (i1 <= i2); },
-                      [](double d1, double d2){ return (d1 <= d2); },
+                      less_equal<int>(),
+                      less_equal<double>(),
                       inacceptable_number_type());
 }
   
 Lisp_ptr number_greater_eq(){
   return number_all_2(">",
-                      [](int i1, int i2){ return (i1 >= i2); },
-                      [](double d1, double d2){ return (d1 >= d2); },
+                      greater_equal<int>(),
+                      greater_equal<double>(),
                       inacceptable_number_type());
 }
 
@@ -373,16 +378,16 @@ Lisp_ptr number_min(){
 
 Lisp_ptr number_plus(){
   return number_fold(Lisp_ptr{Ptr_tag::integer, 0}, "+",
-                     [](int i1, int i2){ return i1 + i2; },
-                     [](double d1, double d2){ return d1 + d2; },
-                     [](Complex z1, Complex z2){ return z1 + z2; });
+                     plus<int>(),
+                     plus<double>(),
+                     plus<Complex>());
 }
 
 Lisp_ptr number_multiple(){
   return number_fold(Lisp_ptr{Ptr_tag::integer, 1}, "*",
-                     [](int i1, int i2){ return i1 * i2; },
-                     [](double d1, double d2){ return d1 * d2; },
-                     [](Complex z1, Complex z2){ return z1 * z2; });
+                     multiplies<int>(),
+                     multiplies<double>(),
+                     multiplies<Complex>());
 }
 
 Lisp_ptr number_minus(){
@@ -394,15 +399,15 @@ Lisp_ptr number_minus(){
 
   if(args.size() == 1){
     return number_unary(args[0], "-",
-                        [](int i){ return -i; },
-                        [](double d){ return -d; },
-                        [](Complex z){ return -z; });
+                        negate<int>(),
+                        negate<double>(),
+                        negate<Complex>());
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "-",
-                       [](int i1, int i2){ return i1 - i2; },
-                       [](double d1, double d2){ return d1 - d2; },
-                       [](Complex z1, Complex z2){ return z1 - z2; });
+                       minus<int>(),
+                       minus<double>(),
+                       minus<Complex>());
   }
 }
 
@@ -417,8 +422,8 @@ Lisp_ptr number_divide(){
     return number_unary(args[0], "/",
                         [](int i){
                           return (i == 1) // integer appears only if '1 / 1'
-                            ? 1
-                            : 1.0 / i;
+                            ? wrap_number(1)
+                            : wrap_number(1.0 / i);
                         },
                         [](double d){ return 1.0 / d; },
                         [](Complex z){ return 1.0 / z; });
@@ -427,11 +432,11 @@ Lisp_ptr number_divide(){
                        args[0], "/",
                        [](int i1, int i2){ 
                          return (i1 % i2)
-                           ? static_cast<double>(i1) / i2
-                           : i1 / i2;
+                           ? wrap_number(static_cast<double>(i1) / i2)
+                           : wrap_number(i1 / i2);
                        },
-                       [](double d1, double d2){ return d1 / d2; },
-                       [](Complex z1, Complex z2){ return z1 / z2; });
+                       divides<double>(),
+                       divides<Complex>());
   }
 }
 
@@ -445,7 +450,7 @@ Lisp_ptr number_abs(){
 
 Lisp_ptr number_quot(){
   return number_binary("quotient",
-                       [](int i1, int i2){ return i1 / i2; },
+                       divides<int>(),
                        inacceptable_number_type(),
                        inacceptable_number_type());
 }
