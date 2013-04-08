@@ -65,10 +65,11 @@ int main(){
   // ordinate
   check_e("(= 1 1)", "#t");
   check_e("(= 1 0)", "#f");
-  check_e("(= 1 1.0)", "#f");
+  check_e("(= 1 1.0)", "#t");   // exact v.s. inexact
   check_e("(= 1 1 1 1 1 1)", "#t");
   check_e("(= 1+1i 1+1i)", "#t");
-  check_e("(= 1 1+0i)", "#f");
+  check_e("(= 1 1+0i)", "#t");  // exact v.s. inexact
+  check_e("(= 1 +1i)", "#f");
 
   check_e("(> 2 1)", "#t");
   check_e("(> 1 2)", "#f");

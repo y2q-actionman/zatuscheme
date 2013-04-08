@@ -223,6 +223,52 @@ Lisp_ptr number_fold(Lisp_ptr init,
 }
 
 
+template<typename IFun, typename RFun, typename CFun, typename Iter>
+Lisp_ptr number_all_2(const Iter& args_begin, const Iter& args_end,
+                      const char* name, const IFun& ifun,
+                      const RFun& rfun, const CFun& cfun){
+  auto i1 = args_begin;
+  auto i2 = next(i1);
+  auto e = args_end;
+
+  if(!is_numeric_type(*i1)){
+    throw number_type_check_failed(name, *i1);
+  }
+
+  for(; i2 != e; i1 = i2, ++i2){
+    if(!is_numeric_type(*i2)){
+      throw number_type_check_failed(name, *i2);
+    }
+
+    if(is_integer_type(*i1) && is_integer_type(*i2)){
+      if(!ifun(coerce<int>(*i1), coerce<int>(*i2))){
+        return Lisp_ptr{false};
+      }
+    }else if(is_real_type(*i1) && is_real_type(*i2)){
+      if(!rfun(coerce<double>(*i1), coerce<double>(*i2))){
+        return Lisp_ptr{false};
+      }
+    }else if(is_complex_type(*i1) && is_complex_type(*i2)){
+      if(!cfun(coerce<Complex>(*i1), coerce<Complex>(*i2))){
+        return Lisp_ptr{false};
+      }
+    }else{
+      UNEXP_DEFAULT();
+    }
+  }
+
+  return Lisp_ptr{true};
+}
+
+template<typename IFun, typename RFun, typename CFun>
+Lisp_ptr number_all_2(const char* name, const IFun& ifun,
+                      const RFun& rfun, const CFun& cfun){
+  ZsArgs args;
+  return number_all_2(begin(args), end(args),
+                      name, ifun, rfun, cfun);
+}
+
+
 struct inacceptable_number_type{
   Lisp_ptr operator()(int) const{
     throw zs_error("number error: cannot accept type: integer\n");
@@ -284,66 +330,6 @@ struct even_odd_pred{
   }
 };
 
-
-// ==== shoudld be rewrite below ==
-
-struct complex_found{
-  static constexpr const char* msg = "native func: number compare: complex cannot be ordinated\n";
-};
-
-  // TODO: delete this! dirty!
-struct complex_cmp{
-  template<typename CmpT>
-  bool operator()(const CmpT&, const CmpT&) const{
-    throw zs_error(complex_found::msg);
-  }
-};
-
-template<template <typename> class Fun,
-         class ComplexComparator = complex_cmp>
-struct number_comparator {
-  inline bool operator()(Lisp_ptr p1, Lisp_ptr p2){
-    if(is_integer_type(p1) && is_integer_type(p2)){
-      static const Fun<int> fun;
-      return fun(coerce<int>(p1), coerce<int>(p2));
-    }else if(is_real_type(p1) && is_real_type(p2)){
-      static const Fun<double> fun;
-      return fun(coerce<double>(p1), coerce<double>(p2));
-    }else if(is_complex_type(p1) && is_complex_type(p2)){
-      static const ComplexComparator fun;
-      return fun(coerce<Complex>(p1),
-                 coerce<Complex>(p2));
-    }else{
-      UNEXP_DEFAULT();
-    }
-  }
-};
-
-
-template<typename Fun>
-inline Lisp_ptr number_compare(const char* name, Fun&& fun){
-  ZsArgs args;
-
-  auto i1 = begin(args);
-  const auto e = end(args);
-
-  if(!is_numeric_type(*i1)){
-    throw number_type_check_failed(name, *i1);
-  }
-                              
-  for(auto i2 = next(i1); i2 != e; i1 = i2, ++i2){
-    if(!is_numeric_type(*i2)){
-      throw number_type_check_failed(name, *i2);
-    }
-
-    if(!fun(*i1, *i2)){
-      return Lisp_ptr{false};
-    }
-  }
-
-  return Lisp_ptr{true};
-}
-
 } // namespace
 
 
@@ -385,30 +371,38 @@ Lisp_ptr inexactp(){
 
 
 Lisp_ptr number_equal(){
-  return number_compare("=",
-                        [](Lisp_ptr p, Lisp_ptr q){
-                          return eqv_internal(p, q);
-                        });
+  return number_all_2("=",
+                      [](int i1, int i2){ return (i1 == i2); },
+                      [](double d1, double d2){ return (d1 == d2); },
+                      [](Complex z1, Complex z2){ return (z1 == z2); });
 }
 
 Lisp_ptr number_less(){
-  return number_compare("<",
-                        number_comparator<std::less>()); 
+  return number_all_2("<",
+                      [](int i1, int i2){ return (i1 < i2); },
+                      [](double d1, double d2){ return (d1 < d2); },
+                      inacceptable_number_type());
 }
 
 Lisp_ptr number_greater(){
-  return number_compare(">",
-                        number_comparator<std::greater>());
+  return number_all_2(">",
+                      [](int i1, int i2){ return (i1 > i2); },
+                      [](double d1, double d2){ return (d1 > d2); },
+                      inacceptable_number_type());
 }
   
 Lisp_ptr number_less_eq(){
-  return number_compare("<=",
-                        number_comparator<std::less_equal>());
+  return number_all_2("<=",
+                      [](int i1, int i2){ return (i1 <= i2); },
+                      [](double d1, double d2){ return (d1 <= d2); },
+                      inacceptable_number_type());
 }
   
 Lisp_ptr number_greater_eq(){
-  return number_compare(">=",
-                        number_comparator<std::greater_equal>());
+  return number_all_2(">",
+                      [](int i1, int i2){ return (i1 >= i2); },
+                      [](double d1, double d2){ return (d1 >= d2); },
+                      inacceptable_number_type());
 }
 
 
