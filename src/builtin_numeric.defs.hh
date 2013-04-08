@@ -40,22 +40,6 @@
     number_greater_eq,
     {2, Variadic::t}}},
 
-{"zero?", {
-    zerop,
-    {1}}},
-{"positive?", {
-    positivep,
-    {1}}},
-{"negative?", {
-    negativep,
-    {1}}},
-{"odd?", {
-    oddp,
-    {1}}},
-{"even?", {
-    evenp,
-    {1}}},
-
 {"max", {
     number_max,
     {2, Variadic::t}}},

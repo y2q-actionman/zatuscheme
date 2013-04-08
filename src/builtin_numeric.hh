@@ -16,11 +16,6 @@ Lisp_ptr number_less();
 Lisp_ptr number_greater();
 Lisp_ptr number_less_eq();
 Lisp_ptr number_greater_eq();
-Lisp_ptr zerop();
-Lisp_ptr positivep();
-Lisp_ptr negativep();
-Lisp_ptr oddp();
-Lisp_ptr evenp();
 
 Lisp_ptr number_max();
 Lisp_ptr number_min();

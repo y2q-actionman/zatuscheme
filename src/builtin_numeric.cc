@@ -295,41 +295,6 @@ struct pass_through{
   }
 };
 
-struct fall_false{
-  template<typename T>
-  Lisp_ptr operator()(T) const{
-    return Lisp_ptr{false};
-  }
-};
-
-
-template<template <typename> class Fun>
-struct pos_neg_pred{
-  Lisp_ptr operator()(int i) const{
-    static const Fun<int> fun;
-    return Lisp_ptr{fun(i, 0)};
-  }
-
-  Lisp_ptr operator()(double d) const{
-    static const Fun<double> fun;
-    return Lisp_ptr{fun(d, 0)};
-  }
-
-  Lisp_ptr operator()(Complex z) const{
-    static const Fun<Complex> fun;
-    return Lisp_ptr{fun(z, 0)};
-  }
-};
-
-
-template<template <typename> class Fun>
-struct even_odd_pred{
-  Lisp_ptr operator()(int i) const{
-    static const Fun<int> fun;
-    return Lisp_ptr{fun(i % 2, 0)};
-  }
-};
-
 } // namespace
 
 
@@ -403,47 +368,6 @@ Lisp_ptr number_greater_eq(){
                       [](int i1, int i2){ return (i1 >= i2); },
                       [](double d1, double d2){ return (d1 >= d2); },
                       inacceptable_number_type());
-}
-
-
-Lisp_ptr zerop(){
-  return number_unary("zero?",
-                      pos_neg_pred<std::equal_to>(),
-                      pos_neg_pred<std::equal_to>(),
-                      pos_neg_pred<std::equal_to>(),
-                      true);
-}
-
-Lisp_ptr positivep(){
-  return number_unary("positive?",
-                      pos_neg_pred<std::greater>(),
-                      pos_neg_pred<std::greater>(),
-                      fall_false(),
-                      true);
-}
-
-Lisp_ptr negativep(){
-  return number_unary("negative?",
-                      pos_neg_pred<std::less>(),
-                      pos_neg_pred<std::less>(),
-                      fall_false(),
-                      true);
-}
-
-Lisp_ptr oddp(){
-  return number_unary("odd?",
-                      even_odd_pred<std::not_equal_to>(),
-                      fall_false(),
-                      fall_false(),
-                      true);
-}
-
-Lisp_ptr evenp(){
-  return number_unary("even?",
-                      even_odd_pred<std::equal_to>(),
-                      fall_false(),
-                      fall_false(),
-                      true);
 }
 
 

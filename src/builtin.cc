@@ -157,6 +157,7 @@ static const BuiltinNProc builtin_funcs[] = {
 static const char* builtin_strs[] = {
 #include "builtin_boolean.strs.hh"
 #include "builtin_cons.strs.hh"
+#include "builtin_numeric.strs.hh"
 #include "builtin_procedure.strs.hh"
 #include "builtin_port.strs.hh"
 };

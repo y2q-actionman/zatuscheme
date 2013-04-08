@@ -28,7 +28,7 @@ libzs_a_SOURCES = zs.hh\
 		builtin_cons.cc builtin_cons.hh builtin_cons.defs.hh builtin_cons.strs.hh\
 		builtin_equal.cc builtin_equal.hh builtin_equal.defs.hh\
 		builtin_extra.cc builtin_extra.hh builtin_extra.defs.hh builtin_extra.strs.hh\
-		builtin_numeric.cc builtin_numeric.hh builtin_numeric.defs.hh\
+		builtin_numeric.cc builtin_numeric.hh builtin_numeric.defs.hh builtin_numeric.strs.hh\
 		builtin_port.cc builtin_port.hh builtin_port.defs.hh builtin_port.strs.hh\
 		builtin_procedure.cc builtin_procedure.hh builtin_procedure.defs.hh builtin_procedure.strs.hh\
 		builtin_string.cc builtin_string.hh builtin_string.defs.hh\
