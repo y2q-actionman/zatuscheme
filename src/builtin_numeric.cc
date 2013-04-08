@@ -90,6 +90,7 @@ Complex coerce(Lisp_ptr p){
   }
 }
 
+
 Lisp_ptr wrap_number(int i){
   return {Ptr_tag::integer, i};
 }
@@ -100,6 +101,10 @@ Lisp_ptr wrap_number(double d){
 
 Lisp_ptr wrap_number(const Complex& z){
   return {new Complex(z)};
+}
+
+Lisp_ptr wrap_number(bool){
+  UNEXP_DEFAULT();
 }
 
 
@@ -128,40 +133,28 @@ T gcd(T m, T n){
 template<typename IFun, typename RFun, typename CFun>
 Lisp_ptr number_unary(Lisp_ptr arg1,
                       const char* name, const IFun& ifun,
-                      const RFun& rfun, const CFun& cfun,
-                      bool no_except = false){
-  static const auto no_except_value = Lisp_ptr{false};
-
+                      const RFun& rfun, const CFun& cfun){
   if(!is_numeric_type(arg1)){
-    if(no_except){
-      return no_except_value;
-    }else{
-      throw number_type_check_failed(name, arg1);
-    }
+    throw number_type_check_failed(name, arg1);
   }
 
   if(is_integer_type(arg1)){
-    return ifun(coerce<int>(arg1));
+    return wrap_number(ifun(coerce<int>(arg1)));
   }else if(is_real_type(arg1)){
-    return rfun(coerce<double>(arg1));
+    return wrap_number(rfun(coerce<double>(arg1)));
   }else if(is_complex_type(arg1)){
-    return cfun(coerce<Complex>(arg1));
+    return wrap_number(cfun(coerce<Complex>(arg1)));
   }else{
-    if(no_except){
-      return no_except_value;
-    }else{
-      UNEXP_DEFAULT();
-    }
+    UNEXP_DEFAULT();
   }
 }
 
 template<typename IFun, typename RFun, typename CFun>
 inline
 Lisp_ptr number_unary(const char* name, const IFun& ifun,
-                      const RFun& rfun, const CFun& cfun,
-                      bool no_except = false){
+                      const RFun& rfun, const CFun& cfun){
   ZsArgs args;
-  return number_unary(args[0], name, ifun, rfun, cfun, no_except);
+  return number_unary(args[0], name, ifun, rfun, cfun);
 }
 
 
@@ -178,14 +171,14 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
   }
   
   if(is_integer_type(arg1) && is_integer_type(arg2)){
-    return ifun(coerce<int>(arg1),
-                coerce<int>(arg2));
+    return wrap_number(ifun(coerce<int>(arg1),
+                            coerce<int>(arg2)));
   }else if(is_real_type(arg1) && is_real_type(arg2)){
-    return rfun(coerce<double>(arg1),
-                coerce<double>(arg2));
+    return wrap_number(rfun(coerce<double>(arg1),
+                            coerce<double>(arg2)));
   }else if(is_complex_type(arg1) && is_complex_type(arg2)){
-    return cfun(coerce<Complex>(arg1),
-                coerce<Complex>(arg2));
+    return wrap_number(cfun(coerce<Complex>(arg1),
+                            coerce<Complex>(arg2)));
   }else{
     UNEXP_DEFAULT();
   }
@@ -270,28 +263,21 @@ Lisp_ptr number_all_2(const char* name, const IFun& ifun,
 
 
 struct inacceptable_number_type{
-  Lisp_ptr operator()(int) const{
-    throw zs_error("number error: cannot accept type: integer\n");
-  }
-
-  Lisp_ptr operator()(double) const{
-    throw zs_error("number error: cannot accept type: real\n");
-  }
-
-  Lisp_ptr operator()(Complex) const{
-    throw zs_error("number error: cannot accept type: complex\n");
+  template<typename T>
+  bool operator()(T) const{
+    throw zs_error("number error: inacceptable type\n");
   }
 
   template<typename T>
-  Lisp_ptr operator()(T t, T) const{
+  bool operator()(T t, T) const{
     return operator()(t);
   }
 };
 
 struct pass_through{
   template<typename T>
-  Lisp_ptr operator()(T t) const{
-    return wrap_number(t);
+  T operator()(T t) const{
+    return t;
   }
 };
 
@@ -375,8 +361,8 @@ Lisp_ptr number_max(){
   ZsArgs args;
   return number_fold(next(args.begin()), args.end(),
                      args[0], "max",
-                     [](int i1, int i2){ return wrap_number(max(i1, i2)); },
-                     [](double d1, double d2){ return wrap_number(max(d1, d2)); },
+                     [](int i1, int i2){ return max(i1, i2); },
+                     [](double d1, double d2){ return max(d1, d2); },
                      inacceptable_number_type());
 }
 
@@ -384,23 +370,23 @@ Lisp_ptr number_min(){
   ZsArgs args;
   return number_fold(next(args.begin()), args.end(),
                      args[0], "min",
-                     [](int i1, int i2){ return wrap_number(min(i1, i2)); },
-                     [](double d1, double d2){ return wrap_number(min(d1, d2)); },
+                     [](int i1, int i2){ return min(i1, i2); },
+                     [](double d1, double d2){ return min(d1, d2); },
                      inacceptable_number_type());
 }
 
 Lisp_ptr number_plus(){
   return number_fold(Lisp_ptr{Ptr_tag::integer, 0}, "+",
-                     [](int i1, int i2){ return wrap_number(i1 + i2); },
-                     [](double d1, double d2){ return wrap_number(d1 + d2); },
-                     [](Complex z1, Complex z2){ return wrap_number(z1 + z2); });
+                     [](int i1, int i2){ return i1 + i2; },
+                     [](double d1, double d2){ return d1 + d2; },
+                     [](Complex z1, Complex z2){ return z1 + z2; });
 }
 
 Lisp_ptr number_multiple(){
   return number_fold(Lisp_ptr{Ptr_tag::integer, 1}, "*",
-                     [](int i1, int i2){ return wrap_number(i1 * i2); },
-                     [](double d1, double d2){ return wrap_number(d1 * d2); },
-                     [](Complex z1, Complex z2){ return wrap_number(z1 * z2); });
+                     [](int i1, int i2){ return i1 * i2; },
+                     [](double d1, double d2){ return d1 * d2; },
+                     [](Complex z1, Complex z2){ return z1 * z2; });
 }
 
 Lisp_ptr number_minus(){
@@ -412,15 +398,15 @@ Lisp_ptr number_minus(){
 
   if(args.size() == 1){
     return number_unary(args[0], "-",
-                        [](int i){ return wrap_number(-i); },
-                        [](double d){ return wrap_number(-d); },
-                        [](Complex z){ return wrap_number(-z); });
+                        [](int i){ return -i; },
+                        [](double d){ return -d; },
+                        [](Complex z){ return -z; });
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "-",
-                       [](int i1, int i2){ return wrap_number(i1 - i2); },
-                       [](double d1, double d2){ return wrap_number(d1 - d2); },
-                       [](Complex z1, Complex z2){ return wrap_number(z1 - z2); });
+                       [](int i1, int i2){ return i1 - i2; },
+                       [](double d1, double d2){ return d1 - d2; },
+                       [](Complex z1, Complex z2){ return z1 - z2; });
   }
 }
 
@@ -434,45 +420,45 @@ Lisp_ptr number_divide(){
   if(args.size() == 1){
     return number_unary(args[0], "/",
                         [](int i){
-                          return wrap_number((i == 1) // integer appears only if '1 / 1'
-                                             ? 1
-                                             : (1.0 / i));
+                          return (i == 1) // integer appears only if '1 / 1'
+                            ? 1
+                            : 1.0 / i;
                         },
-                        [](double d){ return wrap_number(1.0 / d); },
-                        [](Complex z){ return wrap_number(1.0 / z); });
+                        [](double d){ return 1.0 / d; },
+                        [](Complex z){ return 1.0 / z; });
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "/",
                        [](int i1, int i2){ 
-                         return wrap_number((i1 % i2)
-                                            ? static_cast<double>(i1) / i2
-                                            : i1 / i2);
+                         return (i1 % i2)
+                           ? static_cast<double>(i1) / i2
+                           : i1 / i2;
                        },
-                       [](double d1, double d2){ return wrap_number(d1 / d2); },
-                       [](Complex z1, Complex z2){ return wrap_number(z1 / z2); });
+                       [](double d1, double d2){ return d1 / d2; },
+                       [](Complex z1, Complex z2){ return z1 / z2; });
   }
 }
 
 Lisp_ptr number_abs(){
   return number_unary("abs",
-                      [](int i){ return wrap_number(std::abs(i));},
-                      [](double d){ return wrap_number(std::abs(d));},
+                      [](int i){ return std::abs(i);},
+                      [](double d){ return std::abs(d);},
                       inacceptable_number_type());
 }
 
 
 Lisp_ptr number_quot(){
   return number_binary("quotient",
-                       [](int i1, int i2){ return wrap_number(i1 / i2); },
+                       [](int i1, int i2){ return i1 / i2; },
                        inacceptable_number_type(),
                        inacceptable_number_type());
 }
 
 Lisp_ptr number_rem(){
   return number_binary("remainder",
-                       [](int i1, int i2) -> Lisp_ptr {
+                       [](int i1, int i2) -> int{
                          auto q = i1 / i2;
-                         return wrap_number(i1 - (q * i2));
+                         return i1 - (q * i2);
                        },
                        inacceptable_number_type(),
                        inacceptable_number_type());
@@ -480,13 +466,13 @@ Lisp_ptr number_rem(){
 
 Lisp_ptr number_mod(){
   return number_binary("modulo", 
-                       [](int i1, int i2) -> Lisp_ptr{
+                       [](int i1, int i2) -> int{
                          auto m = i1 % i2;
 
                          if((m < 0 && i2 > 0) || (m > 0 && i2 < 0)){
-                           return wrap_number(m + i2);
+                           return m + i2;
                          }else{
-                           return wrap_number(m);
+                           return m;
                          }
                        },
                        inacceptable_number_type(),
@@ -496,7 +482,7 @@ Lisp_ptr number_mod(){
 Lisp_ptr number_gcd(){
   return number_fold(Lisp_ptr{Ptr_tag::integer, 0}, "gcd",
                      [](int i1, int i2){
-                       return wrap_number(gcd(i1, i2));
+                       return gcd(i1, i2);
                      },
                      inacceptable_number_type(),
                      inacceptable_number_type());
@@ -505,7 +491,7 @@ Lisp_ptr number_gcd(){
 Lisp_ptr number_lcm(){
   return number_fold(Lisp_ptr{Ptr_tag::integer, 1}, "lcm",
                      [](int i1, int i2){
-                       return wrap_number(abs(i1 * i2 / gcd(i1, i2)));
+                       return abs(i1 * i2 / gcd(i1, i2));
                      },
                      inacceptable_number_type(),
                      inacceptable_number_type());
@@ -533,28 +519,28 @@ Lisp_ptr number_denominator(){
 Lisp_ptr number_floor(){
   return number_unary("floor",
                       pass_through(),
-                      [](double d){ return wrap_number(std::floor(d));},
+                      [](double d){ return std::floor(d);},
                       inacceptable_number_type());
 }
 
 Lisp_ptr number_ceil(){
   return number_unary("ceiling",
                       pass_through(),
-                      [](double d){ return wrap_number(std::ceil(d));},
+                      [](double d){ return std::ceil(d);},
                       inacceptable_number_type());
 }
 
 Lisp_ptr number_trunc(){
   return number_unary("truncate",
                       pass_through(),
-                      [](double d){ return wrap_number(std::trunc(d));},
+                      [](double d){ return std::trunc(d);},
                       inacceptable_number_type());
 }
 
 Lisp_ptr number_round(){
   return number_unary("round",
                       pass_through(),
-                      [](double d){ return wrap_number(std::round(d));},
+                      [](double d){ return std::round(d);},
                       inacceptable_number_type());
 }
 
@@ -574,51 +560,51 @@ Lisp_ptr number_rationalize(){
 
 Lisp_ptr number_exp(){
   return number_unary("exp",
-                      [](int i){ return wrap_number(std::exp(i));},
-                      [](double d){ return wrap_number(std::exp(d));},
-                      [](Complex z){ return wrap_number(std::exp(z));});
+                      [](int i){ return std::exp(i);},
+                      [](double d){ return std::exp(d);},
+                      [](Complex z){ return std::exp(z);});
 }
 
 Lisp_ptr number_log(){
   return number_unary("log",
-                      [](int i){ return wrap_number(std::log(i));},
-                      [](double d){ return wrap_number(std::log(d));},
-                      [](Complex z){ return wrap_number(std::log(z));});
+                      [](int i){ return std::log(i);},
+                      [](double d){ return std::log(d);},
+                      [](Complex z){ return std::log(z);});
 }
 
 Lisp_ptr number_sin(){
   return number_unary("sin",
-                      [](int i){ return wrap_number(std::sin(i));},
-                      [](double d){ return wrap_number(std::sin(d));},
-                      [](Complex z){ return wrap_number(std::sin(z));});
+                      [](int i){ return std::sin(i);},
+                      [](double d){ return std::sin(d);},
+                      [](Complex z){ return std::sin(z);});
 }
 
 Lisp_ptr number_cos(){
   return number_unary("cos",
-                      [](int i){ return wrap_number(std::cos(i));},
-                      [](double d){ return wrap_number(std::cos(d));},
-                      [](Complex z){ return wrap_number(std::cos(z));});
+                      [](int i){ return std::cos(i);},
+                      [](double d){ return std::cos(d);},
+                      [](Complex z){ return std::cos(z);});
 }
 
 Lisp_ptr number_tan(){
   return number_unary("tan",
-                      [](int i){ return wrap_number(std::tan(i));},
-                      [](double d){ return wrap_number(std::tan(d));},
-                      [](Complex z){ return wrap_number(std::tan(z));});
+                      [](int i){ return std::tan(i);},
+                      [](double d){ return std::tan(d);},
+                      [](Complex z){ return std::tan(z);});
 }
 
 Lisp_ptr number_asin(){
   return number_unary("asin",
-                      [](int i){ return wrap_number(std::asin(i));},
-                      [](double d){ return wrap_number(std::asin(d));},
-                      [](Complex z){ return wrap_number(std::asin(z));});
+                      [](int i){ return std::asin(i);},
+                      [](double d){ return std::asin(d);},
+                      [](Complex z){ return std::asin(z);});
 }
 
 Lisp_ptr number_acos(){
   return number_unary("acos",
-                      [](int i){ return wrap_number(std::acos(i));},
-                      [](double d){ return wrap_number(std::acos(d));},
-                      [](Complex z){ return wrap_number(std::acos(z));});
+                      [](int i){ return std::acos(i);},
+                      [](double d){ return std::acos(d);},
+                      [](Complex z){ return std::acos(z);});
 }
 
 Lisp_ptr number_atan(){
@@ -627,16 +613,16 @@ Lisp_ptr number_atan(){
   switch(args.size()){
   case 1:  // std::atan()
     return number_unary(args[0], "atan",
-                        [](int i){ return wrap_number(std::atan(i)); },
-                        [](double d){ return wrap_number(std::atan(d)); },
-                        [](Complex z){ return wrap_number(std::atan(z)); });
+                        [](int i){ return std::atan(i); },
+                        [](double d){ return std::atan(d); },
+                        [](Complex z){ return std::atan(z); });
   case 2: // std::atan2()
     return number_binary(args[0], args[1], "atan",
                          [](int i1, int i2){
-                           return wrap_number(std::atan2(i1, i2));
+                           return std::atan2(i1, i2);
                          },
                          [](double d1, double d2){
-                           return wrap_number(std::atan2(d1, d2));
+                           return std::atan2(d1, d2);
                          },
                          inacceptable_number_type());
   default:
@@ -646,32 +632,32 @@ Lisp_ptr number_atan(){
 
 Lisp_ptr number_sqrt(){
   return number_unary("sqrt",
-                      [](int i){ return wrap_number(std::sqrt(i));},
-                      [](double d){ return wrap_number(std::sqrt(d));},
-                      [](Complex z){ return wrap_number(std::sqrt(z));});
+                      [](int i){ return std::sqrt(i);},
+                      [](double d){ return std::sqrt(d);},
+                      [](Complex z){ return std::sqrt(z);});
 }
 
 
 Lisp_ptr number_expt(){
   return number_binary("expt",
                        [](int i1, int i2){
-                         return wrap_number(std::pow(i1, i2));
+                         return std::pow(i1, i2);
                        },
                        [](double n1, double n2){
-                         return wrap_number(std::pow(n1, n2));
+                         return std::pow(n1, n2);
                        },
                        [](Complex z1, Complex z2){
-                         return wrap_number(std::pow(z1, z2));
+                         return std::pow(z1, z2);
                        });
 }
 
 Lisp_ptr number_rect(){
   return number_binary("make-rectangular",
                        [](int i1, int i2){
-                         return wrap_number(Complex(i1, i2));
+                         return Complex(i1, i2);
                        },
                        [](double n1, double n2){
-                         return wrap_number(Complex(n1, n2));
+                         return Complex(n1, n2);
                        },
                        inacceptable_number_type());
 }
@@ -679,11 +665,11 @@ Lisp_ptr number_rect(){
 Lisp_ptr number_polar(){
   return number_binary("make-polar",
                        [](int i1, int i2){
-                         return wrap_number(polar(static_cast<double>(i1),
-                                                  static_cast<double>(i2)));
+                         return polar(static_cast<double>(i1),
+                                      static_cast<double>(i2));
                        },
                        [](double n1, double n2){
-                         return wrap_number(polar(n1, n2));
+                         return polar(n1, n2);
                        },
                        inacceptable_number_type());
 }
@@ -693,28 +679,28 @@ Lisp_ptr number_real(){
   return number_unary("real-part",
                       inacceptable_number_type(),
                       inacceptable_number_type(),
-                      [](Complex z){ return wrap_number(z.real());});
+                      [](Complex z){ return z.real();});
 }
 
 Lisp_ptr number_imag(){
   return number_unary("imag-part",
                       inacceptable_number_type(),
                       inacceptable_number_type(),
-                      [](Complex z){ return wrap_number(z.imag());});
+                      [](Complex z){ return z.imag();});
 }
 
 Lisp_ptr number_mag(){
   return number_unary("magnitude",
                       inacceptable_number_type(),
                       inacceptable_number_type(),
-                      [](Complex z){ return wrap_number(std::abs(z));});
+                      [](Complex z){ return std::abs(z);});
 }
 
 Lisp_ptr number_angle(){
   return number_unary("angle",
                       inacceptable_number_type(),
                       inacceptable_number_type(),
-                      [](Complex z){ return wrap_number(arg(z));});
+                      [](Complex z){ return arg(z);});
 }
 
 
@@ -722,13 +708,13 @@ Lisp_ptr number_i_to_e(){
   // MEMO: add complex<int> type??
   return number_unary("inexact->exact",
                       pass_through(),
-                      [](double d){ return wrap_number(static_cast<int>(d));},
+                      [](double d){ return static_cast<int>(d);},
                       inacceptable_number_type());
 }
 
 Lisp_ptr number_e_to_i(){
   return number_unary("exact->inexact",
-                      [](int i){ return wrap_number(static_cast<double>(i));},
+                      [](int i){ return static_cast<double>(i);},
                       pass_through(),
                       pass_through());
 }
