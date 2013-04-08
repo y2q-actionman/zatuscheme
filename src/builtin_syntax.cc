@@ -1,5 +1,4 @@
 #include <string>
-#include <iostream>
 
 #include "builtin_syntax.hh"
 #include "lisp_ptr.hh"

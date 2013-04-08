@@ -1,6 +1,5 @@
 #include <utility>
 #include <istream>
-#include <iostream>
 #include <memory>
 
 #include "reader.hh"
