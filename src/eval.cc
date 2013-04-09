@@ -425,7 +425,7 @@ void proc_enter_cont(Continuation* c){
   // They become return-values of the passed continuation.
   ZsArgs args;
   auto ret_values = new std::vector<Lisp_ptr>(begin(args), end(args));
-  args.~ZsArgs();
+  args.cleanup();
 
   vm.code.insert(vm.code.end(), {ret_values, c, vm_op_replace_vm});
 
@@ -677,51 +677,51 @@ Lisp_ptr let_internal(Entering entering){
   GrowList gl_vals;
   Lisp_ptr body;
 
-  {
-    ZsArgs wargs{1};
+  ZsArgs wargs{1};
 
-    // skips first 'let' symbol
-    auto arg_c = wargs[0].get<Cons*>();
-    assert(arg_c);
+  // skips first 'let' symbol
+  auto arg_c = wargs[0].get<Cons*>();
+  assert(arg_c);
 
-    auto arg = arg_c->cdr();
-    if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-      throw zs_error_arg1("let", "informal syntax -- (LET . <...>)", {arg});
-    }
-    arg_c = arg.get<Cons*>();
-
-    // checks named let
-    if(identifierp(arg_c->car())){
-      name = arg_c->car();
-
-      arg = arg_c->cdr();
-      if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-        throw zs_error_arg1("let", "informal syntax -- (LET <name> . <...>)", {arg});
-      }
-    
-      arg_c = arg.get<Cons*>();
-    }
-
-    // picks elements
-    auto binds = arg_c->car();
-    body = arg_c->cdr();
-
-    if(body.tag() != Ptr_tag::cons || nullp(body)){
-      throw zs_error_arg1("let", "informal body", {body});
-    }
-
-    // parses binding list
-    for(auto bind : binds){
-      if(bind.tag() != Ptr_tag::cons || nullp(bind)){
-        throw zs_error_arg1("let", "informal object found in let binding", {bind});
-      }
-
-      ++len;
-
-      gl_syms.push(nth_cons_list<0>(bind));
-      gl_vals.push(nth_cons_list<1>(bind));
-    }
+  auto arg = arg_c->cdr();
+  if(arg.tag() != Ptr_tag::cons || nullp(arg)){
+    throw zs_error_arg1("let", "informal syntax -- (LET . <...>)", {arg});
   }
+  arg_c = arg.get<Cons*>();
+
+  // checks named let
+  if(identifierp(arg_c->car())){
+    name = arg_c->car();
+
+    arg = arg_c->cdr();
+    if(arg.tag() != Ptr_tag::cons || nullp(arg)){
+      throw zs_error_arg1("let", "informal syntax -- (LET <name> . <...>)", {arg});
+    }
+    
+    arg_c = arg.get<Cons*>();
+  }
+
+  // picks elements
+  auto binds = arg_c->car();
+  body = arg_c->cdr();
+
+  if(body.tag() != Ptr_tag::cons || nullp(body)){
+    throw zs_error_arg1("let", "informal body", {body});
+  }
+
+  // parses binding list
+  for(auto bind : binds){
+    if(bind.tag() != Ptr_tag::cons || nullp(bind)){
+      throw zs_error_arg1("let", "informal object found in let binding", {bind});
+    }
+
+    ++len;
+
+    gl_syms.push(nth_cons_list<0>(bind));
+    gl_vals.push(nth_cons_list<1>(bind));
+  }
+
+  wargs.cleanup();
 
   if(name){
     auto oldenv = vm.frame();

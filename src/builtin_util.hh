@@ -33,6 +33,8 @@ public:
   IterType end() const
   { return stack_iter_s_ + size(); }
 
+  void cleanup();
+
 private:
   void invalidate();
   bool valid() const;

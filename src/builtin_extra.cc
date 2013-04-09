@@ -144,10 +144,10 @@ Lisp_ptr make_synthetic_identifier(){
 }
 
 Lisp_ptr exit_func(){
-  {
-    ZsArgs args; 
-  }
+  ZsArgs args; 
+
   // cerr << "exiting..\n";
+  args.cleanup();
   vm.stack.clear();
   vm.code.clear();
   return {};
