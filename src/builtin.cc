@@ -38,7 +38,7 @@ static const char interaction_env_symname[] = "interaction-env-value";
 
 static
 Lisp_ptr env_pick_2(const char* name){
-  ZsArgs args{1};
+  ZsArgs args;
 
   if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed(name, Ptr_tag::integer, args[0]);
@@ -61,13 +61,13 @@ Lisp_ptr env_null(){
 }
 
 Lisp_ptr env_interactive(){
-  ZsArgs args{0};
+  ZsArgs args;
   return vm.frame()->find(intern(vm.symtable(), interaction_env_symname));
 }
   
 
 Lisp_ptr eval_func(){
-  ZsArgs args{2};
+  ZsArgs args;
   auto env = args[1].get<Env*>();
   if(!env){
     throw builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
@@ -103,7 +103,7 @@ void load_internal(const string& str){
 }
 
 Lisp_ptr load_func(){
-  ZsArgs args{1};
+  ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
     throw builtin_type_check_failed("load", Ptr_tag::string, args[0]);
@@ -124,24 +124,7 @@ static const char* builtin_syntax_strs[] = {
 };
 
 static const BuiltinNProc builtin_funcs[] = {
-  {"eval", {
-      eval_func,
-      {2, 2, Passing::eval, Returning::code, MoveReturnValue::f}}},
-
-  {"scheme-report-environment", {
-      env_r5rs,
-      {1}}},
-  {"null-environment", {
-      env_null,
-      {1}}},
-  {"interaction-environment", {
-      env_interactive,
-      {0}}},
-
-  {"load", {
-      load_func,
-      {1}}},
-
+#include "builtin.defs.hh"
 #include "builtin_boolean.defs.hh"
 #include "builtin_char.defs.hh"
 #include "builtin_cons.defs.hh"
