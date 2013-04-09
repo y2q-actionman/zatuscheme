@@ -11,13 +11,6 @@ ZsArgs::ZsArgs()
   : size_(vm.stack.back().get<int>()),
     stack_iter_s_(vm.stack.end() - (size_ + 1)){}
 
-ZsArgs::ZsArgs(int i)
-  : size_(vm.stack.back().get<int>()),
-    stack_iter_s_(vm.stack.end() - (size_ + 1)){
-  if(i != size_)
-    throw builtin_argcount_failed("(unknown func)", i, i, size_);
-}
-
 ZsArgs::ZsArgs(ZsArgs&& other)
   : size_(other.size_),
     stack_iter_s_(move(other.stack_iter_s_)){

@@ -439,7 +439,10 @@ void proc_enter_cont(Continuation* c){
 }
 
 void proc_enter_srule(SyntaxRules* srule){
-  ZsArgs args{2};
+  ZsArgs args;
+
+  if(args.size() != 2)
+    throw builtin_argcount_failed("syntax-rules entry", 2, 2, args.size());
 
   auto code = srule->apply(args[0], args[1].get<Env*>());
   vm.return_value = {code};
@@ -677,7 +680,10 @@ Lisp_ptr let_internal(Entering entering){
   GrowList gl_vals;
   Lisp_ptr body;
 
-  ZsArgs wargs{1};
+  ZsArgs wargs;
+
+  if(wargs.size() != 1)
+    throw builtin_argcount_failed("let entry", 1, 1, wargs.size());
 
   // skips first 'let' symbol
   auto arg_c = wargs[0].get<Cons*>();

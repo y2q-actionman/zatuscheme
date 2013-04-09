@@ -11,7 +11,6 @@ public:
   typedef decltype(vm.stack.end()) IterType;
 
   explicit ZsArgs();
-  explicit ZsArgs(int);
   ZsArgs(const ZsArgs&) = delete;
   ZsArgs(ZsArgs&&);
 

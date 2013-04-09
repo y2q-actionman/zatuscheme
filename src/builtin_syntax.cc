@@ -19,13 +19,13 @@ using namespace ProcFlag;
 
 static
 Lisp_ptr whole_function_error(const char* opname){
-  ZsArgs wargs{1};
+  ZsArgs wargs;
   throw zs_error_arg1(opname, "cannot be used as operator!!");
 }
 
 
 Lisp_ptr syntax_quote(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   if(args[0].tag() == Ptr_tag::syntactic_closure){
     return args[0].get<SyntacticClosure*>()->expr();
@@ -51,7 +51,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
 }
 
 Lisp_ptr syntax_lambda(){
-  ZsArgs wargs{1};
+  ZsArgs wargs;
 
   return bind_cons_list_strict
     (wargs[0],
@@ -74,13 +74,13 @@ Lisp_ptr syntax_if(){
 }
 
 Lisp_ptr syntax_set(){
-  ZsArgs args{2};
+  ZsArgs args;
   vm.return_value = {args[0], vm_op_set, args[1]};
   return {};
 }
 
 Lisp_ptr syntax_define(){
-  ZsArgs args{1};
+  ZsArgs args;
 
   auto p = args[0].get<Cons*>()->cdr();
   Cons* rest = p.get<Cons*>();
@@ -110,7 +110,7 @@ Lisp_ptr syntax_define(){
 }
 
 Lisp_ptr syntax_begin(){
-  ZsArgs wargs{1};
+  ZsArgs wargs;
 
   auto body = nthcdr_cons_list<1>(wargs[0]);
   if(!body || nullp(body)){
@@ -144,12 +144,12 @@ Lisp_ptr syntax_letrec(){
 }
 
 Lisp_ptr syntax_delay(){
-  ZsArgs wargs{1};
+  ZsArgs wargs;
   return {new Delay(wargs[0], vm.frame())};
 }
 
 Lisp_ptr syntax_quasiquote(){
-  ZsArgs wargs{1};
+  ZsArgs wargs;
 
   auto arg = nth_cons_list<1>(wargs[0]);
 
@@ -205,12 +205,12 @@ Lisp_ptr syntax_quasiquote(){
 }
 
 Lisp_ptr syntax_unquote(){
-  ZsArgs args{1};
+  ZsArgs args;
   return args[0];
 }
 
 Lisp_ptr syntax_unquote_splicing(){
-  ZsArgs args{1};
+  ZsArgs args;
   if(args[0].tag() != Ptr_tag::cons){
     throw builtin_type_check_failed("unquote-splicing", Ptr_tag::cons, args[0]);
   }
@@ -228,7 +228,7 @@ Lisp_ptr syntax_arrow(){
 }
 
 Lisp_ptr syntax_define_syntax(){
-  ZsArgs args{2};
+  ZsArgs args;
 
   if(!identifierp(args[0])){
     throw builtin_identifier_check_failed("define-syntax", args[0]);
@@ -250,7 +250,7 @@ Lisp_ptr syntax_letrec_syntax(){
 }
 
 Lisp_ptr syntax_syntax_rules(){
-  ZsArgs args{2};
+  ZsArgs args;
 
   auto env = args[1].get<Env*>();
   if(!env){
