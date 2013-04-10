@@ -3,6 +3,8 @@
 
 #include "decl.hh"
 
+namespace builtin {
+
 Lisp_ptr char_eq();
 Lisp_ptr char_less();
 Lisp_ptr char_greater();
@@ -22,5 +24,7 @@ Lisp_ptr char_to_int();
 Lisp_ptr char_from_int();
 Lisp_ptr char_toupper();
 Lisp_ptr char_tolower();
+
+}
 
 #endif // BUILTIN_CHAR_HH

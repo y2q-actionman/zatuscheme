@@ -149,6 +149,8 @@ bool stream_ready(istream* is){
 
 } //namespace
 
+namespace builtin {
+
 Lisp_ptr port_open_file_i(){
   return port_open_file<InputPort, ifstream>("open-input-file");
 }  
@@ -223,3 +225,4 @@ Lisp_ptr port_char_ready(){
   return port_input_call("char-ready?", stream_ready);
 }
 
+} // namespace builtin

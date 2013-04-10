@@ -5,62 +5,62 @@
     {1}}},
 
 {"char=?", {
-    char_eq,
+    builtin::char_eq,
     {2}}},
 {"char<?", {
-    char_less,
+    builtin::char_less,
     {2}}},
 {"char>?", {
-    char_greater,
+    builtin::char_greater,
     {2}}},
 {"char<=?", {
-    char_less_eq,
+    builtin::char_less_eq,
     {2}}},
 {"char>=?", {
-    char_greater_eq,
+    builtin::char_greater_eq,
     {2}}},
 
 {"char-ci=?", {
-    char_ci_eq,
+    builtin::char_ci_eq,
     {2}}},
 {"char-ci<?", {
-    char_ci_less,
+    builtin::char_ci_less,
     {2}}},
 {"char-ci>?", {
-    char_ci_greater,
+    builtin::char_ci_greater,
     {2}}},
 {"char-ci<=?", {
-    char_ci_less_eq,
+    builtin::char_ci_less_eq,
     {2}}},
 {"char-ci>=?", {
-    char_ci_greater_eq,
+    builtin::char_ci_greater_eq,
     {2}}},
 
 {"char-alphabetic?", {
-    char_isalpha,
+    builtin::char_isalpha,
     {1}}},
 {"char-numeric?", {
-    char_isdigit,
+    builtin::char_isdigit,
     {1}}},
 {"char-whitespace?", {
-    char_isspace,
+    builtin::char_isspace,
     {1}}},
 {"char-upper-case?", {
-    char_isupper,
+    builtin::char_isupper,
     {1}}},
 {"char-lower-case?", {
-    char_islower,
+    builtin::char_islower,
     {1}}},
 
 {"char->integer", {
-    char_to_int,
+    builtin::char_to_int,
     {1}}},
 {"integer->char", {
-    char_from_int,
+    builtin::char_from_int,
     {1}}},
 {"char-upcase", {
-    char_toupper,
+    builtin::char_toupper,
     {1}}},
 {"char-downcase", {
-    char_tolower,
+    builtin::char_tolower,
     {1}}},

@@ -6,6 +6,8 @@
 #define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
 #define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
 
+namespace builtin {
+
 Lisp_ptr port_open_file_i();
 Lisp_ptr port_open_file_o();
 Lisp_ptr port_close_i();
@@ -21,5 +23,7 @@ Lisp_ptr port_display();
 Lisp_ptr port_write_char();
 
 Lisp_ptr port_char_ready();
+
+}
 
 #endif // BUILTIN_PORT_HH

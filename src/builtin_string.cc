@@ -48,6 +48,8 @@ struct ci_compare{
 
 } // namespace
 
+namespace builtin {
+
 Lisp_ptr string_make(){
   ZsArgs args;
 
@@ -283,3 +285,5 @@ Lisp_ptr string_fill(){
   std::fill(str->begin(), str->end(), ch);
   return {str};
 }
+
+} // namespace builtin

@@ -3,6 +3,8 @@
 
 #include "decl.hh"
 
+namespace builtin {
+
 Lisp_ptr string_make();
 Lisp_ptr string_string();
 Lisp_ptr string_length();
@@ -27,5 +29,7 @@ Lisp_ptr string_to_list();
 Lisp_ptr string_from_list();
 Lisp_ptr string_copy();
 Lisp_ptr string_fill();
+
+}
 
 #endif // BUILTIN_STRING_HH

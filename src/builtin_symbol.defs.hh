@@ -4,8 +4,8 @@
     type_check_pred<Ptr_tag::symbol>,
     {1}}},
 {"symbol->string", {
-    sym_to_string,
+    builtin::symbol_to_string,
     {1}}},
 {"string->symbol", {
-    sym_from_string,
+    builtin::symbol_from_string,
     {1}}},

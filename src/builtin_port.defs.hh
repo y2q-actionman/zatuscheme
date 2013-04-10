@@ -8,43 +8,43 @@
     {1}}},
 
 {"open-input-file", {
-    port_open_file_i,
+    builtin::port_open_file_i,
     {1}}},
 {"open-output-file", {
-    port_open_file_o,
+    builtin::port_open_file_o,
     {1}}},
 
 {"close-input-port", {
-    port_close_i,
+    builtin::port_close_i,
     {1}}},
 {"close-output-port", {
-    port_close_o,
+    builtin::port_close_o,
     {1}}},
 
 {"read", {
-    port_read,
+    builtin::port_read,
     {0, 1}}},
 {"read-char", {
-    port_read_char,
+    builtin::port_read_char,
     {0, 1}}},
 {"peek-char", {
-    port_peek_char,
+    builtin::port_peek_char,
     {0, 1}}},
 
 {"eof-object?", {
-    port_eof_p,
+    builtin::port_eof_p,
     {1}}},
 
 {"write", {
-    port_write,
+    builtin::port_write,
     {1, 2}}},
 {"display", {
-    port_display,
+    builtin::port_display,
     {1, 2}}},
 {"write-char", {
-    port_write_char,
+    builtin::port_write_char,
     {1, 2}}},
 
 {"char-ready?", {
-    port_char_ready,
+    builtin::port_char_ready,
     {0, 1}}},

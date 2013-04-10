@@ -18,6 +18,8 @@ zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
 
 } // namespace
 
+namespace builtin {
+
 Lisp_ptr vector_make(){
   ZsArgs args;
 
@@ -131,3 +133,5 @@ Lisp_ptr vector_fill(){
   std::fill(v->begin(), v->end(), args[1]);
   return {v};
 }
+
+} // namespace builtin

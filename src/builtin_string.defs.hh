@@ -4,70 +4,70 @@
     type_check_pred<Ptr_tag::string>,
     {1}}},
 {"make-string", {
-    string_make,
+    builtin::string_make,
     {1, 2}}},
 {"string", {
-    string_string,
+    builtin::string_string,
     {0, Variadic::t}}},
 {"string-length", {
-    string_length,
+    builtin::string_length,
     {1}}},
 {"string-ref", {
-    string_ref,
+    builtin::string_ref,
     {2}}},
 {"string-set!", {
-    string_set,
+    builtin::string_set,
     {3}}},
 
 {"string=?", {
-    string_equal,
+    builtin::string_equal,
     {2}}},
 {"string<?", {
-    string_less,
+    builtin::string_less,
     {2}}},
 {"string>?", {
-    string_greater,
+    builtin::string_greater,
     {2}}},
 {"string<=?", {
-    string_less_eq,
+    builtin::string_less_eq,
     {2}}},
 {"string>=?", {
-    string_greater_eq,
+    builtin::string_greater_eq,
     {2}}},
 {"string-ci=?", {
-    string_ci_equal,
+    builtin::string_ci_equal,
     {2}}},
 {"string-ci<?", {
-    string_ci_less,
+    builtin::string_ci_less,
     {2}}},
 {"string-ci>?", {
-    string_ci_greater,
+    builtin::string_ci_greater,
     {2}}},
 {"string-ci<=?", {
-    string_ci_less_eq,
+    builtin::string_ci_less_eq,
     {2}}},
 {"string-ci>=?", {
-    string_ci_greater_eq,
+    builtin::string_ci_greater_eq,
     {2}}},
 
 {"substring", {
-    string_substr,
+    builtin::string_substr,
     {3}}},
 {"string-append", {
-    string_append,
+    builtin::string_append,
     {0, Variadic::t}}},
 
 {"string->list", {
-    string_to_list,
+    builtin::string_to_list,
     {1}}},
 {"list->string", {
-    string_from_list,
+    builtin::string_from_list,
     {1}}},
 
 {"string-copy", {
-    string_copy,
+    builtin::string_copy,
     {1}}},
 
 {"string-fill!", {
-    string_fill,
+    builtin::string_fill,
     {2}}},

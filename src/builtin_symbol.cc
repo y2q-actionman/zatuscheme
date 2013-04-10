@@ -7,7 +7,9 @@
 
 using namespace std;
 
-Lisp_ptr sym_to_string(){
+namespace builtin {
+
+Lisp_ptr symbol_to_string(){
   ZsArgs args;
   auto sym = args[0].get<Symbol*>();
   if(!sym){
@@ -18,7 +20,7 @@ Lisp_ptr sym_to_string(){
   return {new String(sym->name())};
 }
 
-Lisp_ptr sym_from_string(){
+Lisp_ptr symbol_from_string(){
   ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
@@ -27,3 +29,5 @@ Lisp_ptr sym_from_string(){
 
   return {intern(vm.symtable(), *str)};
 }
+
+} // namespace builtin

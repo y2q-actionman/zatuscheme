@@ -66,6 +66,7 @@ Lisp_ptr char_conversion(const char* name, Fun&& fun){
   
 } // namespace
 
+namespace builtin {
 
 Lisp_ptr char_eq(){
   return char_compare("char=?", std::equal_to<char>());
@@ -156,3 +157,5 @@ Lisp_ptr char_tolower(){
   return char_conversion("char-downcase",
                          [](char c){ return static_cast<char>(std::tolower(c)); });
 }
+
+} // namespace builtin
