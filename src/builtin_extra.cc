@@ -13,7 +13,9 @@
 #include "cons_util.hh"
 
 using namespace std;
-using namespace ProcFlag;
+using namespace proc_flag;
+
+namespace builtin {
 
 Lisp_ptr traditional_transformer(){
   ZsArgs args;
@@ -78,7 +80,7 @@ Lisp_ptr make_syntactic_closure(){
   return new SyntacticClosure(e, c, args[2]);
 }
 
-Lisp_ptr capture_env(){
+Lisp_ptr capture_syntactic_environment(){
   ZsArgs args;
 
   if(args[0].tag() != Ptr_tag::i_procedure){
@@ -103,12 +105,12 @@ Lisp_ptr capture_env(){
   return ret;
 }
 
-Lisp_ptr proc_identifierp(){
+Lisp_ptr identifierp(){
   ZsArgs args;
   return Lisp_ptr{identifierp(args[0])};
 }
 
-Lisp_ptr proc_identifier_eq(){
+Lisp_ptr identifier_eq(){
   ZsArgs args;
 
   auto ident1_env = args[0].get<Env*>();
@@ -143,7 +145,7 @@ Lisp_ptr make_synthetic_identifier(){
   return new SyntacticClosure(new Env(nullptr), nullptr, args[0]);
 }
 
-Lisp_ptr exit_func(){
+Lisp_ptr exit(){
   ZsArgs args; 
 
   // cerr << "exiting..\n";
@@ -164,3 +166,5 @@ Lisp_ptr transcript_off(){
   dump_mode = false;
   return Lisp_ptr{true};
 }
+
+} // namespace builtin

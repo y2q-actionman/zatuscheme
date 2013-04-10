@@ -1,171 +1,171 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"number?", {
-    numberp,
+    builtin::numberp,
     {1}}},
 
 {"complex?", {
-    complexp,
+    builtin::complexp,
     {1}}},
 {"real?", {
-    realp,
+    builtin::realp,
     {1}}},
 {"rational?", {
-    rationalp,
+    builtin::rationalp,
     {1}}},
 {"integer?", {
-    integerp,
+    builtin::integerp,
     {1}}},
 
 {"exact?", {
-    exactp,
+    builtin::exactp,
     {1}}},
 {"inexact?", {
-    inexactp,
+    builtin::inexactp,
     {1}}},
 
 {"=", {
-    number_equal,
+    builtin::number_equal,
     {2, Variadic::t}}},
 {"<", {
-    number_less,
+    builtin::number_less,
     {2, Variadic::t}}},
 {">", {
-    number_greater,
+    builtin::number_greater,
     {2, Variadic::t}}},
 {"<=", {
-    number_less_eq,
+    builtin::number_less_eq,
     {2, Variadic::t}}},
 {">=", {
-    number_greater_eq,
+    builtin::number_greater_eq,
     {2, Variadic::t}}},
 
 {"max", {
-    number_max,
+    builtin::number_max,
     {2, Variadic::t}}},
 {"min", {
-    number_min,
+    builtin::number_min,
     {2, Variadic::t}}},
 
 {"+", {
-    number_plus,
+    builtin::number_plus,
     {0, Variadic::t}}},
 {"*", {
-    number_multiple,
+    builtin::number_multiple,
     {0, Variadic::t}}},
 {"-", {
-    number_minus,
+    builtin::number_minus,
     {1, Variadic::t}}},
 {"/", {
-    number_divide,
+    builtin::number_divide,
     {1, Variadic::t}}},
 
 {"abs", {
-    number_abs,
+    builtin::number_abs,
     {1}}},
 
 {"quotient", {
-    number_quot,
+    builtin::number_quot,
     {2}}},
 {"remainder", {
-    number_rem,
+    builtin::number_rem,
     {2}}},
 {"modulo", {
-    number_mod,
+    builtin::number_mod,
     {2}}},
 
 {"gcd", {
-    number_gcd,
+    builtin::number_gcd,
     {0, Variadic::t}}},
 {"lcm", {
-    number_lcm,
+    builtin::number_lcm,
     {0, Variadic::t}}},
 
 {"numerator", {
-    number_numerator,
+    builtin::number_numerator,
     {1}}},
 {"denominator", {
-    number_denominator,
+    builtin::number_denominator,
     {1}}},
 
 {"floor", {
-    number_floor,
+    builtin::number_floor,
     {1}}},
 {"ceiling", {
-    number_ceil,
+    builtin::number_ceil,
     {1}}},
 {"truncate", {
-    number_trunc,
+    builtin::number_trunc,
     {1}}},
 {"round", {
-    number_round,
+    builtin::number_round,
     {1}}},
 
 {"rationalize", {
-    number_rationalize,
+    builtin::number_rationalize,
     {2}}},
 
 {"exp", {
-    number_exp,
+    builtin::number_exp,
     {1}}},
 {"log", {
-    number_log,
+    builtin::number_log,
     {1}}},
 {"sin", {
-    number_sin,
+    builtin::number_sin,
     {1}}},
 {"cos", {
-    number_cos,
+    builtin::number_cos,
     {1}}},
 {"tan", {
-    number_tan,
+    builtin::number_tan,
     {1}}},
 {"asin", {
-    number_asin,
+    builtin::number_asin,
     {1}}},
 {"acos", {
-    number_acos,
+    builtin::number_acos,
     {1}}},
 {"atan", {
-    number_atan,
+    builtin::number_atan,
     {1, 2}}},
 
 {"sqrt", {
-    number_sqrt,
+    builtin::number_sqrt,
     {1}}},
 {"expt", {
-    number_expt,
+    builtin::number_expt,
     {2}}},
 
 {"make-rectangular", {
-    number_rect,
+    builtin::number_rect,
     {2}}},
 {"make-polar", {
-    number_polar,
+    builtin::number_polar,
     {2}}},
 {"real-part", {
-    number_real,
+    builtin::number_real,
     {1}}},
 {"imag-part", {
-    number_imag,
+    builtin::number_imag,
     {1}}},
 {"magnitude", {
-    number_mag,
+    builtin::number_mag,
     {1}}},
 {"angle", {
-    number_angle,
+    builtin::number_angle,
     {1}}},
 
 {"inexact->exact", {
-    number_i_to_e,
+    builtin::number_i_to_e,
     {1}}},
 {"exact->inexact", {
-    number_e_to_i,
+    builtin::number_e_to_i,
     {1}}},
 
 {"string->number", {
-    number_from_string,
+    builtin::number_from_string,
     {1, 2}}},
 {"number->string", {
-    number_to_string,
+    builtin::number_to_string,
     {1, 2}}},

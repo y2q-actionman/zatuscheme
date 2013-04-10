@@ -3,12 +3,16 @@
 
 #include "decl.hh"
 
-Lisp_ptr type_check_procedure();
-Lisp_ptr apply_func();
-Lisp_ptr func_force();
-Lisp_ptr proc_values();
+namespace builtin {
+
+Lisp_ptr procedurep();
+Lisp_ptr apply();
+Lisp_ptr force();
+Lisp_ptr values();
 Lisp_ptr call_with_values();
 Lisp_ptr call_cc();
 Lisp_ptr dynamic_wind();
+
+}
 
 #endif // BUILTIN_PROCEDURE_HH

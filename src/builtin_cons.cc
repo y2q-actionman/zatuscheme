@@ -55,8 +55,9 @@ Lisp_ptr cons_set_carcdr(const char* name, Fun&& fun){
 
 } // namespace
 
+namespace builtin {
 
-Lisp_ptr type_check_pair(){
+Lisp_ptr cons_pairp(){
   ZsArgs args;
   return Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
 }
@@ -229,3 +230,5 @@ Lisp_ptr cons_memv(){
 Lisp_ptr cons_member(){
   return cons_mem_funcs("member", equal_internal);
 }
+
+} // namespace builtin

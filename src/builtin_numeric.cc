@@ -284,6 +284,7 @@ struct pass_through{
 
 } // namespace
 
+namespace builtin {
 
 Lisp_ptr numberp(){
   ZsArgs args;
@@ -790,3 +791,5 @@ Lisp_ptr number_to_string(){
 
   return {new String(oss.str())};
 }
+
+} // namespace builtin

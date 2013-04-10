@@ -3,7 +3,9 @@
 
 #include "decl.hh"
 
-Lisp_ptr type_check_pair();
+namespace builtin {
+
+Lisp_ptr cons_pairp();
 Lisp_ptr cons_cons();
 Lisp_ptr cons_car();
 Lisp_ptr cons_cdr();
@@ -20,5 +22,7 @@ Lisp_ptr cons_list_tail();
 Lisp_ptr cons_memq();
 Lisp_ptr cons_memv();
 Lisp_ptr cons_member();
+
+}
 
 #endif // BUILTIN_CONS_HH

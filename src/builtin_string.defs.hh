@@ -1,7 +1,7 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"string?", {
-    type_check_pred<Ptr_tag::string>,
+    builtin::type_check_pred<Ptr_tag::string>,
     {1}}},
 {"make-string", {
     builtin::string_make,

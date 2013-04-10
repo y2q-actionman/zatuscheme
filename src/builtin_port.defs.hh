@@ -1,10 +1,10 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"input-port?", {
-    type_check_pred<Ptr_tag::input_port>,
+    builtin::type_check_pred<Ptr_tag::input_port>,
     {1}}},
 {"output-port?", {
-    type_check_pred<Ptr_tag::output_port>,
+    builtin::type_check_pred<Ptr_tag::output_port>,
     {1}}},
 
 {"open-input-file", {

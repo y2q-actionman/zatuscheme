@@ -9,7 +9,7 @@
 
 typedef Lisp_ptr(*NativeFunc)();
 
-namespace ProcFlag {
+namespace proc_flag {
   enum class Variadic : bool { f = false, t = true };
 
   enum class Passing : unsigned char{
@@ -34,19 +34,19 @@ namespace ProcFlag {
 struct ProcInfo {
   int required_args;
   int max_args;
-  ProcFlag::Passing passing;
-  ProcFlag::Returning returning;
-  ProcFlag::MoveReturnValue move_ret;
-  ProcFlag::Entering entering;
-  ProcFlag::Leaving leaving;
+  proc_flag::Passing passing;
+  proc_flag::Returning returning;
+  proc_flag::MoveReturnValue move_ret;
+  proc_flag::Entering entering;
+  proc_flag::Leaving leaving;
 
   constexpr ProcInfo(int rargs,
                      int margs,
-                     ProcFlag::Passing p = ProcFlag::Passing::eval,
-                     ProcFlag::Returning r = ProcFlag::Returning::pass,
-                     ProcFlag::MoveReturnValue m = ProcFlag::MoveReturnValue::t,
-                     ProcFlag::Entering e = ProcFlag::Entering::at_jump,
-                     ProcFlag::Leaving l = ProcFlag::Leaving::immediate)
+                     proc_flag::Passing p = proc_flag::Passing::eval,
+                     proc_flag::Returning r = proc_flag::Returning::pass,
+                     proc_flag::MoveReturnValue m = proc_flag::MoveReturnValue::t,
+                     proc_flag::Entering e = proc_flag::Entering::at_jump,
+                     proc_flag::Leaving l = proc_flag::Leaving::immediate)
     : required_args(rargs),
       max_args(margs),
       passing(p),
@@ -57,14 +57,14 @@ struct ProcInfo {
 
   // TODO: use delegating constructor
   constexpr ProcInfo(int rargs,
-                     ProcFlag::Variadic v = ProcFlag::Variadic::f,
-                     ProcFlag::Passing p = ProcFlag::Passing::eval,
-                     ProcFlag::Returning r = ProcFlag::Returning::pass,
-                     ProcFlag::MoveReturnValue m = ProcFlag::MoveReturnValue::t,
-                     ProcFlag::Entering e = ProcFlag::Entering::at_jump,
-                     ProcFlag::Leaving l = ProcFlag::Leaving::immediate)
+                     proc_flag::Variadic v = proc_flag::Variadic::f,
+                     proc_flag::Passing p = proc_flag::Passing::eval,
+                     proc_flag::Returning r = proc_flag::Returning::pass,
+                     proc_flag::MoveReturnValue m = proc_flag::MoveReturnValue::t,
+                     proc_flag::Entering e = proc_flag::Entering::at_jump,
+                     proc_flag::Leaving l = proc_flag::Leaving::immediate)
     : required_args(rargs),
-      max_args((v == ProcFlag::Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
+      max_args((v == proc_flag::Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
       passing(p),
       returning(r),
       move_ret(m),
@@ -75,7 +75,7 @@ struct ProcInfo {
 // static_assert(sizeof(ProcInfo) == (sizeof(int) + sizeof(int) + sizeof(int)),
 //               "ProcInfo became too big!!");
 
-std::pair<int, ProcFlag::Variadic> parse_func_arg(Lisp_ptr);
+std::pair<int, proc_flag::Variadic> parse_func_arg(Lisp_ptr);
 
 class IProcedure{
 public:
@@ -152,7 +152,7 @@ public:
   { return vm_; }
 
 private:
-  static constexpr ProcInfo cont_procinfo = ProcInfo{0, ProcFlag::Variadic::t};
+  static constexpr ProcInfo cont_procinfo = ProcInfo{0, proc_flag::Variadic::t};
   const VM vm_;
 };
 

@@ -12,12 +12,14 @@
 
 using namespace std;
 
-Lisp_ptr type_check_procedure(){
+namespace builtin {
+
+Lisp_ptr procedurep(){
   ZsArgs args;
   return Lisp_ptr{is_procedure(args[0])};
 }
 
-Lisp_ptr apply_func(){
+Lisp_ptr apply(){
   ZsArgs args;
 
   auto proc = args[0];
@@ -48,7 +50,7 @@ Lisp_ptr apply_func(){
   return {};
 }
 
-Lisp_ptr func_force(){
+Lisp_ptr force(){
   ZsArgs args;
 
   auto d = args[0].get<Delay*>();
@@ -71,7 +73,7 @@ Lisp_ptr func_force(){
   return {};
 }
 
-Lisp_ptr proc_values(){
+Lisp_ptr values(){
   ZsArgs args;
   vm.return_value.assign(begin(args), end(args));
   return {};
@@ -176,3 +178,5 @@ Lisp_ptr dynamic_wind(){
   proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
   return {};
 }
+
+} // namespace builtin

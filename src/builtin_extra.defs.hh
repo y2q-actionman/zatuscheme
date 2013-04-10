@@ -1,35 +1,35 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"traditional-transformer", {
-    traditional_transformer,
+    builtin::traditional_transformer,
     {1}}},
 {"gensym", {
-    gensym,
+    builtin::gensym,
     {0}}},
 {"sc-macro-transformer", {
-    sc_macro_transformer,
+    builtin::sc_macro_transformer,
     {1}}},
 {"make-syntactic-closure", {
-    make_syntactic_closure,
+    builtin::make_syntactic_closure,
     {3}}},
 {"capture-syntactic-environment", {
-    capture_env,
+    builtin::capture_syntactic_environment,
     {1}}},
 {"identifier?", {
-    proc_identifierp,
+    builtin::identifierp,
     {1}}},
 {"identifier=?", {
-    proc_identifier_eq,
+    builtin::identifier_eq,
     {4}}},
 {"make-synthetic-identifier", {
-    make_synthetic_identifier,
+    builtin::make_synthetic_identifier,
     {1}}},
 {"exit", {
-    exit_func,
+    builtin::exit,
     {0}}},
 {"transcript-on", {
-    transcript_on,
+    builtin::transcript_on,
     {0}}},
 {"transcript-off", {
-    transcript_off,
+    builtin::transcript_off,
     {0}}},

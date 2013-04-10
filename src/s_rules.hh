@@ -34,7 +34,7 @@ public:
 
 private:
   static constexpr ProcInfo sr_procinfo
-  = ProcInfo{2, 2, ProcFlag::Passing::whole, ProcFlag::Returning::code, ProcFlag::MoveReturnValue::f,
+  = ProcInfo{2, 2, proc_flag::Passing::whole, proc_flag::Returning::code, proc_flag::MoveReturnValue::f,
              // Entering::at_jump, Leaving::after_returning_op};
   };
 

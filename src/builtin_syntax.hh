@@ -3,8 +3,8 @@
 
 #include "decl.hh"
 
-Lisp_ptr whole_function_error();
-Lisp_ptr whole_function_pass_through();
+namespace builtin {
+
 Lisp_ptr syntax_quote();
 Lisp_ptr syntax_lambda();
 Lisp_ptr syntax_if();
@@ -23,5 +23,7 @@ Lisp_ptr syntax_define_syntax();
 Lisp_ptr syntax_let_syntax();
 Lisp_ptr syntax_letrec_syntax();
 Lisp_ptr syntax_syntax_rules();
+
+} 
 
 #endif // BUILTIN_SYNTAX_HH

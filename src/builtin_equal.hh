@@ -3,8 +3,12 @@
 
 #include "lisp_ptr.hh"
 
-Lisp_ptr eq_proc();
-Lisp_ptr eqv_proc();
-Lisp_ptr equal_proc();
+namespace builtin {
+
+Lisp_ptr eq();
+Lisp_ptr eqv();
+Lisp_ptr equal();
+
+}
 
 #endif // BUILTIN_EQUAL_HH

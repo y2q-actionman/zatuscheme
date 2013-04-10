@@ -3,6 +3,8 @@
 
 #include "decl.hh"
 
+namespace builtin {
+
 Lisp_ptr numberp();
 Lisp_ptr complexp();
 Lisp_ptr realp();
@@ -66,5 +68,7 @@ Lisp_ptr number_e_to_i();
 
 Lisp_ptr number_from_string();
 Lisp_ptr number_to_string();
+
+}
 
 #endif // BUILTIN_NUMERIC_HH

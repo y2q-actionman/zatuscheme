@@ -15,7 +15,7 @@
 #include "builtin.hh"
 
 using namespace std;
-using namespace ProcFlag;
+using namespace proc_flag;
 
 static
 Lisp_ptr whole_function_error(const char* opname){
@@ -23,6 +23,7 @@ Lisp_ptr whole_function_error(const char* opname){
   throw zs_error_arg1(opname, "cannot be used as operator!!");
 }
 
+namespace builtin {
 
 Lisp_ptr syntax_quote(){
   ZsArgs args;
@@ -264,3 +265,4 @@ Lisp_ptr syntax_syntax_rules(){
     });
 }
     
+} // namespace builtin

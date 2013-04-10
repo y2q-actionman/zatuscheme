@@ -17,7 +17,7 @@
 #include "builtin.hh"
 
 using namespace std;
-using namespace ProcFlag;
+using namespace proc_flag;
 
 bool dump_mode = false;
 

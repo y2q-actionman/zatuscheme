@@ -1,7 +1,7 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"char?", {
-    type_check_pred<Ptr_tag::character>,
+    builtin::type_check_pred<Ptr_tag::character>,
     {1}}},
 
 {"char=?", {

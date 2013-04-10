@@ -7,7 +7,7 @@
 #include "s_closure.hh"
 #include "s_rules.hh"
 
-using namespace ProcFlag;
+using namespace proc_flag;
 
 std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
   int argc = 0;

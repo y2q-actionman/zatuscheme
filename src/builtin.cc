@@ -28,7 +28,7 @@
 #include "builtin_vector.hh"
 
 using namespace std;
-using namespace ProcFlag;
+using namespace proc_flag;
 
 namespace {
 
@@ -36,7 +36,6 @@ static const char null_env_symname[] = "null-env-value";
 static const char r5rs_env_symname[] = "r5rs-env-value";
 static const char interaction_env_symname[] = "interaction-env-value";
 
-static
 Lisp_ptr env_pick_2(const char* name){
   ZsArgs args;
 
@@ -51,34 +50,6 @@ Lisp_ptr env_pick_2(const char* name){
 
   return vm.frame()->find(intern(vm.symtable(), name));
 }
-
-Lisp_ptr env_r5rs(){
-  return env_pick_2(r5rs_env_symname);
-}
-
-Lisp_ptr env_null(){
-  return env_pick_2(null_env_symname);
-}
-
-Lisp_ptr env_interactive(){
-  ZsArgs args;
-  return vm.frame()->find(intern(vm.symtable(), interaction_env_symname));
-}
-  
-
-Lisp_ptr eval_func(){
-  ZsArgs args;
-  auto env = args[1].get<Env*>();
-  if(!env){
-    throw builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
-  }
-
-  auto oldenv = vm.frame();
-  vm.set_frame(env);
-  vm.return_value = {oldenv, vm_op_leave_frame, args[0]};
-  return {};
-}
-
 
 void load_internal(const string& str){
   istringstream ss{str};
@@ -102,7 +73,37 @@ void load_internal(const string& str){
   }
 }
 
-Lisp_ptr load_func(){
+} //namespace
+
+namespace builtin {
+
+Lisp_ptr eval(){
+  ZsArgs args;
+  auto env = args[1].get<Env*>();
+  if(!env){
+    throw builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
+  }
+
+  auto oldenv = vm.frame();
+  vm.set_frame(env);
+  vm.return_value = {oldenv, vm_op_leave_frame, args[0]};
+  return {};
+}
+
+Lisp_ptr env_r5rs(){
+  return env_pick_2(r5rs_env_symname);
+}
+
+Lisp_ptr env_null(){
+  return env_pick_2(null_env_symname);
+}
+
+Lisp_ptr env_interactive(){
+  ZsArgs args;
+  return vm.frame()->find(intern(vm.symtable(), interaction_env_symname));
+}
+
+Lisp_ptr load(){
   ZsArgs args;
   auto str = args[0].get<String*>();
   if(!str){
@@ -113,7 +114,7 @@ Lisp_ptr load_func(){
   return Lisp_ptr{true};
 }
 
-} //namespace
+} // namespace builtin
 
 static const BuiltinNProc builtin_syntax_funcs[] = {
 #include "builtin_syntax.defs.hh"

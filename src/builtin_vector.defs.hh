@@ -1,7 +1,7 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
 {"vector?", {
-    type_check_pred<Ptr_tag::vector>,
+    builtin::type_check_pred<Ptr_tag::vector>,
     {1}}},
 {"make-vector", {
     builtin::vector_make,
