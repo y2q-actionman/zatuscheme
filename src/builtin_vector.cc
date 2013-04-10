@@ -20,9 +20,7 @@ zs_error vector_type_check_failed(const char* func_name, Lisp_ptr p){
 
 namespace builtin {
 
-Lisp_ptr vector_make(){
-  ZsArgs args;
-
+Lisp_ptr vector_make(ZsArgs args){
   if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("make-vector", Ptr_tag::integer, args[0]);
   }
@@ -38,14 +36,11 @@ Lisp_ptr vector_make(){
   }
 }
 
-Lisp_ptr vector_vector(){
-  ZsArgs args;
+Lisp_ptr vector_vector(ZsArgs args){
   return {new Vector(args.begin(), args.end())};
 }
 
-Lisp_ptr vector_length(){
-  ZsArgs args;
-
+Lisp_ptr vector_length(ZsArgs args){
   auto v = args[0].get<Vector*>();
   if(!v){
     throw vector_type_check_failed("vector-length", args[0]);
@@ -56,9 +51,7 @@ Lisp_ptr vector_length(){
       static_cast<int>(v->size())};
 }
 
-Lisp_ptr vector_ref(){
-  ZsArgs args;
-
+Lisp_ptr vector_ref(ZsArgs args){
   auto v = args[0].get<Vector*>();
   if(!v){
     throw vector_type_check_failed("vector-ref", args[0]);
@@ -78,9 +71,7 @@ Lisp_ptr vector_ref(){
   return (*v)[ind];
 }
 
-Lisp_ptr vector_set(){
-  ZsArgs args;
-
+Lisp_ptr vector_set(ZsArgs args){
   auto v = args[0].get<Vector*>();
   if(!v){
     throw vector_type_check_failed("vector-set!", args[0]);
@@ -101,9 +92,7 @@ Lisp_ptr vector_set(){
   return args[2];
 }
 
-Lisp_ptr vector_to_list(){
-  ZsArgs args;
-
+Lisp_ptr vector_to_list(ZsArgs args){
   auto v = args[0].get<Vector*>();
   if(!v){
     throw vector_type_check_failed("vector->list", args[0]);
@@ -112,9 +101,7 @@ Lisp_ptr vector_to_list(){
   return make_cons_list(v->begin(), v->end());
 }
 
-Lisp_ptr vector_from_list(){
-  ZsArgs args;
-
+Lisp_ptr vector_from_list(ZsArgs args){
   if(args[0].tag() != Ptr_tag::cons){
     throw builtin_type_check_failed("list->vector", Ptr_tag::cons, args[0]);
   }
@@ -122,9 +109,7 @@ Lisp_ptr vector_from_list(){
   return {new Vector(begin(args[0]), end(args[0]))};
 }
 
-Lisp_ptr vector_fill(){
-  ZsArgs args;
-
+Lisp_ptr vector_fill(ZsArgs args){
   auto v = args[0].get<Vector*>();
   if(!v){
     throw vector_type_check_failed("vector-fill!", args[0]);

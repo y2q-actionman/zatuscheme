@@ -151,15 +151,6 @@ Lisp_ptr number_unary(Lisp_ptr arg1,
 }
 
 template<typename IFun, typename RFun, typename CFun>
-inline
-Lisp_ptr number_unary(const char* name, const IFun& ifun,
-                      const RFun& rfun, const CFun& cfun){
-  ZsArgs args;
-  return number_unary(args[0], name, ifun, rfun, cfun);
-}
-
-
-template<typename IFun, typename RFun, typename CFun>
 Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
                        const char* name, const IFun& ifun,
                        const RFun& rfun, const CFun& cfun){
@@ -185,14 +176,6 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
   }
 }
 
-template<typename IFun, typename RFun, typename CFun>
-Lisp_ptr number_binary(const char* name, const IFun& ifun,
-                       const RFun& rfun, const CFun& cfun){
-  ZsArgs args;
-  return number_binary(args[0], args[1], name, ifun, rfun, cfun);
-}
-
-
 template<typename IFun, typename RFun, typename CFun, typename Iter>
 Lisp_ptr number_fold(const Iter& args_begin, const Iter& args_end,
                      Lisp_ptr init,
@@ -206,16 +189,6 @@ Lisp_ptr number_fold(const Iter& args_begin, const Iter& args_end,
 
   return acc;
 }
-
-template<typename IFun, typename RFun, typename CFun>
-Lisp_ptr number_fold(Lisp_ptr init,
-                     const char* name, const IFun& ifun,
-                     const RFun& rfun, const CFun& cfun){
-  ZsArgs args;
-  return number_fold(begin(args), end(args), init,
-                     name, ifun, rfun, cfun);
-}
-
 
 template<typename IFun, typename RFun, typename CFun, typename Iter>
 Lisp_ptr number_all_2(const Iter& args_begin, const Iter& args_end,
@@ -254,15 +227,6 @@ Lisp_ptr number_all_2(const Iter& args_begin, const Iter& args_end,
   return Lisp_ptr{true};
 }
 
-template<typename IFun, typename RFun, typename CFun>
-Lisp_ptr number_all_2(const char* name, const IFun& ifun,
-                      const RFun& rfun, const CFun& cfun){
-  ZsArgs args;
-  return number_all_2(begin(args), end(args),
-                      name, ifun, rfun, cfun);
-}
-
-
 struct inacceptable_number_type{
   template<typename T>
   bool operator()(T) const{
@@ -286,81 +250,73 @@ struct pass_through{
 
 namespace builtin {
 
-Lisp_ptr numberp(){
-  ZsArgs args;
+Lisp_ptr numberp(ZsArgs args){
   return Lisp_ptr{is_numeric_type(args[0])};
 }
 
-Lisp_ptr complexp(){
-  ZsArgs args;
+Lisp_ptr complexp(ZsArgs args){
   return Lisp_ptr{is_complex_type(args[0])};
 }
 
-Lisp_ptr realp(){
-  ZsArgs args;
+Lisp_ptr realp(ZsArgs args){
   return Lisp_ptr{is_real_type(args[0])};
 }
 
-Lisp_ptr rationalp(){
-  ZsArgs args;
+Lisp_ptr rationalp(ZsArgs args){
   return Lisp_ptr{is_rational_type(args[0])};
 }
 
-Lisp_ptr integerp(){
-  ZsArgs args;
+Lisp_ptr integerp(ZsArgs args){
   return Lisp_ptr{is_integer_type(args[0])};
 }
 
-Lisp_ptr exactp(){
-  ZsArgs args;
+Lisp_ptr exactp(ZsArgs args){
   return Lisp_ptr{args[0].tag() == Ptr_tag::integer};
 }
 
-Lisp_ptr inexactp(){
-  ZsArgs args;
+Lisp_ptr inexactp(ZsArgs args){
   return Lisp_ptr{args[0].tag() == Ptr_tag::complex
                   || args[0].tag() == Ptr_tag::real};
 }
 
 
-Lisp_ptr number_equal(){
-  return number_all_2("=",
+Lisp_ptr number_equal(ZsArgs args){
+  return number_all_2(begin(args), end(args), "=",
                       equal_to<int>(),
                       equal_to<double>(),
                       equal_to<Complex>());
 }
 
-Lisp_ptr number_less(){
-  return number_all_2("<",
+Lisp_ptr number_less(ZsArgs args){
+  return number_all_2(begin(args), end(args), "<",
                       less<int>(),
                       less<double>(),
                       inacceptable_number_type());
 }
 
-Lisp_ptr number_greater(){
-  return number_all_2(">",
+Lisp_ptr number_greater(ZsArgs args){
+  return number_all_2(begin(args), end(args), ">",
                       greater<int>(),
                       greater<double>(),
                       inacceptable_number_type());
 }
   
-Lisp_ptr number_less_eq(){
-  return number_all_2("<=",
+Lisp_ptr number_less_eq(ZsArgs args){
+  return number_all_2(begin(args), end(args), "<=",
                       less_equal<int>(),
                       less_equal<double>(),
                       inacceptable_number_type());
 }
   
-Lisp_ptr number_greater_eq(){
-  return number_all_2(">",
+Lisp_ptr number_greater_eq(ZsArgs args){
+  return number_all_2(begin(args), end(args), ">",
                       greater_equal<int>(),
                       greater_equal<double>(),
                       inacceptable_number_type());
 }
 
 
-Lisp_ptr number_max(){
-  ZsArgs args;
+Lisp_ptr number_max(ZsArgs args){
   return number_fold(next(args.begin()), args.end(),
                      args[0], "max",
                      [](int i1, int i2){ return max(i1, i2); },
@@ -368,8 +324,7 @@ Lisp_ptr number_max(){
                      inacceptable_number_type());
 }
 
-Lisp_ptr number_min(){
-  ZsArgs args;
+Lisp_ptr number_min(ZsArgs args){
   return number_fold(next(args.begin()), args.end(),
                      args[0], "min",
                      [](int i1, int i2){ return min(i1, i2); },
@@ -377,23 +332,23 @@ Lisp_ptr number_min(){
                      inacceptable_number_type());
 }
 
-Lisp_ptr number_plus(){
-  return number_fold(Lisp_ptr{Ptr_tag::integer, 0}, "+",
+Lisp_ptr number_plus(ZsArgs args){
+  return number_fold(begin(args), end(args),
+                     Lisp_ptr{Ptr_tag::integer, 0}, "+",
                      plus<int>(),
                      plus<double>(),
                      plus<Complex>());
 }
 
-Lisp_ptr number_multiple(){
-  return number_fold(Lisp_ptr{Ptr_tag::integer, 1}, "*",
+Lisp_ptr number_multiple(ZsArgs args){
+  return number_fold(begin(args), end(args),
+                     Lisp_ptr{Ptr_tag::integer, 1}, "*",
                      multiplies<int>(),
                      multiplies<double>(),
                      multiplies<Complex>());
 }
 
-Lisp_ptr number_minus(){
-  ZsArgs args;
-
+Lisp_ptr number_minus(ZsArgs args){
   if(!is_numeric_type(args[0])){
     throw number_type_check_failed("-", args[0]);
   }
@@ -412,9 +367,7 @@ Lisp_ptr number_minus(){
   }
 }
 
-Lisp_ptr number_divide(){
-  ZsArgs args;
-
+Lisp_ptr number_divide(ZsArgs args){
   if(!is_numeric_type(args[0])){
     throw number_type_check_failed("/", args[0]);
   }
@@ -441,23 +394,23 @@ Lisp_ptr number_divide(){
   }
 }
 
-Lisp_ptr number_abs(){
-  return number_unary("abs",
+Lisp_ptr number_abs(ZsArgs args){
+  return number_unary(args[0], "abs",
                       [](int i){ return std::abs(i);},
                       [](double d){ return std::abs(d);},
                       inacceptable_number_type());
 }
 
 
-Lisp_ptr number_quot(){
-  return number_binary("quotient",
+Lisp_ptr number_quot(ZsArgs args){
+  return number_binary(args[0], args[1], "quotient",
                        divides<int>(),
                        inacceptable_number_type(),
                        inacceptable_number_type());
 }
 
-Lisp_ptr number_rem(){
-  return number_binary("remainder",
+Lisp_ptr number_rem(ZsArgs args){
+  return number_binary(args[0], args[1], "remainder",
                        [](int i1, int i2) -> int{
                          auto q = i1 / i2;
                          return i1 - (q * i2);
@@ -466,8 +419,8 @@ Lisp_ptr number_rem(){
                        inacceptable_number_type());
 }
 
-Lisp_ptr number_mod(){
-  return number_binary("modulo", 
+Lisp_ptr number_mod(ZsArgs args){
+  return number_binary(args[0], args[1], "modulo", 
                        [](int i1, int i2) -> int{
                          auto m = i1 % i2;
 
@@ -481,8 +434,9 @@ Lisp_ptr number_mod(){
                        inacceptable_number_type());
 }
 
-Lisp_ptr number_gcd(){
-  return number_fold(Lisp_ptr{Ptr_tag::integer, 0}, "gcd",
+Lisp_ptr number_gcd(ZsArgs args){
+  return number_fold(begin(args), end(args),
+                     Lisp_ptr{Ptr_tag::integer, 0}, "gcd",
                      [](int i1, int i2){
                        return gcd(i1, i2);
                      },
@@ -490,8 +444,9 @@ Lisp_ptr number_gcd(){
                      inacceptable_number_type());
 }
 
-Lisp_ptr number_lcm(){
-  return number_fold(Lisp_ptr{Ptr_tag::integer, 1}, "lcm",
+Lisp_ptr number_lcm(ZsArgs args){
+  return number_fold(begin(args), end(args),
+                     Lisp_ptr{Ptr_tag::integer, 1}, "lcm",
                      [](int i1, int i2){
                        return abs(i1 * i2 / gcd(i1, i2));
                      },
@@ -499,8 +454,7 @@ Lisp_ptr number_lcm(){
                      inacceptable_number_type());
 }
 
-Lisp_ptr number_numerator(){
-  ZsArgs args;
+Lisp_ptr number_numerator(ZsArgs args){
   if(!is_numeric_type(args[0])){
     throw number_type_check_failed("numerator", args[0]);
   }
@@ -508,8 +462,7 @@ Lisp_ptr number_numerator(){
   throw zs_error("internal error: native func 'numerator' is not implemented.\n");
 }
 
-Lisp_ptr number_denominator(){
-  ZsArgs args;
+Lisp_ptr number_denominator(ZsArgs args){
   if(!is_numeric_type(args[0])){
     throw number_type_check_failed("denominator", args[0]);
   }
@@ -518,38 +471,36 @@ Lisp_ptr number_denominator(){
 }
 
 
-Lisp_ptr number_floor(){
-  return number_unary("floor",
+Lisp_ptr number_floor(ZsArgs args){
+  return number_unary(args[0], "floor",
                       pass_through(),
                       [](double d){ return std::floor(d);},
                       inacceptable_number_type());
 }
 
-Lisp_ptr number_ceil(){
-  return number_unary("ceiling",
+Lisp_ptr number_ceil(ZsArgs args){
+  return number_unary(args[0], "ceiling",
                       pass_through(),
                       [](double d){ return std::ceil(d);},
                       inacceptable_number_type());
 }
 
-Lisp_ptr number_trunc(){
-  return number_unary("truncate",
+Lisp_ptr number_trunc(ZsArgs args){
+  return number_unary(args[0], "truncate",
                       pass_through(),
                       [](double d){ return std::trunc(d);},
                       inacceptable_number_type());
 }
 
-Lisp_ptr number_round(){
-  return number_unary("round",
+Lisp_ptr number_round(ZsArgs args){
+  return number_unary(args[0], "round",
                       pass_through(),
                       [](double d){ return std::round(d);},
                       inacceptable_number_type());
 }
 
 
-Lisp_ptr number_rationalize(){
-  ZsArgs args;
-
+Lisp_ptr number_rationalize(ZsArgs args){
   for(auto i = 0; i < 2; ++i){
     if(!is_numeric_type(args[i])){
       throw number_type_check_failed("rationalize", args[i]);
@@ -560,58 +511,56 @@ Lisp_ptr number_rationalize(){
 }
 
 
-Lisp_ptr number_exp(){
-  return number_unary("exp",
+Lisp_ptr number_exp(ZsArgs args){
+  return number_unary(args[0], "exp",
                       [](int i){ return std::exp(i);},
                       [](double d){ return std::exp(d);},
                       [](Complex z){ return std::exp(z);});
 }
 
-Lisp_ptr number_log(){
-  return number_unary("log",
+Lisp_ptr number_log(ZsArgs args){
+  return number_unary(args[0], "log",
                       [](int i){ return std::log(i);},
                       [](double d){ return std::log(d);},
                       [](Complex z){ return std::log(z);});
 }
 
-Lisp_ptr number_sin(){
-  return number_unary("sin",
+Lisp_ptr number_sin(ZsArgs args){
+  return number_unary(args[0], "sin",
                       [](int i){ return std::sin(i);},
                       [](double d){ return std::sin(d);},
                       [](Complex z){ return std::sin(z);});
 }
 
-Lisp_ptr number_cos(){
-  return number_unary("cos",
+Lisp_ptr number_cos(ZsArgs args){
+  return number_unary(args[0], "cos",
                       [](int i){ return std::cos(i);},
                       [](double d){ return std::cos(d);},
                       [](Complex z){ return std::cos(z);});
 }
 
-Lisp_ptr number_tan(){
-  return number_unary("tan",
+Lisp_ptr number_tan(ZsArgs args){
+  return number_unary(args[0], "tan",
                       [](int i){ return std::tan(i);},
                       [](double d){ return std::tan(d);},
                       [](Complex z){ return std::tan(z);});
 }
 
-Lisp_ptr number_asin(){
-  return number_unary("asin",
+Lisp_ptr number_asin(ZsArgs args){
+  return number_unary(args[0], "asin",
                       [](int i){ return std::asin(i);},
                       [](double d){ return std::asin(d);},
                       [](Complex z){ return std::asin(z);});
 }
 
-Lisp_ptr number_acos(){
-  return number_unary("acos",
+Lisp_ptr number_acos(ZsArgs args){
+  return number_unary(args[0], "acos",
                       [](int i){ return std::acos(i);},
                       [](double d){ return std::acos(d);},
                       [](Complex z){ return std::acos(z);});
 }
 
-Lisp_ptr number_atan(){
-  ZsArgs args;
-
+Lisp_ptr number_atan(ZsArgs args){
   switch(args.size()){
   case 1:  // std::atan()
     return number_unary(args[0], "atan",
@@ -632,16 +581,16 @@ Lisp_ptr number_atan(){
   }
 }
 
-Lisp_ptr number_sqrt(){
-  return number_unary("sqrt",
+Lisp_ptr number_sqrt(ZsArgs args){
+  return number_unary(args[0], "sqrt",
                       [](int i){ return std::sqrt(i);},
                       [](double d){ return std::sqrt(d);},
                       [](Complex z){ return std::sqrt(z);});
 }
 
 
-Lisp_ptr number_expt(){
-  return number_binary("expt",
+Lisp_ptr number_expt(ZsArgs args){
+  return number_binary(args[0], args[1], "expt",
                        [](int i1, int i2){
                          return std::pow(i1, i2);
                        },
@@ -653,8 +602,8 @@ Lisp_ptr number_expt(){
                        });
 }
 
-Lisp_ptr number_rect(){
-  return number_binary("make-rectangular",
+Lisp_ptr number_rect(ZsArgs args){
+  return number_binary(args[0], args[1], "make-rectangular",
                        [](int i1, int i2){
                          return Complex(i1, i2);
                        },
@@ -664,8 +613,8 @@ Lisp_ptr number_rect(){
                        inacceptable_number_type());
 }
 
-Lisp_ptr number_polar(){
-  return number_binary("make-polar",
+Lisp_ptr number_polar(ZsArgs args){
+  return number_binary(args[0], args[1], "make-polar",
                        [](int i1, int i2){
                          return polar(static_cast<double>(i1),
                                       static_cast<double>(i2));
@@ -677,54 +626,52 @@ Lisp_ptr number_polar(){
 }
 
 
-Lisp_ptr number_real(){
-  return number_unary("real-part",
+Lisp_ptr number_real(ZsArgs args){
+  return number_unary(args[0], "real-part",
                       inacceptable_number_type(),
                       inacceptable_number_type(),
                       [](Complex z){ return z.real();});
 }
 
-Lisp_ptr number_imag(){
-  return number_unary("imag-part",
+Lisp_ptr number_imag(ZsArgs args){
+  return number_unary(args[0], "imag-part",
                       inacceptable_number_type(),
                       inacceptable_number_type(),
                       [](Complex z){ return z.imag();});
 }
 
-Lisp_ptr number_mag(){
-  return number_unary("magnitude",
+Lisp_ptr number_mag(ZsArgs args){
+  return number_unary(args[0], "magnitude",
                       inacceptable_number_type(),
                       inacceptable_number_type(),
                       [](Complex z){ return std::abs(z);});
 }
 
-Lisp_ptr number_angle(){
-  return number_unary("angle",
+Lisp_ptr number_angle(ZsArgs args){
+  return number_unary(args[0], "angle",
                       inacceptable_number_type(),
                       inacceptable_number_type(),
                       [](Complex z){ return arg(z);});
 }
 
 
-Lisp_ptr number_i_to_e(){
+Lisp_ptr number_i_to_e(ZsArgs args){
   // MEMO: add complex<int> type??
-  return number_unary("inexact->exact",
+  return number_unary(args[0], "inexact->exact",
                       pass_through(),
                       [](double d){ return static_cast<int>(d);},
                       inacceptable_number_type());
 }
 
-Lisp_ptr number_e_to_i(){
-  return number_unary("exact->inexact",
+Lisp_ptr number_e_to_i(ZsArgs args){
+  return number_unary(args[0], "exact->inexact",
                       [](int i){ return static_cast<double>(i);},
                       pass_through(),
                       pass_through());
 }
 
 
-Lisp_ptr number_from_string(){
-  ZsArgs args;
-
+Lisp_ptr number_from_string(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw zs_error_arg1("string->number", "passed arg is not string", {args[0]});
@@ -762,9 +709,7 @@ Lisp_ptr number_from_string(){
   }
 }
 
-Lisp_ptr number_to_string(){
-  ZsArgs args;
-
+Lisp_ptr number_to_string(ZsArgs args){
   if(!is_numeric_type(args[0])){
     throw zs_error_arg1("number->string", "passed arg is not number", {args[0]});
   }

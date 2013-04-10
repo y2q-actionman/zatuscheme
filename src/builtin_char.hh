@@ -5,25 +5,25 @@
 
 namespace builtin {
 
-Lisp_ptr char_eq();
-Lisp_ptr char_less();
-Lisp_ptr char_greater();
-Lisp_ptr char_less_eq();
-Lisp_ptr char_greater_eq();
-Lisp_ptr char_ci_eq();
-Lisp_ptr char_ci_less();
-Lisp_ptr char_ci_greater();
-Lisp_ptr char_ci_less_eq();
-Lisp_ptr char_ci_greater_eq();
-Lisp_ptr char_isalpha();
-Lisp_ptr char_isdigit();
-Lisp_ptr char_isspace();
-Lisp_ptr char_isupper();
-Lisp_ptr char_islower();
-Lisp_ptr char_to_int();
-Lisp_ptr char_from_int();
-Lisp_ptr char_toupper();
-Lisp_ptr char_tolower();
+Lisp_ptr char_eq(ZsArgs);
+Lisp_ptr char_less(ZsArgs);
+Lisp_ptr char_greater(ZsArgs);
+Lisp_ptr char_less_eq(ZsArgs);
+Lisp_ptr char_greater_eq(ZsArgs);
+Lisp_ptr char_ci_eq(ZsArgs);
+Lisp_ptr char_ci_less(ZsArgs);
+Lisp_ptr char_ci_greater(ZsArgs);
+Lisp_ptr char_ci_less_eq(ZsArgs);
+Lisp_ptr char_ci_greater_eq(ZsArgs);
+Lisp_ptr char_isalpha(ZsArgs);
+Lisp_ptr char_isdigit(ZsArgs);
+Lisp_ptr char_isspace(ZsArgs);
+Lisp_ptr char_isupper(ZsArgs);
+Lisp_ptr char_islower(ZsArgs);
+Lisp_ptr char_to_int(ZsArgs);
+Lisp_ptr char_from_int(ZsArgs);
+Lisp_ptr char_toupper(ZsArgs);
+Lisp_ptr char_tolower(ZsArgs);
 
 }
 

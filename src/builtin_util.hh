@@ -47,8 +47,7 @@ private:
 namespace builtin {
 
 template <Ptr_tag p>
-Lisp_ptr type_check_pred(){
-  ZsArgs args;
+Lisp_ptr type_check_pred(ZsArgs args){
   return Lisp_ptr{args[0].tag() == p};
 }
 

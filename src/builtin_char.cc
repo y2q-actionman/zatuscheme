@@ -18,18 +18,17 @@ zs_error char_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 template<typename Fun>
-Lisp_ptr char_compare(const char* name, Fun&& fun){
-  ZsArgs args;
-  char c[2];
-
-  for(auto i = 0; i < 2; ++i){
-    c[i] = args[i].get<char>();
-    if(!c[i]){
-      throw char_type_check_failed(name, args[i]);
-    }
+Lisp_ptr char_compare(Lisp_ptr arg1, Lisp_ptr arg2,
+                      const char* name, const Fun& fun){
+  if(arg1.tag() != Ptr_tag::character){
+    throw char_type_check_failed(name, arg1);
   }
 
-  return Lisp_ptr{fun(c[0], c[1])};
+  if(arg2.tag() != Ptr_tag::character){
+    throw char_type_check_failed(name, arg2);
+  }
+
+  return Lisp_ptr{fun(arg1.get<char>(), arg2.get<char>())};
 }
 
 template<typename Fun>
@@ -41,106 +40,108 @@ struct ci_comparator{
 };
 
 template<typename Fun>
-Lisp_ptr char_pred(Fun&& fun){
-  ZsArgs args;
-
-  auto c = args[0].get<char>();
-  if(!c){
+Lisp_ptr char_pred(Lisp_ptr arg1, const Fun& fun){
+  if(arg1.tag() != Ptr_tag::character){
     return Lisp_ptr{false};
   }
 
-  return Lisp_ptr{fun(c)};
+  return Lisp_ptr{fun(arg1.get<char>())};
 }
 
 template<typename Fun>
-Lisp_ptr char_conversion(const char* name, Fun&& fun){
-  ZsArgs args;
-
-  auto c = args[0].get<char>();
-  if(!c){
-    throw char_type_check_failed(name, args[0]);
+Lisp_ptr char_conversion(Lisp_ptr arg1, const char* name, const Fun& fun){
+  if(arg1.tag() != Ptr_tag::character){
+    throw char_type_check_failed(name, arg1);
   }
 
-  return Lisp_ptr{fun(c)};
+  return Lisp_ptr{fun(arg1.get<char>())};
 }
   
 } // namespace
 
 namespace builtin {
 
-Lisp_ptr char_eq(){
-  return char_compare("char=?", std::equal_to<char>());
+Lisp_ptr char_eq(ZsArgs args){
+  return char_compare(args[0], args[1], "char=?",
+                      std::equal_to<char>());
 }
 
-Lisp_ptr char_less(){
-  return char_compare("char<?", std::less<char>());
+Lisp_ptr char_less(ZsArgs args){
+  return char_compare(args[0], args[1], "char<?",
+                      std::less<char>());
 }
 
-Lisp_ptr char_greater(){
-  return char_compare("char>?", std::greater<char>());
+Lisp_ptr char_greater(ZsArgs args){
+  return char_compare(args[0], args[1], "char>?",
+                      std::greater<char>());
 }
 
-Lisp_ptr char_less_eq(){
-  return char_compare("char<=?", std::less_equal<char>());
+Lisp_ptr char_less_eq(ZsArgs args){
+  return char_compare(args[0], args[1], "char<=?",
+                      std::less_equal<char>());
 }
 
-Lisp_ptr char_greater_eq(){
-  return char_compare("char>=?", std::greater_equal<char>());
+Lisp_ptr char_greater_eq(ZsArgs args){
+  return char_compare(args[0], args[1], "char>=?",
+                      std::greater_equal<char>());
 }
   
 
-Lisp_ptr char_ci_eq(){
-  return char_compare("char-ci=?", ci_comparator<std::equal_to<int> >());
+Lisp_ptr char_ci_eq(ZsArgs args){
+  return char_compare(args[0], args[1], "char-ci=?",
+                      ci_comparator<std::equal_to<int> >());
 }
 
-Lisp_ptr char_ci_less(){
-  return char_compare("char-ci<?", ci_comparator<std::less<int> >());
+Lisp_ptr char_ci_less(ZsArgs args){
+  return char_compare(args[0], args[1], "char-ci<?",
+                      ci_comparator<std::less<int> >());
 }
 
-Lisp_ptr char_ci_greater(){
-  return char_compare("char-ci>?", ci_comparator<std::greater<int> >());
+Lisp_ptr char_ci_greater(ZsArgs args){
+  return char_compare(args[0], args[1], "char-ci>?",
+                      ci_comparator<std::greater<int> >());
 }
 
-Lisp_ptr char_ci_less_eq(){
-  return char_compare("char-ci<=?", ci_comparator<std::less_equal<int> >());
+Lisp_ptr char_ci_less_eq(ZsArgs args){
+  return char_compare(args[0], args[1], "char-ci<=?",
+                      ci_comparator<std::less_equal<int> >());
 }
 
-Lisp_ptr char_ci_greater_eq(){
-  return char_compare("char-ci>=?", ci_comparator<std::greater_equal<int> >());
+Lisp_ptr char_ci_greater_eq(ZsArgs args){
+  return char_compare(args[0], args[1], "char-ci>=?",
+                      ci_comparator<std::greater_equal<int> >());
 }
 
   
-Lisp_ptr char_isalpha(){
-  return char_pred([](char c) -> bool{ return std::isalpha(c); });
+Lisp_ptr char_isalpha(ZsArgs args){
+  return char_pred(args[0], [](char c) -> bool{ return std::isalpha(c); });
 }
 
-Lisp_ptr char_isdigit(){
-  return char_pred([](char c) -> bool{ return std::isdigit(c); });
+Lisp_ptr char_isdigit(ZsArgs args){
+  return char_pred(args[0], [](char c) -> bool{ return std::isdigit(c); });
 }
 
-Lisp_ptr char_isspace(){
-  return char_pred([](char c) -> bool{ return std::isspace(c); });
+Lisp_ptr char_isspace(ZsArgs args){
+  return char_pred(args[0], [](char c) -> bool{ return std::isspace(c); });
 }
 
-Lisp_ptr char_isupper(){
-  return char_pred([](char c) -> bool{ return std::isupper(c); });
+Lisp_ptr char_isupper(ZsArgs args){
+  return char_pred(args[0], [](char c) -> bool{ return std::isupper(c); });
 }
 
-Lisp_ptr char_islower(){
-  return char_pred([](char c) -> bool{ return std::islower(c); });
+Lisp_ptr char_islower(ZsArgs args){
+  return char_pred(args[0], [](char c) -> bool{ return std::islower(c); });
 }
 
 
-Lisp_ptr char_to_int(){
-  return char_conversion("char->integer",
+Lisp_ptr char_to_int(ZsArgs args){
+  return char_conversion(args[0], "char->integer",
                          [](char c){
                            return Lisp_ptr(Ptr_tag::integer, c);
                          });
 }
 
-Lisp_ptr char_from_int(){
-  ZsArgs args;
-
+Lisp_ptr char_from_int(ZsArgs args){
   if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("integer->char", Ptr_tag::integer, args[0]);
   }
@@ -148,13 +149,13 @@ Lisp_ptr char_from_int(){
   return Lisp_ptr{static_cast<char>(args[0].get<int>())};
 }
 
-Lisp_ptr char_toupper(){
-  return char_conversion("char-upcase",
+Lisp_ptr char_toupper(ZsArgs args){
+  return char_conversion(args[0], "char-upcase",
                          [](char c){ return static_cast<char>(std::toupper(c)); });
 }
 
-Lisp_ptr char_tolower(){
-  return char_conversion("char-downcase",
+Lisp_ptr char_tolower(ZsArgs args){
+  return char_conversion(args[0], "char-downcase",
                          [](char c){ return static_cast<char>(std::tolower(c)); });
 }
 

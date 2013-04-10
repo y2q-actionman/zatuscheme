@@ -14,14 +14,11 @@ using namespace std;
 
 namespace builtin {
 
-Lisp_ptr procedurep(){
-  ZsArgs args;
+Lisp_ptr procedurep(ZsArgs args){
   return Lisp_ptr{is_procedure(args[0])};
 }
 
-Lisp_ptr apply(){
-  ZsArgs args;
-
+Lisp_ptr apply(ZsArgs args){
   auto proc = args[0];
   if(!is_procedure(proc)){
     throw zs_error_arg1("apply", "first arg is not procedure", {proc});
@@ -50,9 +47,7 @@ Lisp_ptr apply(){
   return {};
 }
 
-Lisp_ptr force(){
-  ZsArgs args;
-
+Lisp_ptr force(ZsArgs args){
   auto d = args[0].get<Delay*>();
   if(!d){
     return args[0];
@@ -73,14 +68,12 @@ Lisp_ptr force(){
   return {};
 }
 
-Lisp_ptr values(){
-  ZsArgs args;
+Lisp_ptr values(ZsArgs args){
   vm.return_value.assign(begin(args), end(args));
   return {};
 }
 
-Lisp_ptr call_with_values(){
-  ZsArgs args;
+Lisp_ptr call_with_values(ZsArgs args){
   Lisp_ptr procs[2];
 
   if(!is_procedure(args[0])){
@@ -111,8 +104,7 @@ Lisp_ptr call_with_values(){
   return {};
 }
 
-Lisp_ptr call_cc(){
-  ZsArgs args;
+Lisp_ptr call_cc(ZsArgs args){
   Lisp_ptr proc;
 
   if(!is_procedure(args[0])){
@@ -136,8 +128,7 @@ Lisp_ptr call_cc(){
   return {};
 }
 
-Lisp_ptr dynamic_wind(){
-  ZsArgs args;
+Lisp_ptr dynamic_wind(ZsArgs args){
   Lisp_ptr procs[3];
 
   auto procs_i = begin(procs);

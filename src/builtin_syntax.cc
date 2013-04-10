@@ -17,17 +17,9 @@
 using namespace std;
 using namespace proc_flag;
 
-static
-Lisp_ptr whole_function_error(const char* opname){
-  ZsArgs wargs;
-  throw zs_error_arg1(opname, "cannot be used as operator!!");
-}
-
 namespace builtin {
 
-Lisp_ptr syntax_quote(){
-  ZsArgs args;
-
+Lisp_ptr syntax_quote(ZsArgs args){
   if(args[0].tag() == Ptr_tag::syntactic_closure){
     return args[0].get<SyntacticClosure*>()->expr();
   }else{
@@ -51,9 +43,7 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
                         args, vm.frame());
 }
 
-Lisp_ptr syntax_lambda(){
-  ZsArgs wargs;
-
+Lisp_ptr syntax_lambda(ZsArgs wargs){
   return bind_cons_list_strict
     (wargs[0],
      [](Lisp_ptr, Lisp_ptr args, ConsIter code){
@@ -61,9 +51,7 @@ Lisp_ptr syntax_lambda(){
     });
 }
 
-Lisp_ptr syntax_if(){
-  ZsArgs args;
-
+Lisp_ptr syntax_if(ZsArgs args){
   assert(args.size() == 2 || args.size() == 3);
 
   Lisp_ptr test = args[0];
@@ -74,15 +62,12 @@ Lisp_ptr syntax_if(){
   return {};
 }
 
-Lisp_ptr syntax_set(){
-  ZsArgs args;
+Lisp_ptr syntax_set(ZsArgs args){
   vm.return_value = {args[0], vm_op_set, args[1]};
   return {};
 }
 
-Lisp_ptr syntax_define(){
-  ZsArgs args;
-
+Lisp_ptr syntax_define(ZsArgs args){
   auto p = args[0].get<Cons*>()->cdr();
   Cons* rest = p.get<Cons*>();
 
@@ -110,10 +95,8 @@ Lisp_ptr syntax_define(){
   }
 }
 
-Lisp_ptr syntax_begin(){
-  ZsArgs wargs;
-
-  auto body = nthcdr_cons_list<1>(wargs[0]);
+Lisp_ptr syntax_begin(ZsArgs args){
+  auto body = nthcdr_cons_list<1>(args[0]);
   if(!body || nullp(body)){
     throw zs_error_arg1("begin", "has no exprs.");
   }
@@ -122,11 +105,11 @@ Lisp_ptr syntax_begin(){
   return {};
 }
 
-Lisp_ptr syntax_let(){
-  return let_internal(Entering::at_jump);
+Lisp_ptr syntax_let(ZsArgs args){
+  return let_internal(move(args), Entering::at_jump);
 }
 
-Lisp_ptr syntax_letrec(){
+Lisp_ptr syntax_letrec(ZsArgs args){
   // This heavyly depends on the implementation.
   //
   // normal let / funtion call
@@ -141,18 +124,15 @@ Lisp_ptr syntax_letrec(){
   //      when a lambda form occurs, captures the environment.
   //      so these lambdas refer the same environment.
   //   3. set args to the environment.
-  return let_internal(Entering::at_bind);
+  return let_internal(move(args), Entering::at_bind);
 }
 
-Lisp_ptr syntax_delay(){
-  ZsArgs wargs;
-  return {new Delay(wargs[0], vm.frame())};
+Lisp_ptr syntax_delay(ZsArgs args){
+  return {new Delay(args[0], vm.frame())};
 }
 
-Lisp_ptr syntax_quasiquote(){
-  ZsArgs wargs;
-
-  auto arg = nth_cons_list<1>(wargs[0]);
+Lisp_ptr syntax_quasiquote(ZsArgs args){
+  auto arg = nth_cons_list<1>(args[0]);
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
@@ -205,13 +185,11 @@ Lisp_ptr syntax_quasiquote(){
   }
 }
 
-Lisp_ptr syntax_unquote(){
-  ZsArgs args;
+Lisp_ptr syntax_unquote(ZsArgs args){
   return args[0];
 }
 
-Lisp_ptr syntax_unquote_splicing(){
-  ZsArgs args;
+Lisp_ptr syntax_unquote_splicing(ZsArgs args){
   if(args[0].tag() != Ptr_tag::cons){
     throw builtin_type_check_failed("unquote-splicing", Ptr_tag::cons, args[0]);
   }
@@ -220,17 +198,15 @@ Lisp_ptr syntax_unquote_splicing(){
   return {};
 }
 
-Lisp_ptr syntax_else(){
-  return whole_function_error("else");
+Lisp_ptr syntax_else(ZsArgs){
+  throw zs_error_arg1("else", "cannot be used as operator!!");
 }
 
-Lisp_ptr syntax_arrow(){
-  return whole_function_error("=>");
+Lisp_ptr syntax_arrow(ZsArgs){
+  throw zs_error_arg1("=>", "cannot be used as operator!!");
 }
 
-Lisp_ptr syntax_define_syntax(){
-  ZsArgs args;
-
+Lisp_ptr syntax_define_syntax(ZsArgs args){
   if(!identifierp(args[0])){
     throw builtin_identifier_check_failed("define-syntax", args[0]);
   }
@@ -240,19 +216,17 @@ Lisp_ptr syntax_define_syntax(){
   return Lisp_ptr{true};
 }
 
-Lisp_ptr syntax_let_syntax(){
+Lisp_ptr syntax_let_syntax(ZsArgs args){
   // TODO: check each arg is a transformer.
-  return let_internal(Entering::at_jump);
+  return let_internal(move(args), Entering::at_jump);
 }
 
-Lisp_ptr syntax_letrec_syntax(){
+Lisp_ptr syntax_letrec_syntax(ZsArgs args){
   // TODO: check each arg is a transformer.
-  return let_internal(Entering::at_bind);
+  return let_internal(move(args), Entering::at_bind);
 }
 
-Lisp_ptr syntax_syntax_rules(){
-  ZsArgs args;
-
+Lisp_ptr syntax_syntax_rules(ZsArgs args){
   auto env = args[1].get<Env*>();
   if(!env){
     throw builtin_type_check_failed("syntax-rules", Ptr_tag::env, args[1]);

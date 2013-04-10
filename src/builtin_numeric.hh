@@ -5,69 +5,69 @@
 
 namespace builtin {
 
-Lisp_ptr numberp();
-Lisp_ptr complexp();
-Lisp_ptr realp();
-Lisp_ptr rationalp();
-Lisp_ptr integerp();
-Lisp_ptr exactp();
-Lisp_ptr inexactp();
+Lisp_ptr numberp(ZsArgs);
+Lisp_ptr complexp(ZsArgs);
+Lisp_ptr realp(ZsArgs);
+Lisp_ptr rationalp(ZsArgs);
+Lisp_ptr integerp(ZsArgs);
+Lisp_ptr exactp(ZsArgs);
+Lisp_ptr inexactp(ZsArgs);
 
-Lisp_ptr number_equal();
-Lisp_ptr number_less();
-Lisp_ptr number_greater();
-Lisp_ptr number_less_eq();
-Lisp_ptr number_greater_eq();
+Lisp_ptr number_equal(ZsArgs);
+Lisp_ptr number_less(ZsArgs);
+Lisp_ptr number_greater(ZsArgs);
+Lisp_ptr number_less_eq(ZsArgs);
+Lisp_ptr number_greater_eq(ZsArgs);
 
-Lisp_ptr number_max();
-Lisp_ptr number_min();
-Lisp_ptr number_plus();
-Lisp_ptr number_multiple();
-Lisp_ptr number_minus();
-Lisp_ptr number_divide();
-Lisp_ptr number_abs();
+Lisp_ptr number_max(ZsArgs);
+Lisp_ptr number_min(ZsArgs);
+Lisp_ptr number_plus(ZsArgs);
+Lisp_ptr number_multiple(ZsArgs);
+Lisp_ptr number_minus(ZsArgs);
+Lisp_ptr number_divide(ZsArgs);
+Lisp_ptr number_abs(ZsArgs);
 
-Lisp_ptr number_quot();
-Lisp_ptr number_rem();
-Lisp_ptr number_mod();
+Lisp_ptr number_quot(ZsArgs);
+Lisp_ptr number_rem(ZsArgs);
+Lisp_ptr number_mod(ZsArgs);
 
-Lisp_ptr number_gcd();
-Lisp_ptr number_lcm();
+Lisp_ptr number_gcd(ZsArgs);
+Lisp_ptr number_lcm(ZsArgs);
 
-Lisp_ptr number_numerator();
-Lisp_ptr number_denominator();
+Lisp_ptr number_numerator(ZsArgs);
+Lisp_ptr number_denominator(ZsArgs);
 
-Lisp_ptr number_floor();
-Lisp_ptr number_ceil();
-Lisp_ptr number_trunc();
-Lisp_ptr number_round();
+Lisp_ptr number_floor(ZsArgs);
+Lisp_ptr number_ceil(ZsArgs);
+Lisp_ptr number_trunc(ZsArgs);
+Lisp_ptr number_round(ZsArgs);
 
-Lisp_ptr number_rationalize();
+Lisp_ptr number_rationalize(ZsArgs);
 
-Lisp_ptr number_exp();
-Lisp_ptr number_log();
-Lisp_ptr number_sin();
-Lisp_ptr number_cos();
-Lisp_ptr number_tan();
-Lisp_ptr number_asin();
-Lisp_ptr number_acos();
-Lisp_ptr number_atan();
-Lisp_ptr number_sqrt();
+Lisp_ptr number_exp(ZsArgs);
+Lisp_ptr number_log(ZsArgs);
+Lisp_ptr number_sin(ZsArgs);
+Lisp_ptr number_cos(ZsArgs);
+Lisp_ptr number_tan(ZsArgs);
+Lisp_ptr number_asin(ZsArgs);
+Lisp_ptr number_acos(ZsArgs);
+Lisp_ptr number_atan(ZsArgs);
+Lisp_ptr number_sqrt(ZsArgs);
 
-Lisp_ptr number_expt();
-Lisp_ptr number_rect();
-Lisp_ptr number_polar();
+Lisp_ptr number_expt(ZsArgs);
+Lisp_ptr number_rect(ZsArgs);
+Lisp_ptr number_polar(ZsArgs);
 
-Lisp_ptr number_real();
-Lisp_ptr number_imag();
-Lisp_ptr number_mag();
-Lisp_ptr number_angle();
+Lisp_ptr number_real(ZsArgs);
+Lisp_ptr number_imag(ZsArgs);
+Lisp_ptr number_mag(ZsArgs);
+Lisp_ptr number_angle(ZsArgs);
 
-Lisp_ptr number_i_to_e();
-Lisp_ptr number_e_to_i();
+Lisp_ptr number_i_to_e(ZsArgs);
+Lisp_ptr number_e_to_i(ZsArgs);
 
-Lisp_ptr number_from_string();
-Lisp_ptr number_to_string();
+Lisp_ptr number_from_string(ZsArgs);
+Lisp_ptr number_to_string(ZsArgs);
 
 }
 

@@ -5,14 +5,14 @@
 
 namespace builtin {
 
-Lisp_ptr vector_make();
-Lisp_ptr vector_vector();
-Lisp_ptr vector_length();
-Lisp_ptr vector_ref();
-Lisp_ptr vector_set();
-Lisp_ptr vector_to_list();
-Lisp_ptr vector_from_list();
-Lisp_ptr vector_fill();
+Lisp_ptr vector_make(ZsArgs);
+Lisp_ptr vector_vector(ZsArgs);
+Lisp_ptr vector_length(ZsArgs);
+Lisp_ptr vector_ref(ZsArgs);
+Lisp_ptr vector_set(ZsArgs);
+Lisp_ptr vector_to_list(ZsArgs);
+Lisp_ptr vector_from_list(ZsArgs);
+Lisp_ptr vector_fill(ZsArgs);
 
 }
 

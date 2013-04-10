@@ -17,9 +17,7 @@ using namespace proc_flag;
 
 namespace builtin {
 
-Lisp_ptr traditional_transformer(){
-  ZsArgs args;
-
+Lisp_ptr traditional_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
     throw zs_error_arg1("traditional-transformer", "called with a wrong type", {args[0]});
@@ -32,15 +30,12 @@ Lisp_ptr traditional_transformer(){
                         iproc->arg_list(), iproc->closure());
 }
 
-Lisp_ptr gensym(){
+Lisp_ptr gensym(ZsArgs){
   static const string gensym_symname = {"(gensym)"};
-  ZsArgs args;
   return {new Symbol(&gensym_symname)};
 }
 
-Lisp_ptr sc_macro_transformer(){
-  ZsArgs args;
-
+Lisp_ptr sc_macro_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
     throw zs_error_arg1("sc-macro-transformer", "called with a wrong type", {args[0]});
@@ -62,9 +57,7 @@ Lisp_ptr sc_macro_transformer(){
                         iproc->closure()->fork());
 }
 
-Lisp_ptr make_syntactic_closure(){
-  ZsArgs args;
-
+Lisp_ptr make_syntactic_closure(ZsArgs args){
   Env* e = args[0].get<Env*>();
   if(!e){
     throw builtin_type_check_failed("make-syntactic-closure",
@@ -80,9 +73,7 @@ Lisp_ptr make_syntactic_closure(){
   return new SyntacticClosure(e, c, args[2]);
 }
 
-Lisp_ptr capture_syntactic_environment(){
-  ZsArgs args;
-
+Lisp_ptr capture_syntactic_environment(ZsArgs args){
   if(args[0].tag() != Ptr_tag::i_procedure){
     throw zs_error_arg1("capture-syntactic-environment", "first arg is not procedure", {args[0]});
   }
@@ -105,14 +96,11 @@ Lisp_ptr capture_syntactic_environment(){
   return ret;
 }
 
-Lisp_ptr identifierp(){
-  ZsArgs args;
+Lisp_ptr identifierp(ZsArgs args){
   return Lisp_ptr{identifierp(args[0])};
 }
 
-Lisp_ptr identifier_eq(){
-  ZsArgs args;
-
+Lisp_ptr identifier_eq(ZsArgs args){
   auto ident1_env = args[0].get<Env*>();
   if(!ident1_env){
     throw builtin_type_check_failed("identifier=?", Ptr_tag::env, args[0]);
@@ -135,9 +123,7 @@ Lisp_ptr identifier_eq(){
     Lisp_ptr{identifier_eq(ident1_env, args[1], ident2_env, args[3])};
 }
 
-Lisp_ptr make_synthetic_identifier(){
-  ZsArgs args;
-
+Lisp_ptr make_synthetic_identifier(ZsArgs args){
   if(!identifierp(args[0])){
     throw zs_error_arg1("make-synthetic-identifier", "passed value is not identifier", {args[0]});
   }
@@ -145,9 +131,7 @@ Lisp_ptr make_synthetic_identifier(){
   return new SyntacticClosure(new Env(nullptr), nullptr, args[0]);
 }
 
-Lisp_ptr exit(){
-  ZsArgs args; 
-
+Lisp_ptr exit(ZsArgs args){
   // cerr << "exiting..\n";
   args.cleanup();
   vm.stack.clear();
@@ -155,14 +139,12 @@ Lisp_ptr exit(){
   return {};
 }
 
-Lisp_ptr transcript_on(){
-  ZsArgs args; 
+Lisp_ptr transcript_on(ZsArgs){
   dump_mode = true;
   return Lisp_ptr{true};
 }
 
-Lisp_ptr transcript_off(){
-  ZsArgs args; 
+Lisp_ptr transcript_off(ZsArgs){
   dump_mode = false;
   return Lisp_ptr{true};
 }

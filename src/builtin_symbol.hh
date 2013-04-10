@@ -5,8 +5,8 @@
 
 namespace builtin {
 
-Lisp_ptr symbol_to_string();
-Lisp_ptr symbol_from_string();
+Lisp_ptr symbol_to_string(ZsArgs);
+Lisp_ptr symbol_from_string(ZsArgs);
 
 }
 

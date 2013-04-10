@@ -24,18 +24,17 @@ zs_error string_type_check_failed(const char* func_name, Lisp_ptr p){
 }
 
 template<typename Fun>
-Lisp_ptr string_compare(const char* name, Fun&& fun){
-  ZsArgs args;
-  String* str[2];
-
-  for(auto i = 0; i < 2; ++i){
-    str[i] = args[i].get<String*>();
-    if(!str[i]){
-      throw string_type_check_failed(name, args[i]);
-    }
+Lisp_ptr string_compare(Lisp_ptr arg1, Lisp_ptr arg2, const char* name, Fun fun){
+  if(arg1.tag() != Ptr_tag::string){
+    throw string_type_check_failed(name, arg1);
   }
 
-  return Lisp_ptr{fun(*str[0], *str[1])};
+  if(arg2.tag() != Ptr_tag::string){
+    throw string_type_check_failed(name, arg2);
+  }
+
+  return Lisp_ptr{fun(*arg1.get<String*>(),
+                      *arg2.get<String*>())};
 }
 
 template<typename Fun>
@@ -50,9 +49,7 @@ struct ci_compare{
 
 namespace builtin {
 
-Lisp_ptr string_make(){
-  ZsArgs args;
-
+Lisp_ptr string_make(ZsArgs args){
   if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed("make-string", Ptr_tag::integer, args[0]);
   }
@@ -73,9 +70,7 @@ Lisp_ptr string_make(){
   }
 }
 
-Lisp_ptr string_string(){
-  ZsArgs args;
-
+Lisp_ptr string_string(ZsArgs args){
   String ret;
   for(auto i = args.begin(), e = args.end(); i != e; ++i){
     auto c = i->get<char>();
@@ -89,8 +84,7 @@ Lisp_ptr string_string(){
   return {new String(std::move(ret))};
 }
   
-Lisp_ptr string_length(){
-  ZsArgs args;
+Lisp_ptr string_length(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-length", args[0]);
@@ -101,8 +95,7 @@ Lisp_ptr string_length(){
       static_cast<int>(str->length())};
 }
 
-Lisp_ptr string_ref(){
-  ZsArgs args;
+Lisp_ptr string_ref(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-ref", args[0]);
@@ -121,8 +114,7 @@ Lisp_ptr string_ref(){
   return Lisp_ptr{(*str)[ind]};
 }
 
-Lisp_ptr string_set(){
-  ZsArgs args;
+Lisp_ptr string_set(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-set!", args[0]);
@@ -148,49 +140,58 @@ Lisp_ptr string_set(){
 }
 
 
-Lisp_ptr string_equal(){
-  return string_compare("string=?", std::equal_to<std::string>());
+Lisp_ptr string_equal(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string=?", std::equal_to<std::string>());
 }
 
-Lisp_ptr string_less(){
-  return string_compare("string<?", std::less<std::string>());
+Lisp_ptr string_less(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string<?", std::less<std::string>());
 }
 
-Lisp_ptr string_greater(){
-  return string_compare("string>?", std::greater<std::string>());
+Lisp_ptr string_greater(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string>?", std::greater<std::string>());
 }
 
-Lisp_ptr string_less_eq(){
-  return string_compare("string<=?", std::less_equal<std::string>());
+Lisp_ptr string_less_eq(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string<=?", std::less_equal<std::string>());
 }
 
-Lisp_ptr string_greater_eq(){
-  return string_compare("string>=?", std::greater_equal<std::string>());
+Lisp_ptr string_greater_eq(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string>=?", std::greater_equal<std::string>());
 }
 
-Lisp_ptr string_ci_equal(){
-  return string_compare("string-ci=?", ci_compare<std::equal_to<int> >());
+Lisp_ptr string_ci_equal(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string-ci=?", ci_compare<std::equal_to<int> >());
 }
 
-Lisp_ptr string_ci_less(){
-  return string_compare("string-ci<?", ci_compare<std::less<int> >());
+Lisp_ptr string_ci_less(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string-ci<?", ci_compare<std::less<int> >());
 }
 
-Lisp_ptr string_ci_greater(){
-  return string_compare("string-ci>?", ci_compare<std::greater<int> >());
+Lisp_ptr string_ci_greater(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string-ci>?", ci_compare<std::greater<int> >());
 }
 
-Lisp_ptr string_ci_less_eq(){
-  return string_compare("string-ci<=?", ci_compare<std::less_equal<int> >());
+Lisp_ptr string_ci_less_eq(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string-ci<=?", ci_compare<std::less_equal<int> >());
 }
 
-Lisp_ptr string_ci_greater_eq(){
-  return string_compare("string-ci>=?", ci_compare<std::greater_equal<int> >());
+Lisp_ptr string_ci_greater_eq(ZsArgs args){
+  return string_compare(args[0], args[1],
+                        "string-ci>=?", ci_compare<std::greater_equal<int> >());
 }
 
 
-Lisp_ptr string_substr(){
-  ZsArgs args;
+Lisp_ptr string_substr(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("substring", args[0]);
@@ -213,9 +214,7 @@ Lisp_ptr string_substr(){
   return {new String(str->substr(ind[0], ind[1] - ind[0]))};
 }
 
-Lisp_ptr string_append(){
-  ZsArgs args;
-
+Lisp_ptr string_append(ZsArgs args){
   String ret;
 
   for(auto i = begin(args), e = end(args);
@@ -231,8 +230,7 @@ Lisp_ptr string_append(){
   return {new String(std::move(ret))};
 }
 
-Lisp_ptr string_to_list(){
-  ZsArgs args;
+Lisp_ptr string_to_list(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string->list", args[0]);
@@ -241,8 +239,7 @@ Lisp_ptr string_to_list(){
   return make_cons_list(str->begin(), str->end());
 }
 
-Lisp_ptr string_from_list(){
-  ZsArgs args;
+Lisp_ptr string_from_list(ZsArgs args){
   if(args[0].tag() != Ptr_tag::cons){
     throw builtin_type_check_failed("list->string", Ptr_tag::cons, args[0]);
   }
@@ -260,8 +257,7 @@ Lisp_ptr string_from_list(){
   return {new String(std::move(ret))};
 }
 
-Lisp_ptr string_copy(){
-  ZsArgs args;
+Lisp_ptr string_copy(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-copy", args[0]);
@@ -270,8 +266,7 @@ Lisp_ptr string_copy(){
   return {new String(*str)};
 }
 
-Lisp_ptr string_fill(){
-  ZsArgs args;
+Lisp_ptr string_fill(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw string_type_check_failed("string-fill!", args[0]);

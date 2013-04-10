@@ -7,7 +7,7 @@
 #include "env.hh"
 #include "vm.hh"
 
-typedef Lisp_ptr(*NativeFunc)();
+typedef Lisp_ptr(*NativeFunc)(ZsArgs);
 
 namespace proc_flag {
   enum class Variadic : bool { f = false, t = true };

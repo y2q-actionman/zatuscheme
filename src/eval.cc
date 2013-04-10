@@ -253,8 +253,8 @@ void proc_enter_native(const NProcedure* fun){
                                   argc);
   }
 
-
-  auto p = native_func();
+  ZsArgs args;
+  auto p = native_func(move(args));
 
   if(info->move_ret == MoveReturnValue::t){
     vm.return_value = {p};
@@ -673,14 +673,12 @@ void vm_op_get_current_env(){
   vm.return_value = {vm.frame()};
 }
 
-Lisp_ptr let_internal(Entering entering){
+Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
   Lisp_ptr name = {};
   int len = 0;
   GrowList gl_syms;
   GrowList gl_vals;
   Lisp_ptr body;
-
-  ZsArgs wargs;
 
   if(wargs.size() != 1)
     throw builtin_argcount_failed("let entry", 1, 1, wargs.size());

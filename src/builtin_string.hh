@@ -5,30 +5,30 @@
 
 namespace builtin {
 
-Lisp_ptr string_make();
-Lisp_ptr string_string();
-Lisp_ptr string_length();
-Lisp_ptr string_ref();
-Lisp_ptr string_set();
+Lisp_ptr string_make(ZsArgs);
+Lisp_ptr string_string(ZsArgs);
+Lisp_ptr string_length(ZsArgs);
+Lisp_ptr string_ref(ZsArgs);
+Lisp_ptr string_set(ZsArgs);
 
-Lisp_ptr string_equal();
-Lisp_ptr string_less();
-Lisp_ptr string_greater();
-Lisp_ptr string_less_eq();
-Lisp_ptr string_greater_eq();
+Lisp_ptr string_equal(ZsArgs);
+Lisp_ptr string_less(ZsArgs);
+Lisp_ptr string_greater(ZsArgs);
+Lisp_ptr string_less_eq(ZsArgs);
+Lisp_ptr string_greater_eq(ZsArgs);
 
-Lisp_ptr string_ci_equal();
-Lisp_ptr string_ci_less();
-Lisp_ptr string_ci_greater();
-Lisp_ptr string_ci_less_eq();
-Lisp_ptr string_ci_greater_eq();
+Lisp_ptr string_ci_equal(ZsArgs);
+Lisp_ptr string_ci_less(ZsArgs);
+Lisp_ptr string_ci_greater(ZsArgs);
+Lisp_ptr string_ci_less_eq(ZsArgs);
+Lisp_ptr string_ci_greater_eq(ZsArgs);
 
-Lisp_ptr string_substr();
-Lisp_ptr string_append();
-Lisp_ptr string_to_list();
-Lisp_ptr string_from_list();
-Lisp_ptr string_copy();
-Lisp_ptr string_fill();
+Lisp_ptr string_substr(ZsArgs);
+Lisp_ptr string_append(ZsArgs);
+Lisp_ptr string_to_list(ZsArgs);
+Lisp_ptr string_from_list(ZsArgs);
+Lisp_ptr string_copy(ZsArgs);
+Lisp_ptr string_fill(ZsArgs);
 
 }
 

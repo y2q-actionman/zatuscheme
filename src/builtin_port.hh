@@ -8,21 +8,21 @@
 
 namespace builtin {
 
-Lisp_ptr port_open_file_i();
-Lisp_ptr port_open_file_o();
-Lisp_ptr port_close_i();
-Lisp_ptr port_close_o();
+Lisp_ptr port_open_file_i(ZsArgs);
+Lisp_ptr port_open_file_o(ZsArgs);
+Lisp_ptr port_close_i(ZsArgs);
+Lisp_ptr port_close_o(ZsArgs);
 
-Lisp_ptr port_read();
-Lisp_ptr port_read_char();
-Lisp_ptr port_peek_char();
-Lisp_ptr port_eof_p();
+Lisp_ptr port_read(ZsArgs);
+Lisp_ptr port_read_char(ZsArgs);
+Lisp_ptr port_peek_char(ZsArgs);
+Lisp_ptr port_eof_p(ZsArgs);
 
-Lisp_ptr port_write();
-Lisp_ptr port_display();
-Lisp_ptr port_write_char();
+Lisp_ptr port_write(ZsArgs);
+Lisp_ptr port_display(ZsArgs);
+Lisp_ptr port_write_char(ZsArgs);
 
-Lisp_ptr port_char_ready();
+Lisp_ptr port_char_ready(ZsArgs);
 
 }
 

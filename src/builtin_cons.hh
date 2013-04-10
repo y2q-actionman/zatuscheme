@@ -5,23 +5,23 @@
 
 namespace builtin {
 
-Lisp_ptr cons_pairp();
-Lisp_ptr cons_cons();
-Lisp_ptr cons_car();
-Lisp_ptr cons_cdr();
-Lisp_ptr cons_set_car();
-Lisp_ptr cons_set_cdr();
-Lisp_ptr cons_nullp();
-Lisp_ptr cons_listp();
-Lisp_ptr cons_list();
-Lisp_ptr cons_list_star();
-Lisp_ptr cons_length();
-Lisp_ptr cons_append();
-Lisp_ptr cons_reverse();
-Lisp_ptr cons_list_tail();
-Lisp_ptr cons_memq();
-Lisp_ptr cons_memv();
-Lisp_ptr cons_member();
+Lisp_ptr cons_pairp(ZsArgs);
+Lisp_ptr cons_cons(ZsArgs);
+Lisp_ptr cons_car(ZsArgs);
+Lisp_ptr cons_cdr(ZsArgs);
+Lisp_ptr cons_set_car(ZsArgs);
+Lisp_ptr cons_set_cdr(ZsArgs);
+Lisp_ptr cons_nullp(ZsArgs);
+Lisp_ptr cons_listp(ZsArgs);
+Lisp_ptr cons_list(ZsArgs);
+Lisp_ptr cons_list_star(ZsArgs);
+Lisp_ptr cons_length(ZsArgs);
+Lisp_ptr cons_append(ZsArgs);
+Lisp_ptr cons_reverse(ZsArgs);
+Lisp_ptr cons_list_tail(ZsArgs);
+Lisp_ptr cons_memq(ZsArgs);
+Lisp_ptr cons_memv(ZsArgs);
+Lisp_ptr cons_member(ZsArgs);
 
 }
 

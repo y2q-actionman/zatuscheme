@@ -5,9 +5,9 @@
 
 namespace builtin {
 
-Lisp_ptr eq();
-Lisp_ptr eqv();
-Lisp_ptr equal();
+Lisp_ptr eq(ZsArgs);
+Lisp_ptr eqv(ZsArgs);
+Lisp_ptr equal(ZsArgs);
 
 }
 

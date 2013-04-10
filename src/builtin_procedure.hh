@@ -5,13 +5,13 @@
 
 namespace builtin {
 
-Lisp_ptr procedurep();
-Lisp_ptr apply();
-Lisp_ptr force();
-Lisp_ptr values();
-Lisp_ptr call_with_values();
-Lisp_ptr call_cc();
-Lisp_ptr dynamic_wind();
+Lisp_ptr procedurep(ZsArgs);
+Lisp_ptr apply(ZsArgs);
+Lisp_ptr force(ZsArgs);
+Lisp_ptr values(ZsArgs);
+Lisp_ptr call_with_values(ZsArgs);
+Lisp_ptr call_cc(ZsArgs);
+Lisp_ptr dynamic_wind(ZsArgs);
 
 }
 

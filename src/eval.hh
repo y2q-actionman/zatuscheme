@@ -25,7 +25,7 @@ void vm_op_get_current_env();
 void eval();
 
 // builtin funcs near evaluator
-Lisp_ptr let_internal(proc_flag::Entering);
+Lisp_ptr let_internal(ZsArgs, proc_flag::Entering);
 
 // for debug
 const char* stringify(VMop);
