@@ -33,6 +33,16 @@
 "(define (cdddar x) (cdr (cddar x)))",
 "(define (cddddr x) (cdr (cdddr x)))",
 
+/*
+"(define (length lis)"
+"  (let loop ((l lis) (n 0))"
+"    (if (null? l) n (loop (cdr l) (+ n 1)))))",
+
+"(define (reverse lis)"
+"  (let loop ((l lis) (ret ()))"
+"    (if (null? l) ret (loop (cdr l) (cons (car l) ret)))))",
+*/
+
 #define ASS_FUNCS(name, equal_op)                       \
   "(define ("name" obj alist)"                          \
   "  (if (null? alist) #f"                              \
