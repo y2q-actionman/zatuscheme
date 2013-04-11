@@ -17,18 +17,9 @@
 using namespace std;
 using namespace proc_flag;
 
-namespace builtin {
+namespace {
 
-Lisp_ptr syntax_quote(ZsArgs args){
-  if(args[0].tag() == Ptr_tag::syntactic_closure){
-    return args[0].get<SyntacticClosure*>()->expr();
-  }else{
-    return args[0];
-  }
-}
-
-
-static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
+Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
@@ -41,6 +32,83 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   return new IProcedure(code, 
                         {arg_info.first, arg_info.second},
                         args, vm.frame(), name);
+}
+
+Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
+  Lisp_ptr name = {};
+  int len = 0;
+  GrowList gl_syms;
+  GrowList gl_vals;
+  Lisp_ptr body;
+
+  if(wargs.size() != 1)
+    throw builtin_argcount_failed("let entry", 1, 1, wargs.size());
+
+  // skips first 'let' symbol
+  auto arg_c = wargs[0].get<Cons*>();
+  assert(arg_c);
+
+  auto arg = arg_c->cdr();
+  if(arg.tag() != Ptr_tag::cons || nullp(arg)){
+    throw zs_error_arg1("let", "informal syntax -- (LET . <...>)", {arg});
+  }
+  arg_c = arg.get<Cons*>();
+
+  // checks named let
+  if(identifierp(arg_c->car())){
+    name = arg_c->car();
+
+    arg = arg_c->cdr();
+    if(arg.tag() != Ptr_tag::cons || nullp(arg)){
+      throw zs_error_arg1("let", "informal syntax -- (LET <name> . <...>)", {arg});
+    }
+    
+    arg_c = arg.get<Cons*>();
+  }
+
+  // picks elements
+  auto binds = arg_c->car();
+  body = arg_c->cdr();
+
+  if(body.tag() != Ptr_tag::cons || nullp(body)){
+    throw zs_error_arg1("let", "informal body", {body});
+  }
+
+  // parses binding list
+  for(auto bind : binds){
+    if(bind.tag() != Ptr_tag::cons || nullp(bind)){
+      throw zs_error_arg1("let", "informal object found in let binding", {bind});
+    }
+
+    ++len;
+
+    gl_syms.push(nth_cons_list<0>(bind));
+    gl_vals.push(nth_cons_list<1>(bind));
+  }
+
+  wargs.cleanup();
+
+  auto proc = new IProcedure(body, 
+                             {len, Variadic::f,  Passing::eval,
+                                 Returning::pass, MoveReturnValue::t,
+                                 entering},
+                             gl_syms.extract(), vm.frame(), name);
+
+  vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
+  vm.code.insert(vm.code.end(), {vm_op_call, proc});
+  return {};
+}
+
+} // namespace
+
+namespace builtin {
+
+Lisp_ptr syntax_quote(ZsArgs args){
+  if(args[0].tag() == Ptr_tag::syntactic_closure){
+    return args[0].get<SyntacticClosure*>()->expr();
+  }else{
+    return args[0];
+  }
 }
 
 Lisp_ptr syntax_lambda(ZsArgs wargs){

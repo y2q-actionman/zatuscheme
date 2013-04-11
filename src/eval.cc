@@ -55,10 +55,6 @@ void vm_op_arg_push(){
 }
 
 
-/*
-*/
-void vm_op_call();
-
 static void enter_frame(IProcedure* iproc){
   // tail call check
   if(!vm.code.empty()
@@ -192,50 +188,7 @@ void whole_call(Lisp_ptr proc, const ProcInfo* info){
   proc_enter_entrypoint(proc); // direct jump to proc_enter()
 }
 
-/*
-  ret = proc
-  stack[0] = args
-  ---
-  goto proc_call or macro_call
-*/
-void vm_op_call(){
-  assert(vm.code.back().get<VMop>() == vm_op_call);
 
-  auto proc = vm.return_value_1();
-
-  if(!is_procedure(proc)){
-    vm.code.pop_back();
-    vm.stack.pop_back();
-    throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});
-  }
-
-  const ProcInfo* info = get_procinfo(proc);
-
-  switch(info->returning){
-  case Returning::pass:
-    vm.code.pop_back();
-    break;
-  case Returning::code:
-    vm.code.back() = vm_op_macro_call;
-    break;
-  case Returning::stack_splice:
-    vm.code.back() = vm_op_stack_splicing;
-    break;
-  default:
-    UNEXP_DEFAULT();
-  }
-
-  switch(info->passing){
-  case Passing::eval:
-    return function_call(proc, info);
-  case Passing::quote:
-    return macro_call(proc);
-  case Passing::whole:
-    return whole_call(proc, info);
-  default:
-    UNEXP_DEFAULT();
-  }
-}
 
 void proc_enter_native(const NProcedure* fun){
   auto native_func = fun->get();
@@ -454,6 +407,51 @@ void proc_enter_srule(SyntaxRules* srule){
 }
 
 } //namespace
+
+/*
+  ret = proc
+  stack[0] = args
+  ---
+  goto proc_call or macro_call
+*/
+void vm_op_call(){
+  assert(vm.code.back().get<VMop>() == vm_op_call);
+
+  auto proc = vm.return_value_1();
+
+  if(!is_procedure(proc)){
+    vm.code.pop_back();
+    vm.stack.pop_back();
+    throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});
+  }
+
+  const ProcInfo* info = get_procinfo(proc);
+
+  switch(info->returning){
+  case Returning::pass:
+    vm.code.pop_back();
+    break;
+  case Returning::code:
+    vm.code.back() = vm_op_macro_call;
+    break;
+  case Returning::stack_splice:
+    vm.code.back() = vm_op_stack_splicing;
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
+
+  switch(info->passing){
+  case Passing::eval:
+    return function_call(proc, info);
+  case Passing::quote:
+    return macro_call(proc);
+  case Passing::whole:
+    return whole_call(proc, info);
+  default:
+    UNEXP_DEFAULT();
+  }
+}
 
 void proc_enter_entrypoint(Lisp_ptr proc){
   assert(!vm.stack.empty());
@@ -676,71 +674,6 @@ void vm_op_get_current_env(){
   vm.code.pop_back();
   
   vm.return_value = {vm.frame()};
-}
-
-Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
-  Lisp_ptr name = {};
-  int len = 0;
-  GrowList gl_syms;
-  GrowList gl_vals;
-  Lisp_ptr body;
-
-  if(wargs.size() != 1)
-    throw builtin_argcount_failed("let entry", 1, 1, wargs.size());
-
-  // skips first 'let' symbol
-  auto arg_c = wargs[0].get<Cons*>();
-  assert(arg_c);
-
-  auto arg = arg_c->cdr();
-  if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-    throw zs_error_arg1("let", "informal syntax -- (LET . <...>)", {arg});
-  }
-  arg_c = arg.get<Cons*>();
-
-  // checks named let
-  if(identifierp(arg_c->car())){
-    name = arg_c->car();
-
-    arg = arg_c->cdr();
-    if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-      throw zs_error_arg1("let", "informal syntax -- (LET <name> . <...>)", {arg});
-    }
-    
-    arg_c = arg.get<Cons*>();
-  }
-
-  // picks elements
-  auto binds = arg_c->car();
-  body = arg_c->cdr();
-
-  if(body.tag() != Ptr_tag::cons || nullp(body)){
-    throw zs_error_arg1("let", "informal body", {body});
-  }
-
-  // parses binding list
-  for(auto bind : binds){
-    if(bind.tag() != Ptr_tag::cons || nullp(bind)){
-      throw zs_error_arg1("let", "informal object found in let binding", {bind});
-    }
-
-    ++len;
-
-    gl_syms.push(nth_cons_list<0>(bind));
-    gl_vals.push(nth_cons_list<1>(bind));
-  }
-
-  wargs.cleanup();
-
-  auto proc = new IProcedure(body, 
-                             {len, Variadic::f,  Passing::eval,
-                                 Returning::pass, MoveReturnValue::t,
-                                 entering},
-                             gl_syms.extract(), vm.frame(), name);
-
-  vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
-  vm.code.insert(vm.code.end(), {vm_op_call, proc});
-  return {};
 }
 
 void eval(){

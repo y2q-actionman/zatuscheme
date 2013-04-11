@@ -9,6 +9,7 @@ void proc_enter_entrypoint(Lisp_ptr);
 
 // primitives for syntax call
 constexpr VMop vm_op_nop = nullptr;
+void vm_op_call();
 void vm_op_proc_enter();
 void vm_op_move_values();
 void vm_op_leave_frame();
@@ -23,9 +24,6 @@ void vm_op_get_current_env();
 
 // main loop
 void eval();
-
-// builtin funcs near evaluator
-Lisp_ptr let_internal(ZsArgs, proc_flag::Entering);
 
 // for debug
 const char* stringify(VMop);
