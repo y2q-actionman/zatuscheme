@@ -79,8 +79,8 @@ std::pair<int, proc_flag::Variadic> parse_func_arg(Lisp_ptr);
 
 class IProcedure{
 public:
-  IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr al, Env* e)
-    : info_(pi), code_(code), arg_list_(al),  env_(e){}
+  IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr al, Env* e, Lisp_ptr n)
+    : info_(pi), code_(code), arg_list_(al),  env_(e), name_(n){}
 
   IProcedure(const IProcedure&) = default;
   IProcedure(IProcedure&&) = default;
@@ -102,11 +102,15 @@ public:
   Env* closure() const
   { return env_; }
   
+  Lisp_ptr name() const
+  { return name_; }
+  
 private:
   ProcInfo info_;
   Lisp_ptr code_;
   Lisp_ptr arg_list_;
   Env* env_;
+  Lisp_ptr name_;
 };
 
 class NProcedure{

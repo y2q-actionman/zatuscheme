@@ -351,6 +351,11 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   // cleaning stack
   vm.stack.erase(arg_start, arg_end);
 
+  // adds procedure's name
+  if(fun->name()){
+    local_set_with_identifier(vm.frame(), fun->name(), fun);
+  }
+
   // set up lambda body code
   vm.code.insert(vm.code.end(), {fun->get(), vm_op_begin});
 }
@@ -727,21 +732,11 @@ Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
 
   wargs.cleanup();
 
-  if(name){
-    auto oldenv = vm.frame();
-    vm.set_frame(vm.frame()->push());
-    vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
-  }
-
   auto proc = new IProcedure(body, 
                              {len, Variadic::f,  Passing::eval,
                                  Returning::pass, MoveReturnValue::t,
                                  entering},
-                             gl_syms.extract(), vm.frame());
-
-  if(name){
-    local_set_with_identifier(vm.frame(), name, proc);
-  }
+                             gl_syms.extract(), vm.frame(), name);
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
   vm.code.insert(vm.code.end(), {vm_op_call, proc});

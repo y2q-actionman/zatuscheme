@@ -28,7 +28,7 @@ Lisp_ptr syntax_quote(ZsArgs args){
 }
 
 
-static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
+static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
@@ -40,14 +40,14 @@ static Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   
   return new IProcedure(code, 
                         {arg_info.first, arg_info.second},
-                        args, vm.frame());
+                        args, vm.frame(), name);
 }
 
 Lisp_ptr syntax_lambda(ZsArgs wargs){
   return bind_cons_list_strict
     (wargs[0],
      [](Lisp_ptr, Lisp_ptr args, ConsIter code){
-      return lambda_internal(args, code.base());
+      return lambda_internal(args, code.base(), {});
     });
 }
 
@@ -86,7 +86,7 @@ Lisp_ptr syntax_define(ZsArgs args){
     bind_cons_list_strict
       (first,
        [&](Lisp_ptr var, ConsIter l_args){
-        auto value = lambda_internal(l_args.base(), code);
+        auto value = lambda_internal(l_args.base(), code, var);
         vm.code.insert(vm.code.end(), {var, vm_op_local_set, value});
       });
     return {};

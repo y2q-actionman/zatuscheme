@@ -27,7 +27,7 @@ Lisp_ptr traditional_transformer(ZsArgs args){
   info.returning = Returning::code;
 
   return new IProcedure(iproc->get(), info,
-                        iproc->arg_list(), iproc->closure());
+                        iproc->arg_list(), iproc->closure(), {});
 }
 
 Lisp_ptr gensym(ZsArgs){
@@ -54,7 +54,7 @@ Lisp_ptr sc_macro_transformer(ZsArgs args){
 
   return new IProcedure(iproc->get(), info,
                         iproc->arg_list(),
-                        iproc->closure()->fork());
+                        iproc->closure()->fork(), {});
 }
 
 Lisp_ptr make_syntactic_closure(ZsArgs args){
