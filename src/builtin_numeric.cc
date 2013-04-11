@@ -4,7 +4,8 @@
 #include <cmath>
 #include <sstream>
 #include <functional>
-// #include <limits> // numeric_limits
+#include <climits>
+#include <iostream>             // warning messages
 
 #include "builtin_numeric.hh"
 #include "vm.hh"
@@ -19,6 +20,9 @@
 #include "util.hh"
 
 using namespace std;
+
+static_assert(sizeof(int) < sizeof(long long),
+              "integer overflow cannot be treated properly");
 
 namespace {
 
@@ -246,6 +250,55 @@ struct pass_through{
   }
 };
 
+
+static const char integer_overflow_message[]
+= "integer overflow occured. coerced into real.\n";
+
+template <typename Fun>
+struct integer_overflow_check_unary_t{
+  const Fun fun_;
+
+  integer_overflow_check_unary_t(const Fun& f) : fun_(f){}
+
+  Lisp_ptr operator()(int i) const {
+    auto l = fun_(static_cast<long long>(i));
+    if(l > INT_MAX || l < INT_MIN){
+      cerr << integer_overflow_message;
+      return wrap_number(static_cast<double>(l));
+    }else{
+      return wrap_number(static_cast<int>(l));
+    }
+  }
+};
+
+template <typename Fun>
+integer_overflow_check_unary_t<Fun> integer_overflow_check_unary(const Fun& f){
+  return integer_overflow_check_unary_t<Fun>(f);
+}
+
+template <typename Fun>
+struct integer_overflow_check_binary_t{
+  const Fun fun_;
+
+  integer_overflow_check_binary_t(const Fun& f) : fun_(f){}
+
+  Lisp_ptr operator()(int i1, int i2) const {
+    auto l = fun_(static_cast<long long>(i1),
+                  static_cast<long long>(i2));
+    if(l > INT_MAX || l < INT_MIN){
+      cerr << integer_overflow_message;
+      return wrap_number(static_cast<double>(l));
+    }else{
+      return wrap_number(static_cast<int>(l));
+    }
+  }
+};
+
+template <typename Fun>
+integer_overflow_check_binary_t<Fun> integer_overflow_check_binary(const Fun& f){
+  return integer_overflow_check_binary_t<Fun>(f);
+}
+
 } // namespace
 
 namespace builtin {
@@ -335,7 +388,7 @@ Lisp_ptr number_min(ZsArgs args){
 Lisp_ptr number_plus(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 0}, "+",
-                     plus<int>(),
+                     integer_overflow_check_binary(plus<long long>()),
                      plus<double>(),
                      plus<Complex>());
 }
@@ -343,7 +396,7 @@ Lisp_ptr number_plus(ZsArgs args){
 Lisp_ptr number_multiple(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 1}, "*",
-                     multiplies<int>(),
+                     integer_overflow_check_binary(multiplies<long long>()),
                      multiplies<double>(),
                      multiplies<Complex>());
 }
@@ -355,13 +408,13 @@ Lisp_ptr number_minus(ZsArgs args){
 
   if(args.size() == 1){
     return number_unary(args[0], "-",
-                        negate<int>(),
+                        integer_overflow_check_unary(negate<long long>()),
                         negate<double>(),
                         negate<Complex>());
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "-",
-                       minus<int>(),
+                       integer_overflow_check_binary(minus<long long>()),
                        minus<double>(),
                        minus<Complex>());
   }
@@ -374,7 +427,7 @@ Lisp_ptr number_divide(ZsArgs args){
 
   if(args.size() == 1){
     return number_unary(args[0], "/",
-                        [](int i){
+                        [](int i) -> Lisp_ptr{
                           return (i == 1) // integer appears only if '1 / 1'
                             ? wrap_number(1)
                             : wrap_number(1.0 / i);
@@ -384,7 +437,13 @@ Lisp_ptr number_divide(ZsArgs args){
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "/",
-                       [](int i1, int i2){ 
+                       [](int i1, int i2) -> Lisp_ptr{ 
+                         // treating edge case (like 'INT_MIN / -1')
+                         if(i2 == -1){
+                           auto fun = integer_overflow_check_binary(divides<long long>());
+                           return fun(i1, i2);
+                         }
+
                          return (i1 % i2)
                            ? wrap_number(static_cast<double>(i1) / i2)
                            : wrap_number(i1 / i2);
@@ -396,7 +455,7 @@ Lisp_ptr number_divide(ZsArgs args){
 
 Lisp_ptr number_abs(ZsArgs args){
   return number_unary(args[0], "abs",
-                      [](int i){ return std::abs(i);},
+                      integer_overflow_check_unary([](long long l){return std::abs(l);}),
                       [](double d){ return std::abs(d);},
                       inacceptable_number_type());
 }
@@ -513,49 +572,49 @@ Lisp_ptr number_rationalize(ZsArgs args){
 
 Lisp_ptr number_exp(ZsArgs args){
   return number_unary(args[0], "exp",
-                      [](int i){ return std::exp(i);},
+                      [](int i) -> double { return std::exp(i);},
                       [](double d){ return std::exp(d);},
                       [](Complex z){ return std::exp(z);});
 }
 
 Lisp_ptr number_log(ZsArgs args){
   return number_unary(args[0], "log",
-                      [](int i){ return std::log(i);},
+                      [](int i) -> double { return std::log(i);},
                       [](double d){ return std::log(d);},
                       [](Complex z){ return std::log(z);});
 }
 
 Lisp_ptr number_sin(ZsArgs args){
   return number_unary(args[0], "sin",
-                      [](int i){ return std::sin(i);},
+                      [](int i) -> double { return std::sin(i);},
                       [](double d){ return std::sin(d);},
                       [](Complex z){ return std::sin(z);});
 }
 
 Lisp_ptr number_cos(ZsArgs args){
   return number_unary(args[0], "cos",
-                      [](int i){ return std::cos(i);},
+                      [](int i) -> double { return std::cos(i);},
                       [](double d){ return std::cos(d);},
                       [](Complex z){ return std::cos(z);});
 }
 
 Lisp_ptr number_tan(ZsArgs args){
   return number_unary(args[0], "tan",
-                      [](int i){ return std::tan(i);},
+                      [](int i) -> double { return std::tan(i);},
                       [](double d){ return std::tan(d);},
                       [](Complex z){ return std::tan(z);});
 }
 
 Lisp_ptr number_asin(ZsArgs args){
   return number_unary(args[0], "asin",
-                      [](int i){ return std::asin(i);},
+                      [](int i) -> double { return std::asin(i);},
                       [](double d){ return std::asin(d);},
                       [](Complex z){ return std::asin(z);});
 }
 
 Lisp_ptr number_acos(ZsArgs args){
   return number_unary(args[0], "acos",
-                      [](int i){ return std::acos(i);},
+                      [](int i) -> double { return std::acos(i);},
                       [](double d){ return std::acos(d);},
                       [](Complex z){ return std::acos(z);});
 }
@@ -564,12 +623,12 @@ Lisp_ptr number_atan(ZsArgs args){
   switch(args.size()){
   case 1:  // std::atan()
     return number_unary(args[0], "atan",
-                        [](int i){ return std::atan(i); },
+                        [](int i) -> double { return std::atan(i); },
                         [](double d){ return std::atan(d); },
                         [](Complex z){ return std::atan(z); });
   case 2: // std::atan2()
     return number_binary(args[0], args[1], "atan",
-                         [](int i1, int i2){
+                         [](int i1, int i2) -> double {
                            return std::atan2(i1, i2);
                          },
                          [](double d1, double d2){
@@ -583,7 +642,7 @@ Lisp_ptr number_atan(ZsArgs args){
 
 Lisp_ptr number_sqrt(ZsArgs args){
   return number_unary(args[0], "sqrt",
-                      [](int i){ return std::sqrt(i);},
+                      [](int i) -> double { return std::sqrt(i);},
                       [](double d){ return std::sqrt(d);},
                       [](Complex z){ return std::sqrt(z);});
 }
@@ -591,7 +650,7 @@ Lisp_ptr number_sqrt(ZsArgs args){
 
 Lisp_ptr number_expt(ZsArgs args){
   return number_binary(args[0], args[1], "expt",
-                       [](int i1, int i2){
+                       [](int i1, int i2) -> double {
                          return std::pow(i1, i2);
                        },
                        [](double n1, double n2){
