@@ -9,7 +9,6 @@
 #include "procedure.hh"
 #include "lisp_ptr.hh"
 #include "eval.hh"
-#include "builtin_util.hh"
 #include "reader.hh"
 #include "printer.hh"
 #include "vm.hh"

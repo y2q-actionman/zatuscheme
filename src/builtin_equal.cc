@@ -1,6 +1,5 @@
 #include "builtin_equal.hh"
 #include "lisp_ptr.hh"
-#include "builtin_util.hh"
 #include "vm.hh"
 
 using namespace std;

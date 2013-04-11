@@ -3,6 +3,7 @@
 
 #include "decl.hh"
 #include "procedure.hh"
+#include "vm.hh"
 
 void install_builtin();
 
@@ -19,5 +20,15 @@ struct BuiltinNProc {
   constexpr BuiltinNProc(const char* n, const NProcedure& f)
     : name(n), func(f){};
 };
+
+// type check predicate
+namespace builtin {
+
+template <Ptr_tag p>
+Lisp_ptr type_check_pred(ZsArgs args){
+  return Lisp_ptr{args[0].tag() == p};
+}
+
+} // namespace builtin
 
 #endif // BUILTIN_HH

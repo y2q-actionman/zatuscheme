@@ -1,7 +1,7 @@
 #ifndef BUILTIN_EXTRA_HH
 #define BUILTIN_EXTRA_HH
 
-#include "decl.hh"
+#include "builtin.hh"
 
 namespace builtin {
 

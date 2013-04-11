@@ -4,7 +4,6 @@
 #include "builtin_cons.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
-#include "builtin_util.hh"
 #include "cons.hh"
 #include "cons_util.hh"
 #include "printer.hh"

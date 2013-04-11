@@ -1,7 +1,7 @@
 #ifndef BUILTIN_PROCEDURE_HH
 #define BUILTIN_PROCEDURE_HH
 
-#include "decl.hh"
+#include "builtin.hh"
 
 namespace builtin {
 

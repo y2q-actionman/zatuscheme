@@ -1,7 +1,6 @@
 #include "builtin_extra.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
-#include "builtin_util.hh"
 #include "procedure.hh"
 #include "s_closure.hh"
 #include "util.hh"

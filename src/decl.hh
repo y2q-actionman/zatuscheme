@@ -25,8 +25,6 @@ class SyntacticClosure;
 class SyntaxRules;
 typedef void(*VMop)();
 
-class ZsArgs;
-
 
 // Type tag
 enum class Ptr_tag {

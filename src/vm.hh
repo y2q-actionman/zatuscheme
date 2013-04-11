@@ -51,4 +51,41 @@ private:
 
 extern VM vm;
 
+// class for accessing VM's stack from builtin funcs
+class ZsArgs{
+public:
+  typedef decltype(vm.stack.end()) IterType;
+
+  explicit ZsArgs();
+  ZsArgs(const ZsArgs&) = delete;
+  ZsArgs(ZsArgs&&);
+
+  ~ZsArgs();
+
+  ZsArgs& operator=(const ZsArgs&) = delete;
+  ZsArgs& operator=(ZsArgs&&);
+
+  
+  Lisp_ptr& operator[](int i) const
+  { return *(stack_iter_s_ + i); }
+
+  int size() const
+  { return size_; }
+
+  IterType begin() const
+  { return stack_iter_s_; }
+
+  IterType end() const
+  { return stack_iter_s_ + size(); }
+
+  void cleanup();
+
+private:
+  void invalidate();
+  bool valid() const;
+
+  int size_; // not containing last vm_argcount
+  IterType stack_iter_s_;
+};
+
 #endif //VM_HH

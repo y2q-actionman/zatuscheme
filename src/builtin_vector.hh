@@ -1,7 +1,7 @@
 #ifndef BUILTIN_VECTOR_HH
 #define BUILTIN_VECTOR_HH
 
-#include "decl.hh"
+#include "builtin.hh"
 
 namespace builtin {
 

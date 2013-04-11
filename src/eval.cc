@@ -10,7 +10,6 @@
 #include "cons_util.hh"
 #include "procedure.hh"
 #include "printer.hh"
-#include "builtin_util.hh"
 #include "delay.hh"
 #include "s_closure.hh"
 #include "s_rules.hh"

@@ -1,7 +1,7 @@
 #ifndef BUILTIN_NUMERIC_HH
 #define BUILTIN_NUMERIC_HH
 
-#include "decl.hh"
+#include "builtin.hh"
 
 namespace builtin {
 

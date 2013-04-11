@@ -13,7 +13,6 @@
 #include "builtin_string.hh"
 #include "builtin_symbol.hh"
 #include "builtin_syntax.hh"
-#include "builtin_util.hh"
 #include "builtin_vector.hh"
 #include "cons.hh"
 #include "cons_util.hh"

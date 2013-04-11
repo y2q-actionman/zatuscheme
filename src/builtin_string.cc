@@ -8,7 +8,6 @@
 #include "builtin_string.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
-#include "builtin_util.hh"
 #include "eval.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"

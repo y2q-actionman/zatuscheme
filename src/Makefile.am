@@ -21,7 +21,6 @@ libzs_a_SOURCES = zs.hh\
 		s_closure.cc s_closure.hh\
 		s_rules.cc s_rules.hh\
 		equality.cc equality.hh equality.i.hh\
-		builtin_util.cc builtin_util.hh\
 		builtin.cc builtin.hh builtin.defs.hh\
 		builtin_boolean.cc builtin_boolean.hh builtin_boolean.defs.hh builtin_boolean.strs.hh\
 		builtin_char.cc builtin_char.hh builtin_char.defs.hh\

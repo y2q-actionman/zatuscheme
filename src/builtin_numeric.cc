@@ -13,7 +13,6 @@
 #include "zs_error.hh"
 #include "lisp_ptr.hh"
 #include "eval.hh"
-#include "builtin_util.hh"
 #include "printer.hh"
 #include "equality.hh"
 #include "token.hh"

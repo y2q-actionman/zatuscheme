@@ -6,7 +6,6 @@
 #include "reader.hh"
 #include "printer.hh"
 #include "eval.hh"
-#include "builtin_util.hh"
 #include "vm.hh"
 #include "builtin_equal.hh"
 #include "cons_util.hh"

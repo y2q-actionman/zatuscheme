@@ -1,7 +1,7 @@
 #ifndef BUILTIN_SYMBOL_HH
 #define BUILTIN_SYMBOL_HH
 
-#include "decl.hh"
+#include "builtin.hh"
 
 namespace builtin {
 

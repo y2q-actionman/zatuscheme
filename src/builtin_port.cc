@@ -10,7 +10,7 @@
 #include "reader.hh"
 #include "printer.hh"
 #include "zs_error.hh"
-#include "builtin_util.hh"
+#include "vm.hh"
 
 using namespace std;
 

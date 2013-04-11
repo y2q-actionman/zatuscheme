@@ -4,7 +4,6 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 #include "eval.hh"
-#include "builtin_util.hh"
 #include "zs_error.hh"
 #include "procedure.hh"
 #include "printer.hh"

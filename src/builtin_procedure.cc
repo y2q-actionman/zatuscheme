@@ -1,12 +1,10 @@
 #include "builtin_procedure.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
-#include "builtin_util.hh"
 #include "procedure.hh"
 #include "eval.hh"
 #include "util.hh"
 #include "delay.hh"
-#include "builtin_util.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
 

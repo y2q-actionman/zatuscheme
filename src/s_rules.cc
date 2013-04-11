@@ -11,7 +11,6 @@
 #include "env.hh"
 #include "zs_error.hh"
 #include "builtin_extra.hh"
-#include "builtin_util.hh"
 #include "printer.hh"
 #include "equality.hh"
 #include "eval.hh"
