@@ -14,3 +14,6 @@
 
 "(define (even? n)"
 "  (if (integer? n) (= 0 (modulo n 2)) #f))",
+
+"(define (abs n)"
+"  (if (negative? n) (- n) n))",

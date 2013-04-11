@@ -60,10 +60,6 @@
     builtin::number_divide,
     {1, Variadic::t}}},
 
-{"abs", {
-    builtin::number_abs,
-    {1}}},
-
 {"quotient", {
     builtin::number_quot,
     {2}}},

@@ -453,14 +453,6 @@ Lisp_ptr number_divide(ZsArgs args){
   }
 }
 
-Lisp_ptr number_abs(ZsArgs args){
-  return number_unary(args[0], "abs",
-                      integer_overflow_check_unary([](long long l){return std::abs(l);}),
-                      [](double d){ return std::abs(d);},
-                      inacceptable_number_type());
-}
-
-
 Lisp_ptr number_quot(ZsArgs args){
   return number_binary(args[0], args[1], "quotient",
                        divides<int>(),
