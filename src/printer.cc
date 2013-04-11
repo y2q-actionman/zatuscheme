@@ -231,6 +231,12 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
     break;
 
   case Ptr_tag::i_procedure:
+    f << "#<InterpretedProcedure [";
+    if(auto iproc = p.get<IProcedure*>())
+      print(f, iproc->name(), flag);
+    f << "]>";
+    break;
+
   case Ptr_tag::continuation:
   case Ptr_tag::input_port:
   case Ptr_tag::output_port:
