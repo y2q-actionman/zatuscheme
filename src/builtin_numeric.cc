@@ -254,14 +254,11 @@ struct pass_through{
 static const char integer_overflow_message[]
 = "integer overflow occured. coerced into real.\n";
 
-template <typename Fun>
-struct integer_overflow_check_unary_t{
-  const Fun fun_;
-
-  integer_overflow_check_unary_t(const Fun& f) : fun_(f){}
-
+template <template <typename> class Fun>
+struct integer_overflow_check_unary{
   Lisp_ptr operator()(int i) const {
-    auto l = fun_(static_cast<long long>(i));
+    static const Fun<long long> fun;
+    auto l = fun(static_cast<long long>(i));
     if(l > INT_MAX || l < INT_MIN){
       cerr << integer_overflow_message;
       return wrap_number(static_cast<double>(l));
@@ -271,20 +268,12 @@ struct integer_overflow_check_unary_t{
   }
 };
 
-template <typename Fun>
-integer_overflow_check_unary_t<Fun> integer_overflow_check_unary(const Fun& f){
-  return integer_overflow_check_unary_t<Fun>(f);
-}
-
-template <typename Fun>
-struct integer_overflow_check_binary_t{
-  const Fun fun_;
-
-  integer_overflow_check_binary_t(const Fun& f) : fun_(f){}
-
+template <template <typename> class Fun>
+struct integer_overflow_check_binary{
   Lisp_ptr operator()(int i1, int i2) const {
-    auto l = fun_(static_cast<long long>(i1),
-                  static_cast<long long>(i2));
+    static const Fun<long long> fun;
+    auto l = fun(static_cast<long long>(i1),
+                 static_cast<long long>(i2));
     if(l > INT_MAX || l < INT_MIN){
       cerr << integer_overflow_message;
       return wrap_number(static_cast<double>(l));
@@ -293,11 +282,6 @@ struct integer_overflow_check_binary_t{
     }
   }
 };
-
-template <typename Fun>
-integer_overflow_check_binary_t<Fun> integer_overflow_check_binary(const Fun& f){
-  return integer_overflow_check_binary_t<Fun>(f);
-}
 
 } // namespace
 
@@ -388,7 +372,7 @@ Lisp_ptr number_min(ZsArgs args){
 Lisp_ptr number_plus(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 0}, "+",
-                     integer_overflow_check_binary(plus<long long>()),
+                     integer_overflow_check_binary<std::plus>(),
                      plus<double>(),
                      plus<Complex>());
 }
@@ -396,7 +380,7 @@ Lisp_ptr number_plus(ZsArgs args){
 Lisp_ptr number_multiple(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 1}, "*",
-                     integer_overflow_check_binary(multiplies<long long>()),
+                     integer_overflow_check_binary<std::multiplies>(),
                      multiplies<double>(),
                      multiplies<Complex>());
 }
@@ -408,13 +392,13 @@ Lisp_ptr number_minus(ZsArgs args){
 
   if(args.size() == 1){
     return number_unary(args[0], "-",
-                        integer_overflow_check_unary(negate<long long>()),
+                        integer_overflow_check_unary<std::negate>(),
                         negate<double>(),
                         negate<Complex>());
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "-",
-                       integer_overflow_check_binary(minus<long long>()),
+                       integer_overflow_check_binary<std::minus>(),
                        minus<double>(),
                        minus<Complex>());
   }
@@ -440,7 +424,7 @@ Lisp_ptr number_divide(ZsArgs args){
                        [](int i1, int i2) -> Lisp_ptr{ 
                          // treating edge case (like 'INT_MIN / -1')
                          if(i2 == -1){
-                           auto fun = integer_overflow_check_binary(divides<long long>());
+                           auto fun = integer_overflow_check_binary<std::divides>();
                            return fun(i1, i2);
                          }
 
