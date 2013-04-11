@@ -1,7 +1,5 @@
 // This file is intended to be included into an array of 'const char*'
 
-"(define (list-ref lis num) (car (list-tail lis num)))",
-
 "(define (caar x) (car (car x)))",
 "(define (cadr x) (car (cdr x)))",
 "(define (cdar x) (cdr (car x)))",
@@ -33,7 +31,6 @@
 "(define (cdddar x) (cdr (cddar x)))",
 "(define (cddddr x) (cdr (cdddr x)))",
 
-/*
 "(define (length lis)"
 "  (let loop ((l lis) (n 0))"
 "    (if (null? l) n (loop (cdr l) (+ n 1)))))",
@@ -41,7 +38,13 @@
 "(define (reverse lis)"
 "  (let loop ((l lis) (ret ()))"
 "    (if (null? l) ret (loop (cdr l) (cons (car l) ret)))))",
-*/
+
+"(define (list-tail lis n)"
+"  (if (zero? n) lis"
+"    (list-tail (cdr lis) (- n 1))))",
+
+"(define (list-ref lis num)"
+"  (car (list-tail lis num)))",
 
 #define ASS_FUNCS(name, equal_op)                       \
   "(define ("name" obj alist)"                          \

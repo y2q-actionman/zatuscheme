@@ -36,21 +36,9 @@
     builtin::cons_list_star,
     {1, Variadic::t}}},
 
-{"length", {
-    builtin::cons_length,
-    {1}}},
-
 {"append", {
     builtin::cons_append,
     {1, Variadic::t}}},
-
-{"reverse", {
-    builtin::cons_reverse,
-    {1}}},
-
-{"list-tail", {
-    builtin::cons_list_tail,
-    {2}}},
 
 {"memq", {
     builtin::cons_memq,

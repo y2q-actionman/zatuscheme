@@ -130,16 +130,6 @@ Lisp_ptr cons_list_star(ZsArgs args){
   return gl.extract_with_tail(args[args.size() - 1]);
 }
 
-Lisp_ptr cons_length(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed("list?", args[0]);
-  }
-
-  // TODO: add range check, and remove cast.
-  return Lisp_ptr{Ptr_tag::integer,
-      static_cast<int>(std::distance(begin(args[0]), end(args[0])))};
-}
-
 Lisp_ptr cons_append(ZsArgs args){
   GrowList gl;
 
@@ -155,40 +145,6 @@ Lisp_ptr cons_append(ZsArgs args){
 
   // last
   return gl.extract_with_tail(args[args.size() - 1]);
-}
-
-Lisp_ptr cons_reverse(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed("reverse", args[0]);
-  }
-
-  Lisp_ptr ret = Cons::NIL;
-  
-  for(auto p : args[0]){
-    ret = push_cons_list(p, ret);
-  }
-
-  return ret;
-}
-
-Lisp_ptr cons_list_tail(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed("list-tail", args[0]);
-  }
-
-  if(args[1].tag() != Ptr_tag::integer){
-    throw zs_error_arg1("list-tail", "passed radix is not number", {args[1]});
-  }
-  auto nth = args[1].get<int>();
-
-  for(auto i = begin(args[0]), e = end(args[0]); i != e; ++i){
-    if(nth <= 0){
-      return i.base();
-    }
-    --nth;
-  }
-
-  throw zs_error_arg1("list-tail", "passed list is shorter than specified", {args[0], args[1]});
 }
 
 template <typename Func>
