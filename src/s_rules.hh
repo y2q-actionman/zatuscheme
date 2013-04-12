@@ -9,7 +9,7 @@
 
 class SyntaxRules{
 public:
-  SyntaxRules(Env*, Lisp_ptr lits, Lisp_ptr rules);
+  SyntaxRules(Env*, Lisp_ptr literals, Lisp_ptr rules);
   SyntaxRules(const SyntaxRules&) = delete;
   SyntaxRules(SyntaxRules&&) = delete;
 
@@ -34,8 +34,12 @@ public:
 
 private:
   static constexpr ProcInfo sr_procinfo
-  = ProcInfo{2, 2, proc_flag::Passing::whole, proc_flag::Returning::code, proc_flag::MoveReturnValue::f,
-             // Entering::at_jump, Leaving::after_returning_op};
+  = ProcInfo{2, 2,
+             proc_flag::Passing::whole,
+             proc_flag::Returning::code,
+             proc_flag::MoveReturnValue::f,
+             // Entering::at_jump,
+             // Leaving::after_returning_op
   };
 
   Env* const env_;

@@ -17,11 +17,16 @@
 
 using namespace std;
 
+namespace {
+
+// internal types
 typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> EqHashMap;
 typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;
 typedef std::unordered_set<Lisp_ptr, eq_id_hash_obj, eq_id_obj> ExpandSet;
 
-namespace {
+// error classes
+struct try_match_failed{};
+struct expand_failed {};
 
 bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
   for(auto l : sr.literals()){
@@ -30,6 +35,13 @@ bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
     }
   }
   return false;
+}
+
+bool is_ellipsis(Lisp_ptr p){
+  if(!identifierp(p)) return false;
+
+  auto sym = identifier_symbol(p);
+  return sym->name() == "...";
 }
 
 void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
@@ -54,6 +66,7 @@ void push_tail_cons_list(Lisp_ptr* p, Lisp_ptr value){
     push_tail_cons_list_nl(*p, value);
   }
 }
+
 
 Lisp_ptr pick_first(Lisp_ptr p){
   if(p.tag() == Ptr_tag::cons){
@@ -111,39 +124,8 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p){
   check_pattern(sr, p, {});
 }
 
-bool is_ellipsis(Lisp_ptr p){
-  if(!identifierp(p)) return false;
-
-  auto sym = identifier_symbol(p);
-  return sym->name() == "...";
-}
-
-} // namespace
-
-
-constexpr ProcInfo SyntaxRules::sr_procinfo;
-
-SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
-  : env_(e), literals_(lits), rules_(rls){
-  for(auto i : lits){
-    if(!identifierp(i))
-      throw builtin_identifier_check_failed("syntax-rules", i);
-  }
-
-  for(auto i : rls){
-    bind_cons_list_strict
-      (i,
-       [&](Lisp_ptr pat, Lisp_ptr tmpl){
-        (void)tmpl;
-        check_pattern(*this, pat);
-      });
-  }
-}
-
-SyntaxRules::~SyntaxRules() = default;
 
 template<typename DefaultGen>
-static
 void ensure_binding(EqHashMap& match_obj,
                     const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
                     const DefaultGen& default_gen_func){
@@ -193,9 +175,6 @@ void ensure_binding(EqHashMap& match_obj,
   }
 }
 
-struct try_match_failed{};
-
-static
 EqHashMap
 try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
             Env* form_env, Lisp_ptr form){
@@ -348,8 +327,6 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
   }
 }
 
-
-static
 Lisp_ptr close_to_pattern_variable(ExpandSet& expand_ctx,
                                    const SyntaxRules& sr,
                                    Env* form_env, Lisp_ptr form){
@@ -375,7 +352,6 @@ Lisp_ptr close_to_pattern_variable(ExpandSet& expand_ctx,
   }
 }
 
-static
 EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
   EqHashMap ret;
 
@@ -404,14 +380,10 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
   return ret;
 }
 
-struct expand_failed {};
-
-static
 Lisp_ptr expand(ExpandSet&, const EqHashMap&, 
                 const SyntaxRules&, Lisp_ptr);
 
 template<typename Iter, typename Fun>
-static
 Iter expand_seq(ExpandSet& expand_ctx,
                 const EqHashMap& match_obj, 
                 const SyntaxRules& sr,
@@ -447,7 +419,6 @@ Iter expand_seq(ExpandSet& expand_ctx,
   return i;
 }
 
-static
 Lisp_ptr expand(ExpandSet& expand_ctx,
                 const EqHashMap& match_obj, 
                 const SyntaxRules& sr,
@@ -489,6 +460,29 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
     return tmpl;
   }
 }
+
+} // namespace
+
+constexpr ProcInfo SyntaxRules::sr_procinfo;
+
+SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
+  : env_(e), literals_(lits), rules_(rls){
+  for(auto i : lits){
+    if(!identifierp(i))
+      throw builtin_identifier_check_failed("syntax-rules", i);
+  }
+
+  for(auto i : rls){
+    bind_cons_list_strict
+      (i,
+       [&](Lisp_ptr pat, Lisp_ptr tmpl){
+        (void)tmpl;
+        check_pattern(*this, pat);
+      });
+  }
+}
+
+SyntaxRules::~SyntaxRules() = default;
 
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
   for(auto i : this->rules()){
