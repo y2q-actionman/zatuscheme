@@ -79,13 +79,10 @@ ConsIter begin(Lisp_ptr p){
 }
 
 ConsIter end(Lisp_ptr p){
-#ifndef NDEBUG
-  if(p.tag() != Ptr_tag::cons){
-    throw make_cons_iter_error(p);
-  }
-#else
-  (void)p;
-#endif
-
-  return ConsIter(Cons::NIL);
+  // This is too slow, but needed for treating dotted-list correctly.
+  // If you don't want to traverse, you can write without end(), like:
+  //   for(auto i = begin(p); i; ++i){ ... }
+  auto i = begin(p);
+  while(i) ++i;
+  return i;
 }

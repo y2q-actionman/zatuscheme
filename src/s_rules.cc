@@ -238,8 +238,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
           throw zs_error_arg1("syntax-rules", "'...' is appeared following the first identifier");
         }
 
-        auto p_e = p_i;
-        while(p_e) ++p_e;
+        auto p_e = end(pattern);
 
         if(!nullp(p_e.base())){
           throw zs_error_arg1("syntax-rules", "'...' is appeared in a inproper list pattern");
