@@ -71,10 +71,10 @@ Lisp_ptr string_make(ZsArgs args){
 
 Lisp_ptr string_string(ZsArgs args){
   String ret;
-  for(auto i = args.begin(), e = args.end(); i != e; ++i){
-    auto c = i->get<char>();
+  for(auto p : args){
+    auto c = p.get<char>();
     if(!c){
-      throw builtin_type_check_failed("string", Ptr_tag::character, *i);
+      throw builtin_type_check_failed("string", Ptr_tag::character, p);
     }
 
     ret.push_back(c);
@@ -216,11 +216,10 @@ Lisp_ptr string_substr(ZsArgs args){
 Lisp_ptr string_append(ZsArgs args){
   String ret;
 
-  for(auto i = begin(args), e = end(args);
-      i != e; ++i){
-    auto str = i->get<String*>();
+  for(auto p : args){
+    auto str = p.get<String*>();
     if(!str){
-      throw string_type_check_failed("string-append", *i);
+      throw string_type_check_failed("string-append", p);
     }
 
     ret.append(*str);

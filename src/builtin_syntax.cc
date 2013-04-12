@@ -242,8 +242,8 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
     return push_cons_list(find_builtin_nproc("list*"), gl.extract());
   }else if(arg.tag() == Ptr_tag::vector){
     auto v = arg.get<Vector*>();
-    for(auto i = begin(*v); i != end(*v); ++i){
-      qq_elem(*i);
+    for(auto p : *v){
+      qq_elem(p);
     }
 
     return push_cons_list(find_builtin_nproc("vector"), gl.extract());
