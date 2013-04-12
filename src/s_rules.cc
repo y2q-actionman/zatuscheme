@@ -407,6 +407,47 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
 struct expand_failed {};
 
 static
+Lisp_ptr expand(ExpandSet&, const EqHashMap&, 
+                const SyntaxRules&, Lisp_ptr);
+
+template<typename Iter, typename Fun>
+static
+Iter expand_seq(ExpandSet& expand_ctx,
+                const EqHashMap& match_obj, 
+                const SyntaxRules& sr,
+                Iter i_begin,
+                Iter i_end,
+                Fun push_handler){
+  auto i = i_begin;
+
+  for(; i != i_end; ++i){
+    auto i_next = next(i);
+
+    // check ellipsis
+    if((i_next != i_end) && is_ellipsis(*i_next)){
+      int depth = 0;
+      while(1){
+        auto emap = remake_matchobj(match_obj, depth);
+        try{
+          auto ex = expand(expand_ctx, emap, sr, *i);
+          push_handler(ex);
+          ++depth;
+        }catch(const expand_failed& e){
+          break;
+        }
+      }
+
+      ++i;
+    }else{
+      auto ex = expand(expand_ctx, match_obj, sr, *i);
+      push_handler(ex);
+    }
+  }
+
+  return i;
+}
+
+static
 Lisp_ptr expand(ExpandSet& expand_ctx,
                 const EqHashMap& match_obj, 
                 const SyntaxRules& sr,
@@ -426,62 +467,22 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
     if(nullp(tmpl)) return tmpl;
 
     GrowList gl;
-    auto t_i = begin(tmpl);
 
-    for(; t_i; ++t_i){
-      auto t_n = next(t_i);
+    auto last = 
+      expand_seq(expand_ctx, match_obj, sr,
+                 begin(tmpl), end(tmpl),
+                 [&](Lisp_ptr ex){ gl.push(ex); });
 
-      // check ellipsis
-      if((t_n) && is_ellipsis(*t_n)){
-        int depth = 0;
-        while(1){
-          auto emap = remake_matchobj(match_obj, depth);
-          try{
-            auto ex = expand(expand_ctx, emap, sr, *t_i);
-            gl.push(ex);
-            ++depth;
-          }catch(const expand_failed& e){
-            break;
-          }
-        }
-
-        ++t_i;
-      }else{
-        auto ex = expand(expand_ctx, match_obj, sr, *t_i);
-        gl.push(ex);
-      }
-    }
-
-    auto ex = expand(expand_ctx, match_obj, sr, t_i.base());
+    auto ex = expand(expand_ctx, match_obj, sr, last.base());
     return gl.extract_with_tail(ex);
   }else if(tmpl.tag() == Ptr_tag::vector){
     auto t_vec = tmpl.get<Vector*>();
 
     Vector vec;
 
-    for(auto t_i = begin(*t_vec), t_e = end(*t_vec); t_i != t_e; ++t_i){
-      auto t_n = next(t_i);
-
-      // check ellipsis
-      if((t_n != t_e) && is_ellipsis(*t_n)){
-        int depth = 0;
-        while(1){
-          auto emap = remake_matchobj(match_obj, depth);
-          try{
-            auto ex = expand(expand_ctx, emap, sr, *t_i);
-            vec.push_back(ex);
-            ++depth;
-          }catch(const expand_failed& e){
-            break;
-          }
-        }
-
-        ++t_i;
-      }else{
-        auto ex = expand(expand_ctx, match_obj, sr, *t_i);
-        vec.push_back(ex);
-      }
-    }
+    expand_seq(expand_ctx, match_obj, sr,
+               begin(*t_vec), end(*t_vec),
+               [&](Lisp_ptr ex){ vec.push_back(ex); });
 
     return new Vector(move(vec));
   }else{
