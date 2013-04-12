@@ -155,20 +155,15 @@ void ensure_binding(EqHashMap& match_obj,
       ensure_binding(match_obj, sr, ignore_ident, *p_i, default_gen_func);
     }
 
-    // checks length
-    if((p_i.base().tag() == Ptr_tag::cons)){
-      return;
-    }else{
+    if(!nullp(p_i.base())){
       // dotted list case
       ensure_binding(match_obj, sr, ignore_ident, p_i.base(), default_gen_func);
-      return;
     }
   }else if(pattern.tag() == Ptr_tag::vector){
     auto p_v = pattern.get<Vector*>();
-    auto p_i = begin(*p_v), p_e = end(*p_v);
 
-    for(; p_i != p_e; ++p_i){
-      ensure_binding(match_obj, sr, ignore_ident, *p_i, default_gen_func);
+    for(auto p : *p_v){
+      ensure_binding(match_obj, sr, ignore_ident, p, default_gen_func);
     }
   }else{
     return;
