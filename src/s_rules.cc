@@ -170,13 +170,13 @@ void ensure_binding(EqHashMap& match_obj,
   }
 }
 
-template<typename Iter, typename Fun>
+template<typename Iter>
 std::tuple<bool, Iter, Iter>
 try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
                 Iter pattern_begin, Iter pattern_end,
                 Env* form_env,
                 Iter form_begin, Iter form_end,
-                Fun insert_fun){
+                EqHashMap& match_obj){
   auto p_i = pattern_begin;
   auto f_i = form_begin;
   
@@ -211,14 +211,14 @@ try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
       //   throw zs_error_arg1("syntax-rules", "'...' is used for a inproper list form");
       // }
 
-      insert_fun(begin(acc_map), end(acc_map));
+      match_obj.insert(begin(acc_map), end(acc_map));
       return std::tuple<bool, Iter, Iter>{true, p_i, f_i};
     }
 
     if(f_i == form_end) break; // this check is delayed to here, for checking the ellipsis.
 
     auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-    insert_fun(begin(m), end(m));
+    match_obj.insert(begin(m), end(m));
 
     if(f_i != form_end) ++f_i;
   }
@@ -262,10 +262,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
                                begin(pattern), end(pattern),
                                form_env,
                                begin(form), end(form),
-                               [&](EqHashMap::iterator b,
-                                   EqHashMap::iterator e){
-                                 match_obj.insert(b, e);
-                               });
+                               match_obj);
 
     if(get<0>(ret)) return match_obj;
 
@@ -300,10 +297,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
                                begin(*p_v), end(*p_v),
                                form_env,
                                begin(*f_v), end(*f_v),
-                               [&](EqHashMap::iterator b,
-                                   EqHashMap::iterator e){
-                                 match_obj.insert(b, e);
-                               });
+                               match_obj);
 
     if(get<0>(ret)) return match_obj;
 
