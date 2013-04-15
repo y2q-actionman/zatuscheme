@@ -201,18 +201,16 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
     EqHashMap match_obj;
 
-    auto p_i = begin(pattern);
-    auto f_i = begin(form);
+    auto p_i = begin(pattern), p_e = end(pattern);
+    auto f_i = begin(form), f_e = end(form);
 
-    for(; p_i; ++p_i, (f_i ? ++f_i : f_i)){
+    for(; p_i != p_e; ++p_i){
       // checks ellipsis
       auto p_n = next(p_i);
-      if((p_n) && is_ellipsis(*p_n)){
+      if((p_n != p_e) && is_ellipsis(*p_n)){
         if(eq_internal(*p_i, ignore_ident)){
           throw zs_error_arg1("syntax-rules", "'...' is appeared following the first identifier");
         }
-
-        auto p_e = end(pattern);
 
         if(!nullp(p_e.base())){
           throw zs_error_arg1("syntax-rules", "'...' is appeared in a inproper list pattern");
@@ -241,10 +239,12 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         return match_obj;
       }
 
-      if(!f_i) break; // this check is delayed to here, for checking the ellipsis.
+      if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
       auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
       match_obj.insert(begin(m), end(m));
+
+      if(f_i != f_e) ++f_i;
     }
 
     // checks length
@@ -274,7 +274,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     auto p_i = begin(*p_v), p_e = end(*p_v);
     auto f_i = begin(*f_v), f_e = end(*f_v);
 
-    for(; p_i != p_e; ++p_i, ++f_i){
+    for(; p_i != p_e; ++p_i){
       // checks ellipsis
       auto p_n = next(p_i);
       if((p_n != p_e) && is_ellipsis(*p_n)){
@@ -305,6 +305,8 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
       auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
       match_obj.insert(begin(m), end(m));
+
+      if(f_i != f_e) ++f_i;
     }
 
     // checks length
