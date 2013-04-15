@@ -170,6 +170,63 @@ void ensure_binding(EqHashMap& match_obj,
   }
 }
 
+template<typename Iter, typename Fun>
+std::tuple<bool, Iter, Iter>
+try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
+                Iter pattern_begin, Iter pattern_end,
+                Env* form_env,
+                Iter form_begin, Iter form_end,
+                Fun insert_fun){
+  auto p_i = pattern_begin;
+  auto f_i = form_begin;
+  
+  for(; p_i != pattern_end; ++p_i){
+    // checks ellipsis
+    auto p_n = next(p_i);
+    if((p_n != pattern_end) && is_ellipsis(*p_n)){
+      if(eq_internal(*p_i, ignore_ident)){
+        throw zs_error_arg1("syntax-rules", "'...' is appeared following the first identifier");
+      }
+
+      // if(!nullp(p_e.base())){
+      //   throw zs_error_arg1("syntax-rules", "'...' is appeared in a inproper list pattern");
+      // }
+
+      // accumulating...
+      EqHashMap acc_map;
+      ensure_binding(acc_map, sr, ignore_ident, *p_i,
+                     [](){ return Cons::NIL; });
+
+      for(; f_i != form_end; ++f_i){
+        auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
+
+        for(auto i : m){
+          auto place = acc_map.find(i.first);
+          assert(place->second.tag() == Ptr_tag::cons);
+          push_tail_cons_list(&place->second, i.second);
+        }
+      }
+
+      // if(!nullp(f_i.base())){
+      //   throw zs_error_arg1("syntax-rules", "'...' is used for a inproper list form");
+      // }
+
+      insert_fun(begin(acc_map), end(acc_map));
+      return std::tuple<bool, Iter, Iter>{true, p_i, f_i};
+    }
+
+    if(f_i == form_end) break; // this check is delayed to here, for checking the ellipsis.
+
+    auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
+    insert_fun(begin(m), end(m));
+
+    if(f_i != form_end) ++f_i;
+  }
+
+  return std::tuple<bool, Iter, Iter>{false, p_i, f_i};
+}
+
+
 EqHashMap
 try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
             Env* form_env, Lisp_ptr form){
@@ -201,51 +258,19 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
     EqHashMap match_obj;
 
-    auto p_i = begin(pattern), p_e = end(pattern);
-    auto f_i = begin(form), f_e = end(form);
+    auto ret = try_match_1_seq(sr, ignore_ident,
+                               begin(pattern), end(pattern),
+                               form_env,
+                               begin(form), end(form),
+                               [&](EqHashMap::iterator b,
+                                   EqHashMap::iterator e){
+                                 match_obj.insert(b, e);
+                               });
 
-    for(; p_i != p_e; ++p_i){
-      // checks ellipsis
-      auto p_n = next(p_i);
-      if((p_n != p_e) && is_ellipsis(*p_n)){
-        if(eq_internal(*p_i, ignore_ident)){
-          throw zs_error_arg1("syntax-rules", "'...' is appeared following the first identifier");
-        }
+    if(get<0>(ret)) return match_obj;
 
-        if(!nullp(p_e.base())){
-          throw zs_error_arg1("syntax-rules", "'...' is appeared in a inproper list pattern");
-        }
-
-        // accumulating...
-        EqHashMap acc_map;
-        ensure_binding(acc_map, sr, ignore_ident, *p_i,
-                       [](){ return Cons::NIL; });
-
-        for(; f_i; ++f_i){
-          auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-
-          for(auto i : m){
-            auto place = acc_map.find(i.first);
-            assert(place->second.tag() == Ptr_tag::cons);
-            push_tail_cons_list(&place->second, i.second);
-          }
-        }
-
-        if(!nullp(f_i.base())){
-          throw zs_error_arg1("syntax-rules", "'...' is used for a inproper list form");
-        }
-
-        match_obj.insert(begin(acc_map), end(acc_map));
-        return match_obj;
-      }
-
-      if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
-
-      auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-      match_obj.insert(begin(m), end(m));
-
-      if(f_i != f_e) ++f_i;
-    }
+    auto p_i = get<1>(ret);
+    auto f_i = get<2>(ret);
 
     // checks length
     if((p_i.base().tag() == Ptr_tag::cons) && (f_i.base().tag() == Ptr_tag::cons)){
@@ -271,46 +296,22 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     auto p_v = pattern.get<Vector*>();
     auto f_v = form.get<Vector*>();
 
-    auto p_i = begin(*p_v), p_e = end(*p_v);
-    auto f_i = begin(*f_v), f_e = end(*f_v);
+    auto ret = try_match_1_seq(sr, ignore_ident,
+                               begin(*p_v), end(*p_v),
+                               form_env,
+                               begin(*f_v), end(*f_v),
+                               [&](EqHashMap::iterator b,
+                                   EqHashMap::iterator e){
+                                 match_obj.insert(b, e);
+                               });
 
-    for(; p_i != p_e; ++p_i){
-      // checks ellipsis
-      auto p_n = next(p_i);
-      if((p_n != p_e) && is_ellipsis(*p_n)){
-        if(eq_internal(*p_i, ignore_ident)){
-          throw zs_error_arg1("syntax-rules", "'...' is appeared following the first identifier");
-        }
+    if(get<0>(ret)) return match_obj;
 
-        // accumulating...
-        EqHashMap acc_map;
-        ensure_binding(match_obj, sr, ignore_ident, *p_i,
-                       [](){ return new Vector(); });
-
-        for(; f_i != f_e; ++f_i){
-          auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-
-          for(auto i : m){
-            auto place = acc_map.find(i.first);
-            assert(place->second.tag() == Ptr_tag::vector);
-            place->second.get<Vector*>()->push_back(i.second);
-          }
-        }
-
-        match_obj.insert(begin(acc_map), end(acc_map));
-        return match_obj;
-      }
-
-      if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
-
-      auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
-      match_obj.insert(begin(m), end(m));
-
-      if(f_i != f_e) ++f_i;
-    }
+    auto p_i = get<1>(ret);
+    auto f_i = get<2>(ret);
 
     // checks length
-    if((p_i == p_e) && (f_i == f_e)){
+    if((p_i == end(*p_v)) && (f_i == end(*f_v))){
       return match_obj;
     }else{
       throw try_match_failed();
