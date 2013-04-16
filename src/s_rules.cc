@@ -223,6 +223,7 @@ try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
     if(f_i != form_end) ++f_i;
   }
 
+  assert((p_i == pattern_end) || (f_i == form_end));
   return std::tuple<bool, Iter, Iter>{false, p_i, f_i};
 }
 
@@ -252,8 +253,12 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       throw try_match_failed();
     }
 
-    if(nullp(pattern) && nullp(form)){
-      return {};
+    if(nullp(pattern)){
+      if(nullp(form)){
+        return {};
+      }else{
+        throw try_match_failed();
+      }
     }
 
     EqHashMap match_obj;
@@ -269,19 +274,19 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     auto p_i = get<1>(ret);
     auto f_i = get<2>(ret);
 
-    // checks length
-    if((p_i.base().tag() == Ptr_tag::cons) && (f_i.base().tag() == Ptr_tag::cons)){
-      // proper list
-      if(nullp(p_i.base()) && nullp(f_i.base())){
-        return match_obj;
-      }else{
-        throw try_match_failed();
-      }
-    }else{
-      // dotted list
+    if(p_i.base().tag() != Ptr_tag::cons){
+      // dotted list pattern
       auto m = try_match_1(sr, ignore_ident, p_i.base(), form_env, f_i.base());
       match_obj.insert(begin(m), end(m));
       return match_obj;
+    }
+
+    // the pattern is a proper list, or shorter than the form.
+    // checks length.
+    if((p_i == end(pattern)) && (f_i == end(form))){
+      return match_obj;
+    }else{
+      throw try_match_failed();
     }
   }else if(pattern.tag() == Ptr_tag::vector){
     if(form.tag() != Ptr_tag::vector){
