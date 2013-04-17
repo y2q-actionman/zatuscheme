@@ -293,11 +293,11 @@ Lisp_ptr syntax_syntax_rules(ZsArgs args){
     throw builtin_type_check_failed("syntax-rules", Ptr_tag::env, args[1]);
   }
 
-  return bind_cons_list_strict
-    (args[0],
-     [&](Lisp_ptr, Lisp_ptr lits, ConsIter rest){
-      return new SyntaxRules(env, lits, rest.base());
-    });
+  auto sym_i = begin(args[0]);  // symbol 'syntax-rules'
+  auto literals_i = next(sym_i);
+  auto rest_i = next(literals_i);
+
+  return new SyntaxRules(env, *literals_i, rest_i.base());
 }
     
 } // namespace builtin
