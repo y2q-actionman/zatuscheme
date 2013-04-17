@@ -79,18 +79,16 @@ void print_list(ostream& f, Lisp_ptr l, print_human_readable flag){
 
   f.put('(');
 
-  do_list(l,
-          [&](Cons* cell) -> bool{
-            print(f, cell->car(), flag);
-            if(cell->cdr().get<Cons*>()) f.put(' ');
-            return true;
-          },
-          [&](Lisp_ptr dot_cdr){
-            if(!nullp(dot_cdr)){
-              f.write(" . ", 3);
-              print(f, dot_cdr, flag);
-            }
-          });
+  auto i = begin(l);
+  for(; i; ++i){
+    print(f, *i, flag);
+    if(next(i)) f.put(' ');
+  }
+
+  if(!nullp(i.base())){
+    f.write(" . ", 3);
+    print(f, i.base(), flag);
+  }
 
   f.put(')');
 }
