@@ -13,7 +13,7 @@ int main(int argc, const char* argz[]){
     argz = default_code;
   }    
 
-  for(int i = 1; i < argc; ++i){
+  for(int i = argc - 1; i > 0; --i){
     istringstream iss(argz[i]);
     vm.code.push_back(read(iss));
   }

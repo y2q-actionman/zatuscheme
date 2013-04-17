@@ -20,6 +20,9 @@ using namespace proc_flag;
 
 namespace builtin {
 
+// used for interacting between 'exit' and 'hard-repl'
+static bool hard_repl_continue = true;
+
 Lisp_ptr traditional_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
@@ -139,6 +142,7 @@ Lisp_ptr exit(ZsArgs args){
   args.cleanup();
   vm.stack.clear();
   vm.code.clear();
+  hard_repl_continue = false;
   return {};
 }
 
@@ -152,16 +156,20 @@ Lisp_ptr transcript_off(ZsArgs){
   return Lisp_ptr{true};
 }
 
-Lisp_ptr hard_repl(ZsArgs){
-  while(1){
+Lisp_ptr hard_repl(ZsArgs args){
+  args.cleanup();
+  vm.stack.clear();
+  vm.code.clear();
+
+  while(hard_repl_continue){
     cout << ">> " << flush;
-    auto val = read(cin);
-    vm.code.push_back(val);
+    vm.code.push_back(read(cin));
     eval();
     print(cout, vm.return_value[0]);
     cout << endl;
   }
-  return Lisp_ptr{true};
+
+  return {};
 }
 
 } // namespace builtin
