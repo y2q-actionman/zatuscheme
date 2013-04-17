@@ -7,14 +7,6 @@
 
 inline bool nullp(Lisp_ptr);
 
-template<typename MainFun, typename LastFun>
-auto do_list(Lisp_ptr p, MainFun&&, LastFun&& lf)
-  -> decltype(lf(p));
-
-template<typename MainFun, typename LastFun>
-auto do_list_2(Lisp_ptr p, Lisp_ptr q, MainFun&&, LastFun&& lf)
-  -> decltype(lf(p, q));
-
 //these are defined in ".i.hh"
 // template<typename Fun>
 // auto bind_cons_list_loose(Lisp_ptr p, Fun fun);

@@ -21,43 +21,6 @@ bool nullp(Lisp_ptr p){
     && (p.get<void*>() == nullptr);
 }
 
-template<typename MainFun, typename LastFun>
-auto do_list(Lisp_ptr lis, MainFun&& m_fun, LastFun&& l_fun)
-  -> decltype(l_fun(lis)){
-  Lisp_ptr p = lis;
-
-  while(auto c = p.get<Cons*>()){
-    auto next = c->cdr();
-    if(!m_fun(c))
-      break;
-
-    p = next;
-  }
-
-  return l_fun(p);
-}
-
-template<typename MainFun, typename LastFun>
-auto do_list_2(Lisp_ptr lis1, Lisp_ptr lis2, MainFun&& m_fun, LastFun&& l_fun)
-  -> decltype(l_fun(lis1, lis2)){
-  Lisp_ptr p1 = lis1;
-  Lisp_ptr p2 = lis2;
-
-  Cons *c1, *c2;
-
-  while((c1 = p1.get<Cons*>()) && (c2 = p2.get<Cons*>())){
-    auto next1 = c1->cdr();
-    auto next2 = c2->cdr();
-    if(!m_fun(c1, c2))
-      break;
-
-    p1 = next1;
-    p2 = next2;
-  }
-
-  return l_fun(p1, p2);
-}
-
 // experimental third version
 template<typename T>
 inline
