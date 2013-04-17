@@ -111,11 +111,10 @@ Lisp_ptr syntax_quote(ZsArgs args){
 }
 
 Lisp_ptr syntax_lambda(ZsArgs wargs){
-  auto i0 = begin(wargs[0]); // symbol 'lambda'.
-  auto i1 = next(i0);        // args
-  auto i2 = next(i1);        // body
+  auto args = nth_cons_list<1>(wargs[0]);
+  auto body = nthcdr_cons_list<2>(wargs[0]);
 
-  return lambda_internal(*i1, i2.base(), {});
+  return lambda_internal(args, body, {});
 }
 
 Lisp_ptr syntax_if(ZsArgs args){
@@ -135,24 +134,26 @@ Lisp_ptr syntax_set(ZsArgs args){
 }
 
 Lisp_ptr syntax_define(ZsArgs args){
-  auto i0 = begin(args[0]);     // symbol 'define'.
-  auto i1 = next(i0);
+  auto i1 = nth_cons_list<1>(args[0]);
 
   // extracting
-  if(identifierp(*i1)){         // i1 points variable's name.
-    auto i2 = next(i1);         // expression
-    if(next(i2)){
+  if(identifierp(i1)){         // i1 points variable's name.
+    auto expr_cons = nthcdr_cons_list<2>(args[0]);
+
+    assert(expr_cons.get<Cons*>());
+    if(!nullp(expr_cons.get<Cons*>()->cdr())){
       throw zs_error_arg1("define", "informal syntax: too long");
     }
-    vm.code.insert(vm.code.end(), {*i1, vm_op_local_set, *i2});
-    return {};
-  }else if(i1->tag() == Ptr_tag::cons){ // i1 points (funcname . arg-list)
-    auto funcname_i = begin(*i1);
-    auto arg_list_i = next(funcname_i);
-    auto i2 = next(i1);                 // code
 
-    auto value = lambda_internal(arg_list_i.base(), i2.base(), *funcname_i);
-    vm.code.insert(vm.code.end(), {*funcname_i, vm_op_local_set, value});
+    vm.code.insert(vm.code.end(), {i1, vm_op_local_set, expr_cons.get<Cons*>()->car()});
+    return {};
+  }else if(i1.tag() == Ptr_tag::cons){ // i1 points (funcname . arg-list)
+    auto funcname = nth_cons_list<0>(i1);
+    auto arg_list = nthcdr_cons_list<1>(i1);
+    auto code = nthcdr_cons_list<2>(args[0]);
+
+    auto value = lambda_internal(arg_list, code, funcname);
+    vm.code.insert(vm.code.end(), {funcname, vm_op_local_set, value});
     return {};
   }else{
     throw zs_error_arg1("define", "informal syntax!");
@@ -293,11 +294,10 @@ Lisp_ptr syntax_syntax_rules(ZsArgs args){
     throw builtin_type_check_failed("syntax-rules", Ptr_tag::env, args[1]);
   }
 
-  auto sym_i = begin(args[0]);  // symbol 'syntax-rules'
-  auto literals_i = next(sym_i);
-  auto rest_i = next(literals_i);
+  auto literals = nth_cons_list<1>(args[0]);
+  auto rest = nthcdr_cons_list<2>(args[0]);
 
-  return new SyntaxRules(env, *literals_i, rest_i.base());
+  return new SyntaxRules(env, literals, rest);
 }
     
 } // namespace builtin
