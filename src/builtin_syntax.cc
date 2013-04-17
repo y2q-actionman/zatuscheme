@@ -135,27 +135,24 @@ Lisp_ptr syntax_set(ZsArgs args){
 }
 
 Lisp_ptr syntax_define(ZsArgs args){
-  auto p = args[0].get<Cons*>()->cdr();
-  Cons* rest = p.get<Cons*>();
+  auto i0 = begin(args[0]);     // symbol 'define'.
+  auto i1 = next(i0);
 
   // extracting
-  auto first = rest->car();
-
-  if(identifierp(first)){
-    bind_cons_list_strict
-      (p,
-       [](Lisp_ptr var, Lisp_ptr expr){
-        vm.code.insert(vm.code.end(), {var, vm_op_local_set, expr});
-      });
+  if(identifierp(*i1)){         // i1 points variable's name.
+    auto i2 = next(i1);         // expression
+    if(next(i2)){
+      throw zs_error_arg1("define", "informal syntax: too long");
+    }
+    vm.code.insert(vm.code.end(), {*i1, vm_op_local_set, *i2});
     return {};
-  }else if(first.tag() == Ptr_tag::cons){
-    Lisp_ptr code = rest->cdr();
-    bind_cons_list_strict
-      (first,
-       [&](Lisp_ptr var, ConsIter l_args){
-        auto value = lambda_internal(l_args.base(), code, var);
-        vm.code.insert(vm.code.end(), {var, vm_op_local_set, value});
-      });
+  }else if(i1->tag() == Ptr_tag::cons){ // i1 points (funcname . arg-list)
+    auto funcname_i = begin(*i1);
+    auto arg_list_i = next(funcname_i);
+    auto i2 = next(i1);                 // code
+
+    auto value = lambda_internal(arg_list_i.base(), i2.base(), *funcname_i);
+    vm.code.insert(vm.code.end(), {*funcname_i, vm_op_local_set, value});
     return {};
   }else{
     throw zs_error_arg1("define", "informal syntax!");
