@@ -33,3 +33,6 @@
 {"transcript-off", {
     builtin::transcript_off,
     {0}}},
+{"hard-repl", {
+    builtin::hard_repl,
+    {0}}},

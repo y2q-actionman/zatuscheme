@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "builtin_extra.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
@@ -10,6 +12,8 @@
 #include "builtin.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
+#include "reader.hh"
+#include "printer.hh"
 
 using namespace std;
 using namespace proc_flag;
@@ -145,6 +149,18 @@ Lisp_ptr transcript_on(ZsArgs){
 
 Lisp_ptr transcript_off(ZsArgs){
   dump_mode = false;
+  return Lisp_ptr{true};
+}
+
+Lisp_ptr hard_repl(ZsArgs){
+  while(1){
+    cout << ">> " << flush;
+    auto val = read(cin);
+    vm.code.push_back(val);
+    eval();
+    print(cout, vm.return_value[0]);
+    cout << endl;
+  }
   return Lisp_ptr{true};
 }
 
