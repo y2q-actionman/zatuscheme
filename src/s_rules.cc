@@ -304,31 +304,6 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
   }
 }
 
-Lisp_ptr close_to_pattern_variable(ExpandSet& expand_ctx,
-                                   const SyntaxRules& sr,
-                                   Env* form_env, Lisp_ptr form){
-  assert(identifierp(form));
-  if(form.tag() == Ptr_tag::symbol){
-    if(is_literal_identifier(sr, form)){
-      return form;
-    }
-
-    auto new_sc = new SyntacticClosure(form_env, nullptr, form);
-    auto iter = expand_ctx.find(new_sc);
-    if(iter == expand_ctx.end()){
-      expand_ctx.insert(new_sc);
-      return new_sc;
-    }else{
-      delete new_sc;
-      return *iter;
-    }
-  }else if(form.tag() == Ptr_tag::syntactic_closure){
-    return form;
-  }else{
-    UNEXP_DEFAULT();
-  }
-}
-
 EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
   EqHashMap ret;
 
@@ -408,8 +383,27 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
       }else{
         throw expand_failed();
       }
+    }
+
+    // close to pattern variable
+    if(tmpl.tag() == Ptr_tag::symbol){
+      if(is_literal_identifier(sr, tmpl)){
+        return tmpl;
+      }
+
+      auto new_sc = new SyntacticClosure(sr.env(), nullptr, tmpl);
+      auto iter = expand_ctx.find(new_sc);
+      if(iter == expand_ctx.end()){
+        expand_ctx.insert(new_sc);
+        return new_sc;
+      }else{
+        delete new_sc;
+        return *iter;
+      }
+    }else if(tmpl.tag() == Ptr_tag::syntactic_closure){
+      return tmpl;
     }else{
-      return close_to_pattern_variable(expand_ctx, sr, sr.env(), tmpl);
+      UNEXP_DEFAULT();
     }
   }else if(tmpl.tag() == Ptr_tag::cons){
     if(nullp(tmpl)) return tmpl;
