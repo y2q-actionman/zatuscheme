@@ -72,13 +72,14 @@ bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
 
 bool equal_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() == Ptr_tag::cons && b.tag() == Ptr_tag::cons){
-    return do_list_2(a, b,
-                     [](Cons* c1, Cons* c2){
-                       return equal_internal(c1->car(), c2->car());
-                     },
-                     [](Lisp_ptr a_last, Lisp_ptr b_last){
-                       return nullp(a_last) && nullp(b_last);
-                     });
+    auto i_a = begin(a);
+    auto i_b = begin(b);
+
+    for(; i_a && i_b; ++i_a, ++i_b){
+      if(!equal_internal(*i_a, *i_b)) return false;
+    }
+
+    return (nullp(i_a.base()) && nullp(i_b.base()));
   }else if(a.tag() == Ptr_tag::vector && b.tag() == Ptr_tag::vector){
     auto v1 = a.get<Vector*>(), v2 = b.get<Vector*>();
     return std::equal(v1->begin(), v1->end(), v2->begin(), equal_internal);
