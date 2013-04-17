@@ -65,7 +65,7 @@ void load_internal(const string& str){
     eval();
     if(!vm.return_value_1()){
       cerr << "load error: failed at evaluating a form. skipped.\n";
-      cerr << "\tform: \n";
+      cerr << "form: \n";
       print(cerr, form);
       continue;
     }

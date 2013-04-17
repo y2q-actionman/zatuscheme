@@ -143,7 +143,7 @@ Lisp_ptr exit(ZsArgs args){
   vm.stack.clear();
   vm.code.clear();
   hard_repl_continue = false;
-  return {};
+  return Lisp_ptr{true};
 }
 
 Lisp_ptr transcript_on(ZsArgs){
