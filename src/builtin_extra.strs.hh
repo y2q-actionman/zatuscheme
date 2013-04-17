@@ -1,14 +1,15 @@
 // This file is intended to be included into an array of 'const char*'
 
 "(define (read-eval-print-loop)"
-"  (let loop ()"
+"  (define read-obj #f)"
+"  (let repl-loop ()"
 "    (display \">> \")"
-"    (let ((r (read)))"
-"      (if (eof-object? r) #t"
-"        (begin"
-"          (display (eval r (interaction-environment)))"
-"          (newline)"
-"          (loop))))))",
+"    (set! read-obj (read))"
+"    (if (eof-object? read-obj) #t"
+"      (begin"
+"        (display (eval read-obj (interaction-environment)))"
+"        (newline)"
+"        (repl-loop)))))",
 
 "(define (rsc-macro-transformer fun)"
 "  (sc-macro-transformer"

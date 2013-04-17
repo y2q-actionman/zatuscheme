@@ -223,13 +223,13 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
     break;
 
   case Ptr_tag::n_procedure:
-    f << "#<NativeProcedure ["
+    f << "#<procedure ["
       << find_builtin_nproc_name(p.get<const NProcedure*>())
-      << "]>";
+      << "] (native)>";
     break;
 
   case Ptr_tag::i_procedure:
-    f << "#<InterpretedProcedure [";
+    f << "#<procedure [";
     if(auto iproc = p.get<IProcedure*>())
       print(f, iproc->name(), flag);
     f << "]>";
