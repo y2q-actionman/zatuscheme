@@ -48,6 +48,8 @@ Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* name){
   return vm.frame()->find(intern(vm.symtable(), name));
 }
 
+} //namespace
+
 void load_internal(const string& str){
   istringstream ss{str};
   while(ss){
@@ -69,8 +71,6 @@ void load_internal(const string& str){
     }
   }
 }
-
-} //namespace
 
 namespace builtin {
 

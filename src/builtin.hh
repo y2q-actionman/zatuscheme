@@ -1,10 +1,12 @@
 #ifndef BUILTIN_HH
 #define BUILTIN_HH
 
+#include <string>
 #include "decl.hh"
 #include "procedure.hh"
 #include "vm.hh"
 
+void load_internal(const std::string& str);
 void install_builtin();
 
 // finding NProcedure with name

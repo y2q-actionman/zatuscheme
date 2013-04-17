@@ -1,5 +1,4 @@
 #include "zs.hh"
-#include <sstream>
 
 using namespace std;
 
@@ -13,12 +12,9 @@ int main(int argc, const char* argz[]){
     argz = default_code;
   }    
 
-  for(int i = argc - 1; i > 0; --i){
-    istringstream iss(argz[i]);
-    vm.code.push_back(read(iss));
+  for(int i = 1; i < argc; ++i){
+    load_internal(argz[i]);
   }
-
-  eval();
 
   return 0;
 }
