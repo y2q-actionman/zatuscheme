@@ -10,29 +10,28 @@
 using namespace proc_flag;
 
 std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
+  if(identifierp(args)){
+    return {0, Variadic::t};
+  }
+
   int argc = 0;
-  auto v = Variadic::f;
 
-  do_list(args,
-          [&](Cons* c) -> bool {
-            if(!identifierp(c->car())){
-              return false;
-            }
-            ++argc;
-            return true;
-          },
-          [&](Lisp_ptr last){
-            if(nullp(last)){
-              return;
-            }else{
-              if(!identifierp(last)){
-                throw zs_error_arg1("eval error", "informal lambda list!", {args});
-              }
-              v = Variadic::t;
-            }
-          });
+  auto i = begin(args);
+  for(; i; ++i){
+    if(!identifierp(*i)){
+      throw zs_error_arg1("eval error", "informal lambda list!", {args});
+    }
+    ++argc;
+  }
 
-  return {argc, v};
+  if(nullp(i.base())){
+    return {argc, Variadic::f};
+  }else{
+    if(!identifierp(i.base())){
+      throw zs_error_arg1("eval error", "informal lambda list!", {args});
+    }
+    return {argc, Variadic::t};
+  }
 }
 
   // Continuation class
