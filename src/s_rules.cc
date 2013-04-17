@@ -199,6 +199,8 @@ try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
       }
 
       // accumulating...
+      // BUG: this code only accepts cons. vector is rejected.
+      //      (commit adcd5e7f56298d1dddc777dd894762cf0d3ec92c)
       EqHashMap acc_map;
       ensure_binding(acc_map, sr, ignore_ident, *p_i,
                      [](){ return Cons::NIL; });
