@@ -34,47 +34,32 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
 }
 
 Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
-  Lisp_ptr name = {};
-  int len = 0;
-  GrowList gl_syms;
-  GrowList gl_vals;
-  Lisp_ptr body;
-
-  if(wargs.size() != 1)
-    throw builtin_argcount_failed("let entry", 1, 1, wargs.size());
+  auto arg_i = begin(wargs[0]);
 
   // skips first 'let' symbol
-  auto arg_c = wargs[0].get<Cons*>();
-  assert(arg_c);
-
-  auto arg = arg_c->cdr();
-  if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-    throw zs_error_arg1("let", "informal syntax -- (LET . <...>)", {arg});
+  ++arg_i;
+  if(!arg_i){
+    throw zs_error_arg1("let", "informal syntax -- (LET . <...>)", {wargs[0]});
   }
-  arg_c = arg.get<Cons*>();
 
   // checks named let
-  if(identifierp(arg_c->car())){
-    name = arg_c->car();
+  Lisp_ptr name = {};
 
-    arg = arg_c->cdr();
-    if(arg.tag() != Ptr_tag::cons || nullp(arg)){
-      throw zs_error_arg1("let", "informal syntax -- (LET <name> . <...>)", {arg});
+  if(identifierp(*arg_i)){
+    name = *arg_i;
+
+    ++arg_i;
+    if(!arg_i){
+      throw zs_error_arg1("let", "informal syntax -- (LET <name> . <...>)", {wargs[0]});
     }
-    
-    arg_c = arg.get<Cons*>();
-  }
-
-  // picks elements
-  auto binds = arg_c->car();
-  body = arg_c->cdr();
-
-  if(body.tag() != Ptr_tag::cons || nullp(body)){
-    throw zs_error_arg1("let", "informal body", {body});
   }
 
   // parses binding list
-  for(auto bind : binds){
+  int len = 0;
+  GrowList gl_syms;
+  GrowList gl_vals;
+
+  for(auto bind : *arg_i){
     if(bind.tag() != Ptr_tag::cons || nullp(bind)){
       throw zs_error_arg1("let", "informal object found in let binding", {bind});
     }
@@ -85,6 +70,16 @@ Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
     gl_vals.push(nth_cons_list<1>(bind));
   }
 
+  ++arg_i;
+  if(!arg_i){
+    throw zs_error_arg1("let", "informal body", {wargs[0]});
+  }
+
+  // picks body
+  auto body = arg_i.base();
+
+
+  // parsing done. insert code.
   wargs.cleanup();
 
   auto proc = new IProcedure(body, 
