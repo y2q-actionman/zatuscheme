@@ -230,14 +230,11 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
     }
 
     // generic lists
-    do_list(arg,
-            [&](Cons* cell) -> bool {
-              qq_elem(cell->car());
-              return true;
-            },
-            [&](Lisp_ptr last){
-              qq_elem(last);
-            });
+    auto i = begin(arg);
+    for(; i; ++i){
+      qq_elem(*i);
+    }
+    qq_elem(i.base());
 
     return push_cons_list(find_builtin_nproc("list*"), gl.extract());
   }else if(arg.tag() == Ptr_tag::vector){
