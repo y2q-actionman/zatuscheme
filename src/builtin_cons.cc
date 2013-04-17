@@ -27,12 +27,11 @@ Lisp_ptr cons_carcdr(ZsArgs args, const char* name, Fun fun){
     throw cons_type_check_failed(name, args[0]);
   }
 
-  auto c = args[0].get<Cons*>();
-  if(!c){
+  if(nullp(args[0])){
     throw zs_error_arg1(name, "arg is null list!");
   }
-    
-  return fun(c);
+
+  return fun(args[0].get<Cons*>());
 }
 
 template<typename Fun>
@@ -42,12 +41,11 @@ Lisp_ptr cons_set_carcdr(ZsArgs args, const char* name, Fun fun){
     throw cons_type_check_failed(name, args[0]);
   }
   
-  auto c = args[0].get<Cons*>();
-  if(!c){
+  if(nullp(args[0])){
     throw zs_error_arg1(name, "arg is null list!");
   }
-  
-  return fun(c, args[1]);
+
+  return fun(args[0].get<Cons*>(), args[1]);
 }
 
 } // namespace
@@ -102,8 +100,7 @@ Lisp_ptr cons_listp(ZsArgs args){
   auto i = begin(args[0]);
   for(; i; ++i){
     auto c = i.base().get<Cons*>();
-    auto found = found_cons.find(c);
-    if(found != found_cons.end())
+    if(found_cons.find(c) != found_cons.end())
       return Lisp_ptr{false};   // circular list
     found_cons.insert(c);
   }
