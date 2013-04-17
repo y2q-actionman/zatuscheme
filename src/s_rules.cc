@@ -170,13 +170,15 @@ void ensure_binding(EqHashMap& match_obj,
   }
 }
 
-template<typename Iter>
-std::tuple<bool, Iter, Iter>
+template<typename Iter, typename Fun1, typename Fun2>
+EqHashMap
 try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
                 Iter pattern_begin, Iter pattern_end,
                 Env* form_env,
                 Iter form_begin, Iter form_end,
-                EqHashMap& match_obj){
+                Fun1 dotted_checker,
+                Fun2 dotted_handler){
+  EqHashMap match_obj;
   auto p_i = pattern_begin;
   auto f_i = form_begin;
   
@@ -188,9 +190,13 @@ try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
         throw zs_error_arg1("syntax-rules", "'...' is appeared following the first identifier");
       }
 
-      // if(!nullp(p_e.base())){
-      //   throw zs_error_arg1("syntax-rules", "'...' is appeared in a inproper list pattern");
-      // }
+      if(dotted_checker(pattern_end)){
+        throw zs_error_arg1("syntax-rules", "'...' is appeared in a inproper list pattern");
+      }
+
+      if(dotted_checker(form_end)){
+        throw zs_error_arg1("syntax-rules", "'...' is used for a inproper list form");
+      }
 
       // accumulating...
       EqHashMap acc_map;
@@ -207,12 +213,8 @@ try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
         }
       }
 
-      // if(!nullp(f_i.base())){
-      //   throw zs_error_arg1("syntax-rules", "'...' is used for a inproper list form");
-      // }
-
       match_obj.insert(begin(acc_map), end(acc_map));
-      return std::tuple<bool, Iter, Iter>{true, p_i, f_i};
+      return match_obj;
     }
 
     if(f_i == form_end) break; // this check is delayed to here, for checking the ellipsis.
@@ -220,11 +222,19 @@ try_match_1_seq(const SyntaxRules& sr, Lisp_ptr ignore_ident,
     auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
     match_obj.insert(begin(m), end(m));
 
-    if(f_i != form_end) ++f_i;
+    assert(f_i != form_end);
+    ++f_i;
   }
-
   assert((p_i == pattern_end) || (f_i == form_end));
-  return std::tuple<bool, Iter, Iter>{false, p_i, f_i};
+
+
+  if(dotted_checker(p_i)){
+    return dotted_handler(p_i, f_i, match_obj);
+  }else if((p_i == pattern_end) && (f_i == form_end)){
+    return match_obj;
+  }else{
+    throw try_match_failed();
+  }
 }
 
 
@@ -253,68 +263,38 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       throw try_match_failed();
     }
 
-    if(nullp(pattern)){
-      if(nullp(form)){
-        return {};
-      }else{
-        throw try_match_failed();
-      }
-    }
+    return try_match_1_seq
+      (sr, ignore_ident,
+       begin(pattern), end(pattern),
+       form_env,
+       begin(form), end(form),
+       [](ConsIter i){ return !nullp(i.base()); },
+       [&](ConsIter p_i, ConsIter f_i, EqHashMap& match_obj) -> EqHashMap{
+         if(p_i.base().tag() == Ptr_tag::cons){
+          throw try_match_failed();
+         }
 
-    EqHashMap match_obj;
-
-    auto ret = try_match_1_seq(sr, ignore_ident,
-                               begin(pattern), end(pattern),
-                               form_env,
-                               begin(form), end(form),
-                               match_obj);
-
-    if(get<0>(ret)) return match_obj;
-
-    auto p_i = get<1>(ret);
-    auto f_i = get<2>(ret);
-
-    if(p_i.base().tag() != Ptr_tag::cons){
-      // dotted list pattern
-      auto m = try_match_1(sr, ignore_ident, p_i.base(), form_env, f_i.base());
-      match_obj.insert(begin(m), end(m));
-      return match_obj;
-    }
-
-    // the pattern is a proper list, or shorter than the form.
-    // checks length.
-    if((p_i == end(pattern)) && (f_i == end(form))){
-      return match_obj;
-    }else{
-      throw try_match_failed();
-    }
+         auto m = try_match_1(sr, ignore_ident, p_i.base(), form_env, f_i.base());
+         match_obj.insert(begin(m), end(m));
+         return match_obj;
+      });
   }else if(pattern.tag() == Ptr_tag::vector){
     if(form.tag() != Ptr_tag::vector){
       throw try_match_failed();
     }
 
-    EqHashMap match_obj;
-
     auto p_v = pattern.get<Vector*>();
     auto f_v = form.get<Vector*>();
 
-    auto ret = try_match_1_seq(sr, ignore_ident,
-                               begin(*p_v), end(*p_v),
-                               form_env,
-                               begin(*f_v), end(*f_v),
-                               match_obj);
-
-    if(get<0>(ret)) return match_obj;
-
-    auto p_i = get<1>(ret);
-    auto f_i = get<2>(ret);
-
-    // checks length
-    if((p_i == end(*p_v)) && (f_i == end(*f_v))){
-      return match_obj;
-    }else{
-      throw try_match_failed();
-    }
+    return try_match_1_seq
+      (sr, ignore_ident,
+       begin(*p_v), end(*p_v),
+       form_env,
+       begin(*f_v), end(*f_v),
+       [](Vector::iterator){ return false; },
+       [](Vector::iterator, Vector::iterator, EqHashMap&) -> EqHashMap{
+         return {};
+      });
   }else{
     if(equal_internal(pattern, form)){
       return {};
