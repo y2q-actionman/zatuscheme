@@ -6,19 +6,18 @@
 
 void free_cons_list(Lisp_ptr p){
   // TODO: erase elements!
+  
+  auto i = begin(p);
+  while(i){
+    auto cell = i.base();
+    ++i;
+    delete cell.get<Cons*>();
+  }
 
-  do_list(p,
-          [](Cons* c) -> bool {
-            // erase c->car()
-            delete c;
-            return true;
-          },
-          [](Lisp_ptr dot_cdr){
-            if(!nullp(dot_cdr)){
-              // erase element
-              ;
-            }
-          });
+  if(!nullp(i.base())){
+    // erase element
+    ;
+  }
 }
 
 // GrowList class
