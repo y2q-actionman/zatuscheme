@@ -111,11 +111,11 @@ Lisp_ptr syntax_quote(ZsArgs args){
 }
 
 Lisp_ptr syntax_lambda(ZsArgs wargs){
-  return bind_cons_list_strict
-    (wargs[0],
-     [](Lisp_ptr, Lisp_ptr args, ConsIter code){
-      return lambda_internal(args, code.base(), {});
-    });
+  auto i0 = begin(wargs[0]); // symbol 'lambda'.
+  auto i1 = next(i0);        // args
+  auto i2 = next(i1);        // body
+
+  return lambda_internal(*i1, i2.base(), {});
 }
 
 Lisp_ptr syntax_if(ZsArgs args){
