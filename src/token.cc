@@ -147,6 +147,11 @@ int Token::coerce() const{
     return i_;
   case Type::complex:
   case Type::uninitialized:
+  case Type::identifier:
+  case Type::boolean:
+  case Type::character:
+  case Type::string:
+  case Type::notation:
   default:
     UNEXP_CONVERSION("integer");
   }
@@ -161,6 +166,11 @@ double Token::coerce() const{
     return static_cast<double>(i_);
   case Type::complex:
   case Type::uninitialized:
+  case Type::identifier:
+  case Type::boolean:
+  case Type::character:
+  case Type::string:
+  case Type::notation:
   default:
     UNEXP_CONVERSION("real");
   }
@@ -176,6 +186,11 @@ Complex Token::coerce() const{
   case Type::integer:
     return Complex{static_cast<double>(i_)};
   case Type::uninitialized:
+  case Type::identifier:
+  case Type::boolean:
+  case Type::character:
+  case Type::string:
+  case Type::notation:
   default:
     UNEXP_CONVERSION("complex");
   }
@@ -651,8 +666,14 @@ Token tokenize_number(istream& f, int radix){
       return Token{static_cast<int>(r.get<double>()), Token::Exactness::exact};
     case Token::Type::complex:
       throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
+    case Token::Type::uninitialized:
+    case Token::Type::identifier:
+    case Token::Type::boolean:
+    case Token::Type::character:
+    case Token::Type::string:
+    case Token::Type::notation:
     default:
-      UNEXP_DEFAULT();
+      UNEXP_CONVERSION("exact");
     }
   }else{    
     assert(prefix_info.ex == Token::Exactness::inexact);
@@ -662,8 +683,14 @@ Token tokenize_number(istream& f, int radix){
     case Token::Type::real:
     case Token::Type::complex:
       return r;
+    case Token::Type::uninitialized:
+    case Token::Type::identifier:
+    case Token::Type::boolean:
+    case Token::Type::character:
+    case Token::Type::string:
+    case Token::Type::notation:
     default:
-      UNEXP_DEFAULT();
+      UNEXP_CONVERSION("inexact");
     }
   }
 }
