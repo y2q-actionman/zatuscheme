@@ -7,12 +7,6 @@
 
 inline bool nullp(Lisp_ptr);
 
-//these are defined in ".i.hh"
-// template<typename Fun>
-// auto bind_cons_list_loose(Lisp_ptr p, Fun fun);
-// template<typename Fun>
-// auto bind_cons_list_strict(Lisp_ptr p, Fun fun);
-
 void free_cons_list(Lisp_ptr);
 
 template<typename Iter>
