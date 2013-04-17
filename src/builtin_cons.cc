@@ -98,21 +98,21 @@ Lisp_ptr cons_listp(ZsArgs args){
   }
 
   auto found_cons = unordered_set<Cons*>();
-  
-  auto ret = do_list(args[0],
-                     [&](Cons* c) -> bool{
-                       auto found = found_cons.find(c);
-                       if(found != found_cons.end())
-                         return false; //circular list
-                       
-                       found_cons.insert(c);
-                       return true;
-                     },
-                     [](Lisp_ptr p){
-                       return nullp(p);
-                     });
 
-  return Lisp_ptr{ret};
+  auto i = begin(args[0]);
+  for(; i; ++i){
+    auto c = i.base().get<Cons*>();
+    auto found = found_cons.find(c);
+    if(found != found_cons.end())
+      return Lisp_ptr{false};   // circular list
+    found_cons.insert(c);
+  }
+
+  if(!nullp(i.base())){
+    return Lisp_ptr{false};     // dotted list
+  }
+  
+  return Lisp_ptr{true};
 }
 
 Lisp_ptr cons_list(ZsArgs args){
