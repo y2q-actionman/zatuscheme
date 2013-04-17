@@ -446,12 +446,13 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
   }
 
   for(auto i : rls){
-    bind_cons_list_strict
-      (i,
-       [&](Lisp_ptr pat, Lisp_ptr tmpl){
-        (void)tmpl;
-        check_pattern(*this, pat);
-      });
+    auto pat_i = begin(i);
+    auto tmpl_i = next(pat_i);
+    if(next(tmpl_i)){
+      throw zs_error_arg1("syntax-rules", "invalid pattern: too long", {i});
+    }
+      
+    check_pattern(*this, *pat_i);
   }
 }
 
