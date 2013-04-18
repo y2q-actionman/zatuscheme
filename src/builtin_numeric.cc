@@ -17,6 +17,7 @@
 #include "equality.hh"
 #include "token.hh"
 #include "util.hh"
+#include "rational.hh"
 
 using namespace std;
 
@@ -110,25 +111,6 @@ Lisp_ptr wrap_number(bool){
 Lisp_ptr wrap_number(Lisp_ptr p){
   return p;
 }
-
-
-template<typename T>
-T gcd(T m, T n){
-  if(m < 0) m = -m;
-  if(n < 0) n = -n;
-
-  if(m < n)
-    std::swap(m, n);
-
-  while(n > 0){
-    auto mod = m % n;
-    m = n;
-    n = mod;
-  }
-
-  return m;
-}
-
 
 //
 // implementation utilities
