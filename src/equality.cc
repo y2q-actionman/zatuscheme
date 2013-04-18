@@ -7,6 +7,7 @@
 #include "cons_util.hh"
 #include "s_closure.hh"
 #include "zs_error.hh"
+#include "rational.hh"
 
 using namespace std;
 
@@ -59,7 +60,10 @@ bool eq_id_internal(Lisp_ptr a, Lisp_ptr b){
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
   
-  if(a.tag() == Ptr_tag::real){
+  if(a.tag() == Ptr_tag::rational){
+    typedef to_type<Ptr_tag, Ptr_tag::rational>::type RationalT;
+    return *a.get<RationalT>() == *b.get<RationalT>();
+  }else if(a.tag() == Ptr_tag::real){
     typedef to_type<Ptr_tag, Ptr_tag::real>::type RealT;
     return *a.get<RealT>() == *b.get<RealT>();
   }else if(a.tag() == Ptr_tag::complex){

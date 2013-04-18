@@ -32,6 +32,10 @@ void Token::init_from_other(T other){
     this->i_ = other.i_;
     break;
 
+  case Type::rational:
+    this->q_ = other.q_;
+    break;
+
   case Type::real:
     this->d_ = other.d_;
     break;
@@ -90,6 +94,7 @@ Token& Token::assign_from_other(T other){
   case Type::uninitialized:
   case Type::boolean:
   case Type::integer:
+  case Type::rational:
   case Type::real:
   case Type::character:
   case Type::notation:
@@ -125,6 +130,7 @@ Token::~Token(){
   case Type::uninitialized:
   case Type::boolean:
   case Type::integer:
+  case Type::rational:
   case Type::real:
   case Type::character:
   case Type::notation:
@@ -145,6 +151,8 @@ int Token::coerce() const{
     return static_cast<int>(d_);
   case Type::integer:
     return i_;
+  case Type::rational:
+    // ???
   case Type::complex:
   case Type::uninitialized:
   case Type::identifier:
@@ -164,6 +172,8 @@ double Token::coerce() const{
     return d_;
   case Type::integer:
     return static_cast<double>(i_);
+  case Type::rational:
+    // ???
   case Type::complex:
   case Type::uninitialized:
   case Type::identifier:
@@ -185,6 +195,8 @@ Complex Token::coerce() const{
     return Complex{d_};
   case Type::integer:
     return Complex{static_cast<double>(i_)};
+  case Type::rational:
+    // ???
   case Type::uninitialized:
   case Type::identifier:
   case Type::boolean:
@@ -578,8 +590,7 @@ Token parse_real_number(int radix, istream& f){
 
     auto u2 = zs_stoi(radix, digit_chars_2.first);
 
-    return {sign * static_cast<double>(u1) / static_cast<double>(u2),
-        Token::Exactness::inexact};
+    return {Rational(sign * u1, u2), Token::Exactness::exact};
   }
 
   // FIXME: inexact or super-big integer can be fall into float.
@@ -661,6 +672,7 @@ Token tokenize_number(istream& f, int radix){
   }else if(prefix_info.ex == Token::Exactness::exact){
     switch(r.type()){
     case Token::Type::integer:
+    case Token::Type::rational:
       return r;
     case Token::Type::real:
       return Token{static_cast<int>(r.get<double>()), Token::Exactness::exact};
@@ -680,6 +692,10 @@ Token tokenize_number(istream& f, int radix){
     switch(r.type()){
     case Token::Type::integer:
       return Token{static_cast<double>(r.get<int>()), Token::Exactness::inexact};
+    case Token::Type::rational:
+      return Token{static_cast<double>(r.get<Rational>().numerator)
+                   / static_cast<double>(r.get<Rational>().denominator),
+                   Token::Exactness::inexact};
     case Token::Type::real:
     case Token::Type::complex:
       return r;
@@ -852,6 +868,8 @@ const char* stringify(Token::Type t){
     return "boolean";
   case Token::Type::integer:
     return "integer";
+  case Token::Type::rational:
+    return "rational";
   case Token::Type::real:
     return "real";
   case Token::Type::complex:

@@ -6,13 +6,14 @@
 
 #include "decl.hh"
 #include "util.hh"
+#include "rational.hh"
 
 class Token {
 public:
   enum class Type {
     uninitialized = 0,
       identifier, boolean,
-      integer, real, complex,
+      integer, rational, real, complex,
       character, string, notation
       };
 
@@ -41,6 +42,8 @@ public:
   // numerics
   constexpr Token(int, Exactness);
   constexpr Token(double, Exactness);
+  Token(const Rational&, Exactness);
+  Token(Rational&&, Exactness);
   Token(const Complex&, Exactness);
   Token(Complex&&, Exactness);
 
@@ -77,6 +80,7 @@ private:
     std::string str_;
     bool b_;
     int i_;
+    Rational q_;
     double d_;
     Complex z_;
     char c_;

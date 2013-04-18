@@ -753,6 +753,7 @@ void eval(){
       case Ptr_tag::boolean: case Ptr_tag::character:
       case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
       case Ptr_tag::integer:
+      case Ptr_tag::rational:
       case Ptr_tag::real:
       case Ptr_tag::complex:
       case Ptr_tag::string: case Ptr_tag::vector:

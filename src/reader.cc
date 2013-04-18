@@ -10,6 +10,7 @@
 #include "cons.hh"
 #include "cons_util.hh"
 #include "symbol.hh"
+#include "rational.hh"
 
 using namespace std;
 
@@ -92,6 +93,9 @@ Lisp_ptr read_la(istream& f, Token&& tok){
 
   case Token::Type::integer:
     return Lisp_ptr(Ptr_tag::integer, tok.get<int>());
+
+  case Token::Type::rational:
+    return {new Rational(tok.get<Rational>())};
 
   case Token::Type::real:
     return {new double(tok.get<double>())};

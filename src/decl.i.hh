@@ -47,6 +47,11 @@ struct to_type<Ptr_tag, Ptr_tag::integer>{
 };
 
 template<>
+struct to_type<Ptr_tag, Ptr_tag::rational>{
+  typedef Rational* type;
+};
+
+template<>
 struct to_type<Ptr_tag, Ptr_tag::real>{
   typedef double* type;
 };
@@ -147,6 +152,12 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, Continuation*>(){
   return Ptr_tag::continuation;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, Rational*>(){
+  return Ptr_tag::rational;
 }
 
 template<>

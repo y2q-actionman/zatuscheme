@@ -74,6 +74,7 @@ const ProcInfo* get_procinfo(Lisp_ptr p){
   case Ptr_tag::character: case Ptr_tag::cons:
   case Ptr_tag::symbol:
   case Ptr_tag::integer:
+  case Ptr_tag::rational:
   case Ptr_tag::real:
   case Ptr_tag::complex:
   case Ptr_tag::string:    case Ptr_tag::vector:

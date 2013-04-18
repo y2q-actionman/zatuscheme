@@ -24,6 +24,11 @@ struct to_type<Token::Type, Token::Type::integer>{
 };
 
 template<>
+struct to_type<Token::Type, Token::Type::rational>{
+  typedef Rational type;
+};
+
+template<>
 struct to_type<Token::Type, Token::Type::real>{
   typedef double type;
 };
@@ -64,6 +69,12 @@ template<>
 inline constexpr
 Token::Type to_tag<Token::Type, int>(){
   return Token::Type::integer;
+}
+
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, Rational>(){
+  return Token::Type::rational;
 }
 
 template<>
@@ -112,6 +123,16 @@ Token::Token(int i, Exactness ex)
   : type_(Type::integer), i_(i),
     ex_(ex){}
 
+inline
+Token::Token(const Rational& q, Exactness ex)
+  : type_(Type::rational), q_(q),
+    ex_(ex){}
+
+inline
+Token::Token(Rational&& q, Exactness ex)
+  : type_(Type::rational), q_(std::move(q)),
+    ex_(ex){}
+
 inline constexpr
 Token::Token(double d, Exactness ex)
   : type_(Type::real), d_(d),
@@ -156,6 +177,13 @@ inline
 int Token::get<int>() const{
   assert(type_ == Type::integer);
   return i_;
+}
+
+template<>
+inline
+const Rational& Token::get<Rational>() const{
+  assert(type_ == Type::rational);
+  return q_;
 }
 
 template<>
@@ -213,6 +241,13 @@ inline
 int Token::move<int>(){
   assert(type_ == Type::integer);
   return b_;
+}
+
+template<>
+inline
+Rational&& Token::move<Rational>(){
+  assert(type_ == Type::rational);
+  return std::move(q_);
 }
 
 template<>

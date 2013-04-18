@@ -12,6 +12,7 @@
 #include "eval.hh"
 #include "s_closure.hh"
 #include "builtin.hh"
+#include "rational.hh"
 
 using namespace std;
 
@@ -166,6 +167,12 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
   case Ptr_tag::integer:
     print_integer(f, p.get<int>(), radix);
     break;
+
+  case Ptr_tag::rational: {
+    auto r = p.get<Rational*>();
+    f << r->numerator << '/' << r->denominator;
+    break;
+  }
 
   case Ptr_tag::real:
     f << *p.get<double*>();
