@@ -26,7 +26,7 @@ int main(){
   check_e("(number? 3/4)", "#t");
   check_e("(complex? 3/4)", "#t");
   check_e("(real? 3/4)", "#t");
-  // check_e("(rational? 3/4)", "#t");
+  check_e("(rational? 3/4)", "#t");
   check_e("(integer? 3/4)", "#f");
 
   check_e("(number? 3)", "#t");
@@ -43,8 +43,8 @@ int main(){
   // check_e("(real? -2.5+0.0i)", "#t");
   check_e("(real? #e1)", "#t");
   check_e("(real? #e1e10)", "#t");
-  // check_e("(rational? 6/10)", "#t");
-  // check_e("(rational? 6/3)", "#t");
+  check_e("(rational? 6/10)", "#t");
+  check_e("(rational? 6/3)", "#t");
   // check_e("(integer? 3+0i)", "#t");
   // check_e("(integer? 3.0)", "#t");
   // check_e("(integer? 8/4)", "#t");
@@ -169,8 +169,8 @@ int main(){
   check_e("(- 1 2 3)", "-4");
 
   check_e("(/ 1)", "1");
-  check_e("(/ 1 2)", "0.5");
-  check_e("(/ 1 2 2)", "0.25");
+  check_e("(/ 1 2)", "1/2");
+  check_e("(/ 1 2 2)", "1/4");
 
   // abs
   check_e("(abs 1)", "1");
@@ -197,8 +197,8 @@ int main(){
   check_e("(lcm)", "1");
 
   // rational
-  // check_e("(numarator (/ 6 4))", "3");
-  // check_e("(denominator (/ 6 4))", "2");
+  check_e("(numerator (/ 6 4))", "3");
+  check_e("(denominator (/ 6 4))", "2");
   // check_e("(denominator (exact->inexact (/ 6 4)))", "2.0");
 
   // inexact

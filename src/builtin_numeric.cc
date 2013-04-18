@@ -431,7 +431,7 @@ Lisp_ptr number_divide(ZsArgs args){
                         [](int i) -> Lisp_ptr{
                           return (i == 1) // integer appears only if '1 / 1'
                             ? wrap_number(1)
-                            : wrap_number(1.0 / i);
+                            : wrap_number(Rational(1, i));
                         },
                         [](Rational q){ return Rational(q.denominator, q.numerator); },
                         [](double d){ return 1.0 / d; },
@@ -447,7 +447,7 @@ Lisp_ptr number_divide(ZsArgs args){
                          }
 
                          return (i1 % i2)
-                           ? wrap_number(static_cast<double>(i1) / i2)
+                           ? wrap_number(Rational(i1, i2))
                            : wrap_number(i1 / i2);
                        },
                        divides<Rational>(),
@@ -514,19 +514,19 @@ Lisp_ptr number_lcm(ZsArgs args){
 }
 
 Lisp_ptr number_numerator(ZsArgs args){
-  if(!is_numeric_type(args[0])){
-    throw number_type_check_failed("numerator", args[0]);
-  }
-
-  throw zs_error("internal error: native func 'numerator' is not implemented.\n");
+  return number_unary(args[0], "numerator",
+                      [](int i){ return i;},
+                      [](Rational q){ return q.numerator; },
+                      inacceptable_number_type(),
+                      inacceptable_number_type());
 }
 
 Lisp_ptr number_denominator(ZsArgs args){
-  if(!is_numeric_type(args[0])){
-    throw number_type_check_failed("denominator", args[0]);
-  }
-
-  throw zs_error("internal error: native func 'denominator' is not implemented.\n");
+  return number_unary(args[0], "denominator",
+                      [](int){ return 1;},
+                      [](Rational q){ return q.denominator; },
+                      inacceptable_number_type(),
+                      inacceptable_number_type());
 }
 
 
