@@ -623,9 +623,8 @@ void vm_op_begin(){
   assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_begin);
 
   auto& next = vm.code[vm.code.size() - 2];
-  auto next_c = next.get<Cons*>();
-  auto next_car = next_c->car();
-  auto next_cdr = next_c->cdr();
+  auto next_car = nth_cons_list<0>(next);
+  auto next_cdr = nthcdr_cons_list<1>(next);
 
   if(!nullp(next_cdr)){
     next = next_cdr;
