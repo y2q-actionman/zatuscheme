@@ -418,7 +418,7 @@ void vm_op_call(){
 
   auto proc = vm.return_value_1();
 
-  if(!is_procedure(proc)){
+  if(!is_procedure(proc.tag())){
     // processing args. the error is reported after.
     return function_call(proc, Entering::at_jump);
   }
@@ -453,7 +453,7 @@ void vm_op_call(){
 }
 
 void proc_enter_entrypoint(Lisp_ptr proc){
-  if(!is_procedure(proc)){
+  if(!is_procedure(proc.tag())){
     vm.code.pop_back();
     vm.stack.pop_back();
     throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});

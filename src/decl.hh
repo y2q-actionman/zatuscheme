@@ -54,6 +54,7 @@ enum class Ptr_tag {
     };
 
 const char* stringify(Ptr_tag);
+bool is_procedure(Ptr_tag);
 
 
 // declares generic facilities.

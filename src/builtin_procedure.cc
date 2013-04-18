@@ -13,12 +13,12 @@ using namespace std;
 namespace builtin {
 
 Lisp_ptr procedurep(ZsArgs args){
-  return Lisp_ptr{is_procedure(args[0])};
+  return Lisp_ptr{is_procedure(args[0].tag())};
 }
 
 Lisp_ptr apply(ZsArgs args){
   auto proc = args[0];
-  if(!is_procedure(proc)){
+  if(!is_procedure(proc.tag())){
     throw zs_error_arg1("apply", "first arg is not procedure", {proc});
   }
 
@@ -74,7 +74,7 @@ Lisp_ptr values(ZsArgs args){
 Lisp_ptr call_with_values(ZsArgs args){
   Lisp_ptr procs[2];
 
-  if(!is_procedure(args[0])){
+  if(!is_procedure(args[0].tag())){
     throw zs_error_arg1("call-with-values", "first arg is not procedure", {args[0]});
   }
 
@@ -85,7 +85,7 @@ Lisp_ptr call_with_values(ZsArgs args){
                                       info->required_args));
   }    
 
-  if(!is_procedure(args[1])){
+  if(!is_procedure(args[1].tag())){
     throw zs_error_arg1("call-with-values", "second arg is not procedure", {args[1]});
   }
     
@@ -105,7 +105,7 @@ Lisp_ptr call_with_values(ZsArgs args){
 Lisp_ptr call_cc(ZsArgs args){
   Lisp_ptr proc;
 
-  if(!is_procedure(args[0])){
+  if(!is_procedure(args[0].tag())){
     throw zs_error_arg1("call-with-current-continuation", 
                         "first arg is not procedure", {args[0]});
   }
@@ -133,7 +133,7 @@ Lisp_ptr dynamic_wind(ZsArgs args){
   auto procs_i = begin(procs);
 
   for(auto p : args){
-    if(!is_procedure(p)){
+    if(!is_procedure(p.tag())){
       throw zs_error_arg1("dynamic-wind", "arg is not procedure", {p});
     }
 

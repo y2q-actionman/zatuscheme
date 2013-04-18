@@ -30,6 +30,7 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   case Ptr_tag::i_procedure:
   case Ptr_tag::n_procedure:
   case Ptr_tag::continuation:
+  case Ptr_tag::rational:
   case Ptr_tag::real:
   case Ptr_tag::complex:
   case Ptr_tag::string:
@@ -118,6 +119,7 @@ size_t eq_hash(const Lisp_ptr& p){
   case Ptr_tag::i_procedure:
   case Ptr_tag::n_procedure:
   case Ptr_tag::continuation:
+  case Ptr_tag::rational:
   case Ptr_tag::real:
   case Ptr_tag::complex:
   case Ptr_tag::string:

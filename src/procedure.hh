@@ -162,8 +162,4 @@ private:
 
 const ProcInfo* get_procinfo(Lisp_ptr);
 
-inline bool is_procedure(Lisp_ptr p){
-  return !!get_procinfo(p);
-}
-
 #endif //PROCEDURE_HH

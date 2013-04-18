@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <array>
 #include <cstdlib>
+#include <cassert>
 #include "decl.hh"
 #include "lisp_ptr.hh"
 
