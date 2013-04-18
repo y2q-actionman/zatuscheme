@@ -81,7 +81,7 @@ Lisp_ptr call_with_values(ZsArgs args){
   auto info = get_procinfo(args[0]);
   if(info->required_args != 0){
     throw zs_error_arg1("call-with-values",
-                        printf_string("first arg takes 1 or more args (takes %d)",
+                        printf_string("first arg takes zero arg (takes %d)",
                                       info->required_args));
   }    
 
@@ -106,14 +106,15 @@ Lisp_ptr call_cc(ZsArgs args){
   Lisp_ptr proc;
 
   if(!is_procedure(args[0])){
-    throw zs_error_arg1("call/cc", "first arg is not procedure", {args[0]});
+    throw zs_error_arg1("call-with-current-continuation", 
+                        "first arg is not procedure", {args[0]});
   }
 
   auto info = get_procinfo(args[0]);
-  if(info->required_args != 1){
-    throw zs_error_arg1("call/cc",
-                        printf_string("first arg mush take 1 arg (takes %d)",
-                                      info->required_args));
+  if(!(info->required_args <= 1 && 1 <= info->max_args)){
+    throw zs_error_arg1("call-with-current-continuation",
+                        printf_string("first arg must take 1 arg at least(takes %d-%d)",
+                                      info->required_args, info->max_args));
   }
 
   proc = args[0];
@@ -139,7 +140,7 @@ Lisp_ptr dynamic_wind(ZsArgs args){
     auto info = get_procinfo(p);
     if(info->required_args != 0){
       throw zs_error_arg1("dynamic-wind",
-                          printf_string("first arg mush take 0 arg (%d)",
+                          printf_string("each arg must take 0 arg (%d)",
                                         info->required_args));
     }
 

@@ -90,7 +90,7 @@ Lisp_ptr capture_syntactic_environment(ZsArgs args){
 
   if(iproc->info()->required_args != 1){
     throw zs_error_arg1("capture-syntactic-environment",
-                        printf_string("first arg mush take 1 arg (take %d)",
+                        printf_string("first arg must take exactly 1 arg (take %d)",
                                       iproc->info()->required_args));
   }
 

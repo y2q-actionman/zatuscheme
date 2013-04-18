@@ -745,6 +745,7 @@ void eval(){
       }
 
         // self-evaluating
+      case Ptr_tag::undefined:
       case Ptr_tag::boolean: case Ptr_tag::character:
       case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
       case Ptr_tag::integer:
@@ -761,9 +762,6 @@ void eval(){
         break;
 
         // error
-      case Ptr_tag::undefined:
-        throw zs_error("eval error: undefined is passed!\n");
-
       case Ptr_tag::vm_argcount:
         throw zs_error("eval internal error: vm-argcount is rest on VM code stack!\n");
 
