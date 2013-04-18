@@ -70,11 +70,11 @@ static void enter_frame(IProcedure* iproc){
   vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
 }
 
-void function_call(Lisp_ptr proc, const ProcInfo* info){
+void function_call(Lisp_ptr proc, Entering entering_flag){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
-  if(info->entering == Entering::at_bind){
+  if(entering_flag == Entering::at_bind){
     auto iproc = proc.get<IProcedure*>();
     assert(iproc);
 
@@ -171,8 +171,8 @@ void macro_call(Lisp_ptr proc){
   code = (call kind, proc)
   stack = (whole args, arg-bottom)
 */
-void whole_call(Lisp_ptr proc, const ProcInfo* info){
-  switch(info->required_args){
+void whole_call(Lisp_ptr proc, int args){
+  switch(args){
   case 1:
     vm.stack.push_back({Ptr_tag::vm_argcount, 1});
     break;
@@ -419,12 +419,12 @@ void vm_op_call(){
   auto proc = vm.return_value_1();
 
   if(!is_procedure(proc)){
-    vm.code.pop_back();
-    vm.stack.pop_back();
-    throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});
+    // processing args. the error is reported after.
+    return function_call(proc, Entering::at_jump);
   }
 
   const ProcInfo* info = get_procinfo(proc);
+  assert(info);
 
   switch(info->returning){
   case Returning::pass:
@@ -442,19 +442,24 @@ void vm_op_call(){
 
   switch(info->passing){
   case Passing::eval:
-    return function_call(proc, info);
+    return function_call(proc, info->entering);
   case Passing::quote:
     return macro_call(proc);
   case Passing::whole:
-    return whole_call(proc, info);
+    return whole_call(proc, info->required_args);
   default:
     UNEXP_DEFAULT();
   }
 }
 
 void proc_enter_entrypoint(Lisp_ptr proc){
+  if(!is_procedure(proc)){
+    vm.code.pop_back();
+    vm.stack.pop_back();
+    throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});
+  }
+
   assert(!vm.stack.empty());
-  assert(is_procedure(proc));
 
   auto info = get_procinfo(proc);
   auto argc = vm.stack.back().get<int>();
