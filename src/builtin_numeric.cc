@@ -151,9 +151,10 @@ Lisp_ptr number_unary(Lisp_ptr arg1, const char* name,
   }
 }
 
-template<typename IFun, typename RFun, typename CFun>
+template<typename IFun, typename QFun, typename RFun, typename CFun>
 Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
-                       const char* name, const IFun& ifun,
+                       const char* name, 
+                       const IFun& ifun, const QFun& qfun,
                        const RFun& rfun, const CFun& cfun){
   if(!is_numeric_type(arg1)){
     throw number_type_check_failed(name, arg1);
@@ -166,6 +167,9 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
   if(is_integer_type(arg1) && is_integer_type(arg2)){
     return wrap_number(ifun(coerce<int>(arg1),
                             coerce<int>(arg2)));
+  }else if(is_rational_type(arg1) && is_rational_type(arg2)){
+    return wrap_number(qfun(coerce<Rational>(arg1),
+                            coerce<Rational>(arg2)));
   }else if(is_real_type(arg1) && is_real_type(arg2)){
     return wrap_number(rfun(coerce<double>(arg1),
                             coerce<double>(arg2)));
@@ -177,23 +181,24 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
   }
 }
 
-template<typename IFun, typename RFun, typename CFun, typename Iter>
+template<typename IFun, typename QFun, typename RFun, typename CFun, typename Iter>
 Lisp_ptr number_fold(const Iter& args_begin, const Iter& args_end,
-                     Lisp_ptr init,
-                     const char* name, const IFun& ifun,
+                     Lisp_ptr init, const char* name, 
+                     const IFun& ifun, const QFun& qfun,
                      const RFun& rfun, const CFun& cfun){
   auto acc = init;
 
   for(auto i = args_begin, e = args_end; i != e; ++i){
-    acc = number_binary(acc, *i, name, ifun, rfun, cfun);
+    acc = number_binary(acc, *i, name, ifun, qfun, rfun, cfun);
   }
 
   return acc;
 }
 
-template<typename IFun, typename RFun, typename CFun, typename Iter>
+template<typename IFun, typename QFun, typename RFun, typename CFun, typename Iter>
 Lisp_ptr number_all_2(const Iter& args_begin, const Iter& args_end,
-                      const char* name, const IFun& ifun,
+                      const char* name, 
+                      const IFun& ifun, const QFun& qfun,
                       const RFun& rfun, const CFun& cfun){
   auto i1 = args_begin;
   auto i2 = next(i1);
@@ -210,6 +215,10 @@ Lisp_ptr number_all_2(const Iter& args_begin, const Iter& args_end,
 
     if(is_integer_type(*i1) && is_integer_type(*i2)){
       if(!ifun(coerce<int>(*i1), coerce<int>(*i2))){
+        return Lisp_ptr{false};
+      }
+    }else if(is_rational_type(*i1) && is_rational_type(*i2)){
+      if(!qfun(coerce<Rational>(*i1), coerce<Rational>(*i2))){
         return Lisp_ptr{false};
       }
     }else if(is_real_type(*i1) && is_real_type(*i2)){
@@ -317,6 +326,7 @@ Lisp_ptr inexactp(ZsArgs args){
 Lisp_ptr number_equal(ZsArgs args){
   return number_all_2(begin(args), end(args), "=",
                       equal_to<int>(),
+                      equal_to<Rational>(),
                       equal_to<double>(),
                       equal_to<Complex>());
 }
@@ -324,6 +334,7 @@ Lisp_ptr number_equal(ZsArgs args){
 Lisp_ptr number_less(ZsArgs args){
   return number_all_2(begin(args), end(args), "<",
                       less<int>(),
+                      less<Rational>(),
                       less<double>(),
                       inacceptable_number_type());
 }
@@ -331,6 +342,7 @@ Lisp_ptr number_less(ZsArgs args){
 Lisp_ptr number_greater(ZsArgs args){
   return number_all_2(begin(args), end(args), ">",
                       greater<int>(),
+                      greater<Rational>(),
                       greater<double>(),
                       inacceptable_number_type());
 }
@@ -338,6 +350,7 @@ Lisp_ptr number_greater(ZsArgs args){
 Lisp_ptr number_less_eq(ZsArgs args){
   return number_all_2(begin(args), end(args), "<=",
                       less_equal<int>(),
+                      less_equal<Rational>(),
                       less_equal<double>(),
                       inacceptable_number_type());
 }
@@ -345,6 +358,7 @@ Lisp_ptr number_less_eq(ZsArgs args){
 Lisp_ptr number_greater_eq(ZsArgs args){
   return number_all_2(begin(args), end(args), ">",
                       greater_equal<int>(),
+                      greater_equal<Rational>(),
                       greater_equal<double>(),
                       inacceptable_number_type());
 }
@@ -354,6 +368,7 @@ Lisp_ptr number_max(ZsArgs args){
   return number_fold(next(args.begin()), args.end(),
                      args[0], "max",
                      [](int i1, int i2){ return max(i1, i2); },
+                     [](Rational q1, Rational q2){ return max(q1, q2); },
                      [](double d1, double d2){ return max(d1, d2); },
                      inacceptable_number_type());
 }
@@ -362,6 +377,7 @@ Lisp_ptr number_min(ZsArgs args){
   return number_fold(next(args.begin()), args.end(),
                      args[0], "min",
                      [](int i1, int i2){ return min(i1, i2); },
+                     [](Rational q1, Rational q2){ return min(q1, q2); },
                      [](double d1, double d2){ return min(d1, d2); },
                      inacceptable_number_type());
 }
@@ -370,6 +386,7 @@ Lisp_ptr number_plus(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 0}, "+",
                      integer_overflow_check_binary<std::plus>(),
+                     plus<Rational>(),
                      plus<double>(),
                      plus<Complex>());
 }
@@ -378,6 +395,7 @@ Lisp_ptr number_multiple(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 1}, "*",
                      integer_overflow_check_binary<std::multiplies>(),
+                     multiplies<Rational>(),
                      multiplies<double>(),
                      multiplies<Complex>());
 }
@@ -397,6 +415,7 @@ Lisp_ptr number_minus(ZsArgs args){
     return number_fold(next(args.begin()), args.end(),
                        args[0], "-",
                        integer_overflow_check_binary<std::minus>(),
+                       minus<Rational>(),
                        minus<double>(),
                        minus<Complex>());
   }
@@ -431,6 +450,7 @@ Lisp_ptr number_divide(ZsArgs args){
                            ? wrap_number(static_cast<double>(i1) / i2)
                            : wrap_number(i1 / i2);
                        },
+                       divides<Rational>(),
                        divides<double>(),
                        divides<Complex>());
   }
@@ -439,6 +459,7 @@ Lisp_ptr number_divide(ZsArgs args){
 Lisp_ptr number_quot(ZsArgs args){
   return number_binary(args[0], args[1], "quotient",
                        divides<int>(),
+                       inacceptable_number_type(),
                        inacceptable_number_type(),
                        inacceptable_number_type());
 }
@@ -449,6 +470,7 @@ Lisp_ptr number_rem(ZsArgs args){
                          auto q = i1 / i2;
                          return i1 - (q * i2);
                        },
+                       inacceptable_number_type(),
                        inacceptable_number_type(),
                        inacceptable_number_type());
 }
@@ -465,6 +487,7 @@ Lisp_ptr number_mod(ZsArgs args){
                          }
                        },
                        inacceptable_number_type(),
+                       inacceptable_number_type(),
                        inacceptable_number_type());
 }
 
@@ -475,6 +498,7 @@ Lisp_ptr number_gcd(ZsArgs args){
                        return gcd(i1, i2);
                      },
                      inacceptable_number_type(),
+                     inacceptable_number_type(),
                      inacceptable_number_type());
 }
 
@@ -484,6 +508,7 @@ Lisp_ptr number_lcm(ZsArgs args){
                      [](int i1, int i2){
                        return abs(i1 * i2 / gcd(i1, i2));
                      },
+                     inacceptable_number_type(),
                      inacceptable_number_type(),
                      inacceptable_number_type());
 }
@@ -618,6 +643,9 @@ Lisp_ptr number_atan(ZsArgs args){
                          [](int i1, int i2) -> double {
                            return std::atan2(i1, i2);
                          },
+                         [](Rational q1, Rational q2){
+                           return std::atan2(static_cast<double>(q1), static_cast<double>(q2));
+                         },
                          [](double d1, double d2){
                            return std::atan2(d1, d2);
                          },
@@ -641,6 +669,9 @@ Lisp_ptr number_expt(ZsArgs args){
                        [](int i1, int i2) -> double {
                          return std::pow(i1, i2);
                        },
+                       [](Rational q1, Rational q2){
+                         return std::pow(static_cast<double>(q1), static_cast<double>(q2));
+                       },
                        [](double n1, double n2){
                          return std::pow(n1, n2);
                        },
@@ -654,6 +685,9 @@ Lisp_ptr number_rect(ZsArgs args){
                        [](int i1, int i2){
                          return Complex(i1, i2);
                        },
+                       [](Rational q1, Rational q2){
+                         return Complex(static_cast<double>(q1), static_cast<double>(q2));
+                       },
                        [](double n1, double n2){
                          return Complex(n1, n2);
                        },
@@ -665,6 +699,9 @@ Lisp_ptr number_polar(ZsArgs args){
                        [](int i1, int i2){
                          return polar(static_cast<double>(i1),
                                       static_cast<double>(i2));
+                       },
+                       [](Rational q1, Rational q2){
+                         return polar(static_cast<double>(q1), static_cast<double>(q2));
                        },
                        [](double n1, double n2){
                          return polar(n1, n2);
