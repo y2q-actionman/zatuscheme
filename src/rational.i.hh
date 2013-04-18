@@ -7,6 +7,26 @@
 
 #include <utility>
 
+inline
+bool operator!=(const Rational& r1, const Rational& r2){
+  return !(r1 == r2);
+}
+
+inline
+bool operator>(const Rational& r1, const Rational& r2){
+  return (r2 < r1);
+}
+
+inline
+bool operator<=(const Rational& r1, const Rational& r2){
+  return !(r2 < r1);
+}
+
+inline
+bool operator>=(const Rational& r1, const Rational& r2){
+  return !(r1 < r2);
+}
+
 template<typename T>
 T gcd(T m, T n){
   if(m < 0) m = -m;
