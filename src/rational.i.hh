@@ -7,6 +7,27 @@
 
 #include <utility>
 
+template <typename T>
+bool Rational::is_convertible() const = delete;
+
+template <>
+inline
+bool Rational::is_convertible<int>() const{
+  return (!overflow_) && (denominator() == 1);
+}
+
+template <>
+inline
+bool Rational::is_convertible<Rational>() const{
+  return (!overflow_);
+}
+
+template <>
+inline
+bool Rational::is_convertible<double>() const{
+  return true;
+}
+
 inline
 bool Rational::operator!=(const Rational& other) const{
   return !(*this == other);

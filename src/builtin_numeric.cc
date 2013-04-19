@@ -107,7 +107,13 @@ Lisp_ptr wrap_number(int i){
 }
 
 Lisp_ptr wrap_number(Rational q){
-  return {new Rational(q)};
+  if(q.is_convertible<int>()){
+    return {Ptr_tag::integer, static_cast<int>(q)};
+  }else if(q.is_convertible<Rational>()){
+    return {new Rational(q)};
+  }else{
+    return {new double(static_cast<double>(q))};
+  }
 }
 
 Lisp_ptr wrap_number(double d){

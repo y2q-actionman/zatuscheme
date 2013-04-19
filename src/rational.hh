@@ -13,12 +13,15 @@ public:
   Rational& operator=(Rational&&) = default;
 
   int numerator() const
-  { return n_; }
+  { return ratio_.n_; }
 
   int denominator() const
-  { return d_; }
+  { return ratio_.d_; }
 
-  explicit operator double() const;
+  template <typename T> bool is_convertible() const;
+
+  operator int() const;
+  operator double() const;
 
   bool operator==(const Rational&) const;
   bool operator!=(const Rational&) const;
@@ -37,10 +40,16 @@ public:
   Rational& inverse();
 
 private:
-  int n_;                       // includes sign.
-  int d_;
+  bool overflow_;
+  union {
+    struct {
+      int n_;                       // includes sign.
+      int d_;
+    } ratio_;
+    double float_;
+  };
 
-  template<typename T> void normalized_reset(T, T);
+  void normalized_reset(long long, long long);
 };
 
 // utilities
