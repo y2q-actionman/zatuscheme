@@ -468,6 +468,7 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   auto argc = vm.stack.back().get<int>();
 
   if(!(info->required_args <= argc && argc <= info->max_args)){
+    // XXX: incomprehensible
     // This local value is required, for avoiding a strange state.
     // If throws directly, std::uncaught_exception() returns true,
     // but std::current_exception() returns NULL object.
