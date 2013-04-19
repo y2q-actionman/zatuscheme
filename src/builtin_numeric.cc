@@ -4,7 +4,6 @@
 #include <cmath>
 #include <sstream>
 #include <functional>
-#include <climits>
 #include <iostream>             // warning messages
 
 #include "builtin_numeric.hh"
@@ -112,6 +111,7 @@ Lisp_ptr wrap_number(Rational q){
   }else if(q.is_convertible<Rational>()){
     return {new Rational(q)};
   }else{
+    cerr << "integer overflow occured. coerced into real.\n";
     return {new double(static_cast<double>(q))};
   }
 }
@@ -126,10 +126,6 @@ Lisp_ptr wrap_number(const Complex& z){
 
 Lisp_ptr wrap_number(bool){
   UNEXP_DEFAULT();
-}
-
-Lisp_ptr wrap_number(Lisp_ptr p){
-  return p;
 }
 
 //
@@ -263,38 +259,6 @@ struct pass_through{
 };
 
 
-static const char integer_overflow_message[]
-= "integer overflow occured. coerced into real.\n";
-
-template <template <typename> class Fun>
-struct integer_overflow_check_unary{
-  Lisp_ptr operator()(int i) const {
-    static const Fun<long long> fun;
-    auto l = fun(static_cast<long long>(i));
-    if(l > INT_MAX || l < INT_MIN){
-      cerr << integer_overflow_message;
-      return wrap_number(static_cast<double>(l));
-    }else{
-      return wrap_number(static_cast<int>(l));
-    }
-  }
-};
-
-template <template <typename> class Fun>
-struct integer_overflow_check_binary{
-  Lisp_ptr operator()(int i1, int i2) const {
-    static const Fun<long long> fun;
-    auto l = fun(static_cast<long long>(i1),
-                 static_cast<long long>(i2));
-    if(l > INT_MAX || l < INT_MIN){
-      cerr << integer_overflow_message;
-      return wrap_number(static_cast<double>(l));
-    }else{
-      return wrap_number(static_cast<int>(l));
-    }
-  }
-};
-
 } // namespace
 
 namespace builtin {
@@ -391,7 +355,7 @@ Lisp_ptr number_min(ZsArgs args){
 Lisp_ptr number_plus(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 0}, "+",
-                     integer_overflow_check_binary<std::plus>(),
+                     [](int i1, int i2){ return Rational(i1, 1) += Rational(i2, 1); },
                      [](Rational q1, Rational q2){ return q1 += q2; },
                      plus<double>(),
                      plus<Complex>());
@@ -400,7 +364,7 @@ Lisp_ptr number_plus(ZsArgs args){
 Lisp_ptr number_multiple(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 1}, "*",
-                     integer_overflow_check_binary<std::multiplies>(),
+                     [](int i1, int i2){ return Rational(i1, 1) *= Rational(i2, 1); },
                      [](Rational q1, Rational q2){ return q1 *= q2; },
                      multiplies<double>(),
                      multiplies<Complex>());
@@ -413,14 +377,14 @@ Lisp_ptr number_minus(ZsArgs args){
 
   if(args.size() == 1){
     return number_unary(args[0], "-",
-                        integer_overflow_check_unary<std::negate>(),
+                        [](int i){ return Rational(i, 1).negate(); },
                         [](Rational q){ return q.negate(); },
                         negate<double>(),
                         negate<Complex>());
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "-",
-                       integer_overflow_check_binary<std::minus>(),
+                       [](int i1, int i2){ return Rational(i1, 1) -= Rational(i2, 1); },
                        [](Rational q1, Rational q2){ return q1 -= q2; },
                        minus<double>(),
                        minus<Complex>());
@@ -434,28 +398,14 @@ Lisp_ptr number_divide(ZsArgs args){
 
   if(args.size() == 1){
     return number_unary(args[0], "/",
-                        [](int i) -> Lisp_ptr{
-                          return (i == 1) // integer appears only if '1 / 1'
-                            ? wrap_number(1)
-                            : wrap_number(Rational(1, i));
-                        },
+                        [](int i){ return Rational(i, 1).inverse(); },
                         [](Rational q){ return q.inverse(); },
                         [](double d){ return 1.0 / d; },
                         [](Complex z){ return 1.0 / z; });
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "/",
-                       [](int i1, int i2) -> Lisp_ptr{ 
-                         // treating edge case (like 'INT_MIN / -1')
-                         if(i2 == -1){
-                           auto fun = integer_overflow_check_binary<std::divides>();
-                           return fun(i1, i2);
-                         }
-
-                         return (i1 % i2)
-                           ? wrap_number(Rational(i1, i2))
-                           : wrap_number(i1 / i2);
-                       },
+                       [](int i1, int i2){ return Rational(i1, 1) /= Rational(i2, 1); },
                        [](Rational q1, Rational q2){ return q1 /= q2; },
                        divides<double>(),
                        divides<Complex>());
