@@ -1,15 +1,32 @@
 #include <stdexcept>
+#include <utility>
 
 #include "rational.hh"
 
 using namespace std;
 
-Rational::Rational(int n, int d)
-  : numerator(n), denominator(d){
+   // TODO: overflow check
+template<typename T>
+void Rational::normalized_reset(T n, T d){
   if(d == 0)
     throw std::domain_error("Rational::denominator is 0");
 
-  normalize();
+  auto gcd_val = gcd(n, d);
+  n /= gcd_val;
+  d /= gcd_val;
+
+  if(d < 0){
+    n = -n;
+    d = -d;
+  }
+
+  numerator = n;
+  denominator = d;
+}
+
+Rational::Rational(int n, int d)
+  : numerator(), denominator(){
+  normalized_reset(n, d);
 }
   
 Rational::operator double() const{
@@ -17,47 +34,57 @@ Rational::operator double() const{
     / static_cast<double>(denominator);
 }
 
-void Rational::normalize(){
-  auto gcd_val = gcd(numerator, denominator);
-  numerator /= gcd_val;
-  denominator /= gcd_val;
-
-  if(denominator < 0){
-    numerator = -numerator;
-    denominator = -denominator;
-  }
-}
-
-bool operator==(const Rational& r1, const Rational& r2){
+bool Rational::operator==(const Rational& other) const{
   // assumes rationals are normalized.
-  return (r1.numerator == r2.numerator)
-    && (r1.denominator == r2.denominator);
+  return (numerator == other.numerator)
+    && (denominator == other.denominator);
 }
 
-bool operator<(const Rational& r1, const Rational& r2){
-  return (r1.numerator * r2.denominator) < (r2.numerator * r1.denominator);
+bool Rational::operator<(const Rational& other) const{
+  return (numerator * other.denominator) < (numerator * other.denominator);
 }
 
-Rational operator+(const Rational& r1, const Rational& r2){
-  return Rational(r1.numerator * r2.denominator + r2.numerator * r1.denominator,
-                  r1.denominator * r2.denominator);
+Rational& Rational::operator+=(const Rational& other){
+  auto n = (long long)numerator * other.denominator
+    + other.numerator * (long long)denominator;
+  auto d = (long long)denominator * other.denominator;
+
+  normalized_reset(n, d);
+  return *this;
 }
 
-Rational operator-(const Rational& r1){
-  return Rational(-r1.numerator, r1.denominator);
+Rational& Rational::operator-=(const Rational& other){
+  auto n = (long long)numerator * other.denominator
+    - other.numerator * (long long)denominator;
+  auto d = (long long)denominator * other.denominator;
+
+  normalized_reset(n, d);
+  return *this;
 }
 
-Rational operator-(const Rational& r1, const Rational& r2){
-  return Rational(r1.numerator * r2.denominator - r2.numerator * r1.denominator,
-                  r1.denominator * r2.denominator);
+Rational& Rational::operator*=(const Rational& other){
+  auto n = (long long)numerator * other.numerator;
+  auto d = (long long)denominator * other.denominator;
+
+  normalized_reset(n, d);
+  return *this;
 }
 
-Rational operator*(const Rational& r1, const Rational& r2){
-  return Rational(r1.numerator * r2.numerator,
-                  r1.denominator * r2.denominator);
+Rational& Rational::operator/=(const Rational& other){
+  auto n = (long long)numerator * other.denominator;
+  auto d = (long long)denominator * other.numerator;
+
+  normalized_reset(n, d);
+  return *this;
 }
 
-Rational operator/(const Rational& r1, const Rational& r2){
-  return Rational(r1.numerator * r2.denominator,
-                  r1.denominator * r2.numerator);
+Rational& Rational::negate(){
+  normalized_reset(-(long long)numerator, (long long)denominator);
+  return *this;
 }
+
+Rational& Rational::inverse(){
+  normalized_reset((long long)denominator, (long long)numerator);
+  return *this;
+}
+

@@ -3,7 +3,7 @@
 
 class Rational {
 public:
-  explicit Rational(int, int denom = 1);
+  Rational(int, int);
   Rational(const Rational&) = default;
   Rational(Rational&&) = default;
 
@@ -14,27 +14,29 @@ public:
 
   explicit operator double() const;
 
-  void normalize();
+  bool operator==(const Rational&) const;
+  bool operator!=(const Rational&) const;
+
+  bool operator<(const Rational&) const;
+  bool operator>(const Rational&) const;
+  bool operator<=(const Rational&) const;
+  bool operator>=(const Rational&) const;
+
+  Rational& operator+=(const Rational&);
+  Rational& operator-=(const Rational&);
+  Rational& operator*=(const Rational&);
+  Rational& operator/=(const Rational&);
+
+  Rational& negate();
+  Rational& inverse();
 
   // allow public access
   int numerator;                // includes sign.
   int denominator;
+
+private:
+  template<typename T> void normalized_reset(T, T);
 };
-
-bool operator==(const Rational&, const Rational&);
-bool operator!=(const Rational&, const Rational&);
-
-bool operator<(const Rational&, const Rational&);
-bool operator>(const Rational&, const Rational&);
-bool operator<=(const Rational&, const Rational&);
-bool operator>=(const Rational&, const Rational&);
-
-Rational operator+(const Rational&, const Rational&);
-Rational operator-(const Rational&);
-Rational operator-(const Rational&, const Rational&);
-Rational operator*(const Rational&, const Rational&);
-Rational operator/(const Rational&, const Rational&);
-
 
 // utilities
 template<typename T> T gcd(T, T);

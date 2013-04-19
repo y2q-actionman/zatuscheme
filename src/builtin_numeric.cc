@@ -386,7 +386,7 @@ Lisp_ptr number_plus(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 0}, "+",
                      integer_overflow_check_binary<std::plus>(),
-                     plus<Rational>(),
+                     [](Rational q1, Rational q2){ return q1 != q2; },
                      plus<double>(),
                      plus<Complex>());
 }
@@ -395,7 +395,7 @@ Lisp_ptr number_multiple(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 1}, "*",
                      integer_overflow_check_binary<std::multiplies>(),
-                     multiplies<Rational>(),
+                     [](Rational q1, Rational q2){ return q1 *= q2; },
                      multiplies<double>(),
                      multiplies<Complex>());
 }
@@ -408,14 +408,14 @@ Lisp_ptr number_minus(ZsArgs args){
   if(args.size() == 1){
     return number_unary(args[0], "-",
                         integer_overflow_check_unary<std::negate>(),
-                        negate<Rational>(),
+                        [](Rational q){ return q.negate(); },
                         negate<double>(),
                         negate<Complex>());
   }else{
     return number_fold(next(args.begin()), args.end(),
                        args[0], "-",
                        integer_overflow_check_binary<std::minus>(),
-                       minus<Rational>(),
+                       [](Rational q1, Rational q2){ return q1 -= q2; },
                        minus<double>(),
                        minus<Complex>());
   }
@@ -433,7 +433,7 @@ Lisp_ptr number_divide(ZsArgs args){
                             ? wrap_number(1)
                             : wrap_number(Rational(1, i));
                         },
-                        [](Rational q){ return Rational(q.denominator, q.numerator); },
+                        [](Rational q){ return q.inverse(); },
                         [](double d){ return 1.0 / d; },
                         [](Complex z){ return 1.0 / z; });
   }else{
@@ -450,7 +450,7 @@ Lisp_ptr number_divide(ZsArgs args){
                            ? wrap_number(Rational(i1, i2))
                            : wrap_number(i1 / i2);
                        },
-                       divides<Rational>(),
+                       [](Rational q1, Rational q2){ return q1 /= q2; },
                        divides<double>(),
                        divides<Complex>());
   }

@@ -8,23 +8,23 @@
 #include <utility>
 
 inline
-bool operator!=(const Rational& r1, const Rational& r2){
-  return !(r1 == r2);
+bool Rational::operator!=(const Rational& other) const{
+  return !(*this == other);
 }
 
 inline
-bool operator>(const Rational& r1, const Rational& r2){
-  return (r2 < r1);
+bool Rational::operator>(const Rational& other) const{
+  return (other < *this);
 }
 
 inline
-bool operator<=(const Rational& r1, const Rational& r2){
-  return !(r2 < r1);
+bool Rational::operator<=(const Rational& other) const{
+  return !(other < *this);
 }
 
 inline
-bool operator>=(const Rational& r1, const Rational& r2){
-  return !(r1 < r2);
+bool Rational::operator>=(const Rational& other) const{
+  return !(*this < other);
 }
 
 template<typename T>
