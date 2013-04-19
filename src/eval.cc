@@ -419,7 +419,10 @@ void vm_op_call(){
   auto proc = vm.return_value_1();
 
   if(!is_procedure(proc.tag())){
-    // processing args. the error is reported after.
+    // NOTE: too ad-hoc. should be rewritten.
+    // We must process args, even this situation is almost wrong.
+    // This is required for using a continuation in args. If no global
+    // jump occured, errors are reported after.
     return function_call(proc, Entering::at_jump);
   }
 
