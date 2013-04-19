@@ -693,8 +693,8 @@ Token tokenize_number(istream& f, int radix){
     case Token::Type::integer:
       return Token{static_cast<double>(r.get<int>()), Token::Exactness::inexact};
     case Token::Type::rational:
-      return Token{static_cast<double>(r.get<Rational>().numerator)
-                   / static_cast<double>(r.get<Rational>().denominator),
+      return Token{static_cast<double>(r.get<Rational>().numerator())
+          / static_cast<double>(r.get<Rational>().denominator()),
                    Token::Exactness::inexact};
     case Token::Type::real:
     case Token::Type::complex:

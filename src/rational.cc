@@ -20,71 +20,67 @@ void Rational::normalized_reset(T n, T d){
     d = -d;
   }
 
-  numerator = n;
-  denominator = d;
+  this->n_ = n;
+  this->d_ = d;
 }
 
 Rational::Rational(int n, int d)
-  : numerator(), denominator(){
+  : n_(), d_(){
   normalized_reset(n, d);
 }
-  
+
 Rational::operator double() const{
-  return static_cast<double>(numerator)
-    / static_cast<double>(denominator);
+  return static_cast<double>(n_) / static_cast<double>(d_);
 }
 
 bool Rational::operator==(const Rational& other) const{
   // assumes rationals are normalized.
-  return (numerator == other.numerator)
-    && (denominator == other.denominator);
+  return (n_ == other.n_) && (d_ == other.d_);
 }
 
 bool Rational::operator<(const Rational& other) const{
-  return (numerator * other.denominator) < (numerator * other.denominator);
+  return (n_ * other.d_) < (other.n_ * d_);
 }
 
 Rational& Rational::operator+=(const Rational& other){
-  auto n = (long long)numerator * other.denominator
-    + other.numerator * (long long)denominator;
-  auto d = (long long)denominator * other.denominator;
+  auto n = (long long)n_ * other.d_ + other.n_ * (long long)d_;
+  auto d = (long long)d_ * other.d_;
 
   normalized_reset(n, d);
   return *this;
 }
 
 Rational& Rational::operator-=(const Rational& other){
-  auto n = (long long)numerator * other.denominator
-    - other.numerator * (long long)denominator;
-  auto d = (long long)denominator * other.denominator;
+  auto n = (long long)n_ * other.d_ - other.n_ * (long long)d_;
+  auto d = (long long)d_ * other.d_;
 
   normalized_reset(n, d);
   return *this;
 }
 
 Rational& Rational::operator*=(const Rational& other){
-  auto n = (long long)numerator * other.numerator;
-  auto d = (long long)denominator * other.denominator;
+  auto n = (long long)n_ * other.n_;
+  auto d = (long long)d_ * other.d_;
 
   normalized_reset(n, d);
   return *this;
 }
 
 Rational& Rational::operator/=(const Rational& other){
-  auto n = (long long)numerator * other.denominator;
-  auto d = (long long)denominator * other.numerator;
+  auto n = (long long)n_ * other.d_;
+  auto d = (long long)d_ * other.n_;
 
   normalized_reset(n, d);
   return *this;
 }
 
 Rational& Rational::negate(){
-  normalized_reset(-(long long)numerator, (long long)denominator);
+  normalized_reset(-(long long)n_, (long long)d_);
   return *this;
 }
 
 Rational& Rational::inverse(){
-  normalized_reset((long long)denominator, (long long)numerator);
+  normalized_reset((long long)d_, (long long)n_);
   return *this;
 }
 

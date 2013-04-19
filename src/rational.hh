@@ -12,6 +12,12 @@ public:
   Rational& operator=(const Rational&) = default;
   Rational& operator=(Rational&&) = default;
 
+  int numerator() const
+  { return n_; }
+
+  int denominator() const
+  { return d_; }
+
   explicit operator double() const;
 
   bool operator==(const Rational&) const;
@@ -30,11 +36,10 @@ public:
   Rational& negate();
   Rational& inverse();
 
-  // allow public access
-  int numerator;                // includes sign.
-  int denominator;
-
 private:
+  int n_;                       // includes sign.
+  int d_;
+
   template<typename T> void normalized_reset(T, T);
 };
 

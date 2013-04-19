@@ -516,7 +516,7 @@ Lisp_ptr number_lcm(ZsArgs args){
 Lisp_ptr number_numerator(ZsArgs args){
   return number_unary(args[0], "numerator",
                       [](int i){ return i;},
-                      [](Rational q){ return q.numerator; },
+                      [](Rational q){ return q.numerator(); },
                       inacceptable_number_type(),
                       inacceptable_number_type());
 }
@@ -524,7 +524,7 @@ Lisp_ptr number_numerator(ZsArgs args){
 Lisp_ptr number_denominator(ZsArgs args){
   return number_unary(args[0], "denominator",
                       [](int){ return 1;},
-                      [](Rational q){ return q.denominator; },
+                      [](Rational q){ return q.denominator(); },
                       inacceptable_number_type(),
                       inacceptable_number_type());
 }

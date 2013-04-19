@@ -170,7 +170,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
 
   case Ptr_tag::rational: {
     auto r = p.get<Rational*>();
-    f << r->numerator << '/' << r->denominator;
+    f << r->numerator() << '/' << r->denominator();
     break;
   }
 
