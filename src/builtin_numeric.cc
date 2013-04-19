@@ -386,7 +386,7 @@ Lisp_ptr number_plus(ZsArgs args){
   return number_fold(begin(args), end(args),
                      Lisp_ptr{Ptr_tag::integer, 0}, "+",
                      integer_overflow_check_binary<std::plus>(),
-                     [](Rational q1, Rational q2){ return q1 != q2; },
+                     [](Rational q1, Rational q2){ return q1 += q2; },
                      plus<double>(),
                      plus<Complex>());
 }
