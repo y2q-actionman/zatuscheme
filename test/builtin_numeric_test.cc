@@ -201,6 +201,22 @@ int main(){
   check_e("(denominator (/ 6 4))", "2");
   // check_e("(denominator (exact->inexact (/ 6 4)))", "2.0");
 
+  // rational arithmeric
+  check_e("(+ 1/2 1/3)", "5/6");
+  check_e("(+ 1/2 1/3 1/6)", "1");
+  check_e("(+ 1/2 1/3 1/3)", "7/6");
+  check_e("(- 1/2)", "-1/2");
+  check_e("(- 1/2 1/3)", "1/6");
+  check_e("(- 1/2 1/3 1/6)", "0");
+  check_e("(- 1/2 1/3 1/3)", "-1/6");
+  check_e("(* 1/2 1/3)", "1/6");
+  check_e("(* 1/2 1/3 1/6)", "1/36");
+  check_e("(* 1/2 -2/3 -5/6)", "5/18");
+  check_e("(/ 1/2)", "2");
+  check_e("(/ 1/2 1/3)", "3/2");
+  check_e("(/ 1/2 1/3 1/6)", "9");
+  check_e("(/ 1/2 -2/3 -5/6)", "9/10");
+
   // inexact
   check_e("(floor -4.3)", "-5");
   check_e("(ceiling -4.3)", "-4");
