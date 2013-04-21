@@ -2,6 +2,7 @@
 #include <utility>
 #include <climits>
 #include <cassert>
+#include <cmath>
 
 #include "rational.hh"
 
@@ -31,6 +32,11 @@ void Rational::normalized_reset(long long n, long long d){
 }
 
 Rational::Rational(int n, int d)
+  : overflow_(false){
+  normalized_reset(n, d);
+}
+
+Rational::Rational(long long n, long long d)
   : overflow_(false){
   normalized_reset(n, d);
 }
@@ -118,3 +124,41 @@ Rational& Rational::inverse(){
   return *this;
 }
 
+Rational rationalize(double answer, double error){
+  // from:
+  // http://en.wikipedia.org/wiki/Continued_fraction#Infinite_continued_fractions
+  double d = answer;
+
+  int h_2 = 0, h_1 = 1;
+  int k_2 = 1, k_1 = 0;
+  long long h_0;
+  long long k_0;
+
+  while(1){
+    auto int_p = (long long)floor(d);
+    auto frac_p = d - int_p;
+    d = 1 / frac_p;
+
+    h_0 = int_p * h_1 + h_2;
+    k_0 = int_p * k_1 + k_2;
+
+    if(h_0 < INT_MIN || h_0 > INT_MAX
+       || k_0 < INT_MIN || k_0 > INT_MAX){
+      // integer overflow
+      break;
+    }
+
+    auto sub_ans = (double)h_0 / (double)k_0;
+
+    if(abs(sub_ans - answer) <= error){
+      break;
+    }
+
+    h_2 = h_1;
+    h_1 = (int)h_0;
+    k_2 = k_1;
+    k_1 = (int)k_0;
+  }
+
+  return Rational{h_0 , k_0};
+}

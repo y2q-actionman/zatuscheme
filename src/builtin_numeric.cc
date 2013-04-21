@@ -520,13 +520,13 @@ Lisp_ptr number_round(ZsArgs args){
 
 
 Lisp_ptr number_rationalize(ZsArgs args){
-  for(auto i = 0; i < 2; ++i){
-    if(!is_numeric_type(args[i])){
-      throw number_type_check_failed("rationalize", args[i]);
-    }
-  }
-  
-  throw zs_error("internal error: native func 'rationalize' is not implemented.\n");
+  return number_binary(args[0], args[1], "rationalize",
+                       [](int i1, int){ return i1; },
+                       [](Rational q1, Rational){ return q1; },
+                       [](double n1, double n2){
+                         return rationalize(n1, n2);
+                       },
+                       inacceptable_number_type());
 }
 
 

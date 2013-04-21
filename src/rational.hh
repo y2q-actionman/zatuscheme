@@ -4,6 +4,7 @@
 class Rational {
 public:
   Rational(int, int);
+  explicit Rational(long long, long long);
   Rational(const Rational&) = default;
   Rational(Rational&&) = default;
 
@@ -51,6 +52,8 @@ private:
 
   void normalized_reset(long long, long long);
 };
+
+Rational rationalize(double, double);
 
 // utilities
 template<typename T> T gcd(T, T);
