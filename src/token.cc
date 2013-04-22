@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
+#include <climits>
+#include <iostream>
 
 #include "token.hh"
 #include "zs_error.hh"
@@ -444,13 +446,52 @@ pair<string, Token::Exactness> collect_integer_digits(int radix, istream& f){
   return {s, e};
 }
   
-
-int zs_stoi(int radix, const string& s){
-  try{
-    return std::stoi(s, nullptr, radix);
-  }catch(const std::logic_error& err){
-    throw zs_error(printf_string("reader error: reading integer failed: %s\n", err.what()));
+// 0: success, 1: fallen into float
+int zs_stoi(int radix, const string& s, int& ret_i, double& ret_d){
+  if(s.empty()){
+    ret_i = 0;
+    return 0;
   }
+
+  long long tmp = 0;
+  auto i = begin(s), e = end(s);
+
+  while(1){
+    auto digit = char_to_int(radix, *i);
+    if(digit == -1){
+      ret_i = static_cast<int>(tmp);
+      return 0;
+    }
+
+    tmp += digit;
+
+    ++i;
+    if(i == e){
+      ret_i = static_cast<int>(tmp);
+      return 0;
+    }
+
+    tmp *= radix;
+    if(tmp > INT_MAX) break;
+  }
+
+  cerr << "passed integer fallen into float (" << s << ")\n";
+
+  ret_d = static_cast<double>(tmp);
+
+  while(1){
+    auto digit = char_to_int(radix, *i);
+    ++i;
+
+    if(digit == -1 || i == e){
+      return 1;
+    }
+
+    ret_d += digit;
+    ret_d *= 10;
+  }
+
+  UNEXP_DEFAULT();
 }
 
 inline
@@ -578,11 +619,16 @@ Token parse_real_number(int radix, istream& f){
     throw zs_error("reader error: failed at reading a number's integer part\n");
   }
 
-  auto u1 = zs_stoi(radix, digit_chars.first);
+  int u1;
+  double d1;
+  auto d1_used_flag = zs_stoi(radix, digit_chars.first, u1, d1);
 
   if(c != '/'){
-    // FIXME: inexact or super-big integer can be fall into float.
-    return {sign * u1, digit_chars.second};
+    if(d1_used_flag){
+      return {d1, Token::Exactness::inexact};
+    }else{
+      return {sign * u1, digit_chars.second};
+    }
   }
 
   // rational
@@ -593,9 +639,23 @@ Token parse_real_number(int radix, istream& f){
     throw zs_error("reader error: failed at reading a rational number's denominator\n");
   }
 
-  auto u2 = zs_stoi(radix, digit_chars_2.first);
+  int u2;
+  double d2;
+  auto d2_used_flag = zs_stoi(radix, digit_chars_2.first, u2, d2);
 
-  return {Rational(sign * u1, u2), Token::Exactness::exact};
+  if(d1_used_flag || d2_used_flag){
+    return {d1 / d2, Token::Exactness::inexact};
+  }else{
+    Token::Exactness ex;
+    if(digit_chars.second == Token::Exactness::inexact
+       || digit_chars_2.second == Token::Exactness::inexact){
+      ex = Token::Exactness::inexact;
+    }else{
+      ex = Token::Exactness::exact;
+    }
+
+    return {Rational(sign * u1, u2), ex};
+  }
 }
 
 Token parse_complex(int radix, istream& f){
