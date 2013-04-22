@@ -272,6 +272,7 @@ Token::Notation Token::move<Token::Notation>(){
 }
 
 template <> int Token::coerce() const;
+template <> Rational Token::coerce() const;
 template <> double Token::coerce() const;
 template <> Complex Token::coerce() const;
 
