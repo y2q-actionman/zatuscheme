@@ -644,6 +644,8 @@ Token parse_real_number(int radix, istream& f){
   auto d2_used_flag = zs_stoi(radix, digit_chars_2.first, u2, d2);
 
   if(d1_used_flag || d2_used_flag){
+    if(!d1_used_flag) d1 = u1;
+    if(!d2_used_flag) d2 = u2;
     return {d1 / d2, Token::Exactness::inexact};
   }else{
     Token::Exactness ex;
