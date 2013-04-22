@@ -378,36 +378,37 @@ PrefixValue parse_number_prefix(istream& f){
   return {r, e};
 }
 
-inline
-bool is_number_char(int radix, int c){
+int char_to_int(int radix, int c){
   switch(radix){
-  case 16:
-    return isxdigit(c);
-
-  case 10:
-    return isdigit(c);
-
-  case 8:
-    switch(c){
-    case '0': case '1':
-    case '2': case '3': case '4':
-    case '5': case '6': case '7':
-      return true;
-    default:
-      return false;
-    }
-
-  case 2:
-    switch(c){
-    case '0': case '1':
-      return true;
-    default:
-      return false;
-    }
-    
-  default:
-    UNEXP_DEFAULT();
+  case 16: goto xdigit;
+  case 10: goto digit;
+  case 8:  goto octet;
+  case 2:  goto binary;
+  default: UNEXP_DEFAULT();
   }
+
+ xdigit:
+  if(c == 'f' || c == 'F') return 15;
+  if(c == 'e' || c == 'E') return 14;
+  if(c == 'd' || c == 'D') return 13;
+  if(c == 'c' || c == 'C') return 12;
+  if(c == 'b' || c == 'B') return 11;
+  if(c == 'a' || c == 'A') return 10;
+ digit:
+  if(c == '9') return 9;
+  if(c == '8') return 8;
+ octet:
+  if(c == '7') return 7;
+  if(c == '6') return 6;
+  if(c == '5') return 5;
+  if(c == '4') return 4;
+  if(c == '3') return 3;
+  if(c == '2') return 2;
+ binary:
+  if(c == '1') return 1;
+  if(c == '0') return 0;
+
+  return -1;
 }
 
 int eat_sharp(istream& f, string& o){
@@ -428,7 +429,7 @@ pair<string, Token::Exactness> collect_integer_digits(int radix, istream& f){
   decltype(f.get()) c;
   string s;
 
-  while(is_number_char(radix, c = f.get()))
+  while(char_to_int(radix, c = f.get()) != -1)
     s.push_back(c);
   f.unget();
 
@@ -579,22 +580,22 @@ Token parse_real_number(int radix, istream& f){
 
   auto u1 = zs_stoi(radix, digit_chars.first);
 
-  if(c == '/'){
-    f.ignore(1);
-
-    // rational
-    auto digit_chars_2 = collect_integer_digits(radix, f);
-    if(digit_chars_2.first.empty()){
-      throw zs_error("reader error: failed at reading a rational number's denominator\n");
-    }
-
-    auto u2 = zs_stoi(radix, digit_chars_2.first);
-
-    return {Rational(sign * u1, u2), Token::Exactness::exact};
+  if(c != '/'){
+    // FIXME: inexact or super-big integer can be fall into float.
+    return {sign * u1, digit_chars.second};
   }
 
-  // FIXME: inexact or super-big integer can be fall into float.
-  return {sign * u1, digit_chars.second};
+  // rational
+  f.ignore(1);
+
+  auto digit_chars_2 = collect_integer_digits(radix, f);
+  if(digit_chars_2.first.empty()){
+    throw zs_error("reader error: failed at reading a rational number's denominator\n");
+  }
+
+  auto u2 = zs_stoi(radix, digit_chars_2.first);
+
+  return {Rational(sign * u1, u2), Token::Exactness::exact};
 }
 
 Token parse_complex(int radix, istream& f){
@@ -747,7 +748,7 @@ Token tokenize(istream& f){
     auto c2 = f.peek();
 
     // checks number like '.1'
-    if(is_number_char(10, c2)){
+    if(char_to_int(10, c2) != -1){
       f.unget();
       return tokenize_number(f);
     }      
