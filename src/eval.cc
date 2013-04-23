@@ -687,7 +687,6 @@ void eval(){
   try{
     while(!vm.code.empty()){
       if(dump_mode) cout << vm << endl;
-
       auto p = vm.code.back();
 
       switch(p.tag()){
@@ -704,6 +703,8 @@ void eval(){
           break;
         }
 
+        gc(); // temporary..
+
         vm.code.back() = vm_op_call;
         vm.code.push_back(c->car());
         vm.stack.push_back(p);
@@ -713,9 +714,6 @@ void eval(){
       case Ptr_tag::vm_op:
         if(auto op = p.get<VMop>()){
           op();
-          // temporary..
-          if(op == vm_op_leave_frame)
-            gc();
         }else{
           vm.code.pop_back();
         }
