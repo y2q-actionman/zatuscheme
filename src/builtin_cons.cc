@@ -9,6 +9,7 @@
 #include "printer.hh"
 #include "zs_error.hh"
 #include "equality.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -57,7 +58,7 @@ Lisp_ptr cons_pairp(ZsArgs args){
 }
 
 Lisp_ptr cons_cons(ZsArgs args){
-  return {new Cons(args[0], args[1])};
+  return {zs_new<Cons>(args[0], args[1])};
 }
 
 Lisp_ptr cons_car(ZsArgs args){

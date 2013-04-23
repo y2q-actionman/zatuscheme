@@ -17,6 +17,7 @@
 #include "token.hh"
 #include "util.hh"
 #include "rational.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -109,19 +110,19 @@ Lisp_ptr wrap_number(Rational q){
   if(q.is_convertible<int>()){
     return {Ptr_tag::integer, static_cast<int>(q)};
   }else if(q.is_convertible<Rational>()){
-    return {new Rational(q)};
+    return {zs_new<Rational>(q)};
   }else{
     cerr << "integer overflow occured. coerced into real.\n";
-    return {new double(static_cast<double>(q))};
+    return {zs_new<double>(static_cast<double>(q))};
   }
 }
 
 Lisp_ptr wrap_number(double d){
-  return {new double(d)};
+  return {zs_new<double>(d)};
 }
 
 Lisp_ptr wrap_number(const Complex& z){
-  return {new Complex(z)};
+  return {zs_new<Complex>(z)};
 }
 
 Lisp_ptr wrap_number(bool){
@@ -748,11 +749,11 @@ Lisp_ptr number_from_string(ZsArgs args){
   if(t.type() == Token::Type::integer){
     return Lisp_ptr(Ptr_tag::integer, t.get<int>());
   }else if(t.type() == Token::Type::rational){
-    return {new double(t.get<Rational>())};
+    return {zs_new<double>(t.get<Rational>())};
   }else if(t.type() == Token::Type::real){
-    return {new double(t.get<double>())};
+    return {zs_new<double>(t.get<double>())};
   }else if(t.type() == Token::Type::complex){
-    return {new Complex(t.get<Complex>())};
+    return {zs_new<Complex>(t.get<Complex>())};
   }else{
     throw zs_error_arg1("string->number", "string cannot be read as number", {args[0]});
   }
@@ -783,7 +784,7 @@ Lisp_ptr number_to_string(ZsArgs args){
   ostringstream oss;
   print(oss, args[0], print_human_readable::f, radix);
 
-  return {new String(oss.str())};
+  return {zs_new<String>(oss.str())};
 }
 
 } // namespace builtin

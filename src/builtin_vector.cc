@@ -4,6 +4,7 @@
 #include "eval.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -27,16 +28,16 @@ Lisp_ptr vector_make(ZsArgs args){
 
   switch(args.size()){
   case 1:
-    return {new Vector(count, {})};
+    return {zs_new<Vector>(count, Lisp_ptr{})};
   case 2:
-    return {new Vector(count, args[1])};
+    return {zs_new<Vector>(count, args[1])};
   default:
     throw builtin_argcount_failed("make-vector", 1, 2, args.size());
   }
 }
 
 Lisp_ptr vector_vector(ZsArgs args){
-  return {new Vector(args.begin(), args.end())};
+  return {zs_new<Vector>(args.begin(), args.end())};
 }
 
 Lisp_ptr vector_length(ZsArgs args){
@@ -105,7 +106,7 @@ Lisp_ptr vector_from_list(ZsArgs args){
     throw builtin_type_check_failed("list->vector", Ptr_tag::cons, args[0]);
   }
 
-  return {new Vector(begin(args[0]), end(args[0]))};
+  return {zs_new<Vector>(begin(args[0]), end(args[0]))};
 }
 
 Lisp_ptr vector_fill(ZsArgs args){

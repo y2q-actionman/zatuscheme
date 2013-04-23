@@ -14,6 +14,7 @@
 #include "cons_util.hh"
 #include "reader.hh"
 #include "printer.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 using namespace proc_flag;
@@ -32,13 +33,13 @@ Lisp_ptr traditional_transformer(ZsArgs args){
   info.passing = Passing::quote;
   info.returning = Returning::code;
 
-  return new IProcedure(iproc->get(), info,
-                        iproc->arg_list(), iproc->closure(), {});
+  return zs_new<IProcedure>(iproc->get(), info,
+                            iproc->arg_list(), iproc->closure(), Lisp_ptr{});
 }
 
 Lisp_ptr gensym(ZsArgs){
   static const string gensym_symname = {"(gensym)"};
-  return {new Symbol(&gensym_symname)};
+  return {zs_new<Symbol>(&gensym_symname)};
 }
 
 Lisp_ptr sc_macro_transformer(ZsArgs args){
@@ -58,9 +59,9 @@ Lisp_ptr sc_macro_transformer(ZsArgs args){
   info.returning = Returning::code;
   info.leaving = Leaving::after_returning_op;
 
-  return new IProcedure(iproc->get(), info,
-                        iproc->arg_list(),
-                        iproc->closure()->fork(), {});
+  return zs_new<IProcedure>(iproc->get(), info,
+                            iproc->arg_list(),
+                            iproc->closure()->fork(), Lisp_ptr{});
 }
 
 Lisp_ptr make_syntactic_closure(ZsArgs args){
@@ -76,7 +77,7 @@ Lisp_ptr make_syntactic_closure(ZsArgs args){
   }
   Cons* c = args[1].get<Cons*>();
 
-  return new SyntacticClosure(e, c, args[2]);
+  return zs_new<SyntacticClosure>(e, c, args[2]);
 }
 
 Lisp_ptr capture_syntactic_environment(ZsArgs args){
@@ -134,7 +135,7 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
     throw zs_error_arg1("make-synthetic-identifier", "passed value is not identifier", {args[0]});
   }
 
-  return new SyntacticClosure(new Env(nullptr), nullptr, args[0]);
+  return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), nullptr, args[0]);
 }
 
 Lisp_ptr exit(ZsArgs args){

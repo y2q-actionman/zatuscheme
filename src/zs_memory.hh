@@ -1,23 +1,25 @@
 #ifndef ZS_MEMORY_HH
 #define ZS_MEMORY_HH
 
-#include <new>
-#include <memory>
 #include "decl.hh"
 
-void* operator new(size_t, Ptr_tag);
-void* operator new[](size_t, Ptr_tag) = delete;
+// primitives
+void* zs_m_in(void* p, Ptr_tag tag);
+void zs_m_out(void* p, Ptr_tag tag);
 
-void operator delete(void*, Ptr_tag);
-void operator delete[](void*, Ptr_tag) = delete;
+// wrappers
+template<typename T, typename... Args>
+T* zs_new(Args...);
 
-// like 'std::default_delete'
+template<typename T, Ptr_tag, typename... Args>
+T* zs_new_with_tag(Args...);
+
 template<typename T>
-struct zs_memory_delete{
-  void operator()(T* p){
-    p->~T();
-    operator delete(p, to_tag<T>()); 
-  }
-};
+void zs_delete(T*);
+
+template<typename T>
+struct zs_deleter;
+
+#include "zs_memory.i.hh"
 
 #endif // ZS_MEMORY_HH

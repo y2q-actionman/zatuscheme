@@ -12,6 +12,7 @@
 #include "s_closure.hh"
 #include "s_rules.hh"
 #include "builtin.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 using namespace proc_flag;
@@ -28,9 +29,9 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
     throw zs_error_arg1("lambda", "invalid body!");
   }
   
-  return new IProcedure(code, 
-                        {arg_info.first, arg_info.second},
-                        args, vm.frame(), name);
+  return zs_new<IProcedure>(code, 
+                            ProcInfo{arg_info.first, arg_info.second},
+                            args, vm.frame(), name);
 }
 
 Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
@@ -82,11 +83,11 @@ Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
   // parsing done. insert code.
   wargs.cleanup();
 
-  auto proc = new IProcedure(body, 
-                             {len, Variadic::f,  Passing::eval,
-                                 Returning::pass, MoveReturnValue::t,
-                                 entering},
-                             gl_syms.extract(), vm.frame(), name);
+  auto proc = zs_new<IProcedure>(body, 
+                                 ProcInfo{len, Variadic::f,  Passing::eval,
+                                     Returning::pass, MoveReturnValue::t,
+                                     entering},
+                                 gl_syms.extract(), vm.frame(), name);
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
   vm.code.insert(vm.code.end(), {vm_op_call, proc});
@@ -188,7 +189,7 @@ Lisp_ptr syntax_letrec(ZsArgs args){
 }
 
 Lisp_ptr syntax_delay(ZsArgs args){
-  return {new Delay(args[0], vm.frame())};
+  return {zs_new<Delay>(args[0], vm.frame())};
 }
 
 Lisp_ptr syntax_quasiquote(ZsArgs args){
@@ -292,7 +293,7 @@ Lisp_ptr syntax_syntax_rules(ZsArgs args){
   auto literals = nth_cons_list<1>(args[0]);
   auto rest = nthcdr_cons_list<2>(args[0]);
 
-  return new SyntaxRules(env, literals, rest);
+  return zs_new<SyntaxRules>(env, literals, rest);
 }
     
 } // namespace builtin

@@ -11,6 +11,7 @@
 #include "eval.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -56,13 +57,13 @@ Lisp_ptr string_make(ZsArgs args){
 
   switch(args.size()){
   case 1:
-    return {new String(char_count, '\0')};
+    return {zs_new<String>(char_count, '\0')};
   case 2: {
     auto c = args[1].get<char>();
     if(!c){
       throw builtin_type_check_failed("make-string", Ptr_tag::character, args[1]);
     }
-    return {new String(char_count, c)};
+    return {zs_new<String>(char_count, c)};
   }
   default:
     throw builtin_argcount_failed("make-string", 1, 2, args.size());
@@ -80,7 +81,7 @@ Lisp_ptr string_string(ZsArgs args){
     ret.push_back(c);
   }
 
-  return {new String(std::move(ret))};
+  return {zs_new<String>(std::move(ret))};
 }
   
 Lisp_ptr string_length(ZsArgs args){
@@ -210,7 +211,7 @@ Lisp_ptr string_substr(ZsArgs args){
                                  str->length(), ind[0], ind[1]));
   }
 
-  return {new String(str->substr(ind[0], ind[1] - ind[0]))};
+  return {zs_new<String>(str->substr(ind[0], ind[1] - ind[0]))};
 }
 
 Lisp_ptr string_append(ZsArgs args){
@@ -225,7 +226,7 @@ Lisp_ptr string_append(ZsArgs args){
     ret.append(*str);
   }
 
-  return {new String(std::move(ret))};
+  return {zs_new<String>(std::move(ret))};
 }
 
 Lisp_ptr string_to_list(ZsArgs args){
@@ -252,7 +253,7 @@ Lisp_ptr string_from_list(ZsArgs args){
     ret.push_back(ch);
   }
 
-  return {new String(std::move(ret))};
+  return {zs_new<String>(std::move(ret))};
 }
 
 Lisp_ptr string_copy(ZsArgs args){
@@ -261,7 +262,7 @@ Lisp_ptr string_copy(ZsArgs args){
     throw string_type_check_failed("string-copy", args[0]);
   }
 
-  return {new String(*str)};
+  return {zs_new<String>(*str)};
 }
 
 Lisp_ptr string_fill(ZsArgs args){

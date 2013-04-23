@@ -393,13 +393,13 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
         return tmpl;
       }
 
-      auto new_sc = new SyntacticClosure(sr.env(), nullptr, tmpl);
-      auto iter = expand_ctx.find(new_sc);
+      unique_ptr<SyntacticClosure, zs_deleter<SyntacticClosure> > new_sc
+        (zs_new<SyntacticClosure>(sr.env(), nullptr, tmpl));
+      auto iter = expand_ctx.find(new_sc.get());
       if(iter == expand_ctx.end()){
-        expand_ctx.insert(new_sc);
-        return new_sc;
+        expand_ctx.insert(new_sc.get());
+        return new_sc.release();
       }else{
-        delete new_sc;
         return *iter;
       }
     }else if(tmpl.tag() == Ptr_tag::syntactic_closure){
@@ -428,7 +428,7 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
                begin(*t_vec), end(*t_vec),
                [&](Lisp_ptr ex){ vec.push_back(ex); });
 
-    return new Vector(move(vec));
+    return zs_new<Vector>(move(vec));
   }else{
     return tmpl;
   }

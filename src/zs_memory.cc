@@ -1,37 +1,28 @@
-#include <deque>
+#include <unordered_set>
 #include <array>
 #include <algorithm>
 #include "zs_memory.hh"
 
-// Assumes 'operator delete' is not called frequently,
+// Assumes 'delete' is not called frequently.
 
 using namespace std;
 
 namespace {
 
-class zs_allocator {
-public:
-  typedef deque<void*> ArenaType;
+typedef unordered_set<void*> ArenaType;
 
-  ArenaType& arena(Ptr_tag tag)
-  { return arena_table_[static_cast<int>(tag)]; }
-
-private:
-  array<ArenaType, static_cast<size_t>(Ptr_tag::PTR_TAG_MAX)> arena_table_;
-};
-
-static zs_allocator alloc;
+static array<ArenaType, static_cast<size_t>(Ptr_tag::PTR_TAG_MAX)>
+arena_table;
 
 }
 
-void* operator new(size_t size, Ptr_tag tag){
-  auto p = operator new(size);
-  alloc.arena(tag).push_front(p);
+void* zs_m_in(void* p, Ptr_tag tag){
+  arena_table[static_cast<int>(tag)].insert(p);
   return p;
 }
 
-void operator delete(void* p, Ptr_tag tag){
-  auto arena = alloc.arena(tag);
+void zs_m_out(void* p, Ptr_tag tag){
+  auto arena = arena_table[static_cast<int>(tag)];
   auto i = find(begin(arena), end(arena), p);
   if(i != end(arena)){
     arena.erase(i);

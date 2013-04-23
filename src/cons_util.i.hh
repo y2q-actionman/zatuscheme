@@ -10,6 +10,7 @@
 #include <type_traits>
 #include "zs_error.hh"
 #include "equality.hh"
+#include "zs_memory.hh"
 
 inline
 bool nullp(Lisp_ptr p){
@@ -48,7 +49,7 @@ Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
 
 inline
 Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
-  return Lisp_ptr(new Cons(p, q));
+  return Lisp_ptr(zs_new<Cons>(p, q));
 }
 
 

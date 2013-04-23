@@ -3,6 +3,7 @@
 #include "vm.hh"
 #include "symbol.hh"
 #include "zs_error.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ Lisp_ptr symbol_to_string(ZsArgs args){
   }
 
   // TODO: support invariant string!
-  return {new String(sym->name())};
+  return {zs_new<String>(sym->name())};
 }
 
 Lisp_ptr symbol_from_string(ZsArgs args){

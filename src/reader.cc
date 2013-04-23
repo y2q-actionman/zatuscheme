@@ -11,6 +11,7 @@
 #include "cons_util.hh"
 #include "symbol.hh"
 #include "rational.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -63,7 +64,7 @@ Lisp_ptr read_list(istream& f){
 }
 
 Lisp_ptr read_vector(istream& f){
-  unique_ptr<Vector> v{new Vector()};
+  unique_ptr<Vector, zs_deleter<Vector>> v{zs_new<Vector>()};
 
   while(1){
     auto t = tokenize(f);
@@ -95,22 +96,22 @@ Lisp_ptr read_la(istream& f, Token&& tok){
     return Lisp_ptr(Ptr_tag::integer, tok.get<int>());
 
   case Token::Type::rational:
-    return {new Rational(tok.get<Rational>())};
+    return {zs_new<Rational>(tok.get<Rational>())};
 
   case Token::Type::real:
-    return {new double(tok.get<double>())};
+    return {zs_new<double>(tok.get<double>())};
 
   case Token::Type::complex:
-    return {new Complex(tok.get<Complex>())};
+    return {zs_new<Complex>(tok.get<Complex>())};
 
   case Token::Type::character:
     return Lisp_ptr{tok.move<char>()};
 
   case Token::Type::string:
-    return Lisp_ptr(new String(tok.move<string>()));
+    return {zs_new<String>(tok.move<string>())};
 
   case Token::Type::identifier:
-    return Lisp_ptr{intern(vm.symtable(), tok.move<string>())};
+    return {intern(vm.symtable(), tok.move<string>())};
 
     // compound datum
   case Token::Type::notation:

@@ -22,7 +22,6 @@ bool dump_mode = false;
 
 namespace {
 
-static
 void local_set_with_identifier(Env* e, Lisp_ptr ident, Lisp_ptr value){
   e->local_set(ident, value);
 }
@@ -333,7 +332,7 @@ void vm_op_restore_values(){
   vm.code.pop_back();
 
   vm.return_value = std::move(*values);
-  delete values;
+  zs_delete(values);
 }
 
 void vm_op_replace_vm(){
@@ -381,7 +380,7 @@ void proc_enter_cont(Continuation* c){
   // saves arguments .
   // They become return-values of the passed continuation.
   ZsArgs args;
-  auto ret_values = new std::vector<Lisp_ptr>(begin(args), end(args));
+  auto ret_values = zs_new<Vector>(begin(args), end(args));
   args.cleanup();
 
   vm.code.insert(vm.code.end(), {ret_values, c, vm_op_replace_vm});
@@ -670,7 +669,7 @@ void vm_op_save_values_and_enter(){
   assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_save_values_and_enter);
   auto proc = vm.code[vm.code.size() - 2];
 
-  vm.code[vm.code.size() - 2] = new Vector(vm.return_value);
+  vm.code[vm.code.size() - 2] = zs_new<Vector>(vm.return_value);
   vm.code[vm.code.size() - 1] = vm_op_restore_values;
   
   proc_enter_entrypoint(proc);

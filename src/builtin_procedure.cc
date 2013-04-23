@@ -7,6 +7,7 @@
 #include "delay.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -121,7 +122,7 @@ Lisp_ptr call_cc(ZsArgs args){
 
   args.cleanup();
 
-  auto cont = new Continuation(vm);
+  auto cont = zs_new<Continuation>(vm);
   vm.stack.insert(vm.stack.end(), {cont, {Ptr_tag::vm_argcount, 1}});
   proc_enter_entrypoint(proc); // direct jump to proc_enter()
   return {};

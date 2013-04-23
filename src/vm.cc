@@ -5,14 +5,14 @@
 #include "vm.hh"
 #include "env.hh"
 #include "printer.hh"
+#include "zs_memory.hh"
 
 VM vm;
-
 
 VM::VM() : code(), stack(),
            return_value(1, {}),
            extent(),
-           frame_(new Env{nullptr}),
+           frame_(new Env(nullptr)),
            symtable_(new SymTable()){}
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),

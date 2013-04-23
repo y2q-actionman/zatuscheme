@@ -5,6 +5,7 @@
 #include "util.hh"
 #include "symbol.hh"
 #include "printer.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -12,8 +13,7 @@ Env::Env(Env* e)
   : map_(), next_(e){
 }
 
-Env::~Env(){
-}
+Env::~Env(){}
 
 Lisp_ptr Env::find(Lisp_ptr s){
   for(Env* e = this; e; e = e->next_){
@@ -48,11 +48,11 @@ void Env::local_set(Lisp_ptr s, Lisp_ptr p){
 }
 
 Env* Env::push(){
-  return new Env{this};
+  return zs_new<Env>(this);
 }
 
 Env* Env::fork() const{
-  auto ret = new Env(nullptr);
+  auto ret = zs_new<Env>(nullptr);
 
   for(auto e = this; e; e = e->next_){
     ret->map_.insert(begin(e->map_), end(e->map_));

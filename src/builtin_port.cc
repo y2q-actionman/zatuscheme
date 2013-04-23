@@ -11,6 +11,7 @@
 #include "printer.hh"
 #include "zs_error.hh"
 #include "vm.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 
@@ -30,7 +31,9 @@ Lisp_ptr port_open_file(ZsArgs args, const char* name){
     throw builtin_type_check_failed(name, Ptr_tag::string, args[0]);
   }
 
-  unique_ptr<IOType> p{new F_IOType(str->c_str())};
+  unique_ptr<IOType, zs_deleter<IOType>> p
+    {zs_new_with_tag<F_IOType, to_tag<Ptr_tag, IOType*>()>
+        (str->c_str())};
   if(!*p){
     throw zs_error_arg1(name, "failed at opening file");
   }
