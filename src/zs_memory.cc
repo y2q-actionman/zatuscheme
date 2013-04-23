@@ -248,9 +248,13 @@ void gc_sweep_on_tag(){
       // cout << "deletion! " << i->first << ":" << stringify(tag) << endl;;
       delete static_cast<TargetT*>(i->first);
       arena.erase(i);
+    }else{
+      i->second = false;
     }
     i = ii;
   }
+
+  // if(arena.size()) cout << stringify(tag) << " : " << arena.size() << '\n';
 }
 
 void gc_sweep(){
