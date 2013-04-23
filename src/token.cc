@@ -148,65 +148,37 @@ Token::~Token(){
 
 template <>
 int Token::coerce() const{
-  switch(type_){
-  case Type::real:
-    return static_cast<int>(d_);
-  case Type::integer:
+  if(type_ == Type::integer){
     return i_;
-  case Type::rational:
-    // ???
-  case Type::complex:
-  case Type::uninitialized:
-  case Type::identifier:
-  case Type::boolean:
-  case Type::character:
-  case Type::string:
-  case Type::notation:
-  default:
-    UNEXP_CONVERSION("integer");
+  }else{
+    UNEXP_DEFAULT();
+  }
+}
+
+template <>
+Rational Token::coerce() const{
+  if(type_ == Type::rational){
+    return q_;
+  }else{
+    return Rational(coerce<int>(), 1);
   }
 }
 
 template <>
 double Token::coerce() const{
-  switch(type_){
-  case Type::real:
+  if(type_ == Type::real){
     return d_;
-  case Type::integer:
-    return static_cast<double>(i_);
-  case Type::rational:
-    // ???
-  case Type::complex:
-  case Type::uninitialized:
-  case Type::identifier:
-  case Type::boolean:
-  case Type::character:
-  case Type::string:
-  case Type::notation:
-  default:
-    UNEXP_CONVERSION("real");
+  }else{
+    return static_cast<double>(coerce<Rational>());
   }
 }
 
 template <>
 Complex Token::coerce() const{
-  switch(type_){
-  case Type::complex:
+  if(type_ == Type::complex){
     return z_;
-  case Type::real:
-    return Complex{d_};
-  case Type::integer:
-    return Complex{static_cast<double>(i_)};
-  case Type::rational:
-    // ???
-  case Type::uninitialized:
-  case Type::identifier:
-  case Type::boolean:
-  case Type::character:
-  case Type::string:
-  case Type::notation:
-  default:
-    UNEXP_CONVERSION("complex");
+  }else{
+    return Complex{coerce<double>()};
   }
 }
 
