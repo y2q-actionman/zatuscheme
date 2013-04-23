@@ -50,7 +50,8 @@ enum class Ptr_tag {
     syntactic_closure,
     syntax_rules,
     vm_op,
-    vm_argcount
+    vm_argcount,
+    PTR_TAG_MAX
     };
 
 const char* stringify(Ptr_tag);
