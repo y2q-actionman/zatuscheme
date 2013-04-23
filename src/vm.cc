@@ -12,7 +12,7 @@ VM vm;
 VM::VM() : code(), stack(),
            return_value(1, {}),
            extent(),
-           frame_(new Env(nullptr)),
+           frame_(),
            symtable_(new SymTable()){}
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),
@@ -34,6 +34,10 @@ VM& VM::operator=(const VM& other){
   symtable_ = other.symtable_;
 
   return *this;
+}
+
+void VM::start_up(){
+  frame_ = zs_new<Env>(nullptr);
 }
 
 std::ostream& operator<<(std::ostream& f, const VM& v){

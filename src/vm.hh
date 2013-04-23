@@ -27,6 +27,8 @@ public:
   VM& operator=(const VM&);
   VM& operator=(VM&&) = delete;
 
+  void start_up();
+
   void set_frame(Env* e){ frame_ = e; }
   Env* frame() const { return frame_; }
 

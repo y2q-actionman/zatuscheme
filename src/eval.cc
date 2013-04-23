@@ -713,7 +713,9 @@ void eval(){
       case Ptr_tag::vm_op:
         if(auto op = p.get<VMop>()){
           op();
-          gc(); // temporary..
+          // temporary..
+          if(op == vm_op_leave_frame)
+            gc();
         }else{
           vm.code.pop_back();
         }
