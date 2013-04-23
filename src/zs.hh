@@ -21,6 +21,7 @@
 #include "util.hh"
 #include "vm.hh"
 #include "zs_error.hh"
+#include "zs_memory.hh"
 
 void zs_init();
 
