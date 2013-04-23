@@ -1,5 +1,6 @@
 #include <deque>
 #include <array>
+#include <algorithm>
 #include "zs_memory.hh"
 
 // Assumes 'operator delete' is not called frequently,
@@ -31,10 +32,8 @@ void* operator new(size_t size, Ptr_tag tag){
 
 void operator delete(void* p, Ptr_tag tag){
   auto arena = alloc.arena(tag);
-  for(auto i = begin(arena), e = end(arena); i != e; ++i){
-    if(*i == p){
-      arena.erase(i);
-      return;
-    }
+  auto i = find(begin(arena), end(arena), p);
+  if(i != end(arena)){
+    arena.erase(i);
   }
 }
