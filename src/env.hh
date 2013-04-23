@@ -30,6 +30,7 @@ public:
   Env* fork() const;
   
   friend std::ostream& operator<<(std::ostream&, const Env&);
+  friend void gc_mark(Env*);
 
 private:
   map_type map_;

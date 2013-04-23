@@ -20,6 +20,9 @@ void zs_delete(T*);
 template<typename T>
 struct zs_deleter;
 
+// run GC
+void gc();
+
 #include "zs_memory.i.hh"
 
 #endif // ZS_MEMORY_HH

@@ -57,6 +57,7 @@ static void enter_frame(IProcedure* iproc){
   // tail call check
   if(!vm.code.empty()
      && vm.code.back().get<VMop>() == vm_op_leave_frame){
+    // cout << "tail call!" << endl;
     vm_op_leave_frame();
   }
 
@@ -712,6 +713,7 @@ void eval(){
       case Ptr_tag::vm_op:
         if(auto op = p.get<VMop>()){
           op();
+          gc(); // temporary..
         }else{
           vm.code.pop_back();
         }
