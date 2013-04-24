@@ -22,11 +22,4 @@ void zs_delete(T* p){
   delete p;
 }
 
-template<typename T>
-struct zs_deleter{
-  void operator()(T* p){
-    zs_delete(p);
-  }
-};
-
 #endif // ZS_MEMORY_I_HH

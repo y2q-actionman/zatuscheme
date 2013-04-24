@@ -64,16 +64,16 @@ Lisp_ptr read_list(istream& f){
 }
 
 Lisp_ptr read_vector(istream& f){
-  unique_ptr<Vector, zs_deleter<Vector>> v{zs_new<Vector>()};
+  unique_ptr<Vector> v{new Vector()};
 
   while(1){
     auto t = tokenize(f);
     if(!t){
       throw zs_error("reader error: reached EOF in a vector.\n");
     }else if((t.type() == Token::Type::notation)
-             && (t.get<Token::Notation>()
-                 == Token::Notation::r_paren)){
-      return Lisp_ptr{v.release()};
+             && (t.get<Token::Notation>() == Token::Notation::r_paren)){
+      zs_m_in(v.get(), Ptr_tag::Vector);
+      return {v.release()};
     }else{
       v->emplace_back(read_la(f, move(t)));
     }

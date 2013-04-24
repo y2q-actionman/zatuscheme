@@ -17,9 +17,6 @@ T* zs_new_with_tag(Args...);
 template<typename T>
 void zs_delete(T*);
 
-template<typename T>
-struct zs_deleter;
-
 // run GC
 void gc();
 

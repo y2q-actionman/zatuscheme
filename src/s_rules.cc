@@ -393,11 +393,11 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
         return tmpl;
       }
 
-      unique_ptr<SyntacticClosure, zs_deleter<SyntacticClosure> > new_sc
-        (zs_new<SyntacticClosure>(sr.env(), nullptr, tmpl));
+      unique_ptr<SyntacticClosure> new_sc(new SyntacticClosure(sr.env(), nullptr, tmpl));
       auto iter = expand_ctx.find(new_sc.get());
       if(iter == expand_ctx.end()){
         expand_ctx.insert(new_sc.get());
+        zs_m_in(new_sc.get(), Ptr_tag::SyntacticClosure);
         return new_sc.release();
       }else{
         return *iter;
