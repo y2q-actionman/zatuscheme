@@ -21,9 +21,15 @@ using namespace std;
 
 namespace {
 
+enum MarkBit {
+  unmarked = 0,
+  marked = 1,
+  fixed = 2
+};
+
 struct MarkObj {
   Ptr_tag tag;
-  bool mark;
+  MarkBit mark;
 };
 
 static unordered_map<void*, MarkObj> arena;
@@ -31,7 +37,7 @@ static unordered_map<void*, MarkObj> arena;
 }
 
 void* zs_m_in(void* p, Ptr_tag tag){
-  arena[p] = {tag, false};
+  arena[p] = {tag, MarkBit::unmarked};
   return p;
 }
 
@@ -55,8 +61,8 @@ bool gc_is_marked_ptr(void* p){
 void gc_mark_ptr(void* p){
   auto i = arena.find(p);
 
-  if(i != end(arena)){
-    i->second.mark = true;
+  if(i != end(arena) && !i->second.mark){
+    i->second.mark = MarkBit::marked;
   }
 }
   
@@ -233,7 +239,8 @@ void gc_sweep(){
   auto i = begin(arena), e = end(arena);
   while(i != e){
     auto ii = next(i);
-    if(!i->second.mark){
+    switch(i->second.mark){
+    case MarkBit::unmarked:
       switch(i->second.tag){
       case Ptr_tag::undefined:
         break;
@@ -298,8 +305,14 @@ void gc_sweep(){
         break;
       }
       arena.erase(i);
-    }else{
-      i->second.mark = false;
+      break;
+    case MarkBit::marked:
+      i->second.mark = MarkBit::unmarked;
+      break;
+    case MarkBit::fixed:
+      break;
+    default:
+      break;
     }
     i = ii;
   }
