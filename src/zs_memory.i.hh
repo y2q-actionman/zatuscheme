@@ -18,7 +18,7 @@ T* zs_new_with_tag(Args... args){
 
 template<typename T>
 void zs_delete(T* p){
-  zs_m_out(p, to_tag<Ptr_tag, T*>());
+  zs_m_out(p);
   delete p;
 }
 

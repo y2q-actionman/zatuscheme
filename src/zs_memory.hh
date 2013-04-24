@@ -5,7 +5,7 @@
 
 // primitives
 void* zs_m_in(void* p, Ptr_tag tag);
-void zs_m_out(void* p, Ptr_tag tag);
+void zs_m_out(void* p);
 
 // wrappers
 template<typename T, typename... Args>

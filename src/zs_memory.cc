@@ -1,5 +1,4 @@
 #include <unordered_map>
-#include <array>
 #include <algorithm>
 #include "zs_memory.hh"
 #include "vm.hh"
@@ -11,6 +10,7 @@
 #include "symbol.hh"
 #include "s_rules.hh"
 #include "zs_error.hh"
+#include "rational.hh"
 
 #include <iostream>
 #include "printer.hh"
@@ -21,20 +21,21 @@ using namespace std;
 
 namespace {
 
-typedef unordered_map<void*, bool> ArenaType;
+struct MarkObj {
+  Ptr_tag tag;
+  bool mark;
+};
 
-static array<ArenaType, static_cast<size_t>(Ptr_tag::PTR_TAG_MAX)>
-arena_table;
+static unordered_map<void*, MarkObj> arena;
 
 }
 
 void* zs_m_in(void* p, Ptr_tag tag){
-  arena_table[static_cast<int>(tag)][p] = false;
+  arena[p] = {tag, false};
   return p;
 }
 
-void zs_m_out(void* p, Ptr_tag tag){
-  auto& arena = arena_table[static_cast<int>(tag)];
+void zs_m_out(void* p){
   auto i = arena.find(p);
   if(i != end(arena)){
     arena.erase(i);
@@ -46,32 +47,19 @@ void zs_m_out(void* p, Ptr_tag tag){
 
 namespace {
 
-bool gc_is_marked_ptr(void* p, Ptr_tag tag){
-  auto& arena = arena_table[static_cast<int>(tag)];
+bool gc_is_marked_ptr(void* p){
   auto i = arena.find(p);
-  return (i == end(arena)) || i->second;
+  return (i == end(arena)) || i->second.mark;
 }
 
-template<typename T>
-bool gc_is_marked_ptr(T* p){
-  return gc_is_marked_ptr(p, to_tag<Ptr_tag, T*>());
-}
-
-void gc_mark_ptr(void* p, Ptr_tag tag){
-  auto& arena = arena_table[static_cast<int>(tag)];
+void gc_mark_ptr(void* p){
   auto i = arena.find(p);
 
   if(i != end(arena)){
-    i->second = true;
+    i->second.mark = true;
   }
 }
   
-template<typename T>
-void gc_mark_ptr(T* p){
-  gc_mark_ptr(p, to_tag<Ptr_tag, T*>());
-}
-
-
 void gc_mark_lp(Lisp_ptr p);
     
 void gc_mark(Cons* c){
@@ -176,7 +164,7 @@ namespace {
 void gc_mark_lp(Lisp_ptr p){
   auto tag = p.tag();
 
-  if(gc_is_marked_ptr(p.get<void*>(), tag))
+  if(gc_is_marked_ptr(p.get<void*>()))
     return;
 
   switch(tag){
@@ -201,7 +189,7 @@ void gc_mark_lp(Lisp_ptr p){
   case Ptr_tag::string:
   case Ptr_tag::input_port:
   case Ptr_tag::output_port:
-    gc_mark_ptr(p.get<void*>(), tag);
+    gc_mark_ptr(p.get<void*>());
     break;
 
     // container
@@ -236,44 +224,85 @@ void gc_mark_lp(Lisp_ptr p){
 }
 
 template<Ptr_tag tag>
-void gc_sweep_on_tag(){
+void gc_tagged_delete(void* p){
   typedef typename to_type<Ptr_tag, tag>::type TargetT;
-
-  auto& arena = arena_table[static_cast<int>(tag)];
-  auto i = begin(arena), e = end(arena);
-
-  while(i != e){
-    auto ii = next(i);
-    if(!i->second){
-      // cout << "deletion! " << i->first << ":" << stringify(tag) << endl;;
-      delete static_cast<TargetT*>(i->first);
-      arena.erase(i);
-    }else{
-      i->second = false;
-    }
-    i = ii;
-  }
-
-  // if(arena.size()) cout << stringify(tag) << " : " << arena.size() << '\n';
+  delete static_cast<TargetT>(p);
 }
 
 void gc_sweep(){
-  gc_sweep_on_tag<Ptr_tag::symbol>();
-  gc_sweep_on_tag<Ptr_tag::rational>();
-  gc_sweep_on_tag<Ptr_tag::real>();
-  gc_sweep_on_tag<Ptr_tag::complex>();
-  gc_sweep_on_tag<Ptr_tag::string>();
-  gc_sweep_on_tag<Ptr_tag::input_port>();
-  gc_sweep_on_tag<Ptr_tag::output_port>();
-
-  gc_sweep_on_tag<Ptr_tag::cons>();
-  gc_sweep_on_tag<Ptr_tag::i_procedure>();
-  gc_sweep_on_tag<Ptr_tag::continuation>();
-  gc_sweep_on_tag<Ptr_tag::vector>();
-  gc_sweep_on_tag<Ptr_tag::env>();
-  gc_sweep_on_tag<Ptr_tag::delay>();
-  gc_sweep_on_tag<Ptr_tag::syntactic_closure>();
-  gc_sweep_on_tag<Ptr_tag::syntax_rules>();
+  auto i = begin(arena), e = end(arena);
+  while(i != e){
+    auto ii = next(i);
+    if(!i->second.mark){
+      switch(i->second.tag){
+      case Ptr_tag::undefined:
+        break;
+      case Ptr_tag::boolean:
+        break;
+      case Ptr_tag::character:
+        break;
+      case Ptr_tag::cons:
+        gc_tagged_delete<Ptr_tag::cons>(i->first);
+        break;
+      case Ptr_tag::symbol: 
+        gc_tagged_delete<Ptr_tag::symbol>(i->first);
+        break;
+      case Ptr_tag::i_procedure: 
+        gc_tagged_delete<Ptr_tag::i_procedure>(i->first);
+        break;
+      case Ptr_tag::n_procedure:
+        break;
+      case Ptr_tag::continuation: 
+        gc_tagged_delete<Ptr_tag::continuation>(i->first);
+        break;
+      case Ptr_tag::integer: 
+        break;
+      case Ptr_tag::rational: 
+        gc_tagged_delete<Ptr_tag::rational>(i->first);
+        break;
+      case Ptr_tag::real: 
+        gc_tagged_delete<Ptr_tag::real>(i->first);
+        break;
+      case Ptr_tag::complex: 
+        gc_tagged_delete<Ptr_tag::complex>(i->first);
+        break;
+      case Ptr_tag::string: 
+        gc_tagged_delete<Ptr_tag::string>(i->first);
+        break;
+      case Ptr_tag::vector: 
+        gc_tagged_delete<Ptr_tag::vector>(i->first);
+        break;
+      case Ptr_tag::input_port: 
+        gc_tagged_delete<Ptr_tag::input_port>(i->first);
+        break;
+      case Ptr_tag::output_port: 
+        gc_tagged_delete<Ptr_tag::output_port>(i->first);
+        break;
+      case Ptr_tag::env: 
+        gc_tagged_delete<Ptr_tag::env>(i->first);
+        break;
+      case Ptr_tag::delay: 
+        gc_tagged_delete<Ptr_tag::delay>(i->first);
+        break;
+      case Ptr_tag::syntactic_closure: 
+        gc_tagged_delete<Ptr_tag::syntactic_closure>(i->first);
+        break;
+      case Ptr_tag::syntax_rules: 
+        gc_tagged_delete<Ptr_tag::syntax_rules>(i->first);
+        break;
+      case Ptr_tag::vm_op: 
+        break;
+      case Ptr_tag::vm_argcount:
+        break;
+      default:
+        break;
+      }
+      arena.erase(i);
+    }else{
+      i->second.mark = false;
+    }
+    i = ii;
+  }
 }
 
 } // namespace
