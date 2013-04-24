@@ -397,7 +397,7 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
       auto iter = expand_ctx.find(new_sc.get());
       if(iter == expand_ctx.end()){
         expand_ctx.insert(new_sc.get());
-        zs_m_in(new_sc.get(), Ptr_tag::SyntacticClosure);
+        zs_m_in(new_sc.get(), Ptr_tag::syntactic_closure);
         return new_sc.release();
       }else{
         return *iter;

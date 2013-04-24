@@ -72,7 +72,7 @@ Lisp_ptr read_vector(istream& f){
       throw zs_error("reader error: reached EOF in a vector.\n");
     }else if((t.type() == Token::Type::notation)
              && (t.get<Token::Notation>() == Token::Notation::r_paren)){
-      zs_m_in(v.get(), Ptr_tag::Vector);
+      zs_m_in(v.get(), Ptr_tag::vector);
       return {v.release()};
     }else{
       v->emplace_back(read_la(f, move(t)));
