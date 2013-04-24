@@ -13,7 +13,7 @@ VM::VM() : code(), stack(),
            return_value(1, {}),
            extent(),
            frame_(),
-           symtable_(new SymTable()){}
+           symtable_(){}
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           return_value(other.return_value),
@@ -37,6 +37,7 @@ VM& VM::operator=(const VM& other){
 }
 
 void VM::start_up(){
+  symtable_.reset(new SymTable());
   frame_ = zs_new<Env>(nullptr);
 }
 

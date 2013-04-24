@@ -4,6 +4,8 @@
 using namespace std;
 
 int main(){
+  zs_init();
+
   // boolean
   check_p(Lisp_ptr{true}, "#t");
   check_p(Lisp_ptr{false}, "#f");

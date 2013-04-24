@@ -2,6 +2,8 @@
 #include "test_util.hh"
 
 int main(){
+  zs_init();
+
   // boolean
   check_r("#t", "#t");
   check_r("#f", "#f");

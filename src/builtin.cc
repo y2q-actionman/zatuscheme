@@ -160,8 +160,6 @@ void install_builtin(){
     vm.frame()->local_set(intern(vm.symtable(), name), value);
   };    
 
-  vm.start_up();
-
   // null-environment
   for_each(std::begin(builtin_syntax_funcs), std::end(builtin_syntax_funcs),
            install_builtin_native);

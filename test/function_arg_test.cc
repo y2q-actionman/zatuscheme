@@ -48,6 +48,8 @@ void check_uninit(const char* input){
 
 
 int main(){
+  zs_init();
+
   // arginfo test
   check_uninit("#t");
   check_uninit("#\\h");
