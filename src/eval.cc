@@ -19,6 +19,8 @@ using namespace std;
 using namespace proc_flag;
 
 bool dump_mode = false;
+unsigned instruction_counter = 0;
+const unsigned gc_invoke_interval = 0x100u;
 
 namespace {
 
@@ -703,8 +705,6 @@ void eval(){
           break;
         }
 
-        gc(); // temporary..
-
         vm.code.back() = vm_op_call;
         vm.code.push_back(c->car());
         vm.stack.push_back(p);
@@ -779,6 +779,10 @@ void eval(){
         throw zs_error(printf_string("eval error: unknown object appeared! (tag = %d)!\n",
                                      static_cast<int>(p.tag())));
       }
+
+      ++instruction_counter;
+      if((instruction_counter % gc_invoke_interval) == 0)
+        gc();
     }
   }catch(const std::exception& e){
     cerr << e.what() << endl;

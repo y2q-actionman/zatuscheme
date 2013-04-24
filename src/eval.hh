@@ -28,5 +28,7 @@ void eval();
 // for debug
 const char* stringify(VMop);
 extern bool dump_mode;
+extern unsigned instruction_counter;
+extern const unsigned gc_invoke_interval;
 
 #endif // EVAL_HH
