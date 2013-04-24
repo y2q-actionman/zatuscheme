@@ -318,9 +318,35 @@ void gc_sweep(){
   }
 }
 
+void gc_marked_to_fixed(){
+  auto i = begin(arena), e = end(arena);
+  while(i != e){
+    auto ii = next(i);
+    switch(i->second.mark){
+    case MarkBit::unmarked:
+      break;
+    case MarkBit::marked:
+      if(i->second.tag != Ptr_tag::env){
+        i->second.mark = MarkBit::fixed;
+      }
+      break;
+    case MarkBit::fixed:
+      break;
+    default:
+      break;
+    }
+    i = ii;
+  }
+}
+
 } // namespace
 
 void gc(){
   gc_mark(vm);
   gc_sweep();
+}
+
+void gc_fix_object(){
+  gc_mark(vm);
+  gc_marked_to_fixed();
 }
