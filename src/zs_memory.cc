@@ -77,16 +77,6 @@ void gc_mark(Cons* c){
   gc_mark_lp(c->cdr());
 }
 
-void gc_mark(IProcedure* iproc){
-  if(gc_is_marked_ptr(iproc)) return;
-  gc_mark_ptr(iproc);
-
-  gc_mark_lp(iproc->arg_list());
-  gc_mark_lp(iproc->get());
-  gc_mark(iproc->closure());
-  gc_mark_lp(iproc->name());
-}
-
 void gc_mark(const VM& v){
   for(auto i : v.code){
     gc_mark_lp(i);
@@ -107,48 +97,6 @@ void gc_mark(const VM& v){
   }
   
   gc_mark(v.frame());
-}
-
-void gc_mark(Continuation* c){
-  if(gc_is_marked_ptr(c)) return;
-  gc_mark_ptr(c);
-
-  gc_mark(c->get());
-}
-
-void gc_mark(Vector* v){
-  if(gc_is_marked_ptr(v)) return;
-  gc_mark_ptr(v);
-
-  for(auto i : *v){
-    gc_mark_lp(i);
-  }
-}
-
-void gc_mark(Delay* d){
-  if(gc_is_marked_ptr(d)) return;
-  gc_mark_ptr(d);
-
-  gc_mark_lp(d->get());
-  gc_mark(d->env());
-}
-
-void gc_mark(SyntacticClosure* sc){
-  if(gc_is_marked_ptr(sc)) return;
-  gc_mark_ptr(sc);
-
-  gc_mark(sc->env());
-  gc_mark(sc->free_names());
-  gc_mark_lp(sc->expr());
-}
-
-void gc_mark(SyntaxRules* sr){
-  if(gc_is_marked_ptr(sr)) return;
-  gc_mark_ptr(sr);
-
-  gc_mark(sr->env());
-  gc_mark_lp(sr->literals());
-  gc_mark_lp(sr->rules());
 }
 
 } // namespace
@@ -202,27 +150,76 @@ void gc_mark_lp(Lisp_ptr p){
   case Ptr_tag::cons:
     gc_mark(p.get<Cons*>());
     break;
-  case Ptr_tag::i_procedure:
-    gc_mark(p.get<IProcedure*>());
+
+  case Ptr_tag::i_procedure: {
+    auto iproc = p.get<IProcedure*>();
+    // TODO: this check should be replaced with assertion.
+    // this is required now, but strange.
+    if(!iproc) return;
+
+    gc_mark_ptr(iproc);
+
+    gc_mark_lp(iproc->arg_list());
+    gc_mark_lp(iproc->get());
+    gc_mark(iproc->closure());
+    gc_mark_lp(iproc->name());
     break;
-  case Ptr_tag::continuation:
-    gc_mark(p.get<Continuation*>());
+  }
+
+  case Ptr_tag::continuation: {
+    auto c = p.get<Continuation*>();
+    gc_mark_ptr(c);
+
+    gc_mark(c->get());
     break;
-  case Ptr_tag::vector:
-    gc_mark(p.get<Vector*>());
+  }
+
+  case Ptr_tag::vector: {
+    auto v = p.get<Vector*>();
+    // TODO: this check should be replaced with assertion.
+    // this is required now, but strange.
+    if(!v) return;
+
+    gc_mark_ptr(v);
+
+    for(auto i : *v){
+      gc_mark_lp(i);
+    }
     break;
+  }
+
   case Ptr_tag::env:
     gc_mark(p.get<Env*>());
     break;
-  case Ptr_tag::delay:
-    gc_mark(p.get<Delay*>());
+
+  case Ptr_tag::delay: {
+    auto d = p.get<Delay*>();
+    gc_mark_ptr(d);
+
+    gc_mark_lp(d->get());
+    gc_mark(d->env());
     break;
-  case Ptr_tag::syntactic_closure:
-    gc_mark(p.get<SyntacticClosure*>());
+  }
+
+  case Ptr_tag::syntactic_closure: {
+    auto sc = p.get<SyntacticClosure*>();
+    gc_mark_ptr(sc);
+
+    gc_mark(sc->env());
+    gc_mark(sc->free_names());
+    gc_mark_lp(sc->expr());
     break;
-  case Ptr_tag::syntax_rules:
-    gc_mark(p.get<SyntaxRules*>());
+  }
+
+  case Ptr_tag::syntax_rules: {
+    auto sr = p.get<SyntaxRules*>();
+    gc_mark_ptr(sr);
+
+    gc_mark(sr->env());
+    gc_mark_lp(sr->literals());
+    gc_mark_lp(sr->rules());
     break;
+  }
 
   default:
     break;
