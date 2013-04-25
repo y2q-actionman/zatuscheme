@@ -44,6 +44,11 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
   case Token::Type::integer:
     o << tok.get<int>();
     break;
+  case Token::Type::rational: {
+    auto q = tok.get<Rational>();
+    o << q.numerator() << '/' << q.denominator();
+    break;
+  }
   case Token::Type::real:
     o << tok.get<double>();
     break;

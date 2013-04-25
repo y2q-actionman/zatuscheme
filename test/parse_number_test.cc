@@ -57,6 +57,10 @@ void check(int i, int radix, const char* expect){
     print(ss, {Ptr_tag::integer, t.get<int>()},
           print_human_readable::f, radix);
     break;
+  case Token::Type::rational:
+    print(ss, {Ptr_tag::rational, t.get<Rational>()},
+          print_human_readable::f, radix);
+    break;
   case Token::Type::real:
     print(ss, {new double(t.get<double>())},
           print_human_readable::f, radix);
@@ -65,6 +69,12 @@ void check(int i, int radix, const char* expect){
     print(ss, {new Complex(t.get<Complex>())},
           print_human_readable::f, radix);
     break;
+  case Token::Type::uninitialized:
+  case Token::Type::identifier:
+  case Token::Type::boolean:
+  case Token::Type::character:
+  case Token::Type::string:
+  case Token::Type::notation:
   default:
     UNEXP_DEFAULT();
   }
