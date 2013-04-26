@@ -5,7 +5,7 @@
 
 class SyntacticClosure{
 public:
-  SyntacticClosure(Env*, Cons* free_names, Lisp_ptr expr);
+  SyntacticClosure(Env*, Lisp_ptr free_names, Lisp_ptr expr);
   SyntacticClosure(const SyntacticClosure&) = delete;
   SyntacticClosure(SyntacticClosure&&) = delete;
 
@@ -15,12 +15,12 @@ public:
   SyntacticClosure& operator=(SyntacticClosure&&) = delete;
 
   Env* env() const { return env_; }
-  Cons* free_names() const { return free_names_; }
+  Lisp_ptr free_names() const { return free_names_; }
   Lisp_ptr expr() const { return expr_; }
 
 private:
   Env* env_;
-  Cons* free_names_;
+  Lisp_ptr free_names_;         // cons list
   Lisp_ptr expr_;
 };
 

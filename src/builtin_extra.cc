@@ -135,7 +135,7 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
     throw zs_error_arg1("make-synthetic-identifier", "passed value is not identifier", {args[0]});
   }
 
-  return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), nullptr, args[0]);
+  return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
 }
 
 Lisp_ptr exit(ZsArgs args){

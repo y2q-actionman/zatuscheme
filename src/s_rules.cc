@@ -410,7 +410,7 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
         return tmpl;
       }
 
-      unique_ptr<SyntacticClosure> new_sc(new SyntacticClosure(sr.env(), nullptr, tmpl));
+      unique_ptr<SyntacticClosure> new_sc(new SyntacticClosure(sr.env(), Cons::NIL, tmpl));
       auto iter = expand_ctx.find(new_sc.get());
       if(iter == expand_ctx.end()){
         expand_ctx.insert(new_sc.get());

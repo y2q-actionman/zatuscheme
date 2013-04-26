@@ -68,15 +68,6 @@ void gc_mark_ptr(void* p){
   
 void gc_mark_lp(Lisp_ptr p);
     
-void gc_mark(Cons* c){
-  if(gc_is_marked_ptr(c)) return;
-  gc_mark_ptr(c);
-
-  if(!c) return;
-  gc_mark_lp(c->car());
-  gc_mark_lp(c->cdr());
-}
-
 void gc_mark(const VM& v){
   for(auto i : v.code){
     gc_mark_lp(i);
@@ -102,10 +93,10 @@ void gc_mark(const VM& v){
 } // namespace
 
 void gc_mark(Env* e){
-  if(gc_is_marked_ptr(e)) return;
-  gc_mark_ptr(e);
-
   if(!e) return;
+  if(gc_is_marked_ptr(e)) return;
+
+  gc_mark_ptr(e);
   for(auto i : e->map_){
     gc_mark_lp(i.first);
     gc_mark_lp(i.second);
@@ -116,12 +107,12 @@ void gc_mark(Env* e){
 namespace {
 
 void gc_mark_lp(Lisp_ptr p){
-  auto tag = p.tag();
+  if(!p.get<void*>()) return;
 
   if(gc_is_marked_ptr(p.get<void*>()))
     return;
 
-  switch(tag){
+  switch(p.tag()){
     // included in Lisp_ptr
   case Ptr_tag::undefined:
   case Ptr_tag::boolean:
@@ -147,16 +138,17 @@ void gc_mark_lp(Lisp_ptr p){
     break;
 
     // container
-  case Ptr_tag::cons:
-    gc_mark(p.get<Cons*>());
+  case Ptr_tag::cons: {
+    auto c = p.get<Cons*>();
+    gc_mark_ptr(c);
+
+    gc_mark_lp(c->car());
+    gc_mark_lp(c->cdr());
     break;
+  }
 
   case Ptr_tag::i_procedure: {
     auto iproc = p.get<IProcedure*>();
-    // TODO: this check should be replaced with assertion.
-    // this is required now, but strange.
-    if(!iproc) return;
-
     gc_mark_ptr(iproc);
 
     gc_mark_lp(iproc->arg_list());
@@ -176,10 +168,6 @@ void gc_mark_lp(Lisp_ptr p){
 
   case Ptr_tag::vector: {
     auto v = p.get<Vector*>();
-    // TODO: this check should be replaced with assertion.
-    // this is required now, but strange.
-    if(!v) return;
-
     gc_mark_ptr(v);
 
     for(auto i : *v){
@@ -206,7 +194,7 @@ void gc_mark_lp(Lisp_ptr p){
     gc_mark_ptr(sc);
 
     gc_mark(sc->env());
-    gc_mark(sc->free_names());
+    gc_mark_lp(sc->free_names());
     gc_mark_lp(sc->expr());
     break;
   }
