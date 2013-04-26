@@ -71,15 +71,11 @@ Lisp_ptr cons_cdr(ZsArgs args){
 
 
 Lisp_ptr cons_set_car(ZsArgs args){
-  return cons_set_carcdr(move(args), "set-car!", rplaca);
+  return cons_set_carcdr(move(args), "set-car!", &rplaca);
 }
 
 Lisp_ptr cons_set_cdr(ZsArgs args){
-  return cons_set_carcdr(move(args), "set-cdr!",
-                         [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
-                           rplacd(c, p);
-                           return p;
-                         });
+  return cons_set_carcdr(move(args), "set-cdr!", &rplacd);
 }
 
 
