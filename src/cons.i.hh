@@ -22,15 +22,17 @@ Lisp_ptr cdr(Cons* c){
 }
 
 inline
-void rplaca(Cons* c, Lisp_ptr p){
+Lisp_ptr rplaca(Cons* c, Lisp_ptr p){
   assert(c);
   c->car_ = p;
+  return p;
 }
 
 inline
-void rplacd(Cons* c, Lisp_ptr p){
+Lisp_ptr rplacd(Cons* c, Lisp_ptr p){
   assert(c);
   c->cdr_ = p;
+  return p;
 }
 
 #endif // CONS_I_HH

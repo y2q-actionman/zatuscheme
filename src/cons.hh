@@ -21,8 +21,8 @@ public:
 
   friend Lisp_ptr car(Cons*);
   friend Lisp_ptr cdr(Cons*);
-  friend void rplaca(Cons*, Lisp_ptr);
-  friend void rplacd(Cons*, Lisp_ptr);
+  friend Lisp_ptr rplaca(Cons*, Lisp_ptr);
+  friend Lisp_ptr rplacd(Cons*, Lisp_ptr);
 
 private:
   Lisp_ptr car_;
