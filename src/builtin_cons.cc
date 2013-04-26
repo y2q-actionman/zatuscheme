@@ -62,18 +62,18 @@ Lisp_ptr cons_cons(ZsArgs args){
 }
 
 Lisp_ptr cons_car(ZsArgs args){
-  return cons_carcdr(move(args), "car", [](Cons* c){ return c->car(); });
+  return cons_carcdr(move(args), "car", [](Cons* c){ return car(c); });
 }
 
 Lisp_ptr cons_cdr(ZsArgs args){
-  return cons_carcdr(move(args), "cdr", [](Cons* c){ return c->cdr(); });
+  return cons_carcdr(move(args), "cdr", [](Cons* c){ return cdr(c); });
 }
 
 
 Lisp_ptr cons_set_car(ZsArgs args){
   return cons_set_carcdr(move(args), "set-car!",
                          [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
-                           c->rplaca(p);
+                           rplaca(c, p);
                            return p;
                          });
 }
@@ -81,7 +81,7 @@ Lisp_ptr cons_set_car(ZsArgs args){
 Lisp_ptr cons_set_cdr(ZsArgs args){
   return cons_set_carcdr(move(args), "set-cdr!",
                          [](Cons* c, Lisp_ptr p) -> Lisp_ptr {
-                           c->rplacd(p);
+                           rplacd(c, p);
                            return p;
                          });
 }

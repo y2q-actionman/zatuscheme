@@ -137,11 +137,11 @@ Lisp_ptr syntax_define(ZsArgs args){
     auto expr_cons = nthcdr_cons_list<2>(args[0]);
 
     assert(expr_cons.get<Cons*>());
-    if(!nullp(expr_cons.get<Cons*>()->cdr())){
+    if(!nullp(cdr(expr_cons.get<Cons*>()))){
       throw zs_error_arg1("define", "informal syntax: too long");
     }
 
-    vm.code.insert(vm.code.end(), {i1, vm_op_local_set, expr_cons.get<Cons*>()->car()});
+    vm.code.insert(vm.code.end(), {i1, vm_op_local_set, car(expr_cons.get<Cons*>())});
     return {};
   }else if(i1.tag() == Ptr_tag::cons){ // i1 points (funcname . arg-list)
     auto funcname = nth_cons_list<0>(i1);

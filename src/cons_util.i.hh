@@ -58,8 +58,7 @@ template<unsigned n>
 constexpr
 Lisp_ptr nth_cons_list(Lisp_ptr p){
   // This cast is for telling a type to the compiler. 
-  return static_cast<Lisp_ptr>(nthcdr_cons_list<n>(p))
-    .get<Cons*>()->car();
+  return car(static_cast<Lisp_ptr>(nthcdr_cons_list<n>(p)).get<Cons*>());
 }
 
 template<>
@@ -71,7 +70,7 @@ Lisp_ptr nthcdr_cons_list<0u>(Lisp_ptr p){
 template<unsigned n>
 constexpr
 Lisp_ptr nthcdr_cons_list(Lisp_ptr p){
-  return nthcdr_cons_list<n-1>(p.get<Cons*>()->cdr());
+  return nthcdr_cons_list<n-1>(cdr(p.get<Cons*>()));
 }
 
 

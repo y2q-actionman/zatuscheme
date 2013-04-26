@@ -142,8 +142,8 @@ void gc_mark_lp(Lisp_ptr p){
     auto c = p.get<Cons*>();
     gc_mark_ptr(c);
 
-    gc_mark_lp(c->car());
-    gc_mark_lp(c->cdr());
+    gc_mark_lp(car(c));
+    gc_mark_lp(cdr(c));
     break;
   }
 

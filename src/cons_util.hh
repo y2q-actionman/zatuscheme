@@ -65,7 +65,7 @@ public:
   ConsIter& operator=(ConsIter&&) = default;
 
   Lisp_ptr operator*() const
-  { return (*this) ? p_.get<Cons*>()->car() : Lisp_ptr{}; }
+  { return (*this) ? car(p_.get<Cons*>()) : Lisp_ptr{}; }
 
   Lisp_ptr* operator->() const;
 

@@ -3,7 +3,7 @@
 
 #include "lisp_ptr.hh"
 
-class Cons {
+struct Cons {
   friend class GrowList;
   friend class ConsIter;
 
@@ -19,10 +19,10 @@ public:
   Cons& operator=(const Cons&) = default;
   Cons& operator=(Cons&&) = default;
 
-  inline Lisp_ptr car() const;
-  inline Lisp_ptr cdr() const;
-  inline void rplaca(Lisp_ptr);
-  inline void rplacd(Lisp_ptr);
+  friend Lisp_ptr car(Cons*);
+  friend Lisp_ptr cdr(Cons*);
+  friend void rplaca(Cons*, Lisp_ptr);
+  friend void rplacd(Cons*, Lisp_ptr);
 
 private:
   Lisp_ptr car_;

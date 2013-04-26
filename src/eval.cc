@@ -284,8 +284,8 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       break;
     }
    
-    local_set_with_identifier(vm.frame(), arg_name_cell->car(), *i);
-    arg_name = arg_name_cell->cdr();
+    local_set_with_identifier(vm.frame(), car(arg_name_cell), *i);
+    arg_name = cdr(arg_name_cell);
   }
 
   // variadic arg push
@@ -706,7 +706,7 @@ void eval(){
         }
 
         vm.code.back() = vm_op_call;
-        vm.code.push_back(c->car());
+        vm.code.push_back(car(c));
         vm.stack.push_back(p);
         break;
       }

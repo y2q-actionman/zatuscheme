@@ -52,10 +52,10 @@ void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
   if(!c)
     throw zs_error(printf_string("internal %s: the passed list is an empty list!\n", __func__));
 
-  if(nullp(c->cdr())){
-    c->rplacd(make_cons_list({value}));
+  if(nullp(cdr(c))){
+    rplacd(c, make_cons_list({value}));
   }else{
-    push_tail_cons_list_nl(c->cdr(), value);
+    push_tail_cons_list_nl(cdr(c), value);
   }
 }
 
@@ -73,7 +73,7 @@ Lisp_ptr pick_first(Lisp_ptr p){
     auto c = p.get<Cons*>();
     if(!c) throw zs_error_arg1("syntax-rules", "the pattern is empty list");
 
-    return c->car();
+    return car(c);
   }else if(p.tag() == Ptr_tag::vector){
     auto v = p.get<Vector*>();
     assert(v);
@@ -340,7 +340,7 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
       auto nthcdr = ci.base();
 
       if(!nullp(nthcdr)){
-        ret.insert({i.first, nthcdr.get<Cons*>()->car()});
+        ret.insert({i.first, car(nthcdr.get<Cons*>())});
         continue;
       }
     }

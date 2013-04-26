@@ -54,7 +54,7 @@ ConsIter& ConsIter::operator++(){
   }
 
   if(auto c = p_.get<Cons*>()){
-    p_ = c->cdr();
+    p_ = cdr(c);
   }
   return *this;
 }
