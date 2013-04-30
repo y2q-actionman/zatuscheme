@@ -55,6 +55,8 @@ public:
   using zs_error::what; // override
 
 private:
+  std::string make_what_str();
+
   const char* context_;
   std::string body_;
   std::array<Lisp_ptr, ARGS_SIZE> args_;

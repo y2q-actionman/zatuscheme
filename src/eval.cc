@@ -207,11 +207,17 @@ void proc_enter_native(const NProcedure* fun){
                                   argc);
   }
 
-  ZsArgs args;
-  auto p = native_func(move(args));
+  try{
+    ZsArgs args;
+    auto p = native_func(move(args));
 
-  if(info->move_ret == MoveReturnValue::t){
-    vm.return_value = {p};
+    if(info->move_ret == MoveReturnValue::t){
+      vm.return_value = {p};
+    }
+  }catch(const zs_error& e){
+    throw zs_error(printf_string("%s: %s",
+                                 find_builtin_nproc_name(fun),
+                                 e.what()));
   }
 }
 

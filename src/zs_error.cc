@@ -53,6 +53,25 @@ zs_error_arg1::zs_error_arg1(const char* context, const std::string& body,
     args_.at(i) = a;
   }
 
+  this->str_ = make_what_str();
+}
+
+// should use 'delegating constructor'
+zs_error_arg1::zs_error_arg1(const char* context, const std::string& body)
+  : zs_error(), context_(context), body_(body), args_()
+{
+  this->str_ = make_what_str();
+}
+
+zs_error_arg1::zs_error_arg1(const zs_error_arg1&) = default;
+zs_error_arg1::zs_error_arg1(zs_error_arg1&&) = default;
+
+zs_error_arg1::~zs_error_arg1() noexcept = default;
+
+zs_error_arg1& zs_error_arg1::operator=(const zs_error_arg1&) noexcept = default;
+zs_error_arg1& zs_error_arg1::operator=(zs_error_arg1&&) noexcept = default;
+
+std::string zs_error_arg1::make_what_str(){
   ostringstream oss;
 
   oss << context_ << " : " << body_;
@@ -65,26 +84,8 @@ zs_error_arg1::zs_error_arg1(const char* context, const std::string& body,
   }
   oss << endl;
   
-  this->str_ = oss.str();
+  return oss.str();
 }
-
-// should use 'delegating constructor'
-zs_error_arg1::zs_error_arg1(const char* context, const std::string& body)
-  : zs_error(), context_(context), body_(body), args_()
-{
-  ostringstream oss;
-  oss << context_ << " : " << body_ << endl;
-  this->str_ = oss.str();
-}
-
-zs_error_arg1::zs_error_arg1(const zs_error_arg1&) = default;
-zs_error_arg1::zs_error_arg1(zs_error_arg1&&) = default;
-
-zs_error_arg1::~zs_error_arg1() noexcept = default;
-
-zs_error_arg1& zs_error_arg1::operator=(const zs_error_arg1&) noexcept = default;
-zs_error_arg1& zs_error_arg1::operator=(zs_error_arg1&&) noexcept = default;
-
 
 // error functions
 zs_error builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
