@@ -74,7 +74,10 @@ zs_error_arg1& zs_error_arg1::operator=(zs_error_arg1&&) noexcept = default;
 std::string zs_error_arg1::make_what_str(){
   ostringstream oss;
 
-  oss << context_ << " : " << body_;
+  if(context_){
+    oss << context_ << " : ";
+  }
+  oss << body_;
   if(args_[0]){
     oss << " @ (";
     for(auto p : args_){

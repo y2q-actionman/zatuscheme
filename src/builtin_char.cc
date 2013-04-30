@@ -10,21 +10,15 @@ using namespace std;
 
 namespace {
 
-zs_error char_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error_arg1(func_name,
-                       printf_string("arg is not %s!", stringify(Ptr_tag::character)),
-                       {p});
-}
-
 template<typename Fun>
 Lisp_ptr char_compare(Lisp_ptr arg1, Lisp_ptr arg2,
                       const char* name, const Fun& fun){
   if(arg1.tag() != Ptr_tag::character){
-    throw char_type_check_failed(name, arg1);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::character, arg1);
   }
 
   if(arg2.tag() != Ptr_tag::character){
-    throw char_type_check_failed(name, arg2);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::character, arg2);
   }
 
   return Lisp_ptr{fun(arg1.get<char>(), arg2.get<char>())};
@@ -50,7 +44,7 @@ Lisp_ptr char_pred(Lisp_ptr arg1, const Fun& fun){
 template<typename Fun>
 Lisp_ptr char_conversion(Lisp_ptr arg1, const char* name, const Fun& fun){
   if(arg1.tag() != Ptr_tag::character){
-    throw char_type_check_failed(name, arg1);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::character, arg1);
   }
 
   return Lisp_ptr{fun(arg1.get<char>())};
