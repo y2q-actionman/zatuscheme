@@ -15,21 +15,15 @@ using namespace std;
 
 namespace {
 
-zs_error cons_type_check_failed(const char* func_name, Lisp_ptr p){
-  return zs_error_arg1(func_name,
-                       printf_string("arg is not %s!", stringify(Ptr_tag::cons)),
-                       {p});
-}
-
 template<typename Fun>
 inline
-Lisp_ptr cons_carcdr(ZsArgs args, const char* name, Fun fun){
+Lisp_ptr cons_carcdr(ZsArgs args, Fun fun){
   if(args[0].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed(name, args[0]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
   }
 
   if(nullp(args[0])){
-    throw zs_error_arg1(name, "arg is null list!");
+    throw zs_error_arg1(nullptr, "arg is null list!");
   }
 
   return fun(args[0].get<Cons*>());
@@ -37,13 +31,13 @@ Lisp_ptr cons_carcdr(ZsArgs args, const char* name, Fun fun){
 
 template<typename Fun>
 inline
-Lisp_ptr cons_set_carcdr(ZsArgs args, const char* name, Fun fun){
+Lisp_ptr cons_set_carcdr(ZsArgs args, Fun fun){
   if(args[0].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed(name, args[0]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
   }
   
   if(nullp(args[0])){
-    throw zs_error_arg1(name, "arg is null list!");
+    throw zs_error_arg1(nullptr, "arg is null list!");
   }
 
   return fun(args[0].get<Cons*>(), args[1]);
@@ -62,20 +56,20 @@ Lisp_ptr cons_cons(ZsArgs args){
 }
 
 Lisp_ptr cons_car(ZsArgs args){
-  return cons_carcdr(move(args), "car", &car);
+  return cons_carcdr(move(args), &car);
 }
 
 Lisp_ptr cons_cdr(ZsArgs args){
-  return cons_carcdr(move(args), "cdr", &cdr);
+  return cons_carcdr(move(args), &cdr);
 }
 
 
 Lisp_ptr cons_set_car(ZsArgs args){
-  return cons_set_carcdr(move(args), "set-car!", &rplaca);
+  return cons_set_carcdr(move(args), &rplaca);
 }
 
 Lisp_ptr cons_set_cdr(ZsArgs args){
-  return cons_set_carcdr(move(args), "set-cdr!", &rplacd);
+  return cons_set_carcdr(move(args), &rplacd);
 }
 
 
@@ -85,7 +79,7 @@ Lisp_ptr cons_nullp(ZsArgs args){
 
 Lisp_ptr cons_listp(ZsArgs args){
   if(args[0].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed("list?", args[0]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
   }
 
   auto found_cons = unordered_set<Cons*>();
@@ -124,7 +118,7 @@ Lisp_ptr cons_append(ZsArgs args){
 
   for(auto i = 0; i < args.size() - 1; ++i){
     if(args[i].tag() != Ptr_tag::cons){
-      throw cons_type_check_failed("append", args[i]);
+      throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[i]);
     }
 
     for(auto p : args[i]){
@@ -137,9 +131,9 @@ Lisp_ptr cons_append(ZsArgs args){
 }
 
 template <typename Func>
-Lisp_ptr cons_mem_funcs(ZsArgs args, const char* name, Func fun){
+Lisp_ptr cons_mem_funcs(ZsArgs args, Func fun){
   if(args[1].tag() != Ptr_tag::cons){
-    throw cons_type_check_failed(name, args[1]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[1]);
   }
 
   for(auto i = begin(args[1]), e = end(args[1]); i != e; ++i){
@@ -151,15 +145,15 @@ Lisp_ptr cons_mem_funcs(ZsArgs args, const char* name, Func fun){
 }
 
 Lisp_ptr cons_memq(ZsArgs args){
-  return cons_mem_funcs(move(args), "memq", eq_internal);
+  return cons_mem_funcs(move(args), eq_internal);
 }
 
 Lisp_ptr cons_memv(ZsArgs args){
-  return cons_mem_funcs(move(args), "memv", eqv_internal);
+  return cons_mem_funcs(move(args), eqv_internal);
 }
 
 Lisp_ptr cons_member(ZsArgs args){
-  return cons_mem_funcs(move(args), "member", equal_internal);
+  return cons_mem_funcs(move(args), equal_internal);
 }
 
 } // namespace builtin
