@@ -11,8 +11,7 @@ using namespace std;
 namespace {
 
 template<typename Fun>
-Lisp_ptr char_compare(Lisp_ptr arg1, Lisp_ptr arg2,
-                      const char* name, const Fun& fun){
+Lisp_ptr char_compare(Lisp_ptr arg1, Lisp_ptr arg2, const Fun& fun){
   if(arg1.tag() != Ptr_tag::character){
     throw builtin_type_check_failed(nullptr, Ptr_tag::character, arg1);
   }
@@ -42,7 +41,7 @@ Lisp_ptr char_pred(Lisp_ptr arg1, const Fun& fun){
 }
 
 template<typename Fun>
-Lisp_ptr char_conversion(Lisp_ptr arg1, const char* name, const Fun& fun){
+Lisp_ptr char_conversion(Lisp_ptr arg1, const Fun& fun){
   if(arg1.tag() != Ptr_tag::character){
     throw builtin_type_check_failed(nullptr, Ptr_tag::character, arg1);
   }
@@ -55,53 +54,48 @@ Lisp_ptr char_conversion(Lisp_ptr arg1, const char* name, const Fun& fun){
 namespace builtin {
 
 Lisp_ptr char_eq(ZsArgs args){
-  return char_compare(args[0], args[1], "char=?",
-                      std::equal_to<char>());
+  return char_compare(args[0], args[1], std::equal_to<char>());
 }
 
 Lisp_ptr char_less(ZsArgs args){
-  return char_compare(args[0], args[1], "char<?",
-                      std::less<char>());
+  return char_compare(args[0], args[1], std::less<char>());
 }
 
 Lisp_ptr char_greater(ZsArgs args){
-  return char_compare(args[0], args[1], "char>?",
-                      std::greater<char>());
+  return char_compare(args[0], args[1], std::greater<char>());
 }
 
 Lisp_ptr char_less_eq(ZsArgs args){
-  return char_compare(args[0], args[1], "char<=?",
-                      std::less_equal<char>());
+  return char_compare(args[0], args[1], std::less_equal<char>());
 }
 
 Lisp_ptr char_greater_eq(ZsArgs args){
-  return char_compare(args[0], args[1], "char>=?",
-                      std::greater_equal<char>());
+  return char_compare(args[0], args[1], std::greater_equal<char>());
 }
   
 
 Lisp_ptr char_ci_eq(ZsArgs args){
-  return char_compare(args[0], args[1], "char-ci=?",
+  return char_compare(args[0], args[1],
                       ci_comparator<std::equal_to<int> >());
 }
 
 Lisp_ptr char_ci_less(ZsArgs args){
-  return char_compare(args[0], args[1], "char-ci<?",
+  return char_compare(args[0], args[1],
                       ci_comparator<std::less<int> >());
 }
 
 Lisp_ptr char_ci_greater(ZsArgs args){
-  return char_compare(args[0], args[1], "char-ci>?",
+  return char_compare(args[0], args[1],
                       ci_comparator<std::greater<int> >());
 }
 
 Lisp_ptr char_ci_less_eq(ZsArgs args){
-  return char_compare(args[0], args[1], "char-ci<=?",
+  return char_compare(args[0], args[1],
                       ci_comparator<std::less_equal<int> >());
 }
 
 Lisp_ptr char_ci_greater_eq(ZsArgs args){
-  return char_compare(args[0], args[1], "char-ci>=?",
+  return char_compare(args[0], args[1],
                       ci_comparator<std::greater_equal<int> >());
 }
 
@@ -128,7 +122,7 @@ Lisp_ptr char_islower(ZsArgs args){
 
 
 Lisp_ptr char_to_int(ZsArgs args){
-  return char_conversion(args[0], "char->integer",
+  return char_conversion(args[0],
                          [](char c){
                            return Lisp_ptr(Ptr_tag::integer, c);
                          });
@@ -136,19 +130,19 @@ Lisp_ptr char_to_int(ZsArgs args){
 
 Lisp_ptr char_from_int(ZsArgs args){
   if(args[0].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed("integer->char", Ptr_tag::integer, args[0]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[0]);
   }
 
   return Lisp_ptr{static_cast<char>(args[0].get<int>())};
 }
 
 Lisp_ptr char_toupper(ZsArgs args){
-  return char_conversion(args[0], "char-upcase",
+  return char_conversion(args[0],
                          [](char c){ return static_cast<char>(std::toupper(c)); });
 }
 
 Lisp_ptr char_tolower(ZsArgs args){
-  return char_conversion(args[0], "char-downcase",
+  return char_conversion(args[0],
                          [](char c){ return static_cast<char>(std::tolower(c)); });
 }
 
