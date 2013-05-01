@@ -28,9 +28,6 @@ void local_set_with_identifier(Env* e, Lisp_ptr ident, Lisp_ptr value){
   e->local_set(ident, value);
 }
 
-// for internal direct 'goto'.
-void proc_enter_entrypoint(Lisp_ptr);
-
 /*
   ret = some value
 */
@@ -167,7 +164,7 @@ void macro_call(Lisp_ptr proc){
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
-  proc_enter_entrypoint(proc); // direct jump to proc_enter()
+  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
 }
 
 /*
@@ -189,7 +186,7 @@ void whole_call(Lisp_ptr proc, int args){
     throw zs_error("eval internal error: 'whole' function must take one or two args\n");
   }
 
-  proc_enter_entrypoint(proc); // direct jump to proc_enter()
+  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
 }
 
 

@@ -311,8 +311,12 @@ void gc_marked_to_fixed(){
     case MarkBit::unmarked:
       break;
     case MarkBit::marked:
+      // exclude mutable types.
+      // FIXME: Env is not only mutable type!!.
       if(i->second.tag != Ptr_tag::env){
         i->second.mark = MarkBit::fixed;
+      }else{
+        i->second.mark = MarkBit::unmarked;
       }
       break;
     case MarkBit::fixed:
