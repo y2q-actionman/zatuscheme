@@ -27,7 +27,7 @@ static bool hard_repl_continue = true;
 Lisp_ptr traditional_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw zs_error_arg1("traditional-transformer", "called with a wrong type", {args[0]});
+    throw zs_error_arg1(nullptr, "called with a wrong type", {args[0]});
   }
   auto info = *iproc->info();
   info.passing = Passing::quote;
@@ -45,12 +45,12 @@ Lisp_ptr gensym(ZsArgs){
 Lisp_ptr sc_macro_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw zs_error_arg1("sc-macro-transformer", "called with a wrong type", {args[0]});
+    throw zs_error_arg1(nullptr, "called with a wrong type", {args[0]});
   }
 
   auto info = *iproc->info();
   if(info.required_args != 2 || info.max_args != 2){
-    throw zs_error_arg1("sc-macro-transformer",
+    throw zs_error_arg1(nullptr,
                         printf_string("procedure must take exactly 2 args (this takes %d-%d))",
                                       info.required_args, info.max_args));
   }
@@ -67,13 +67,11 @@ Lisp_ptr sc_macro_transformer(ZsArgs args){
 Lisp_ptr make_syntactic_closure(ZsArgs args){
   Env* e = args[0].get<Env*>();
   if(!e){
-    throw builtin_type_check_failed("make-syntactic-closure",
-                                    Ptr_tag::env, args[0]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[0]);
   }
 
   if(args[1].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed("make-syntactic-closure",
-                                    Ptr_tag::cons, args[1]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[1]);
   }
   Cons* c = args[1].get<Cons*>();
 
@@ -82,7 +80,7 @@ Lisp_ptr make_syntactic_closure(ZsArgs args){
 
 Lisp_ptr capture_syntactic_environment(ZsArgs args){
   if(args[0].tag() != Ptr_tag::i_procedure){
-    throw zs_error_arg1("capture-syntactic-environment", "first arg is not procedure", {args[0]});
+    throw zs_error_arg1(nullptr, "first arg is not procedure", {args[0]});
   }
 
   auto iproc = args[0].get<IProcedure*>();
@@ -90,7 +88,7 @@ Lisp_ptr capture_syntactic_environment(ZsArgs args){
   assert(iproc && iproc->info());
 
   if(iproc->info()->required_args != 1){
-    throw zs_error_arg1("capture-syntactic-environment",
+    throw zs_error_arg1(nullptr,
                         printf_string("first arg must take exactly 1 arg (take %d)",
                                       iproc->info()->required_args));
   }
@@ -110,20 +108,20 @@ Lisp_ptr identifierp(ZsArgs args){
 Lisp_ptr identifier_eq(ZsArgs args){
   auto ident1_env = args[0].get<Env*>();
   if(!ident1_env){
-    throw builtin_type_check_failed("identifier=?", Ptr_tag::env, args[0]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[0]);
   }
 
   if(!identifierp(args[1])){
-    throw builtin_identifier_check_failed("identifier=?", args[1]);
+    throw builtin_identifier_check_failed(nullptr, args[1]);
   }
   
   auto ident2_env = args[2].get<Env*>();
   if(!ident2_env){
-    throw builtin_type_check_failed("identifier=?", Ptr_tag::env, args[2]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[2]);
   }
 
   if(!identifierp(args[3])){
-    throw builtin_identifier_check_failed("identifier=?", args[3]);
+    throw builtin_identifier_check_failed(nullptr, args[3]);
   }
 
   return 
@@ -132,7 +130,7 @@ Lisp_ptr identifier_eq(ZsArgs args){
 
 Lisp_ptr make_synthetic_identifier(ZsArgs args){
   if(!identifierp(args[0])){
-    throw zs_error_arg1("make-synthetic-identifier", "passed value is not identifier", {args[0]});
+    throw zs_error_arg1(nullptr, "passed value is not identifier", {args[0]});
   }
 
   return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
