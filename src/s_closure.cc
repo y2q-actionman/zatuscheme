@@ -31,7 +31,7 @@ Symbol* identifier_symbol(Lisp_ptr p){
   }else if(p.tag() == Ptr_tag::syntactic_closure){
     return identifier_symbol(p.get<SyntacticClosure*>()->expr());
   }else{
-    throw zs_error_arg1("idenitifier-symbol internal", "not identifier", {p});
+    throw builtin_identifier_check_failed("idenitifier-symbol internal", p);
   }
 }
 

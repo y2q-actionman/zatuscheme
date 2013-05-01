@@ -27,7 +27,7 @@ static bool hard_repl_continue = true;
 Lisp_ptr traditional_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw zs_error_arg1(nullptr, "called with a wrong type", {args[0]});
+    throw builtin_type_check_failed(nullptr, Ptr_tag::i_procedure, args[0]);
   }
   auto info = *iproc->info();
   info.passing = Passing::quote;
@@ -45,7 +45,7 @@ Lisp_ptr gensym(ZsArgs){
 Lisp_ptr sc_macro_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw zs_error_arg1(nullptr, "called with a wrong type", {args[0]});
+    throw builtin_type_check_failed(nullptr, Ptr_tag::i_procedure, args[0]);
   }
 
   auto info = *iproc->info();
@@ -80,7 +80,7 @@ Lisp_ptr make_syntactic_closure(ZsArgs args){
 
 Lisp_ptr capture_syntactic_environment(ZsArgs args){
   if(args[0].tag() != Ptr_tag::i_procedure){
-    throw zs_error_arg1(nullptr, "first arg is not procedure", {args[0]});
+    throw builtin_type_check_failed(nullptr, Ptr_tag::i_procedure, args[0]);
   }
 
   auto iproc = args[0].get<IProcedure*>();
@@ -130,7 +130,7 @@ Lisp_ptr identifier_eq(ZsArgs args){
 
 Lisp_ptr make_synthetic_identifier(ZsArgs args){
   if(!identifierp(args[0])){
-    throw zs_error_arg1(nullptr, "passed value is not identifier", {args[0]});
+    throw builtin_identifier_check_failed(nullptr, args[0]);
   }
 
   return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
