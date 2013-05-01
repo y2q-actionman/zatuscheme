@@ -19,7 +19,6 @@ void zs_delete(T*);
 
 // run GC
 void gc();
-void gc_fix_object();
 
 #include "zs_memory.i.hh"
 

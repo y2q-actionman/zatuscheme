@@ -23,8 +23,7 @@ namespace {
 
 enum MarkBit {
   unmarked = 0,
-  marked = 1,
-  fixed = 2
+  marked = 1
 };
 
 struct MarkObj {
@@ -294,33 +293,6 @@ void gc_sweep(){
     case MarkBit::marked:
       i->second.mark = MarkBit::unmarked;
       break;
-    case MarkBit::fixed:
-      break;
-    default:
-      break;
-    }
-    i = ii;
-  }
-}
-
-void gc_marked_to_fixed(){
-  auto i = begin(arena), e = end(arena);
-  while(i != e){
-    auto ii = next(i);
-    switch(i->second.mark){
-    case MarkBit::unmarked:
-      break;
-    case MarkBit::marked:
-      // exclude mutable types.
-      // FIXME: Env is not only mutable type!!.
-      if(i->second.tag != Ptr_tag::env){
-        i->second.mark = MarkBit::fixed;
-      }else{
-        i->second.mark = MarkBit::unmarked;
-      }
-      break;
-    case MarkBit::fixed:
-      break;
     default:
       break;
     }
@@ -333,9 +305,4 @@ void gc_marked_to_fixed(){
 void gc(){
   gc_mark(vm);
   gc_sweep();
-}
-
-void gc_fix_object(){
-  gc_mark(vm);
-  gc_marked_to_fixed();
 }

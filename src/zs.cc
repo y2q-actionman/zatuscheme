@@ -23,5 +23,4 @@ void zs_init(){
   std::set_terminate(term_handle);
   vm.start_up();
   install_builtin();
-  gc_fix_object();
 }
