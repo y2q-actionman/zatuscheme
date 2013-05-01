@@ -11,6 +11,14 @@
 
 using namespace std;
 
+namespace {
+
+zs_error procedure_type_check_failed(Lisp_ptr p){
+  return zs_error_arg1(nullptr, "arg is not procedure!", {p});
+}
+
+} // namespace
+
 namespace builtin {
 
 Lisp_ptr procedurep(ZsArgs args){
@@ -20,7 +28,7 @@ Lisp_ptr procedurep(ZsArgs args){
 Lisp_ptr apply(ZsArgs args){
   auto proc = args[0];
   if(!is_procedure(proc.tag())){
-    throw zs_error_arg1("apply", "first arg is not procedure", {proc});
+    throw procedure_type_check_failed(proc);
   }
 
   std::vector<Lisp_ptr> a_args(next(begin(args)), end(args));
@@ -76,18 +84,17 @@ Lisp_ptr call_with_values(ZsArgs args){
   Lisp_ptr procs[2];
 
   if(!is_procedure(args[0].tag())){
-    throw zs_error_arg1("call-with-values", "first arg is not procedure", {args[0]});
+    throw procedure_type_check_failed(args[0]);
   }
 
   auto info = get_procinfo(args[0]);
   if(info->required_args != 0){
-    throw zs_error_arg1("call-with-values",
-                        printf_string("first arg takes zero arg (takes %d)",
-                                      info->required_args));
+    throw zs_error(printf_string("first arg takes zero arg (takes %d)",
+                                 info->required_args));
   }    
 
   if(!is_procedure(args[1].tag())){
-    throw zs_error_arg1("call-with-values", "second arg is not procedure", {args[1]});
+    throw procedure_type_check_failed(args[1]);
   }
     
   std::copy(args.begin(), args.end(), procs);
@@ -107,15 +114,13 @@ Lisp_ptr call_cc(ZsArgs args){
   Lisp_ptr proc;
 
   if(!is_procedure(args[0].tag())){
-    throw zs_error_arg1("call-with-current-continuation", 
-                        "first arg is not procedure", {args[0]});
+    throw procedure_type_check_failed(args[0]);
   }
 
   auto info = get_procinfo(args[0]);
   if(!(info->required_args <= 1 && 1 <= info->max_args)){
-    throw zs_error_arg1("call-with-current-continuation",
-                        printf_string("first arg must take 1 arg at least(takes %d-%d)",
-                                      info->required_args, info->max_args));
+    throw zs_error(printf_string("first arg must take 1 arg at least(takes %d-%d)",
+                                 info->required_args, info->max_args));
   }
 
   proc = args[0];
@@ -135,14 +140,13 @@ Lisp_ptr dynamic_wind(ZsArgs args){
 
   for(auto p : args){
     if(!is_procedure(p.tag())){
-      throw zs_error_arg1("dynamic-wind", "arg is not procedure", {p});
+      throw procedure_type_check_failed(p);
     }
 
     auto info = get_procinfo(p);
     if(info->required_args != 0){
-      throw zs_error_arg1("dynamic-wind",
-                          printf_string("each arg must take 0 arg (%d)",
-                                        info->required_args));
+      throw zs_error(printf_string("each arg must take 0 arg (%d)",
+                                   info->required_args));
     }
 
     *procs_i = p;

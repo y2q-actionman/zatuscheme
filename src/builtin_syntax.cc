@@ -23,10 +23,10 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
-    throw zs_error_arg1("lambda", "invalid args!", {args});
+    throw zs_error_arg1(nullptr, "invalid args!", {args});
   }
   if(!code){
-    throw zs_error_arg1("lambda", "invalid body!");
+    throw zs_error_arg1(nullptr, "invalid body!");
   }
   
   return zs_new<IProcedure>(code, 
@@ -40,7 +40,7 @@ Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
   // skips first 'let' symbol
   ++arg_i;
   if(!arg_i){
-    throw zs_error_arg1("let", "informal syntax -- (LET . <...>)", {wargs[0]});
+    throw zs_error_arg1(nullptr, "informal syntax -- (LET . <...>)", {wargs[0]});
   }
 
   // checks named let
@@ -51,7 +51,7 @@ Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
 
     ++arg_i;
     if(!arg_i){
-      throw zs_error_arg1("let", "informal syntax -- (LET <name> . <...>)", {wargs[0]});
+      throw zs_error_arg1(nullptr, "informal syntax -- (LET <name> . <...>)", {wargs[0]});
     }
   }
 
@@ -62,7 +62,7 @@ Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
 
   for(auto bind : *arg_i){
     if(bind.tag() != Ptr_tag::cons || nullp(bind)){
-      throw zs_error_arg1("let", "informal object found in let binding", {bind});
+      throw zs_error_arg1(nullptr, "informal object found in let binding", {bind});
     }
 
     ++len;
@@ -73,7 +73,7 @@ Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
 
   ++arg_i;
   if(!arg_i){
-    throw zs_error_arg1("let", "informal body", {wargs[0]});
+    throw zs_error_arg1(nullptr, "informal body", {wargs[0]});
   }
 
   // picks body
@@ -138,7 +138,7 @@ Lisp_ptr syntax_define(ZsArgs args){
 
     assert(expr_cons.get<Cons*>());
     if(!nullp(cdr(expr_cons.get<Cons*>()))){
-      throw zs_error_arg1("define", "informal syntax: too long");
+      throw zs_error_arg1(nullptr, "informal syntax: too long");
     }
 
     vm.code.insert(vm.code.end(), {i1, vm_op_local_set, car(expr_cons.get<Cons*>())});
@@ -152,14 +152,14 @@ Lisp_ptr syntax_define(ZsArgs args){
     vm.code.insert(vm.code.end(), {funcname, vm_op_local_set, value});
     return {};
   }else{
-    throw zs_error_arg1("define", "informal syntax!");
+    throw zs_error_arg1(nullptr, "informal syntax!");
   }
 }
 
 Lisp_ptr syntax_begin(ZsArgs args){
   auto body = nthcdr_cons_list<1>(args[0]);
   if(!body || nullp(body)){
-    throw zs_error_arg1("begin", "has no exprs.");
+    throw zs_error_arg1(nullptr, "has no exprs.");
   }
   
   vm.return_value = {body, vm_op_begin};
@@ -249,7 +249,7 @@ Lisp_ptr syntax_unquote(ZsArgs args){
 
 Lisp_ptr syntax_unquote_splicing(ZsArgs args){
   if(args[0].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed("unquote-splicing", Ptr_tag::cons, args[0]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
   }
 
   vm.return_value.assign(begin(args[0]), end(args[0]));
@@ -257,16 +257,16 @@ Lisp_ptr syntax_unquote_splicing(ZsArgs args){
 }
 
 Lisp_ptr syntax_else(ZsArgs){
-  throw zs_error_arg1("else", "cannot be used as operator!!");
+  throw zs_error_arg1(nullptr, "cannot be used as operator!!");
 }
 
 Lisp_ptr syntax_arrow(ZsArgs){
-  throw zs_error_arg1("=>", "cannot be used as operator!!");
+  throw zs_error_arg1(nullptr, "cannot be used as operator!!");
 }
 
 Lisp_ptr syntax_define_syntax(ZsArgs args){
   if(!identifierp(args[0])){
-    throw builtin_identifier_check_failed("define-syntax", args[0]);
+    throw builtin_identifier_check_failed(nullptr, args[0]);
   }
 
   // TODO: check args[1] is a transformer.
@@ -287,7 +287,7 @@ Lisp_ptr syntax_letrec_syntax(ZsArgs args){
 Lisp_ptr syntax_syntax_rules(ZsArgs args){
   auto env = args[1].get<Env*>();
   if(!env){
-    throw builtin_type_check_failed("syntax-rules", Ptr_tag::env, args[1]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[1]);
   }
 
   auto literals = nth_cons_list<1>(args[0]);
