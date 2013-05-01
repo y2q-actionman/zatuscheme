@@ -49,8 +49,7 @@ Lisp_ptr apply(ZsArgs args){
     }
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
-
-  proc_enter_entrypoint(proc); // direct jump to proc_enter()
+  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
   return {};
 }
 
@@ -106,7 +105,7 @@ Lisp_ptr call_with_values(ZsArgs args){
 
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-  proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
+  vm.code.insert(vm.code.end(), {procs[0], vm_op_proc_enter});
   return {};
 }
 
@@ -129,7 +128,7 @@ Lisp_ptr call_cc(ZsArgs args){
 
   auto cont = zs_new<Continuation>(vm);
   vm.stack.insert(vm.stack.end(), {cont, {Ptr_tag::vm_argcount, 1}});
-  proc_enter_entrypoint(proc); // direct jump to proc_enter()
+  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
   return {};
 }
 
@@ -170,7 +169,7 @@ Lisp_ptr dynamic_wind(ZsArgs args){
 
   // first proc, calling with zero args.
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
-  proc_enter_entrypoint(procs[0]); // direct jump to proc_enter()
+  vm.code.insert(vm.code.end(), {procs[0], vm_op_proc_enter});
   return {};
 }
 

@@ -28,6 +28,9 @@ void local_set_with_identifier(Env* e, Lisp_ptr ident, Lisp_ptr value){
   e->local_set(ident, value);
 }
 
+// for internal direct 'goto'.
+void proc_enter_entrypoint(Lisp_ptr);
+
 /*
   ret = some value
 */
@@ -413,6 +416,41 @@ void proc_enter_srule(SyntaxRules* srule){
   vm.return_value = {code};
 }
 
+void proc_enter_entrypoint(Lisp_ptr proc){
+  if(!is_procedure(proc.tag())){
+    vm.code.pop_back();
+    vm.stack.pop_back();
+    throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});
+  }
+
+  assert(!vm.stack.empty());
+
+  auto info = get_procinfo(proc);
+  auto argc = vm.stack.back().get<int>();
+
+  if(!(info->required_args <= argc && argc <= info->max_args)){
+    // XXX: incomprehensible
+    // This local value is required, for avoiding a strange state.
+    // If throws directly, std::uncaught_exception() returns true,
+    // but std::current_exception() returns NULL object.
+    auto e = builtin_argcount_failed("(unknown)", info->required_args,
+                                     info->max_args, argc);
+    throw e;
+  }
+
+  if(auto ifun = proc.get<IProcedure*>()){
+    proc_enter_interpreted(ifun, info);
+  }else if(auto nfun = proc.get<const NProcedure*>()){
+    proc_enter_native(nfun);
+  }else if(auto cont = proc.get<Continuation*>()){
+    proc_enter_cont(cont);
+  }else if(auto srule = proc.get<SyntaxRules*>()){
+    proc_enter_srule(srule);
+  }else{
+    throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
+  }
+}
+
 } //namespace
 
 /*
@@ -460,41 +498,6 @@ void vm_op_call(){
     return whole_call(proc, info->required_args);
   default:
     UNEXP_DEFAULT();
-  }
-}
-
-void proc_enter_entrypoint(Lisp_ptr proc){
-  if(!is_procedure(proc.tag())){
-    vm.code.pop_back();
-    vm.stack.pop_back();
-    throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});
-  }
-
-  assert(!vm.stack.empty());
-
-  auto info = get_procinfo(proc);
-  auto argc = vm.stack.back().get<int>();
-
-  if(!(info->required_args <= argc && argc <= info->max_args)){
-    // XXX: incomprehensible
-    // This local value is required, for avoiding a strange state.
-    // If throws directly, std::uncaught_exception() returns true,
-    // but std::current_exception() returns NULL object.
-    auto e = builtin_argcount_failed("(unknown)", info->required_args,
-                                     info->max_args, argc);
-    throw e;
-  }
-
-  if(auto ifun = proc.get<IProcedure*>()){
-    proc_enter_interpreted(ifun, info);
-  }else if(auto nfun = proc.get<const NProcedure*>()){
-    proc_enter_native(nfun);
-  }else if(auto cont = proc.get<Continuation*>()){
-    proc_enter_cont(cont);
-  }else if(auto srule = proc.get<SyntaxRules*>()){
-    proc_enter_srule(srule);
-  }else{
-    throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
   }
 }
 

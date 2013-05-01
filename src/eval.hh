@@ -4,9 +4,6 @@
 #include "lisp_ptr.hh"
 #include "procedure.hh"
 
-// for internal direct 'goto'.
-void proc_enter_entrypoint(Lisp_ptr);
-
 // primitives for syntax call
 constexpr VMop vm_op_nop = nullptr;
 void vm_op_call();
