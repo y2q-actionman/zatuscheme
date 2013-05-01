@@ -17,30 +17,16 @@ namespace {
 
 template<typename Fun>
 inline
-Lisp_ptr cons_carcdr(ZsArgs args, Fun fun){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
+Lisp_ptr with_nonnull_cons(Lisp_ptr p, Fun fun){
+  if(p.tag() != Ptr_tag::cons){
+    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, p);
   }
 
-  if(nullp(args[0])){
+  if(nullp(p)){
     throw zs_error_arg1(nullptr, "arg is null list!");
   }
 
-  return fun(args[0].get<Cons*>());
-}
-
-template<typename Fun>
-inline
-Lisp_ptr cons_set_carcdr(ZsArgs args, Fun fun){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
-  }
-  
-  if(nullp(args[0])){
-    throw zs_error_arg1(nullptr, "arg is null list!");
-  }
-
-  return fun(args[0].get<Cons*>(), args[1]);
+  return fun(p.get<Cons*>());
 }
 
 } // namespace
@@ -56,20 +42,24 @@ Lisp_ptr cons_cons(ZsArgs args){
 }
 
 Lisp_ptr cons_car(ZsArgs args){
-  return cons_carcdr(move(args), &car);
+  return with_nonnull_cons(args[0], &car);
 }
 
 Lisp_ptr cons_cdr(ZsArgs args){
-  return cons_carcdr(move(args), &cdr);
+  return with_nonnull_cons(args[0], &cdr);
 }
 
 
 Lisp_ptr cons_set_car(ZsArgs args){
-  return cons_set_carcdr(move(args), &rplaca);
+  auto val = args[1];
+  return with_nonnull_cons(args[0],
+                           [val](Cons* c){ return rplaca(c, val); });
 }
 
 Lisp_ptr cons_set_cdr(ZsArgs args){
-  return cons_set_carcdr(move(args), &rplacd);
+  auto val = args[1];
+  return with_nonnull_cons(args[0],
+                           [val](Cons* c){ return rplacd(c, val); });
 }
 
 
