@@ -412,8 +412,13 @@ void proc_enter_srule(SyntaxRules* srule){
   if(args.size() != 2)
     throw builtin_argcount_failed("syntax-rules entry", 2, 2, args.size());
 
-  auto code = srule->apply(args[0], args[1].get<Env*>());
-  vm.return_value = {code};
+  try{
+    auto code = srule->apply(args[0], args[1].get<Env*>());
+    vm.return_value = {code};
+  }catch(const zs_error& e){
+    // TODO: add name to syntax-rules struct, and use that.
+    throw zs_error(printf_string("%s: %s", "syntax-rules", e.what()));
+  }
 }
 
 void proc_enter_entrypoint(Lisp_ptr proc){
