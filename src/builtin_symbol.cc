@@ -12,7 +12,7 @@ namespace builtin {
 Lisp_ptr symbol_to_string(ZsArgs args){
   auto sym = args[0].get<Symbol*>();
   if(!sym){
-    throw zs_error_arg1("symbol->string", "arg is not symbol!", {args[0]});
+    throw builtin_type_check_failed(nullptr, Ptr_tag::symbol, {args[0]});
   }
 
   // TODO: support invariant string!
@@ -22,7 +22,7 @@ Lisp_ptr symbol_to_string(ZsArgs args){
 Lisp_ptr symbol_from_string(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw zs_error_arg1("string->symbol", "arg is not string!", {args[0]});
+    throw builtin_type_check_failed(nullptr, Ptr_tag::symbol, {args[0]});
   }
 
   return {intern(vm.symtable(), *str)};
