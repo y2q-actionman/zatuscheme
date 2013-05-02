@@ -263,13 +263,13 @@ Token tokenize_character(istream& f){
     return Token{static_cast<char>(ret_char)};
   }else{
     // check character name
-    switch(tolower(ret_char)){
-    case 's':
+    switch(ret_char){
+    case 's': case 'S':
       if(check_name("pace")){
         return Token{' '};
       }
       break;
-    case 'n':
+    case 'n': case 'N':
       if(check_name("ewline")){
         return Token{'\n'};
       }
@@ -315,7 +315,7 @@ struct PrefixValue {
 PrefixValue parse_number_prefix(istream& f){
   int r = 10;
   Token::Exactness e = Token::Exactness::unspecified;
-  bool r_appeared = false, e_appeared = false;
+  int r_appeared = 0, e_appeared = 0;
 
   for(int loop = 0; loop < 2; ++loop){
     auto c = f.get();
@@ -326,27 +326,39 @@ PrefixValue parse_number_prefix(istream& f){
     }
 
     switch(c = f.get()){
-    case 'i': case 'e':
-      if(e_appeared){
-        throw zs_error(printf_string("reader error: duplicated number prefix appeared (%c)\n", c));
-      }
-      e_appeared = true;
-      e = (c == 'i') ? Token::Exactness::inexact 
-        : Token::Exactness::exact;
+    case 'i': case 'I':
+      ++e_appeared;
+      e = Token::Exactness::inexact;
       break;
-    case 'b': case 'o': case 'd': case 'x':
-      if(r_appeared){
-        throw zs_error(printf_string("reader error: duplicated number prefix appeared (%c)\n", c));
-      }
-      r_appeared = true;
-      r = (c == 'b') ? 2
-        : (c == 'o') ? 8
-        : (c == 'x') ? 16
-        : 10;
+    case 'e': case 'E':
+      ++e_appeared;
+      e = Token::Exactness::exact;
+      break;
+    case 'b': case 'B':
+      ++r_appeared;
+      r = 2;
+      break;
+    case 'o': case 'O':
+      ++r_appeared;
+      r = 8;
+      break;
+    case 'd': case 'D':
+      ++r_appeared;
+      r = 10;
+      break;
+    case 'x': case 'X':
+      ++r_appeared;
+      r = 16;
       break;
     default:
       throw zs_error(printf_string("reader error: unknown number prefix '%c' appeared!\n", c));
     }
+    
+    if(e_appeared > 1)
+      throw zs_error(printf_string("reader error: duplicated number prefix appeared (%c)\n", c));
+
+    if(r_appeared > 1)
+      throw zs_error(printf_string("reader error: duplicated number prefix appeared (%c)\n", c));
   }  
   
   return {r, e};
@@ -466,10 +478,13 @@ int zs_stoi(int radix, const string& s, int& ret_i, double& ret_d){
   UNEXP_DEFAULT();
 }
 
-inline
 bool check_decimal_suffix(int c){
   switch(c){
-  case 'e': case 's': case 'f': case 'd': case 'l':
+  case 'e': case 'E':
+  case 's': case 'S':
+  case 'f': case 'F':
+  case 'd': case 'D':
+  case 'l': case 'L':
     return true;
   default:
     return false;
@@ -638,7 +653,7 @@ Token parse_complex(int radix, istream& f){
   // treating +i, -i. (dirty part!)
   if(first_char == '+' || first_char == '-'){
     f.get();
-    if(f.peek() == 'i'){
+    if(f.peek() == 'i' || f.peek() == 'I'){
       f.ignore(1);
       return {Complex(0, (first_char == '+') ? 1 : -1),
           Token::Exactness::inexact};
@@ -659,21 +674,23 @@ Token parse_complex(int radix, istream& f){
   case '+': case '-': {
     const int sign = (c == '+') ? 1 : -1;
 
-    if(f.peek() == 'i'){
+    if(f.peek() == 'i' || f.peek() == 'I'){
       f.ignore(1);
       return {Complex(real.coerce<double>(), sign),
           Token::Exactness::inexact};
     }
     
     auto imag = parse_real_number(radix, f);
-    if(f.get() != 'i'){
+
+    if(f.peek() != 'i' && f.peek() != 'I'){
       throw zs_error("reader error: failed at reading a complex number's imaginary part.\n");
     }
+    f.ignore(1);
 
     return {Complex(real.coerce<double>(), imag.coerce<double>() * sign),
         Token::Exactness::inexact};
   }
-  case 'i':
+  case 'i': case 'I':
     if(first_char == '+' || first_char == '-'){
       return {Complex(0, real.coerce<double>()),
           Token::Exactness::inexact};
@@ -819,15 +836,18 @@ Token tokenize(istream& f){
     switch(auto sharp_c = f.get()){
     case '(':
       return Token{Token::Notation::vector_paren};
-    case 't':
+    case 't': case 'T':
       return Token{true};
-    case 'f':
+    case 'f': case 'F':
       return Token{false};
     case '\\':
       return tokenize_character(f);
-    case 'i': case 'e':
-    case 'b': case 'o':
-    case 'd': case 'x':
+    case 'i': case 'I':
+    case 'b': case 'B':
+    case 'd': case 'D':
+    case 'e': case 'E':
+    case 'o': case 'O':
+    case 'x': case 'X':
       f.unget();
       f.putback('#');
       return tokenize_number(f);
