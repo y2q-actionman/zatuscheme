@@ -26,5 +26,18 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([floor pow sqrt strcasecmp strerror])
 
+## case selection
+AC_ARG_ENABLE([case],
+        [AS_HELP_STRING([--enable-case],
+                [specifies reading case from upper,lower (default is upper)])],
+        [],
+        [enable_case=upper])
+
+AS_IF([test "x$enable_case" = xupper],
+            [AC_DEFINE([USE_CASE_UPPER], [1], [reading case is upper])],
+      [test "x$enable_case" = xlower],
+            [AC_DEFINE([USE_CASE_LOWER], [1], [reading case is lower])],
+      AC_MSG_ERROR([cannot use specified reading case: $enable_case]))
+
 AC_CONFIG_FILES([Makefile src/Makefile test/Makefile])
 AC_OUTPUT
