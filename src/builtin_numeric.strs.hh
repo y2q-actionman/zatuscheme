@@ -1,7 +1,10 @@
 // This file is intended to be included into an array of 'const char*'
 
+"(define (inexact? n)"
+"  (if (number? n) (not (exact? n)) #f))",
+
 "(define (zero? n)"
-"  (if (number? n) (= n 0) #f))"
+"  (if (number? n) (= n 0) #f))",
 
 "(define (positive? n)"
 "  (if (real? n) (> n 0) #f))",

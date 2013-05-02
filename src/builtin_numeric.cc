@@ -281,14 +281,9 @@ Lisp_ptr integerp(ZsArgs args){
 }
 
 Lisp_ptr exactp(ZsArgs args){
-  return Lisp_ptr{args[0].tag() == Ptr_tag::integer};
+  return Lisp_ptr{args[0].tag() == Ptr_tag::integer
+                  || args[0].tag() == Ptr_tag::rational};
 }
-
-Lisp_ptr inexactp(ZsArgs args){
-  return Lisp_ptr{args[0].tag() == Ptr_tag::complex
-                  || args[0].tag() == Ptr_tag::real};
-}
-
 
 Lisp_ptr number_equal(ZsArgs args){
   return number_all_2(begin(args), end(args),

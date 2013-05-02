@@ -20,9 +20,6 @@
 {"exact?", {
     builtin::exactp,
     {1}}},
-{"inexact?", {
-    builtin::inexactp,
-    {1}}},
 
 {"=", {
     builtin::number_equal,
