@@ -1,8 +1,12 @@
 #include "zs.hh"
 #include "test_util.hh"
+#include "config.h"
 
-// TODO: if case-insensitivity is supported, define CASE_INSENSITIVE
-
+#ifndef CASE_INSENSITIVE
+# if defined(USE_CASE_UPPER) || defined(USE_CASE_LOWER)
+#  define CASE_INSENSITIVE
+# endif
+#endif
 
 int main(){
   zs_init();
@@ -17,7 +21,7 @@ int main(){
 
   check_e("(symbol->string 'flying-fish)", "\"flying-fish\"");
 
-#if CASE_INSENSITIVE
+#ifdef CASE_INSENSITIVE
   check_e("(symbol->string 'Martin)", "\"martin\"");
 #else
   check_e("(symbol->string 'Martin)", "\"Martin\"");
@@ -26,7 +30,7 @@ int main(){
   check_e("(symbol->string (string->symbol \"Malvina\"))", "\"Malvina\"");
 
 
-#if CASE_INSENSITIVE
+#ifdef CASE_INSENSITIVE
   check_e("(eq? 'mISSISSIppi 'mississippi)", "#t");
 #else
   check_e("(eq? 'mISSISSIppi 'mISSISSIppi)", "#t");
@@ -34,7 +38,7 @@ int main(){
 
   check_e("(string->symbol \"mISSISSIppi\")", "mISSISSIppi");
 
-#if CASE_INSENSITIVE
+#ifdef CASE_INSENSITIVE
   check_e("(eq? 'bitBlt (string->symbol \"bitBlt\"))", "#f");
 #else
   check_e("(eq? 'bitBlt (string->symbol \"bitBlt\"))", "#t");

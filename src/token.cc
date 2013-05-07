@@ -1,13 +1,23 @@
 #include <istream>
-
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 #include <climits>
 #include <iostream>
+#include <cctype>
+
+#include "config.h"
 
 #include "token.hh"
 #include "zs_error.hh"
+
+#ifdef USE_CASE_UPPER
+# define ZS_CASE(c) toupper(c)
+#elif USE_CASE_LOWER
+# define ZS_CASE(c) tolower(c)
+#else
+# define ZS_CASE(c) c
+#endif
 
 using namespace std;
 
@@ -225,7 +235,7 @@ void skip_intertoken_space(istream& f){
 
 
 Token tokenize_identifier(istream& f, int first_char){
-  string s(1, first_char);
+  string s(1, ZS_CASE(first_char));
 
   // subsequent
   decltype(f.get()) c;
@@ -234,7 +244,7 @@ Token tokenize_identifier(istream& f, int first_char){
         && (isalpha(c) || is_special_initial(c) 
             || isdigit(c) || c == '+' || c == '-'
             || c == '.' || c == '@')){
-    s.push_back(c);
+    s.push_back(ZS_CASE(c));
   }
   f.unget();
 

@@ -29,9 +29,9 @@ AC_CHECK_FUNCS([floor pow sqrt strcasecmp strerror])
 ## case selection
 AC_ARG_ENABLE([case],
         [AS_HELP_STRING([--enable-case],
-                [specifies reading case from upper,lower (default is upper)])],
+                [specifies reading case from upper,lower (default is lower)])],
         [],
-        [enable_case=upper])
+        [enable_case=lower])
 
 AS_IF([test "x$enable_case" = xupper],
             [AC_DEFINE([USE_CASE_UPPER], [1], [reading case is upper])],
