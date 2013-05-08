@@ -7,7 +7,8 @@ AM_DEFAULT_SOURCE_EXT = .cc
 
 test_lib = test_util.o describe.o
 
-LDADD = $(test_lib)\
+LDADD = $(test_lib) \
+	../src/zs.hh \
 	../src/libzs_test.a
 
 check_PROGRAMS = token_test\
@@ -35,7 +36,7 @@ check_PROGRAMS = token_test\
 		extra_test
 
 TESTS = $(check_PROGRAMS)
-TESTS_ENVIRONMENT = $(test_envs)
+AM_TESTS_ENVIRONMENT = $(test_envs)
 
 clean-local:
 	rm -rf $(test_lib)
