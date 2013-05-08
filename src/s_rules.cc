@@ -18,6 +18,39 @@ using namespace std;
 
 namespace {
 
+// hash funcs
+bool eq_id_internal(Lisp_ptr a, Lisp_ptr b){
+  if(a.tag() == Ptr_tag::syntactic_closure
+     && b.tag() == Ptr_tag::syntactic_closure){
+    auto sc_a = a.get<SyntacticClosure*>();
+    auto sc_b = b.get<SyntacticClosure*>();
+    return (sc_a->env() == sc_b->env()) && eq_internal(sc_a->expr(), sc_b->expr());
+  }else{
+    return eq_internal(a, b);
+  }
+}
+
+size_t eq_id_hash(const Lisp_ptr& p){
+  if(p.tag() == Ptr_tag::syntactic_closure){
+    auto sc = p.get<SyntacticClosure*>();
+    return hash<void*>()(sc->env()) ^ eq_hash(sc->expr());
+  }else{
+    return eq_hash(p);
+  }
+}
+
+struct eq_id_obj {
+  bool operator()(const Lisp_ptr& a, const Lisp_ptr& b) const{
+    return eq_id_internal(a, b);
+  }
+};
+
+struct eq_id_hash_obj{
+  size_t operator()(const Lisp_ptr& p) const{
+    return eq_id_hash(p);
+  }
+};
+
 // internal types
 typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> EqHashMap;
 typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;

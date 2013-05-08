@@ -48,16 +48,6 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   }
 }
 
-bool eq_id_internal(Lisp_ptr a, Lisp_ptr b){
-  if(a.tag() == Ptr_tag::syntactic_closure
-     && b.tag() == Ptr_tag::syntactic_closure){
-    auto sc_a = a.get<SyntacticClosure*>();
-    auto sc_b = b.get<SyntacticClosure*>();
-    return (sc_a->env() == sc_b->env()) && eq_internal(sc_a->expr(), sc_b->expr());
-  }else{
-    return eq_internal(a, b);
-  }
-}
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
   
@@ -138,13 +128,4 @@ size_t eq_hash(const Lisp_ptr& p){
   }
 
   return tag_hash ^ val_hash;
-}
-
-size_t eq_id_hash(const Lisp_ptr& p){
-  if(p.tag() == Ptr_tag::syntactic_closure){
-    auto sc = p.get<SyntacticClosure*>();
-    return hash<void*>()(sc->env()) ^ eq_hash(sc->expr());
-  }else{
-    return eq_hash(p);
-  }
 }
