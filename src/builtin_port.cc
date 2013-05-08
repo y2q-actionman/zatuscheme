@@ -24,13 +24,12 @@ Lisp_ptr port_open_file(ZsArgs args){
     throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
   }
 
-  unique_ptr<IOType> p{new F_IOType(str->c_str())};
-  if(!*p){
+  IOType* p = zs_new_with_tag<F_IOType, to_tag<Ptr_tag, IOType*>()>(*str);
+  if(!p || !*p){
     throw zs_error_arg1(nullptr, "failed at opening file");
   }
   
-  zs_m_in(p.get(), to_tag<Ptr_tag, IOType*>());
-  return {p.release()};
+  return {p};
 }  
 
 template<typename IOType, typename F_IOType>
