@@ -3,10 +3,12 @@
 #include <utility>
 #include <cstdlib>
 #include <iostream>
+#include <cctype>
 
 #include "token.hh"
 #include "test_util.hh"
 #include "describe.hh"
+#include "config.h"
 
 #define PRINT_BUFSIZE 100
 
@@ -125,7 +127,18 @@ void check(string&& input, T&& expect,
 
 template<typename T>
 void check_ident(T&& t, const char* expect){
-  check(forward<T>(t), string(expect), Token::Type::identifier);
+  string s;
+  for(auto p = expect; *p; ++p){
+#ifdef USE_CASE_UPPER
+    s.push_back(toupper(*p));
+#elif USE_CASE_LOWER
+    s.push_back(tolower(*p));
+#else
+    s.push_back(*p);
+#endif
+  }
+
+  check(forward<T>(t), s, Token::Type::identifier);
 }
 
 template<typename T>
