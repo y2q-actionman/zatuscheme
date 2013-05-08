@@ -5,14 +5,16 @@
 #error "Please include via parent file"
 #endif
 
+#include <utility>
+
 template<typename T, typename... Args>
-T* zs_new(Args... args){
-  return zs_new_with_tag<T, to_tag<Ptr_tag, T*>()>(args...);
+T* zs_new(Args&&... args){
+  return zs_new_with_tag<T, to_tag<Ptr_tag, T*>()>(std::forward<Args>(args)...);
 }
 
 template<typename T, Ptr_tag tag, typename... Args>
-T* zs_new_with_tag(Args... args){
-  auto p = new T(args...);
+T* zs_new_with_tag(Args&&... args){
+  auto p = new T(std::forward<Args>(args)...);
   return static_cast<T*>(zs_m_in(p, tag));
 }
 

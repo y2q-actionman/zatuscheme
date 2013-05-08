@@ -9,10 +9,10 @@ void zs_m_out(void* p);
 
 // wrappers
 template<typename T, typename... Args>
-T* zs_new(Args...);
+T* zs_new(Args&&...);
 
 template<typename T, Ptr_tag, typename... Args>
-T* zs_new_with_tag(Args...);
+T* zs_new_with_tag(Args&&...);
 
 template<typename T>
 void zs_delete(T*);

@@ -117,23 +117,21 @@ void check(istream& f, const T& expect,
 }
 
 template<typename T>
-void check(string&& input, T&& expect){
-  stringstream ss(input);
-  check(ss, expect);
+void check(string&& input, T&& expect,
+           Token::Type type = to_tag<Token::Type, T>()){
+  stringstream ss{move(input)};
+  check(ss, forward<T>(expect), type);
 }
 
-void check(istream& f, const char* expect, Token::Type t){
-  check(f, std::string(expect), t);
+template<typename T>
+void check_ident(T&& t, const char* expect){
+  check(forward<T>(t), string(expect), Token::Type::identifier);
 }
 
-void check(const string& input, const char* expect, Token::Type t){
-  stringstream ss(input);
-  check(ss, expect, t);
+template<typename T>
+void check_string(T&& t, const char* expect){
+  check(forward<T>(t), string(expect), Token::Type::string);
 }
-
-
-#define check_ident(a, b) check(a, b, Token::Type::identifier)
-#define check_string(a, b) check(a, b, Token::Type::string)
 
 #define N Token::Notation
 

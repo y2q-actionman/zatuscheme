@@ -194,12 +194,12 @@ Lisp_ptr tmp_file(ZsArgs){
     throw zs_error_arg1(nullptr, printf_string("mkstemp(3) error: %s", strerror(eno)));
   }
 
-  InputPort* i_port = zs_new_with_tag<ifstream, Ptr_tag::input_port>(static_cast<const char*>(name));
+  InputPort* i_port = zs_new_with_tag<ifstream, Ptr_tag::input_port>(name);
   if(!i_port || !*i_port){
     throw zs_error_arg1(nullptr, "failed at opening file for input");
   }
   
-  OutputPort* o_port = zs_new_with_tag<ofstream, Ptr_tag::output_port>(static_cast<const char*>(name));
+  OutputPort* o_port = zs_new_with_tag<ofstream, Ptr_tag::output_port>(name);
   if(!o_port || !*o_port){
     throw zs_error_arg1(nullptr, "failed at opening file for output");
   }
