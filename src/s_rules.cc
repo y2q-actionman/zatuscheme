@@ -18,43 +18,10 @@ using namespace std;
 
 namespace {
 
-// hash funcs
-bool eq_id_internal(Lisp_ptr a, Lisp_ptr b){
-  if(a.tag() == Ptr_tag::syntactic_closure
-     && b.tag() == Ptr_tag::syntactic_closure){
-    auto sc_a = a.get<SyntacticClosure*>();
-    auto sc_b = b.get<SyntacticClosure*>();
-    return (sc_a->env() == sc_b->env()) && eq_internal(sc_a->expr(), sc_b->expr());
-  }else{
-    return eq_internal(a, b);
-  }
-}
-
-size_t eq_id_hash(const Lisp_ptr& p){
-  if(p.tag() == Ptr_tag::syntactic_closure){
-    auto sc = p.get<SyntacticClosure*>();
-    return hash<void*>()(sc->env()) ^ eq_hash(sc->expr());
-  }else{
-    return eq_hash(p);
-  }
-}
-
-struct eq_id_obj {
-  bool operator()(const Lisp_ptr& a, const Lisp_ptr& b) const{
-    return eq_id_internal(a, b);
-  }
-};
-
-struct eq_id_hash_obj{
-  size_t operator()(const Lisp_ptr& p) const{
-    return eq_id_hash(p);
-  }
-};
-
 // internal types
 typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> EqHashMap;
 typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;
-typedef std::unordered_set<Lisp_ptr, eq_id_hash_obj, eq_id_obj> ExpandSet;
+typedef std::unordered_map<Lisp_ptr, SyntacticClosure*, eq_hash_obj, eq_obj> ExpandMap;
 
 // error classes
 struct try_match_failed{};
@@ -383,11 +350,11 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
   return ret;
 }
 
-Lisp_ptr expand(ExpandSet&, const EqHashMap&, 
+Lisp_ptr expand(ExpandMap&, const EqHashMap&, 
                 const SyntaxRules&, Lisp_ptr);
 
 template<typename Iter, typename Fun>
-Iter expand_seq(ExpandSet& expand_ctx,
+Iter expand_seq(ExpandMap& expand_ctx,
                 const EqHashMap& match_obj, 
                 const SyntaxRules& sr,
                 Iter i_begin,
@@ -422,7 +389,7 @@ Iter expand_seq(ExpandSet& expand_ctx,
   return i;
 }
 
-Lisp_ptr expand(ExpandSet& expand_ctx,
+Lisp_ptr expand(ExpandMap& expand_ctx,
                 const EqHashMap& match_obj, 
                 const SyntaxRules& sr,
                 Lisp_ptr tmpl){
@@ -442,14 +409,13 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
         return tmpl;
       }
 
-      auto new_sc = zs_new<SyntacticClosure>(sr.env(), Cons::NIL, tmpl);
-      auto iter = expand_ctx.find(new_sc);
-      if(iter == expand_ctx.end()){
-        expand_ctx.insert(new_sc);
-        return new_sc;
+      auto iter = expand_ctx.find(tmpl);
+      if(iter != expand_ctx.end()){
+        return iter->second;
       }else{
-        zs_delete(new_sc);
-        return *iter;
+        auto new_sc = zs_new<SyntacticClosure>(sr.env(), Cons::NIL, tmpl);
+        expand_ctx.insert({tmpl, new_sc});
+        return new_sc;
       }
     }else if(tmpl.tag() == Ptr_tag::syntactic_closure){
       return tmpl;
@@ -516,7 +482,7 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     try{
       auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form);
 
-      ExpandSet expand_ctx;
+      ExpandMap expand_ctx;
       return expand(expand_ctx, match_ret, *this, tmpl);
     }catch(const try_match_failed& e){
       continue;
