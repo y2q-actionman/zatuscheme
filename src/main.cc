@@ -1,4 +1,5 @@
 #include "zs.hh"
+#include <sstream>
 
 using namespace std;
 
@@ -13,7 +14,8 @@ int main(int argc, const char* argz[]){
   }    
 
   for(int i = 1; i < argc; ++i){
-    load_internal(argz[i]);
+    istringstream iss{argz[i]};
+    load_internal(iss);
   }
 
   return 0;

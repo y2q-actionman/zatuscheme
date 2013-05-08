@@ -1,8 +1,10 @@
 #include <sstream>
 #include <istream>
+#include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <cstring>
+#include <string>
 
 #include "builtin.hh"
 #include "zs_error.hh"
@@ -50,8 +52,7 @@ Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* name){
 
 } //namespace
 
-void load_internal(const string& str){
-  istringstream ss{str};
+void load_internal(std::istream& ss){
   while(ss){
     auto form = read(ss);
     if(!form){
@@ -104,7 +105,8 @@ Lisp_ptr load(ZsArgs args){
     throw builtin_type_check_failed("load", Ptr_tag::string, args[0]);
   }
 
-  load_internal(*str);
+  ifstream ifs{*str};
+  load_internal(ifs);
   return Lisp_ptr{true};
 }
 
@@ -154,7 +156,8 @@ void install_builtin(){
     vm.frame()->local_set(intern(vm.symtable(), bf.name), {&bf.func});
   };    
   static constexpr auto install_builtin_string = [](const char* s){
-    load_internal(s);
+    istringstream iss{s};
+    load_internal(iss);
   };    
   static constexpr auto install_builtin_symbol = [](const char* name, Lisp_ptr value){
     vm.frame()->local_set(intern(vm.symtable(), name), value);
