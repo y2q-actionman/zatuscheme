@@ -12,7 +12,3 @@ test_flags = -D_FORTIFY_SOURCE=2 -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\
 		-D_GLIBCXX_CONCEPT_CHECKS
 #	-g
 #	-Wconversion 
-
-test_envs = export MALLOC_CHECK_=2; \
-		ulimit -t 30;
-

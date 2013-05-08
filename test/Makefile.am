@@ -36,7 +36,9 @@ check_PROGRAMS = token_test\
 		extra_test
 
 TESTS = $(check_PROGRAMS)
-AM_TESTS_ENVIRONMENT = $(test_envs)
+TESTS_ENVIRONMENT = \
+	export MALLOC_CHECK_=2; \
+	ulimit -t 30; 
 
 clean-local:
 	rm -rf $(test_lib)
