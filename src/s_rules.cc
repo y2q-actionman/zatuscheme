@@ -1,4 +1,3 @@
-#include <memory>
 #include <algorithm>
 #include <iterator>
 #include <unordered_set>
@@ -282,7 +281,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         // accumulating...
         EqHashMap acc_map;
         ensure_binding(acc_map, sr, ignore_ident, *p_i,
-                       [](){ return new Vector(); });
+                       [](){ return zs_new<Vector>(); });
 
         for(; f_i != f_e; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
@@ -410,13 +409,13 @@ Lisp_ptr expand(ExpandSet& expand_ctx,
         return tmpl;
       }
 
-      unique_ptr<SyntacticClosure> new_sc(new SyntacticClosure(sr.env(), Cons::NIL, tmpl));
-      auto iter = expand_ctx.find(new_sc.get());
+      auto new_sc = zs_new<SyntacticClosure>(sr.env(), Cons::NIL, tmpl);
+      auto iter = expand_ctx.find(new_sc);
       if(iter == expand_ctx.end()){
-        expand_ctx.insert(new_sc.get());
-        zs_m_in(new_sc.get(), Ptr_tag::syntactic_closure);
-        return new_sc.release();
+        expand_ctx.insert(new_sc);
+        return new_sc;
       }else{
+        zs_delete(new_sc);
         return *iter;
       }
     }else if(tmpl.tag() == Ptr_tag::syntactic_closure){

@@ -1,6 +1,5 @@
 #include <utility>
 #include <istream>
-#include <memory>
 
 #include "reader.hh"
 #include "vm.hh"
@@ -64,7 +63,7 @@ Lisp_ptr read_list(istream& f){
 }
 
 Lisp_ptr read_vector(istream& f){
-  unique_ptr<Vector> v{new Vector()};
+  auto v = zs_new<Vector>();
 
   while(1){
     auto t = tokenize(f);
@@ -72,8 +71,7 @@ Lisp_ptr read_vector(istream& f){
       throw zs_error("reader error: reached EOF in a vector.\n");
     }else if((t.type() == Token::Type::notation)
              && (t.get<Token::Notation>() == Token::Notation::r_paren)){
-      zs_m_in(v.get(), Ptr_tag::vector);
-      return {v.release()};
+      return {v};
     }else{
       v->emplace_back(read_la(f, move(t)));
     }
