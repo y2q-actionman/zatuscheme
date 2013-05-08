@@ -194,13 +194,13 @@ Lisp_ptr tmp_file(ZsArgs){
     throw zs_error_arg1(nullptr, printf_string("mkstemp(3) error: %s", strerror(eno)));
   }
 
-  unique_ptr<InputPort> i_port{new ifstream(static_cast<const char*>(name))};
-  if(!i_port){
+  InputPort* i_port = zs_new_with_tag<ifstream, Ptr_tag::input_port>(static_cast<const char*>(name));
+  if(!i_port || !*i_port){
     throw zs_error_arg1(nullptr, "failed at opening file for input");
   }
   
-  unique_ptr<OutputPort> o_port{new ofstream(static_cast<const char*>(name))};
-  if(!o_port){
+  OutputPort* o_port = zs_new_with_tag<ofstream, Ptr_tag::output_port>(static_cast<const char*>(name));
+  if(!o_port || !*o_port){
     throw zs_error_arg1(nullptr, "failed at opening file for output");
   }
   
@@ -214,10 +214,7 @@ Lisp_ptr tmp_file(ZsArgs){
     throw zs_error_arg1(nullptr, printf_string("unlink(2) error: %s", strerror(eno)));
   }
 
-  zs_m_in(i_port.get(), Ptr_tag::input_port);
-  zs_m_in(o_port.get(), Ptr_tag::output_port);
-
-  return make_cons_list({i_port.release(), o_port.release()});
+  return make_cons_list({i_port, o_port});
 #else
   throw zs_error_arg1(nullptr, "tmp-file is not supported");
 #endif
