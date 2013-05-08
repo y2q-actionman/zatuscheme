@@ -33,12 +33,16 @@ check_PROGRAMS = token_test\
 		builtin_vector_test\
 		delay_test\
 		macro_test\
-		extra_test
+		extra_test\
+		zs_test_main
 
-TESTS = $(check_PROGRAMS)
+
+TESTS = $(check_PROGRAMS) \
+	r5rs_pitfall.scm
+
 TESTS_ENVIRONMENT = \
 	export MALLOC_CHECK_=2; \
 	ulimit -t 30; 
 
-clean-local:
-	rm -rf $(test_lib)
+TEST_EXTENSIONS = .scm
+SCM_LOG_COMPILER = ./zs_test_main

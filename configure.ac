@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.68])
 AC_INIT([zatuscheme], [alpha.1], [http://github.com/y2q-actionman/zatuscheme/issues])
-AM_INIT_AUTOMAKE([foreign color-tests])
+AM_INIT_AUTOMAKE([foreign parallel-tests])
 AC_CONFIG_SRCDIR([src/token.cc])
 AC_CONFIG_HEADERS([config.h])
 
