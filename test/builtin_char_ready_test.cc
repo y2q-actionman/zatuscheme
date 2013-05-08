@@ -1,8 +1,6 @@
 #include "zs.hh"
 #include "test_util.hh"
 
-#define TEST_FILE_NAME "\"/tmp/zs_test.txt\""
-
 int main(){
   zs_init();
 
@@ -11,22 +9,24 @@ int main(){
   check_e("(char-ready?)", "#f");
 
   // regular file. 
-  eval_text("(define tmpf (open-output-file "TEST_FILE_NAME"))"); 
-  eval_text("(write-char #\\a tmpf)");
-  eval_text("(close-output-port tmpf)");
+  eval_text("(define tmpf-in #f)");
+  eval_text("(define tmpf-out #f)");
+  eval_text("(let ((ports (tmp-file))) (set! tmpf-in (car ports)) (set! tmpf-out (cadr ports)))");
 
-  eval_text("(define tmpf (open-input-file "TEST_FILE_NAME"))"); 
-  check_e("(char-ready? tmpf)", "#t");
-  check_e("(read-char tmpf)", "#\\a");
+  eval_text("(write-char #\\a tmpf-out)");
+  eval_text("(close-output-port tmpf-out)");
+
+  check_e("(char-ready? tmpf-in)", "#t");
+  check_e("(read-char tmpf-in)", "#\\a");
 
   // edge case. fd points the end-of-file, just.
-  // check_e("(char-ready? tmpf)", "#t");
+  // check_e("(char-ready? tmpf-in)", "#t");
 
-  check_e("(eof-object? (read-char tmpf))", "#t");
-  check_e("(char-ready? tmpf)", "#t");
-  check_e("(eof-object? (read-char tmpf))", "#t");
-  check_e("(char-ready? tmpf)", "#t");
-  eval_text("(close-input-port tmpf)");
+  check_e("(eof-object? (read-char tmpf-in))", "#t");
+  check_e("(char-ready? tmpf-in)", "#t");
+  check_e("(eof-object? (read-char tmpf-in))", "#t");
+  check_e("(char-ready? tmpf-in)", "#t");
+  eval_text("(close-input-port tmpf-in)");
 
   return RESULT;
 }

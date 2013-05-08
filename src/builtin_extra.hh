@@ -23,6 +23,8 @@ Lisp_ptr transcript_on(ZsArgs);
 Lisp_ptr transcript_off(ZsArgs);
 
 Lisp_ptr hard_repl(ZsArgs);
+
+Lisp_ptr tmp_file(ZsArgs);
 }
 
 #endif // BUILTIN_EXTRA_HH

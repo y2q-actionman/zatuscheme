@@ -36,3 +36,6 @@
 {"hard-repl", {
     builtin::hard_repl,
     {0}}},
+{"tmp-file", {
+    builtin::tmp_file,
+    {0}}},

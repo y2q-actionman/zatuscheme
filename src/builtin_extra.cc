@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include "builtin_extra.hh"
 #include "lisp_ptr.hh"
@@ -15,6 +16,12 @@
 #include "reader.hh"
 #include "printer.hh"
 #include "zs_memory.hh"
+
+#ifdef _POSIX_C_SOURCE
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#endif
 
 using namespace std;
 using namespace proc_flag;
@@ -169,6 +176,51 @@ Lisp_ptr hard_repl(ZsArgs args){
   }
 
   return {};
+}
+
+Lisp_ptr tmp_file(ZsArgs){
+#ifdef _POSIX_C_SOURCE
+  char name[] = 
+#ifdef P_tmpdir
+    P_tmpdir
+#else
+    "/tmp"
+#endif
+    "/zs_temp_file_XXXXXX";
+
+  auto fd = mkstemp(name);
+  if(fd == -1){
+    auto eno = errno;
+    throw zs_error_arg1(nullptr, printf_string("mkstemp(3) error: %s", strerror(eno)));
+  }
+
+  unique_ptr<InputPort> i_port{new ifstream(static_cast<const char*>(name))};
+  if(!i_port){
+    throw zs_error_arg1(nullptr, "failed at opening file for input");
+  }
+  
+  unique_ptr<OutputPort> o_port{new ofstream(static_cast<const char*>(name))};
+  if(!o_port){
+    throw zs_error_arg1(nullptr, "failed at opening file for output");
+  }
+  
+  if(close(fd) == -1){
+    auto eno = errno;
+    throw zs_error_arg1(nullptr, printf_string("close(2) error: %s", strerror(eno)));
+  }
+
+  if(unlink(name) == -1){
+    auto eno = errno;
+    throw zs_error_arg1(nullptr, printf_string("unlink(2) error: %s", strerror(eno)));
+  }
+
+  zs_m_in(i_port.get(), Ptr_tag::input_port);
+  zs_m_in(o_port.get(), Ptr_tag::output_port);
+
+  return make_cons_list({i_port.release(), o_port.release()});
+#else
+  throw zs_error_arg1(nullptr, "tmp-file is not supported");
+#endif
 }
 
 } // namespace builtin
