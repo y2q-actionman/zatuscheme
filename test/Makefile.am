@@ -19,7 +19,6 @@ check_PROGRAMS = token_test\
 		eval_test\
 		enclose_test\
 		quasiquote_test\
-		builtin_boolean_test\
 		builtin_char_test\
 		builtin_cons_test\
 		builtin_control_test\
@@ -39,7 +38,7 @@ check_PROGRAMS = token_test\
 
 TESTS = $(check_PROGRAMS) \
 	r5rs_pitfall.scm \
-	builtin_boolean_test2.scm
+	builtin_boolean_test.scm
 
 TESTS_ENVIRONMENT = \
 	export MALLOC_CHECK_=2; \
