@@ -18,5 +18,5 @@ int main(int argc, const char* argz[]){
     load_internal(iss);
   }
 
-  return 0;
+  return zs_exit_status();
 }

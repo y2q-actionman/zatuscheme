@@ -1,5 +1,6 @@
 #include <exception>
 #include <iostream>
+#include <cstdlib>
 
 #include "zs.hh"
 
@@ -23,4 +24,15 @@ void zs_init(){
   std::set_terminate(term_handle);
   vm.start_up();
   install_builtin();
+}
+
+int zs_exit_status(){
+  auto val = vm.return_value_1();
+  if(val.tag() == Ptr_tag::integer){
+    return val.get<int>();
+  }else if(val.tag() == Ptr_tag::boolean){
+    return (val.get<bool>()) ? EXIT_SUCCESS : EXIT_FAILURE;
+  }else{
+    return (val) ? EXIT_SUCCESS : EXIT_FAILURE;
+  }
 }

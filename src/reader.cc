@@ -171,3 +171,8 @@ Lisp_ptr read_la(istream& f, Token&& tok){
 Lisp_ptr read(istream& f){
   return read_la(f, tokenize(f));
 }
+
+bool eof_object_p(Lisp_ptr p){
+  return (p.tag() == Ptr_tag::character)
+    && (p.get<char>() == EOF);
+}

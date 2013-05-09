@@ -26,7 +26,7 @@
     {1}}},
 {"exit", {
     builtin::exit,
-    {0}}},
+    {0, 1}}},
 {"transcript-on", {
     builtin::transcript_on,
     {0}}},

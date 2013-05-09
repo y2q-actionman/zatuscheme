@@ -24,5 +24,6 @@
 #include "zs_memory.hh"
 
 void zs_init();
+int zs_exit_status();
 
 #endif //ZS_HH

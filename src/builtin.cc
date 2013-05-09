@@ -62,6 +62,8 @@ void load_internal(std::istream& ss){
       break;
     }
 
+    if(eof_object_p(form)) break;
+
     vm.code.push_back(form);
     eval();
     if(!vm.return_value_1()){

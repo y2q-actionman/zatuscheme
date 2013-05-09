@@ -172,11 +172,7 @@ Lisp_ptr port_peek_char(ZsArgs args){
 }
 
 Lisp_ptr port_eof_p(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::character){
-    return Lisp_ptr{false};
-  }
-
-  return Lisp_ptr{args[0].get<char>() == EOF};
+  return Lisp_ptr{eof_object_p(args[0])};
 }  
 
 
