@@ -22,7 +22,6 @@ check_PROGRAMS = token_test\
 		builtin_control_test\
 		builtin_numeric_test\
 		builtin_char_ready_test\
-		builtin_symbol_test\
 		builtin_syntax_test\
 		builtin_vector_test\
 		delay_test\
@@ -38,7 +37,8 @@ TESTS = $(check_PROGRAMS) \
 	builtin_cons_test.scm \
 	builtin_equal_test.scm \
 	builtin_port_test.scm \
-	builtin_string_test.scm
+	builtin_string_test.scm \
+	builtin_symbol_test.scm
 
 TESTS_ENVIRONMENT = \
 	export MALLOC_CHECK_=2; \
