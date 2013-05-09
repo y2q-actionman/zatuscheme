@@ -17,7 +17,6 @@ check_PROGRAMS = token_test\
 		function_arg_test\
 		reader_test\
 		eval_test\
-		enclose_test\
 		quasiquote_test\
 		builtin_control_test\
 		builtin_numeric_test\
@@ -30,7 +29,7 @@ check_PROGRAMS = token_test\
 
 
 TESTS = $(check_PROGRAMS) \
-	r5rs_pitfall.scm \
+	enclose_test.scm \
 	builtin_boolean_test.scm \
 	builtin_char_test.scm \
 	builtin_cons_test.scm \
@@ -38,7 +37,8 @@ TESTS = $(check_PROGRAMS) \
 	builtin_port_test.scm \
 	builtin_string_test.scm \
 	builtin_symbol_test.scm \
-	builtin_vector_test.scm
+	builtin_vector_test.scm \
+	r5rs_pitfall.scm
 
 TESTS_ENVIRONMENT = \
 	export MALLOC_CHECK_=2; \
