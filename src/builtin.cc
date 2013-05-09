@@ -2,7 +2,6 @@
 #include <istream>
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -147,14 +146,14 @@ static const char* builtin_extra_strs[] = {
 
 
 void install_builtin(){
-  static constexpr auto install_builtin_native = [](const BuiltinNProc& bf){
+  static constexpr auto install_native = [](const BuiltinNProc& bf){
     vm.frame()->local_set(intern(*vm.symtable, bf.name), {&bf.func});
   };    
-  static constexpr auto install_builtin_string = [](const char* s){
+  static constexpr auto install_string = [](const char* s){
     istringstream iss{s};
     load_internal(iss);
   };    
-  static constexpr auto install_builtin_symbol = [](const char* name, Lisp_ptr value){
+  static constexpr auto install_symbol = [](const char* name, Lisp_ptr value){
     vm.frame()->local_set(intern(*vm.symtable, name), value);
   };
 
@@ -166,34 +165,28 @@ void install_builtin(){
   assert(vm.code.empty() && vm.stack.empty());
   assert(!vm.frame());
   vm.set_frame(zs_new<Env>(nullptr));
-  for_each(std::begin(builtin_syntax_funcs), std::end(builtin_syntax_funcs),
-           install_builtin_native);
-  for_each(std::begin(builtin_syntax_strs), std::end(builtin_syntax_strs),
-           install_builtin_string);
+  for(auto& i : builtin_syntax_funcs) install_native(i);
+  for(auto i : builtin_syntax_strs) install_string(i);
   eval();
   auto null_env = vm.frame();
 
   // r5rs-environment
   assert(vm.code.empty() && vm.stack.empty());
   vm.set_frame(vm.frame()->push());
-  for_each(std::begin(builtin_funcs), std::end(builtin_funcs),
-           install_builtin_native);
-  for_each(std::begin(builtin_strs), std::end(builtin_strs),
-           install_builtin_string);
-  install_builtin_symbol(CURRENT_INPUT_PORT_SYMNAME, &std::cin);
-  install_builtin_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
-  install_builtin_symbol(null_env_symname, null_env);
-  install_builtin_symbol(r5rs_env_symname, vm.frame());
+  for(auto& i : builtin_funcs) install_native(i);
+  for(auto i : builtin_strs) install_string(i);
+  install_symbol(CURRENT_INPUT_PORT_SYMNAME, &std::cin);
+  install_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
+  install_symbol(null_env_symname, null_env);
+  install_symbol(r5rs_env_symname, vm.frame());
   eval();
 
   // interaction-environment
   assert(vm.code.empty() && vm.stack.empty());
   vm.set_frame(vm.frame()->push());
-  for_each(std::begin(builtin_extra_funcs), std::end(builtin_extra_funcs),
-           install_builtin_native);
-  for_each(std::begin(builtin_extra_strs), std::end(builtin_extra_strs),
-           install_builtin_string);
-  install_builtin_symbol(interaction_env_symname, vm.frame());
+  for(auto& i : builtin_extra_funcs) install_native(i);
+  for(auto i : builtin_extra_strs) install_string(i);
+  install_symbol(interaction_env_symname, vm.frame());
   eval();
 }
 
