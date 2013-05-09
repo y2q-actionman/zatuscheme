@@ -197,34 +197,30 @@ void install_builtin(){
   eval();
 }
 
+
+template<typename Fun>
+static
+const BuiltinNProc* find_builtin_nproc_internal(Fun fun){
+  for(auto& i : builtin_syntax_funcs) if(fun(i)) return &i;
+  for(auto& i : builtin_funcs)        if(fun(i)) return &i;
+  for(auto& i : builtin_extra_funcs)  if(fun(i)) return &i;
+  return nullptr;
+}
+
 const NProcedure* find_builtin_nproc(const char* name){
-  const auto find_func
-    = [name](const BuiltinNProc& bf){ return strcmp(name, bf.name) == 0; };
-
-  auto i = find_if(begin(builtin_syntax_funcs), end(builtin_syntax_funcs), find_func);
-  if(i != end(builtin_syntax_funcs)) return &(i->func);
-
-  i = find_if(begin(builtin_funcs), end(builtin_funcs), find_func);
-  if(i != end(builtin_funcs)) return &(i->func);
-
-  i = find_if(begin(builtin_extra_funcs), end(builtin_extra_funcs), find_func);
-  if(i != end(builtin_extra_funcs)) return &(i->func);
-
-  throw zs_error(printf_string("internal error: native function '%s' is not registered!", name));
+  if(auto p = find_builtin_nproc_internal
+     ([=](const BuiltinNProc& bf){ return strcmp(name, bf.name) == 0; })){
+    return &(p->func);
+  }else{
+    throw zs_error(printf_string("internal error: native function '%s' is not registered!", name));
+  }
 }
 
 const char* find_builtin_nproc_name(const NProcedure* nproc){
-  const auto find_func
-    = [nproc](const BuiltinNProc& bf){ return nproc == &bf.func; };
-
-  auto i = find_if(begin(builtin_syntax_funcs), end(builtin_syntax_funcs), find_func);
-  if(i != end(builtin_syntax_funcs)) return i->name;
-
-  i = find_if(begin(builtin_funcs), end(builtin_funcs), find_func);
-  if(i != end(builtin_funcs)) return i->name;
-
-  i = find_if(begin(builtin_extra_funcs), end(builtin_extra_funcs), find_func);
-  if(i != end(builtin_extra_funcs)) return i->name;
-
-  return "(unknown native procedure)";
+  if(auto p = find_builtin_nproc_internal
+     ([=](const BuiltinNProc& bf){ return nproc == &bf.func; })){
+    return p->name;
+  }else{
+    return "(unknown native procedure)";
+  }
 }
