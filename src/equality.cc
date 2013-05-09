@@ -74,7 +74,8 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
       if(!equal_internal(*i_a, *i_b)) return false;
     }
 
-    return (nullp(i_a.base()) && nullp(i_b.base()));
+    return (nullp(i_a.base()) && nullp(i_b.base()))
+      || equal_internal(i_a.base(), i_b.base());
   }else if(a.tag() == Ptr_tag::vector && b.tag() == Ptr_tag::vector){
     auto v1 = a.get<Vector*>(), v2 = b.get<Vector*>();
     return std::equal(v1->begin(), v1->end(), v2->begin(), equal_internal);
