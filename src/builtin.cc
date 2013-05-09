@@ -39,17 +39,17 @@ static const char null_env_symname[] = "null-env-value";
 static const char r5rs_env_symname[] = "r5rs-env-value";
 static const char interaction_env_symname[] = "interaction-env-value";
 
-Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* name){
+Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* envname){
   if(arg1.tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed(name, Ptr_tag::integer, arg1);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::integer, arg1);
   }
 
   auto ver = arg1.get<int>();
   if(ver != 5){
-    throw zs_error_arg1(name, "passed number is not 5", {arg1});
+    throw zs_error_arg1(nullptr, "passed number is not 5", {arg1});
   }
 
-  return vm.frame()->find(intern(*vm.symtable, name));
+  return vm.frame()->find(intern(*vm.symtable, envname));
 }
 
 } //namespace
@@ -73,7 +73,7 @@ namespace builtin {
 Lisp_ptr eval(ZsArgs args){
   auto env = args[1].get<Env*>();
   if(!env){
-    throw builtin_type_check_failed("eval", Ptr_tag::env, args[1]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[1]);
   }
 
   auto oldenv = vm.frame();
@@ -97,7 +97,7 @@ Lisp_ptr env_interactive(ZsArgs){
 Lisp_ptr load(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed("load", Ptr_tag::string, args[0]);
+    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
   }
 
   ifstream ifs{*str};
