@@ -38,7 +38,8 @@ check_PROGRAMS = token_test\
 
 
 TESTS = $(check_PROGRAMS) \
-	r5rs_pitfall.scm
+	r5rs_pitfall.scm \
+	builtin_boolean_test2.scm
 
 TESTS_ENVIRONMENT = \
 	export MALLOC_CHECK_=2; \
