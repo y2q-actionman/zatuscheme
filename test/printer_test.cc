@@ -18,8 +18,8 @@ int main(){
   check_p(Lisp_ptr{'\\'}, "#\\\\");
 
   // symbol
-  check_p(intern(vm.symtable(), "hoge"), "hoge");
-  check_p(intern(vm.symtable(), "a b c "), "a b c ");
+  check_p(intern(*vm.symtable, "hoge"), "hoge");
+  check_p(intern(*vm.symtable, "a b c "), "a b c ");
 
   // function (should be added in future)
   check_p_success(static_cast<IProcedure*>(nullptr));

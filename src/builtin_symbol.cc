@@ -25,7 +25,7 @@ Lisp_ptr symbol_from_string(ZsArgs args){
     throw builtin_type_check_failed(nullptr, Ptr_tag::symbol, {args[0]});
   }
 
-  return {intern(vm.symtable(), *str)};
+  return {intern(*vm.symtable, *str)};
 }
 
 } // namespace builtin

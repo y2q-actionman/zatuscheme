@@ -27,12 +27,8 @@ public:
   VM& operator=(const VM&);
   VM& operator=(VM&&) = delete;
 
-  void start_up();
-
   void set_frame(Env* e){ frame_ = e; }
   Env* frame() const { return frame_; }
-
-  SymTable& symtable(){ return *symtable_; }
 
   Lisp_ptr return_value_1()
   { return (return_value.empty()) ? Lisp_ptr{} : return_value[0]; }
@@ -45,10 +41,10 @@ public:
   std::vector<Lisp_ptr> return_value;
 
   std::vector<winding> extent;
+  std::shared_ptr<SymTable> symtable;
 
 private:
   Env* frame_;
-  std::shared_ptr<SymTable> symtable_;
 };
 
 extern VM vm;

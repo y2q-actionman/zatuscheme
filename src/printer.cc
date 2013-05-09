@@ -156,7 +156,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
 
   case Ptr_tag::symbol: {
     auto sym = p.get<Symbol*>();
-    if(vm.symtable().find(sym->name()) != vm.symtable().end()){
+    if(vm.symtable->find(sym->name()) != vm.symtable->end()){
       f << sym->name();
     }else{
       f << "#<uninterned '" << sym->name() << "' " << c_cast<void*>(sym) << ">";

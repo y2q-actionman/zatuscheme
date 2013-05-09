@@ -49,7 +49,7 @@ Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* name){
     throw zs_error_arg1(name, "passed number is not 5", {arg1});
   }
 
-  return vm.frame()->find(intern(vm.symtable(), name));
+  return vm.frame()->find(intern(*vm.symtable, name));
 }
 
 } //namespace
@@ -91,7 +91,7 @@ Lisp_ptr env_null(ZsArgs args){
 }
 
 Lisp_ptr env_interactive(ZsArgs){
-  return vm.frame()->find(intern(vm.symtable(), interaction_env_symname));
+  return vm.frame()->find(intern(*vm.symtable, interaction_env_symname));
 }
 
 Lisp_ptr load(ZsArgs args){
@@ -148,15 +148,19 @@ static const char* builtin_extra_strs[] = {
 
 void install_builtin(){
   static constexpr auto install_builtin_native = [](const BuiltinNProc& bf){
-    vm.frame()->local_set(intern(vm.symtable(), bf.name), {&bf.func});
+    vm.frame()->local_set(intern(*vm.symtable, bf.name), {&bf.func});
   };    
   static constexpr auto install_builtin_string = [](const char* s){
     istringstream iss{s};
     load_internal(iss);
   };    
   static constexpr auto install_builtin_symbol = [](const char* name, Lisp_ptr value){
-    vm.frame()->local_set(intern(vm.symtable(), name), value);
-  };    
+    vm.frame()->local_set(intern(*vm.symtable, name), value);
+  };
+
+  // symtable
+  assert(!vm.symtable);
+  vm.symtable.reset(new SymTable());
 
   // null-environment
   assert(vm.code.empty() && vm.stack.empty());

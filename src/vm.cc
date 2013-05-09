@@ -12,14 +12,14 @@ VM vm;
 VM::VM() : code(), stack(),
            return_value(1, {}),
            extent(),
-           frame_(),
-           symtable_(){}
+           symtable(),
+           frame_(){}
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           return_value(other.return_value),
                           extent(other.extent),
-                          frame_(other.frame_),
-                          symtable_(other.symtable_){}
+                          symtable(other.symtable),
+                          frame_(other.frame_){}
 
 VM::~VM(){}
 
@@ -28,16 +28,10 @@ VM& VM::operator=(const VM& other){
   stack = other.stack;
   return_value = other.return_value;
   extent = other.extent,
+  symtable = other.symtable;
 
   frame_ = other.frame_;
-  
-  symtable_ = other.symtable_;
-
   return *this;
-}
-
-void VM::start_up(){
-  symtable_.reset(new SymTable());
 }
 
 std::ostream& operator<<(std::ostream& f, const VM& v){

@@ -81,7 +81,7 @@ Lisp_ptr read_vector(istream& f){
 }
 
 Lisp_ptr read_abbrev(const char* name, istream& f){
-  return make_cons_list({intern(vm.symtable(), name), read(f)});
+  return make_cons_list({intern(*vm.symtable, name), read(f)});
 }
 
 Lisp_ptr read_la(istream& f, Token&& tok){
@@ -109,7 +109,7 @@ Lisp_ptr read_la(istream& f, Token&& tok){
     return {zs_new<String>(tok.move<string>())};
 
   case Token::Type::identifier:
-    return {intern(vm.symtable(), tok.move<string>())};
+    return {intern(*vm.symtable, tok.move<string>())};
 
     // compound datum
   case Token::Type::notation:
