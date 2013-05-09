@@ -38,7 +38,6 @@ VM& VM::operator=(const VM& other){
 
 void VM::start_up(){
   symtable_.reset(new SymTable());
-  frame_ = zs_new<Env>(nullptr);
 }
 
 std::ostream& operator<<(std::ostream& f, const VM& v){

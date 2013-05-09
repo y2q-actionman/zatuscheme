@@ -17,6 +17,7 @@ int main(int argc, const char* argz[]){
     istringstream iss{argz[i]};
     load_internal(iss);
   }
+  eval();
 
   return zs_exit_status();
 }

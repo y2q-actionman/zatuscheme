@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstring>
 #include <string>
+#include <vector>
 
 #include "builtin.hh"
 #include "zs_error.hh"
@@ -14,6 +15,7 @@
 #include "reader.hh"
 #include "printer.hh"
 #include "vm.hh"
+#include "zs_memory.hh"
 
 #include "builtin_boolean.hh"
 #include "builtin_char.hh"
@@ -53,26 +55,17 @@ Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* name){
 } //namespace
 
 void load_internal(std::istream& ss){
+  vector<Lisp_ptr> tmpv;
+
   while(ss){
     auto form = read(ss);
-    if(!form){
-      if(!ss){
-        // cerr << "load error: failed at reading a form. abandoned.\n";
-      }
+    if(!form || eof_object_p(form)){
       break;
     }
-
-    if(eof_object_p(form)) break;
-
-    vm.code.push_back(form);
-    eval();
-    if(!vm.return_value_1()){
-      cerr << "load error: failed at evaluating a form. skipped.\n";
-      cerr << "form: \n";
-      print(cerr, form);
-      continue;
-    }
+    tmpv.push_back(form);
   }
+
+  vm.code.insert(vm.code.end(), tmpv.rbegin(), tmpv.rend());
 }
 
 namespace builtin {
@@ -166,13 +159,18 @@ void install_builtin(){
   };    
 
   // null-environment
+  assert(vm.code.empty() && vm.stack.empty());
+  assert(!vm.frame());
+  vm.set_frame(zs_new<Env>(nullptr));
   for_each(std::begin(builtin_syntax_funcs), std::end(builtin_syntax_funcs),
            install_builtin_native);
   for_each(std::begin(builtin_syntax_strs), std::end(builtin_syntax_strs),
            install_builtin_string);
+  eval();
   auto null_env = vm.frame();
 
   // r5rs-environment
+  assert(vm.code.empty() && vm.stack.empty());
   vm.set_frame(vm.frame()->push());
   for_each(std::begin(builtin_funcs), std::end(builtin_funcs),
            install_builtin_native);
@@ -182,14 +180,17 @@ void install_builtin(){
   install_builtin_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
   install_builtin_symbol(null_env_symname, null_env);
   install_builtin_symbol(r5rs_env_symname, vm.frame());
+  eval();
 
   // interaction-environment
+  assert(vm.code.empty() && vm.stack.empty());
   vm.set_frame(vm.frame()->push());
   for_each(std::begin(builtin_extra_funcs), std::end(builtin_extra_funcs),
            install_builtin_native);
   for_each(std::begin(builtin_extra_strs), std::end(builtin_extra_strs),
            install_builtin_string);
   install_builtin_symbol(interaction_env_symname, vm.frame());
+  eval();
 }
 
 const NProcedure* find_builtin_nproc(const char* name){

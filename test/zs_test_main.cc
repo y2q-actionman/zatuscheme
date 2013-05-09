@@ -12,5 +12,6 @@ int main(int argc, const char* argz[]){
 
   ifstream ifs{argz[1]};
   load_internal(ifs);
+  eval();
   return zs_exit_status();
 }
