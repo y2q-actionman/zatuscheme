@@ -18,7 +18,6 @@ check_PROGRAMS = token_test\
 		reader_test\
 		eval_test\
 		builtin_numeric_test\
-		builtin_char_ready_test\
 		macro_test\
 		zs_test_main
 
@@ -28,6 +27,7 @@ TESTS = $(check_PROGRAMS) \
 	quasiquote_test.scm \
 	builtin_boolean_test.scm \
 	builtin_char_test.scm \
+	builtin_char_ready_test.scm \
 	builtin_cons_test.scm \
 	builtin_control_test.scm \
 	builtin_equal_test.scm \
