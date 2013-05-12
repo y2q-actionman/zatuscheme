@@ -39,9 +39,12 @@ TESTS = $(check_PROGRAMS) \
 	builtin_vector_test.scm \
 	extra_test_exit0.scm \
 	extra_test_exit1.scm \
+	extra_test_error.scm \
 	r5rs_pitfall.scm
 
-XFAIL_TESTS = extra_test_exit1.scm
+XFAIL_TESTS = extra_test_exit1.scm \
+	extra_test_error.scm
+
 
 TESTS_ENVIRONMENT = \
 	export MALLOC_CHECK_=2; \
