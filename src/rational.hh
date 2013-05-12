@@ -40,6 +40,8 @@ public:
   Rational& negate();
   Rational& inverse();
 
+  Rational& expt(const Rational&);
+
 private:
   bool overflow_;
   union {

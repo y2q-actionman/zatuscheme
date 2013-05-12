@@ -162,3 +162,28 @@ Rational rationalize(double answer, double error){
 
   return Rational{h_0 , k_0};
 }
+
+Rational& Rational::expt(const Rational& other){
+  if(other.denominator() != 1){
+    overflow_ = true;
+    float_ = std::pow(static_cast<double>(*this),
+                      static_cast<double>(other));
+    return *this;
+  }
+
+  const auto base_r = *this;
+  normalized_reset(1, 1);
+
+  auto ex = other.numerator();
+  for(; ex > 0; --ex){
+    operator*=(base_r);
+    if(overflow_) break;
+  }
+
+  if(overflow_){
+    auto base_d = static_cast<double>(base_r);
+    for(; ex > 0; --ex) float_ *= base_d;
+  }
+
+  return *this;
+}

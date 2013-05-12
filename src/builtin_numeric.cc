@@ -615,10 +615,10 @@ Lisp_ptr number_sqrt(ZsArgs args){
 Lisp_ptr number_expt(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){
-                         return std::pow(i1, i2);
+                         return Rational(i1, 1).expt(Rational(i2, 1));
                        },
                        [](Rational q1, Rational q2){
-                         return std::pow(static_cast<double>(q1), static_cast<double>(q2));
+                         return q1.expt(q2);
                        },
                        [](double n1, double n2){
                          return std::pow(n1, n2);

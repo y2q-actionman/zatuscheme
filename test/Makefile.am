@@ -17,7 +17,6 @@ check_PROGRAMS = token_test\
 		function_arg_test\
 		reader_test\
 		eval_test\
-		builtin_control_test\
 		builtin_numeric_test\
 		builtin_char_ready_test\
 		delay_test\
@@ -32,6 +31,7 @@ TESTS = $(check_PROGRAMS) \
 	builtin_boolean_test.scm \
 	builtin_char_test.scm \
 	builtin_cons_test.scm \
+	builtin_control_test.scm \
 	builtin_equal_test.scm \
 	builtin_port_test.scm \
 	builtin_string_test.scm \
