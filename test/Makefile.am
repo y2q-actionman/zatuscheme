@@ -17,11 +17,12 @@ check_PROGRAMS = token_test\
 		function_arg_test\
 		reader_test\
 		eval_test\
-		macro_test\
 		zs_test_main
 
 
 TESTS = $(check_PROGRAMS) \
+	macro_test.scm \
+	delay_test.scm \
 	enclose_test.scm \
 	quasiquote_test.scm \
 	builtin_boolean_test.scm \
@@ -36,7 +37,6 @@ TESTS = $(check_PROGRAMS) \
 	builtin_symbol_test.scm \
 	builtin_syntax_test.scm \
 	builtin_vector_test.scm \
-	delay_test.scm \
 	extra_test_exit0.scm \
 	extra_test_exit1.scm \
 	r5rs_pitfall.scm
