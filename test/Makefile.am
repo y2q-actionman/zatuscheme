@@ -20,7 +20,6 @@ check_PROGRAMS = token_test\
 		builtin_numeric_test\
 		builtin_char_ready_test\
 		macro_test\
-		extra_test\
 		zs_test_main
 
 
@@ -38,7 +37,11 @@ TESTS = $(check_PROGRAMS) \
 	builtin_syntax_test.scm \
 	builtin_vector_test.scm \
 	delay_test.scm \
+	extra_test_exit0.scm \
+	extra_test_exit1.scm \
 	r5rs_pitfall.scm
+
+XFAIL_TESTS = extra_test_exit1.scm
 
 TESTS_ENVIRONMENT = \
 	export MALLOC_CHECK_=2; \
