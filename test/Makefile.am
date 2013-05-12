@@ -19,7 +19,6 @@ check_PROGRAMS = token_test\
 		eval_test\
 		builtin_numeric_test\
 		builtin_char_ready_test\
-		delay_test\
 		macro_test\
 		extra_test\
 		zs_test_main
@@ -38,6 +37,7 @@ TESTS = $(check_PROGRAMS) \
 	builtin_symbol_test.scm \
 	builtin_syntax_test.scm \
 	builtin_vector_test.scm \
+	delay_test.scm \
 	r5rs_pitfall.scm
 
 TESTS_ENVIRONMENT = \
