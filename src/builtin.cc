@@ -124,7 +124,6 @@ static const BuiltinNProc builtin_funcs[] = {
 #include "builtin_numeric.defs.hh"
 #include "builtin_port.defs.hh"
 #include "builtin_procedure.defs.hh"
-#include "builtin_srfi.defs.hh"
 #include "builtin_string.defs.hh"
 #include "builtin_symbol.defs.hh"
 #include "builtin_vector.defs.hh"
@@ -140,10 +139,12 @@ static const char* builtin_strs[] = {
 
 static const BuiltinNProc builtin_extra_funcs[] = {
 #include "builtin_extra.defs.hh"
+#include "builtin_srfi.defs.hh"
 };
 
 static const char* builtin_extra_strs[] = {
 #include "builtin_extra.strs.hh"
+#include "builtin_srfi.strs.hh"
 };
 
 

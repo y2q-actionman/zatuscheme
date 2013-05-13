@@ -22,7 +22,7 @@ libzs_a_SOURCES = \
 		builtin_procedure.cc builtin_procedure.hh \
 		builtin_procedure.defs.hh builtin_procedure.strs.hh \
 		builtin_srfi.cc builtin_srfi.hh \
-		builtin_srfi.defs.hh \
+		builtin_srfi.defs.hh builtin_srfi.strs.hh \
 		builtin_string.cc builtin_string.hh \
 		builtin_string.defs.hh \
 		builtin_symbol.cc builtin_symbol.hh \
