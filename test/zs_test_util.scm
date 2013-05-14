@@ -52,6 +52,10 @@
                                ,expr 
                                (+ ,expected ,error))))))))
 
+;; TODO: use this!
+(define (with-ignoring-errors thunk)
+  (with-exception-handler (lambda (_) #f) thunk))
+
 (define-syntax test-error
   (traditional-transformer
    (lambda (expr)
