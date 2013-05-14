@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "builtin_procedure.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
@@ -133,10 +135,6 @@ Lisp_ptr call_cc(ZsArgs args){
 }
 
 Lisp_ptr dynamic_wind(ZsArgs args){
-  Lisp_ptr procs[3];
-
-  auto procs_i = begin(procs);
-
   for(auto p : args){
     if(!is_procedure(p.tag())){
       throw procedure_type_check_failed(p);
@@ -147,11 +145,10 @@ Lisp_ptr dynamic_wind(ZsArgs args){
       throw zs_error(printf_string("each arg must take 0 arg (%d)",
                                    info->required_args));
     }
-
-    *procs_i = p;
-    ++procs_i;
   }
 
+  Lisp_ptr procs[3];
+  std::copy(begin(args), end(args), begin(procs));
   args.cleanup();
 
   vm.extent.push_back({procs[0], procs[1], procs[2]});
