@@ -25,8 +25,6 @@ private:
 };
 
 bool identifierp(Lisp_ptr);
-Symbol* identifier_symbol(Lisp_ptr);
-
 bool identifier_eq(Env*, Lisp_ptr, Env*, Lisp_ptr);
 
 #endif // S_CLOSURE_HH

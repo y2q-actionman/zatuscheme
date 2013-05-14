@@ -25,16 +25,6 @@ bool identifierp(Lisp_ptr p){
   }
 }
 
-Symbol* identifier_symbol(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::symbol){
-    return p.get<Symbol*>();
-  }else if(p.tag() == Ptr_tag::syntactic_closure){
-    return identifier_symbol(p.get<SyntacticClosure*>()->expr());
-  }else{
-    throw builtin_identifier_check_failed("idenitifier-symbol internal", p);
-  }
-}
-
 bool identifier_eq(Env* ident1_env, Lisp_ptr ident1,
                    Env* ident2_env, Lisp_ptr ident2){
   return eq_internal(ident1_env->find(ident1), ident2_env->find(ident2));
