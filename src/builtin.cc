@@ -182,6 +182,7 @@ void install_builtin(){
   install_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
   install_symbol(null_env_symname, null_env);
   install_symbol(r5rs_env_symname, vm.frame());
+  install_symbol(CURRENT_EXCEPTION_HANDLER_SYMNAME, {});
   eval();
 
   // interaction-environment

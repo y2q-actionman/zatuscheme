@@ -697,8 +697,8 @@ void vm_op_get_current_env(){
 }
 
 void eval(){
-  try{
-    while(!vm.code.empty()){
+  while(!vm.code.empty()){
+    try{
       if(dump_mode) cout << vm << endl;
       auto p = vm.code.back();
 
@@ -794,16 +794,25 @@ void eval(){
       ++instruction_counter;
       if((instruction_counter % gc_invoke_interval) == 0)
         gc();
+    }catch(const std::exception& e){
+      auto handler = vm.frame()->find(intern(*vm.symtable, CURRENT_EXCEPTION_HANDLER_SYMNAME));
+      if(handler){
+        vm.code.push_back(vm_op_call);
+        vm.code.push_back(handler);
+        vm.stack.push_back(zs_new<String>(e.what()));
+      }else{      
+        cerr << "uncaught exception\n"
+             << e.what() << 'n'
+             << "VM dump...\n"
+             << vm << endl;
+        vm.return_value = {{}};
+        break;
+      }
     }
-  }catch(const std::exception& e){
-    cerr << e.what() << endl;
-    vm.return_value = {{}};
   }
 
   if(!vm.code.empty()){
     cerr << "eval internal warning: VM code stack is broken!\n";
-    cerr << "VM dump...\n";
-    cerr << vm << endl;
     vm.code.clear();
   }
 
