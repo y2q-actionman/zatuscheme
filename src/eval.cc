@@ -696,6 +696,11 @@ void vm_op_get_current_env(){
   vm.return_value = {vm.frame()};
 }
 
+void vm_op_unwind_guard(){
+  assert(vm.code.back().get<VMop>() == vm_op_unwind_guard);
+  vm.code.pop_back();
+}
+
 void eval(){
   while(!vm.code.empty()){
     try{
@@ -795,11 +800,27 @@ void eval(){
       if((instruction_counter % gc_invoke_interval) == 0)
         gc();
     }catch(const std::exception& e){
+      while(!vm.code.empty()){
+        auto p = vm.code.back();
+        vm.code.pop_back();
+        if(p.get<VMop>() == vm_op_unwind_guard) break;
+      }
+      
+      while(!vm.stack.empty()){
+        auto p = vm.stack.back();
+        vm.stack.pop_back();
+        if(p.get<VMop>() == vm_op_unwind_guard) break;
+      }
+      
+      cerr << "exception!\n"
+           << e.what() << '\n'
+           << vm << endl;
+
       auto handler = vm.frame()->find(intern(*vm.symtable, CURRENT_EXCEPTION_HANDLER_SYMNAME));
       if(handler){
         vm.code.push_back(vm_op_call);
         vm.code.push_back(handler);
-        vm.stack.push_back(zs_new<String>(e.what()));
+        vm.stack.push_back(make_cons_list({{}, zs_new<String>(e.what())}));
       }else{      
         cerr << "uncaught exception\n"
              << e.what() << 'n'
@@ -861,6 +882,8 @@ const char* stringify(VMop op){
     return "splicing args";
   }else if(op == vm_op_get_current_env){
     return "get current env";
+  }else if(op == vm_op_unwind_guard){
+    return "unwind guard";
   }else{
     return "unknown vm-op";
   }
