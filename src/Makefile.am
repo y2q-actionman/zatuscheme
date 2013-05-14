@@ -50,7 +50,6 @@ libzs_a_SOURCES = \
 		util.cc util.hh util.i.hh \
 		vm.cc vm.hh \
 		zs.cc zs.hh \
-		zs.cc zs.hh \
 		zs_error.cc zs_error.hh \
 		zs_memory.cc zs_memory.hh zs_memory.i.hh
 libzs_a_CXXFLAGS = $(release_flags) $(AM_CXXFLAGS)
