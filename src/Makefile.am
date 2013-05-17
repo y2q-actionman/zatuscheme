@@ -30,7 +30,7 @@ libzs_a_SOURCES = \
 		builtin_syntax.cc builtin_syntax.hh \
 		builtin_syntax.defs.hh builtin_syntax.strs.hh \
 		builtin_vector.cc builtin_vector.hh \
-		builtin_vector.defs.hh \
+		builtin_vector.defs.hh builtin_vector.strs.hh \
 		cons.cc cons.hh cons.i.hh \
 		cons_util.cc cons_util.hh cons_util.i.hh \
 		decl.hh decl.cc decl.i.hh \

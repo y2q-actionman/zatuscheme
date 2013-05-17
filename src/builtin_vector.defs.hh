@@ -25,7 +25,3 @@
 {"list->vector", {
     builtin::vector_from_list,
     {1}}},
-
-{"vector-fill!", {
-    builtin::vector_fill,
-    {2}}},

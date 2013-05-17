@@ -135,6 +135,7 @@ static const char* builtin_strs[] = {
 #include "builtin_numeric.strs.hh"
 #include "builtin_procedure.strs.hh"
 #include "builtin_port.strs.hh"
+#include "builtin_vector.strs.hh"
 };
 
 static const BuiltinNProc builtin_extra_funcs[] = {

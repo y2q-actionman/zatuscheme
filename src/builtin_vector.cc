@@ -97,14 +97,4 @@ Lisp_ptr vector_from_list(ZsArgs args){
   return {zs_new<Vector>(begin(args[0]), end(args[0]))};
 }
 
-Lisp_ptr vector_fill(ZsArgs args){
-  auto v = args[0].get<Vector*>();
-  if(!v){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::vector, args[0]);
-  }
-
-  std::fill(v->begin(), v->end(), args[1]);
-  return {v};
-}
-
 } // namespace builtin
