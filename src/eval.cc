@@ -699,6 +699,7 @@ void vm_op_get_current_env(){
 void vm_op_unwind_guard(){
   assert(vm.code.back().get<VMop>() == vm_op_unwind_guard);
   vm.code.pop_back();
+  vm.exception_handler.pop_back();
 }
 
 void eval(){
@@ -816,10 +817,10 @@ void eval(){
            << e.what() << '\n'
            << vm << endl;
 
-      auto handler = vm.frame->find(intern(*vm.symtable, CURRENT_EXCEPTION_HANDLER_SYMNAME));
-      if(handler){
-        vm.code.push_back(vm_op_call);
-        vm.code.push_back(handler);
+      if(!vm.exception_handler.empty()){
+        auto handler = vm.stack.back();
+        vm.stack.pop_back();
+        vm.code.insert(vm.code.end(), {vm_op_call, handler});
         vm.stack.push_back(make_cons_list({{}, zs_new<String>(e.what())}));
       }else{      
         cerr << "uncaught exception\n"

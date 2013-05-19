@@ -40,6 +40,7 @@ public:
   std::vector<winding> extent;
   std::shared_ptr<SymTable> symtable;
   Env* frame;
+  std::vector<Lisp_ptr> exception_handler;
 };
 
 extern VM vm;

@@ -6,8 +6,6 @@
 #include "procedure.hh"
 #include "vm.hh"
 
-#define CURRENT_EXCEPTION_HANDLER_SYMNAME "current-exception-handler-value"
-
 void load_internal(std::istream&);
 void install_builtin();
 
