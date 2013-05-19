@@ -133,29 +133,6 @@ Lisp_ptr internal_string_strcasecmp(ZsArgs args){
   return internal_string_cmp(move(args), strcasecmp);
 }
 
-Lisp_ptr string_substr(ZsArgs args){
-  auto str = args[0].get<String*>();
-  if(!str){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
-  }
-
-  int ind[2];
-
-  for(int i = 1; i < 3; ++i){
-    if(args[i].tag() != Ptr_tag::integer){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[i]);
-    }
-    ind[i-1] = args[i].get<int>();
-  }
-
-  if(!(0 <= ind[0] && ind[0] <= ind[1] && ind[1] <= static_cast<signed>(str->length()))){
-    throw zs_error(printf_string("index is out-of-bound ([0, %ld), supplied [%d, %d)\n",
-                                 str->length(), ind[0], ind[1]));
-  }
-
-  return {zs_new<String>(str->substr(ind[0], ind[1] - ind[0]))};
-}
-
 Lisp_ptr string_append(ZsArgs args){
   String ret;
 

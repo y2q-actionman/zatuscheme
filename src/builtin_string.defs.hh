@@ -26,9 +26,6 @@
     builtin::internal_string_strcasecmp,
     {2}}},
 
-{"substring", {
-    builtin::string_substr,
-    {3}}},
 {"string-append", {
     builtin::string_append,
     {0, Variadic::t}}},
