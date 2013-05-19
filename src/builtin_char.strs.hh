@@ -1,0 +1,12 @@
+// This file is intended to be included into an array of 'const char*'
+
+#define CHAR_CMP_FUNCS(op)                              \
+  "(define (char"op"? c1 c2)"                           \
+  "  ("op" (char->integer c1) (char->integer c2)))"
+
+CHAR_CMP_FUNCS("="),
+CHAR_CMP_FUNCS("<"),
+CHAR_CMP_FUNCS(">"),
+CHAR_CMP_FUNCS("<="),
+CHAR_CMP_FUNCS(">="),
+#undef CHAR_CMP_FUNCS

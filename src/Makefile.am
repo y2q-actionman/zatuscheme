@@ -8,7 +8,7 @@ libzs_a_SOURCES = \
 		builtin_boolean.cc builtin_boolean.hh \
 		builtin_boolean.defs.hh builtin_boolean.strs.hh \
 		builtin_char.cc builtin_char.hh \
-		builtin_char.defs.hh \
+		builtin_char.defs.hh builtin_char.strs.hh \
 		builtin_cons.cc builtin_cons.hh \
 		builtin_cons.defs.hh builtin_cons.strs.hh \
 		builtin_equal.cc builtin_equal.hh \

@@ -53,27 +53,6 @@ Lisp_ptr char_conversion(Lisp_ptr arg1, const Fun& fun){
 
 namespace builtin {
 
-Lisp_ptr char_eq(ZsArgs args){
-  return char_compare(args[0], args[1], std::equal_to<char>());
-}
-
-Lisp_ptr char_less(ZsArgs args){
-  return char_compare(args[0], args[1], std::less<char>());
-}
-
-Lisp_ptr char_greater(ZsArgs args){
-  return char_compare(args[0], args[1], std::greater<char>());
-}
-
-Lisp_ptr char_less_eq(ZsArgs args){
-  return char_compare(args[0], args[1], std::less_equal<char>());
-}
-
-Lisp_ptr char_greater_eq(ZsArgs args){
-  return char_compare(args[0], args[1], std::greater_equal<char>());
-}
-  
-
 Lisp_ptr char_ci_eq(ZsArgs args){
   return char_compare(args[0], args[1],
                       ci_comparator<std::equal_to<int> >());

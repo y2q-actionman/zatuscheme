@@ -4,22 +4,6 @@
     builtin::type_check_pred<Ptr_tag::character>,
     {1}}},
 
-{"char=?", {
-    builtin::char_eq,
-    {2}}},
-{"char<?", {
-    builtin::char_less,
-    {2}}},
-{"char>?", {
-    builtin::char_greater,
-    {2}}},
-{"char<=?", {
-    builtin::char_less_eq,
-    {2}}},
-{"char>=?", {
-    builtin::char_greater_eq,
-    {2}}},
-
 {"char-ci=?", {
     builtin::char_ci_eq,
     {2}}},
