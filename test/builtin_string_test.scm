@@ -94,7 +94,13 @@
 (test-equal "a" (list->string '(#\a)))
 (test-equal "abc" (list->string '(#\a #\b #\c)))
 
-(test-equal "abc" (string-copy "abc"))
+(define str1 "abc")
+(define str2 (string-copy str1))
+(test-equal "abc" str2)
+(string-fill! str2 #\!)
+(test-equal "abc" str1)
+(test-equal "!!!" str2)
+
 
 (define tmpstr (string #\a #\b #\c))
 (string-fill! tmpstr #\?)

@@ -250,13 +250,4 @@ Lisp_ptr string_from_list(ZsArgs args){
   return {zs_new<String>(std::move(ret))};
 }
 
-Lisp_ptr string_copy(ZsArgs args){
-  auto str = args[0].get<String*>();
-  if(!str){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
-  }
-
-  return {zs_new<String>(*str)};
-}
-
 } // namespace builtin

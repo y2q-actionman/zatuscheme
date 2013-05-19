@@ -27,7 +27,6 @@ Lisp_ptr string_substr(ZsArgs);
 Lisp_ptr string_append(ZsArgs);
 Lisp_ptr string_to_list(ZsArgs);
 Lisp_ptr string_from_list(ZsArgs);
-Lisp_ptr string_copy(ZsArgs);
 
 }
 

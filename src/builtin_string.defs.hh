@@ -63,7 +63,3 @@
 {"list->string", {
     builtin::string_from_list,
     {1}}},
-
-{"string-copy", {
-    builtin::string_copy,
-    {1}}},
