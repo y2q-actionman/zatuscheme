@@ -32,12 +32,14 @@
 "(define (cddddr x) (cdr (cdddr x)))",
 
 "(define (length lis)"
-"  (let loop ((l lis) (n 0))"
-"    (if (null? l) n (loop (cdr l) (+ n 1)))))",
+"  (do ((l lis (cdr l))"
+"       (n 0 (+ n 1)))"
+"      ((null? l) n)))",
 
 "(define (reverse lis)"
-"  (let loop ((l lis) (ret ()))"
-"    (if (null? l) ret (loop (cdr l) (cons (car l) ret)))))",
+"  (do ((l lis (cdr l))"
+"       (ret () (cons (car l) ret)))"
+"      ((null? l) ret)))",
 
 "(define (list-tail lis n)"
 "  (if (zero? n) lis"
