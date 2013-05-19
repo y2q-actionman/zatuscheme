@@ -48,11 +48,11 @@
 "(define (list-ref lis num)"
 "  (car (list-tail lis num)))",
 
-#define ASS_FUNCS(name, equal_op)                       \
+#define ASS_FUNCS(name, eq_op)                          \
   "(define ("name" obj alist)"                          \
-  "  (if (null? alist) #f"                              \
-  "    (if ("equal_op" obj (caar alist)) (car alist)"   \
-  "      ("name" obj (cdr alist)))))"
+  "  (cond ((null? alist) #f)"                          \
+  "        (("eq_op" obj (caar alist)) (car alist))"    \
+  "        (else ("name" obj (cdr alist)))))"
 
 ASS_FUNCS("assq", "eq?"),
 ASS_FUNCS("assv", "eqv?"),
