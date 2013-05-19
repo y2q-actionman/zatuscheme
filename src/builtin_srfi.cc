@@ -39,6 +39,7 @@ Lisp_ptr with_exception_handler(ZsArgs args){
 
   vm.exception_handler.push_back(handler);
   vm.code.push_back(vm_op_unwind_guard);
+  vm.stack.push_back(vm_op_unwind_guard);
 
   vm.stack.push_back({Ptr_tag::vm_argcount, 0});
   vm.code.insert(vm.code.end(), {thunk, vm_op_proc_enter});

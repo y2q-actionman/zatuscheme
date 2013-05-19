@@ -696,9 +696,23 @@ void vm_op_get_current_env(){
   vm.return_value = {vm.frame};
 }
 
+static void exception_unwind(){
+  while(!vm.code.empty()){
+    auto p = vm.code.back();
+    vm.code.pop_back();
+    if(p.get<VMop>() == vm_op_unwind_guard) break;
+  }
+      
+  while(!vm.stack.empty()){
+    auto p = vm.stack.back();
+    vm.stack.pop_back();
+    if(p.get<VMop>() == vm_op_unwind_guard) break;
+  }
+}
+
 void vm_op_unwind_guard(){
   assert(vm.code.back().get<VMop>() == vm_op_unwind_guard);
-  vm.code.pop_back();
+  exception_unwind();
   vm.exception_handler.pop_back();
 }
 
@@ -801,27 +815,14 @@ void eval(){
       if((instruction_counter % gc_invoke_interval) == 0)
         gc();
     }catch(const std::exception& e){
-      while(!vm.code.empty()){
-        auto p = vm.code.back();
-        vm.code.pop_back();
-        if(p.get<VMop>() == vm_op_unwind_guard) break;
-      }
+      exception_unwind();
       
-      while(!vm.stack.empty()){
-        auto p = vm.stack.back();
-        vm.stack.pop_back();
-        if(p.get<VMop>() == vm_op_unwind_guard) break;
-      }
-      
-      cerr << "exception!\n"
-           << e.what() << '\n'
-           << vm << endl;
-
       if(!vm.exception_handler.empty()){
-        auto handler = vm.stack.back();
-        vm.stack.pop_back();
-        vm.code.insert(vm.code.end(), {vm_op_call, handler});
-        vm.stack.push_back(make_cons_list({{}, zs_new<String>(e.what())}));
+        auto handler = vm.exception_handler.back();
+        vm.exception_handler.pop_back();
+        vm.stack.push_back(zs_new<String>(e.what()));
+        vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+        vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
       }else{      
         cerr << "uncaught exception\n"
              << e.what() << 'n'
