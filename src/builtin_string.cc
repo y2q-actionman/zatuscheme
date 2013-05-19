@@ -134,29 +134,15 @@ Lisp_ptr string_set(ZsArgs args){
 }
 
 
-Lisp_ptr string_equal(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        std::equal_to<std::string>());
-}
+Lisp_ptr internal_string_strcmp(ZsArgs args){
+  for(auto p : args){
+    if(p.tag() != Ptr_tag::string){
+      throw builtin_type_check_failed(nullptr, Ptr_tag::string, p);
+    }
+  }
 
-Lisp_ptr string_less(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        std::less<std::string>());
-}
-
-Lisp_ptr string_greater(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        std::greater<std::string>());
-}
-
-Lisp_ptr string_less_eq(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        std::less_equal<std::string>());
-}
-
-Lisp_ptr string_greater_eq(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        std::greater_equal<std::string>());
+  return Lisp_ptr{Ptr_tag::integer,
+      args[0].get<String*>()->compare(*args[1].get<String*>())};
 }
 
 Lisp_ptr string_ci_equal(ZsArgs args){

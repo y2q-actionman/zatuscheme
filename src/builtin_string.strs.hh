@@ -1,5 +1,20 @@
 // This file is intended to be included into an array of 'const char*'
 
+"(define (string=? s1 s2)"
+"  (= (%string-strcmp s1 s2) 0))",
+
+"(define (string<? s1 s2)"
+"  (< (%string-strcmp s1 s2) 0))",
+
+"(define (string>? s1 s2)"
+"  (> (%string-strcmp s1 s2) 0))",
+
+"(define (string<=? s1 s2)"
+"  (<= (%string-strcmp s1 s2) 0))",
+
+"(define (string>=? s1 s2)"
+"  (>= (%string-strcmp s1 s2) 0))",
+
 "(define (string-copy str)"
 "  (let* ((size (string-length str))"
 "         (str2 (make-string size)))"

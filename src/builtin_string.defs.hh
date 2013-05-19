@@ -19,20 +19,8 @@
     builtin::string_set,
     {3}}},
 
-{"string=?", {
-    builtin::string_equal,
-    {2}}},
-{"string<?", {
-    builtin::string_less,
-    {2}}},
-{"string>?", {
-    builtin::string_greater,
-    {2}}},
-{"string<=?", {
-    builtin::string_less_eq,
-    {2}}},
-{"string>=?", {
-    builtin::string_greater_eq,
+{"%string-strcmp", {
+    builtin::internal_string_strcmp,
     {2}}},
 {"string-ci=?", {
     builtin::string_ci_equal,

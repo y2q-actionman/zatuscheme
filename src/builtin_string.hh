@@ -11,11 +11,7 @@ Lisp_ptr string_length(ZsArgs);
 Lisp_ptr string_ref(ZsArgs);
 Lisp_ptr string_set(ZsArgs);
 
-Lisp_ptr string_equal(ZsArgs);
-Lisp_ptr string_less(ZsArgs);
-Lisp_ptr string_greater(ZsArgs);
-Lisp_ptr string_less_eq(ZsArgs);
-Lisp_ptr string_greater_eq(ZsArgs);
+Lisp_ptr internal_string_strcmp(ZsArgs);
 
 Lisp_ptr string_ci_equal(ZsArgs);
 Lisp_ptr string_ci_less(ZsArgs);
