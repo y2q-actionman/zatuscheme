@@ -24,7 +24,7 @@ libzs_a_SOURCES = \
 		builtin_srfi.cc builtin_srfi.hh \
 		builtin_srfi.defs.hh builtin_srfi.strs.hh \
 		builtin_string.cc builtin_string.hh \
-		builtin_string.defs.hh \
+		builtin_string.defs.hh builtin_string.strs.hh \
 		builtin_symbol.cc builtin_symbol.hh \
 		builtin_symbol.defs.hh \
 		builtin_syntax.cc builtin_syntax.hh \

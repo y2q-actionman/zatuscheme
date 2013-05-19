@@ -259,19 +259,4 @@ Lisp_ptr string_copy(ZsArgs args){
   return {zs_new<String>(*str)};
 }
 
-Lisp_ptr string_fill(ZsArgs args){
-  auto str = args[0].get<String*>();
-  if(!str){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
-  }
-
-  auto ch = args[1].get<char>();
-  if(!ch){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::character, args[1]);
-  }
-
-  std::fill(str->begin(), str->end(), ch);
-  return {str};
-}
-
 } // namespace builtin

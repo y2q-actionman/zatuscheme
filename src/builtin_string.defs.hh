@@ -67,7 +67,3 @@
 {"string-copy", {
     builtin::string_copy,
     {1}}},
-
-{"string-fill!", {
-    builtin::string_fill,
-    {2}}},
