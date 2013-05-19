@@ -4,20 +4,8 @@
     builtin::type_check_pred<Ptr_tag::character>,
     {1}}},
 
-{"char-ci=?", {
-    builtin::char_ci_eq,
-    {2}}},
-{"char-ci<?", {
-    builtin::char_ci_less,
-    {2}}},
-{"char-ci>?", {
-    builtin::char_ci_greater,
-    {2}}},
-{"char-ci<=?", {
-    builtin::char_ci_less_eq,
-    {2}}},
-{"char-ci>=?", {
-    builtin::char_ci_greater_eq,
+{"%char-casecmp", {
+    builtin::internal_char_casecmp,
     {2}}},
 
 {"char-alphabetic?", {

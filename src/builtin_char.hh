@@ -5,11 +5,8 @@
 
 namespace builtin {
 
-Lisp_ptr char_ci_eq(ZsArgs);
-Lisp_ptr char_ci_less(ZsArgs);
-Lisp_ptr char_ci_greater(ZsArgs);
-Lisp_ptr char_ci_less_eq(ZsArgs);
-Lisp_ptr char_ci_greater_eq(ZsArgs);
+Lisp_ptr internal_char_casecmp(ZsArgs);
+
 Lisp_ptr char_isalpha(ZsArgs);
 Lisp_ptr char_isdigit(ZsArgs);
 Lisp_ptr char_isspace(ZsArgs);
