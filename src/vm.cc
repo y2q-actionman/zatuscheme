@@ -13,13 +13,13 @@ VM::VM() : code(), stack(),
            return_value(1, {}),
            extent(),
            symtable(),
-           frame_(){}
+           frame(nullptr){}
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           return_value(other.return_value),
                           extent(other.extent),
                           symtable(other.symtable),
-                          frame_(other.frame_){}
+                          frame(other.frame){}
 
 VM::~VM(){}
 
@@ -29,8 +29,7 @@ VM& VM::operator=(const VM& other){
   return_value = other.return_value;
   extent = other.extent,
   symtable = other.symtable;
-
-  frame_ = other.frame_;
+  frame = other.frame;
   return *this;
 }
 

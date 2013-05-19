@@ -31,7 +31,7 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   
   return zs_new<IProcedure>(code, 
                             ProcInfo{arg_info.first, arg_info.second},
-                            args, vm.frame(), name);
+                            args, vm.frame, name);
 }
 
 Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
@@ -87,7 +87,7 @@ Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
                                  ProcInfo{len, Variadic::f,  Passing::eval,
                                      Returning::pass, MoveReturnValue::t,
                                      entering},
-                                 gl_syms.extract(), vm.frame(), name);
+                                 gl_syms.extract(), vm.frame, name);
 
   vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
   vm.code.insert(vm.code.end(), {vm_op_call, proc});
@@ -189,7 +189,7 @@ Lisp_ptr syntax_letrec(ZsArgs args){
 }
 
 Lisp_ptr syntax_delay(ZsArgs args){
-  return {zs_new<Delay>(args[0], vm.frame())};
+  return {zs_new<Delay>(args[0], vm.frame)};
 }
 
 Lisp_ptr syntax_quasiquote(ZsArgs args){
@@ -217,7 +217,7 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
     }
 
     // check unquote -- like `,x
-    auto first_val = vm.frame()->find(nth_cons_list<0>(arg));
+    auto first_val = vm.frame->find(nth_cons_list<0>(arg));
     if(eq_internal(first_val, unquote_fun)
        || eq_internal(first_val, unquote_splicing_fun)){
       return arg;

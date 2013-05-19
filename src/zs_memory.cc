@@ -86,7 +86,7 @@ void gc_mark(const VM& v){
     gc_mark_lp(i.after);
   }
   
-  gc_mark(v.frame());
+  gc_mark(v.frame);
 }
 
 } // namespace

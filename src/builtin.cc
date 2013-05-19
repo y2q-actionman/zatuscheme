@@ -49,7 +49,7 @@ Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* envname){
     throw zs_error_arg1(nullptr, "passed number is not 5", {arg1});
   }
 
-  return vm.frame()->find(intern(*vm.symtable, envname));
+  return vm.frame->find(intern(*vm.symtable, envname));
 }
 
 } //namespace
@@ -76,8 +76,8 @@ Lisp_ptr eval(ZsArgs args){
     throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[1]);
   }
 
-  auto oldenv = vm.frame();
-  vm.set_frame(env);
+  auto oldenv = vm.frame;
+  vm.frame = env;
   vm.return_value = {oldenv, vm_op_leave_frame, args[0]};
   return {};
 }
@@ -91,7 +91,7 @@ Lisp_ptr env_null(ZsArgs args){
 }
 
 Lisp_ptr env_interactive(ZsArgs){
-  return vm.frame()->find(intern(*vm.symtable, interaction_env_symname));
+  return vm.frame->find(intern(*vm.symtable, interaction_env_symname));
 }
 
 Lisp_ptr load(ZsArgs args){
@@ -153,14 +153,14 @@ static const char* builtin_extra_strs[] = {
 
 void install_builtin(){
   static constexpr auto install_native = [](const BuiltinNProc& bf){
-    vm.frame()->local_set(intern(*vm.symtable, bf.name), {&bf.func});
+    vm.frame->local_set(intern(*vm.symtable, bf.name), {&bf.func});
   };    
   static constexpr auto install_string = [](const char* s){
     istringstream iss{s};
     load_internal(iss);
   };    
   static constexpr auto install_symbol = [](const char* name, Lisp_ptr value){
-    vm.frame()->local_set(intern(*vm.symtable, name), value);
+    vm.frame->local_set(intern(*vm.symtable, name), value);
   };
 
   // symtable
@@ -169,31 +169,31 @@ void install_builtin(){
 
   // null-environment
   assert(vm.code.empty() && vm.stack.empty());
-  assert(!vm.frame());
-  vm.set_frame(zs_new<Env>(nullptr));
+  assert(!vm.frame);
+  vm.frame = zs_new<Env>(nullptr);
   for(auto& i : builtin_syntax_funcs) install_native(i);
   for(auto i : builtin_syntax_strs) install_string(i);
   eval();
-  auto null_env = vm.frame();
+  auto null_env = vm.frame;
 
   // r5rs-environment
   assert(vm.code.empty() && vm.stack.empty());
-  vm.set_frame(vm.frame()->push());
+  vm.frame = vm.frame->push();
   for(auto& i : builtin_funcs) install_native(i);
   for(auto i : builtin_strs) install_string(i);
   install_symbol(CURRENT_INPUT_PORT_SYMNAME, &std::cin);
   install_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
   install_symbol(null_env_symname, null_env);
-  install_symbol(r5rs_env_symname, vm.frame());
+  install_symbol(r5rs_env_symname, vm.frame);
   install_symbol(CURRENT_EXCEPTION_HANDLER_SYMNAME, {});
   eval();
 
   // interaction-environment
   assert(vm.code.empty() && vm.stack.empty());
-  vm.set_frame(vm.frame()->push());
+  vm.frame = vm.frame->push();
   for(auto& i : builtin_extra_funcs) install_native(i);
   for(auto i : builtin_extra_strs) install_string(i);
-  install_symbol(interaction_env_symname, vm.frame());
+  install_symbol(interaction_env_symname, vm.frame);
   eval();
 }
 

@@ -63,11 +63,11 @@ static void enter_frame(IProcedure* iproc){
     vm_op_leave_frame();
   }
 
-  auto oldenv = vm.frame();
+  auto oldenv = vm.frame;
   if(auto closure = iproc->closure()){
-    vm.set_frame(closure->push());
+    vm.frame = closure->push();
   }else{
-    vm.set_frame(vm.frame()->push());
+    vm.frame = vm.frame->push();
   }
   vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
 }
@@ -85,10 +85,10 @@ void function_call(Lisp_ptr proc, Entering entering_flag){
     // captures arguments
     auto i = begin(iproc->arg_list());
     for(; i ; ++i){
-      local_set_with_identifier(vm.frame(), *i, Lisp_ptr{});
+      local_set_with_identifier(vm.frame, *i, Lisp_ptr{});
     }
     if(identifierp(i.base())){
-      local_set_with_identifier(vm.frame(), i.base(), Lisp_ptr{});
+      local_set_with_identifier(vm.frame, i.base(), Lisp_ptr{});
     }
   }
 
@@ -179,7 +179,7 @@ void whole_call(Lisp_ptr proc, int args){
     vm.stack.push_back({Ptr_tag::vm_argcount, 1});
     break;
   case 2:
-    vm.stack.push_back(vm.frame());
+    vm.stack.push_back(vm.frame);
     vm.stack.push_back({Ptr_tag::vm_argcount, 2});
     break;
   default:
@@ -290,7 +290,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       break;
     }
    
-    local_set_with_identifier(vm.frame(), car(arg_name_cell), *i);
+    local_set_with_identifier(vm.frame, car(arg_name_cell), *i);
     arg_name = cdr(arg_name_cell);
   }
 
@@ -301,7 +301,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     }
 
     auto var_args = make_cons_list(i, arg_end);
-    local_set_with_identifier(vm.frame(), arg_name, var_args);
+    local_set_with_identifier(vm.frame, arg_name, var_args);
   }else{
     if(i != arg_end){
       throw zs_error("eval error: corrupted stack -- passed too much args!\n");
@@ -313,7 +313,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
 
   // adds procedure's name
   if(fun->name()){
-    local_set_with_identifier(vm.frame(), fun->name(), fun);
+    local_set_with_identifier(vm.frame, fun->name(), fun);
   }
 
   // set up lambda body code
@@ -547,7 +547,7 @@ void vm_op_leave_frame(){
   assert(oldenv.tag() == Ptr_tag::env);
   vm.code.pop_back();
 
-  vm.set_frame(oldenv.get<Env*>());
+  vm.frame = oldenv.get<Env*>();
 }  
 
 /*
@@ -590,11 +590,11 @@ void vm_op_set(){
   auto val = vm.return_value_1();
 
   if(var.tag() == Ptr_tag::symbol){
-    vm.frame()->set(var, val);
+    vm.frame->set(var, val);
   }else if(var.tag() == Ptr_tag::syntactic_closure){
-    if(vm.frame()->find(var)){
+    if(vm.frame->find(var)){
       // bound alias
-      vm.frame()->set(var, val);
+      vm.frame->set(var, val);
     }else{
       // not-bound syntactic closure
       auto sc = var.get<SyntacticClosure*>();
@@ -625,7 +625,7 @@ void vm_op_local_set(){
     throw builtin_identifier_check_failed("(local set)", var);
   }
 
-  local_set_with_identifier(vm.frame(), var, vm.return_value_1()); 
+  local_set_with_identifier(vm.frame, var, vm.return_value_1()); 
 }
 
 /*
@@ -693,7 +693,7 @@ void vm_op_get_current_env(){
   assert(vm.code.back().get<VMop>() == vm_op_get_current_env);
   vm.code.pop_back();
   
-  vm.return_value = {vm.frame()};
+  vm.return_value = {vm.frame};
 }
 
 void vm_op_unwind_guard(){
@@ -710,7 +710,7 @@ void eval(){
       switch(p.tag()){
       case Ptr_tag::symbol:
         vm.code.pop_back();
-        vm.return_value = {vm.frame()->find(p)};
+        vm.return_value = {vm.frame->find(p)};
         break;
     
       case Ptr_tag::cons: {
@@ -738,7 +738,7 @@ void eval(){
       case Ptr_tag::syntactic_closure: {
         // bound alias
         if(identifierp(p)){
-          if(auto val = vm.frame()->find(p)){
+          if(auto val = vm.frame->find(p)){
             vm.code.pop_back();
             vm.return_value = {val};
             break;
@@ -749,7 +749,7 @@ void eval(){
         auto sc = p.get<SyntacticClosure*>();
         assert(sc);
 
-        auto oldenv = vm.frame();
+        auto oldenv = vm.frame;
         Env* newenv;
 
         if(!sc->free_names()){
@@ -757,12 +757,12 @@ void eval(){
         }else{
           newenv = sc->env()->push();
           for(auto i : sc->free_names()){
-            auto val = vm.frame()->find(i);
+            auto val = vm.frame->find(i);
             local_set_with_identifier(newenv, i, val);
           }
         }
 
-        vm.set_frame(newenv);
+        vm.frame = newenv;
         vm.code.back() = oldenv;
         vm.code.push_back(vm_op_leave_frame);
         vm.code.push_back(sc->expr());
@@ -816,7 +816,7 @@ void eval(){
            << e.what() << '\n'
            << vm << endl;
 
-      auto handler = vm.frame()->find(intern(*vm.symtable, CURRENT_EXCEPTION_HANDLER_SYMNAME));
+      auto handler = vm.frame->find(intern(*vm.symtable, CURRENT_EXCEPTION_HANDLER_SYMNAME));
       if(handler){
         vm.code.push_back(vm_op_call);
         vm.code.push_back(handler);

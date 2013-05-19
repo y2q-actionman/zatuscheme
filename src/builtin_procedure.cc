@@ -68,8 +68,8 @@ Lisp_ptr force(ZsArgs args){
   // evaluates Delay's contents
   args.cleanup();
 
-  auto oldenv = vm.frame();
-  vm.set_frame(d->env());
+  auto oldenv = vm.frame;
+  vm.frame = d->env();
   vm.stack.push_back(d);
   vm.code.insert(vm.code.end(),
                  {vm_op_force, oldenv, vm_op_leave_frame, d->get()});
