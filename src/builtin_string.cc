@@ -18,26 +18,17 @@ using namespace std;
 namespace {
 
 template<typename Fun>
-Lisp_ptr string_compare(Lisp_ptr arg1, Lisp_ptr arg2, Fun fun){
-  if(arg1.tag() != Ptr_tag::string){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, arg1);
+Lisp_ptr internal_string_cmp(ZsArgs args, Fun fun){
+  for(auto p : args){
+    if(p.tag() != Ptr_tag::string){
+      throw builtin_type_check_failed(nullptr, Ptr_tag::string, p);
+    }
   }
 
-  if(arg2.tag() != Ptr_tag::string){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, arg2);
-  }
-
-  return Lisp_ptr{fun(*arg1.get<String*>(),
-                      *arg2.get<String*>())};
+  return Lisp_ptr{Ptr_tag::integer,
+      fun(args[0].get<String*>()->c_str(),
+          args[1].get<String*>()->c_str())};
 }
-
-template<typename Fun>
-struct ci_compare{
-  inline bool operator()(const String& s1, const String& s2) const {
-    static constexpr Fun fun;
-    return fun(strcasecmp(s1.c_str(), s2.c_str()), 0);
-  }
-};
 
 } // namespace
 
@@ -135,41 +126,12 @@ Lisp_ptr string_set(ZsArgs args){
 
 
 Lisp_ptr internal_string_strcmp(ZsArgs args){
-  for(auto p : args){
-    if(p.tag() != Ptr_tag::string){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::string, p);
-    }
-  }
-
-  return Lisp_ptr{Ptr_tag::integer,
-      args[0].get<String*>()->compare(*args[1].get<String*>())};
+  return internal_string_cmp(move(args), strcmp);
 }
 
-Lisp_ptr string_ci_equal(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        ci_compare<std::equal_to<int> >());
+Lisp_ptr internal_string_strcasecmp(ZsArgs args){
+  return internal_string_cmp(move(args), strcasecmp);
 }
-
-Lisp_ptr string_ci_less(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        ci_compare<std::less<int> >());
-}
-
-Lisp_ptr string_ci_greater(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        ci_compare<std::greater<int> >());
-}
-
-Lisp_ptr string_ci_less_eq(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        ci_compare<std::less_equal<int> >());
-}
-
-Lisp_ptr string_ci_greater_eq(ZsArgs args){
-  return string_compare(args[0], args[1],
-                        ci_compare<std::greater_equal<int> >());
-}
-
 
 Lisp_ptr string_substr(ZsArgs args){
   auto str = args[0].get<String*>();

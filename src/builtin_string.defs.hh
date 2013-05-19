@@ -22,20 +22,8 @@
 {"%string-strcmp", {
     builtin::internal_string_strcmp,
     {2}}},
-{"string-ci=?", {
-    builtin::string_ci_equal,
-    {2}}},
-{"string-ci<?", {
-    builtin::string_ci_less,
-    {2}}},
-{"string-ci>?", {
-    builtin::string_ci_greater,
-    {2}}},
-{"string-ci<=?", {
-    builtin::string_ci_less_eq,
-    {2}}},
-{"string-ci>=?", {
-    builtin::string_ci_greater_eq,
+{"%string-strcasecmp", {
+    builtin::internal_string_strcasecmp,
     {2}}},
 
 {"substring", {

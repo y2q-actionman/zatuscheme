@@ -15,6 +15,21 @@
 "(define (string>=? s1 s2)"
 "  (>= (%string-strcmp s1 s2) 0))",
 
+"(define (string-ci=? s1 s2)"
+"  (= (%string-strcasecmp s1 s2) 0))",
+
+"(define (string-ci<? s1 s2)"
+"  (< (%string-strcasecmp s1 s2) 0))",
+
+"(define (string-ci>? s1 s2)"
+"  (> (%string-strcasecmp s1 s2) 0))",
+
+"(define (string-ci<=? s1 s2)"
+"  (<= (%string-strcasecmp s1 s2) 0))",
+
+"(define (string-ci>=? s1 s2)"
+"  (>= (%string-strcasecmp s1 s2) 0))",
+
 "(define (string-copy str)"
 "  (let* ((size (string-length str))"
 "         (str2 (make-string size)))"

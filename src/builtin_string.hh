@@ -12,12 +12,7 @@ Lisp_ptr string_ref(ZsArgs);
 Lisp_ptr string_set(ZsArgs);
 
 Lisp_ptr internal_string_strcmp(ZsArgs);
-
-Lisp_ptr string_ci_equal(ZsArgs);
-Lisp_ptr string_ci_less(ZsArgs);
-Lisp_ptr string_ci_greater(ZsArgs);
-Lisp_ptr string_ci_less_eq(ZsArgs);
-Lisp_ptr string_ci_greater_eq(ZsArgs);
+Lisp_ptr internal_string_strcasecmp(ZsArgs);
 
 Lisp_ptr string_substr(ZsArgs);
 Lisp_ptr string_append(ZsArgs);
