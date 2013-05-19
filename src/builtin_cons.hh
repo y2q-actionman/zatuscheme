@@ -16,9 +16,6 @@ Lisp_ptr cons_listp(ZsArgs);
 Lisp_ptr cons_list(ZsArgs);
 Lisp_ptr cons_list_star(ZsArgs);
 Lisp_ptr cons_append(ZsArgs);
-Lisp_ptr cons_memq(ZsArgs);
-Lisp_ptr cons_memv(ZsArgs);
-Lisp_ptr cons_member(ZsArgs);
 
 }
 

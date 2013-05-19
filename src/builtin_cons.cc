@@ -120,30 +120,4 @@ Lisp_ptr cons_append(ZsArgs args){
   return gl.extract_with_tail(args[args.size() - 1]);
 }
 
-template <typename Func>
-Lisp_ptr cons_mem_funcs(ZsArgs args, Func fun){
-  if(args[1].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[1]);
-  }
-
-  for(auto i = begin(args[1]), e = end(args[1]); i != e; ++i){
-    if(fun(args[0], *i))
-      return i.base();
-  }
-
-  return Lisp_ptr{false};
-}
-
-Lisp_ptr cons_memq(ZsArgs args){
-  return cons_mem_funcs(move(args), eq_internal);
-}
-
-Lisp_ptr cons_memv(ZsArgs args){
-  return cons_mem_funcs(move(args), eqv_internal);
-}
-
-Lisp_ptr cons_member(ZsArgs args){
-  return cons_mem_funcs(move(args), equal_internal);
-}
-
 } // namespace builtin

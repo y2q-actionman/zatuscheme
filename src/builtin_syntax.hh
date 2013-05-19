@@ -24,6 +24,8 @@ Lisp_ptr syntax_let_syntax(ZsArgs);
 Lisp_ptr syntax_letrec_syntax(ZsArgs);
 Lisp_ptr syntax_syntax_rules(ZsArgs);
 
+Lisp_ptr syntax_internal_memv(ZsArgs);
+
 } 
 
 #endif // BUILTIN_SYNTAX_HH

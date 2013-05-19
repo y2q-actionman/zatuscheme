@@ -296,4 +296,17 @@ Lisp_ptr syntax_syntax_rules(ZsArgs args){
   return zs_new<SyntaxRules>(env, literals, rest);
 }
     
+Lisp_ptr syntax_internal_memv(ZsArgs args){
+  if(args[1].tag() != Ptr_tag::cons){
+    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[1]);
+  }
+
+  for(auto i = begin(args[1]), e = end(args[1]); i != e; ++i){
+    if(eqv_internal(args[0], *i))
+      return i.base();
+  }
+
+  return Lisp_ptr{false};
+}
+
 } // namespace builtin

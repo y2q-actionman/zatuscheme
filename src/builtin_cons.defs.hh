@@ -39,14 +39,3 @@
 {"append", {
     builtin::cons_append,
     {1, Variadic::t}}},
-
-{"memq", {
-    builtin::cons_memq,
-    {2}}},
-{"memv", {
-    builtin::cons_memv,
-    {2}}},
-{"member", {
-    builtin::cons_member,
-    {2}}},
-

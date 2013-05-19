@@ -63,6 +63,5 @@
 
 // for cond
 {"memv", {
-    builtin::cons_memv,
+    builtin::syntax_internal_memv,
     {2}}},
-
