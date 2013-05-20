@@ -28,11 +28,7 @@ STRING_CI_CMP_FUNCS(">="),
 "      (string-set! str2 i (string-ref str (+ i start))))))",
 
 "(define (string-copy str)"
-"  (let* ((size (string-length str))"
-"         (str2 (make-string size)))"
-"    (do ((i 0 (+ i 1)))"
-"        ((= i size) str2)"
-"      (string-set! str2 i (string-ref str i)))))",
+"  (substring str 0 (string-length str)))",
 
 "(define (string-fill! str fill)"
 "  (let ((size (string-length str)))"
