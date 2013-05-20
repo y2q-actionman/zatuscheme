@@ -73,7 +73,7 @@ Lisp_ptr raise(ZsArgs args){
     vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
   }else{      
     cerr << "uncaught exception\n"
-         << errobj << 'n'
+         << errobj << '\n'
          << "VM dump...\n"
          << vm << endl;
   }
