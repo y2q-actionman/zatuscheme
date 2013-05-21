@@ -220,18 +220,4 @@ Lisp_ptr tmp_file(ZsArgs){
 #endif
 }
 
-Lisp_ptr default_exception_handler(ZsArgs args){
-  cerr << "uncaught exception\n"
-       << args[0] << '\n'
-       << "VM dump...\n"
-       << vm << endl;
-
-  // calling exit
-  args.cleanup();
-  vm.stack.push_back(Lisp_ptr{});
-  vm.stack.push_back({Ptr_tag::vm_argcount, 1});
-  vm.code.insert(vm.code.end(), {find_builtin_nproc("exit"), vm_op_proc_enter});
-  return {};
-}
-
 } // namespace builtin

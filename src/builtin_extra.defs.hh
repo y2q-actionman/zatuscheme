@@ -39,6 +39,3 @@
 {"tmp-file", {
     builtin::tmp_file,
     {0}}},
-{"default-exception-handler", {
-    builtin::default_exception_handler,
-    {1, 1}}},

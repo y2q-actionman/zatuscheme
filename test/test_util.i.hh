@@ -6,7 +6,7 @@
 #endif
 
 #include <iostream>
-#include "zs_error.hh"
+#include <exception>
 
 namespace test_util_detail {
 
@@ -24,7 +24,7 @@ void with_expect_error(Fun f){
   test_util_detail::with_null_stream wns;
   try{
     f();
-  }catch(const zs_error& e){
+  }catch(const std::exception& e){
     std::cerr << e.what() << std::endl;
   }
 }

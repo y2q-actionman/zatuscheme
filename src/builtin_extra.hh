@@ -25,8 +25,6 @@ Lisp_ptr transcript_off(ZsArgs);
 Lisp_ptr hard_repl(ZsArgs);
 
 Lisp_ptr tmp_file(ZsArgs);
-
-Lisp_ptr default_exception_handler(ZsArgs);
 }
 
 #endif // BUILTIN_EXTRA_HH
