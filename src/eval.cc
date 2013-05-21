@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <functional>
+#include <stdexcept>
 
 #include "vm.hh"
 #include "eval.hh"
@@ -696,7 +697,22 @@ void vm_op_get_current_env(){
   vm.return_value = {vm.frame};
 }
 
-static void do_unwind(){
+void vm_op_unwind_guard(){
+  assert(vm.code.back().get<VMop>() == vm_op_unwind_guard);
+  vm.code.pop_back();
+
+  assert(vm.stack.back().get<VMop>() == vm_op_unwind_guard);
+  vm.stack.pop_back();
+
+  vm.exception_handler.pop_back();
+}
+
+static void invoke_exception_handler(Lisp_ptr errobj){
+  if(vm.exception_handler.empty()){
+    // goto std::terminate()
+    throw std::runtime_error("no exception handler found!");
+  }
+
   while(!vm.code.empty()){
     auto p = vm.code.back();
     vm.code.pop_back();
@@ -708,14 +724,12 @@ static void do_unwind(){
     vm.stack.pop_back();
     if(p.get<VMop>() == vm_op_unwind_guard) break;
   }
-}
 
-
-void vm_op_unwind_guard(){
-  assert(vm.code.back().get<VMop>() == vm_op_unwind_guard);
-  do_unwind();
-
+  auto handler = vm.exception_handler.back();
   vm.exception_handler.pop_back();
+  vm.stack.push_back(errobj);
+  vm.stack.push_back({Ptr_tag::vm_argcount, 1});
+  vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
 }
 
 void eval(){
@@ -816,22 +830,10 @@ void eval(){
       ++instruction_counter;
       if((instruction_counter % gc_invoke_interval) == 0)
         gc();
-    }catch(const std::exception& e){
-      do_unwind();
-      if(!vm.exception_handler.empty()){
-        auto handler = vm.exception_handler.back();
-        vm.exception_handler.pop_back();
-        vm.stack.push_back(zs_new<String>(e.what()));
-        vm.stack.push_back({Ptr_tag::vm_argcount, 1});
-        vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
-      }else{      
-        cerr << "uncaught exception\n"
-             << e.what() << '\n'
-             << "VM dump...\n"
-             << vm << endl;
-        vm.return_value = {{}};
-        break;
-      }
+    }catch(const zs_error& e){
+      invoke_exception_handler(zs_new<String>(e.what()));
+    }catch(Lisp_ptr p){
+      invoke_exception_handler(p);
     }
   }
 

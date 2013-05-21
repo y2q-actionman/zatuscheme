@@ -194,6 +194,9 @@ void install_builtin(){
   for(auto i : builtin_extra_strs) install_string(i);
   install_symbol(interaction_env_symname, vm.frame);
   eval();
+
+  // exception handling
+  vm.exception_handler.push_back(find_builtin_nproc("default-exception-handler"));
 }
 
 
