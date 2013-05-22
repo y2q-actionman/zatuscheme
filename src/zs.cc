@@ -27,6 +27,7 @@ static void term_handle() noexcept{
     }
   }
 
+  cerr << "Aborting..." << endl;
   abort();
 }
 

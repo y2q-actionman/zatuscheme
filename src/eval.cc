@@ -700,37 +700,32 @@ void vm_op_unwind_guard(){
   assert(vm.code.back().get<VMop>() == vm_op_unwind_guard);
   vm.code.pop_back();
 
-  assert(vm.stack.back().get<VMop>() == vm_op_unwind_guard);
-  vm.stack.pop_back();
-
-  vm.exception_handler.pop_back();
-}
-
-static void invoke_exception_handler(Lisp_ptr errobj){
-  if(vm.exception_handler.empty()){
-    // goto std::terminate()
-    throw errobj;
-  }
-
-  // unwinding.
-  // BUG: this loop ignores dynamic-wind systems!
-  while(!vm.code.empty()){
-    auto p = vm.code.back();
-    vm.code.pop_back();
-    if(p.get<VMop>() == vm_op_unwind_guard) break;
-  }
-      
   while(!vm.stack.empty()){
     auto p = vm.stack.back();
     vm.stack.pop_back();
     if(p.get<VMop>() == vm_op_unwind_guard) break;
   }
 
-  auto handler = vm.exception_handler.back();
-  vm.exception_handler.pop_back();
-  vm.stack.push_back(errobj);
-  vm.stack.push_back({Ptr_tag::vm_argcount, 1});
-  vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
+  if(!vm.exception_object){
+    vm.exception_handler.pop_back();
+  }else{
+    auto errobj = vm.exception_object;
+    vm.exception_object = {};
+
+    if(vm.exception_handler.empty()){
+      // this code disposes old error object..
+      throw zs_error_arg1("eval internal error",
+                          "No accociated exception handler!",
+                          {errobj});
+    }
+
+    auto handler = vm.exception_handler.back();
+    vm.exception_handler.pop_back();
+
+    // invoke exception handler
+    vm.stack.insert(vm.stack.end(), {errobj, {Ptr_tag::vm_argcount, 1}});
+    vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
+  }
 }
 
 void eval(){
@@ -738,6 +733,10 @@ void eval(){
     try{
       if(dump_mode) cout << vm << endl;
       auto p = vm.code.back();
+
+      if(vm.exception_object){
+        goto treat_vm_op;
+      }
 
       switch(p.tag()){
       case Ptr_tag::symbol:
@@ -760,6 +759,7 @@ void eval(){
       }
 
       case Ptr_tag::vm_op:
+        treat_vm_op:
         if(auto op = p.get<VMop>()){
           op();
         }else{
@@ -833,9 +833,9 @@ void eval(){
         gc();
     }catch(const zs_error& e){
       // TODO: wrap with 'Condition' object instead of String.
-      invoke_exception_handler(zs_new<String>(e.what()));
+      vm.exception_object = zs_new<String>(e.what());
     }catch(Lisp_ptr p){
-      invoke_exception_handler(p);
+      vm.exception_object = p;
     }
   }
 
@@ -847,6 +847,15 @@ void eval(){
   if(!vm.stack.empty()){
     cerr << "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n";
     vm.stack.clear();
+  }
+
+  if(vm.exception_object){
+    auto errobj = vm.exception_object;
+    vm.exception_object = {};
+    cerr << "uncaught exception!\n";
+
+    // going to std::terminate() (or handlers supplied by  debug-build).
+    throw errobj;
   }
 }
 
