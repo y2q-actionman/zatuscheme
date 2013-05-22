@@ -6,17 +6,28 @@
 
 using namespace std;
 
-static void term_handle(){
+static void term_handle() noexcept{
   std::set_terminate(nullptr);
 
-  cerr << "uncaught exception! aborting..\n\n";
-  cerr << vm << endl;
-
-  try{
-    rethrow_exception(current_exception());
-  }catch(std::exception& e){
-    cerr << "what: " << e.what() << endl;
+  if(uncaught_exception()){
+    try{
+      rethrow_exception(current_exception());
+    }catch(Lisp_ptr errobj){
+      cerr << "uncaught exception!\n"
+           << "errobj: \n" << errobj << '\n'
+           << "vm dump: \n" << vm << '\n'
+           << endl;
+    }catch(const std::exception& e){
+      cerr << "uncaught system exception!\n"
+           << "what: " << e.what()
+           << endl;
+    }catch(...){
+      cerr << "unexpected internal exception!\n"
+           << endl;
+    }
   }
+
+  abort();
 }
 
 void zs_init(){

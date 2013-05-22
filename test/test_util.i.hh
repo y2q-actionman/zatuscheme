@@ -6,7 +6,8 @@
 #endif
 
 #include <iostream>
-#include <exception>
+#include "printer.hh"
+#include "zs_error.hh"
 
 namespace test_util_detail {
 
@@ -24,8 +25,10 @@ void with_expect_error(Fun f){
   test_util_detail::with_null_stream wns;
   try{
     f();
-  }catch(const std::exception& e){
+  }catch(const zs_error& e){
     std::cerr << e.what() << std::endl;
+  }catch(Lisp_ptr errobj){
+    std::cerr << errobj << std::endl;
   }
 }
 

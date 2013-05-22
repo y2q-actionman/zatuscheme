@@ -1,7 +1,6 @@
 #include <cassert>
 #include <iostream>
 #include <functional>
-#include <stdexcept>
 
 #include "vm.hh"
 #include "eval.hh"
@@ -710,9 +709,11 @@ void vm_op_unwind_guard(){
 static void invoke_exception_handler(Lisp_ptr errobj){
   if(vm.exception_handler.empty()){
     // goto std::terminate()
-    throw std::runtime_error("no exception handler found!");
+    throw errobj;
   }
 
+  // unwinding.
+  // BUG: this loop ignores dynamic-wind systems!
   while(!vm.code.empty()){
     auto p = vm.code.back();
     vm.code.pop_back();
@@ -831,6 +832,7 @@ void eval(){
       if((instruction_counter % gc_invoke_interval) == 0)
         gc();
     }catch(const zs_error& e){
+      // TODO: wrap with 'Condition' object instead of String.
       invoke_exception_handler(zs_new<String>(e.what()));
     }catch(Lisp_ptr p){
       invoke_exception_handler(p);
