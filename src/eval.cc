@@ -706,26 +706,28 @@ void vm_op_unwind_guard(){
     if(p.get<VMop>() == vm_op_unwind_guard) break;
   }
 
-  if(!vm.exception_object){
+  if(!vm.exception_handler.empty()){
     vm.exception_handler.pop_back();
-  }else{
-    auto errobj = vm.exception_object;
-    vm.exception_object = {};
-
-    if(vm.exception_handler.empty()){
-      // this code disposes old error object..
-      throw zs_error_arg1("eval internal error",
-                          "No accociated exception handler!",
-                          {errobj});
-    }
-
-    auto handler = vm.exception_handler.back();
-    vm.exception_handler.pop_back();
-
-    // invoke exception handler
-    vm.stack.insert(vm.stack.end(), {errobj, {Ptr_tag::vm_argcount, 1}});
-    vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
   }
+
+  vm.unwind_mode = false;
+}
+
+static void invoke_exception_handler(Lisp_ptr errobj){
+  if(vm.exception_handler.empty()){
+    // this code disposes old error object..
+    throw zs_error_arg1("eval internal error",
+                        "No accociated exception handler!",
+                        {errobj});
+  }
+
+  auto handler = vm.exception_handler.back();
+  vm.exception_handler.pop_back();
+
+  vm.stack.insert(vm.stack.end(), {errobj, {Ptr_tag::vm_argcount, 1}});
+  vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
+
+  // TODO: re-raising returned objects. (same as R6RS raise)
 }
 
 void eval(){
@@ -734,7 +736,7 @@ void eval(){
       if(dump_mode) cout << vm << endl;
       auto p = vm.code.back();
 
-      if(vm.exception_object){
+      if(vm.unwind_mode){
         goto treat_vm_op;
       }
 
@@ -833,9 +835,9 @@ void eval(){
         gc();
     }catch(const zs_error& e){
       // TODO: wrap with 'Condition' object instead of String.
-      vm.exception_object = zs_new<String>(e.what());
+      invoke_exception_handler(zs_new<String>(e.what()));
     }catch(Lisp_ptr p){
-      vm.exception_object = p;
+      invoke_exception_handler(p);
     }
   }
 
@@ -847,15 +849,6 @@ void eval(){
   if(!vm.stack.empty()){
     cerr << "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n";
     vm.stack.clear();
-  }
-
-  if(vm.exception_object){
-    auto errobj = vm.exception_object;
-    vm.exception_object = {};
-    cerr << "uncaught exception!\n";
-
-    // going to std::terminate() (or handlers supplied by  debug-build).
-    throw errobj;
   }
 }
 

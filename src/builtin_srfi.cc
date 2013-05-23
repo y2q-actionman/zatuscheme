@@ -53,4 +53,9 @@ Lisp_ptr raise(ZsArgs args){
   throw args[0];
 }
 
+Lisp_ptr unwind(ZsArgs args){
+  vm.unwind_mode = true;
+  return Lisp_ptr{true};
+}
+
 } // namespace builtin
