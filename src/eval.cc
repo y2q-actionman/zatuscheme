@@ -732,9 +732,7 @@ static void invoke_exception_handler(Lisp_ptr errobj){
   vm.exception_handler.pop_back();
 
   vm.stack.insert(vm.stack.end(), {errobj, {Ptr_tag::vm_argcount, 1}});
-  vm.code.insert(vm.code.end(), {handler, vm_op_proc_enter});
-
-  // TODO: re-raising returned objects. (same as R6RS raise)
+  vm.code.insert(vm.code.end(), {vm_op_raise, handler, vm_op_proc_enter});
 }
 
 void eval(){
