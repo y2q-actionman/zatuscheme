@@ -9,3 +9,6 @@
 {"raise", {
     builtin::raise,
     {1, 1}}},
+{"%unwind", {
+    builtin::internal_unwind,
+    {0, 0}}},

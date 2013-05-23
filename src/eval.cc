@@ -696,6 +696,13 @@ void vm_op_get_current_env(){
   vm.return_value = {vm.frame};
 }
 
+void vm_op_raise(){
+  assert(vm.code.back().get<VMop>() == vm_op_raise);
+  vm.code.pop_back();
+
+  throw vm.return_value;
+}
+
 void vm_op_unwind_guard(){
   assert(vm.code.back().get<VMop>() == vm_op_unwind_guard);
   vm.code.pop_back();
@@ -891,6 +898,8 @@ const char* stringify(VMop op){
     return "splicing args";
   }else if(op == vm_op_get_current_env){
     return "get current env";
+  }else if(op == vm_op_raise){
+    return "raise";
   }else if(op == vm_op_unwind_guard){
     return "unwind guard";
   }else{

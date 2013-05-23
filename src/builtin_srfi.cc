@@ -50,10 +50,11 @@ Lisp_ptr with_exception_handler(ZsArgs args){
 }
 
 Lisp_ptr raise(ZsArgs args){
-  throw args[0];
+  vm.code.insert(vm.code.end(), {vm_op_raise, args[0]});
+  return {};
 }
 
-Lisp_ptr unwind(ZsArgs args){
+Lisp_ptr internal_unwind(ZsArgs){
   vm.unwind_mode = true;
   return Lisp_ptr{true};
 }
