@@ -41,7 +41,6 @@ public:
   std::shared_ptr<SymTable> symtable;
   Env* frame;
   std::vector<Lisp_ptr> exception_handler;
-  bool unwind_mode;
 };
 
 extern VM vm;

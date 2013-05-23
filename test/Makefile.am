@@ -42,9 +42,7 @@ TESTS = $(check_PROGRAMS) \
 	extra_test_error.scm \
 	r5rs_pitfall.scm
 
-XFAIL_TESTS = extra_test_exit1.scm \
-	extra_test_error.scm
-
+XFAIL_TESTS = extra_test_exit1.scm
 
 TESTS_ENVIRONMENT = \
 	export MALLOC_CHECK_=2; \

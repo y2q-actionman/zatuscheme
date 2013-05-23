@@ -161,5 +161,6 @@ private:
 };
 
 const ProcInfo* get_procinfo(Lisp_ptr);
+Lisp_ptr get_procname(Lisp_ptr);
 
 #endif //PROCEDURE_HH

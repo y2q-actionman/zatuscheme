@@ -431,11 +431,19 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   auto argc = vm.stack.back().get<int>();
 
   if(!(info->required_args <= argc && argc <= info->max_args)){
+    auto name = get_procname(proc);
+    const char* namestr = nullptr;
+    if(auto str = name.get<String*>()){
+      namestr = str->c_str();
+    }else{
+      namestr = "(?)";
+    }
     // XXX: incomprehensible
     // This local value is required, for avoiding a strange state.
     // If throws directly, std::uncaught_exception() returns true,
     // but std::current_exception() returns NULL object.
-    auto e = builtin_argcount_failed("(unknown)", info->required_args,
+    auto e = builtin_argcount_failed(namestr,
+                                     info->required_args,
                                      info->max_args, argc);
     throw e;
   }
@@ -716,8 +724,6 @@ void vm_op_unwind_guard(){
   if(!vm.exception_handler.empty()){
     vm.exception_handler.pop_back();
   }
-
-  vm.unwind_mode = false;
 }
 
 static void invoke_exception_handler(Lisp_ptr errobj){
@@ -737,10 +743,6 @@ void eval(){
     try{
       if(dump_mode) cout << vm << endl;
       auto p = vm.code.back();
-
-      if(vm.unwind_mode){
-        goto treat_vm_op;
-      }
 
       switch(p.tag()){
       case Ptr_tag::symbol:
@@ -763,7 +765,6 @@ void eval(){
       }
 
       case Ptr_tag::vm_op:
-        treat_vm_op:
         if(auto op = p.get<VMop>()){
           op();
         }else{

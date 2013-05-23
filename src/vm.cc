@@ -14,16 +14,14 @@ VM::VM() : code(), stack(),
            extent(),
            symtable(),
            frame(nullptr),
-           exception_handler(),
-           unwind_mode()
+           exception_handler()
 {}
 
 VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           return_value(other.return_value),
                           extent(other.extent),
                           symtable(other.symtable),
-                          frame(other.frame),
-                          unwind_mode(other.unwind_mode)
+                          frame(other.frame)
 {}
 
 VM::~VM(){}
@@ -36,7 +34,6 @@ VM& VM::operator=(const VM& other){
   symtable = other.symtable;
   frame = other.frame;
   exception_handler = other.exception_handler;
-  unwind_mode = other.unwind_mode;
   return *this;
 }
 

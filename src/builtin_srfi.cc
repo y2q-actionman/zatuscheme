@@ -50,8 +50,8 @@ Lisp_ptr with_exception_handler(ZsArgs args){
 }
 
 Lisp_ptr raise(ZsArgs args){
-  vm.code.insert(vm.code.end(), {vm_op_raise, args[0]});
-  return {};
+  vm.code.push_back(vm_op_raise);
+  return args[0];
 }
 
 } // namespace builtin
