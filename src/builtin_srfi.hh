@@ -8,7 +8,6 @@ namespace builtin {
 Lisp_ptr error(ZsArgs);
 Lisp_ptr with_exception_handler(ZsArgs);
 Lisp_ptr raise(ZsArgs);
-Lisp_ptr internal_unwind(ZsArgs);
 
 } // namespace builtin
 
