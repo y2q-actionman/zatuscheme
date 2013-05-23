@@ -700,7 +700,7 @@ void vm_op_raise(){
   assert(vm.code.back().get<VMop>() == vm_op_raise);
   vm.code.pop_back();
 
-  throw vm.return_value;
+  throw vm.return_value_1();
 }
 
 void vm_op_unwind_guard(){
@@ -722,10 +722,7 @@ void vm_op_unwind_guard(){
 
 static void invoke_exception_handler(Lisp_ptr errobj){
   if(vm.exception_handler.empty()){
-    // this code disposes old error object..
-    throw zs_error_arg1("eval internal error",
-                        "No accociated exception handler!",
-                        {errobj});
+    throw errobj; // going to std::terminate (or handlers established by debug-build)
   }
 
   auto handler = vm.exception_handler.back();

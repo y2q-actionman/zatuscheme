@@ -9,22 +9,22 @@ using namespace std;
 static void term_handle() noexcept{
   std::set_terminate(nullptr);
 
-  if(uncaught_exception()){
-    try{
-      rethrow_exception(current_exception());
-    }catch(Lisp_ptr errobj){
-      cerr << "uncaught exception!\n"
-           << "errobj: \n" << errobj << '\n'
-           << "vm dump: \n" << vm << '\n'
-           << endl;
-    }catch(const std::exception& e){
-      cerr << "uncaught system exception!\n"
-           << "what: " << e.what()
-           << endl;
-    }catch(...){
-      cerr << "unexpected internal exception!\n"
-           << endl;
-    }
+  cerr << "terminate() called." << endl;
+
+  try{
+    rethrow_exception(current_exception());
+  }catch(const Lisp_ptr& errobj){
+    cerr << "uncaught exception!\n"
+         << "errobj: \n" << errobj << '\n'
+         << "vm dump: \n" << vm << '\n'
+         << endl;
+  }catch(const std::exception& e){
+    cerr << "uncaught system exception!\n"
+         << "what: " << e.what()
+         << endl;
+  }catch(...){
+    cerr << "unexpected internal exception!\n"
+         << endl;
   }
 
   cerr << "Aborting..." << endl;
