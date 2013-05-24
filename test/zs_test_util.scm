@@ -52,13 +52,13 @@
                                ,expr 
                                (+ ,expected ,error))))))))
 
-;; TODO: use this!
-(define (with-ignoring-errors thunk)
-  (with-exception-handler (lambda (_) #f) thunk))
-
 (define-syntax test-error
   (traditional-transformer
    (lambda (expr)
-     `(if (not ,expr)
-          #t
-          (zs-test-fail '(not ,expr))))))
+     `(call-with-current-continuation
+       (lambda (cont)
+         (with-exception-handler
+          (lambda (e) (cont #t e))
+          (lambda ()
+            ,expr
+            (zs-test-fail '(error ,expr)))))))))

@@ -14,17 +14,17 @@
 
 (test-equal #\a (string-ref "a" 0))
 (test-equal #\d (string-ref "abcde" 3))
-;; (test-error (string-ref "a" -1))
-;; (test-error (string-ref "a" 100))
-;; (test-error (string-ref "" 0))
+(test-error (string-ref "a" -1))
+(test-error (string-ref "a" 100))
+(test-error (string-ref "" 0))
 
 (define tmpstr (make-string 3 #\*))
 (string-set! tmpstr 0 #\?)
 (test-equal "?**" tmpstr)
 (string-set! tmpstr 1 #\!)
 (test-equal "?!*" tmpstr)
-;; (test-error (string-set! tmpstr -1 #\_))
-;; (test-error (string-set! tmpstr 100 #\_))
+(test-error (string-set! tmpstr -1 #\_))
+(test-error (string-set! tmpstr 100 #\_))
 
 ;; when immutable string implemented..
 ;; (define (f) (make-string 3 #\*))
@@ -77,8 +77,8 @@
 (test-equal "1234" (substring "0123456789" 1 5))
 (test-equal "" (substring "0123456789" 1 1))
 (test-equal "0" (substring "0123456789" 0 1))
-;; (test-error (substring "0123456789" -1 1))
-;; (test-error (substring "0123456789" 0 999))
+(test-error (substring "0123456789" -1 1))
+(test-error (substring "0123456789" 0 999))
 ;; (test-error (substring "0123456789" 5 4))
 ;; (test-error (substring "0123456789" 199 -1))
 
