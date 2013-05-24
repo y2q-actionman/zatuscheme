@@ -87,6 +87,10 @@ void gc_mark(const VM& v){
   }
   
   gc_mark(v.frame);
+
+  for(auto i : v.exception_handler){
+    gc_mark_lp(i);
+  }
 }
 
 } // namespace

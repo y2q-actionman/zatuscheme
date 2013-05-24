@@ -15,7 +15,7 @@ static void term_handle() noexcept{
     rethrow_exception(current_exception());
   }catch(const Lisp_ptr& errobj){
     cerr << "uncaught exception!\n"
-         << "errobj: \n" << errobj << '\n'
+         << "raised object: " << errobj << '\n'
          << "vm dump: \n" << vm << '\n'
          << endl;
   }catch(const std::exception& e){
