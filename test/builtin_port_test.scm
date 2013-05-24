@@ -2,22 +2,22 @@
 
 (define test-file-name "/tmp/zs_test.txt")
 
-(test-error (input-port? 'hoge))
-(test-assert (input-port? (current-input-port)))
-(test-error (input-port? (current-output-port)))
+(test-eq #f (input-port? 'hoge))
+(test-eq #t (input-port? (current-input-port)))
+(test-eq #f (input-port? (current-output-port)))
 
-(test-error (output-port? 'hoge))
-(test-error (output-port? (current-input-port)))
-(test-assert (output-port? (current-output-port)))
+(test-eq #f (output-port? 'hoge))
+(test-eq #f (output-port? (current-input-port)))
+(test-eq #t (output-port? (current-output-port)))
 
 (define tmpf (open-output-file test-file-name)) 
-(test-error (input-port? tmpf))
-(test-assert (output-port? tmpf))
+(test-eq #f (input-port? tmpf))
+(test-eq #t (output-port? tmpf))
 (close-output-port tmpf)
 
 (define tmpf (open-input-file test-file-name)) 
-(test-assert (input-port? tmpf))
-(test-error (output-port? tmpf))
+(test-eq #t (input-port? tmpf))
+(test-eq #f (output-port? tmpf))
 (close-input-port tmpf)
 
 (define tmpf (open-output-file test-file-name)) 
@@ -36,7 +36,7 @@
 (test-eqv #\c (peek-char tmpf))
 (test-eqv #\c (read-char tmpf))
 (test-eqv #\newline (read-char tmpf))
-(test-assert (eof-object? (read-char tmpf)))
+(test-eq #t (eof-object? (read-char tmpf)))
 (close-input-port tmpf)
 
 (define tmpf (open-output-file test-file-name)) 
@@ -49,7 +49,7 @@
 (test-equal '(1 2 3 4 5) (read tmpf))
 (test-equal #(#\a #\b #\space) (read tmpf))
 (test-equal " \" " (read tmpf))
-(test-assert (eof-object? (read-char tmpf)))
+(test-eq #t (eof-object? (read-char tmpf)))
 (close-input-port tmpf)
 
 
@@ -65,7 +65,7 @@
 (test-eqv #\space (read-char tmpf))
 (test-eqv #\" (read-char tmpf))
 (test-eqv #\space (read-char tmpf))
-(test-assert (eof-object? (read-char tmpf)))
+(test-eq #t (eof-object? (read-char tmpf)))
 (close-input-port tmpf)
 
 (test-eqv 'written

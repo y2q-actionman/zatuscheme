@@ -1,8 +1,8 @@
 (load "zs_test_util.scm")
 
-(test-assert (vector? '#()))
-(test-assert (vector? '#(1)))
-(test-error (vector? 'foo))
+(test-eq #t (vector? '#()))
+(test-eq #t (vector? '#(1)))
+(test-eq #f (vector? 'foo))
 
 (test-equal '#(a a a) (make-vector 3 'a))
 (test-equal '#(a a a a a) (make-vector 5 'a))

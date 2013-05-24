@@ -52,14 +52,14 @@
 (test-assert sc-test-3)
 ;; (test-error (eval sc-test-3 (null-environment 5)))
 
-(test-assert (identifier? 'a))
-(test-assert (identifier? (make-syntactic-closure (null-environment 5) '() 'a)))
-(test-error (identifier? "a"))
-(test-error (identifier? #\a))
-(test-error (identifier? 97))
-(test-error (identifier? #f))
-(test-error (identifier? '(a)))
-(test-error (identifier? '#(a)))
+(test-eq #t (identifier? 'a))
+(test-eq #t (identifier? (make-syntactic-closure (null-environment 5) '() 'a)))
+(test-eq #f (identifier? "a"))
+(test-eq #f (identifier? #\a))
+(test-eq #f (identifier? 97))
+(test-eq #f (identifier? #f))
+(test-eq #f (identifier? '(a)))
+(test-eq #f (identifier? '#(a)))
 
 ;; syntactic closure examples (from MIT-scheme documents)
 (define-syntax push

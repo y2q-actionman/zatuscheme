@@ -1,9 +1,9 @@
 (load "zs_test_util.scm")
 
-(test-assert (pair? '(a . b)))
-(test-assert (pair? '(a b c)))
-(test-error (pair? '()))
-(test-error (pair? #(a b)))
+(test-eq #t (pair? '(a . b)))
+(test-eq #t (pair? '(a b c)))
+(test-eq #f (pair? '()))
+(test-eq #f (pair? #(a b)))
 
 (test-equal '(a) (cons 'a '()))
 (test-equal '((a) b c d) (cons '(a) '(b c d)))
@@ -27,10 +27,10 @@
 (set-cdr! tmp 2)
 (test-equal '(1 . 2) tmp)
 
-(test-assert (list? '(a b c)))
-(test-assert (list? '()))
-(test-error (list? '(a . b)))
-(test-error (let ((x (list 'a))) 
+(test-eq #t (list? '(a b c)))
+(test-eq #t (list? '()))
+(test-eq #f (list? '(a . b)))
+(test-eq #f (let ((x (list 'a))) 
               (set-cdr! x x) 
               (list? x)))
 
@@ -105,8 +105,8 @@
 
 (test-equal '(a b c) (memq 'a '(a b c)))
 (test-equal '(b c) (memq 'b '(a b c)))
-(test-error (memq 'a '(b c d)))
-(test-error (memq (list 'a) '(b (a) c)))
+(test-eq #f (memq 'a '(b c d)))
+(test-eq #f (memq (list 'a) '(b (a) c)))
 (test-equal '((a) c) (member (list 'a) '(b (a) c)))
 (test-equal '(101 102) (memq 101 '(100 101 102))) ; unspecified
 (test-equal '(101 102) (memv 101 '(100 101 102)))
@@ -114,8 +114,8 @@
 (define e '((a 1) (b 2) (c 3)))
 (test-equal '(a 1) (assq 'a e))
 (test-equal '(b 2) (assq 'b e))
-(test-error (assq 'd e))
-(test-error (assq (list 'a) '(((a)) ((b)) ((c)))))
+(test-eq #f (assq 'd e))
+(test-eq #f (assq (list 'a) '(((a)) ((b)) ((c)))))
 (test-equal '((a)) (assoc (list 'a) '(((a)) ((b)) ((c)))))
 (test-equal '(5 7) (assq 5 '((2 3) (5 7) (11 13)))) ; unspecified
 (test-equal '(5 7) (assv 5 '((2 3) (5 7) (11 13))))

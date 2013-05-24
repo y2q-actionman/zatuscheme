@@ -1,11 +1,11 @@
 (load "zs_test_util.scm")
 
-(test-assert (symbol? 'foo))
-(test-assert (symbol? (car '(a b))))
-(test-error (symbol? "bar"))
-(test-assert (symbol? 'nil))
-(test-error (symbol? '()))
-(test-error (symbol? #f))
+(test-eq #t (symbol? 'foo))
+(test-eq #t (symbol? (car '(a b))))
+(test-eq #f (symbol? "bar"))
+(test-eq #t (symbol? 'nil))
+(test-eq #f (symbol? '()))
+(test-eq #f (symbol? #f))
 
 (test-assert (let ((ss (symbol->string 'flying-fish)))
                (or (equal? "flying-fish" ss)
@@ -19,13 +19,13 @@
 
 (test-eq 'mISSISSIppi 'mississippi)
 
-(test-assert (symbol? (string->symbol "mISSISSIppi")))
+(test-eq #t (symbol? (string->symbol "mISSISSIppi")))
 
-(test-error (eq? 'bitBlt (string->symbol "bitBlt")))
+(test-eq #f (eq? 'bitBlt (string->symbol "bitBlt")))
 
 (test-eq 'JollyWog (string->symbol (symbol->string 'JollyWog)))
 
-(test-assert (string=? "K. Harper, M.D."
+(test-eq #t (string=? "K. Harper, M.D."
                        (symbol->string (string->symbol "K. Harper, M.D."))))
 
 

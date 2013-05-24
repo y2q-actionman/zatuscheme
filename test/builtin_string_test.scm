@@ -1,7 +1,7 @@
 (load "zs_test_util.scm")
 
-(test-assert (string? "foo"))
-(test-error (string? 'foo))
+(test-eq #t (string? "foo"))
+(test-eq #f (string? 'foo))
 
 (test-equal "aaaaaaaaaa" (make-string 10 #\a))
 
@@ -33,45 +33,45 @@
 ;; (test-error (string-set! (g) 0 #\?))
 ;; (test-error (string-set! (symbol->string 'immutable) 0 #\?))
 
-(test-assert (string=? "aaa" "aaa"))
-(test-error (string=? "aaa" "aab"))
-(test-error (string=? "aba" "aab"))
+(test-eq #t (string=? "aaa" "aaa"))
+(test-eq #f (string=? "aaa" "aab"))
+(test-eq #f (string=? "aba" "aab"))
 
-(test-error (string<? "aaa" "aaa"))
-(test-assert (string<? "aaa" "aab"))
-(test-error (string<? "aba" "aab"))
+(test-eq #f (string<? "aaa" "aaa"))
+(test-eq #t (string<? "aaa" "aab"))
+(test-eq #f (string<? "aba" "aab"))
 
-(test-error (string>? "aaa" "aaa"))
-(test-error (string>? "aaa" "aab"))
-(test-assert (string>? "aba" "aab"))
+(test-eq #f (string>? "aaa" "aaa"))
+(test-eq #f (string>? "aaa" "aab"))
+(test-eq #t (string>? "aba" "aab"))
 
-(test-assert (string<=? "aaa" "aaa"))
-(test-assert (string<=? "aaa" "aab"))
-(test-error (string<=? "aba" "aab"))
+(test-eq #t (string<=? "aaa" "aaa"))
+(test-eq #t (string<=? "aaa" "aab"))
+(test-eq #f (string<=? "aba" "aab"))
 
-(test-assert (string>=? "aaa" "aaa"))
-(test-error (string>=? "aaa" "aab"))
-(test-assert (string>=? "aba" "aab"))
+(test-eq #t (string>=? "aaa" "aaa"))
+(test-eq #f (string>=? "aaa" "aab"))
+(test-eq #t (string>=? "aba" "aab"))
 
-(test-assert (string-ci=? "Aaa" "aaa"))
-(test-error (string-ci=? "Aaa" "aab"))
-(test-error (string-ci=? "Aba" "aab"))
+(test-eq #t (string-ci=? "Aaa" "aaa"))
+(test-eq #f (string-ci=? "Aaa" "aab"))
+(test-eq #f (string-ci=? "Aba" "aab"))
 
-(test-error (string-ci<? "Aaa" "aaa"))
-(test-assert (string-ci<? "Aaa" "aab"))
-(test-error (string-ci<? "Aba" "aab"))
+(test-eq #f (string-ci<? "Aaa" "aaa"))
+(test-eq #t (string-ci<? "Aaa" "aab"))
+(test-eq #f (string-ci<? "Aba" "aab"))
 
-(test-error (string-ci>? "Aaa" "aaa"))
-(test-error (string-ci>? "Aaa" "aab"))
-(test-assert (string-ci>? "Aba" "aab"))
+(test-eq #f (string-ci>? "Aaa" "aaa"))
+(test-eq #f (string-ci>? "Aaa" "aab"))
+(test-eq #t (string-ci>? "Aba" "aab"))
 
-(test-assert (string-ci<=? "Aaa" "aaa"))
-(test-assert (string-ci<=? "Aaa" "aab"))
-(test-error (string-ci<=? "Aba" "aab"))
+(test-eq #t (string-ci<=? "Aaa" "aaa"))
+(test-eq #t (string-ci<=? "Aaa" "aab"))
+(test-eq #f (string-ci<=? "Aba" "aab"))
 
-(test-assert (string-ci>=? "Aaa" "aaa"))
-(test-error (string-ci>=? "Aaa" "aab"))
-(test-assert (string-ci>=? "Aba" "aab"))
+(test-eq #t (string-ci>=? "Aaa" "aaa"))
+(test-eq #f (string-ci>=? "Aaa" "aab"))
+(test-eq #t (string-ci>=? "Aba" "aab"))
 
 
 (test-equal "1234" (substring "0123456789" 1 5))

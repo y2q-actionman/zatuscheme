@@ -8,8 +8,8 @@
 (test-eq #f (not (list)))
 (test-eq #f (not 'nil))
 
-(test-assert (boolean? #f))
-(test-error (boolean? 0))
-(test-error (boolean? '()))
+(test-eq #t (boolean? #f))
+(test-eq #f (boolean? 0))
+(test-eq #f (boolean? '()))
 
 (zs-test-report)

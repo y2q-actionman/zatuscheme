@@ -32,7 +32,7 @@
               x))
 
 ;; TODO: add more named-let patterns
-(test-assert (let loop ((x #f)) (if x x (loop #t))))
+(test-eq #t (let loop ((x #f)) (if x x (loop #t))))
 ;; (test-error (let 100 ((x 0))
 ;;               x))
 ;; (test-assert (let loop ((x #f)) (if x x (loop #f)))) // infinite loop!
