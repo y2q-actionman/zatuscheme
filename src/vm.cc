@@ -17,26 +17,11 @@ VM::VM() : code(), stack(),
            exception_handler()
 {}
 
-VM::VM(const VM& other) : code(other.code), stack(other.stack),
-                          return_value(other.return_value),
-                          extent(other.extent),
-                          symtable(other.symtable),
-                          frame(other.frame),
-                          exception_handler(other.exception_handler)
-{}
+VM::VM(const VM&) = default;
 
-VM::~VM(){}
+VM::~VM() = default;
 
-VM& VM::operator=(const VM& other){
-  code = other.code;
-  stack = other.stack;
-  return_value = other.return_value;
-  extent = other.extent,
-  symtable = other.symtable;
-  frame = other.frame;
-  exception_handler = other.exception_handler;
-  return *this;
-}
+VM& VM::operator=(const VM&) = default;
 
 std::ostream& operator<<(std::ostream& f, const VM& v){
   f << "--- [code] ---\n";
