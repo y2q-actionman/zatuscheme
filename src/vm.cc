@@ -21,7 +21,8 @@ VM::VM(const VM& other) : code(other.code), stack(other.stack),
                           return_value(other.return_value),
                           extent(other.extent),
                           symtable(other.symtable),
-                          frame(other.frame)
+                          frame(other.frame),
+                          exception_handler(other.exception_handler)
 {}
 
 VM::~VM(){}
@@ -66,6 +67,13 @@ std::ostream& operator<<(std::ostream& f, const VM& v){
 
   // f << "--- [symtable] ---\n";
   // f << *v.symtable_;
+
+  if(!v.exception_handler.empty()){
+    f << "--- [exception handler] ---\n";
+    for(auto i = v.exception_handler.rbegin(), e = v.exception_handler.rend(); i != e; ++i){
+      f << *i << "\n";
+    }
+  }
 
   f << "\n\n";
 
