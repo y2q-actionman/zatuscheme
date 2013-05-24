@@ -19,9 +19,9 @@
 
 (test-equal 'a (vector-ref '#(a) 0))
 (test-equal 'c (vector-ref '#(a b c d e) 2))
-;; (test-error (vector-ref '#(a) -1))
-;; (test-error (vector-ref '#(a) 100))
-;; (test-error (vector-ref '#() 0))
+(test-error (vector-ref '#(a) -1))
+(test-error (vector-ref '#(a) 100))
+(test-error (vector-ref '#() 0))
 
 (test-equal 8 (vector-ref '#(1 1 2 3 5 8 13 21) 5))
 (test-equal 13 (vector-ref '#(1 1 2 3 5 8 13 21)
@@ -34,8 +34,8 @@
 ;; (test-error (vector-set! '#(0 1 2) 1 "doe"))
 
 (define tmpvec (vector 1))
-;; (test-error (vector-set! tmpvec -1 'hoge))
-;; (test-error (vector-set! tmpvec 100 'hoge))
+(test-error (vector-set! tmpvec -1 'hoge))
+(test-error (vector-set! tmpvec 100 'hoge))
 
 (test-equal '(dah dah didah) (vector->list '#(dah dah didah)))
 (test-equal '#(dididit dah) (list->vector '(dididit dah)))

@@ -14,11 +14,11 @@
 (test-equal 'a (car '(a b c)))
 (test-equal '(a) (car '((a) b c d)))
 (test-equal 1 (car '(1 . 2)))
-;; (test-error (car '()))
+(test-error (car '()))
   
 (test-equal '(b c d) (cdr '((a) b c d)))
 (test-equal '2 (cdr '(1 . 2)))
-;; (test-error (cdr '()))
+(test-error (cdr '()))
 
 (define tmp (cons 'a 'b))
 (test-equal '(a . b) tmp)

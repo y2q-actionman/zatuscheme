@@ -16,7 +16,7 @@
 (test-eqv 2 (or #f 2 #f 4))
 
 (test-eqv 100 (let () 100))
-;; (test-error (let (x) x))                ; not '()
+(test-error (let (x) x))                ; not '()
 (test-eqv 1 (let ((x 1) (y 2) (z 3))
               x))
 (test-eqv 2 (let ((x 1) (y 2) (z 3))
@@ -33,8 +33,8 @@
 
 ;; TODO: add more named-let patterns
 (test-eq #t (let loop ((x #f)) (if x x (loop #t))))
-;; (test-error (let 100 ((x 0))
-;;               x))
+(test-error (let 100 ((x 0))
+              x))
 ;; (test-assert (let loop ((x #f)) (if x x (loop #f)))) // infinite loop!
 
 (test-eqv 1 (let* ((x 1))

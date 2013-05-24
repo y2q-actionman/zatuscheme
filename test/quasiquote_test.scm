@@ -1,7 +1,7 @@
 (load "zs_test_util.scm")
 
-;; (test-error ,@(1))
-;; (test-error `(,@1))
+(test-error ,@(1))
+(test-error `(,@1))
 (test-equal () `(,@()))
 
 (test-equal 1 `1)
