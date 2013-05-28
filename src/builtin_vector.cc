@@ -14,7 +14,11 @@ Lisp_ptr vector_make(ZsArgs args){
   if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[0]);
   }
+
   auto count = args[0].get<int>();
+  if(count < 0){
+    throw zs_error("passed size is less than 0");
+  }    
 
   switch(args.size()){
   case 1:

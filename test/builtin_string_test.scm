@@ -79,8 +79,8 @@
 (test-equal "0" (substring "0123456789" 0 1))
 (test-error (substring "0123456789" -1 1))
 (test-error (substring "0123456789" 0 999))
-;; (test-error (substring "0123456789" 5 4))
-;; (test-error (substring "0123456789" 199 -1))
+(test-error (substring "0123456789" 5 4))
+(test-error (substring "0123456789" 199 -1))
 
 (test-equal "" (string-append))
 (test-equal "" (string-append ""))

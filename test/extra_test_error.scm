@@ -15,17 +15,17 @@
              (lambda ()
                (+ 1 (raise 'an-error)))))))
 
-;; ;; PRINTS: something went wrong
-;; (test-error 
-;;  (call-with-current-continuation
-;;   (lambda (k)
-;;     (with-exception-handler
-;;      (lambda (x)
-;;        (display "something went wrong")
-;;        (newline)
-;;        'dont-care)
-;;      (lambda ()
-;;        (+ 1 (raise 'an-error)))))))
+;; PRINTS: something went wrong
+(test-error 
+ (call-with-current-continuation
+  (lambda (k)
+    (with-exception-handler
+     (lambda (x)
+       (display "something went wrong")
+       (newline)
+       'dont-care)
+     (lambda ()
+       (+ 1 (raise 'an-error)))))))
 
 ;; PRINTS: condition: an-error
 (test-eq 'exception
