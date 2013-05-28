@@ -9,8 +9,6 @@ using namespace std;
 static void term_handle() noexcept{
   std::set_terminate(nullptr);
 
-  cerr << "terminate() called." << endl;
-
   try{
     rethrow_exception(current_exception());
   }catch(const Lisp_ptr& errobj){

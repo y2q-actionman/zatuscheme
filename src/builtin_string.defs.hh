@@ -6,9 +6,6 @@
 {"make-string", {
     builtin::string_make,
     {1, 2}}},
-{"string", {
-    builtin::string_string,
-    {0, Variadic::t}}},
 {"string-length", {
     builtin::string_length,
     {1}}},

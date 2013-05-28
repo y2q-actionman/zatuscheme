@@ -1,5 +1,13 @@
 // This file is intended to be included into an array of 'const char*'
 
+"(define (string . chars)"
+"  (let* ((size (length chars))"
+"         (str (make-string size)))"
+"    (let loop ((i 0) (cs chars))"
+"       (if (null? cs) str"
+"         (begin (string-set! str i (car cs))"
+"                (loop (+ i 1) (cdr cs)))))))",
+
 #define STRING_CMP_FUNCS(op)                    \
   "(define (string"op"? s1 s2)"                 \
   "  ("op" (%string-strcmp s1 s2) 0))"

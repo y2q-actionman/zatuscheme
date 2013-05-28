@@ -59,20 +59,6 @@ Lisp_ptr string_make(ZsArgs args){
   }
 }
 
-Lisp_ptr string_string(ZsArgs args){
-  String ret;
-  for(auto p : args){
-    auto c = p.get<char>();
-    if(!c){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::character, p);
-    }
-
-    ret.push_back(c);
-  }
-
-  return {zs_new<String>(std::move(ret))};
-}
-  
 Lisp_ptr string_length(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){

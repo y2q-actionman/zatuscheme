@@ -6,7 +6,6 @@
 namespace builtin {
 
 Lisp_ptr string_make(ZsArgs);
-Lisp_ptr string_string(ZsArgs);
 Lisp_ptr string_length(ZsArgs);
 Lisp_ptr string_ref(ZsArgs);
 Lisp_ptr string_set(ZsArgs);
