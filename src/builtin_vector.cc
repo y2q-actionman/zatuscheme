@@ -84,21 +84,4 @@ Lisp_ptr vector_set(ZsArgs args){
   return args[2];
 }
 
-Lisp_ptr vector_to_list(ZsArgs args){
-  auto v = args[0].get<Vector*>();
-  if(!v){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::vector, args[0]);
-  }
-
-  return make_cons_list(v->begin(), v->end());
-}
-
-Lisp_ptr vector_from_list(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
-  }
-
-  return {zs_new<Vector>(begin(args[0]), end(args[0]))};
-}
-
 } // namespace builtin

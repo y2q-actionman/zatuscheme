@@ -18,10 +18,3 @@
 {"vector-set!", {
     builtin::vector_set,
     {3}}},
-
-{"vector->list", {
-    builtin::vector_to_list,
-    {1}}},
-{"list->vector", {
-    builtin::vector_from_list,
-    {1}}},
