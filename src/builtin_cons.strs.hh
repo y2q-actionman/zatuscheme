@@ -31,6 +31,9 @@
 "(define (cdddar x) (cdr (cddar x)))",
 "(define (cddddr x) (cdr (cdddr x)))",
 
+"(define (null? x)"
+"  (eq? x ()))",
+
 "(define (length lis)"
 "  (do ((l lis (cdr l))"
 "       (n 0 (+ n 1)))"

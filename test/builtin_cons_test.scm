@@ -5,6 +5,14 @@
 (test-eq #f (pair? '()))
 (test-eq #f (pair? #(a b)))
 
+(test-eq #t (null? ()))
+(test-eq #t (null? '()))
+(test-eq #f (null? 'a))
+(test-eq #f (null? '100))
+(test-eq #f (null? "hoge"))
+(test-eq #f (null? '(a)))
+(test-eq #f (null? '(a . b)))
+
 (test-equal '(a) (cons 'a '()))
 (test-equal '((a) b c d) (cons '(a) '(b c d)))
 (test-equal '("a" b c) (cons "a" '(b c)))

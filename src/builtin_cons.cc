@@ -63,10 +63,6 @@ Lisp_ptr cons_set_cdr(ZsArgs args){
 }
 
 
-Lisp_ptr cons_nullp(ZsArgs args){
-  return Lisp_ptr{nullp(args[0])};
-}
-
 Lisp_ptr cons_listp(ZsArgs args){
   if(args[0].tag() != Ptr_tag::cons){
     throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
