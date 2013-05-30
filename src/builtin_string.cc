@@ -138,31 +138,4 @@ Lisp_ptr string_append(ZsArgs args){
   return {zs_new<String>(std::move(ret))};
 }
 
-Lisp_ptr string_to_list(ZsArgs args){
-  auto str = args[0].get<String*>();
-  if(!str){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
-  }
-
-  return make_cons_list(str->begin(), str->end());
-}
-
-Lisp_ptr string_from_list(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
-  }
-
-  String ret;
-  
-  for(auto p : args[0]){
-    auto ch = p.get<char>();
-    if(!ch){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::character, p);
-    }
-    ret.push_back(ch);
-  }
-
-  return {zs_new<String>(std::move(ret))};
-}
-
 } // namespace builtin

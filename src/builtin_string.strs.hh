@@ -35,6 +35,15 @@ STRING_CI_CMP_FUNCS(">="),
 "        ((= i size) str2)"
 "      (string-set! str2 i (string-ref str (+ i start))))))",
 
+"(define (string->list str)"
+"  (let ((size (string-length str)))"
+"    (let loop ((i 0) (lis ()))"
+"       (if (= i size) (reverse lis)"
+"         (loop (+ i 1) (cons (string-ref str i) lis))))))",
+
+"(define (list->string lis)"
+"  (apply string lis))",
+
 "(define (string-copy str)"
 "  (substring str 0 (string-length str)))",
 

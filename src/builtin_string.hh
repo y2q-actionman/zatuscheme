@@ -14,8 +14,6 @@ Lisp_ptr internal_string_strcmp(ZsArgs);
 Lisp_ptr internal_string_strcasecmp(ZsArgs);
 
 Lisp_ptr string_append(ZsArgs);
-Lisp_ptr string_to_list(ZsArgs);
-Lisp_ptr string_from_list(ZsArgs);
 
 }
 

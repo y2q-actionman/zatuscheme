@@ -26,10 +26,3 @@
 {"string-append", {
     builtin::string_append,
     {0, Variadic::t}}},
-
-{"string->list", {
-    builtin::string_to_list,
-    {1}}},
-{"list->string", {
-    builtin::string_from_list,
-    {1}}},

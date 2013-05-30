@@ -13,9 +13,4 @@
 "         (loop (+ i 1) (cons (vector-ref vec i) lis))))))",
 
 "(define (list->vector lis)"
-"  (let* ((size (length lis))"
-"         (vec (make-vector size)))"
-"    (let loop ((i 0) (l lis))"
-"       (if (null? l) vec"
-"         (begin (vector-set! vec i (car l))"
-"                (loop (+ i 1) (cdr l)))))))",
+"  (apply vector lis))",
