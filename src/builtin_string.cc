@@ -123,19 +123,4 @@ Lisp_ptr internal_string_strcasecmp(ZsArgs args){
   return internal_string_cmp(move(args), strcasecmp);
 }
 
-Lisp_ptr string_append(ZsArgs args){
-  String ret;
-
-  for(auto p : args){
-    auto str = p.get<String*>();
-    if(!str){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::string, p);
-    }
-
-    ret.append(*str);
-  }
-
-  return {zs_new<String>(std::move(ret))};
-}
-
 } // namespace builtin

@@ -13,8 +13,6 @@ Lisp_ptr string_set(ZsArgs);
 Lisp_ptr internal_string_strcmp(ZsArgs);
 Lisp_ptr internal_string_strcasecmp(ZsArgs);
 
-Lisp_ptr string_append(ZsArgs);
-
 }
 
 #endif // BUILTIN_STRING_HH

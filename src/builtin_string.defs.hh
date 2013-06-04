@@ -22,7 +22,3 @@
 {"%string-strcasecmp", {
     builtin::internal_string_strcasecmp,
     {2}}},
-
-{"string-append", {
-    builtin::string_append,
-    {0, Variadic::t}}},

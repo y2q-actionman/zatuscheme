@@ -35,6 +35,20 @@ STRING_CI_CMP_FUNCS(">="),
 "        ((= i size) str2)"
 "      (string-set! str2 i (string-ref str (+ i start))))))",
 
+"(define (string-append . strs)"
+"  (let* ((size (let loop ((len 0) (s strs))"
+"                 (if (null? s) len"
+"                   (loop (+ len (string-length (car s))) (cdr s)))))"
+"         (str2 (make-string size)))"
+"    (let loop ((start 0) (s strs))"
+"      (if (null? s) str2"
+"        (let* ((str1 (car s))"
+"               (str1-len (string-length str1)))"
+"          (do ((read-i 0 (+ read-i 1))"
+"               (write-i start (+ write-i 1)))"
+"              ((= read-i str1-len) (loop write-i (cdr s)))"
+"            (string-set! str2 write-i (string-ref str1 read-i))))))))",
+
 "(define (string->list str)"
 "  (let ((size (string-length str)))"
 "    (let loop ((i 0) (lis ()))"
