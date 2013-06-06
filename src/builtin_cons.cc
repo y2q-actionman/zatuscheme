@@ -85,10 +85,6 @@ Lisp_ptr cons_listp(ZsArgs args){
   return Lisp_ptr{true};
 }
 
-Lisp_ptr cons_list(ZsArgs args){
-  return make_cons_list(begin(args), end(args));
-}
-
 Lisp_ptr cons_list_star(ZsArgs args){
   GrowList gl;
 

@@ -34,6 +34,9 @@
 "(define (null? x)"
 "  (eq? x ()))",
 
+"(define (list . objs)"
+"  objs)",
+
 "(define (length lis)"
 "  (do ((l lis (cdr l))"
 "       (n 0 (+ n 1)))"
