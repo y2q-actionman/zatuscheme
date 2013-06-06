@@ -7,7 +7,11 @@
 "    (set! read-obj (read))"
 "    (if (eof-object? read-obj) #t"
 "      (begin"
-"        (display (eval read-obj (interaction-environment)))"
+"        (call-with-current-continuation"
+"          (lambda (c)"
+"            (with-exception-handler"
+"                (lambda (e) (display e) (c #f))"
+"              (lambda () (display (eval read-obj (interaction-environment)))))))"
 "        (newline)"
 "        (repl-loop)))))",
 

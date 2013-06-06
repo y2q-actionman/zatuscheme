@@ -422,7 +422,7 @@ void proc_enter_entrypoint(Lisp_ptr proc){
   if(!is_procedure(proc.tag())){
     vm.code.pop_back();
     vm.stack.pop_back();
-    throw zs_error_arg1("eval error", "not procedure object is used for call", {proc});
+    throw zs_error_arg1("eval error", "the object used for call is not a procedure", {proc});
   }
 
   assert(!vm.stack.empty());
