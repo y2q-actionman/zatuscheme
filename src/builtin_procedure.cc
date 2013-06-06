@@ -90,8 +90,7 @@ Lisp_ptr call_with_values(ZsArgs args){
 
   auto info = get_procinfo(args[0]);
   if(info->required_args != 0){
-    throw zs_error(printf_string("first arg takes zero arg (takes %d)",
-                                 info->required_args));
+    throw builtin_argcount_failed(nullptr, info->required_args, info->max_args, 0);
   }    
 
   if(!is_procedure(args[1].tag())){
@@ -120,8 +119,7 @@ Lisp_ptr call_cc(ZsArgs args){
 
   auto info = get_procinfo(args[0]);
   if(!(info->required_args <= 1 && 1 <= info->max_args)){
-    throw zs_error(printf_string("first arg must take 1 arg at least(takes %d-%d)",
-                                 info->required_args, info->max_args));
+    throw builtin_argcount_failed(nullptr, info->required_args, info->max_args, 1);
   }
 
   proc = args[0];
@@ -142,8 +140,7 @@ Lisp_ptr dynamic_wind(ZsArgs args){
 
     auto info = get_procinfo(p);
     if(info->required_args != 0){
-      throw zs_error(printf_string("each arg must take 0 arg (%d)",
-                                   info->required_args));
+      throw builtin_argcount_failed(nullptr, info->required_args, info->max_args, 0);
     }
   }
 

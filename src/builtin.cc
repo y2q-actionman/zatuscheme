@@ -211,7 +211,8 @@ const NProcedure* find_builtin_nproc(const char* name){
      ([=](const BuiltinNProc& bf){ return strcmp(name, bf.name) == 0; })){
     return &(p->func);
   }else{
-    throw zs_error(printf_string("internal error: native function '%s' is not registered!", name));
+    throw zs_error_arg1(nullptr,
+                        printf_string("internal error: not registered native function! (%s)", name));
   }
 }
 

@@ -239,7 +239,7 @@ Lisp_ptr number_all_2(const Iter& args_begin, const Iter& args_end,
 struct inacceptable_number_type{
   template<typename T>
   bool operator()(T) const{
-    throw zs_error("number error: inacceptable type\n");
+    throw zs_error_arg1(nullptr, "number error: inacceptable type");
   }
 
   template<typename T>
