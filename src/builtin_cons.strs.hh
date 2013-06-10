@@ -34,6 +34,13 @@
 "(define (null? x)"
 "  (eq? x ()))",
 
+"(define (list? obj)"
+"  (let loop ((obj obj) (conses ()))"
+"    (cond ((null? obj) #t)"
+"          ((not (pair? obj)) #f)"
+"          ((memq obj conses) #f)"
+"          (else (loop (cdr obj) (cons obj conses))))))",
+
 "(define (list . objs)"
 "  objs)",
 

@@ -1,6 +1,3 @@
-#include <unordered_set>
-#include <iterator>
-
 #include "builtin_cons.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
@@ -62,28 +59,6 @@ Lisp_ptr cons_set_cdr(ZsArgs args){
                            [val](Cons* c){ return rplacd(c, val); });
 }
 
-
-Lisp_ptr cons_listp(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
-  }
-
-  auto found_cons = unordered_set<Cons*>();
-
-  auto i = begin(args[0]);
-  for(; i; ++i){
-    auto c = i.base().get<Cons*>();
-    if(found_cons.find(c) != found_cons.end())
-      return Lisp_ptr{false};   // circular list
-    found_cons.insert(c);
-  }
-
-  if(!nullp(i.base())){
-    return Lisp_ptr{false};     // dotted list
-  }
-  
-  return Lisp_ptr{true};
-}
 
 Lisp_ptr cons_list_star(ZsArgs args){
   GrowList gl;

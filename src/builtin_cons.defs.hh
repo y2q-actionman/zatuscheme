@@ -22,10 +22,6 @@
     builtin::cons_set_cdr,
     {2}}},
 
-{"list?", {
-    builtin::cons_listp,
-    {1}}},
-
 {"list*", {
     builtin::cons_list_star,
     {1, Variadic::t}}},
