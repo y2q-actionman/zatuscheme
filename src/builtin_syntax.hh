@@ -20,8 +20,6 @@ Lisp_ptr syntax_unquote_splicing(ZsArgs);
 Lisp_ptr syntax_else(ZsArgs);
 Lisp_ptr syntax_arrow(ZsArgs);
 Lisp_ptr syntax_define_syntax(ZsArgs);
-Lisp_ptr syntax_let_syntax(ZsArgs);
-Lisp_ptr syntax_letrec_syntax(ZsArgs);
 Lisp_ptr syntax_syntax_rules(ZsArgs);
 
 Lisp_ptr syntax_internal_memv(ZsArgs);

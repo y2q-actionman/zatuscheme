@@ -43,12 +43,6 @@
 {"define-syntax", {
     builtin::syntax_define_syntax,
     {2, 2, Passing::quote}}},
-{"let-syntax", {
-    builtin::syntax_let_syntax,
-    {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
-{"letrec-syntax", {
-    builtin::syntax_letrec_syntax,
-    {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
 
 {"syntax-rules", {
     builtin::syntax_syntax_rules,

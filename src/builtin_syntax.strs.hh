@@ -133,3 +133,15 @@
 "     x)"
 "    ((do \"step\" x y)"
 "     y)))",
+
+// in this implementation, 'let-syntax' is a synonym of 'let'.
+"(define-syntax let-syntax"
+"  (syntax-rules ()"
+"    ((_ x ...)"
+"     (let x ...))))",
+
+// in this implementation, 'letrec-syntax' is a synonym of 'letrec'.
+"(define-syntax letrec-syntax"
+"  (syntax-rules ()"
+"    ((_ x ...)"
+"     (letrec x ...))))",

@@ -34,66 +34,6 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
                             args, vm.frame, name);
 }
 
-Lisp_ptr let_internal(ZsArgs wargs, Entering entering){
-  auto arg_i = begin(wargs[0]);
-
-  // skips first 'let' symbol
-  ++arg_i;
-  if(!arg_i){
-    throw zs_error_arg1(nullptr, "informal syntax -- (LET . <...>)", {wargs[0]});
-  }
-
-  // checks named let
-  Lisp_ptr name = {};
-
-  if(identifierp(*arg_i)){
-    name = *arg_i;
-
-    ++arg_i;
-    if(!arg_i){
-      throw zs_error_arg1(nullptr, "informal syntax -- (LET <name> . <...>)", {wargs[0]});
-    }
-  }
-
-  // parses binding list
-  int len = 0;
-  GrowList gl_syms;
-  GrowList gl_vals;
-
-  for(auto bind : *arg_i){
-    if(bind.tag() != Ptr_tag::cons || nullp(bind)){
-      throw zs_error_arg1(nullptr, "informal object found in let binding", {bind});
-    }
-
-    ++len;
-
-    gl_syms.push(nth_cons_list<0>(bind));
-    gl_vals.push(nth_cons_list<1>(bind));
-  }
-
-  ++arg_i;
-  if(!arg_i){
-    throw zs_error_arg1(nullptr, "informal body", {wargs[0]});
-  }
-
-  // picks body
-  auto body = arg_i.base();
-
-
-  // parsing done. insert code.
-  wargs.cleanup();
-
-  auto proc = zs_new<IProcedure>(body, 
-                                 ProcInfo{len, Variadic::f,  Passing::eval,
-                                     Returning::pass, MoveReturnValue::t,
-                                     entering},
-                                 gl_syms.extract(), vm.frame, name);
-
-  vm.stack.push_back(push_cons_list({}, gl_vals.extract()));
-  vm.code.insert(vm.code.end(), {vm_op_call, proc});
-  return {};
-}
-
 } // namespace
 
 namespace builtin {
@@ -250,16 +190,6 @@ Lisp_ptr syntax_define_syntax(ZsArgs args){
   // TODO: check args[1] is a transformer.
   vm.code.insert(vm.code.end(), {args[0], vm_op_local_set, args[1]});
   return Lisp_ptr{true};
-}
-
-Lisp_ptr syntax_let_syntax(ZsArgs args){
-  // TODO: check each arg is a transformer.
-  return let_internal(move(args), Entering::at_jump);
-}
-
-Lisp_ptr syntax_letrec_syntax(ZsArgs args){
-  // TODO: check each arg is a transformer.
-  return let_internal(move(args), Entering::at_bind);
 }
 
 Lisp_ptr syntax_syntax_rules(ZsArgs args){
