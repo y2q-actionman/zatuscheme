@@ -388,49 +388,6 @@ void proc_enter_srule(SyntaxRules* srule){
   }
 }
 
-void proc_enter_entrypoint(Lisp_ptr proc){
-  if(!is_procedure(proc.tag())){
-    vm.code.pop_back();
-    vm.stack.pop_back();
-    throw zs_error_arg1("eval error", "the object used for call is not a procedure", {proc});
-  }
-
-  assert(!vm.stack.empty());
-
-  auto info = get_procinfo(proc);
-  auto argc = vm.stack.back().get<int>();
-
-  if(!(info->required_args <= argc && argc <= info->max_args)){
-    auto name = get_procname(proc);
-    const char* namestr = nullptr;
-    if(auto str = name.get<String*>()){
-      namestr = str->c_str();
-    }else{
-      namestr = "(?)";
-    }
-    // XXX: incomprehensible
-    // This local value is required, for avoiding a strange state.
-    // If throws directly, std::uncaught_exception() returns true,
-    // but std::current_exception() returns NULL object.
-    auto e = builtin_argcount_failed(namestr,
-                                     info->required_args,
-                                     info->max_args, argc);
-    throw e;
-  }
-
-  if(auto ifun = proc.get<IProcedure*>()){
-    proc_enter_interpreted(ifun, info);
-  }else if(auto nfun = proc.get<const NProcedure*>()){
-    proc_enter_native(nfun);
-  }else if(auto cont = proc.get<Continuation*>()){
-    proc_enter_cont(cont);
-  }else if(auto srule = proc.get<SyntaxRules*>()){
-    proc_enter_srule(srule);
-  }else{
-    throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
-  }
-}
-
 } //namespace
 
 /*
@@ -494,7 +451,46 @@ void vm_op_proc_enter(){
   auto proc = vm.code.back();
   vm.code.pop_back();
 
-  proc_enter_entrypoint(proc);
+  if(!is_procedure(proc.tag())){
+    vm.code.pop_back();
+    vm.stack.pop_back();
+    throw zs_error_arg1("eval error", "the object used for call is not a procedure", {proc});
+  }
+
+  assert(!vm.stack.empty());
+
+  auto info = get_procinfo(proc);
+  auto argc = vm.stack.back().get<int>();
+
+  if(!(info->required_args <= argc && argc <= info->max_args)){
+    auto name = get_procname(proc);
+    const char* namestr = nullptr;
+    if(auto str = name.get<String*>()){
+      namestr = str->c_str();
+    }else{
+      namestr = "(?)";
+    }
+    // XXX: incomprehensible
+    // This local value is required, for avoiding a strange state.
+    // If throws directly, std::uncaught_exception() returns true,
+    // but std::current_exception() returns NULL object.
+    auto e = builtin_argcount_failed(namestr,
+                                     info->required_args,
+                                     info->max_args, argc);
+    throw e;
+  }
+
+  if(auto ifun = proc.get<IProcedure*>()){
+    proc_enter_interpreted(ifun, info);
+  }else if(auto nfun = proc.get<const NProcedure*>()){
+    proc_enter_native(nfun);
+  }else if(auto cont = proc.get<Continuation*>()){
+    proc_enter_cont(cont);
+  }else if(auto srule = proc.get<SyntaxRules*>()){
+    proc_enter_srule(srule);
+  }else{
+    throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
+  }
 }
  
 /*
@@ -663,8 +659,8 @@ void vm_op_save_values_and_enter(){
 
   vm.code[vm.code.size() - 2] = zs_new<Vector>(vm.return_value);
   vm.code[vm.code.size() - 1] = vm_op_restore_values;
-  
-  proc_enter_entrypoint(proc);
+  vm.code.push_back(proc);
+  vm.code.push_back(vm_op_proc_enter);
 }
 
 void vm_op_get_current_env(){
