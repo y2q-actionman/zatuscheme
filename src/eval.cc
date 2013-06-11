@@ -72,36 +72,6 @@ static void vm_op_leave_frame_delayed(){
                  {oldenv, vm_op_leave_frame, op});
 }  
 
-static void enter_frame(IProcedure* iproc){
-  // tail call check
-  if(!vm.code.empty()
-     && vm.code.back().get<VMop>() == vm_op_leave_frame){
-    // cout << "tail call!" << endl;
-    vm_op_leave_frame();
-  }
-
-  // select leaving op
-  VMop leave_op;
-  switch(iproc->info()->leaving){
-  case Leaving::immediate:
-    leave_op = vm_op_leave_frame;
-    break;
-  case Leaving::after_returning_op:
-    leave_op = vm_op_leave_frame_delayed;
-    break;
-  default:
-    UNEXP_DEFAULT();
-  }
-
-  auto oldenv = vm.frame;
-  if(auto closure = iproc->closure()){
-    vm.frame = closure->push();
-  }else{
-    vm.frame = vm.frame->push();
-  }
-  vm.code.insert(vm.code.end(), {oldenv, leave_op});
-}
-
 void function_call(Lisp_ptr proc){
   auto args = vm.stack.back();
   vm.stack.pop_back();
@@ -243,7 +213,35 @@ void proc_enter_native(const NProcedure* fun){
   stack = ()
 */
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
-  enter_frame(fun);
+  // == entering frame ==
+
+  // tail call check
+  if(!vm.code.empty()
+     && vm.code.back().get<VMop>() == vm_op_leave_frame){
+    // cout << "tail call!" << endl;
+    vm_op_leave_frame();
+  }
+
+  // select leaving op
+  VMop leave_op;
+  switch(fun->info()->leaving){
+  case Leaving::immediate:
+    leave_op = vm_op_leave_frame;
+    break;
+  case Leaving::after_returning_op:
+    leave_op = vm_op_leave_frame_delayed;
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
+
+  auto oldenv = vm.frame;
+  if(auto closure = fun->closure()){
+    vm.frame = closure->push();
+  }else{
+    vm.frame = vm.frame->push();
+  }
+  vm.code.insert(vm.code.end(), {oldenv, leave_op});
 
   // == processing args ==
 
