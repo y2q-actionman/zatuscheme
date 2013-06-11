@@ -55,6 +55,23 @@ void vm_op_arg_push(){
 }
 
 
+// {..., <VMop>, env, leave_frame_delayed} -> {..., env, leave_frame, <VMop>}
+static void vm_op_leave_frame_delayed(){
+  assert(vm.code.back().get<VMop>() == vm_op_leave_frame_delayed);
+  vm.code.pop_back();
+
+  auto oldenv = vm.code.back();
+  assert(oldenv.tag() == Ptr_tag::env);
+  vm.code.pop_back();
+
+  auto op = vm.code.back();
+  assert(op.tag() == Ptr_tag::vm_op);
+  vm.code.pop_back();
+
+  vm.code.insert(vm.code.end(),
+                 {oldenv, vm_op_leave_frame, op});
+}  
+
 static void enter_frame(IProcedure* iproc){
   // tail call check
   if(!vm.code.empty()
@@ -63,13 +80,26 @@ static void enter_frame(IProcedure* iproc){
     vm_op_leave_frame();
   }
 
+  // select leaving op
+  VMop leave_op;
+  switch(iproc->info()->leaving){
+  case Leaving::immediate:
+    leave_op = vm_op_leave_frame;
+    break;
+  case Leaving::after_returning_op:
+    leave_op = vm_op_leave_frame_delayed;
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
+
   auto oldenv = vm.frame;
   if(auto closure = iproc->closure()){
     vm.frame = closure->push();
   }else{
     vm.frame = vm.frame->push();
   }
-  vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
+  vm.code.insert(vm.code.end(), {oldenv, leave_op});
 }
 
 void function_call(Lisp_ptr proc, Entering entering_flag){
@@ -231,46 +261,6 @@ void proc_enter_native(const NProcedure* fun){
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   if(info->entering == Entering::at_jump){
     enter_frame(fun);
-  }
-
-  switch(info->leaving){
-  case Leaving::immediate:
-    break;
-  case Leaving::after_returning_op: {
-    // finds last leave_op
-    decltype(vm.code.begin()) leave_op_i, b = vm.code.begin();
-    for(leave_op_i = prev(vm.code.end()); leave_op_i > b; --leave_op_i){
-      if(leave_op_i->tag() == Ptr_tag::vm_op 
-         && leave_op_i->get<VMop>() == vm_op_leave_frame)
-        break;
-    }
-
-    if(leave_op_i == b){
-      throw zs_error("eval internal error: vm_op_leave_frame is not found!\n");
-    }
-
-    // replacing
-    // {..., <VMop>, env, leave_frame} -> {..., env, leave_frame, <VMop>}
-    auto env_i = prev(leave_op_i);
-    if(env_i->tag() != Ptr_tag::env){
-      throw zs_error("eval internal error: leave op has no env!\n");
-    }
-
-    if(env_i == b){
-      throw zs_error("eval internal error: return op is not found!\n");
-    }
-
-    auto return_op_i = prev(env_i);
-    if(return_op_i->tag() != Ptr_tag::vm_op){
-      throw zs_error("eval internal error: return op is not VMop!\n");
-    }
-
-    std::swap(*return_op_i, *env_i);
-    std::swap(*env_i, *leave_op_i);
-    break;
-  }
-  default:
-    UNEXP_DEFAULT();
   }
 
   // == processing args ==
@@ -898,6 +888,8 @@ const char* stringify(VMop op){
     return "raise";
   }else if(op == vm_op_unwind_guard){
     return "unwind guard";
+  }else if(op == vm_op_leave_frame_delayed){
+    return "leave frame delayed";
   }else{
     return "unknown vm-op";
   }
