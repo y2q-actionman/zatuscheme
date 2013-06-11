@@ -590,7 +590,7 @@ void vm_op_set(){
   if(var.tag() == Ptr_tag::symbol){
     vm.frame->set(var, val);
   }else if(var.tag() == Ptr_tag::syntactic_closure){
-    if(vm.frame->find(var)){
+    if(vm.frame->is_bound(var)){
       // bound alias
       vm.frame->set(var, val);
     }else{
@@ -764,12 +764,11 @@ void eval(){
 
       case Ptr_tag::syntactic_closure: {
         // bound alias
-        if(identifierp(p)){
-          if(auto val = vm.frame->find(p)){
-            vm.code.pop_back();
-            vm.return_value = {val};
-            break;
-          }
+        if(identifierp(p) && vm.frame->is_bound(p)){
+          auto val = vm.frame->find(p);
+          vm.code.pop_back();
+          vm.return_value = {val};
+          break;
         }
 
         // not-bound syntax closure

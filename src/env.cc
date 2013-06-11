@@ -15,8 +15,17 @@ Env::Env(Env* e)
 
 Env::~Env(){}
 
+bool Env::is_bound(Lisp_ptr s) const{
+  for(auto e = this; e; e = e->next_){
+    if(e->map_.find(s) != e->map_.end()){
+      return true;
+    }
+  }
+  return false;
+}
+
 Lisp_ptr Env::find(Lisp_ptr s){
-  for(Env* e = this; e; e = e->next_){
+  for(auto e = this; e; e = e->next_){
     auto ei = e->map_.find(s);
     if(ei != e->map_.end()){
       return ei->second;
@@ -27,7 +36,7 @@ Lisp_ptr Env::find(Lisp_ptr s){
 }
 
 Lisp_ptr Env::set(Lisp_ptr s, Lisp_ptr p){
-  for(Env* e = this; e; e = e->next_){
+  for(auto e = this; e; e = e->next_){
     auto ei = e->map_.find(s);
     if(ei != e->map_.end()){
       auto old = ei->second;
