@@ -19,13 +19,6 @@
     builtin::syntax_begin,
     {1, Variadic::f, Passing::whole, Returning::code, MoveReturnValue::f}}},
 
-{"let", {
-    builtin::syntax_let,
-    {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
-{"letrec", {
-    builtin::syntax_letrec,
-    {1, Variadic::f, Passing::whole, Returning::pass, MoveReturnValue::f}}},
-
 {"delay", {
     builtin::syntax_delay,
     {1, Variadic::f, Passing::quote, Returning::code}}},

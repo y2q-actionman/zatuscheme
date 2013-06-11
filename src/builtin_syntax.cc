@@ -166,28 +166,6 @@ Lisp_ptr syntax_begin(ZsArgs args){
   return {};
 }
 
-Lisp_ptr syntax_let(ZsArgs args){
-  return let_internal(move(args), Entering::at_jump);
-}
-
-Lisp_ptr syntax_letrec(ZsArgs args){
-  // This heavyly depends on the implementation.
-  //
-  // normal let / funtion call
-  //   1. evaluate args
-  //      when a lambda form occurs, captures outer environment.
-  //   2. enter a new environment.
-  //   3. set args to the environment.
-  // 
-  // early bind
-  //   1. enter a new environment.
-  //   2. evaluate args
-  //      when a lambda form occurs, captures the environment.
-  //      so these lambdas refer the same environment.
-  //   3. set args to the environment.
-  return let_internal(move(args), Entering::at_bind);
-}
-
 Lisp_ptr syntax_delay(ZsArgs args){
   return {zs_new<Delay>(args[0], vm.frame)};
 }
