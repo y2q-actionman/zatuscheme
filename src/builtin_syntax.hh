@@ -3,6 +3,8 @@
 
 #include "builtin.hh"
 
+#define INTERNAL_UNDEFINED_SYMNAME "%undefined"
+
 namespace builtin {
 
 Lisp_ptr syntax_quote(ZsArgs);

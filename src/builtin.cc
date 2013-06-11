@@ -173,6 +173,7 @@ void install_builtin(){
   vm.frame = zs_new<Env>(nullptr);
   for(auto& i : builtin_syntax_funcs) install_native(i);
   for(auto i : builtin_syntax_strs) install_string(i);
+  install_symbol(INTERNAL_UNDEFINED_SYMNAME, {});
   eval();
   auto null_env = vm.frame;
 

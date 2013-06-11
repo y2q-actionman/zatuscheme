@@ -81,7 +81,7 @@
 "         (lambda (var ...)"
 "           (if test"
 "               (begin"
-"                 #f" // in R5RS, (if #f #f)
+"                 "INTERNAL_UNDEFINED_SYMNAME // in R5RS, (if #f #f)
 "                 expr ...)"
 "               (begin"
 "                 command"
