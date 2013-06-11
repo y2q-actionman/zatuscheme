@@ -82,8 +82,7 @@ Lisp_ptr string_ref(ZsArgs args){
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw zs_error(printf_string("index is out-of-bound ([0, %ld), supplied %d\n",
-                                 str->length(), ind));
+    throw builtin_range_check_failed(str->length(), ind);
   }
 
   return Lisp_ptr{(*str)[ind]};
@@ -101,8 +100,7 @@ Lisp_ptr string_set(ZsArgs args){
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw zs_error(printf_string("index is out-of-bound ([0, %ld), supplied %d\n",
-                                 str->length(), ind));
+    throw builtin_range_check_failed(str->length(), ind);
   }
 
   auto ch = args[2].get<char>();

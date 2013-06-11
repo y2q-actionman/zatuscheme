@@ -98,9 +98,9 @@ zs_error builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr 
 }
 
 zs_error builtin_argcount_failed(const char* name, int required, int max, int passed){
-  throw zs_error_arg1(name,
-                      printf_string("number of passed args is mismatched!!"
-                                    " (acceptable %d-%d args, passed %d)\n",
+  return zs_error_arg1(name,
+                       printf_string("number of passed args is mismatched!!"
+                                     " (acceptable %d-%d args, passed %d)\n",
                                     required, max, passed));
 }
 
@@ -108,4 +108,9 @@ zs_error builtin_identifier_check_failed(const char* name, Lisp_ptr p){
   return zs_error_arg1(name,
                        "arg is not identifier!",
                        {p});
+}
+
+zs_error builtin_range_check_failed(int max, int passed){
+  return zs_error(printf_string("index is out-of-bound ([0, %d), supplied %d\n",
+                                max, passed));
 }

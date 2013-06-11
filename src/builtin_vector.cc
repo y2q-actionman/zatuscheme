@@ -57,8 +57,7 @@ Lisp_ptr vector_ref(ZsArgs args){
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
-    throw zs_error(printf_string("index is out-of-bound ([0, %ld), supplied %d",
-                                 v->size(), ind));
+    throw builtin_range_check_failed(v->size(), ind);
   }
 
   return (*v)[ind];
@@ -76,8 +75,7 @@ Lisp_ptr vector_set(ZsArgs args){
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
-    throw zs_error(printf_string("index is out-of-bound ([0, %ld), supplied %d",
-                                 v->size(), ind));
+    throw builtin_range_check_failed(v->size(), ind);
   }
 
   (*v)[ind] = args[2];
