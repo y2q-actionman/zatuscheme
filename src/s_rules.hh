@@ -38,7 +38,6 @@ private:
              proc_flag::Passing::whole,
              proc_flag::Returning::code,
              proc_flag::MoveReturnValue::f,
-             // Entering::at_jump,
              // Leaving::after_returning_op
   };
 

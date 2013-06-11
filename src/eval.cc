@@ -102,25 +102,9 @@ static void enter_frame(IProcedure* iproc){
   vm.code.insert(vm.code.end(), {oldenv, leave_op});
 }
 
-void function_call(Lisp_ptr proc, Entering entering_flag){
+void function_call(Lisp_ptr proc){
   auto args = vm.stack.back();
   vm.stack.pop_back();
-
-  if(entering_flag == Entering::at_bind){
-    auto iproc = proc.get<IProcedure*>();
-    assert(iproc);
-
-    enter_frame(iproc);
-
-    // captures arguments
-    auto i = begin(iproc->arg_list());
-    for(; i ; ++i){
-      local_set_with_identifier(vm.frame, *i, Lisp_ptr{});
-    }
-    if(identifierp(i.base())){
-      local_set_with_identifier(vm.frame, i.base(), Lisp_ptr{});
-    }
-  }
 
   auto args_head = nthcdr_cons_list<1>(args); // skips first symbol
 
@@ -259,9 +243,7 @@ void proc_enter_native(const NProcedure* fun){
   stack = ()
 */
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
-  if(info->entering == Entering::at_jump){
-    enter_frame(fun);
-  }
+  enter_frame(fun);
 
   // == processing args ==
 
@@ -469,7 +451,7 @@ void vm_op_call(){
     // We must process args, even this situation is almost wrong.
     // This is required for using a continuation in args. If no global
     // jump occured, errors are reported after.
-    return function_call(proc, Entering::at_jump);
+    return function_call(proc);
   }
 
   const ProcInfo* info = get_procinfo(proc);
@@ -491,7 +473,7 @@ void vm_op_call(){
 
   switch(info->passing){
   case Passing::eval:
-    return function_call(proc, info->entering);
+    return function_call(proc);
   case Passing::quote:
     return macro_call(proc);
   case Passing::whole:

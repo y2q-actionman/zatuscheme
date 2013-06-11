@@ -22,10 +22,6 @@ namespace proc_flag {
 
   enum class MoveReturnValue : bool { f = false, t = true };
 
-  enum class Entering : unsigned char { 
-    at_bind, at_jump
-  };
-
   enum class Leaving : unsigned char {
     immediate, after_returning_op
   };
@@ -37,7 +33,6 @@ struct ProcInfo {
   proc_flag::Passing passing;
   proc_flag::Returning returning;
   proc_flag::MoveReturnValue move_ret;
-  proc_flag::Entering entering;
   proc_flag::Leaving leaving;
 
   constexpr ProcInfo(int rargs,
@@ -45,14 +40,12 @@ struct ProcInfo {
                      proc_flag::Passing p = proc_flag::Passing::eval,
                      proc_flag::Returning r = proc_flag::Returning::pass,
                      proc_flag::MoveReturnValue m = proc_flag::MoveReturnValue::t,
-                     proc_flag::Entering e = proc_flag::Entering::at_jump,
                      proc_flag::Leaving l = proc_flag::Leaving::immediate)
     : required_args(rargs),
       max_args(margs),
       passing(p),
       returning(r),
       move_ret(m),
-      entering(e),
       leaving(l){}
 
   // TODO: use delegating constructor
@@ -61,14 +54,12 @@ struct ProcInfo {
                      proc_flag::Passing p = proc_flag::Passing::eval,
                      proc_flag::Returning r = proc_flag::Returning::pass,
                      proc_flag::MoveReturnValue m = proc_flag::MoveReturnValue::t,
-                     proc_flag::Entering e = proc_flag::Entering::at_jump,
                      proc_flag::Leaving l = proc_flag::Leaving::immediate)
     : required_args(rargs),
       max_args((v == proc_flag::Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
       passing(p),
       returning(r),
       move_ret(m),
-      entering(e),
       leaving(l){}
 };
 
