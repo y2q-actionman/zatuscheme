@@ -303,15 +303,7 @@ Lisp_ptr internal_number_multiple(ZsArgs args){
                        multiplies<Complex>());
 }
 
-Lisp_ptr internal_number_minus_1(ZsArgs args){
-  return number_unary(args[0],
-                      [](int i){ return Rational(i, 1).negate(); },
-                      [](Rational q){ return q.negate(); },
-                      negate<double>(),
-                      negate<Complex>());
-}
-
-Lisp_ptr internal_number_minus_2(ZsArgs args){
+Lisp_ptr internal_number_minus(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1, 1) -= Rational(i2, 1); },
                        [](Rational q1, Rational q2){ return q1 -= q2; },
@@ -319,15 +311,7 @@ Lisp_ptr internal_number_minus_2(ZsArgs args){
                        minus<Complex>());
 }
 
-Lisp_ptr internal_number_divide_1(ZsArgs args){
-  return number_unary(args[0],
-                      [](int i){ return Rational(i, 1).inverse(); },
-                      [](Rational q){ return q.inverse(); },
-                      [](double d){ return 1.0 / d; },
-                      [](Complex z){ return 1.0 / z; });
-}
-
-Lisp_ptr internal_number_divide_2(ZsArgs args){
+Lisp_ptr internal_number_divide(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1, 1) /= Rational(i2, 1); },
                        [](Rational q1, Rational q2){ return q1 /= q2; },

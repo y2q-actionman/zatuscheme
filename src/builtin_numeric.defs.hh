@@ -50,17 +50,11 @@
 {"%*", {
     builtin::internal_number_multiple,
     {2}}},
-{"%-1", {
-    builtin::internal_number_minus_1,
-    {1}}},
-{"%-2", {
-    builtin::internal_number_minus_2,
+{"%-", {
+    builtin::internal_number_minus,
     {2}}},
-{"%/1", {
-    builtin::internal_number_divide_1,
-    {1}}},
-{"%/2", {
-    builtin::internal_number_divide_2,
+{"%/", {
+    builtin::internal_number_divide,
     {2}}},
 
 {"quotient", {
