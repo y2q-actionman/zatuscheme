@@ -15,38 +15,36 @@ Env::Env(Env* e)
 
 Env::~Env(){}
 
-bool Env::is_bound(Lisp_ptr s) const{
+template<typename Fun>
+Lisp_ptr Env::traverse(Lisp_ptr key, Fun f){
   for(auto e = this; e; e = e->next_){
-    if(e->map_.find(s) != e->map_.end()){
-      return true;
+    auto ei = e->map_.find(key);
+    if(ei != e->map_.end()){
+      return f(e, ei);
     }
   }
-  return false;
+  return {};
+}
+
+bool Env::is_bound(Lisp_ptr s){
+  return static_cast<bool>
+    (traverse(s, [](Env*, Env::map_type::iterator){
+        return Lisp_ptr{true};
+      }));
 }
 
 Lisp_ptr Env::find(Lisp_ptr s){
-  for(auto e = this; e; e = e->next_){
-    auto ei = e->map_.find(s);
-    if(ei != e->map_.end()){
+  return traverse(s, [](Env*, Env::map_type::iterator ei){
       return ei->second;
-    }
-  }
-
-  return {};
+    });
 }
 
-Lisp_ptr Env::set(Lisp_ptr s, Lisp_ptr p){
-  for(auto e = this; e; e = e->next_){
-    auto ei = e->map_.find(s);
-    if(ei != e->map_.end()){
-      auto old = ei->second;
+void Env::set(Lisp_ptr s, Lisp_ptr p){
+  traverse(s, [&](Env* e, Env::map_type::iterator ei) -> Lisp_ptr{
       e->map_.erase(ei);
       e->map_.insert({s, p});
-      return old;
-    }
-  }
-
-  return {};
+      return {};
+    });
 }
 
 void Env::local_set(Lisp_ptr s, Lisp_ptr p){

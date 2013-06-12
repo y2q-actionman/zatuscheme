@@ -22,9 +22,9 @@ public:
   Env& operator=(const Env&) = delete;
   Env& operator=(Env&&) = delete;
 
-  bool is_bound(Lisp_ptr) const;
+  bool is_bound(Lisp_ptr);
   Lisp_ptr find(Lisp_ptr);
-  Lisp_ptr set(Lisp_ptr, Lisp_ptr);
+  void set(Lisp_ptr, Lisp_ptr);
   void local_set(Lisp_ptr, Lisp_ptr);
   Env* push();
 
@@ -34,6 +34,9 @@ public:
   friend void gc_mark(Env*);
 
 private:
+  template<typename Fun>
+  Lisp_ptr traverse(Lisp_ptr, Fun);
+
   map_type map_;
   Env* next_;
 };
