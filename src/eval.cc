@@ -55,23 +55,6 @@ void vm_op_arg_push(){
 }
 
 
-// {..., <VMop>, env, leave_frame_delayed} -> {..., env, leave_frame, <VMop>}
-static void vm_op_leave_frame_delayed(){
-  assert(vm.code.back().get<VMop>() == vm_op_leave_frame_delayed);
-  vm.code.pop_back();
-
-  auto oldenv = vm.code.back();
-  assert(oldenv.tag() == Ptr_tag::env);
-  vm.code.pop_back();
-
-  auto op = vm.code.back();
-  assert(op.tag() == Ptr_tag::vm_op);
-  vm.code.pop_back();
-
-  vm.code.insert(vm.code.end(),
-                 {oldenv, vm_op_leave_frame, op});
-}  
-
 void function_call(Lisp_ptr proc){
   auto args = vm.stack.back();
   vm.stack.pop_back();
@@ -203,8 +186,6 @@ void proc_enter_native(const NProcedure* fun){
   stack = ()
 */
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
-  // == entering frame ==
-
   // tail call check
   if(!vm.code.empty()
      && vm.code.back().get<VMop>() == vm_op_leave_frame){
@@ -212,29 +193,29 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     vm_op_leave_frame();
   }
 
-  // select leaving op
-  VMop leave_op;
-  switch(fun->info()->leaving){
-  case Leaving::immediate:
-    leave_op = vm_op_leave_frame;
-    break;
-  case Leaving::after_returning_op:
-    leave_op = vm_op_leave_frame_delayed;
-    break;
-  default:
-    UNEXP_DEFAULT();
-  }
-
+  // == entering frame ==
   auto oldenv = vm.frame;
   if(auto closure = fun->closure()){
     vm.frame = closure->push();
   }else{
     vm.frame = vm.frame->push();
   }
-  vm.code.insert(vm.code.end(), {oldenv, leave_op});
+
+  switch(fun->info()->leaving){
+  case Leaving::immediate:
+    vm.code.insert(vm.code.end(), {oldenv, vm_op_leave_frame});
+    break;
+  case Leaving::after_returning_op:
+    assert(info->returning == Returning::code
+           || info->returning == Returning::stack_splice);
+    assert(vm.code.back().tag() == Ptr_tag::vm_op);
+    vm.code.insert(prev(vm.code.end()), {oldenv, vm_op_leave_frame});
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
 
   // == processing args ==
-
   Lisp_ptr arg_name = fun->arg_list();
   Lisp_ptr argc = vm.stack.back();
   vm.stack.pop_back();
@@ -388,6 +369,7 @@ void proc_enter_srule(SyntaxRules* srule){
 */
 void vm_op_call(){
   assert(vm.code.back().get<VMop>() == vm_op_call);
+  vm.code.pop_back();
 
   auto proc = vm.return_value_1();
 
@@ -401,20 +383,6 @@ void vm_op_call(){
 
   const ProcInfo* info = get_procinfo(proc);
   assert(info);
-
-  switch(info->returning){
-  case Returning::pass:
-    vm.code.pop_back();
-    break;
-  case Returning::code:
-    vm.code.back() = vm_op_macro_call;
-    break;
-  case Returning::stack_splice:
-    vm.code.back() = vm_op_stack_splicing;
-    break;
-  default:
-    UNEXP_DEFAULT();
-  }
 
   switch(info->passing){
   case Passing::eval:
@@ -470,6 +438,19 @@ void vm_op_proc_enter(){
     throw e;
   }
 
+  switch(info->returning){
+  case Returning::pass:
+    break;
+  case Returning::code:
+    vm.code.push_back(vm_op_macro_call);
+    break;
+  case Returning::stack_splice:
+    vm.code.push_back(vm_op_stack_splicing);
+    break;
+  default:
+    UNEXP_DEFAULT();
+  }
+
   if(auto ifun = proc.get<IProcedure*>()){
     proc_enter_interpreted(ifun, info);
   }else if(auto nfun = proc.get<const NProcedure*>()){
@@ -479,7 +460,7 @@ void vm_op_proc_enter(){
   }else if(auto srule = proc.get<SyntaxRules*>()){
     proc_enter_srule(srule);
   }else{
-    throw zs_error("eval internal error: corrupted code stack -- no proc found for entering!\n");
+    UNEXP_DEFAULT();
   }
 }
  
@@ -784,8 +765,7 @@ void eval(){
         throw zs_error("eval internal error: vm-argcount is rest on VM code stack!\n");
 
       default:
-        throw zs_error(printf_string("eval error: unknown object appeared! (tag = %d)!\n",
-                                     static_cast<int>(p.tag())));
+        UNEXP_DEFAULT();
       }
 
       ++instruction_counter;
@@ -853,8 +833,6 @@ const char* stringify(VMop op){
     return "raise";
   }else if(op == vm_op_unwind_guard){
     return "unwind guard";
-  }else if(op == vm_op_leave_frame_delayed){
-    return "leave frame delayed";
   }else{
     return "unknown vm-op";
   }
