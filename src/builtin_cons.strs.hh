@@ -49,6 +49,21 @@
 "       (n 0 (+ n 1)))"
 "      ((null? l) n)))",
 
+"(define (append . lsts)"
+"  (cond ((null? lsts) ())"
+"        ((null? (cdr lsts)) (car lsts))"
+"        ((null? (car lsts)) (apply append (cdr lsts)))"
+"        (else"
+"         (define head (cons (caar lsts) ()))"
+"         (let loop ((l (cdar lsts))"
+"                    (c head))"
+"           (cond ((null? l)"
+"                  (set-cdr! c (apply append (cdr lsts)))"
+"                  head)"
+"                 (else"
+"                  (set-cdr! c (cons (car l) ()))"
+"                  (loop (cdr l) (cdr c))))))))",
+
 "(define (reverse lis)"
 "  (do ((l lis (cdr l))"
 "       (ret () (cons (car l) ret)))"

@@ -25,7 +25,3 @@
 {"list*", {
     builtin::cons_list_star,
     {1, Variadic::t}}},
-
-{"append", {
-    builtin::cons_append,
-    {1, Variadic::t}}},

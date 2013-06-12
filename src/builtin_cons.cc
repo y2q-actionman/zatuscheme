@@ -70,21 +70,4 @@ Lisp_ptr cons_list_star(ZsArgs args){
   return gl.extract_with_tail(args[args.size() - 1]);
 }
 
-Lisp_ptr cons_append(ZsArgs args){
-  GrowList gl;
-
-  for(auto i = 0; i < args.size() - 1; ++i){
-    if(args[i].tag() != Ptr_tag::cons){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[i]);
-    }
-
-    for(auto p : args[i]){
-      gl.push(p);
-    }
-  }
-
-  // last
-  return gl.extract_with_tail(args[args.size() - 1]);
-}
-
 } // namespace builtin
