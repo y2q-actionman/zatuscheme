@@ -33,13 +33,6 @@
     builtin::syntax_unquote_splicing,
     {1, Variadic::f, Passing::eval, Returning::stack_splice, MoveReturnValue::f}}},
 
-{"else", {
-    builtin::syntax_else,
-    {2, Variadic::f, Passing::whole}}},
-{"=>", {
-    builtin::syntax_arrow,
-    {2, Variadic::f, Passing::whole}}},
-
 {"define-syntax", {
     builtin::syntax_define_syntax,
     {2, 2, Passing::quote}}},

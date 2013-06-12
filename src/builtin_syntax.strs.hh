@@ -134,6 +134,13 @@
 "    ((do \"step\" x y)"
 "     y)))",
 
+// dummy operators
+"(define (else . _)"
+"  "INTERNAL_UNDEFINED_SYMNAME")",
+
+"(define (=> . _)"
+"  "INTERNAL_UNDEFINED_SYMNAME")",
+
 // in this implementation, 'let-syntax' is a synonym of 'let'.
 "(define-syntax let-syntax"
 "  (syntax-rules ()"

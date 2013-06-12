@@ -174,14 +174,6 @@ Lisp_ptr syntax_unquote_splicing(ZsArgs args){
   return {};
 }
 
-Lisp_ptr syntax_else(ZsArgs){
-  throw zs_error_arg1(nullptr, "cannot be used as operator!!");
-}
-
-Lisp_ptr syntax_arrow(ZsArgs){
-  throw zs_error_arg1(nullptr, "cannot be used as operator!!");
-}
-
 Lisp_ptr syntax_define_syntax(ZsArgs args){
   if(!identifierp(args[0])){
     throw builtin_identifier_check_failed(nullptr, args[0]);
