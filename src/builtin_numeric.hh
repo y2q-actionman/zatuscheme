@@ -12,11 +12,11 @@ Lisp_ptr rationalp(ZsArgs);
 Lisp_ptr integerp(ZsArgs);
 Lisp_ptr exactp(ZsArgs);
 
-Lisp_ptr number_equal(ZsArgs);
-Lisp_ptr number_less(ZsArgs);
-Lisp_ptr number_greater(ZsArgs);
-Lisp_ptr number_less_eq(ZsArgs);
-Lisp_ptr number_greater_eq(ZsArgs);
+Lisp_ptr internal_number_equal(ZsArgs);
+Lisp_ptr internal_number_less(ZsArgs);
+Lisp_ptr internal_number_greater(ZsArgs);
+Lisp_ptr internal_number_less_eq(ZsArgs);
+Lisp_ptr internal_number_greater_eq(ZsArgs);
 
 Lisp_ptr number_max(ZsArgs);
 Lisp_ptr number_min(ZsArgs);

@@ -123,8 +123,8 @@ Lisp_ptr wrap_number(const Complex& z){
   return {zs_new<Complex>(z)};
 }
 
-Lisp_ptr wrap_number(bool){
-  UNEXP_DEFAULT();
+Lisp_ptr wrap_number(bool b){
+  return Lisp_ptr{b};
 }
 
 //
@@ -195,47 +195,6 @@ Lisp_ptr number_fold(const Iter& args_begin, const Iter& args_end,
   return acc;
 }
 
-template<typename IFun, typename QFun, typename RFun, typename CFun, typename Iter>
-Lisp_ptr number_all_2(const Iter& args_begin, const Iter& args_end,
-                      const IFun& ifun, const QFun& qfun,
-                      const RFun& rfun, const CFun& cfun){
-  auto i1 = args_begin;
-  auto i2 = next(i1);
-  auto e = args_end;
-
-  if(!is_numeric_type(*i1)){
-    throw number_type_check_failed(*i1);
-  }
-
-  for(; i2 != e; i1 = i2, ++i2){
-    if(!is_numeric_type(*i2)){
-      throw number_type_check_failed(*i2);
-    }
-
-    if(is_integer_type(*i1) && is_integer_type(*i2)){
-      if(!ifun(coerce<int>(*i1), coerce<int>(*i2))){
-        return Lisp_ptr{false};
-      }
-    }else if(is_rational_type(*i1) && is_rational_type(*i2)){
-      if(!qfun(coerce<Rational>(*i1), coerce<Rational>(*i2))){
-        return Lisp_ptr{false};
-      }
-    }else if(is_real_type(*i1) && is_real_type(*i2)){
-      if(!rfun(coerce<double>(*i1), coerce<double>(*i2))){
-        return Lisp_ptr{false};
-      }
-    }else if(is_complex_type(*i1) && is_complex_type(*i2)){
-      if(!cfun(coerce<Complex>(*i1), coerce<Complex>(*i2))){
-        return Lisp_ptr{false};
-      }
-    }else{
-      UNEXP_DEFAULT();
-    }
-  }
-
-  return Lisp_ptr{true};
-}
-
 struct inacceptable_number_type{
   template<typename T>
   bool operator()(T) const{
@@ -285,40 +244,40 @@ Lisp_ptr exactp(ZsArgs args){
                   || args[0].tag() == Ptr_tag::rational};
 }
 
-Lisp_ptr number_equal(ZsArgs args){
-  return number_all_2(begin(args), end(args),
+Lisp_ptr internal_number_equal(ZsArgs args){
+  return number_binary(args[0], args[1],
                       equal_to<int>(),
                       equal_to<Rational>(),
                       equal_to<double>(),
                       equal_to<Complex>());
 }
 
-Lisp_ptr number_less(ZsArgs args){
-  return number_all_2(begin(args), end(args),
+Lisp_ptr internal_number_less(ZsArgs args){
+  return number_binary(args[0], args[1],
                       less<int>(),
                       less<Rational>(),
                       less<double>(),
                       inacceptable_number_type());
 }
 
-Lisp_ptr number_greater(ZsArgs args){
-  return number_all_2(begin(args), end(args),
+Lisp_ptr internal_number_greater(ZsArgs args){
+  return number_binary(args[0], args[1],
                       greater<int>(),
                       greater<Rational>(),
                       greater<double>(),
                       inacceptable_number_type());
 }
   
-Lisp_ptr number_less_eq(ZsArgs args){
-  return number_all_2(begin(args), end(args),
+Lisp_ptr internal_number_less_eq(ZsArgs args){
+  return number_binary(args[0], args[1],
                       less_equal<int>(),
                       less_equal<Rational>(),
                       less_equal<double>(),
                       inacceptable_number_type());
 }
   
-Lisp_ptr number_greater_eq(ZsArgs args){
-  return number_all_2(begin(args), end(args),
+Lisp_ptr internal_number_greater_eq(ZsArgs args){
+  return number_binary(args[0], args[1],
                       greater_equal<int>(),
                       greater_equal<Rational>(),
                       greater_equal<double>(),

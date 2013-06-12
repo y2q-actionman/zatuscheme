@@ -21,21 +21,21 @@
     builtin::exactp,
     {1}}},
 
-{"=", {
-    builtin::number_equal,
-    {2, Variadic::t}}},
-{"<", {
-    builtin::number_less,
-    {2, Variadic::t}}},
-{">", {
-    builtin::number_greater,
-    {2, Variadic::t}}},
-{"<=", {
-    builtin::number_less_eq,
-    {2, Variadic::t}}},
-{">=", {
-    builtin::number_greater_eq,
-    {2, Variadic::t}}},
+{"%=", {
+    builtin::internal_number_equal,
+    {2}}},
+{"%<", {
+    builtin::internal_number_less,
+    {2}}},
+{"%>", {
+    builtin::internal_number_greater,
+    {2}}},
+{"%<=", {
+    builtin::internal_number_less_eq,
+    {2}}},
+{"%>=", {
+    builtin::internal_number_greater_eq,
+    {2}}},
 
 {"max", {
     builtin::number_max,
