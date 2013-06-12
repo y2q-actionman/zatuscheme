@@ -5,7 +5,7 @@
     {1, 1, Passing::quote}}},
 {"lambda", {
     builtin::syntax_lambda,
-    {1, 1, Passing::whole}}},
+    {2, Variadic::f, Passing::whole}}},
 {"if", {
     builtin::syntax_if,
     {2, 3, Passing::quote, Returning::code, MoveReturnValue::f}}},
@@ -14,10 +14,10 @@
     {2, 2, Passing::quote, Returning::code, MoveReturnValue::f}}},
 {"define", {
     builtin::syntax_define,
-    {1, Variadic::f, Passing::whole, Returning::pass}}},
+    {2, Variadic::f, Passing::whole, Returning::pass}}},
 {"begin", {
     builtin::syntax_begin,
-    {1, Variadic::f, Passing::whole, Returning::code, MoveReturnValue::f}}},
+    {2, Variadic::f, Passing::whole, Returning::code, MoveReturnValue::f}}},
 
 {"delay", {
     builtin::syntax_delay,
@@ -25,7 +25,7 @@
 
 {"quasiquote", {
     builtin::syntax_quasiquote,
-    {1, Variadic::f, Passing::whole, Returning::code}}},
+    {2, Variadic::f, Passing::whole, Returning::code}}},
 {"unquote", {
     builtin::syntax_unquote,
     {1}}},
@@ -35,10 +35,10 @@
 
 {"else", {
     builtin::syntax_else,
-    {1, Variadic::f, Passing::whole}}},
+    {2, Variadic::f, Passing::whole}}},
 {"=>", {
     builtin::syntax_arrow,
-    {1, Variadic::f, Passing::whole}}},
+    {2, Variadic::f, Passing::whole}}},
 
 {"define-syntax", {
     builtin::syntax_define_syntax,

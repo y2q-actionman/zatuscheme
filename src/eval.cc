@@ -157,19 +157,9 @@ void macro_call(Lisp_ptr proc){
   code = (call kind, proc)
   stack = (whole args, arg-bottom)
 */
-void whole_call(Lisp_ptr proc, int args){
-  switch(args){
-  case 1:
-    vm.stack.push_back({Ptr_tag::vm_argcount, 1});
-    break;
-  case 2:
-    vm.stack.push_back(vm.frame);
-    vm.stack.push_back({Ptr_tag::vm_argcount, 2});
-    break;
-  default:
-    throw zs_error("eval internal error: 'whole' function must take one or two args\n");
-  }
-
+void whole_call(Lisp_ptr proc){
+  vm.stack.push_back(vm.frame);
+  vm.stack.push_back({Ptr_tag::vm_argcount, 2});
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
 }
 
@@ -432,7 +422,7 @@ void vm_op_call(){
   case Passing::quote:
     return macro_call(proc);
   case Passing::whole:
-    return whole_call(proc, info->required_args);
+    return whole_call(proc);
   default:
     UNEXP_DEFAULT();
   }
