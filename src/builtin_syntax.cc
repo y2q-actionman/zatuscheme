@@ -115,18 +115,17 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
-    return make_cons_list({find_builtin_nproc("quote"), arg});
+    return make_cons_list({intern(*vm.symtable, "quote"), arg});
   }
 
-
-  const auto quasiquote_fun = find_builtin_nproc("quasiquote");
-  const auto unquote_fun = find_builtin_nproc("unquote");
-  const auto unquote_splicing_fun = find_builtin_nproc("unquote-splicing");
+  const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
+  const auto unquote_sym = intern(*vm.symtable, "unquote");
+  const auto unquote_splicing_sym = intern(*vm.symtable, "unquote-splicing");
 
   GrowList gl;
 
   const auto qq_elem = [&](Lisp_ptr p){
-    gl.push(make_cons_list({quasiquote_fun, p}));
+    gl.push(make_cons_list({quasiquote_sym, p}));
   };
 
   if(arg.tag() == Ptr_tag::cons){
@@ -135,9 +134,9 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
     }
 
     // check unquote -- like `,x
-    auto first_val = vm.frame->find(nth_cons_list<0>(arg));
-    if(eq_internal(first_val, unquote_fun)
-       || eq_internal(first_val, unquote_splicing_fun)){
+    auto first_sym = nth_cons_list<0>(arg).get<Symbol*>();
+    if(first_sym == unquote_sym
+       || first_sym == unquote_splicing_sym){
       return arg;
     }
 
@@ -159,10 +158,6 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
   }else{
     UNEXP_DEFAULT();
   }
-}
-
-Lisp_ptr syntax_unquote(ZsArgs args){
-  return args[0];
 }
 
 Lisp_ptr syntax_unquote_splicing(ZsArgs args){

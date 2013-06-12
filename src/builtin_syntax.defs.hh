@@ -26,9 +26,6 @@
 {"quasiquote", {
     builtin::syntax_quasiquote,
     {2, Variadic::f, Passing::whole, Returning::code}}},
-{"unquote", {
-    builtin::syntax_unquote,
-    {1}}},
 {"unquote-splicing", {
     builtin::syntax_unquote_splicing,
     {1, Variadic::f, Passing::eval, Returning::stack_splice, MoveReturnValue::f}}},

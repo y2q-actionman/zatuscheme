@@ -135,6 +135,9 @@
 "     y)))",
 
 // dummy operators
+"(define (unquote x)"
+"  x)",
+
 "(define (else . _)"
 "  "INTERNAL_UNDEFINED_SYMNAME")",
 
