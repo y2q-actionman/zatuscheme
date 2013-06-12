@@ -32,9 +32,6 @@ void local_set_with_identifier(Env* e, Lisp_ptr ident, Lisp_ptr value){
   ret = some value
 */
 void vm_op_arg_push(){
-  assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_arg_push);
-  vm.code.pop_back();
-
   auto ret = vm.return_value_1();
   auto& argc = vm.code[vm.code.size() - 1];
   auto& args = vm.code[vm.code.size() - 2];
@@ -73,8 +70,6 @@ void function_call(Lisp_ptr proc){
   code = proc
 */
 void vm_op_macro_call(){
-  assert(vm.code.back().get<VMop>() == vm_op_macro_call);
-  vm.code.pop_back();
   vm.code.insert(vm.code.end(),
                  vm.return_value.begin(), vm.return_value.end());
 }  
@@ -89,9 +84,6 @@ void vm_op_macro_call(){
   stack = bn, bn-1, ..., an, an-1, ...
 */
 void vm_op_stack_splicing(){
-  assert(vm.code.back().get<VMop>() == vm_op_stack_splicing);
-  vm.code.pop_back();
-
   auto& op = vm.code[vm.code.size() - 1];
   auto& outer_argc = vm.code[vm.code.size() - 2];
   auto& outer_args = vm.code[vm.code.size() - 3];
@@ -191,6 +183,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   if(!vm.code.empty()
      && vm.code.back().get<VMop>() == vm_op_leave_frame){
     // cout << "tail call!" << endl;
+    vm.code.pop_back();
     vm_op_leave_frame();
   }
 
@@ -274,9 +267,6 @@ static unsigned get_wind_index(const VM& va, const VM& vb){
 }
 
 void vm_op_restore_values(){
-  assert(vm.code.back().get<VMop>() == vm_op_restore_values);
-  vm.code.pop_back();
-
   auto values_p = vm.code.back();
   auto values = values_p.get<Vector*>();
   assert(values);
@@ -287,9 +277,6 @@ void vm_op_restore_values(){
 }
 
 void vm_op_replace_vm(){
-  assert(vm.code.back().get<VMop>() == vm_op_replace_vm);
-  vm.code.pop_back();
-
   auto cont = vm.code.back();
   vm.code.pop_back();
   assert(cont.get<Continuation*>());
@@ -369,9 +356,6 @@ void proc_enter_srule(SyntaxRules* srule){
   goto proc_call or macro_call
 */
 void vm_op_call(){
-  assert(vm.code.back().get<VMop>() == vm_op_call);
-  vm.code.pop_back();
-
   auto proc = vm.return_value_1();
 
   if(!is_procedure(proc.tag())){
@@ -404,9 +388,6 @@ void vm_op_call(){
    and goto handler.
 */
 void vm_op_proc_enter(){
-  assert(vm.code.back().get<VMop>() == vm_op_proc_enter);
-  vm.code.pop_back();
-
   auto proc = vm.code.back();
   vm.code.pop_back();
 
@@ -472,11 +453,7 @@ void vm_op_proc_enter(){
   goto proc_enter 
 */
 void vm_op_move_values(){
-  assert(vm.code.back().get<VMop>() == vm_op_move_values);
-  vm.code.pop_back();
-
   int argc = vm.return_value.size();
-
   vm.stack.insert(vm.stack.end(), vm.return_value.begin(), vm.return_value.end());
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 }
@@ -486,9 +463,6 @@ void vm_op_move_values(){
   no stack operations.
 */
 void vm_op_leave_frame(){
-  assert(vm.code.back().get<VMop>() == vm_op_leave_frame);
-  vm.code.pop_back();
-
   auto oldenv = vm.code.back();
   assert(oldenv.tag() == Ptr_tag::env);
   vm.code.pop_back();
@@ -502,9 +476,6 @@ void vm_op_leave_frame(){
   stack = (consequent or alternative)
 */
 void vm_op_if(){
-  assert(vm.code.back().get<VMop>() == vm_op_if);
-  vm.code.pop_back();
-
   auto test_result = vm.return_value_1();
 
   if(test_result.get<bool>()){
@@ -523,9 +494,6 @@ void vm_op_if(){
   return-value is setted.
 */
 void vm_op_set(){
-  assert(vm.code.back().tag() == Ptr_tag::vm_op);
-  vm.code.pop_back();
-
   auto var = vm.code.back();
   vm.code.pop_back();
 
@@ -551,7 +519,6 @@ void vm_op_set(){
   }else{
     UNEXP_DEFAULT();
   }
-
 }
 
 /*
@@ -561,9 +528,6 @@ void vm_op_set(){
   return-value is setted.
 */
 void vm_op_local_set(){
-  assert(vm.code.back().tag() == Ptr_tag::vm_op);
-  vm.code.pop_back();
-
   auto var = vm.code.back();
   vm.code.pop_back();
 
@@ -583,9 +547,6 @@ void vm_op_local_set(){
     code = [(car #1)]
  */
 void vm_op_begin(){
-  assert(vm.code.back().get<VMop>() == vm_op_begin);
-  vm.code.pop_back();
-
   auto& next = vm.code[vm.code.size() - 1];
   auto next_car = nth_cons_list<0>(next);
   auto next_cdr = nthcdr_cons_list<1>(next);
@@ -604,9 +565,6 @@ void vm_op_begin(){
   stack[0] = delay
 */
 void vm_op_force(){
-  assert(vm.code.back().get<VMop>() == vm_op_force);
-  vm.code.pop_back();
-
   auto arg = vm.stack.back();
   vm.stack.pop_back();
 
@@ -619,18 +577,11 @@ void vm_op_force(){
 }
 
 void vm_op_leave_winding(){
-  assert(vm.code.back().get<VMop>() == vm_op_leave_winding);
-  vm.code.pop_back();
-
   vm.extent.pop_back();
 }
 
 void vm_op_save_values_and_enter(){
-  assert(vm.code.back().get<VMop>() == vm_op_save_values_and_enter);
-  vm.code.pop_back();
-
   auto proc = vm.code[vm.code.size() - 1];
-
   vm.code.back() = zs_new<Vector>(vm.return_value);
   vm.code.push_back(vm_op_restore_values);
   vm.code.push_back(proc);
@@ -638,23 +589,14 @@ void vm_op_save_values_and_enter(){
 }
 
 void vm_op_get_current_env(){
-  assert(vm.code.back().get<VMop>() == vm_op_get_current_env);
-  vm.code.pop_back();
-  
   vm.return_value = {vm.frame};
 }
 
 void vm_op_raise(){
-  assert(vm.code.back().get<VMop>() == vm_op_raise);
-  vm.code.pop_back();
-
   throw vm.return_value_1();
 }
 
 void vm_op_unwind_guard(){
-  assert(vm.code.back().get<VMop>() == vm_op_unwind_guard);
-  vm.code.pop_back();
-
   while(!vm.stack.empty()){
     auto p = vm.stack.back();
     vm.stack.pop_back();
@@ -683,67 +625,57 @@ void eval(){
     try{
       if(dump_mode) cout << vm << endl;
       auto p = vm.code.back();
+      vm.code.pop_back();
 
       switch(p.tag()){
       case Ptr_tag::symbol:
-        vm.code.pop_back();
         vm.return_value = {vm.frame->find(p)};
         break;
     
-      case Ptr_tag::cons: {
-        auto c = p.get<Cons*>();
-        if(!c){
-          vm.code.pop_back();
+      case Ptr_tag::cons:
+        if(auto c = p.get<Cons*>()){
+          vm.code.push_back(vm_op_call);
+          vm.code.push_back(car(c));
+          vm.stack.push_back(p);
+        }else{
           vm.return_value = {Cons::NIL};
-          break;
         }
-
-        vm.code.back() = vm_op_call;
-        vm.code.push_back(car(c));
-        vm.stack.push_back(p);
         break;
-      }
 
       case Ptr_tag::vm_op:
         if(auto op = p.get<VMop>()){
           op();
-        }else{
-          vm.code.pop_back();
         }
         break;
 
-      case Ptr_tag::syntactic_closure: {
-        // bound alias
+      case Ptr_tag::syntactic_closure:
         if(identifierp(p) && vm.frame->is_bound(p)){
-          auto val = vm.frame->find(p);
-          vm.code.pop_back();
-          vm.return_value = {val};
-          break;
-        }
-
-        // not-bound syntax closure
-        auto sc = p.get<SyntacticClosure*>();
-        assert(sc);
-
-        auto oldenv = vm.frame;
-        Env* newenv;
-
-        if(!sc->free_names()){
-          newenv = sc->env();
+          // bound alias
+          vm.return_value = {vm.frame->find(p)};
         }else{
-          newenv = sc->env()->push();
-          for(auto i : sc->free_names()){
-            auto val = vm.frame->find(i);
-            local_set_with_identifier(newenv, i, val);
-          }
-        }
+          // not-bound syntax closure
+          auto sc = p.get<SyntacticClosure*>();
+          assert(sc);
 
-        vm.frame = newenv;
-        vm.code.back() = oldenv;
-        vm.code.push_back(vm_op_leave_frame);
-        vm.code.push_back(sc->expr());
+          auto oldenv = vm.frame;
+          Env* newenv;
+
+          if(!sc->free_names()){
+            newenv = sc->env();
+          }else{
+            newenv = sc->env()->push();
+            for(auto i : sc->free_names()){
+              auto val = vm.frame->find(i);
+              local_set_with_identifier(newenv, i, val);
+            }
+          }
+
+          vm.frame = newenv;
+          vm.code.push_back(oldenv);
+          vm.code.push_back(vm_op_leave_frame);
+          vm.code.push_back(sc->expr());
+        }
         break;
-      }
 
         // self-evaluating
       case Ptr_tag::undefined:
@@ -759,7 +691,6 @@ void eval(){
       case Ptr_tag::delay:
       case Ptr_tag::continuation:
       case Ptr_tag::syntax_rules:
-        vm.code.pop_back();
         vm.return_value = {p};
         break;
 
@@ -796,8 +727,6 @@ void eval(){
 const char* stringify(VMop op){
   if(op == vm_op_nop){
     return "NOP / arg bottom";
-  }else if(op == vm_op_proc_enter){
-    return "proc enter";
   }else if(op == vm_op_arg_push){
     return "arg push";
   }else if(op == vm_op_macro_call){
