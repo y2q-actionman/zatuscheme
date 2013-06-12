@@ -33,14 +33,15 @@ void local_set_with_identifier(Env* e, Lisp_ptr ident, Lisp_ptr value){
 */
 void vm_op_arg_push(){
   assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_arg_push);
+  vm.code.pop_back();
 
   auto ret = vm.return_value_1();
-  auto& argc = vm.code[vm.code.size() - 2];
-  auto& args = vm.code[vm.code.size() - 3];
+  auto& argc = vm.code[vm.code.size() - 1];
+  auto& args = vm.code[vm.code.size() - 2];
 
   if(nullp(args)){
     vm.stack.push_back(argc);
-    vm.code.erase(vm.code.end() - 3, vm.code.end());
+    vm.code.erase(vm.code.end() - 2, vm.code.end());
   }else{
     // auto arg1 = nth_cons_list<0>(args); // the EXPR just evaled.
     auto args_rest = nthcdr_cons_list<1>(args);
@@ -49,7 +50,7 @@ void vm_op_arg_push(){
 
     args = args_rest;
     argc = {Ptr_tag::vm_argcount, argc.get<int>() + 1};
-    // vm.code[vm.code.size() - 1] = vm_op_begin;
+    vm.code.push_back(vm_op_arg_push);
     vm.code.push_back(nth_cons_list<0>(args_rest));
   }
 }
@@ -89,14 +90,14 @@ void vm_op_macro_call(){
 */
 void vm_op_stack_splicing(){
   assert(vm.code.back().get<VMop>() == vm_op_stack_splicing);
+  vm.code.pop_back();
 
-  auto& op = vm.code[vm.code.size() - 2];
-  auto& outer_argc = vm.code[vm.code.size() - 3];
-  auto& outer_args = vm.code[vm.code.size() - 4];
+  auto& op = vm.code[vm.code.size() - 1];
+  auto& outer_argc = vm.code[vm.code.size() - 2];
+  auto& outer_args = vm.code[vm.code.size() - 3];
 
   if(op.tag() != Ptr_tag::vm_op
      || outer_argc.tag() != Ptr_tag::vm_argcount){
-    vm.code.pop_back();
     throw zs_error("eval internal error: stack-splicing operater is called in invalid context!\n");
   }
 
@@ -111,7 +112,7 @@ void vm_op_stack_splicing(){
 
   outer_argc = {Ptr_tag::vm_argcount, outer_argc.get<int>() + argc};
   outer_args = outer_next_args;
-  vm.code.back() = outer_next_arg1;
+  vm.code.push_back(outer_next_arg1);
 }
 
 /*
@@ -472,8 +473,8 @@ void vm_op_proc_enter(){
 */
 void vm_op_move_values(){
   assert(vm.code.back().get<VMop>() == vm_op_move_values);
-
   vm.code.pop_back();
+
   int argc = vm.return_value.size();
 
   vm.stack.insert(vm.stack.end(), vm.return_value.begin(), vm.return_value.end());
@@ -582,18 +583,18 @@ void vm_op_local_set(){
     code = [(car #1)]
  */
 void vm_op_begin(){
-  assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_begin);
+  assert(vm.code.back().get<VMop>() == vm_op_begin);
+  vm.code.pop_back();
 
-  auto& next = vm.code[vm.code.size() - 2];
+  auto& next = vm.code[vm.code.size() - 1];
   auto next_car = nth_cons_list<0>(next);
   auto next_cdr = nthcdr_cons_list<1>(next);
 
   if(!nullp(next_cdr)){
     next = next_cdr;
-    // vm.code[vm.code.size() - 1] = vm_op_begin;
+    vm.code.push_back(vm_op_begin);
     vm.code.push_back(next_car);
   }else{
-    vm.code.pop_back();
     vm.code.back() = next_car;
   }
 }
@@ -625,11 +626,13 @@ void vm_op_leave_winding(){
 }
 
 void vm_op_save_values_and_enter(){
-  assert(vm.code[vm.code.size() - 1].get<VMop>() == vm_op_save_values_and_enter);
-  auto proc = vm.code[vm.code.size() - 2];
+  assert(vm.code.back().get<VMop>() == vm_op_save_values_and_enter);
+  vm.code.pop_back();
 
-  vm.code[vm.code.size() - 2] = zs_new<Vector>(vm.return_value);
-  vm.code[vm.code.size() - 1] = vm_op_restore_values;
+  auto proc = vm.code[vm.code.size() - 1];
+
+  vm.code.back() = zs_new<Vector>(vm.return_value);
+  vm.code.push_back(vm_op_restore_values);
   vm.code.push_back(proc);
   vm.code.push_back(vm_op_proc_enter);
 }
