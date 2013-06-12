@@ -50,12 +50,18 @@
 {"%*", {
     builtin::internal_number_multiple,
     {2}}},
-{"-", {
-    builtin::number_minus,
-    {1, Variadic::t}}},
-{"/", {
-    builtin::number_divide,
-    {1, Variadic::t}}},
+{"%-1", {
+    builtin::internal_number_minus_1,
+    {1}}},
+{"%-2", {
+    builtin::internal_number_minus_2,
+    {2}}},
+{"%/1", {
+    builtin::internal_number_divide_1,
+    {1}}},
+{"%/2", {
+    builtin::internal_number_divide_2,
+    {2}}},
 
 {"quotient", {
     builtin::number_quot,
@@ -67,12 +73,12 @@
     builtin::number_mod,
     {2}}},
 
-{"gcd", {
-    builtin::number_gcd,
-    {0, Variadic::t}}},
-{"lcm", {
-    builtin::number_lcm,
-    {0, Variadic::t}}},
+{"%gcd", {
+    builtin::internal_number_gcd,
+    {2}}},
+{"%lcm", {
+    builtin::internal_number_lcm,
+    {2}}},
 
 {"numerator", {
     builtin::number_numerator,

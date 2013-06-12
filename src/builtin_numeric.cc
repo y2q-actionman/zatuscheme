@@ -181,20 +181,6 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
   }
 }
 
-template<typename IFun, typename QFun, typename RFun, typename CFun, typename Iter>
-Lisp_ptr number_fold(const Iter& args_begin, const Iter& args_end,
-                     Lisp_ptr init,
-                     const IFun& ifun, const QFun& qfun,
-                     const RFun& rfun, const CFun& cfun){
-  auto acc = init;
-
-  for(auto i = args_begin, e = args_end; i != e; ++i){
-    acc = number_binary(acc, *i, ifun, qfun, rfun, cfun);
-  }
-
-  return acc;
-}
-
 struct inacceptable_number_type{
   template<typename T>
   bool operator()(T) const{
@@ -317,46 +303,36 @@ Lisp_ptr internal_number_multiple(ZsArgs args){
                        multiplies<Complex>());
 }
 
-Lisp_ptr number_minus(ZsArgs args){
-  if(!is_numeric_type(args[0])){
-    throw number_type_check_failed(args[0]);
-  }
+Lisp_ptr internal_number_minus_1(ZsArgs args){
+  return number_unary(args[0],
+                      [](int i){ return Rational(i, 1).negate(); },
+                      [](Rational q){ return q.negate(); },
+                      negate<double>(),
+                      negate<Complex>());
+}
 
-  if(args.size() == 1){
-    return number_unary(args[0],
-                        [](int i){ return Rational(i, 1).negate(); },
-                        [](Rational q){ return q.negate(); },
-                        negate<double>(),
-                        negate<Complex>());
-  }else{
-    return number_fold(next(args.begin()), args.end(),
-                       args[0],
+Lisp_ptr internal_number_minus_2(ZsArgs args){
+  return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1, 1) -= Rational(i2, 1); },
                        [](Rational q1, Rational q2){ return q1 -= q2; },
                        minus<double>(),
                        minus<Complex>());
-  }
 }
 
-Lisp_ptr number_divide(ZsArgs args){
-  if(!is_numeric_type(args[0])){
-    throw number_type_check_failed(args[0]);
-  }
+Lisp_ptr internal_number_divide_1(ZsArgs args){
+  return number_unary(args[0],
+                      [](int i){ return Rational(i, 1).inverse(); },
+                      [](Rational q){ return q.inverse(); },
+                      [](double d){ return 1.0 / d; },
+                      [](Complex z){ return 1.0 / z; });
+}
 
-  if(args.size() == 1){
-    return number_unary(args[0],
-                        [](int i){ return Rational(i, 1).inverse(); },
-                        [](Rational q){ return q.inverse(); },
-                        [](double d){ return 1.0 / d; },
-                        [](Complex z){ return 1.0 / z; });
-  }else{
-    return number_fold(next(args.begin()), args.end(),
-                       args[0],
+Lisp_ptr internal_number_divide_2(ZsArgs args){
+  return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1, 1) /= Rational(i2, 1); },
                        [](Rational q1, Rational q2){ return q1 /= q2; },
                        divides<double>(),
                        divides<Complex>());
-  }
 }
 
 Lisp_ptr number_quot(ZsArgs args){
@@ -394,26 +370,24 @@ Lisp_ptr number_mod(ZsArgs args){
                        inacceptable_number_type());
 }
 
-Lisp_ptr number_gcd(ZsArgs args){
-  return number_fold(begin(args), end(args),
-                     Lisp_ptr{Ptr_tag::integer, 0},
-                     [](int i1, int i2){
-                       return gcd(i1, i2);
-                     },
-                     inacceptable_number_type(),
-                     inacceptable_number_type(),
-                     inacceptable_number_type());
+Lisp_ptr internal_number_gcd(ZsArgs args){
+  return number_binary(args[0], args[1],
+                       [](int i1, int i2){
+                         return gcd(i1, i2);
+                       },
+                       inacceptable_number_type(),
+                       inacceptable_number_type(),
+                       inacceptable_number_type());
 }
 
-Lisp_ptr number_lcm(ZsArgs args){
-  return number_fold(begin(args), end(args),
-                     Lisp_ptr{Ptr_tag::integer, 1},
-                     [](int i1, int i2){
-                       return abs(i1 * i2 / gcd(i1, i2));
-                     },
-                     inacceptable_number_type(),
-                     inacceptable_number_type(),
-                     inacceptable_number_type());
+Lisp_ptr internal_number_lcm(ZsArgs args){
+  return number_binary(args[0], args[1],
+                       [](int i1, int i2){
+                         return abs(i1 * i2 / gcd(i1, i2));
+                       },
+                       inacceptable_number_type(),
+                       inacceptable_number_type(),
+                       inacceptable_number_type());
 }
 
 Lisp_ptr number_numerator(ZsArgs args){

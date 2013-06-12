@@ -22,16 +22,17 @@ Lisp_ptr internal_number_max(ZsArgs);
 Lisp_ptr internal_number_min(ZsArgs);
 Lisp_ptr internal_number_plus(ZsArgs);
 Lisp_ptr internal_number_multiple(ZsArgs);
-Lisp_ptr number_minus(ZsArgs);
-Lisp_ptr number_divide(ZsArgs);
-Lisp_ptr number_abs(ZsArgs);
+Lisp_ptr internal_number_minus_1(ZsArgs);
+Lisp_ptr internal_number_minus_2(ZsArgs);
+Lisp_ptr internal_number_divide_1(ZsArgs);
+Lisp_ptr internal_number_divide_2(ZsArgs);
 
 Lisp_ptr number_quot(ZsArgs);
 Lisp_ptr number_rem(ZsArgs);
 Lisp_ptr number_mod(ZsArgs);
 
-Lisp_ptr number_gcd(ZsArgs);
-Lisp_ptr number_lcm(ZsArgs);
+Lisp_ptr internal_number_gcd(ZsArgs);
+Lisp_ptr internal_number_lcm(ZsArgs);
 
 Lisp_ptr number_numerator(ZsArgs);
 Lisp_ptr number_denominator(ZsArgs);

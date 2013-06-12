@@ -46,5 +46,19 @@ NUMBER_CMP_FUNCS(">="),
 "(define (* . n)"
 "  (%fold %* 1 n))",
 
+"(define (- n . m)"
+"  (if (null? m) (%-1 n)"
+"    (%fold %-2 n m)))",
+
+"(define (/ n . m)"
+"  (if (null? m) (%/1 n)"
+"    (%fold %/2 n m)))",
+
 "(define (abs n)"
 "  (if (negative? n) (- n) n))",
+
+"(define (gcd . n)"
+"  (%fold %gcd 0 n))",
+
+"(define (lcm . n)"
+"  (%fold %lcm 1 n))",
