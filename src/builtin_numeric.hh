@@ -18,10 +18,10 @@ Lisp_ptr internal_number_greater(ZsArgs);
 Lisp_ptr internal_number_less_eq(ZsArgs);
 Lisp_ptr internal_number_greater_eq(ZsArgs);
 
-Lisp_ptr number_max(ZsArgs);
-Lisp_ptr number_min(ZsArgs);
-Lisp_ptr number_plus(ZsArgs);
-Lisp_ptr number_multiple(ZsArgs);
+Lisp_ptr internal_number_max(ZsArgs);
+Lisp_ptr internal_number_min(ZsArgs);
+Lisp_ptr internal_number_plus(ZsArgs);
+Lisp_ptr internal_number_multiple(ZsArgs);
 Lisp_ptr number_minus(ZsArgs);
 Lisp_ptr number_divide(ZsArgs);
 Lisp_ptr number_abs(ZsArgs);

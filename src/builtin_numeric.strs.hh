@@ -1,5 +1,9 @@
 // This file is intended to be included into an array of 'const char*'
 
+"(define (%fold proc init lis)"
+"  (if (null? lis) init"
+"    (%fold proc (apply proc init (car lis)) (cdr lis))))",
+
 "(define (inexact? n)"
 "  (if (number? n) (not (exact? n)) #f))",
 
@@ -29,6 +33,18 @@ NUMBER_CMP_FUNCS(">="),
 
 "(define (even? n)"
 "  (if (integer? n) (= 0 (modulo n 2)) #f))",
+
+"(define (max n . m)"
+"  (%fold %max n m))",
+
+"(define (min n . m)"
+"  (%fold %min n m))",
+
+"(define (+ . n)"
+"  (%fold %+ 0 n))",
+
+"(define (* . n)"
+"  (%fold %* 1 n))",
 
 "(define (abs n)"
 "  (if (negative? n) (- n) n))",

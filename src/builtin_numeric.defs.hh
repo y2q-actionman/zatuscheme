@@ -37,19 +37,19 @@
     builtin::internal_number_greater_eq,
     {2}}},
 
-{"max", {
-    builtin::number_max,
-    {2, Variadic::t}}},
-{"min", {
-    builtin::number_min,
-    {2, Variadic::t}}},
+{"%max", {
+    builtin::internal_number_max,
+    {2}}},
+{"%min", {
+    builtin::internal_number_min,
+    {2}}},
 
-{"+", {
-    builtin::number_plus,
-    {0, Variadic::t}}},
-{"*", {
-    builtin::number_multiple,
-    {0, Variadic::t}}},
+{"%+", {
+    builtin::internal_number_plus,
+    {2}}},
+{"%*", {
+    builtin::internal_number_multiple,
+    {2}}},
 {"-", {
     builtin::number_minus,
     {1, Variadic::t}}},

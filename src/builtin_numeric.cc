@@ -285,40 +285,36 @@ Lisp_ptr internal_number_greater_eq(ZsArgs args){
 }
 
 
-Lisp_ptr number_max(ZsArgs args){
-  return number_fold(next(args.begin()), args.end(),
-                     args[0],
-                     [](int i1, int i2){ return max(i1, i2); },
-                     [](Rational q1, Rational q2){ return max(q1, q2); },
-                     [](double d1, double d2){ return max(d1, d2); },
-                     inacceptable_number_type());
+Lisp_ptr internal_number_max(ZsArgs args){
+  return number_binary(args[0], args[1],
+                       [](int i1, int i2){ return max(i1, i2); },
+                       [](Rational q1, Rational q2){ return max(q1, q2); },
+                       [](double d1, double d2){ return max(d1, d2); },
+                       inacceptable_number_type());
 }
 
-Lisp_ptr number_min(ZsArgs args){
-  return number_fold(next(args.begin()), args.end(),
-                     args[0],
-                     [](int i1, int i2){ return min(i1, i2); },
-                     [](Rational q1, Rational q2){ return min(q1, q2); },
-                     [](double d1, double d2){ return min(d1, d2); },
-                     inacceptable_number_type());
+Lisp_ptr internal_number_min(ZsArgs args){
+  return number_binary(args[0], args[1],
+                       [](int i1, int i2){ return min(i1, i2); },
+                       [](Rational q1, Rational q2){ return min(q1, q2); },
+                       [](double d1, double d2){ return min(d1, d2); },
+                       inacceptable_number_type());
 }
 
-Lisp_ptr number_plus(ZsArgs args){
-  return number_fold(begin(args), end(args),
-                     Lisp_ptr{Ptr_tag::integer, 0},
-                     [](int i1, int i2){ return Rational(i1, 1) += Rational(i2, 1); },
-                     [](Rational q1, Rational q2){ return q1 += q2; },
-                     plus<double>(),
-                     plus<Complex>());
+Lisp_ptr internal_number_plus(ZsArgs args){
+  return number_binary(args[0], args[1],
+                       [](int i1, int i2){ return Rational(i1, 1) += Rational(i2, 1); },
+                       [](Rational q1, Rational q2){ return q1 += q2; },
+                       plus<double>(),
+                       plus<Complex>());
 }
 
-Lisp_ptr number_multiple(ZsArgs args){
-  return number_fold(begin(args), end(args),
-                     Lisp_ptr{Ptr_tag::integer, 1},
-                     [](int i1, int i2){ return Rational(i1, 1) *= Rational(i2, 1); },
-                     [](Rational q1, Rational q2){ return q1 *= q2; },
-                     multiplies<double>(),
-                     multiplies<Complex>());
+Lisp_ptr internal_number_multiple(ZsArgs args){
+  return number_binary(args[0], args[1],
+                       [](int i1, int i2){ return Rational(i1, 1) *= Rational(i2, 1); },
+                       [](Rational q1, Rational q2){ return q1 *= q2; },
+                       multiplies<double>(),
+                       multiplies<Complex>());
 }
 
 Lisp_ptr number_minus(ZsArgs args){
