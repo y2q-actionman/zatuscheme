@@ -101,8 +101,8 @@ Lisp_ptr syntax_begin(ZsArgs args){
   if(!body || nullp(body)){
     throw zs_error_arg1(nullptr, "has no exprs.");
   }
-  
-  vm.return_value = {body, vm_op_begin};
+
+  vm.code.insert(vm.code.end(), {body, vm_op_begin});
   return {};
 }
 

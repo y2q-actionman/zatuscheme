@@ -14,10 +14,10 @@
     {2, 2, Passing::quote, Returning::code, MoveReturnValue::f}}},
 {"define", {
     builtin::syntax_define,
-    {2, Variadic::f, Passing::whole, Returning::pass}}},
+    {2, Variadic::f, Passing::whole}}},
 {"begin", {
     builtin::syntax_begin,
-    {2, Variadic::f, Passing::whole, Returning::code, MoveReturnValue::f}}},
+    {2, Variadic::f, Passing::whole}}},
 
 {"delay", {
     builtin::syntax_delay,
