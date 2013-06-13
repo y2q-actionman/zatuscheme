@@ -112,9 +112,9 @@ static const BuiltinNProc builtin_syntax_funcs[] = {
 #include "builtin_syntax.defs.hh"
 };
 
-static const char* builtin_syntax_strs[] = {
+static const char* builtin_syntax_str =
 #include "builtin_syntax.scm"
-};
+;
 
 static const BuiltinNProc builtin_funcs[] = {
 #include "builtin.defs.hh"
@@ -130,7 +130,7 @@ static const BuiltinNProc builtin_funcs[] = {
 #include "builtin_vector.defs.hh"
 };
 
-static const char* builtin_strs[] = {
+static const char* builtin_str =
 #include "builtin_boolean.scm"
 #include "builtin_char.scm"
 #include "builtin_cons.scm"
@@ -139,17 +139,17 @@ static const char* builtin_strs[] = {
 #include "builtin_procedure.scm"
 #include "builtin_string.scm"
 #include "builtin_vector.scm"
-};
+;
 
 static const BuiltinNProc builtin_extra_funcs[] = {
 #include "builtin_extra.defs.hh"
 #include "builtin_srfi.defs.hh"
 };
 
-static const char* builtin_extra_strs[] = {
+static const char* builtin_extra_str =
 #include "builtin_extra.scm"
 #include "builtin_srfi.scm"
-};
+;
 
 
 void install_builtin(){
@@ -176,7 +176,7 @@ void install_builtin(){
   install_symbol("%t", Lisp_ptr{true});
   install_symbol("%f", Lisp_ptr{false});
   for(auto& i : builtin_syntax_funcs) install_native(i);
-  for(auto i : builtin_syntax_strs) install_string(i);
+  install_string(builtin_syntax_str);
   eval();
   auto null_env = vm.frame;
 
@@ -184,7 +184,7 @@ void install_builtin(){
   assert(vm.code.empty() && vm.stack.empty());
   vm.frame = vm.frame->push();
   for(auto& i : builtin_funcs) install_native(i);
-  for(auto i : builtin_strs) install_string(i);
+  install_string(builtin_str);
   install_symbol(CURRENT_INPUT_PORT_SYMNAME, &std::cin);
   install_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
   install_symbol(null_env_symname, null_env);
@@ -195,7 +195,7 @@ void install_builtin(){
   assert(vm.code.empty() && vm.stack.empty());
   vm.frame = vm.frame->push();
   for(auto& i : builtin_extra_funcs) install_native(i);
-  for(auto i : builtin_extra_strs) install_string(i);
+  install_string(builtin_extra_str);
   install_symbol(interaction_env_symname, vm.frame);
   eval();
 }
