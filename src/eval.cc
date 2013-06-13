@@ -252,7 +252,10 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   }
 
   // set up lambda body code
-  vm.code.insert(vm.code.end(), {fun->get(), vm_op_begin});
+  vector<Lisp_ptr> tmpv;
+  tmpv.assign(begin(fun->get()), end(fun->get()));
+
+  vm.code.insert(vm.code.end(), tmpv.rbegin(), tmpv.rend());
 }
 
 
@@ -539,28 +542,6 @@ void vm_op_local_set(){
 }
 
 /*
-  code = [#1=(...)]
-  ---
-  (cdr #1) is not null.
-    code = [(car #1) <vm-op-begin> (cdr #1)]
-  (cdr #1) is null.
-    code = [(car #1)]
- */
-void vm_op_begin(){
-  auto& next = vm.code[vm.code.size() - 1];
-  auto next_car = nth_cons_list<0>(next);
-  auto next_cdr = nthcdr_cons_list<1>(next);
-
-  if(!nullp(next_cdr)){
-    next = next_cdr;
-    vm.code.push_back(vm_op_begin);
-    vm.code.push_back(next_car);
-  }else{
-    vm.code.back() = next_car;
-  }
-}
-
-/*
   return  = forced value
   stack[0] = delay
 */
@@ -735,8 +716,6 @@ const char* stringify(VMop op){
     return "call";
   }else if(op == vm_op_leave_frame){
     return "leave frame";
-  }else if(op == vm_op_begin){
-    return "begin";
   }else if(op == vm_op_restore_values){
     return "restore values";
   }else if(op == vm_op_replace_vm){

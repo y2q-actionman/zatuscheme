@@ -13,7 +13,6 @@ void vm_op_leave_frame();
 void vm_op_if();
 void vm_op_set();
 void vm_op_local_set();
-void vm_op_begin();
 void vm_op_force();
 void vm_op_leave_winding();
 void vm_op_save_values_and_enter();
