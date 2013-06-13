@@ -48,10 +48,7 @@ void Env::set(Lisp_ptr s, Lisp_ptr p){
 }
 
 void Env::local_set(Lisp_ptr s, Lisp_ptr p){
-  auto it = map_.find(s);
-  if(it != map_.end()) map_.erase(it);
-
-  map_.insert({s, p});
+  this->map_[s] = p;
 }
 
 Env* Env::push(){
