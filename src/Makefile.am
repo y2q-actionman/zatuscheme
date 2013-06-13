@@ -45,7 +45,6 @@ libzs_a_SOURCES = \
 		cons.cc cons.hh cons.i.hh \
 		cons_util.cc cons_util.hh cons_util.i.hh \
 		decl.hh decl.cc decl.i.hh \
-		delay.cc delay.hh \
 		env.cc env.hh \
 		equality.cc equality.hh equality.i.hh \
 		eval.cc eval.hh \
