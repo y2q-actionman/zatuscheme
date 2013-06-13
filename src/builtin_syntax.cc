@@ -25,10 +25,15 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   if(arg_info.first < 0){
     throw zs_error_arg1(nullptr, "invalid args!", {args});
   }
+
   if(!code){
     throw zs_error_arg1(nullptr, "invalid body!");
   }
-  
+
+  if(nullp(code)){
+    throw zs_error_arg1(nullptr, "has no exprs.");
+  }
+
   return zs_new<IProcedure>(code, 
                             ProcInfo{arg_info.first, arg_info.second},
                             args, vm.frame, name);
@@ -94,16 +99,6 @@ Lisp_ptr syntax_define(ZsArgs args){
   }else{
     throw zs_error_arg1(nullptr, "informal syntax!");
   }
-}
-
-Lisp_ptr syntax_begin(ZsArgs args){
-  auto body = nthcdr_cons_list<1>(args[0]);
-  if(!body || nullp(body)){
-    throw zs_error_arg1(nullptr, "has no exprs.");
-  }
-
-  vm.code.insert(vm.code.end(), {body, vm_op_begin});
-  return {};
 }
 
 Lisp_ptr syntax_delay(ZsArgs args){

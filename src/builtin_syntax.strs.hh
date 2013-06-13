@@ -111,6 +111,11 @@
 "         (begin result1 result2 ...)"
 "         (case key clause clauses ...)))))",
 
+"(define-syntax begin"
+"  (syntax-rules ()"
+"    ((begin exp ...)"
+"     ((lambda () exp ...)))))",
+
 "(define-syntax do"
 "  (syntax-rules ()"
 "    ((do ((var init step ...) ...)"

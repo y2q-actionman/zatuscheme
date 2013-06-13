@@ -15,9 +15,6 @@
 {"define", {
     builtin::syntax_define,
     {2, Variadic::f, Passing::whole}}},
-{"begin", {
-    builtin::syntax_begin,
-    {2, Variadic::f, Passing::whole}}},
 
 {"delay", {
     builtin::syntax_delay,

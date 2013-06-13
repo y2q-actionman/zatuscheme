@@ -166,6 +166,9 @@ bool check_e_undef(const char* input){
   Lisp_ptr ret;
   with_expect_error([&](){ ret = eval_text(input); });
 
+  vm.code.clear();
+  vm.stack.clear();
+
   if(!ret){
     return true;
   }else{
