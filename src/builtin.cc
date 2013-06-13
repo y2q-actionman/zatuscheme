@@ -113,7 +113,7 @@ static const BuiltinNProc builtin_syntax_funcs[] = {
 };
 
 static const char* builtin_syntax_strs[] = {
-#include "builtin_syntax.strs.hh"
+#include "builtin_syntax.scm"
 };
 
 static const BuiltinNProc builtin_funcs[] = {
@@ -137,8 +137,8 @@ static const char* builtin_strs[] = {
 #include "builtin_numeric.scm"
 #include "builtin_port.scm"
 #include "builtin_procedure.scm"
-#include "builtin_string.strs.hh"
-#include "builtin_vector.strs.hh"
+#include "builtin_string.scm"
+#include "builtin_vector.scm"
 };
 
 static const BuiltinNProc builtin_extra_funcs[] = {
@@ -148,7 +148,7 @@ static const BuiltinNProc builtin_extra_funcs[] = {
 
 static const char* builtin_extra_strs[] = {
 #include "builtin_extra.scm"
-#include "builtin_srfi.strs.hh"
+#include "builtin_srfi.scm"
 };
 
 
@@ -172,9 +172,11 @@ void install_builtin(){
   assert(vm.code.empty() && vm.stack.empty());
   assert(!vm.frame);
   vm.frame = zs_new<Env>(nullptr);
+  install_symbol("%undefined", {});
+  install_symbol("%t", Lisp_ptr{true});
+  install_symbol("%f", Lisp_ptr{false});
   for(auto& i : builtin_syntax_funcs) install_native(i);
   for(auto i : builtin_syntax_strs) install_string(i);
-  install_symbol(INTERNAL_UNDEFINED_SYMNAME, {});
   eval();
   auto null_env = vm.frame;
 

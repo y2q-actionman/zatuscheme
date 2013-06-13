@@ -1,10 +1,4 @@
 LOAD
-(define %t (eq? () ()))
-
-LOAD
-(define %f (not %t))
-
-LOAD
 (define (map proc . lists)
   (define (all-null? lists)
     (if (null? lists) %t

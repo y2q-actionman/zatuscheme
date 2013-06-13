@@ -29,15 +29,19 @@ libzs_a_SOURCES = \
 		builtin_procedure.defs.hh \
 		builtin_procedure.scm \
 		builtin_srfi.cc builtin_srfi.hh \
-		builtin_srfi.defs.hh builtin_srfi.strs.hh \
+		builtin_srfi.defs.hh \
+		builtin_srfi.scm \
 		builtin_string.cc builtin_string.hh \
-		builtin_string.defs.hh builtin_string.strs.hh \
+		builtin_string.defs.hh \
+		builtin_string.scm \
 		builtin_symbol.cc builtin_symbol.hh \
 		builtin_symbol.defs.hh \
 		builtin_syntax.cc builtin_syntax.hh \
-		builtin_syntax.defs.hh builtin_syntax.strs.hh \
+		builtin_syntax.defs.hh \
+		builtin_syntax.scm \
 		builtin_vector.cc builtin_vector.hh \
-		builtin_vector.defs.hh builtin_vector.strs.hh \
+		builtin_vector.defs.hh \
+		builtin_vector.scm \
 		cons.cc cons.hh cons.i.hh \
 		cons_util.cc cons_util.hh cons_util.i.hh \
 		decl.hh decl.cc decl.i.hh \
