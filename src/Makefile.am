@@ -23,9 +23,11 @@ libzs_a_SOURCES = \
 		builtin_numeric.defs.hh \
 		builtin_numeric.scm \
 		builtin_port.cc builtin_port.hh \
-		builtin_port.defs.hh builtin_port.strs.hh \
+		builtin_port.defs.hh \
+		builtin_port.scm \
 		builtin_procedure.cc builtin_procedure.hh \
-		builtin_procedure.defs.hh builtin_procedure.strs.hh \
+		builtin_procedure.defs.hh \
+		builtin_procedure.scm \
 		builtin_srfi.cc builtin_srfi.hh \
 		builtin_srfi.defs.hh builtin_srfi.strs.hh \
 		builtin_string.cc builtin_string.hh \

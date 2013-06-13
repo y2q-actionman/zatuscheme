@@ -36,9 +36,9 @@ using namespace proc_flag;
 
 namespace {
 
-static const char null_env_symname[] = "null-env-value";
-static const char r5rs_env_symname[] = "r5rs-env-value";
-static const char interaction_env_symname[] = "interaction-env-value";
+static const char null_env_symname[] = "*null-env-value*";
+static const char r5rs_env_symname[] = "*r5rs-env-value*";
+static const char interaction_env_symname[] = "*interaction-env-value*";
 
 Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* envname){
   if(arg1.tag() != Ptr_tag::integer){
@@ -135,8 +135,8 @@ static const char* builtin_strs[] = {
 #include "builtin_char.scm"
 #include "builtin_cons.scm"
 #include "builtin_numeric.scm"
-#include "builtin_procedure.strs.hh"
-#include "builtin_port.strs.hh"
+#include "builtin_port.scm"
+#include "builtin_procedure.scm"
 #include "builtin_string.strs.hh"
 #include "builtin_vector.strs.hh"
 };

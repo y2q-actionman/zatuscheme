@@ -12,6 +12,8 @@ Restrictions:
   - every form must begin with '('.
 
   - ' (quote) causes error. Use (quote...) instead.
+
+  - cannot use notations begins with '#' (#t, #f, etc.).
 */
 
 #endif // ZS_SCM_INCLUDE_HH

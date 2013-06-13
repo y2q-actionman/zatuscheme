@@ -3,8 +3,8 @@
 
 #include "builtin.hh"
 
-#define CURRENT_INPUT_PORT_SYMNAME "current-input-port-value"
-#define CURRENT_OUTPUT_PORT_SYMNAME "current-output-port-value"
+#define CURRENT_INPUT_PORT_SYMNAME "*current-input-port-value*"
+#define CURRENT_OUTPUT_PORT_SYMNAME "*current-output-port-value*"
 
 namespace builtin {
 
