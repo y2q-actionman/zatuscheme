@@ -132,9 +132,9 @@ static const BuiltinNProc builtin_funcs[] = {
 
 static const char* builtin_strs[] = {
 #include "builtin_boolean.scm"
-#include "builtin_char.strs.hh"
-#include "builtin_cons.strs.hh"
-#include "builtin_numeric.strs.hh"
+#include "builtin_char.scm"
+#include "builtin_cons.scm"
+#include "builtin_numeric.scm"
 #include "builtin_procedure.strs.hh"
 #include "builtin_port.strs.hh"
 #include "builtin_string.strs.hh"
@@ -147,7 +147,7 @@ static const BuiltinNProc builtin_extra_funcs[] = {
 };
 
 static const char* builtin_extra_strs[] = {
-#include "builtin_extra.strs.hh"
+#include "builtin_extra.scm"
 #include "builtin_srfi.strs.hh"
 };
 

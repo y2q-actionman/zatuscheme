@@ -9,15 +9,19 @@ libzs_a_SOURCES = \
 		builtin_boolean.defs.hh \
 		builtin_boolean.scm \
 		builtin_char.cc builtin_char.hh \
-		builtin_char.defs.hh builtin_char.strs.hh \
+		builtin_char.defs.hh \
+		builtin_char.scm \
 		builtin_cons.cc builtin_cons.hh \
-		builtin_cons.defs.hh builtin_cons.strs.hh \
+		builtin_cons.defs.hh \
+		builtin_cons.scm \
 		builtin_equal.cc builtin_equal.hh \
 		builtin_equal.defs.hh \
 		builtin_extra.cc builtin_extra.hh \
-		builtin_extra.defs.hh builtin_extra.strs.hh \
+		builtin_extra.defs.hh \
+		builtin_extra.scm \
 		builtin_numeric.cc builtin_numeric.hh \
-		builtin_numeric.defs.hh builtin_numeric.strs.hh \
+		builtin_numeric.defs.hh \
+		builtin_numeric.scm \
 		builtin_port.cc builtin_port.hh \
 		builtin_port.defs.hh builtin_port.strs.hh \
 		builtin_procedure.cc builtin_procedure.hh \
