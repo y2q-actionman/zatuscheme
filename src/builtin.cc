@@ -15,6 +15,7 @@
 #include "printer.hh"
 #include "vm.hh"
 #include "zs_memory.hh"
+#include "zs_scm_include.hh"
 
 #include "builtin_boolean.hh"
 #include "builtin_char.hh"
@@ -130,7 +131,7 @@ static const BuiltinNProc builtin_funcs[] = {
 };
 
 static const char* builtin_strs[] = {
-#include "builtin_boolean.strs.hh"
+#include "builtin_boolean.scm"
 #include "builtin_char.strs.hh"
 #include "builtin_cons.strs.hh"
 #include "builtin_numeric.strs.hh"

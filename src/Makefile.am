@@ -6,7 +6,8 @@ noinst_LIBRARIES = libzs.a
 libzs_a_SOURCES = \
 		builtin.cc builtin.hh builtin.defs.hh \
 		builtin_boolean.cc builtin_boolean.hh \
-		builtin_boolean.defs.hh builtin_boolean.strs.hh \
+		builtin_boolean.defs.hh \
+		builtin_boolean.scm \
 		builtin_char.cc builtin_char.hh \
 		builtin_char.defs.hh builtin_char.strs.hh \
 		builtin_cons.cc builtin_cons.hh \
