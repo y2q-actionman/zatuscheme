@@ -173,8 +173,6 @@ void install_builtin(){
   assert(!vm.frame);
   vm.frame = zs_new<Env>(nullptr);
   install_symbol("%undefined", {});
-  install_symbol("%t", Lisp_ptr{true});
-  install_symbol("%f", Lisp_ptr{false});
   for(auto& i : builtin_syntax_funcs) install_native(i);
   install_string(builtin_syntax_str);
   eval();

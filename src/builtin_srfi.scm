@@ -2,7 +2,7 @@ LOAD
 (define (ignore-errors thunk)
   (call-with-current-continuation
    (lambda (cont)
-     (with-exception-handler (lambda (e) (cont %f e))
+     (with-exception-handler (lambda (e) (cont #f e))
                              thunk))))
 
 LOAD

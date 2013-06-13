@@ -13,7 +13,7 @@ Restrictions:
 
   - ' (quote) causes error. Use (quote...) instead.
 
-  - cannot use notations begins with '#' (#t, #f, etc.).
+  - '#' notations may be confused with CPP directives.
 */
 
 #endif // ZS_SCM_INCLUDE_HH

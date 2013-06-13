@@ -81,15 +81,15 @@ LOAD
 LOAD
 (define-syntax and
   (syntax-rules ()
-    ((and) %t)
+    ((and) #t)
     ((and test) test)
     ((and test1 test2 ...)
-     (if test1 (and test2 ...) %f))))
+     (if test1 (and test2 ...) #f))))
 
 LOAD
 (define-syntax or
   (syntax-rules ()
-    ((or) %f)
+    ((or) #f)
     ((or test) test)
     ((or test1 test2 ...)
      (let ((x test1))
