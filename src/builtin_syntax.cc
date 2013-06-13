@@ -164,16 +164,6 @@ Lisp_ptr syntax_unquote_splicing(ZsArgs args){
   return {};
 }
 
-Lisp_ptr syntax_define_syntax(ZsArgs args){
-  if(!identifierp(args[0])){
-    throw builtin_identifier_check_failed(nullptr, args[0]);
-  }
-
-  // TODO: check args[1] is a transformer.
-  vm.code.insert(vm.code.end(), {args[0], vm_op_local_set, args[1]});
-  return Lisp_ptr{true};
-}
-
 Lisp_ptr syntax_syntax_rules(ZsArgs args){
   auto env = args[1].get<Env*>();
   if(!env){
