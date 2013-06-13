@@ -7,7 +7,6 @@ namespace builtin {
 
 Lisp_ptr procedurep(ZsArgs);
 Lisp_ptr apply(ZsArgs);
-Lisp_ptr force(ZsArgs);
 Lisp_ptr values(ZsArgs);
 Lisp_ptr call_with_values(ZsArgs);
 Lisp_ptr call_cc(ZsArgs);

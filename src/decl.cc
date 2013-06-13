@@ -37,8 +37,6 @@ const char* stringify(Ptr_tag p){
     return "output port";
   case Ptr_tag::env:
     return "env";
-  case Ptr_tag::delay:
-    return "delay";
   case Ptr_tag::syntactic_closure:
     return "syntactic closure";
   case Ptr_tag::syntax_rules:
@@ -70,7 +68,6 @@ bool is_procedure(Ptr_tag tag){
   case Ptr_tag::string:    case Ptr_tag::vector:
   case Ptr_tag::input_port: case Ptr_tag::output_port:
   case Ptr_tag::env:
-  case Ptr_tag::delay:
   case Ptr_tag::syntactic_closure:
   case Ptr_tag::vm_op:
   case Ptr_tag::vm_argcount:

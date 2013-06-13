@@ -16,10 +16,6 @@
     builtin::syntax_define,
     {2, Variadic::f, Passing::whole}}},
 
-{"delay", {
-    builtin::syntax_delay,
-    {1, Variadic::f, Passing::quote, Returning::code}}},
-
 {"quasiquote", {
     builtin::syntax_quasiquote,
     {2, Variadic::f, Passing::whole, Returning::code}}},

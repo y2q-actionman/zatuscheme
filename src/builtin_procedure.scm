@@ -29,3 +29,28 @@ LOAD
                                (cons (cdar lis) next-lists)
                                (cdr lis)))))))
   (worker lists))
+
+
+LOAD
+(define (force object)
+    (object))
+
+LOAD
+(define-syntax delay
+  (syntax-rules ()
+    ((delay expression)
+     (make-promise (lambda () expression)))))
+
+LOAD
+(define (make-promise proc)
+  (let ((result-ready? #f)
+        (result #f))
+    (lambda ()
+      (if result-ready?
+          result
+          (let ((x (proc)))
+            (if result-ready?
+                result
+                (begin (set! result-ready? #t)
+                       (set! result x)
+                       result)))))))

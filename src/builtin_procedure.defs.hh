@@ -6,9 +6,6 @@
 {"apply", {
     builtin::apply,
     {1, Variadic::t, Passing::eval, Returning::pass, MoveReturnValue::f}}},
-{"force", {
-    builtin::force,
-    {1}}},
 {"values", {
     builtin::values,
     {0, Variadic::t, Passing::eval, Returning::pass, MoveReturnValue::f}}},

@@ -3,7 +3,6 @@
 #include "zs_memory.hh"
 #include "vm.hh"
 #include "cons.hh"
-#include "delay.hh"
 #include "env.hh"
 #include "procedure.hh"
 #include "s_closure.hh"
@@ -183,15 +182,6 @@ void gc_mark_lp(Lisp_ptr p){
     gc_mark(p.get<Env*>());
     break;
 
-  case Ptr_tag::delay: {
-    auto d = p.get<Delay*>();
-    gc_mark_ptr(d);
-
-    gc_mark_lp(d->get());
-    gc_mark(d->env());
-    break;
-  }
-
   case Ptr_tag::syntactic_closure: {
     auto sc = p.get<SyntacticClosure*>();
     gc_mark_ptr(sc);
@@ -275,9 +265,6 @@ void gc_sweep(){
         break;
       case Ptr_tag::env: 
         gc_tagged_delete<Ptr_tag::env>(i->first);
-        break;
-      case Ptr_tag::delay: 
-        gc_tagged_delete<Ptr_tag::delay>(i->first);
         break;
       case Ptr_tag::syntactic_closure: 
         gc_tagged_delete<Ptr_tag::syntactic_closure>(i->first);

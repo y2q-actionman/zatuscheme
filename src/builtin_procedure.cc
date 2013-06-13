@@ -6,7 +6,6 @@
 #include "procedure.hh"
 #include "eval.hh"
 #include "util.hh"
-#include "delay.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
 #include "zs_memory.hh"
@@ -52,27 +51,6 @@ Lisp_ptr apply(ZsArgs args){
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
-  return {};
-}
-
-Lisp_ptr force(ZsArgs args){
-  auto d = args[0].get<Delay*>();
-  if(!d){
-    return args[0];
-  }
-  
-  if(d->forced()){
-    return d->get();
-  }
-
-  // evaluates Delay's contents
-  args.cleanup();
-
-  auto oldenv = vm.frame;
-  vm.frame = d->env();
-  vm.stack.push_back(d);
-  vm.code.insert(vm.code.end(),
-                 {vm_op_force, oldenv, vm_op_leave_frame, d->get()});
   return {};
 }
 

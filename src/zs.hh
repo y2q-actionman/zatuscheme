@@ -5,7 +5,6 @@
 #include "cons.hh"
 #include "cons_util.hh"
 #include "decl.hh"
-#include "delay.hh"
 #include "env.hh"
 #include "equality.hh"
 #include "eval.hh"

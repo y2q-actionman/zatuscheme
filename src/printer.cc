@@ -7,7 +7,6 @@
 #include "cons.hh"
 #include "cons_util.hh"
 #include "util.hh"
-#include "delay.hh"
 #include "vm.hh"
 #include "eval.hh"
 #include "s_closure.hh"
@@ -191,18 +190,6 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
   case Ptr_tag::vector:
     print_vector(f, p.get<Vector*>(), flag);
     break;
-
-  case Ptr_tag::delay: {
-    auto d = p.get<Delay*>();
-    if(flag == print_human_readable::t || !d->forced()){
-      f << "#<delay (" << (d->forced() ? "forced" : "delayed") << ") [";
-    }
-    print(f, d->get(), flag);
-    if(flag == print_human_readable::t || !d->forced()){
-      f << "]>";
-    }
-    break;
-  }
 
   case Ptr_tag::syntactic_closure: {
     auto sc = p.get<SyntacticClosure*>();

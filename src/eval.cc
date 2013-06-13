@@ -10,7 +10,6 @@
 #include "cons_util.hh"
 #include "procedure.hh"
 #include "printer.hh"
-#include "delay.hh"
 #include "s_closure.hh"
 #include "s_rules.hh"
 #include "builtin.hh"
@@ -541,22 +540,6 @@ void vm_op_local_set(){
   local_set_with_identifier(vm.frame, var, vm.return_value_1()); 
 }
 
-/*
-  return  = forced value
-  stack[0] = delay
-*/
-void vm_op_force(){
-  auto arg = vm.stack.back();
-  vm.stack.pop_back();
-
-  auto delay = arg.get<Delay*>();
-  if(!delay){
-    throw zs_error_arg1("force internal error", "'force' found strange DELAY object", {arg});
-  }
-
-  delay->force(vm.return_value_1());
-}
-
 void vm_op_leave_winding(){
   vm.extent.pop_back();
 }
@@ -669,7 +652,6 @@ void eval(){
       case Ptr_tag::string: case Ptr_tag::vector:
       case Ptr_tag::input_port: case Ptr_tag::output_port:
       case Ptr_tag::env:
-      case Ptr_tag::delay:
       case Ptr_tag::continuation:
       case Ptr_tag::syntax_rules:
         vm.return_value = {p};
@@ -730,8 +712,6 @@ const char* stringify(VMop op){
     return "set";
   }else if(op == vm_op_local_set){
     return "local set";
-  }else if(op == vm_op_force){
-    return "force";
   }else if(op == vm_op_leave_winding){
     return "leave winding";
   }else if(op == vm_op_save_values_and_enter){

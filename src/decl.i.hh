@@ -87,11 +87,6 @@ struct to_type<Ptr_tag, Ptr_tag::env>{
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::delay>{
-  typedef Delay* type;
-};
-
-template<>
 struct to_type<Ptr_tag, Ptr_tag::syntactic_closure>{
   typedef SyntacticClosure* type;
 };
@@ -200,12 +195,6 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, Env*>(){
   return Ptr_tag::env;
-}
-
-template<>
-inline constexpr
-Ptr_tag to_tag<Ptr_tag, Delay*>(){
-  return Ptr_tag::delay;
 }
 
 template<>

@@ -7,7 +7,6 @@
 #include "zs_error.hh"
 #include "procedure.hh"
 #include "printer.hh"
-#include "delay.hh"
 #include "cons_util.hh"
 #include "s_closure.hh"
 #include "s_rules.hh"
@@ -99,10 +98,6 @@ Lisp_ptr syntax_define(ZsArgs args){
   }else{
     throw zs_error_arg1(nullptr, "informal syntax!");
   }
-}
-
-Lisp_ptr syntax_delay(ZsArgs args){
-  return {zs_new<Delay>(args[0], vm.frame)};
 }
 
 Lisp_ptr syntax_quasiquote(ZsArgs args){

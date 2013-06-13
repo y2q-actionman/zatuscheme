@@ -21,7 +21,6 @@ typedef std::vector<Lisp_ptr> Vector;
 typedef std::istream InputPort;
 typedef std::ostream OutputPort;
 class Env;
-class Delay;
 class SyntacticClosure;
 class SyntaxRules;
 typedef void(*VMop)();
@@ -46,7 +45,6 @@ enum class Ptr_tag {
     input_port,
     output_port,
     env,
-    delay,
     syntactic_closure,
     syntax_rules,
     vm_op,

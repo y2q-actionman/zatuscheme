@@ -38,7 +38,6 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   case Ptr_tag::input_port:
   case Ptr_tag::output_port:
   case Ptr_tag::env:
-  case Ptr_tag::delay:
   case Ptr_tag::syntactic_closure:
   case Ptr_tag::syntax_rules:
   case Ptr_tag::vm_op:
@@ -118,7 +117,6 @@ size_t eq_hash(const Lisp_ptr& p){
   case Ptr_tag::input_port:
   case Ptr_tag::output_port:
   case Ptr_tag::env:
-  case Ptr_tag::delay:
   case Ptr_tag::syntactic_closure:
   case Ptr_tag::syntax_rules:
   case Ptr_tag::vm_op:
