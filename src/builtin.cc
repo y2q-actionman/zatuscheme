@@ -35,27 +35,6 @@
 using namespace std;
 using namespace proc_flag;
 
-namespace {
-
-static const char null_env_symname[] = "*null-env-value*";
-static const char r5rs_env_symname[] = "*r5rs-env-value*";
-static const char interaction_env_symname[] = "*interaction-env-value*";
-
-Lisp_ptr env_pick_2(Lisp_ptr arg1, const char* envname){
-  if(arg1.tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::integer, arg1);
-  }
-
-  auto ver = arg1.get<int>();
-  if(ver != 5){
-    throw zs_error_arg1(nullptr, "passed number is not 5", {arg1});
-  }
-
-  return vm.frame->find(intern(*vm.symtable, envname));
-}
-
-} //namespace
-
 void load_internal(std::istream& ss){
   vector<Lisp_ptr> tmpv;
 
@@ -82,18 +61,6 @@ Lisp_ptr eval(ZsArgs args){
   vm.frame = env;
   vm.return_value = {oldenv, vm_op_leave_frame, args[0]};
   return {};
-}
-
-Lisp_ptr env_r5rs(ZsArgs args){
-  return env_pick_2(args[0], r5rs_env_symname);
-}
-
-Lisp_ptr env_null(ZsArgs args){
-  return env_pick_2(args[0], null_env_symname);
-}
-
-Lisp_ptr env_interactive(ZsArgs){
-  return vm.frame->find(intern(*vm.symtable, interaction_env_symname));
 }
 
 Lisp_ptr load(ZsArgs args){
@@ -132,6 +99,7 @@ static const BuiltinNProc builtin_funcs[] = {
 };
 
 static const char* builtin_str =
+#include "builtin.scm"
 #include "builtin_boolean.scm"
 #include "builtin_char.scm"
 #include "builtin_cons.scm"
@@ -165,36 +133,40 @@ void install_builtin(){
     vm.frame->local_set(intern(*vm.symtable, name), value);
   };
 
+  assert(vm.code.empty() && vm.stack.empty());
+  assert(!vm.frame);
+
   // symtable
   assert(!vm.symtable);
   vm.symtable.reset(new SymTable());
 
   // null-environment
-  assert(vm.code.empty() && vm.stack.empty());
-  assert(!vm.frame);
   vm.frame = zs_new<Env>(nullptr);
   for(auto& i : builtin_syntax_funcs) install_native(i);
   install_string(builtin_syntax_str);
   eval();
+  assert(vm.code.empty() && vm.stack.empty());
+
   auto null_env = vm.frame;
 
   // r5rs-environment
-  assert(vm.code.empty() && vm.stack.empty());
   vm.frame = vm.frame->push();
   for(auto& i : builtin_funcs) install_native(i);
   install_string(builtin_str);
   install_symbol(EXPAND_STRINGIFY(CURRENT_INPUT_PORT_SYMNAME), &std::cin);
   install_symbol(EXPAND_STRINGIFY(CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
-  install_symbol(null_env_symname, null_env);
-  install_symbol(r5rs_env_symname, vm.frame);
+  install_symbol(EXPAND_STRINGIFY(NULL_ENV_SYMNAME), null_env);
+  install_symbol(EXPAND_STRINGIFY(R5RS_ENV_SYMNAME), vm.frame);
   eval();
+  assert(vm.code.empty() && vm.stack.empty());
 
   // interaction-environment
-  assert(vm.code.empty() && vm.stack.empty());
-  vm.frame = vm.frame->push();
+  auto i_env = vm.frame->push();
+  install_symbol(EXPAND_STRINGIFY(INTERACTION_ENV_SYMNAME), i_env);
+
+  vm.frame = i_env;
   for(auto& i : builtin_extra_funcs) install_native(i);
   install_string(builtin_extra_str);
-  install_symbol(interaction_env_symname, vm.frame);
   eval();
 }
 

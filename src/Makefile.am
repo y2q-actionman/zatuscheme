@@ -4,7 +4,9 @@ AM_CXXFLAGS = $(warning_flags)
 
 noinst_LIBRARIES = libzs.a
 libzs_a_SOURCES = \
-		builtin.cc builtin.hh builtin.defs.hh \
+		builtin.cc builtin.hh \
+		builtin.defs.hh \
+		builtin.scm \
 		builtin_boolean.cc builtin_boolean.hh \
 		builtin_boolean.defs.hh \
 		builtin_boolean.scm \
