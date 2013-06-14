@@ -1,6 +1,6 @@
 LOAD
 (define (newline . args)
-  (apply write-char (quote (#\\newline)) args))
+  (apply write-char (string-ref "\n" 0) args))
 
 LOAD
 (define (current-input-port) *current-input-port-value*)

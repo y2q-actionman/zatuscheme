@@ -303,6 +303,9 @@ Token tokenize_string(istream& f){
       case '"': case '\\':
         s.push_back(c);
         break;
+      case 'n':
+        s.push_back('\n');
+        break;
       default:
         throw zs_error(printf_string("reader error: unknown string escape '%c' appeared.\n", c));
       }

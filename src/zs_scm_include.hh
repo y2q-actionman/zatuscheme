@@ -14,6 +14,8 @@ Restrictions:
   - ' (quote) causes error. Use (quote...) instead.
 
   - '#' notations may be confused with CPP directives.
+
+  - '\' (backslash) is reduced if it is out of string literal.
 */
 
 #endif // ZS_SCM_INCLUDE_HH
