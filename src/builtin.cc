@@ -173,7 +173,6 @@ void install_builtin(){
   assert(vm.code.empty() && vm.stack.empty());
   assert(!vm.frame);
   vm.frame = zs_new<Env>(nullptr);
-  install_symbol("%undefined", {});
   for(auto& i : builtin_syntax_funcs) install_native(i);
   install_string(builtin_syntax_str);
   eval();
