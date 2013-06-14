@@ -1,7 +1,9 @@
 #ifndef ZS_SCM_INCLUDE_HH
 #define ZS_SCM_INCLUDE_HH
 
-#define LOAD(...) "("#__VA_ARGS__")"
+#include "util.hh"
+
+#define LOAD(...) "("EXPAND_STRINGIFY(__VA_ARGS__)")"
 
 /*
 LOAD allows to include a Scheme code as C string.

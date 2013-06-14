@@ -3,10 +3,10 @@ LOAD
   (apply write-char (string-ref "\n" 0) args))
 
 LOAD
-(define (current-input-port) *current-input-port-value*)
+(define (current-input-port) CURRENT_INPUT_PORT_SYMNAME)
 
 LOAD
-(define (current-output-port) *current-output-port-value*)
+(define (current-output-port) CURRENT_OUTPUT_PORT_SYMNAME)
 
 LOAD
 (define (call-with-input-file string proc)
@@ -26,16 +26,16 @@ LOAD
 (define (with-input-from-file string thunk)
   (let ((old-port (current-input-port)))
     (dynamic-wind
-        (lambda () (set! *current-input-port-value* (open-input-file string)))
+        (lambda () (set! CURRENT_INPUT_PORT_SYMNAME (open-input-file string)))
         thunk
         (lambda () (close-input-port (current-input-port))
-                (set! *current-input-port-value* old-port)))))
+                (set! CURRENT_INPUT_PORT_SYMNAME old-port)))))
 
 LOAD
 (define (with-output-to-file string thunk)
   (let ((old-port (current-output-port)))
     (dynamic-wind 
-        (lambda () (set! *current-output-port-value* (open-output-file string)))
+        (lambda () (set! CURRENT_OUTPUT_PORT_SYMNAME (open-output-file string)))
         thunk
         (lambda () (close-output-port (current-output-port))
-                (set! *current-output-port-value* old-port)))))
+                (set! CURRENT_OUTPUT_PORT_SYMNAME old-port)))))

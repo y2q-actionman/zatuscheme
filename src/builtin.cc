@@ -16,6 +16,7 @@
 #include "vm.hh"
 #include "zs_memory.hh"
 #include "zs_scm_include.hh"
+#include "util.hh"
 
 #include "builtin_boolean.hh"
 #include "builtin_char.hh"
@@ -183,8 +184,8 @@ void install_builtin(){
   vm.frame = vm.frame->push();
   for(auto& i : builtin_funcs) install_native(i);
   install_string(builtin_str);
-  install_symbol(CURRENT_INPUT_PORT_SYMNAME, &std::cin);
-  install_symbol(CURRENT_OUTPUT_PORT_SYMNAME, &std::cout);
+  install_symbol(EXPAND_STRINGIFY(CURRENT_INPUT_PORT_SYMNAME), &std::cin);
+  install_symbol(EXPAND_STRINGIFY(CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
   install_symbol(null_env_symname, null_env);
   install_symbol(r5rs_env_symname, vm.frame);
   eval();

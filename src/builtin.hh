@@ -6,6 +6,9 @@
 #include "procedure.hh"
 #include "vm.hh"
 
+#define CURRENT_INPUT_PORT_SYMNAME *current-input-port-value*
+#define CURRENT_OUTPUT_PORT_SYMNAME *current-output-port-value*
+
 void load_internal(std::istream&);
 void install_builtin();
 
