@@ -11,6 +11,7 @@
 #define R5RS_ENV_SYMNAME *r5rs-env-value*
 #define NULL_ENV_SYMNAME *null-env-value*
 #define INTERACTION_ENV_SYMNAME *interaction-env-value*
+#define NEWLINE_CHAR_SYMNAME %newline-char
 
 void load_internal(std::istream&);
 void install_builtin();
