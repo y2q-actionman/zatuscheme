@@ -44,19 +44,11 @@ Lisp_ptr string_make(ZsArgs args){
     throw zs_error("passed size is less than 0");
   }    
 
-  switch(args.size()){
-  case 1:
-    return {zs_new<String>(char_count, '\0')};
-  case 2: {
-    auto c = args[1].get<char>();
-    if(!c){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::character, args[1]);
-    }
-    return {zs_new<String>(char_count, c)};
+  if(args[1].tag() != Ptr_tag::character){
+    throw builtin_type_check_failed(nullptr, Ptr_tag::character, args[1]);
   }
-  default:
-    throw builtin_argcount_failed(nullptr, 1, 2, args.size());
-  }
+  
+  return {zs_new<String>(char_count, args[1].get<char>())};
 }
 
 Lisp_ptr string_length(ZsArgs args){

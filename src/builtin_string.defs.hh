@@ -3,9 +3,9 @@
 {"string?", {
     builtin::type_check_pred<Ptr_tag::string>,
     {1}}},
-{"make-string", {
+{"%make-string2", {
     builtin::string_make,
-    {1, 2}}},
+    {2}}},
 {"string-length", {
     builtin::string_length,
     {1}}},
