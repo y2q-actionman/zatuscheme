@@ -21,15 +21,15 @@
     builtin::port_close_o,
     {1}}},
 
-{"read", {
+{"%read", {
     builtin::port_read,
-    {0, 1}}},
-{"read-char", {
+    {1}}},
+{"%read-char", {
     builtin::port_read_char,
-    {0, 1}}},
-{"peek-char", {
+    {1}}},
+{"%peek-char", {
     builtin::port_peek_char,
-    {0, 1}}},
+    {1}}},
 
 {"eof-object?", {
     builtin::port_eof_p,
@@ -45,6 +45,6 @@
     builtin::port_write_char,
     {1, 2}}},
 
-{"char-ready?", {
+{"%char-ready?", {
     builtin::port_char_ready,
-    {0, 1}}},
+    {1}}},

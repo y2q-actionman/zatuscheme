@@ -39,3 +39,17 @@ LOAD
         thunk
         (lambda () (close-output-port (current-output-port))
                 (set! CURRENT_OUTPUT_PORT_SYMNAME old-port)))))
+
+LOAD
+(define (%read-funcs fun)
+  (lambda args (apply fun (if (null? args) (current-input-port) args))))
+
+LOAD
+(define read (%read-funcs %read))
+LOAD
+(define read-char (%read-funcs %read-char))
+LOAD
+(define peek-char (%read-funcs %peek-char))
+
+LOAD
+(define char-ready? (%read-funcs %char-ready?))

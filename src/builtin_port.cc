@@ -52,23 +52,9 @@ Lisp_ptr port_close(ZsArgs args){
 
 template<typename Fun>
 Lisp_ptr port_input_call(ZsArgs args, Fun fun){
-  InputPort* p;
-
-  switch(args.size()){
-  case 0:
-    p = vm.frame->find(intern(*vm.symtable, EXPAND_STRINGIFY(CURRENT_INPUT_PORT_SYMNAME))).get<InputPort*>();
-    if(!p){
-      throw zs_error_arg1(nullptr, "internal variable '"EXPAND_STRINGIFY(CURRENT_INPUT_PORT_SYMNAME)"' is broken!");
-    }
-    break;
-  case 1:
-    p = args[0].get<InputPort*>();
-    if(!p){
-      throw builtin_type_check_failed(nullptr, to_tag<Ptr_tag, InputPort*>(), args[0]);
-    }
-    break;
-  default:
-    throw builtin_argcount_failed(nullptr, 0, 1, args.size());
+  InputPort* p = args[0].get<InputPort*>();
+  if(!p){
+    throw builtin_type_check_failed(nullptr, to_tag<Ptr_tag, InputPort*>(), args[0]);
   }
 
   return Lisp_ptr{fun(p)};
