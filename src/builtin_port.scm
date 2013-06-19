@@ -50,6 +50,16 @@ LOAD
 (define read-char (%read-funcs %read-char))
 LOAD
 (define peek-char (%read-funcs %peek-char))
-
 LOAD
 (define char-ready? (%read-funcs %char-ready?))
+
+LOAD
+(define (%write-funcs fun)
+  (lambda (p . args) (apply fun `(,p) (if (null? args) (current-output-port) args))))
+
+LOAD
+(define write (%write-funcs %write))
+LOAD
+(define display (%write-funcs %display))
+LOAD
+(define write-char (%write-funcs %write-char))

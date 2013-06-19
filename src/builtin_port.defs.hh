@@ -35,15 +35,15 @@
     builtin::port_eof_p,
     {1}}},
 
-{"write", {
+{"%write", {
     builtin::port_write,
-    {1, 2}}},
-{"display", {
+    {2}}},
+{"%display", {
     builtin::port_display,
-    {1, 2}}},
-{"write-char", {
+    {2}}},
+{"%write-char", {
     builtin::port_write_char,
-    {1, 2}}},
+    {2}}},
 
 {"%char-ready?", {
     builtin::port_char_ready,
