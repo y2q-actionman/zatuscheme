@@ -1,4 +1,8 @@
 LOAD
+(define (make-vector k . fill)
+  (apply %make-vector2 `(,k) (if (null? fill) %undefined fill)))
+
+LOAD
 (define (vector-fill! vec fill)
   (let ((size (vector-length vec)))
     (do ((i 0 (+ i 1)))

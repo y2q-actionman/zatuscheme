@@ -20,14 +20,7 @@ Lisp_ptr vector_make(ZsArgs args){
     throw zs_error("passed size is less than 0");
   }    
 
-  switch(args.size()){
-  case 1:
-    return {zs_new<Vector>(count, Lisp_ptr{})};
-  case 2:
-    return {zs_new<Vector>(count, args[1])};
-  default:
-    throw builtin_argcount_failed(nullptr, 1, 2, args.size());
-  }
+  return {zs_new<Vector>(count, args[1])};
 }
 
 Lisp_ptr vector_vector(ZsArgs args){

@@ -3,9 +3,9 @@
 {"vector?", {
     builtin::type_check_pred<Ptr_tag::vector>,
     {1}}},
-{"make-vector", {
+{"%make-vector2", {
     builtin::vector_make,
-    {1, 2}}},
+    {2}}},
 {"vector", {
     builtin::vector_vector, 
     {1, Variadic::t}}},
