@@ -3,7 +3,7 @@
 #include "test_util.hh"
 
 using namespace std;
-
+#if 0
 template<typename T>
 void fail_message(Token::Type t, istream& i, 
                   const Token& n, T expect){
@@ -84,8 +84,10 @@ void check(int i, int radix, const char* expect){
     RESULT = EXIT_FAILURE;
   }
 }
+#endif
 
 int main(){
+#if 0
   // invalids
   check("hogehoge");
   check(".");
@@ -152,6 +154,8 @@ int main(){
   check(-100, 8, "#o-144");
   check(-100, 16, "#x-64");
   check(-100, 2, "#b-1100100");
-
+#else
+  RESULT = EXIT_FAILURE;
+#endif
   return RESULT;
 }

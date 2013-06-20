@@ -563,19 +563,7 @@ Lisp_ptr internal_number_from_string(ZsArgs args){
 
   istringstream iss(*str);
 
-  auto t = tokenize_number(iss, radix);
-
-  if(t.type() == Token::Type::integer){
-    return Lisp_ptr(Ptr_tag::integer, t.get<int>());
-  }else if(t.type() == Token::Type::rational){
-    return {zs_new<double>(t.get<Rational>())};
-  }else if(t.type() == Token::Type::real){
-    return {zs_new<double>(t.get<double>())};
-  }else if(t.type() == Token::Type::complex){
-    return {zs_new<Complex>(t.get<Complex>())};
-  }else{
-    throw zs_error_arg1(nullptr, "string cannot be read as number", {args[0]});
-  }
+  return parse_number(iss, radix);
 }
 
 Lisp_ptr internal_number_to_string(ZsArgs args){

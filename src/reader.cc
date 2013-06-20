@@ -87,18 +87,6 @@ Lisp_ptr read_abbrev(const char* name, istream& f){
 Lisp_ptr read_la(istream& f, Token&& tok){
   switch(tok.type()){
     // simple datum
-  case Token::Type::integer:
-    return Lisp_ptr(Ptr_tag::integer, tok.get<int>());
-
-  case Token::Type::rational:
-    return {zs_new<Rational>(tok.get<Rational>())};
-
-  case Token::Type::real:
-    return {zs_new<double>(tok.get<double>())};
-
-  case Token::Type::complex:
-    return {zs_new<Complex>(tok.get<Complex>())};
-
   case Token::Type::identifier:
     return {intern(*vm.symtable, tok.move<string>())};
 

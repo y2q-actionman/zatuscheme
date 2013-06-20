@@ -14,7 +14,6 @@ public:
   enum class Type {
     uninitialized = 0,
       identifier,
-      integer, rational, real, complex,
       notation,
       lisp_ptr
       };
@@ -38,14 +37,6 @@ public:
   Token(const std::string&, Type);
   Token(std::string&&, Type);
   explicit constexpr Token(Notation);
-  // numerics
-  explicit constexpr Token(int);
-  explicit constexpr Token(double);
-  explicit Token(const Rational&);
-  explicit Token(Rational&&);
-  explicit Token(const Complex&);
-  explicit Token(Complex&&);
-  //
   explicit constexpr Token(Lisp_ptr);
 
 
@@ -70,17 +61,10 @@ public:
   explicit operator bool() const
   { return type() != Type::uninitialized; }
 
-  // numeric interface
-  template <typename T> T coerce() const;
-  
 private:
   Type type_;
   union {
     std::string str_;
-    int i_;
-    Rational q_;
-    double d_;
-    Complex z_;
     Notation not_;
     Lisp_ptr lisp_value_;
   };
@@ -92,7 +76,7 @@ private:
 Token tokenize(std::istream&);
 
 // 'radix == 0' means 10 or the specified value of prefix.
-Token tokenize_number(std::istream&, int radix = 0);
+Lisp_ptr parse_number(std::istream&, int radix = 0);
 
 const char* stringify(Token::Notation);
 const char* stringify(Token::Type);

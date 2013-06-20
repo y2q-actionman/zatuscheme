@@ -37,20 +37,6 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
   case Token::Type::identifier:
     o << tok.get<string>();
     break;
-  case Token::Type::integer:
-    o << tok.get<int>();
-    break;
-  case Token::Type::rational: {
-    auto q = tok.get<Rational>();
-    o << q.numerator() << '/' << q.denominator();
-    break;
-  }
-  case Token::Type::real:
-    o << tok.get<double>();
-    break;
-  case Token::Type::complex:
-    o << tok.get<Complex>();
-    break;
   case Token::Type::notation:
     o << tok.get<Token::Notation>();
     break;

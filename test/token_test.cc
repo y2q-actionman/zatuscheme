@@ -169,29 +169,45 @@ int main(){
   check(" ;hogehoge\n"); // EOF
   check_ident("   abc;fhei", "abc");
 
-  // // boolean (TODO: -> Lisp_ptr)
-  // check("#t", true);
-  // check("#f", false);
+  // boolean
+#if 0
+  check("#t", true);
+  check("#f", false);
+#else
+  RESULT = EXIT_FAILURE;
+#endif
 
-  // number
+  // number (TODO: -> Lisp_ptr)
+#if 0
   check("+1", 1);
   check("#x16", 0x16);
+#else
+  RESULT = EXIT_FAILURE;
+#endif
   
-  // // character (TODO: -> Lisp_ptr)
-  // check("#\\");
-  // check("#\\a", 'a');
-  // check("#\\b", 'b');
-  // check("#\\x", 'x');
-  // check("#\\s", 's');
-  // check("#\\space", ' ');
-  // check("#\\newline", '\n');
+  // character
+#if 0  
+  check("#\\");
+  check("#\\a", 'a');
+  check("#\\b", 'b');
+  check("#\\x", 'x');
+  check("#\\s", 's');
+  check("#\\space", ' ');
+  check("#\\newline", '\n');
+#else
+  RESULT = EXIT_FAILURE;
+#endif
 
-  // // string (TODO: -> Lisp_ptr)
-  // check("\"");
-  // check_string("\"\"", "");
-  // check_string("\"a\"", "a");
-  // check_string("\"abcd\nedf jfkdj\"", "abcd\nedf jfkdj");
-  // check_string("\"\\\"\\\"\"", "\"\"");
+  // string
+#if 0  
+  check("\"");
+  check_string("\"\"", "");
+  check_string("\"a\"", "a");
+  check_string("\"abcd\nedf jfkdj\"", "abcd\nedf jfkdj");
+  check_string("\"\\\"\\\"\"", "\"\"");
+#else
+  RESULT = EXIT_FAILURE;
+#endif
 
   // error
   check("#z");
@@ -214,7 +230,7 @@ int main(){
     check(ss, N::r_paren);
     check_ident(ss, "e");
     check_ident(ss, "...");
-
+#if 0
     check_ident(ss, "f");
     check(ss, 11);
     check(ss, 0.3);
@@ -224,10 +240,13 @@ int main(){
     check_ident(ss, "x");
     check(ss, N::comma_at);
     check_ident(ss, "y");
-    // check_string(ss, "ho()ge");
-    // check(ss, N::r_paren);
+    check_string(ss, "ho()ge");
+    check(ss, N::r_paren);
 
-    // check(ss); // EOF
+    check(ss); // EOF
+#else
+    RESULT = EXIT_FAILURE;
+#endif
   }
 
   return RESULT;
