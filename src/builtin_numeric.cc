@@ -491,29 +491,26 @@ Lisp_ptr number_acos(ZsArgs args){
                       [](Complex z){ return std::acos(z);});
 }
 
-Lisp_ptr number_atan(ZsArgs args){
-  switch(args.size()){
-  case 1:  // std::atan()
-    return number_unary(args[0],
-                        [](int i){ return std::atan(i); },
-                        [](Rational q){ return std::atan(static_cast<double>(q));},
-                        [](double d){ return std::atan(d); },
-                        [](Complex z){ return std::atan(z); });
-  case 2: // std::atan2()
-    return number_binary(args[0], args[1],
-                         [](int i1, int i2){
-                           return std::atan2(i1, i2);
-                         },
-                         [](Rational q1, Rational q2){
-                           return std::atan2(static_cast<double>(q1), static_cast<double>(q2));
-                         },
-                         [](double d1, double d2){
-                           return std::atan2(d1, d2);
-                         },
-                         inacceptable_number_type());
-  default:
-    throw builtin_argcount_failed(nullptr, 1, 2, args.size());
-  }
+Lisp_ptr internal_number_atan1(ZsArgs args){
+  return number_unary(args[0],
+                      [](int i){ return std::atan(i); },
+                      [](Rational q){ return std::atan(static_cast<double>(q));},
+                      [](double d){ return std::atan(d); },
+                      [](Complex z){ return std::atan(z); });
+}
+
+Lisp_ptr internal_number_atan2(ZsArgs args){
+  return number_binary(args[0], args[1],
+                       [](int i1, int i2){
+                         return std::atan2(i1, i2);
+                       },
+                       [](Rational q1, Rational q2){
+                         return std::atan2(static_cast<double>(q1), static_cast<double>(q2));
+                       },
+                       [](double d1, double d2){
+                         return std::atan2(d1, d2);
+                       },
+                       inacceptable_number_type());
 }
 
 Lisp_ptr number_sqrt(ZsArgs args){

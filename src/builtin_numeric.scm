@@ -78,6 +78,10 @@ LOAD
   (if (negative? n) (- n) n))
 
 LOAD
+(define (atan n . m)
+  (if (null? m) (%atan1 n) (apply %atan2 `(,n) m)))
+
+LOAD
 (define (gcd . n)
   (%fold %gcd 0 n))
 

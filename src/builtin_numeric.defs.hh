@@ -119,9 +119,12 @@
 {"acos", {
     builtin::number_acos,
     {1}}},
-{"atan", {
-    builtin::number_atan,
-    {1, 2}}},
+{"%atan1", {
+    builtin::internal_number_atan1,
+    {1}}},
+{"%atan2", {
+    builtin::internal_number_atan2,
+    {2}}},
 
 {"sqrt", {
     builtin::number_sqrt,

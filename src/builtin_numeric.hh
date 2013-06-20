@@ -49,9 +49,10 @@ Lisp_ptr number_cos(ZsArgs);
 Lisp_ptr number_tan(ZsArgs);
 Lisp_ptr number_asin(ZsArgs);
 Lisp_ptr number_acos(ZsArgs);
-Lisp_ptr number_atan(ZsArgs);
-Lisp_ptr number_sqrt(ZsArgs);
+Lisp_ptr internal_number_atan1(ZsArgs);
+Lisp_ptr internal_number_atan2(ZsArgs);
 
+Lisp_ptr number_sqrt(ZsArgs);
 Lisp_ptr number_expt(ZsArgs);
 Lisp_ptr number_rect(ZsArgs);
 Lisp_ptr number_polar(ZsArgs);
