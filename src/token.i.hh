@@ -53,6 +53,11 @@ struct to_type<Token::Type, Token::Type::notation>{
   typedef Token::Notation type;
 };
 
+template<>
+struct to_type<Token::Type, Token::Type::lisp_ptr>{
+  typedef Lisp_ptr type;
+};
+
 
 // std::string -> Token::Type is ambigious
 template<>
@@ -99,6 +104,12 @@ template<>
 inline constexpr
 Token::Type to_tag<Token::Type, Token::Notation>(){
   return Token::Type::notation;
+}
+
+template<>
+inline constexpr
+Token::Type to_tag<Token::Type, Lisp_ptr>(){
+  return Token::Type::lisp_ptr;
 }
 
 
@@ -158,6 +169,11 @@ Token::Token(Notation n)
   : type_(Type::notation), not_(n),
     ex_(Exactness::unspecified){}
 
+inline constexpr
+Token::Token(Lisp_ptr p)
+  : type_(Type::lisp_ptr), lisp_value_(p),
+    ex_(Exactness::unspecified){}
+
 template<>
 inline
 const std::string& Token::get<std::string>() const{
@@ -212,6 +228,13 @@ inline
 Token::Notation Token::get<Token::Notation>() const{
   assert(type_ == Type::notation);
   return not_;
+}
+
+template<>
+inline
+const Lisp_ptr& Token::get<Lisp_ptr>() const{
+  assert(type_ == Type::lisp_ptr);
+  return lisp_value_;
 }
 
 
@@ -269,6 +292,13 @@ inline
 Token::Notation Token::move<Token::Notation>(){
   assert(type_ == Type::notation);
   return not_;
+}
+
+template<>
+inline
+Lisp_ptr&& Token::move<Lisp_ptr>(){
+  assert(type_ == Type::lisp_ptr);
+  return std::move(lisp_value_);
 }
 
 template <> int Token::coerce() const;

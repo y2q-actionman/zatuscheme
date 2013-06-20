@@ -7,6 +7,7 @@
 #include "decl.hh"
 #include "util.hh"
 #include "rational.hh"
+#include "lisp_ptr.hh"
 
 class Token {
 public:
@@ -14,7 +15,8 @@ public:
     uninitialized = 0,
       identifier, boolean,
       integer, rational, real, complex,
-      character, string, notation
+      character, string, notation,
+      lisp_ptr
       };
 
   enum class Notation {
@@ -46,6 +48,9 @@ public:
   Token(Rational&&, Exactness);
   Token(const Complex&, Exactness);
   Token(Complex&&, Exactness);
+  //
+  explicit constexpr Token(Lisp_ptr);
+
 
   Token(const Token&);
   Token(Token&&);
@@ -85,6 +90,7 @@ private:
     Complex z_;
     char c_;
     Notation not_;
+    Lisp_ptr lisp_value_;
   };
 
   // numeric flags
