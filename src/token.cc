@@ -25,7 +25,6 @@ template<typename T>
 inline
 void Token::init_from_other(T other){
   type_ = other.type_;
-  ex_ = other.ex_;
 
   switch(other.type_){
   case Type::uninitialized:
@@ -75,8 +74,6 @@ Token::Token(Token&& other){
 template<typename T>
 inline
 Token& Token::assign_from_other(T other){
-  ex_ = other.ex_;
-
   switch(this->type_){
   case Type::identifier:
     if(other.type_ == Type::identifier){
@@ -568,7 +565,7 @@ double zs_stof(istream& f, string s){
   }
 }
 
-Token parse_real_number(int radix, istream& f){
+pair<Token, Token::Exactness> parse_real_number(int radix, istream& f){
   int sign = 1;
 
   switch(f.peek()){
@@ -595,7 +592,7 @@ Token parse_real_number(int radix, istream& f){
     // decimal float
     auto d = zs_stof(f, move(digit_chars.first));
       
-    return {d * sign, Token::Exactness::inexact};
+    return {Token(d * sign), Token::Exactness::inexact};
   }
 
   if(digit_chars.first.empty()){
@@ -608,9 +605,9 @@ Token parse_real_number(int radix, istream& f){
 
   if(c != '/'){
     if(d1_used_flag){
-      return {d1, Token::Exactness::inexact};
+      return {Token(d1), Token::Exactness::inexact};
     }else{
-      return {sign * u1, digit_chars.second};
+      return {Token(sign * u1), digit_chars.second};
     }
   }
 
@@ -629,7 +626,7 @@ Token parse_real_number(int radix, istream& f){
   if(d1_used_flag || d2_used_flag){
     if(!d1_used_flag) d1 = u1;
     if(!d2_used_flag) d2 = u2;
-    return {d1 / d2, Token::Exactness::inexact};
+    return {Token(d1 / d2), Token::Exactness::inexact};
   }else{
     Token::Exactness ex;
     if(digit_chars.second == Token::Exactness::inexact
@@ -639,11 +636,11 @@ Token parse_real_number(int radix, istream& f){
       ex = Token::Exactness::exact;
     }
 
-    return {Rational(sign * u1, u2), ex};
+    return {Token(Rational(sign * u1, u2)), ex};
   }
 }
 
-Token parse_complex(int radix, istream& f){
+pair<Token, Token::Exactness>  parse_complex(int radix, istream& f){
   const auto first_char = f.peek();
 
   // treating +i, -i. (dirty part!)
@@ -651,7 +648,7 @@ Token parse_complex(int radix, istream& f){
     f.get();
     if(f.peek() == 'i' || f.peek() == 'I'){
       f.ignore(1);
-      return {Complex(0, (first_char == '+') ? 1 : -1),
+      return {Token(Complex(0, (first_char == '+') ? 1 : -1)),
           Token::Exactness::inexact};
     }
     f.unget();
@@ -664,7 +661,7 @@ Token parse_complex(int radix, istream& f){
   case '@': {// polar literal
     auto deg = parse_real_number(radix, f);
         
-    return {polar(real.coerce<double>(), deg.coerce<double>()),
+    return {Token(polar(real.first.coerce<double>(), deg.first.coerce<double>())),
         Token::Exactness::inexact};
   }
   case '+': case '-': {
@@ -672,7 +669,7 @@ Token parse_complex(int radix, istream& f){
 
     if(f.peek() == 'i' || f.peek() == 'I'){
       f.ignore(1);
-      return {Complex(real.coerce<double>(), sign),
+      return {Token(Complex(real.first.coerce<double>(), sign)),
           Token::Exactness::inexact};
     }
     
@@ -683,12 +680,12 @@ Token parse_complex(int radix, istream& f){
     }
     f.ignore(1);
 
-    return {Complex(real.coerce<double>(), imag.coerce<double>() * sign),
+    return {Token(Complex(real.first.coerce<double>(), imag.first.coerce<double>() * sign)),
         Token::Exactness::inexact};
   }
   case 'i': case 'I':
     if(first_char == '+' || first_char == '-'){
-      return {Complex(0, real.coerce<double>()),
+      return {Token(Complex(0, real.first.coerce<double>())),
           Token::Exactness::inexact};
     }else{
       throw zs_error("reader error: failed at reading a complex number. ('i' appeared alone.)\n");
@@ -709,21 +706,21 @@ Token tokenize_number(istream& f, int radix){
   }
 
   const auto r = parse_complex(radix, f);
-  if(!r){
+  if(!r.first){
     // TODO: add context information.
     throw zs_error("parser error: cannot be read as number.\n");
   }
 
   if(prefix_info.second == Token::Exactness::unspecified
-     || prefix_info.second == r.exactness()){
-    return r;
+     || prefix_info.second == r.second){
+    return r.first;
   }else if(prefix_info.second == Token::Exactness::exact){
-    switch(r.type()){
+    switch(r.first.type()){
     case Token::Type::integer:
     case Token::Type::rational:
-      return r;
+      return r.first;
     case Token::Type::real:
-      return Token{static_cast<int>(r.get<double>()), Token::Exactness::exact};
+      return Token(static_cast<int>(r.first.get<double>()));
     case Token::Type::complex:
       throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
     case Token::Type::uninitialized:
@@ -735,16 +732,15 @@ Token tokenize_number(istream& f, int radix){
     }
   }else{    
     assert(prefix_info.second == Token::Exactness::inexact);
-    switch(r.type()){
+    switch(r.first.type()){
     case Token::Type::integer:
-      return Token{static_cast<double>(r.get<int>()), Token::Exactness::inexact};
+      return Token(static_cast<double>(r.first.get<int>()));
     case Token::Type::rational:
-      return Token{static_cast<double>(r.get<Rational>().numerator())
-          / static_cast<double>(r.get<Rational>().denominator()),
-                   Token::Exactness::inexact};
+      return Token(static_cast<double>(r.first.get<Rational>().numerator())
+                   / static_cast<double>(r.first.get<Rational>().denominator()));
     case Token::Type::real:
     case Token::Type::complex:
-      return r;
+      return r.first;
     case Token::Type::uninitialized:
     case Token::Type::identifier:
     case Token::Type::notation:

@@ -48,7 +48,7 @@ void check(const char* input, const T& expect){
 
 // printing test
 void check(int i, int radix, const char* expect){
-  Token t{i, Token::Exactness::unspecified};
+  Token t{i};
 
   stringstream ss;
 

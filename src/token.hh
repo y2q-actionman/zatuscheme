@@ -33,19 +33,18 @@ public:
 
 
   constexpr Token()
-    : type_(Type::uninitialized),
-      ex_(Exactness::unspecified){}
+    : type_(Type::uninitialized){}
 
   Token(const std::string&, Type);
   Token(std::string&&, Type);
   explicit constexpr Token(Notation);
   // numerics
-  constexpr Token(int, Exactness);
-  constexpr Token(double, Exactness);
-  Token(const Rational&, Exactness);
-  Token(Rational&&, Exactness);
-  Token(const Complex&, Exactness);
-  Token(Complex&&, Exactness);
+  explicit constexpr Token(int);
+  explicit constexpr Token(double);
+  explicit Token(const Rational&);
+  explicit Token(Rational&&);
+  explicit Token(const Complex&);
+  explicit Token(Complex&&);
   //
   explicit constexpr Token(Lisp_ptr);
 
@@ -74,9 +73,6 @@ public:
   // numeric interface
   template <typename T> T coerce() const;
   
-  Exactness exactness() const
-  { return ex_; }
-
 private:
   Type type_;
   union {
@@ -88,9 +84,6 @@ private:
     Notation not_;
     Lisp_ptr lisp_value_;
   };
-
-  // numeric flags
-  Exactness ex_;
 
   template<typename T> void init_from_other(T other);
   template<typename T> Token& assign_from_other(T other);

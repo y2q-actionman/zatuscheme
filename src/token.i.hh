@@ -89,53 +89,43 @@ Token::Type to_tag<Token::Type, Lisp_ptr>(){
 // Token definitions
 inline
 Token::Token(const std::string& s, Type t)
-  : type_(t), str_(s),
-    ex_(Exactness::unspecified){}
+  : type_(t), str_(s){}
 
 inline
 Token::Token(std::string&& s, Type t)
-  : type_(t), str_(std::move(s)),
-    ex_(Exactness::unspecified){}
+  : type_(t), str_(std::move(s)){}
 
 inline constexpr
-Token::Token(int i, Exactness ex)
-  : type_(Type::integer), i_(i),
-    ex_(ex){}
+Token::Token(int i)
+  : type_(Type::integer), i_(i){}
 
 inline
-Token::Token(const Rational& q, Exactness ex)
-  : type_(Type::rational), q_(q),
-    ex_(ex){}
+Token::Token(const Rational& q)
+  : type_(Type::rational), q_(q){}
 
 inline
-Token::Token(Rational&& q, Exactness ex)
-  : type_(Type::rational), q_(std::move(q)),
-    ex_(ex){}
+Token::Token(Rational&& q)
+  : type_(Type::rational), q_(std::move(q)){}
 
 inline constexpr
-Token::Token(double d, Exactness ex)
-  : type_(Type::real), d_(d),
-    ex_(ex){}
+Token::Token(double d)
+  : type_(Type::real), d_(d){}
 
 inline
-Token::Token(const Complex& z, Exactness ex)
-  : type_(Type::complex), z_(z),
-    ex_(ex){}
+Token::Token(const Complex& z)
+  : type_(Type::complex), z_(z){}
 
 inline
-Token::Token(Complex&& z, Exactness ex)
-  : type_(Type::complex), z_(std::move(z)),
-    ex_(ex){}
+Token::Token(Complex&& z)
+  : type_(Type::complex), z_(std::move(z)){}
 
 inline constexpr
 Token::Token(Notation n)
-  : type_(Type::notation), not_(n),
-    ex_(Exactness::unspecified){}
+  : type_(Type::notation), not_(n){}
 
 inline constexpr
 Token::Token(Lisp_ptr p)
-  : type_(Type::lisp_ptr), lisp_value_(p),
-    ex_(Exactness::unspecified){}
+  : type_(Type::lisp_ptr), lisp_value_(p){}
 
 template<>
 inline
