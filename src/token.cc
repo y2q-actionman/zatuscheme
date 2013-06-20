@@ -308,12 +308,7 @@ Token tokenize_string(istream& f){
 
   // number parsers
 
-struct PrefixValue {
-  int radix;
-  Token::Exactness ex;
-};
-
-PrefixValue parse_number_prefix(istream& f){
+pair<int, Token::Exactness> parse_number_prefix(istream& f){
   int r = 10;
   Token::Exactness e = Token::Exactness::unspecified;
   int r_appeared = 0, e_appeared = 0;
@@ -710,7 +705,7 @@ Token tokenize_number(istream& f, int radix){
   const auto prefix_info = parse_number_prefix(f);
 
   if(!radix){
-    radix = prefix_info.radix;
+    radix = prefix_info.first;
   }
 
   const auto r = parse_complex(radix, f);
@@ -719,10 +714,10 @@ Token tokenize_number(istream& f, int radix){
     throw zs_error("parser error: cannot be read as number.\n");
   }
 
-  if(prefix_info.ex == Token::Exactness::unspecified
-     || prefix_info.ex == r.exactness()){
+  if(prefix_info.second == Token::Exactness::unspecified
+     || prefix_info.second == r.exactness()){
     return r;
-  }else if(prefix_info.ex == Token::Exactness::exact){
+  }else if(prefix_info.second == Token::Exactness::exact){
     switch(r.type()){
     case Token::Type::integer:
     case Token::Type::rational:
@@ -739,7 +734,7 @@ Token tokenize_number(istream& f, int radix){
       UNEXP_CONVERSION("exact");
     }
   }else{    
-    assert(prefix_info.ex == Token::Exactness::inexact);
+    assert(prefix_info.second == Token::Exactness::inexact);
     switch(r.type()){
     case Token::Type::integer:
       return Token{static_cast<double>(r.get<int>()), Token::Exactness::inexact};
