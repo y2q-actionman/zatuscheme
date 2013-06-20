@@ -99,9 +99,6 @@ Lisp_ptr read_la(istream& f, Token&& tok){
   case Token::Type::complex:
     return {zs_new<Complex>(tok.get<Complex>())};
 
-  case Token::Type::character:
-    return Lisp_ptr{tok.move<char>()};
-
   case Token::Type::string:
     return {zs_new<String>(tok.move<string>())};
 

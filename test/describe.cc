@@ -52,9 +52,6 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
   case Token::Type::complex:
     o << tok.get<Complex>();
     break;
-  case Token::Type::character:
-    o << tok.get<char>();
-    break;
   case Token::Type::notation:
     o << tok.get<Token::Notation>();
     break;

@@ -34,11 +34,6 @@ struct to_type<Token::Type, Token::Type::complex>{
 };
 
 template<>
-struct to_type<Token::Type, Token::Type::character>{
-  typedef char type;
-};
-
-template<>
 struct to_type<Token::Type, Token::Type::string>{
   typedef std::string type;
 };
@@ -81,12 +76,6 @@ template<>
 inline constexpr
 Token::Type to_tag<Token::Type, Complex>(){
   return Token::Type::complex;
-}
-
-template<>
-inline constexpr
-Token::Type to_tag<Token::Type, char>(){
-  return Token::Type::character;
 }
 
 template<>
@@ -144,11 +133,6 @@ Token::Token(Complex&& z, Exactness ex)
     ex_(ex){}
 
 inline constexpr
-Token::Token(char c)
-  : type_(Type::character), c_(c),
-    ex_(Exactness::unspecified){}
-
-inline constexpr
 Token::Token(Notation n)
   : type_(Type::notation), not_(n),
     ex_(Exactness::unspecified){}
@@ -195,13 +179,6 @@ const Complex& Token::get<Complex>() const{
 
 template<>
 inline
-char Token::get<char>() const{
-  assert(type_ == Type::character);
-  return c_;
-}
-
-template<>
-inline
 Token::Notation Token::get<Token::Notation>() const{
   assert(type_ == Type::notation);
   return not_;
@@ -220,13 +197,6 @@ inline
 std::string&& Token::move<std::string>(){
   assert(type_ == Type::identifier || type_ == Type::string);
   return std::move(str_);
-}
-
-template<>
-inline
-char Token::move<char>(){
-  assert(type_ == Type::character);
-  return c_;
 }
 
 template<>

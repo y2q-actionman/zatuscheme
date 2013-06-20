@@ -52,10 +52,6 @@ void Token::init_from_other(T other){
     new (&this->z_) Complex(std::move(other.z_));
     break;
 
-  case Type::character:
-    this->c_ = other.c_;
-    break;
-
   case Type::notation:
     this->not_ = other.not_;
     break;
@@ -107,7 +103,6 @@ Token& Token::assign_from_other(T other){
   case Type::integer:
   case Type::rational:
   case Type::real:
-  case Type::character:
   case Type::notation:
   case Type::lisp_ptr:
     break;
@@ -143,7 +138,6 @@ Token::~Token(){
   case Type::integer:
   case Type::rational:
   case Type::real:
-  case Type::character:
   case Type::notation:
   case Type::lisp_ptr:
     break;
@@ -270,18 +264,18 @@ Token tokenize_character(istream& f){
   }
 
   if(is_delimiter(f.peek())){
-    return Token{static_cast<char>(ret_char)};
+    return Token{Lisp_ptr(static_cast<char>(ret_char))};
   }else{
     // check character name
     switch(ret_char){
     case 's': case 'S':
       if(check_name("pace")){
-        return Token{' '};
+        return Token{Lisp_ptr(' ')};
       }
       break;
     case 'n': case 'N':
       if(check_name("ewline")){
-        return Token{'\n'};
+        return Token{Lisp_ptr('\n')};
       }
       break;
     }
@@ -742,7 +736,6 @@ Token tokenize_number(istream& f, int radix){
       throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
     case Token::Type::uninitialized:
     case Token::Type::identifier:
-    case Token::Type::character:
     case Token::Type::string:
     case Token::Type::notation:
     case Token::Type::lisp_ptr:
@@ -763,7 +756,6 @@ Token tokenize_number(istream& f, int radix){
       return r;
     case Token::Type::uninitialized:
     case Token::Type::identifier:
-    case Token::Type::character:
     case Token::Type::string:
     case Token::Type::notation:
     case Token::Type::lisp_ptr:
@@ -937,8 +929,6 @@ const char* stringify(Token::Type t){
     return "real";
   case Token::Type::complex:
     return "complex";
-  case Token::Type::character:
-    return "character";
   case Token::Type::notation:
     return "notation";
   case Token::Type::lisp_ptr:

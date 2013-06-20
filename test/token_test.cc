@@ -182,14 +182,14 @@ int main(){
   check("+1", 1);
   check("#x16", 0x16);
   
-  // character
-  check("#\\");
-  check("#\\a", 'a');
-  check("#\\b", 'b');
-  check("#\\x", 'x');
-  check("#\\s", 's');
-  check("#\\space", ' ');
-  check("#\\newline", '\n');
+  // // character (TODO: -> Lisp_ptr)
+  // check("#\\");
+  // check("#\\a", 'a');
+  // check("#\\b", 'b');
+  // check("#\\x", 'x');
+  // check("#\\s", 's');
+  // check("#\\space", ' ');
+  // check("#\\newline", '\n');
 
   // string
   check("\"");

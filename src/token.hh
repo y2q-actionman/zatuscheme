@@ -15,7 +15,7 @@ public:
     uninitialized = 0,
       identifier,
       integer, rational, real, complex,
-      character, string, notation,
+      string, notation,
       lisp_ptr
       };
 
@@ -38,7 +38,6 @@ public:
 
   Token(const std::string&, Type);
   Token(std::string&&, Type);
-  explicit constexpr Token(char);
   explicit constexpr Token(Notation);
   // numerics
   constexpr Token(int, Exactness);
@@ -86,7 +85,6 @@ private:
     Rational q_;
     double d_;
     Complex z_;
-    char c_;
     Notation not_;
     Lisp_ptr lisp_value_;
   };
