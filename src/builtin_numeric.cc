@@ -532,21 +532,11 @@ Lisp_ptr number_angle(ZsArgs args){
 
 
 Lisp_ptr number_i_to_e(ZsArgs args){
-  // MEMO: add complex<int> type??
-  return number_unary(args[0],
-                      identity(),
-                      identity(),
-                      // TODO: rationalize() here.
-                      [](double d){ return static_cast<int>(d);},
-                      inacceptable_number_type());
+  return to_exact(args[0]);
 }
 
 Lisp_ptr number_e_to_i(ZsArgs args){
-  return number_unary(args[0],
-                      [](int i){ return static_cast<double>(i);},
-                      [](Rational q){ return static_cast<double>(q);},
-                      identity(),
-                      identity());
+  return to_inexact(args[0]);
 }
 
 

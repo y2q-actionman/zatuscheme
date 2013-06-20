@@ -70,6 +70,9 @@ Lisp_ptr wrap_number(double);
 Lisp_ptr wrap_number(const Complex&);
 Lisp_ptr wrap_number(bool);
 
+Lisp_ptr to_exact(Lisp_ptr);
+Lisp_ptr to_inexact(Lisp_ptr);
+
 #include "rational.i.hh"
 
 #endif // RATIONAL_HH

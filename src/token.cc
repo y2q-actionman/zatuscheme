@@ -622,29 +622,9 @@ Lisp_ptr parse_number(istream& f, int radix){
      || prefix_info.second == r.second){
     return r.first;
   }else if(prefix_info.second == Token::Exactness::exact){
-    switch(r.first.tag()){
-    case Ptr_tag::integer:
-    case Ptr_tag::rational:
-      return r.first;
-    case Ptr_tag::real:
-      return wrap_number(static_cast<int>(coerce<double>(r.first)));
-    case Ptr_tag::complex:
-      throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
-    default:
-      UNEXP_CONVERSION("exact");
-    }
+    return to_exact(r.first);
   }else{    
-    assert(prefix_info.second == Token::Exactness::inexact);
-    switch(r.first.tag()){
-    case Ptr_tag::integer:
-    case Ptr_tag::rational:
-      return wrap_number(coerce<double>(r.first));
-    case Ptr_tag::real:
-    case Ptr_tag::complex:
-      return r.first;
-    default:
-      UNEXP_CONVERSION("inexact");
-    }
+    return to_inexact(r.first);
   }
 }
 

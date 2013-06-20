@@ -256,3 +256,32 @@ Lisp_ptr wrap_number(const Complex& z){
 Lisp_ptr wrap_number(bool b){
   return Lisp_ptr{b};
 }
+
+Lisp_ptr to_exact(Lisp_ptr p){
+  switch(p.tag()){
+  case Ptr_tag::integer:
+  case Ptr_tag::rational:
+    return p;
+  case Ptr_tag::real:
+    // TODO: rationalize() here.
+    return wrap_number(static_cast<int>(*p.get<double*>()));
+  case Ptr_tag::complex:
+    throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
+  default:
+    UNEXP_CONVERSION("exact");
+  }
+}
+
+Lisp_ptr to_inexact(Lisp_ptr p){
+  switch(p.tag()){
+  case Ptr_tag::integer:
+  case Ptr_tag::rational:
+    return wrap_number(coerce<double>(p));
+  case Ptr_tag::real:
+  case Ptr_tag::complex:
+    return p;
+  default:
+    UNEXP_CONVERSION("inexact");
+  }
+}
+
