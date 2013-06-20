@@ -9,8 +9,10 @@
 #include "config.h"
 
 #include "token.hh"
+#include "rational.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
+#include "vm.hh"
 
 #ifdef USE_CASE_UPPER
 # define ZS_CASE(c) toupper(c)
@@ -29,10 +31,6 @@ void Token::init_from_other(T other){
 
   switch(other.type_){
   case Type::uninitialized:
-    break;
-
-  case Type::identifier:
-    new (&this->str_) string(std::move(other.str_));
     break;
 
   case Type::notation:
@@ -60,16 +58,6 @@ template<typename T>
 inline
 Token& Token::assign_from_other(T other){
   switch(this->type_){
-  case Type::identifier:
-    if(other.type_ == Type::identifier){
-      this->type_ = other.type_;
-      this->str_ = std::move(other.str_);
-      return *this;
-    }else{
-      str_.~string();
-      break;
-    }
-
   case Type::uninitialized:
   case Type::notation:
   case Type::lisp_ptr:
@@ -93,10 +81,6 @@ Token& Token::operator=(Token&& other){
 
 Token::~Token(){
   switch(type_){
-  case Type::identifier:
-    str_.~string();
-    break;
-
   case Type::uninitialized:
   case Type::notation:
   case Type::lisp_ptr:
@@ -167,7 +151,7 @@ Token tokenize_identifier(istream& f, int first_char){
   f.unget();
 
   assert(!s.empty());
-  return Token{move(s), Token::Type::identifier};
+  return Token{Lisp_ptr{intern(*vm.symtable, move(s))}};
 }
 
 Token tokenize_character(istream& f){
@@ -715,7 +699,7 @@ Token tokenize(istream& f){
     case 1:
       return Token{Token::Notation::dot};
     case 3:
-      return Token{"...", Token::Type::identifier};
+      return Token{Lisp_ptr{intern(*vm.symtable, "...")}};
     default:
       throw zs_error(printf_string("reader error: %d dots appeared.\n", dots));
     }
@@ -726,7 +710,7 @@ Token tokenize(istream& f){
 
   case '+': case '-': {
     if(is_delimiter(f.peek())){
-      return Token{string(1, c), Token::Type::identifier};
+      return Token{Lisp_ptr{intern(*vm.symtable, string(1, c))}};
     }else{
       f.unget();
       return Token{parse_number(f)};
@@ -816,8 +800,6 @@ const char* stringify(Token::Type t){
   switch(t){
   case Token::Type::uninitialized:
     return "uninitialized";
-  case Token::Type::identifier:
-    return "identifier";
   case Token::Type::notation:
     return "notation";
   case Token::Type::lisp_ptr:

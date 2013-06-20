@@ -6,16 +6,12 @@
 
 #include "decl.hh"
 #include "util.hh"
-#include "rational.hh"
 #include "lisp_ptr.hh"
 
 class Token {
 public:
   enum class Type {
-    uninitialized = 0,
-      identifier,
-      notation,
-      lisp_ptr
+    uninitialized = 0, notation, lisp_ptr
       };
 
   enum class Notation {
@@ -33,12 +29,8 @@ public:
 
   constexpr Token()
     : type_(Type::uninitialized){}
-
-  Token(const std::string&, Type);
-  Token(std::string&&, Type);
   explicit constexpr Token(Notation);
   explicit constexpr Token(Lisp_ptr);
-
 
   Token(const Token&);
   Token(Token&&);
@@ -64,7 +56,6 @@ public:
 private:
   Type type_;
   union {
-    std::string str_;
     Notation not_;
     Lisp_ptr lisp_value_;
   };

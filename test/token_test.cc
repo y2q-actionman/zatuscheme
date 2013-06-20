@@ -138,7 +138,11 @@ void check_ident(T&& t, const char* expect){
 #endif
   }
 
+#if 0
   check(forward<T>(t), s, Token::Type::identifier);
+#else
+  RESULT = EXIT_FAILURE;
+#endif
 }
 
 #define N Token::Notation
