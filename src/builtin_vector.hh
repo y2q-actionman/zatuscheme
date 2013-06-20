@@ -5,7 +5,7 @@
 
 namespace builtin {
 
-Lisp_ptr vector_make(ZsArgs);
+Lisp_ptr internal_vector_make(ZsArgs);
 Lisp_ptr vector_vector(ZsArgs);
 Lisp_ptr vector_length(ZsArgs);
 Lisp_ptr vector_ref(ZsArgs);

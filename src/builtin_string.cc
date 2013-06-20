@@ -34,7 +34,7 @@ Lisp_ptr internal_string_cmp(ZsArgs args, Fun fun){
 
 namespace builtin {
 
-Lisp_ptr string_make(ZsArgs args){
+Lisp_ptr internal_string_make(ZsArgs args){
   if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[0]);
   }

@@ -4,7 +4,7 @@
     builtin::type_check_pred<Ptr_tag::vector>,
     {1}}},
 {"%make-vector2", {
-    builtin::vector_make,
+    builtin::internal_vector_make,
     {2}}},
 {"vector", {
     builtin::vector_vector, 

@@ -4,7 +4,7 @@
     builtin::type_check_pred<Ptr_tag::string>,
     {1}}},
 {"%make-string2", {
-    builtin::string_make,
+    builtin::internal_string_make,
     {2}}},
 {"string-length", {
     builtin::string_length,

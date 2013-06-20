@@ -129,17 +129,17 @@ Lisp_ptr port_close_o(ZsArgs args){
 }
 
 
-Lisp_ptr port_read(ZsArgs args){
+Lisp_ptr internal_port_read(ZsArgs args){
   return port_input_call(move(args),
                          [](std::istream* is){ return read(*is); });
 }
 
-Lisp_ptr port_read_char(ZsArgs args){
+Lisp_ptr internal_port_read_char(ZsArgs args){
   return port_input_call(move(args),
                          [](std::istream* is) -> char { return is->get(); });
 }
 
-Lisp_ptr port_peek_char(ZsArgs args){
+Lisp_ptr internal_port_peek_char(ZsArgs args){
   return port_input_call(move(args),
                          [](std::istream* is) -> char{ return is->peek(); });
 }
@@ -149,7 +149,7 @@ Lisp_ptr port_eof_p(ZsArgs args){
 }  
 
 
-Lisp_ptr port_write(ZsArgs args){
+Lisp_ptr internal_port_write(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os) -> bool{
                             print(*os, c, print_human_readable::f);
@@ -157,7 +157,7 @@ Lisp_ptr port_write(ZsArgs args){
                           });
 }
 
-Lisp_ptr port_display(ZsArgs args){
+Lisp_ptr internal_port_display(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os) -> bool{
                             print(*os, c, print_human_readable::t);
@@ -165,7 +165,7 @@ Lisp_ptr port_display(ZsArgs args){
                           });
 }
 
-Lisp_ptr port_write_char(ZsArgs args){
+Lisp_ptr internal_port_write_char(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os) -> Lisp_ptr{
                             if(c.tag() != Ptr_tag::character){
@@ -177,7 +177,7 @@ Lisp_ptr port_write_char(ZsArgs args){
                           });
 }
 
-Lisp_ptr port_char_ready(ZsArgs args){
+Lisp_ptr internal_port_char_ready(ZsArgs args){
   return port_input_call(move(args), stream_ready);
 }
 

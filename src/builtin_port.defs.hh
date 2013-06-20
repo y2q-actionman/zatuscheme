@@ -22,13 +22,13 @@
     {1}}},
 
 {"%read", {
-    builtin::port_read,
+    builtin::internal_port_read,
     {1}}},
 {"%read-char", {
-    builtin::port_read_char,
+    builtin::internal_port_read_char,
     {1}}},
 {"%peek-char", {
-    builtin::port_peek_char,
+    builtin::internal_port_peek_char,
     {1}}},
 
 {"eof-object?", {
@@ -36,15 +36,15 @@
     {1}}},
 
 {"%write", {
-    builtin::port_write,
+    builtin::internal_port_write,
     {2}}},
 {"%display", {
-    builtin::port_display,
+    builtin::internal_port_display,
     {2}}},
 {"%write-char", {
-    builtin::port_write_char,
+    builtin::internal_port_write_char,
     {2}}},
 
 {"%char-ready?", {
-    builtin::port_char_ready,
+    builtin::internal_port_char_ready,
     {1}}},

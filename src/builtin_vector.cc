@@ -10,7 +10,7 @@ using namespace std;
 
 namespace builtin {
 
-Lisp_ptr vector_make(ZsArgs args){
+Lisp_ptr internal_vector_make(ZsArgs args){
   if(args[0].tag() != Ptr_tag::integer){
     throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[0]);
   }
