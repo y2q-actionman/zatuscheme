@@ -326,15 +326,8 @@ pair<string, Token::Exactness> collect_integer_digits(int radix, istream& f){
     s.push_back(c);
   f.unget();
 
-  Token::Exactness e;
-
-  if(eat_sharp(f, s) > 0){
-    e = Token::Exactness::inexact;
-  }else{
-    e = Token::Exactness::exact;
-  }
-
-  return {s, e};
+  auto sharps = eat_sharp(f, s);
+  return {s, (sharps > 0) ? Token::Exactness::inexact : Token::Exactness::exact};
 }
   
 Lisp_ptr zs_stoi(int radix, const string& s){
