@@ -3,8 +3,11 @@
 #include <climits>
 #include <cassert>
 #include <cmath>
+#include <iostream>
 
 #include "rational.hh"
+#include "zs_memory.hh"
+#include "zs_error.hh"
 
 using namespace std;
 
@@ -186,4 +189,70 @@ Rational& Rational::expt(const Rational& other){
   }
 
   return *this;
+}
+
+
+// utilities
+
+template<>
+int coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::integer){
+    return p.get<int>();
+  }else{
+    UNEXP_DEFAULT();
+  }
+}
+
+template<>
+Rational coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::rational){
+    return *p.get<Rational*>();
+  }else{
+    return Rational(p.get<int>(), 1);
+  }
+}
+
+template<>
+double coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::real){
+    return *(p.get<double*>());
+  }else{
+    return static_cast<double>(coerce<Rational>(p));
+  }
+}
+
+template<>
+Complex coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::complex){
+    return *(p.get<Complex*>());
+  }else{
+    return Complex(coerce<double>(p), 0);
+  }
+}
+
+Lisp_ptr wrap_number(int i){
+  return {Ptr_tag::integer, i};
+}
+
+Lisp_ptr wrap_number(const Rational& q){
+  if(q.is_convertible<int>()){
+    return {Ptr_tag::integer, static_cast<int>(q)};
+  }else if(q.is_convertible<Rational>()){
+    return {zs_new<Rational>(q)};
+  }else{
+    cerr << "integer overflow occured. coerced into real.\n";
+    return {zs_new<double>(static_cast<double>(q))};
+  }
+}
+
+Lisp_ptr wrap_number(double d){
+  return {zs_new<double>(d)};
+}
+
+Lisp_ptr wrap_number(const Complex& z){
+  return {zs_new<Complex>(z)};
+}
+
+Lisp_ptr wrap_number(bool b){
+  return Lisp_ptr{b};
 }

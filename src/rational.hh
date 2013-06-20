@@ -1,6 +1,8 @@
 #ifndef RATIONAL_HH
 #define RATIONAL_HH
 
+#include "lisp_ptr.hh"
+
 class Rational {
 public:
   Rational(int, int);
@@ -59,6 +61,14 @@ Rational rationalize(double, double);
 
 // utilities
 template<typename T> T gcd(T, T);
+
+template<typename T> T coerce(Lisp_ptr);
+
+Lisp_ptr wrap_number(int);
+Lisp_ptr wrap_number(const Rational&);
+Lisp_ptr wrap_number(double);
+Lisp_ptr wrap_number(const Complex&);
+Lisp_ptr wrap_number(bool);
 
 #include "rational.i.hh"
 

@@ -65,4 +65,10 @@ T gcd(T m, T n){
   return m;
 }
 
+
+template<> int coerce(Lisp_ptr);
+template<> Rational coerce(Lisp_ptr);
+template<> double coerce(Lisp_ptr);
+template<> Complex coerce(Lisp_ptr);
+
 #endif // RATIONAL_I_HH
