@@ -13,7 +13,7 @@ class Token {
 public:
   enum class Type {
     uninitialized = 0,
-      identifier, boolean,
+      identifier,
       integer, rational, real, complex,
       character, string, notation,
       lisp_ptr
@@ -38,7 +38,6 @@ public:
 
   Token(const std::string&, Type);
   Token(std::string&&, Type);
-  explicit constexpr Token(bool);
   explicit constexpr Token(char);
   explicit constexpr Token(Notation);
   // numerics
@@ -83,7 +82,6 @@ private:
   Type type_;
   union {
     std::string str_;
-    bool b_;
     int i_;
     Rational q_;
     double d_;

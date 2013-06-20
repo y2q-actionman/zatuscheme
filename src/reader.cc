@@ -87,9 +87,6 @@ Lisp_ptr read_abbrev(const char* name, istream& f){
 Lisp_ptr read_la(istream& f, Token&& tok){
   switch(tok.type()){
     // simple datum
-  case Token::Type::boolean:
-    return Lisp_ptr(tok.move<bool>());
-
   case Token::Type::integer:
     return Lisp_ptr(Ptr_tag::integer, tok.get<int>());
 
@@ -110,6 +107,9 @@ Lisp_ptr read_la(istream& f, Token&& tok){
 
   case Token::Type::identifier:
     return {intern(*vm.symtable, tok.move<string>())};
+
+  case Token::Type::lisp_ptr:
+    return tok.move<Lisp_ptr>();
 
     // compound datum
   case Token::Type::notation:

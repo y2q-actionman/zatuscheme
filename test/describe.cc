@@ -38,9 +38,6 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
   case Token::Type::string:
     o << tok.get<string>();
     break;
-  case Token::Type::boolean:
-    o << boolalpha << tok.get<bool>() << noboolalpha;
-    break;
   case Token::Type::integer:
     o << tok.get<int>();
     break;
@@ -60,6 +57,9 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
     break;
   case Token::Type::notation:
     o << tok.get<Token::Notation>();
+    break;
+  case Token::Type::lisp_ptr:
+    o << tok.get<Lisp_ptr>();
     break;
   default:
     UNEXP_DEFAULT();

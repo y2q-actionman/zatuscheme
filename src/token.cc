@@ -36,10 +36,6 @@ void Token::init_from_other(T other){
     new (&this->str_) string(std::move(other.str_));
     break;
 
-  case Type::boolean:
-    this->b_ = other.b_;
-    break;
-
   case Type::integer:
     this->i_ = other.i_;
     break;
@@ -62,6 +58,10 @@ void Token::init_from_other(T other){
 
   case Type::notation:
     this->not_ = other.not_;
+    break;
+
+  case Type::lisp_ptr:
+    this->lisp_value_ = other.lisp_value_;
     break;
 
   default:
@@ -104,12 +104,12 @@ Token& Token::assign_from_other(T other){
     }
 
   case Type::uninitialized:
-  case Type::boolean:
   case Type::integer:
   case Type::rational:
   case Type::real:
   case Type::character:
   case Type::notation:
+  case Type::lisp_ptr:
     break;
 
   default:
@@ -140,12 +140,12 @@ Token::~Token(){
     break;
 
   case Type::uninitialized:
-  case Type::boolean:
   case Type::integer:
   case Type::rational:
   case Type::real:
   case Type::character:
   case Type::notation:
+  case Type::lisp_ptr:
     break;
 
   default:
@@ -742,10 +742,10 @@ Token tokenize_number(istream& f, int radix){
       throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
     case Token::Type::uninitialized:
     case Token::Type::identifier:
-    case Token::Type::boolean:
     case Token::Type::character:
     case Token::Type::string:
     case Token::Type::notation:
+    case Token::Type::lisp_ptr:
     default:
       UNEXP_CONVERSION("exact");
     }
@@ -763,10 +763,10 @@ Token tokenize_number(istream& f, int radix){
       return r;
     case Token::Type::uninitialized:
     case Token::Type::identifier:
-    case Token::Type::boolean:
     case Token::Type::character:
     case Token::Type::string:
     case Token::Type::notation:
+    case Token::Type::lisp_ptr:
     default:
       UNEXP_CONVERSION("inexact");
     }
@@ -847,9 +847,9 @@ Token tokenize(istream& f){
     case '(':
       return Token{Token::Notation::vector_paren};
     case 't': case 'T':
-      return Token{true};
+      return Token{Lisp_ptr(true)};
     case 'f': case 'F':
-      return Token{false};
+      return Token{Lisp_ptr(false)};
     case '\\':
       return tokenize_character(f);
     case 'i': case 'I':
@@ -929,8 +929,6 @@ const char* stringify(Token::Type t){
     return "identifier";
   case Token::Type::string:
     return "string";
-  case Token::Type::boolean:
-    return "boolean";
   case Token::Type::integer:
     return "integer";
   case Token::Type::rational:
@@ -943,6 +941,8 @@ const char* stringify(Token::Type t){
     return "character";
   case Token::Type::notation:
     return "notation";
+  case Token::Type::lisp_ptr:
+    return "lisp_ptr";
   default:
     return "(unknown token type)";
   }    
