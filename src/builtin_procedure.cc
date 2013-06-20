@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "builtin_procedure.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
@@ -62,20 +60,12 @@ Lisp_ptr values(ZsArgs args){
 Lisp_ptr call_with_values(ZsArgs args){
   Lisp_ptr procs[2];
 
-  if(!is_procedure(args[0].tag())){
-    throw procedure_type_check_failed(args[0]);
+  for(int i = 0; i < 2; ++i){
+    if(!is_procedure(args[i].tag())){
+      throw procedure_type_check_failed(args[i]);
+    }
+    procs[i] = args[i];
   }
-
-  auto info = get_procinfo(args[0]);
-  if(info->required_args != 0){
-    throw builtin_argcount_failed(nullptr, info->required_args, info->max_args, 0);
-  }    
-
-  if(!is_procedure(args[1].tag())){
-    throw procedure_type_check_failed(args[1]);
-  }
-    
-  std::copy(args.begin(), args.end(), procs);
 
   args.cleanup();
 
@@ -95,11 +85,6 @@ Lisp_ptr call_cc(ZsArgs args){
     throw procedure_type_check_failed(args[0]);
   }
 
-  auto info = get_procinfo(args[0]);
-  if(!(info->required_args <= 1 && 1 <= info->max_args)){
-    throw builtin_argcount_failed(nullptr, info->required_args, info->max_args, 1);
-  }
-
   proc = args[0];
 
   args.cleanup();
@@ -111,19 +96,15 @@ Lisp_ptr call_cc(ZsArgs args){
 }
 
 Lisp_ptr dynamic_wind(ZsArgs args){
-  for(auto p : args){
-    if(!is_procedure(p.tag())){
-      throw procedure_type_check_failed(p);
-    }
+  Lisp_ptr procs[3];
 
-    auto info = get_procinfo(p);
-    if(info->required_args != 0){
-      throw builtin_argcount_failed(nullptr, info->required_args, info->max_args, 0);
+  for(int i = 0; i < 3; ++i){
+    if(!is_procedure(args[i].tag())){
+      throw procedure_type_check_failed(args[i]);
     }
+    procs[i] = args[i];
   }
 
-  Lisp_ptr procs[3];
-  std::copy(begin(args), end(args), begin(procs));
   args.cleanup();
 
   vm.extent.push_back({procs[0], procs[1], procs[2]});

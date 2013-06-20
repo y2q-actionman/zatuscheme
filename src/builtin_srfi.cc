@@ -25,19 +25,9 @@ Lisp_ptr with_exception_handler(ZsArgs args){
     throw zs_error_arg1(nullptr, "arg is not procedure!", {handler});
   }
 
-  auto h_info = get_procinfo(handler);
-  if(h_info->required_args != 1){
-    throw builtin_argcount_failed(nullptr, h_info->required_args, h_info->max_args, 1);
-  }
-
   Lisp_ptr thunk = args[1];
   if(!is_procedure(thunk.tag())){
     throw zs_error_arg1(nullptr, "arg is not procedure!", {thunk});
-  }
-
-  auto t_info = get_procinfo(thunk);
-  if(t_info->required_args != 0){
-    throw builtin_argcount_failed(nullptr, t_info->required_args, t_info->max_args, 0);
   }
 
   args.cleanup();

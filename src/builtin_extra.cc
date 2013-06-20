@@ -56,11 +56,6 @@ Lisp_ptr sc_macro_transformer(ZsArgs args){
   }
 
   auto info = *iproc->info();
-  if(info.required_args != 2 || info.max_args != 2){
-    throw zs_error_arg1(nullptr,
-                        printf_string("procedure must take exactly 2 args (this takes %d-%d))",
-                                      info.required_args, info.max_args));
-  }
 
   info.passing = Passing::whole;
   info.returning = Returning::code;
@@ -94,18 +89,10 @@ Lisp_ptr capture_syntactic_environment(ZsArgs args){
 
   assert(iproc && iproc->info());
 
-  if(iproc->info()->required_args != 1){
-    throw zs_error_arg1(nullptr,
-                        printf_string("first arg must take exactly 1 arg (take %d)",
-                                      iproc->info()->required_args));
-  }
-
-  auto ret =  make_cons_list
+  return make_cons_list
     ({find_builtin_nproc("eval"),
         make_cons_list({find_builtin_nproc("apply"), iproc, vm_op_get_current_env}),
         vm_op_get_current_env});
-
-  return ret;
 }
 
 Lisp_ptr identifierp(ZsArgs args){
