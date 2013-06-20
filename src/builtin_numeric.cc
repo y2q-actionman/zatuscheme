@@ -549,11 +549,9 @@ Lisp_ptr internal_number_from_string(ZsArgs args){
   if(!is_integer_type(args[1])){
     throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[1]);
   }
-  auto radix = coerce<int>(args[1]);
 
   istringstream iss(*str);
-
-  return parse_number(iss, radix);
+  return parse_number(iss, coerce<int>(args[1]));
 }
 
 Lisp_ptr internal_number_to_string(ZsArgs args){
