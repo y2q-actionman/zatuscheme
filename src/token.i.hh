@@ -31,7 +31,6 @@ Token::Type to_tag<Token::Type, Lisp_ptr>(){
   return Token::Type::lisp_ptr;
 }
 
-
 // Token definitions
 inline constexpr
 Token::Token(Notation n)
@@ -40,6 +39,7 @@ Token::Token(Notation n)
 inline constexpr
 Token::Token(Lisp_ptr p)
   : type_(Type::lisp_ptr), lisp_value_(p){}
+
 
 template<>
 inline
@@ -50,24 +50,9 @@ Token::Notation Token::get<Token::Notation>() const{
 
 template<>
 inline
-const Lisp_ptr& Token::get<Lisp_ptr>() const{
+Lisp_ptr Token::get<Lisp_ptr>() const{
   assert(type_ == Type::lisp_ptr);
   return lisp_value_;
-}
-
-
-template<>
-inline
-Token::Notation Token::move<Token::Notation>(){
-  assert(type_ == Type::notation);
-  return not_;
-}
-
-template<>
-inline
-Lisp_ptr&& Token::move<Lisp_ptr>(){
-  assert(type_ == Type::lisp_ptr);
-  return std::move(lisp_value_);
 }
 
 #endif // TOKEN_I_HH

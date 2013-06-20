@@ -88,11 +88,11 @@ Lisp_ptr read_la(istream& f, Token&& tok){
   switch(tok.type()){
     // simple datum
   case Token::Type::lisp_ptr:
-    return tok.move<Lisp_ptr>();
+    return tok.get<Lisp_ptr>();
 
     // compound datum
   case Token::Type::notation:
-    switch(auto n = tok.move<Token::Notation>()){
+    switch(auto n = tok.get<Token::Notation>()){
 
     case Token::Notation::l_paren: // list
       return read_list(f);
