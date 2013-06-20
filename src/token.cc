@@ -10,6 +10,7 @@
 
 #include "token.hh"
 #include "zs_error.hh"
+#include "zs_memory.hh"
 
 #ifdef USE_CASE_UPPER
 # define ZS_CASE(c) toupper(c)
@@ -285,7 +286,7 @@ Token tokenize_string(istream& f){
   while((c = f.get()) != EOF){
     switch(c){
     case '"':
-      return Token{Lisp_ptr(new String(move(s)))};
+      return Token{Lisp_ptr(zs_new<String>(move(s)))};
     case '\\':
       switch(c = f.get()){
       case '"': case '\\':
