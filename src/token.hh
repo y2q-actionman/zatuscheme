@@ -32,13 +32,13 @@ public:
   explicit constexpr Token(Notation);
   explicit constexpr Token(Lisp_ptr);
 
-  Token(const Token&);
-  Token(Token&&);
+  Token(const Token&) = default;
+  Token(Token&&) = default;
 
-  ~Token();
+  ~Token() = default;
 
-  Token& operator=(const Token&);
-  Token& operator=(Token&&);
+  Token& operator=(const Token&) = default;
+  Token& operator=(Token&&) = default;
   
 
   Type type() const
@@ -59,9 +59,6 @@ private:
     Notation not_;
     Lisp_ptr lisp_value_;
   };
-
-  template<typename T> void init_from_other(T other);
-  template<typename T> Token& assign_from_other(T other);
 };
 
 Token tokenize(std::istream&);
