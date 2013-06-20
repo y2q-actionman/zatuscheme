@@ -71,7 +71,6 @@ void check(int i, int radix, const char* expect){
     break;
   case Token::Type::uninitialized:
   case Token::Type::identifier:
-  case Token::Type::string:
   case Token::Type::notation:
   case Token::Type::lisp_ptr:
   default:

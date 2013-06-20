@@ -32,7 +32,6 @@ void Token::init_from_other(T other){
     break;
 
   case Type::identifier:
-  case Type::string:
     new (&this->str_) string(std::move(other.str_));
     break;
 
@@ -80,8 +79,7 @@ Token& Token::assign_from_other(T other){
 
   switch(this->type_){
   case Type::identifier:
-  case Type::string:
-    if(other.type_ == Type::string || other.type_ == Type::identifier){
+    if(other.type_ == Type::identifier){
       this->type_ = other.type_;
       this->str_ = std::move(other.str_);
       return *this;
@@ -126,7 +124,6 @@ Token& Token::operator=(Token&& other){
 Token::~Token(){
   switch(type_){
   case Type::identifier:
-  case Type::string:
     str_.~string();
     break;
 
@@ -291,7 +288,7 @@ Token tokenize_string(istream& f){
   while((c = f.get()) != EOF){
     switch(c){
     case '"':
-      return Token{move(s), Token::Type::string};
+      return Token{Lisp_ptr(new String(move(s)))};
     case '\\':
       switch(c = f.get()){
       case '"': case '\\':
@@ -736,7 +733,6 @@ Token tokenize_number(istream& f, int radix){
       throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
     case Token::Type::uninitialized:
     case Token::Type::identifier:
-    case Token::Type::string:
     case Token::Type::notation:
     case Token::Type::lisp_ptr:
     default:
@@ -756,7 +752,6 @@ Token tokenize_number(istream& f, int radix){
       return r;
     case Token::Type::uninitialized:
     case Token::Type::identifier:
-    case Token::Type::string:
     case Token::Type::notation:
     case Token::Type::lisp_ptr:
     default:
@@ -919,8 +914,6 @@ const char* stringify(Token::Type t){
     return "uninitialized";
   case Token::Type::identifier:
     return "identifier";
-  case Token::Type::string:
-    return "string";
   case Token::Type::integer:
     return "integer";
   case Token::Type::rational:

@@ -34,11 +34,6 @@ struct to_type<Token::Type, Token::Type::complex>{
 };
 
 template<>
-struct to_type<Token::Type, Token::Type::string>{
-  typedef std::string type;
-};
-
-template<>
 struct to_type<Token::Type, Token::Type::notation>{
   typedef Token::Notation type;
 };
@@ -145,7 +140,7 @@ Token::Token(Lisp_ptr p)
 template<>
 inline
 const std::string& Token::get<std::string>() const{
-  assert(type_ == Type::identifier || type_ == Type::string);
+  assert(type_ == Type::identifier);
   return str_;
 }
 
@@ -195,7 +190,7 @@ const Lisp_ptr& Token::get<Lisp_ptr>() const{
 template<>
 inline
 std::string&& Token::move<std::string>(){
-  assert(type_ == Type::identifier || type_ == Type::string);
+  assert(type_ == Type::identifier);
   return std::move(str_);
 }
 

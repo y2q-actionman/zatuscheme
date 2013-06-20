@@ -141,11 +141,6 @@ void check_ident(T&& t, const char* expect){
   check(forward<T>(t), s, Token::Type::identifier);
 }
 
-template<typename T>
-void check_string(T&& t, const char* expect){
-  check(forward<T>(t), string(expect), Token::Type::string);
-}
-
 #define N Token::Notation
 
 int main(){
@@ -191,12 +186,12 @@ int main(){
   // check("#\\space", ' ');
   // check("#\\newline", '\n');
 
-  // string
-  check("\"");
-  check_string("\"\"", "");
-  check_string("\"a\"", "a");
-  check_string("\"abcd\nedf jfkdj\"", "abcd\nedf jfkdj");
-  check_string("\"\\\"\\\"\"", "\"\"");
+  // // string (TODO: -> Lisp_ptr)
+  // check("\"");
+  // check_string("\"\"", "");
+  // check_string("\"a\"", "a");
+  // check_string("\"abcd\nedf jfkdj\"", "abcd\nedf jfkdj");
+  // check_string("\"\\\"\\\"\"", "\"\"");
 
   // error
   check("#z");
@@ -229,10 +224,10 @@ int main(){
     check_ident(ss, "x");
     check(ss, N::comma_at);
     check_ident(ss, "y");
-    check_string(ss, "ho()ge");
-    check(ss, N::r_paren);
+    // check_string(ss, "ho()ge");
+    // check(ss, N::r_paren);
 
-    check(ss); // EOF
+    // check(ss); // EOF
   }
 
   return RESULT;

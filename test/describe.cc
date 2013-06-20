@@ -35,7 +35,6 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
   case Token::Type::uninitialized:
     break;
   case Token::Type::identifier:
-  case Token::Type::string:
     o << tok.get<string>();
     break;
   case Token::Type::integer:

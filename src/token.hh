@@ -15,7 +15,7 @@ public:
     uninitialized = 0,
       identifier,
       integer, rational, real, complex,
-      string, notation,
+      notation,
       lisp_ptr
       };
 
