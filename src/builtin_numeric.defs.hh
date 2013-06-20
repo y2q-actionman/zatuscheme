@@ -159,9 +159,9 @@
     builtin::number_e_to_i,
     {1}}},
 
-{"string->number", {
-    builtin::number_from_string,
-    {1, 2}}},
-{"number->string", {
-    builtin::number_to_string,
-    {1, 2}}},
+{"%string->number2", {
+    builtin::internal_number_from_string,
+    {2}}},
+{"%number->string2", {
+    builtin::internal_number_to_string,
+    {2}}},

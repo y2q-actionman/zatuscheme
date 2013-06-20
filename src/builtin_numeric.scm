@@ -88,3 +88,13 @@ LOAD
 LOAD
 (define (lcm . n)
   (%fold %lcm 1 n))
+
+LOAD
+(define (string->number str . radix)
+  (if (null? radix) (%string->number2 str 10)
+      (apply %string->number2 `(,str) radix))) 
+
+LOAD
+(define (number->string num . radix)
+  (if (null? radix) (%number->string2 num 10)
+      (apply %number->string2 `(,num) radix))) 

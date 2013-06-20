@@ -65,8 +65,8 @@ Lisp_ptr number_angle(ZsArgs);
 Lisp_ptr number_i_to_e(ZsArgs);
 Lisp_ptr number_e_to_i(ZsArgs);
 
-Lisp_ptr number_from_string(ZsArgs);
-Lisp_ptr number_to_string(ZsArgs);
+Lisp_ptr internal_number_from_string(ZsArgs);
+Lisp_ptr internal_number_to_string(ZsArgs);
 
 }
 

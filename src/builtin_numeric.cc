@@ -620,28 +620,16 @@ Lisp_ptr number_e_to_i(ZsArgs args){
 }
 
 
-Lisp_ptr number_from_string(ZsArgs args){
+Lisp_ptr internal_number_from_string(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
     throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
   }
 
-  int radix;
-
-  switch(args.size()){
-  case 1:
-    radix = 10;
-    break;
-  case 2: {
-    if(!is_integer_type(args[1])){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[1]);
-    }
-    radix = coerce<int>(args[1]);
-    break;
+  if(!is_integer_type(args[1])){
+    throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[1]);
   }
-  default:
-    throw builtin_argcount_failed(nullptr, 1, 2, args.size());
-  }
+  auto radix = coerce<int>(args[1]);
 
   istringstream iss(*str);
 
@@ -660,27 +648,15 @@ Lisp_ptr number_from_string(ZsArgs args){
   }
 }
 
-Lisp_ptr number_to_string(ZsArgs args){
+Lisp_ptr internal_number_to_string(ZsArgs args){
   if(!is_numeric_type(args[0])){
     throw number_type_check_failed(args[0]);
   }
 
-  int radix;
-
-  switch(args.size()){
-  case 1:
-    radix = 10;
-    break;
-  case 2: {
-    if(!is_integer_type(args[1])){
-      throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[1]);
-    }
-    radix = coerce<int>(args[1]);
-    break;
+  if(!is_integer_type(args[1])){
+    throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[1]);
   }
-  default:
-    throw builtin_argcount_failed(nullptr, 1, 2, args.size());
-  }
+  auto radix = coerce<int>(args[1]);
 
   ostringstream oss;
   print(oss, args[0], print_human_readable::f, radix);
