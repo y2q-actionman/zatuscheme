@@ -4,55 +4,19 @@
 #include <cstdlib>
 #include <iostream>
 #include <cctype>
+#include <functional>
+
+#include "config.h"
 
 #include "token.hh"
 #include "test_util.hh"
 #include "describe.hh"
-#include "config.h"
 
 #define PRINT_BUFSIZE 100
 
+#define N Token::Notation
+
 using namespace std;
-
-template<typename T>
-void check_copy_move(const Token& tok){
-  // constructor
-  {
-    Token tok_c_con(tok);
-    if(tok.type() != tok_c_con.type() || tok.get<T>() != tok_c_con.get<T>()){
-      cerr << "[failed] on copy construct: ";
-      goto error;
-    }else{
-      Token tok_m_con{move(tok_c_con)};
-      if(tok.type() != tok_m_con.type() || tok.get<T>() != tok_m_con.get<T>()){
-        cerr << "[failed] on move construct ";
-        goto error;
-      }
-    }
-  }
-  
-  // operator=
-  {
-    Token tok_c_op = tok;
-    if(tok.type() != tok_c_op.type() || tok.get<T>() != tok_c_op.get<T>()){
-      cerr << "[failed] on copy operator= ";
-      goto error;
-    }else{
-      Token tok_m_op = move(tok_c_op);
-      if(tok.type() != tok_m_op.type() || tok.get<T>() != tok_m_op.get<T>()){
-        cerr << "[failed] on move operator= ";
-        goto error;
-      }
-    }
-  }
-
-  return;
-
- error:
-  RESULT = EXIT_FAILURE;
-  cerr << tok << '\n';
-  return;
-}
 
 template<typename T, typename Pos>
 void fail_message(Token::Type t, istream& f, const Pos& b_pos,
@@ -92,8 +56,6 @@ void check(istream& f){
     fail_message(type, f, init_pos, tok, "uninitialized");
     return;
   }
-  
-  check_copy_move<Token::Type>(tok);
 }
 
 void check(string&& input){
@@ -103,26 +65,31 @@ void check(string&& input){
 
 
 // for normal cases
-template<typename T>
-void check(istream& f, const T& expect,
-           Token::Type type = to_tag<Token::Type, T>()){
+template<typename T, typename Fun>
+void check(istream& f, const T& expect, Fun comparator){
+  const auto type = to_tag<Token::Type, T>();
   auto init_pos = f.tellg();
 
   const Token tok = tokenize(f);
 
-  if(tok.type() != type || tok.get<T>() != expect){
+  if(tok.type() != type || !comparator(tok.get<T>(),expect)){
     fail_message(type, f, init_pos, tok, expect);
     return;
   }
-  
-  check_copy_move<T>(tok);
+}
+
+void check(istream& f, Lisp_ptr expect){
+  check(f, expect, equal_internal);
+}
+
+void check(istream& f, N expect){
+  check(f, expect, std::equal_to<N>());
 }
 
 template<typename T>
-void check(string&& input, T&& expect,
-           Token::Type type = to_tag<Token::Type, T>()){
+void check(string&& input, T&& expect){
   stringstream ss{move(input)};
-  check(ss, forward<T>(expect), type);
+  check(ss, forward<T>(expect));
 }
 
 template<typename T>
@@ -138,16 +105,18 @@ void check_ident(T&& t, const char* expect){
 #endif
   }
 
-#if 0
-  check(forward<T>(t), s, Token::Type::identifier);
-#else
-  RESULT = EXIT_FAILURE;
-#endif
+  check(forward<T>(t), intern(*vm.symtable, s));
 }
 
-#define N Token::Notation
+template<typename T>
+void check_string(T&& t, const char* expect){
+  string s{expect};
+  check(forward<T>(t), Lisp_ptr{&s});
+}
 
 int main(){
+  zs_init();
+
   // identifier
   check_ident("lambda", "lambda");
   check_ident("q", "q");
@@ -174,44 +143,28 @@ int main(){
   check_ident("   abc;fhei", "abc");
 
   // boolean
-#if 0
-  check("#t", true);
-  check("#f", false);
-#else
-  RESULT = EXIT_FAILURE;
-#endif
+  check("#t", Lisp_ptr{true});
+  check("#f", Lisp_ptr{false});
 
-  // number (TODO: -> Lisp_ptr)
-#if 0
-  check("+1", 1);
-  check("#x16", 0x16);
-#else
-  RESULT = EXIT_FAILURE;
-#endif
+  // number
+  check("+1", wrap_number(1));
+  check("#x16", wrap_number(0x16));
   
   // character
-#if 0  
   check("#\\");
-  check("#\\a", 'a');
-  check("#\\b", 'b');
-  check("#\\x", 'x');
-  check("#\\s", 's');
-  check("#\\space", ' ');
-  check("#\\newline", '\n');
-#else
-  RESULT = EXIT_FAILURE;
-#endif
+  check("#\\a", Lisp_ptr{'a'});
+  check("#\\b", Lisp_ptr{'b'});
+  check("#\\x", Lisp_ptr{'x'});
+  check("#\\s", Lisp_ptr{'s'});
+  check("#\\space", Lisp_ptr{' '});
+  check("#\\newline", Lisp_ptr{'\n'});
 
   // string
-#if 0  
   check("\"");
   check_string("\"\"", "");
   check_string("\"a\"", "a");
   check_string("\"abcd\nedf jfkdj\"", "abcd\nedf jfkdj");
   check_string("\"\\\"\\\"\"", "\"\"");
-#else
-  RESULT = EXIT_FAILURE;
-#endif
 
   // error
   check("#z");
@@ -234,10 +187,10 @@ int main(){
     check(ss, N::r_paren);
     check_ident(ss, "e");
     check_ident(ss, "...");
-#if 0
     check_ident(ss, "f");
-    check(ss, 11);
-    check(ss, 0.3);
+
+    check(ss, wrap_number(11));
+    check(ss, wrap_number(0.3));
     check(ss, N::quasiquote);
     check(ss, N::l_paren);
     check(ss, N::comma);
@@ -248,9 +201,6 @@ int main(){
     check(ss, N::r_paren);
 
     check(ss); // EOF
-#else
-    RESULT = EXIT_FAILURE;
-#endif
   }
 
   return RESULT;
