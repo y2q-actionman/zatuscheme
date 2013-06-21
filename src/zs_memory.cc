@@ -121,6 +121,7 @@ void gc_mark_lp(Lisp_ptr p){
   case Ptr_tag::character:
   case Ptr_tag::integer:
   case Ptr_tag::vm_argcount:
+  case Ptr_tag::notation:
     break;
 
     // no dynamic allocation
@@ -275,6 +276,8 @@ void gc_sweep(){
       case Ptr_tag::vm_op: 
         break;
       case Ptr_tag::vm_argcount:
+        break;
+      case Ptr_tag::notation:
         break;
       default:
         break;

@@ -106,6 +106,11 @@ struct to_type<Ptr_tag, Ptr_tag::vm_argcount>{
   typedef int type;
 };
 
+template<>
+struct to_type<Ptr_tag, Ptr_tag::notation>{
+  typedef Notation type;
+};
+
 
 template<>
 inline constexpr
@@ -213,6 +218,12 @@ template<>
 inline constexpr
 Ptr_tag to_tag<Ptr_tag, VMop>(){
   return Ptr_tag::vm_op;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<Ptr_tag, Notation>(){
+  return Ptr_tag::notation;
 }
 
 #endif // DECL_I_HH

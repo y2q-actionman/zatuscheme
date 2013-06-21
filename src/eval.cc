@@ -661,6 +661,7 @@ void eval(){
       case Ptr_tag::vm_argcount:
         throw zs_error("eval internal error: vm-argcount is rest on VM code stack!\n");
 
+      case Ptr_tag::notation:
       default:
         UNEXP_DEFAULT();
       }

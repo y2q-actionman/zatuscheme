@@ -25,10 +25,10 @@ Lisp_ptr read_list(istream& f){
   if(!t){
     throw zs_error("reader error: reached EOF in a list.\n");
   }else if(t.type() == Token::Type::notation){
-    auto n = t.get<Token::Notation>();
-    if(n == Token::Notation::r_paren){ // empty list
+    auto n = t.get<Notation>();
+    if(n == Notation::r_paren){ // empty list
       return Cons::NIL;
-    }else if(n == Token::Notation::dot){
+    }else if(n == Notation::dot){
       throw zs_error("reader error: dotted list has no car.\n");
     }
   }
@@ -44,14 +44,14 @@ Lisp_ptr read_list(istream& f){
     if(!t){
       throw zs_error("reader error: reached EOF in a list.\n");
     }else if(t.type() == Token::Type::notation){
-      auto n = t.get<Token::Notation>();
-      if(n == Token::Notation::r_paren){ // proper list
+      auto n = t.get<Notation>();
+      if(n == Notation::r_paren){ // proper list
         return gl.extract();
-      }else if(n == Token::Notation::dot){ // dotted list
+      }else if(n == Notation::dot){ // dotted list
         auto ret = gl.extract_with_tail(read(f));
         t = tokenize(f);
         if(t.type() != Token::Type::notation
-           || t.get<Token::Notation>() != Token::Notation::r_paren){
+           || t.get<Notation>() != Notation::r_paren){
           throw zs_error("reader error: dotted list has two or more cdrs.\n");
         }
         return ret;
@@ -70,7 +70,7 @@ Lisp_ptr read_vector(istream& f){
     if(!t){
       throw zs_error("reader error: reached EOF in a vector.\n");
     }else if((t.type() == Token::Type::notation)
-             && (t.get<Token::Notation>() == Token::Notation::r_paren)){
+             && (t.get<Notation>() == Notation::r_paren)){
       return {v};
     }else{
       v->emplace_back(read_la(f, move(t)));
@@ -85,47 +85,58 @@ Lisp_ptr read_abbrev(const char* name, istream& f){
 }
 
 Lisp_ptr read_la(istream& f, Token&& tok){
+  Lisp_ptr p;
+  Notation n;
+
   switch(tok.type()){
     // simple datum
   case Token::Type::lisp_ptr:
-    return tok.get<Lisp_ptr>();
+    p = tok.get<Lisp_ptr>();
+    if(p.tag() != Ptr_tag::notation){
+      return p;
+    }else{
+      n = p.get<Notation>();
+      goto notation_switch;
+    }
 
     // compound datum
   case Token::Type::notation:
-    switch(auto n = tok.get<Token::Notation>()){
+    n = tok.get<Notation>();
+  notation_switch:
+    switch(n){
 
-    case Token::Notation::l_paren: // list
+    case Notation::l_paren: // list
       return read_list(f);
 
-    case Token::Notation::vector_paren: // vector
+    case Notation::vector_paren: // vector
       return read_vector(f);
 
       // abbrev prefix
-    case Token::Notation::quote:
+    case Notation::quote:
       return read_abbrev("quote", f);
 
-    case Token::Notation::quasiquote:
+    case Notation::quasiquote:
       return read_abbrev("quasiquote", f);
 
-    case Token::Notation::comma:
+    case Notation::comma:
       return read_abbrev("unquote", f);
 
-    case Token::Notation::comma_at:
+    case Notation::comma_at:
       return read_abbrev("unquote-splicing", f);
       
-    case Token::Notation::l_bracket:
-    case Token::Notation::l_brace:
+    case Notation::l_bracket:
+    case Notation::l_brace:
       throw zs_error(printf_string("reader error: not supported notation! (type=%s)\n",
                                    stringify(n)));
 
-    case Token::Notation::r_paren:
-    case Token::Notation::r_bracket:
-    case Token::Notation::r_brace:
+    case Notation::r_paren:
+    case Notation::r_bracket:
+    case Notation::r_brace:
       throw zs_error(printf_string("reader error: closing notation appeared alone! (type=%s)\n",
                                    stringify(n)));
 
-    case Token::Notation::dot:
-    case Token::Notation::bar:
+    case Notation::dot:
+    case Notation::bar:
     default:
       throw zs_error(printf_string("reader error: unexpected notation was passed! (type=%s)\n",
                                    stringify(n)));

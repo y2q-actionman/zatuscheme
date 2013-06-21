@@ -12,6 +12,7 @@
 #include "s_closure.hh"
 #include "builtin.hh"
 #include "rational.hh"
+#include "token.hh"
 
 using namespace std;
 
@@ -237,6 +238,9 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
     f << "#<" << stringify(p.tag()) << " " << p.get<void*>() << ">";
     break;
 
+  case Ptr_tag::notation:
+    f << "#<" << stringify(p.tag()) << " " << stringify(p.get<Notation>()) << ">";
+    
   default:
     f << "#<UNKNOWN TYPE " << static_cast<int>(p.tag()) << " " << p.get<void*>() << ">";
     break;

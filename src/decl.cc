@@ -45,6 +45,8 @@ const char* stringify(Ptr_tag p){
     return "VMop";
   case Ptr_tag::vm_argcount:
     return "VMop (argcount)";
+  case Ptr_tag::notation:
+    return "notation";
   default:
     return "(unknown PTR type)";
   }
@@ -71,6 +73,7 @@ bool is_procedure(Ptr_tag tag){
   case Ptr_tag::syntactic_closure:
   case Ptr_tag::vm_op:
   case Ptr_tag::vm_argcount:
+  case Ptr_tag::notation:
     return false;
 
   default:

@@ -25,6 +25,8 @@ bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   case Ptr_tag::integer:
   case Ptr_tag::vm_argcount:
     return a.get<int>() == b.get<int>();
+  case Ptr_tag::notation:
+    return a.get<Notation>() == b.get<Notation>();
   case Ptr_tag::cons:
   case Ptr_tag::symbol:
   case Ptr_tag::i_procedure:
@@ -103,6 +105,9 @@ size_t eq_hash(const Lisp_ptr& p){
   case Ptr_tag::integer:
   case Ptr_tag::vm_argcount:
     val_hash = hash<int>()(p.get<int>());
+    break;
+  case Ptr_tag::notation:
+    val_hash = hash<int>()(static_cast<int>(p.get<Notation>()));
     break;
   case Ptr_tag::cons:
   case Ptr_tag::symbol:

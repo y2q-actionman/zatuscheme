@@ -24,7 +24,7 @@ class Env;
 class SyntacticClosure;
 class SyntaxRules;
 typedef void(*VMop)();
-
+enum class Notation;
 
 // Type tag
 enum class Ptr_tag {
@@ -48,7 +48,8 @@ enum class Ptr_tag {
     syntactic_closure,
     syntax_rules,
     vm_op,
-    vm_argcount
+    vm_argcount,
+    notation
     };
 
 const char* stringify(Ptr_tag);

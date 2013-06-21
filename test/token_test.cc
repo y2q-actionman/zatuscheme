@@ -14,8 +14,6 @@
 
 #define PRINT_BUFSIZE 100
 
-#define N Token::Notation
-
 using namespace std;
 
 template<typename T, typename Pos>
@@ -82,8 +80,8 @@ void check(istream& f, Lisp_ptr expect){
   check(f, expect, equal_internal, Token::Type::lisp_ptr);
 }
 
-void check(istream& f, N expect){
-  check(f, expect, std::equal_to<N>(), Token::Type::notation);
+void check(istream& f, Notation expect){
+  check(f, expect, std::equal_to<Notation>(), Token::Type::notation);
 }
 
 template<typename T>
@@ -175,30 +173,30 @@ int main(){
     char teststr[] = "(a . b)#(c 'd) e ...;comment\nf +11 .3 `(,x ,@y \"ho()ge\")";
     stringstream ss(teststr);
 
-    check(ss, N::l_paren);
+    check(ss, Notation::l_paren);
     check_ident(ss, "a");
-    check(ss, N::dot);
+    check(ss, Notation::dot);
     check_ident(ss, "b");
-    check(ss, N::r_paren);
-    check(ss, N::vector_paren);
+    check(ss, Notation::r_paren);
+    check(ss, Notation::vector_paren);
     check_ident(ss, "c");
-    check(ss, N::quote);
+    check(ss, Notation::quote);
     check_ident(ss, "d");
-    check(ss, N::r_paren);
+    check(ss, Notation::r_paren);
     check_ident(ss, "e");
     check_ident(ss, "...");
     check_ident(ss, "f");
 
     check(ss, wrap_number(11));
     check(ss, wrap_number(0.3));
-    check(ss, N::quasiquote);
-    check(ss, N::l_paren);
-    check(ss, N::comma);
+    check(ss, Notation::quasiquote);
+    check(ss, Notation::l_paren);
+    check(ss, Notation::comma);
     check_ident(ss, "x");
-    check(ss, N::comma_at);
+    check(ss, Notation::comma_at);
     check_ident(ss, "y");
     check_string(ss, "ho()ge");
-    check(ss, N::r_paren);
+    check(ss, Notation::r_paren);
 
     check(ss); // EOF
   }

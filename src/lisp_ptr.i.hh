@@ -29,6 +29,10 @@ inline constexpr
 Lisp_ptr::Lisp_ptr(Ptr_tag p, int i)
   : tag_(p), u_(i){}
 
+inline constexpr
+Lisp_ptr::Lisp_ptr(Notation n)
+  : tag_(Ptr_tag::notation), u_(static_cast<int>(n)){}
+
 
 template<>
 inline constexpr
@@ -50,6 +54,13 @@ inline constexpr
 VMop Lisp_ptr::get<VMop>() const {
   return (tag() == to_tag<Ptr_tag, VMop>())
      ? u_.f_ : nullptr;
+}
+
+template<>
+inline constexpr
+Notation Lisp_ptr::get<Notation>() const {
+  return  static_cast<Notation>
+    ((tag() == Ptr_tag::notation) ? u_.i_ : 0);
 }
 
 template<>

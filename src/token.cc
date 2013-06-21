@@ -546,29 +546,29 @@ Token tokenize(istream& f){
 
   switch(auto c = f.get()){
   case '(':
-    return Token{Token::Notation::l_paren};
+    return Token{Notation::l_paren};
   case ')':
-    return Token{Token::Notation::r_paren};
+    return Token{Notation::r_paren};
   case '\'':
-    return Token{Token::Notation::quote};
+    return Token{Lisp_ptr{Notation::quote}};
   case '`':
-    return Token{Token::Notation::quasiquote};
+    return Token{Lisp_ptr{Notation::quasiquote}};
   case '[':
-    return Token{Token::Notation::l_bracket};
+    return Token{Notation::l_bracket};
   case ']':
-    return Token{Token::Notation::r_bracket};
+    return Token{Notation::r_bracket};
   case '{':
-    return Token{Token::Notation::l_brace};
+    return Token{Notation::l_brace};
   case '}':
-    return Token{Token::Notation::r_brace};
+    return Token{Notation::r_brace};
   case '|':
-    return Token{Token::Notation::bar};
+    return Token{Lisp_ptr{Notation::bar}};
   case ',': {
     if(f.peek() == '@'){
       f.ignore(1);
-      return Token{Token::Notation::comma_at};
+      return Token{Lisp_ptr{Notation::comma_at}};
     }else{
-      return Token{Token::Notation::comma};
+      return Token{Lisp_ptr{Notation::comma}};
     }
   }
 
@@ -590,7 +590,7 @@ Token tokenize(istream& f){
 
     switch(dots){
     case 1:
-      return Token{Token::Notation::dot};
+      return Token{Notation::dot};
     case 3:
       return Token{Lisp_ptr{intern(*vm.symtable, "...")}};
     default:
@@ -613,7 +613,7 @@ Token tokenize(istream& f){
   case '#':
     switch(auto sharp_c = f.get()){
     case '(':
-      return Token{Token::Notation::vector_paren};
+      return Token{Notation::vector_paren};
     case 't': case 'T':
       return Token{Lisp_ptr(true)};
     case 'f': case 'F':
@@ -656,33 +656,33 @@ Token tokenize(istream& f){
   }
 }
 
-const char* stringify(Token::Notation n){
+const char* stringify(Notation n){
   switch(n){
-  case Token::Notation::l_paren:
+  case Notation::l_paren:
     return "left parensis";
-  case Token::Notation::r_paren:
+  case Notation::r_paren:
     return "right parensis";
-  case Token::Notation::vector_paren:
+  case Notation::vector_paren:
     return "vector parensis";
-  case Token::Notation::quote:
+  case Notation::quote:
     return "quote";
-  case Token::Notation::quasiquote:
+  case Notation::quasiquote:
     return "backquote";
-  case Token::Notation::comma:
+  case Notation::comma:
     return "comma";
-  case Token::Notation::comma_at:
+  case Notation::comma_at:
     return "comma+at";
-  case Token::Notation::dot:
+  case Notation::dot:
     return "dot";
-  case Token::Notation::l_bracket:
+  case Notation::l_bracket:
     return "left bracket";
-  case Token::Notation::r_bracket:
+  case Notation::r_bracket:
     return "right bracket";
-  case Token::Notation::l_brace:
+  case Notation::l_brace:
     return "left brace";
-  case Token::Notation::r_brace:
+  case Notation::r_brace:
     return "right brace";
-  case Token::Notation::bar:
+  case Notation::bar:
     return "bar";
   default:
     return "(unknown token notation)";

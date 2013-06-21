@@ -10,6 +10,7 @@ public:
   explicit constexpr Lisp_ptr(char);
   template<typename T> constexpr Lisp_ptr(T); // non-fundamental type
   constexpr Lisp_ptr(Ptr_tag, int); // integer, argcount
+  explicit constexpr Lisp_ptr(Notation);
 
   Lisp_ptr(const Lisp_ptr&) = default;
   Lisp_ptr(Lisp_ptr&&) = default;

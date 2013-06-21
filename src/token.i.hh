@@ -19,7 +19,7 @@ Token::Token(Lisp_ptr p)
 
 template<>
 inline
-Token::Notation Token::get<Token::Notation>() const{
+Notation Token::get<Notation>() const{
   assert(type_ == Type::notation);
   return not_;
 }

@@ -8,20 +8,20 @@
 #include "util.hh"
 #include "lisp_ptr.hh"
 
+enum class Notation {
+  l_paren, r_paren, vector_paren,
+    quote, quasiquote, comma, comma_at, dot,
+    l_bracket, r_bracket,
+    l_brace, r_brace,
+    bar
+    };
+
+
 class Token {
 public:
   enum class Type {
     uninitialized = 0, notation, lisp_ptr
       };
-
-  enum class Notation {
-      l_paren, r_paren, vector_paren,
-      quote, quasiquote, comma, comma_at, dot,
-      l_bracket, r_bracket,
-      l_brace, r_brace,
-      bar
-      };
-
 
   constexpr Token()
     : type_(Type::uninitialized){}
@@ -59,7 +59,7 @@ Token tokenize(std::istream&);
 // 'radix == 0' means 10 or the specified value of prefix.
 Lisp_ptr parse_number(std::istream&, int radix = 0);
 
-const char* stringify(Token::Notation);
+const char* stringify(Notation);
 const char* stringify(Token::Type);
 
 #include "token.i.hh"

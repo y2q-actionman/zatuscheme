@@ -23,7 +23,7 @@ std::ostream& operator<<(std::ostream& o, Token::Type t){
   return (o << stringify(t));
 }
 
-std::ostream& operator<<(std::ostream& o, Token::Notation n){
+std::ostream& operator<<(std::ostream& o, Notation n){
   return (o << stringify(n));
 }
 
@@ -35,7 +35,7 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
   case Token::Type::uninitialized:
     break;
   case Token::Type::notation:
-    o << tok.get<Token::Notation>();
+    o << tok.get<Notation>();
     break;
   case Token::Type::lisp_ptr:
     o << tok.get<Lisp_ptr>();
