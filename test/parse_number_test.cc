@@ -3,10 +3,9 @@
 #include "test_util.hh"
 
 using namespace std;
-#if 0
+
 template<typename T>
-void fail_message(Token::Type t, istream& i, 
-                  const Token& n, T expect){
+void fail_message(istream& i, Lisp_ptr p, T expect){
   RESULT = EXIT_FAILURE;
 
   string buf;
@@ -15,79 +14,45 @@ void fail_message(Token::Type t, istream& i,
   i.seekg(0, ios_base::beg);
   std::getline(i, buf);
 
-  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t) << "'"
+  cerr << "[failed] input='" << buf << "', expect type='" << stringify(p.tag()) << "'"
        << ", expected = '" << expect << "'\n"
-       << "\tgotten: " << n << '\n';
+       << "\tgotten: " << p << '\n';
 }
 
 void check(const char* input){
   stringstream ss(input);
 
   with_expect_error([&]() -> void {
-      auto n = tokenize_number(ss);
+      auto n = parse_number(ss);
       if(!n){
-        fail_message(Token::Type::uninitialized, ss, n, "(uninitialized)");
-        return;
+        fail_message(ss, n, "(uninitialized)");
       }
     });
 }
 
 template<typename T>
 void check(const char* input, const T& expect){
-  static constexpr auto type = to_tag<Token::Type, T>();
-
   stringstream ss(input);
-
-  auto n = tokenize_number(ss);
-  if(n.type() != type || n.get<T>() != expect){
-    fail_message(type, ss, n, expect);
-    return;
+  auto n = parse_number(ss);
+  
+  if(!equal_internal(n, wrap_number(expect))){
+    fail_message(ss, n, expect);
   }
 }
-
 
 // printing test
 void check(int i, int radix, const char* expect){
-  Token t{i};
-
   stringstream ss;
+  print(ss, Lisp_ptr{Ptr_tag::integer, i},
+        print_human_readable::f, radix);
 
-  switch(t.type()){
-  case Token::Type::integer:
-    print(ss, {Ptr_tag::integer, t.get<int>()},
-          print_human_readable::f, radix);
-    break;
-  case Token::Type::rational:
-    print(ss, {Ptr_tag::rational, t.get<Rational>()},
-          print_human_readable::f, radix);
-    break;
-  case Token::Type::real:
-    print(ss, {new double(t.get<double>())},
-          print_human_readable::f, radix);
-    break;
-  case Token::Type::complex:
-    print(ss, {new Complex(t.get<Complex>())},
-          print_human_readable::f, radix);
-    break;
-  case Token::Type::uninitialized:
-  case Token::Type::identifier:
-  case Token::Type::notation:
-  case Token::Type::lisp_ptr:
-  default:
-    UNEXP_DEFAULT();
-  }
-
-  auto evaled = ss.str();
-
-  if(evaled != expect){
-    cerr << "[failed] printed " << evaled << ", expected " << expect << "\n";
+  if(ss.str() != expect){
+    cerr << "[failed] printed " << ss.str() << ", expected " << expect << "\n";
     RESULT = EXIT_FAILURE;
   }
 }
-#endif
 
 int main(){
-#if 0
   // invalids
   check("hogehoge");
   check(".");
@@ -95,7 +60,7 @@ int main(){
   // int
   check("100", 100);
   check("-100", -100);
-  check("1##", 100);
+  check("1##", static_cast<double>(100));
 
   check("#b10", 2);
   check("#b-10", -2);
@@ -154,8 +119,6 @@ int main(){
   check(-100, 8, "#o-144");
   check(-100, 16, "#x-64");
   check(-100, 2, "#b-1100100");
-#else
-  RESULT = EXIT_FAILURE;
-#endif
+
   return RESULT;
 }
