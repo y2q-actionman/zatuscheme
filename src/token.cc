@@ -394,7 +394,7 @@ double zs_stof(istream& f, string s){
   }
 }
 
-pair<Lisp_ptr, Token::Exactness> parse_real_number(int radix, istream& f){
+Lisp_ptr parse_real_number(int radix, istream& f){
   int sign = 1;
 
   switch(f.peek()){
@@ -421,7 +421,7 @@ pair<Lisp_ptr, Token::Exactness> parse_real_number(int radix, istream& f){
     // decimal float
     auto d = zs_stof(f, move(digit_chars.first));
       
-    return {wrap_number(d * sign), Token::Exactness::inexact};
+    return wrap_number(d * sign);
   }
 
   if(digit_chars.first.empty()){
@@ -429,12 +429,15 @@ pair<Lisp_ptr, Token::Exactness> parse_real_number(int radix, istream& f){
   }
 
   auto u1 = zs_stoi(radix, digit_chars.first);
+  if(digit_chars.second == Token::Exactness::inexact){
+    u1 = wrap_number(coerce<double>(u1));
+  }
 
   if(c != '/'){
     if(u1.tag() == Ptr_tag::integer){
-      return {wrap_number(u1.get<int>() * sign), digit_chars.second};
+      return wrap_number(coerce<int>(u1) * sign);
     }else{
-      return {u1, Token::Exactness::inexact};
+      return wrap_number(coerce<double>(u1) * sign);
     }
   }
 
@@ -447,24 +450,18 @@ pair<Lisp_ptr, Token::Exactness> parse_real_number(int radix, istream& f){
   }
 
   auto u2 = zs_stoi(radix, digit_chars_2.first);
+  if(digit_chars_2.second == Token::Exactness::inexact){
+    u2 = wrap_number(coerce<double>(u2));
+  }
 
-  if(u1.tag() == Ptr_tag::real || u2.tag() == Ptr_tag::real){
-    return {wrap_number(coerce<double>(u1) / coerce<double>(u2)),
-        Token::Exactness::inexact};
+  if(u1.tag() == Ptr_tag::integer && u2.tag() == Ptr_tag::integer){
+    return wrap_number(Rational(sign * coerce<int>(u1), coerce<int>(u2)));
   }else{
-    Token::Exactness ex;
-    if(digit_chars.second == Token::Exactness::inexact
-       || digit_chars_2.second == Token::Exactness::inexact){
-      ex = Token::Exactness::inexact;
-    }else{
-      ex = Token::Exactness::exact;
-    }
-
-    return {wrap_number(Rational(sign * coerce<int>(u1), coerce<int>(u2))), ex};
+    return wrap_number(sign * coerce<double>(u1) / coerce<double>(u2));
   }
 }
 
-pair<Lisp_ptr, Token::Exactness>  parse_complex(int radix, istream& f){
+Lisp_ptr  parse_complex(int radix, istream& f){
   const auto first_char = f.peek();
 
   // treating +i, -i. (dirty part!)
@@ -472,8 +469,7 @@ pair<Lisp_ptr, Token::Exactness>  parse_complex(int radix, istream& f){
     f.get();
     if(f.peek() == 'i' || f.peek() == 'I'){
       f.ignore(1);
-      return {wrap_number(Complex(0, (first_char == '+') ? 1 : -1)),
-          Token::Exactness::inexact};
+      return wrap_number(Complex(0, (first_char == '+') ? 1 : -1));
     }
     f.unget();
   }
@@ -485,17 +481,14 @@ pair<Lisp_ptr, Token::Exactness>  parse_complex(int radix, istream& f){
   case '@': {// polar literal
     auto deg = parse_real_number(radix, f);
         
-    return {wrap_number(polar(coerce<double>(real.first),
-                              coerce<double>(deg.first))),
-        Token::Exactness::inexact};
+    return wrap_number(polar(coerce<double>(real), coerce<double>(deg)));
   }
   case '+': case '-': {
     const int sign = (c == '+') ? 1 : -1;
 
     if(f.peek() == 'i' || f.peek() == 'I'){
       f.ignore(1);
-      return {wrap_number(Complex(coerce<double>(real.first), sign)),
-          Token::Exactness::inexact};
+      return wrap_number(Complex(coerce<double>(real), sign));
     }
     
     auto imag = parse_real_number(radix, f);
@@ -505,14 +498,12 @@ pair<Lisp_ptr, Token::Exactness>  parse_complex(int radix, istream& f){
     }
     f.ignore(1);
 
-    return {wrap_number(Complex(coerce<double>(real.first),
-                                coerce<double>(imag.first) * sign)),
-        Token::Exactness::inexact};
+    return wrap_number(Complex(coerce<double>(real),
+                               coerce<double>(imag) * sign));
   }
   case 'i': case 'I':
     if(first_char == '+' || first_char == '-'){
-      return {wrap_number(Complex(0, coerce<double>(real.first))),
-          Token::Exactness::inexact};
+      return wrap_number(Complex(0, coerce<double>(real)));
     }else{
       throw zs_error("reader error: failed at reading a complex number. ('i' appeared alone.)\n");
     }
@@ -532,18 +523,20 @@ Lisp_ptr parse_number(istream& f, int radix){
   }
 
   const auto r = parse_complex(radix, f);
-  if(!r.first){
+  if(!r){
     // TODO: add context information.
     throw zs_error("parser error: cannot be read as number.\n");
   }
 
-  if(prefix_info.second == Token::Exactness::unspecified
-     || prefix_info.second == r.second){
-    return r.first;
-  }else if(prefix_info.second == Token::Exactness::exact){
-    return to_exact(r.first);
-  }else{    
-    return to_inexact(r.first);
+  switch(prefix_info.second){
+  case Token::Exactness::unspecified:
+    return r;
+  case Token::Exactness::exact:
+    return to_exact(r);
+  case Token::Exactness::inexact:
+    return to_inexact(r);
+  default:
+    UNEXP_DEFAULT();
   }
 }
 
