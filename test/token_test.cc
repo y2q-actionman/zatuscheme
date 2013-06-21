@@ -66,8 +66,8 @@ void check(string&& input){
 
 // for normal cases
 template<typename T, typename Fun>
-void check(istream& f, const T& expect, Fun comparator){
-  const auto type = to_tag<Token::Type, T>();
+void check(istream& f, const T& expect,
+           Fun comparator, Token::Type type){
   auto init_pos = f.tellg();
 
   const Token tok = tokenize(f);
@@ -79,11 +79,11 @@ void check(istream& f, const T& expect, Fun comparator){
 }
 
 void check(istream& f, Lisp_ptr expect){
-  check(f, expect, equal_internal);
+  check(f, expect, equal_internal, Token::Type::lisp_ptr);
 }
 
 void check(istream& f, N expect){
-  check(f, expect, std::equal_to<N>());
+  check(f, expect, std::equal_to<N>(), Token::Type::notation);
 }
 
 template<typename T>

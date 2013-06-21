@@ -7,30 +7,6 @@
 
 #include <cassert>
 
-// Type mapping
-template<>
-struct to_type<Token::Type, Token::Type::notation>{
-  typedef Token::Notation type;
-};
-
-template<>
-struct to_type<Token::Type, Token::Type::lisp_ptr>{
-  typedef Lisp_ptr type;
-};
-
-
-template<>
-inline constexpr
-Token::Type to_tag<Token::Type, Token::Notation>(){
-  return Token::Type::notation;
-}
-
-template<>
-inline constexpr
-Token::Type to_tag<Token::Type, Lisp_ptr>(){
-  return Token::Type::lisp_ptr;
-}
-
 // Token definitions
 inline constexpr
 Token::Token(Notation n)
