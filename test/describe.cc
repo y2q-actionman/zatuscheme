@@ -34,9 +34,6 @@ std::ostream& operator<<(std::ostream& o, const Token& tok){
   switch(t){
   case Token::Type::uninitialized:
     break;
-  case Token::Type::notation:
-    o << tok.get<Notation>();
-    break;
   case Token::Type::lisp_ptr:
     o << tok.get<Lisp_ptr>();
     break;

@@ -546,21 +546,21 @@ Token tokenize(istream& f){
 
   switch(auto c = f.get()){
   case '(':
-    return Token{Notation::l_paren};
+    return Token{Lisp_ptr{Notation::l_paren}};
   case ')':
-    return Token{Notation::r_paren};
+    return Token{Lisp_ptr{Notation::r_paren}};
   case '\'':
     return Token{Lisp_ptr{Notation::quote}};
   case '`':
     return Token{Lisp_ptr{Notation::quasiquote}};
   case '[':
-    return Token{Notation::l_bracket};
+    return Token{Lisp_ptr{Notation::l_bracket}};
   case ']':
-    return Token{Notation::r_bracket};
+    return Token{Lisp_ptr{Notation::r_bracket}};
   case '{':
-    return Token{Notation::l_brace};
+    return Token{Lisp_ptr{Notation::l_brace}};
   case '}':
-    return Token{Notation::r_brace};
+    return Token{Lisp_ptr{Notation::r_brace}};
   case '|':
     return Token{Lisp_ptr{Notation::bar}};
   case ',': {
@@ -590,7 +590,7 @@ Token tokenize(istream& f){
 
     switch(dots){
     case 1:
-      return Token{Notation::dot};
+      return Token{Lisp_ptr{Notation::dot}};
     case 3:
       return Token{Lisp_ptr{intern(*vm.symtable, "...")}};
     default:
@@ -613,7 +613,7 @@ Token tokenize(istream& f){
   case '#':
     switch(auto sharp_c = f.get()){
     case '(':
-      return Token{Notation::vector_paren};
+      return Token{Lisp_ptr{Notation::vector_paren}};
     case 't': case 'T':
       return Token{Lisp_ptr(true)};
     case 'f': case 'F':
@@ -693,8 +693,6 @@ const char* stringify(Token::Type t){
   switch(t){
   case Token::Type::uninitialized:
     return "uninitialized";
-  case Token::Type::notation:
-    return "notation";
   case Token::Type::lisp_ptr:
     return "lisp_ptr";
   default:

@@ -9,20 +9,9 @@
 
 // Token definitions
 inline constexpr
-Token::Token(Notation n)
-  : type_(Type::notation), not_(n){}
-
-inline constexpr
 Token::Token(Lisp_ptr p)
   : type_(Type::lisp_ptr), lisp_value_(p){}
 
-
-template<>
-inline
-Notation Token::get<Notation>() const{
-  assert(type_ == Type::notation);
-  return not_;
-}
 
 template<>
 inline

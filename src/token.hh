@@ -20,12 +20,11 @@ enum class Notation {
 class Token {
 public:
   enum class Type {
-    uninitialized = 0, notation, lisp_ptr
+    uninitialized = 0, lisp_ptr
       };
 
   constexpr Token()
     : type_(Type::uninitialized){}
-  explicit constexpr Token(Notation);
   explicit constexpr Token(Lisp_ptr);
 
   Token(const Token&) = default;

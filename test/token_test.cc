@@ -81,7 +81,7 @@ void check(istream& f, Lisp_ptr expect){
 }
 
 void check(istream& f, Notation expect){
-  check(f, expect, std::equal_to<Notation>(), Token::Type::notation);
+  check(f, Lisp_ptr(expect));
 }
 
 template<typename T>

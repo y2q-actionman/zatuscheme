@@ -24,8 +24,8 @@ Lisp_ptr read_list(istream& f){
   // first check
   if(!t){
     throw zs_error("reader error: reached EOF in a list.\n");
-  }else if(t.type() == Token::Type::notation){
-    auto n = t.get<Notation>();
+  }else if(t.get<Lisp_ptr>().tag() == Ptr_tag::notation){
+    auto n = t.get<Lisp_ptr>().get<Notation>();
     if(n == Notation::r_paren){ // empty list
       return Cons::NIL;
     }else if(n == Notation::dot){
@@ -43,15 +43,15 @@ Lisp_ptr read_list(istream& f){
     t = tokenize(f);
     if(!t){
       throw zs_error("reader error: reached EOF in a list.\n");
-    }else if(t.type() == Token::Type::notation){
-      auto n = t.get<Notation>();
+    }else if(t.get<Lisp_ptr>().tag() == Ptr_tag::notation){
+      auto n = t.get<Lisp_ptr>().get<Notation>();
       if(n == Notation::r_paren){ // proper list
         return gl.extract();
       }else if(n == Notation::dot){ // dotted list
         auto ret = gl.extract_with_tail(read(f));
         t = tokenize(f);
-        if(t.type() != Token::Type::notation
-           || t.get<Notation>() != Notation::r_paren){
+        if(!t
+           || t.get<Lisp_ptr>().get<Notation>() != Notation::r_paren){
           throw zs_error("reader error: dotted list has two or more cdrs.\n");
         }
         return ret;
@@ -69,8 +69,8 @@ Lisp_ptr read_vector(istream& f){
     auto t = tokenize(f);
     if(!t){
       throw zs_error("reader error: reached EOF in a vector.\n");
-    }else if((t.type() == Token::Type::notation)
-             && (t.get<Notation>() == Notation::r_paren)){
+    }else if(t && t.get<Lisp_ptr>().tag() == Ptr_tag::notation
+             && t.get<Lisp_ptr>().get<Notation>() == Notation::r_paren){
       return {v};
     }else{
       v->emplace_back(read_la(f, move(t)));
@@ -85,26 +85,14 @@ Lisp_ptr read_abbrev(const char* name, istream& f){
 }
 
 Lisp_ptr read_la(istream& f, Token&& tok){
-  Lisp_ptr p;
-  Notation n;
-
   switch(tok.type()){
-    // simple datum
-  case Token::Type::lisp_ptr:
-    p = tok.get<Lisp_ptr>();
+  case Token::Type::lisp_ptr: {
+    auto p = tok.get<Lisp_ptr>();
     if(p.tag() != Ptr_tag::notation){
       return p;
-    }else{
-      n = p.get<Notation>();
-      goto notation_switch;
     }
 
-    // compound datum
-  case Token::Type::notation:
-    n = tok.get<Notation>();
-  notation_switch:
-    switch(n){
-
+    switch(auto n = p.get<Notation>()){
     case Notation::l_paren: // list
       return read_list(f);
 
@@ -141,6 +129,7 @@ Lisp_ptr read_la(istream& f, Token&& tok){
       throw zs_error(printf_string("reader error: unexpected notation was passed! (type=%s)\n",
                                    stringify(n)));
     }
+  }
 
   case Token::Type::uninitialized:
     // Checking "f.peek() == EOF" is needed because tokenize() may do 'unget(EOF)'
