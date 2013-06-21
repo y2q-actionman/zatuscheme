@@ -22,10 +22,6 @@ public:
       bar
       };
 
-  enum class Exactness{
-    unspecified, exact, inexact
-      };
-
 
   constexpr Token()
     : type_(Type::uninitialized){}

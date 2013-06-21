@@ -144,10 +144,11 @@ Token tokenize_string(istream& f){
 }
 
   // number parsers
+enum class Exactness{ unspecified, exact, inexact };
 
-pair<int, Token::Exactness> parse_number_prefix(istream& f){
+pair<int, Exactness> parse_number_prefix(istream& f){
   int r = 10;
-  Token::Exactness e = Token::Exactness::unspecified;
+  Exactness e = Exactness::unspecified;
   int r_appeared = 0, e_appeared = 0;
 
   for(int loop = 0; loop < 2; ++loop){
@@ -161,11 +162,11 @@ pair<int, Token::Exactness> parse_number_prefix(istream& f){
     switch(c = f.get()){
     case 'i': case 'I':
       ++e_appeared;
-      e = Token::Exactness::inexact;
+      e = Exactness::inexact;
       break;
     case 'e': case 'E':
       ++e_appeared;
-      e = Token::Exactness::exact;
+      e = Exactness::exact;
       break;
     case 'b': case 'B':
       ++r_appeared;
@@ -244,7 +245,7 @@ int eat_sharp(istream& f, string& o){
 }
 
 
-pair<string, Token::Exactness> collect_integer_digits(int radix, istream& f){
+pair<string, Exactness> collect_integer_digits(int radix, istream& f){
   decltype(f.get()) c;
   string s;
 
@@ -253,7 +254,7 @@ pair<string, Token::Exactness> collect_integer_digits(int radix, istream& f){
   f.unget();
 
   auto sharps = eat_sharp(f, s);
-  return {s, (sharps > 0) ? Token::Exactness::inexact : Token::Exactness::exact};
+  return {s, (sharps > 0) ? Exactness::inexact : Exactness::exact};
 }
   
 Lisp_ptr zs_stoi(int radix, const string& s){
@@ -429,7 +430,7 @@ Lisp_ptr parse_real_number(int radix, istream& f){
   }
 
   auto u1 = zs_stoi(radix, digit_chars.first);
-  if(digit_chars.second == Token::Exactness::inexact){
+  if(digit_chars.second == Exactness::inexact){
     u1 = wrap_number(coerce<double>(u1));
   }
 
@@ -450,7 +451,7 @@ Lisp_ptr parse_real_number(int radix, istream& f){
   }
 
   auto u2 = zs_stoi(radix, digit_chars_2.first);
-  if(digit_chars_2.second == Token::Exactness::inexact){
+  if(digit_chars_2.second == Exactness::inexact){
     u2 = wrap_number(coerce<double>(u2));
   }
 
@@ -529,11 +530,11 @@ Lisp_ptr parse_number(istream& f, int radix){
   }
 
   switch(prefix_info.second){
-  case Token::Exactness::unspecified:
+  case Exactness::unspecified:
     return r;
-  case Token::Exactness::exact:
+  case Exactness::exact:
     return to_exact(r);
-  case Token::Exactness::inexact:
+  case Exactness::inexact:
     return to_inexact(r);
   default:
     UNEXP_DEFAULT();
