@@ -5,6 +5,7 @@
 #include <climits>
 #include <iostream>
 #include <cctype>
+#include <string>
 
 #include "config.h"
 
@@ -62,7 +63,7 @@ void skip_intertoken_space(istream& f){
 }
 
 
-Token tokenize_identifier(istream& f, int first_char){
+Lisp_ptr tokenize_identifier(istream& f, int first_char){
   string s(1, ZS_CASE(first_char));
 
   // subsequent
@@ -77,10 +78,10 @@ Token tokenize_identifier(istream& f, int first_char){
   f.unget();
 
   assert(!s.empty());
-  return Token{Lisp_ptr{intern(*vm.symtable, move(s))}};
+  return {intern(*vm.symtable, move(s))};
 }
 
-Token tokenize_character(istream& f){
+Lisp_ptr tokenize_character(istream& f){
   // function for checking character-name
   const auto check_name = [&](const char* str) -> bool {
     for(const char* c = str; *c; ++c){
@@ -98,18 +99,18 @@ Token tokenize_character(istream& f){
   }
 
   if(is_delimiter(f.peek())){
-    return Token{Lisp_ptr(static_cast<char>(ret_char))};
+    return Lisp_ptr{static_cast<char>(ret_char)};
   }else{
     // check character name
     switch(ret_char){
     case 's': case 'S':
       if(check_name("pace")){
-        return Token{Lisp_ptr(' ')};
+        return Lisp_ptr{' '};
       }
       break;
     case 'n': case 'N':
       if(check_name("ewline")){
-        return Token{Lisp_ptr('\n')};
+        return Lisp_ptr{'\n'};
       }
       break;
     }
@@ -118,14 +119,14 @@ Token tokenize_character(istream& f){
   }
 }
 
-Token tokenize_string(istream& f){
+Lisp_ptr tokenize_string(istream& f){
   decltype(f.get()) c;
   string s;
 
   while((c = f.get()) != EOF){
     switch(c){
     case '"':
-      return Token{Lisp_ptr(zs_new<String>(move(s)))};
+      return Lisp_ptr{zs_new<String>(move(s))};
     case '\\':
       switch(c = f.get()){
       case '"': case '\\':
@@ -541,34 +542,34 @@ Lisp_ptr parse_number(istream& f, int radix){
   }
 }
 
-Token tokenize(istream& f){
+Lisp_ptr tokenize(istream& f){
   skip_intertoken_space(f);
 
   switch(auto c = f.get()){
   case '(':
-    return Token{Lisp_ptr{Notation::l_paren}};
+    return Lisp_ptr{Notation::l_paren};
   case ')':
-    return Token{Lisp_ptr{Notation::r_paren}};
+    return Lisp_ptr{Notation::r_paren};
   case '\'':
-    return Token{Lisp_ptr{Notation::quote}};
+    return Lisp_ptr{Notation::quote};
   case '`':
-    return Token{Lisp_ptr{Notation::quasiquote}};
+    return Lisp_ptr{Notation::quasiquote};
   case '[':
-    return Token{Lisp_ptr{Notation::l_bracket}};
+    return Lisp_ptr{Notation::l_bracket};
   case ']':
-    return Token{Lisp_ptr{Notation::r_bracket}};
+    return Lisp_ptr{Notation::r_bracket};
   case '{':
-    return Token{Lisp_ptr{Notation::l_brace}};
+    return Lisp_ptr{Notation::l_brace};
   case '}':
-    return Token{Lisp_ptr{Notation::r_brace}};
+    return Lisp_ptr{Notation::r_brace};
   case '|':
-    return Token{Lisp_ptr{Notation::bar}};
+    return Lisp_ptr{Notation::bar};
   case ',': {
     if(f.peek() == '@'){
       f.ignore(1);
-      return Token{Lisp_ptr{Notation::comma_at}};
+      return Lisp_ptr{Notation::comma_at};
     }else{
-      return Token{Lisp_ptr{Notation::comma}};
+      return Lisp_ptr{Notation::comma};
     }
   }
 
@@ -579,7 +580,7 @@ Token tokenize(istream& f){
     // checks number like '.1'
     if(char_to_int(10, c2) != -1){
       f.unget();
-      return Token{parse_number(f)};
+      return parse_number(f);
     }      
 
     // '.' or '...' below
@@ -590,9 +591,9 @@ Token tokenize(istream& f){
 
     switch(dots){
     case 1:
-      return Token{Lisp_ptr{Notation::dot}};
+      return Lisp_ptr{Notation::dot};
     case 3:
-      return Token{Lisp_ptr{intern(*vm.symtable, "...")}};
+      return {intern(*vm.symtable, "...")};
     default:
       throw zs_error(printf_string("reader error: %d dots appeared.\n", dots));
     }
@@ -603,21 +604,21 @@ Token tokenize(istream& f){
 
   case '+': case '-': {
     if(is_delimiter(f.peek())){
-      return Token{Lisp_ptr{intern(*vm.symtable, string(1, c))}};
+      return {intern(*vm.symtable, string(1, c))};
     }else{
       f.unget();
-      return Token{parse_number(f)};
+      return parse_number(f);
     }
   }
 
   case '#':
     switch(auto sharp_c = f.get()){
     case '(':
-      return Token{Lisp_ptr{Notation::vector_paren}};
+      return Lisp_ptr{Notation::vector_paren};
     case 't': case 'T':
-      return Token{Lisp_ptr(true)};
+      return Lisp_ptr{true};
     case 'f': case 'F':
-      return Token{Lisp_ptr(false)};
+      return Lisp_ptr{false};
     case '\\':
       return tokenize_character(f);
     case 'i': case 'I':
@@ -628,7 +629,7 @@ Token tokenize(istream& f){
     case 'x': case 'X':
       f.unget();
       f.putback('#');
-      return Token{parse_number(f)};
+      return parse_number(f);
     case '<':
       // cleaning input stream
       do{
@@ -642,14 +643,14 @@ Token tokenize(istream& f){
     }
 
   case EOF:
-    return Token{};
+    return {};
 
   default:
     if(isalpha(c) || is_special_initial(c)){
       return tokenize_identifier(f, c);
     }else if(isdigit(c)){
       f.unget();
-      return Token{parse_number(f)};
+      return parse_number(f);
     }else{
       throw zs_error(printf_string("reader error: invalid char '%c' appeared.\n", c));
     }
@@ -687,15 +688,4 @@ const char* stringify(Notation n){
   default:
     return "(unknown token notation)";
   }
-}
-
-const char* stringify(Token::Type t){
-  switch(t){
-  case Token::Type::uninitialized:
-    return "uninitialized";
-  case Token::Type::lisp_ptr:
-    return "lisp_ptr";
-  default:
-    return "(unknown token type)";
-  }    
 }

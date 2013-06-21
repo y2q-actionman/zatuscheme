@@ -17,8 +17,8 @@
 using namespace std;
 
 template<typename T, typename Pos>
-void fail_message(Token::Type t, istream& f, const Pos& b_pos,
-                  const Token& tok, const T& expect){
+void fail_message(istream& f, const Pos& b_pos,
+                  Lisp_ptr tok, const T& expect){
   // extract input from stream
 
   f.seekg(b_pos);
@@ -26,7 +26,7 @@ void fail_message(Token::Type t, istream& f, const Pos& b_pos,
   string buf;
   std::getline(f, buf);
 
-  cerr << "[failed] input='" << buf << "', expect type='" << stringify(t) << "'"
+  cerr << "[failed] input='" << buf << "'"
        << ", expected str='" << expect << "'\n"
        << "\tgotten token: " << tok << '\n';
 
@@ -35,24 +35,16 @@ void fail_message(Token::Type t, istream& f, const Pos& b_pos,
 
 
 // for error case
-template<>
-inline
-Token::Type Token::get<Token::Type>() const{
-  return type_;
-}
-
 void check(istream& f){
-  static const auto type = Token::Type::uninitialized;
   auto init_pos = f.tellg();
 
-  Token tok;
+  Lisp_ptr tok;
   with_expect_error([&]() -> void{
       tok = tokenize(f);
     });
 
-  if(tok.type() != type){
-    fail_message(type, f, init_pos, tok, "uninitialized");
-    return;
+  if(tok){
+    fail_message(f, init_pos, tok, "uninitialized");
   }
 }
 
@@ -63,21 +55,14 @@ void check(string&& input){
 
 
 // for normal cases
-template<typename T, typename Fun>
-void check(istream& f, const T& expect,
-           Fun comparator, Token::Type type){
+void check(istream& f, Lisp_ptr expect){
   auto init_pos = f.tellg();
 
-  const Token tok = tokenize(f);
+  const auto tok = tokenize(f);
 
-  if(tok.type() != type || !comparator(tok.get<T>(),expect)){
-    fail_message(type, f, init_pos, tok, expect);
-    return;
+  if(!equal_internal(tok, expect)){
+    fail_message(f, init_pos, tok, expect);
   }
-}
-
-void check(istream& f, Lisp_ptr expect){
-  check(f, expect, equal_internal, Token::Type::lisp_ptr);
 }
 
 void check(istream& f, Notation expect){

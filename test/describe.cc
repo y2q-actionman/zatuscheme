@@ -19,28 +19,6 @@ std::ostream& operator<<(std::ostream& o, proc_flag::Variadic v){
   return (o << boolalpha << static_cast<bool>(v) << noboolalpha);
 }
 
-std::ostream& operator<<(std::ostream& o, Token::Type t){
-  return (o << stringify(t));
-}
-
 std::ostream& operator<<(std::ostream& o, Notation n){
   return (o << stringify(n));
-}
-
-std::ostream& operator<<(std::ostream& o, const Token& tok){
-  const auto t = tok.type();
-
-  o << "Token: " << t << "(";
-  switch(t){
-  case Token::Type::uninitialized:
-    break;
-  case Token::Type::lisp_ptr:
-    o << tok.get<Lisp_ptr>();
-    break;
-  default:
-    UNEXP_DEFAULT();
-  }
-  o << ')';
-
-  return o;
 }
