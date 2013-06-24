@@ -6,6 +6,20 @@
 #endif
 
 #include <utility>
+#include "zs_error.hh"
+#include "zs_memory.hh"
+
+inline
+Rational::Rational(int n, int d)
+  : overflow_(false){
+  normalized_reset(n, d);
+}
+
+inline
+Rational::Rational(long long n, long long d)
+  : overflow_(false){
+  normalized_reset(n, d);
+}
 
 template <typename T>
 bool Rational::is_convertible() const = delete;
@@ -48,6 +62,7 @@ bool Rational::operator>=(const Rational& other) const{
   return !(*this < other);
 }
 
+// utilities
 template<typename T>
 T gcd(T m, T n){
   if(m < 0) m = -m;
@@ -65,10 +80,64 @@ T gcd(T m, T n){
   return m;
 }
 
+template<>
+inline
+int coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::integer){
+    return p.get<int>();
+  }else{
+    UNEXP_DEFAULT();
+  }
+}
 
-template<> int coerce(Lisp_ptr);
-template<> Rational coerce(Lisp_ptr);
-template<> double coerce(Lisp_ptr);
-template<> Complex coerce(Lisp_ptr);
+template<>
+inline
+Rational coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::rational){
+    return *p.get<Rational*>();
+  }else{
+    return Rational(p.get<int>(), 1);
+  }
+}
+
+template<>
+inline
+double coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::real){
+    return *(p.get<double*>());
+  }else{
+    return static_cast<double>(coerce<Rational>(p));
+  }
+}
+
+template<>
+inline
+Complex coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::complex){
+    return *(p.get<Complex*>());
+  }else{
+    return Complex(coerce<double>(p), 0);
+  }
+}
+
+inline
+Lisp_ptr wrap_number(int i){
+  return {Ptr_tag::integer, i};
+}
+
+inline
+Lisp_ptr wrap_number(double d){
+  return {zs_new<double>(d)};
+}
+
+inline
+Lisp_ptr wrap_number(const Complex& z){
+  return {zs_new<Complex>(z)};
+}
+
+inline
+Lisp_ptr wrap_number(bool b){
+  return Lisp_ptr{b};
+}
 
 #endif // RATIONAL_I_HH

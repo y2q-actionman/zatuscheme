@@ -34,16 +34,6 @@ void Rational::normalized_reset(long long n, long long d){
   }
 }
 
-Rational::Rational(int n, int d)
-  : overflow_(false){
-  normalized_reset(n, d);
-}
-
-Rational::Rational(long long n, long long d)
-  : overflow_(false){
-  normalized_reset(n, d);
-}
-
 Rational::operator int() const{
   assert(is_convertible<int>());
   return numerator();
@@ -193,47 +183,6 @@ Rational& Rational::expt(const Rational& other){
 
 
 // utilities
-
-template<>
-int coerce(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::integer){
-    return p.get<int>();
-  }else{
-    UNEXP_DEFAULT();
-  }
-}
-
-template<>
-Rational coerce(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::rational){
-    return *p.get<Rational*>();
-  }else{
-    return Rational(p.get<int>(), 1);
-  }
-}
-
-template<>
-double coerce(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::real){
-    return *(p.get<double*>());
-  }else{
-    return static_cast<double>(coerce<Rational>(p));
-  }
-}
-
-template<>
-Complex coerce(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::complex){
-    return *(p.get<Complex*>());
-  }else{
-    return Complex(coerce<double>(p), 0);
-  }
-}
-
-Lisp_ptr wrap_number(int i){
-  return {Ptr_tag::integer, i};
-}
-
 Lisp_ptr wrap_number(const Rational& q){
   if(q.is_convertible<int>()){
     return {Ptr_tag::integer, static_cast<int>(q)};
@@ -245,25 +194,12 @@ Lisp_ptr wrap_number(const Rational& q){
   }
 }
 
-Lisp_ptr wrap_number(double d){
-  return {zs_new<double>(d)};
-}
-
-Lisp_ptr wrap_number(const Complex& z){
-  return {zs_new<Complex>(z)};
-}
-
-Lisp_ptr wrap_number(bool b){
-  return Lisp_ptr{b};
-}
-
 Lisp_ptr to_exact(Lisp_ptr p){
   switch(p.tag()){
   case Ptr_tag::integer:
   case Ptr_tag::rational:
     return p;
   case Ptr_tag::real:
-    // TODO: rationalize() here.
     return wrap_number(static_cast<int>(*p.get<double*>()));
   case Ptr_tag::complex:
     throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
@@ -284,4 +220,3 @@ Lisp_ptr to_inexact(Lisp_ptr p){
     UNEXP_CONVERSION("inexact");
   }
 }
-
