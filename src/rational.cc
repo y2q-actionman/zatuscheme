@@ -34,33 +34,6 @@ void Rational::normalized_reset(long long n, long long d){
   }
 }
 
-Rational::operator int() const{
-  assert(is_convertible<int>());
-  return numerator();
-}
-
-Rational::operator double() const{
-  assert(is_convertible<double>());
-  if(overflow_){
-    return float_;
-  }else{
-    return static_cast<double>(numerator()) / static_cast<double>(denominator());
-  }
-}
-
-bool Rational::operator==(const Rational& other) const{
-  if(overflow_) return false;
-
-  // assumes rationals are normalized.
-  return (numerator() == other.numerator()) && (denominator() == other.denominator());
-}
-
-bool Rational::operator<(const Rational& other) const{
-  if(overflow_) return false;
-
-  return (numerator() * other.denominator()) < (other.numerator() * denominator());
-}
-
 Rational& Rational::operator+=(const Rational& other){
   if(overflow_) return *this;
 

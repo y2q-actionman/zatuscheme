@@ -43,8 +43,39 @@ bool Rational::is_convertible<double>() const{
 }
 
 inline
+Rational::operator int() const{
+  assert(is_convertible<int>());
+  return numerator();
+}
+
+inline
+Rational::operator double() const{
+  assert(is_convertible<double>());
+  if(overflow_){
+    return float_;
+  }else{
+    return static_cast<double>(numerator()) / static_cast<double>(denominator());
+  }
+}
+
+inline
+bool Rational::operator==(const Rational& other) const{
+  if(overflow_) return false;
+
+  // assumes rationals are normalized.
+  return (numerator() == other.numerator()) && (denominator() == other.denominator());
+}
+
+inline
 bool Rational::operator!=(const Rational& other) const{
   return !(*this == other);
+}
+
+inline
+bool Rational::operator<(const Rational& other) const{
+  if(overflow_) return false;
+
+  return (numerator() * other.denominator()) < (other.numerator() * denominator());
 }
 
 inline
