@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void Rational::normalized_reset(long long n, long long d){
+Rational& Rational::normalized_reset(long long n, long long d){
   if(d == 0)
     throw std::domain_error("Rational::denominator is 0");
 
@@ -32,6 +32,8 @@ void Rational::normalized_reset(long long n, long long d){
     ratio_.n_ = n;
     ratio_.d_ = d;
   }
+
+  return *this;
 }
 
 Rational& Rational::operator+=(const Rational& other){
@@ -41,8 +43,7 @@ Rational& Rational::operator+=(const Rational& other){
     + other.numerator() * (long long)denominator();
   auto d = (long long)denominator() * other.denominator();
 
-  normalized_reset(n, d);
-  return *this;
+  return normalized_reset(n, d);
 }
 
 Rational& Rational::operator-=(const Rational& other){
@@ -52,8 +53,7 @@ Rational& Rational::operator-=(const Rational& other){
     - other.numerator() * (long long)denominator();
   auto d = (long long)denominator() * other.denominator();
 
-  normalized_reset(n, d);
-  return *this;
+  return normalized_reset(n, d);
 }
 
 Rational& Rational::operator*=(const Rational& other){
@@ -62,8 +62,7 @@ Rational& Rational::operator*=(const Rational& other){
   auto n = (long long)numerator() * other.numerator();
   auto d = (long long)denominator() * other.denominator();
 
-  normalized_reset(n, d);
-  return *this;
+  return normalized_reset(n, d);
 }
 
 Rational& Rational::operator/=(const Rational& other){
@@ -72,22 +71,19 @@ Rational& Rational::operator/=(const Rational& other){
   auto n = (long long)numerator() * other.denominator();
   auto d = (long long)denominator() * other.numerator();
 
-  normalized_reset(n, d);
-  return *this;
+  return normalized_reset(n, d);
 }
 
 Rational& Rational::negate(){
   if(overflow_) return *this;
 
-  normalized_reset(-(long long)numerator(), (long long)denominator());
-  return *this;
+  return normalized_reset(-(long long)numerator(), (long long)denominator());
 }
 
 Rational& Rational::inverse(){
   if(overflow_) return *this;
 
-  normalized_reset((long long)denominator(), (long long)numerator());
-  return *this;
+  return normalized_reset((long long)denominator(), (long long)numerator());
 }
 
 Rational rationalize(double answer, double error){

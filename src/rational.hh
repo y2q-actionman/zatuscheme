@@ -54,7 +54,7 @@ private:
     double float_;
   };
 
-  void normalized_reset(long long, long long);
+  Rational& normalized_reset(long long, long long);
 };
 
 Rational rationalize(double, double);
