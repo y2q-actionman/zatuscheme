@@ -26,7 +26,7 @@ static_assert(sizeof(int) < sizeof(long long),
 
 namespace {
 
-zs_error number_type_check_failed(Lisp_ptr p){
+Lisp_ptr number_type_check_failed(Lisp_ptr p){
   return zs_error_arg1(nullptr, "arg is not number!", {p});
 }
 

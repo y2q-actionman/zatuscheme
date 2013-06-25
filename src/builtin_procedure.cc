@@ -12,7 +12,7 @@ using namespace std;
 
 namespace {
 
-zs_error procedure_type_check_failed(Lisp_ptr p){
+Lisp_ptr procedure_type_check_failed(Lisp_ptr p){
   return zs_error_arg1(nullptr, "arg is not procedure!", {p});
 }
 

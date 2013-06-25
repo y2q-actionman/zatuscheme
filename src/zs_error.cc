@@ -5,6 +5,7 @@
 #include <cassert>
 
 #include "zs_error.hh"
+#include "zs_memory.hh"
 #include "lisp_ptr.hh"
 #include "printer.hh"
 
@@ -40,71 +41,45 @@ const char* zs_error::what() const noexcept{
   return str_.c_str();
 }
 
-
-// class zs_error_arg1
-zs_error_arg1::zs_error_arg1(const char* context, const std::string& body,
-                             std::initializer_list<Lisp_ptr> args)
-  : zs_error(), context_(context), body_(body), args_()
-{
-  assert(args.size() <= ARGS_SIZE);
-
-  int i = 0;
-  for(auto a : args){
-    args_.at(i) = a;
-  }
-
-  this->str_ = make_what_str();
-}
-
-// should use 'delegating constructor'
-zs_error_arg1::zs_error_arg1(const char* context, const std::string& body)
-  : zs_error(), context_(context), body_(body), args_()
-{
-  this->str_ = make_what_str();
-}
-
-zs_error_arg1::zs_error_arg1(const zs_error_arg1&) = default;
-zs_error_arg1::zs_error_arg1(zs_error_arg1&&) = default;
-
-zs_error_arg1::~zs_error_arg1() noexcept = default;
-
-zs_error_arg1& zs_error_arg1::operator=(const zs_error_arg1&) noexcept = default;
-zs_error_arg1& zs_error_arg1::operator=(zs_error_arg1&&) noexcept = default;
-
-std::string zs_error_arg1::make_what_str(){
+// error functions
+Lisp_ptr zs_error_arg1(const char* context, const std::string& str,
+                       std::initializer_list<Lisp_ptr> args){
   ostringstream oss;
 
-  if(context_){
-    oss << context_ << " : ";
+  if(context){
+    oss << context << " : ";
   }
-  oss << body_;
-  if(args_[0]){
+  oss << str;
+  if(args.size() > 0){
     oss << " @ (";
-    for(auto p : args_){
+    for(auto p : args){
       oss << p << " ";
     }
     oss << ")";
   }
   oss << endl;
   
-  return oss.str();
+  return zs_new<String>(oss.str());
 }
 
-// error functions
-zs_error builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
+Lisp_ptr zs_error_arg1(const char* context, const std::string& str){
+  return zs_error_arg1(context, str, {});
+}
+
+Lisp_ptr builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
   return zs_error_arg1(func_name,
                        printf_string("arg is not %s!", stringify(tag)),
                        {p});
 }
 
-zs_error builtin_argcount_failed(const char* name, int required, int max, int passed){
+Lisp_ptr builtin_argcount_failed(const char* name, int required, int max, int passed){
   return zs_error_arg1(name,
                        printf_string("number of passed args is mismatched!!"
                                      " (acceptable %d-%d args, passed %d)\n",
                                     required, max, passed));
 }
 
-zs_error builtin_identifier_check_failed(const char* name, Lisp_ptr p){
+Lisp_ptr builtin_identifier_check_failed(const char* name, Lisp_ptr p){
   return zs_error_arg1(name,
                        "arg is not identifier!",
                        {p});
