@@ -11,6 +11,7 @@
 
 using namespace std;
 
+// TODO: make this as constructor.
 Rational& Rational::normalized_reset(long long n, long long d){
   if(d == 0)
     throw std::domain_error("Rational::denominator is 0");
