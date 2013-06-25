@@ -93,6 +93,60 @@ bool Rational::operator>=(const Rational& other) const{
   return !(*this < other);
 }
 
+inline
+Rational& Rational::operator+=(const Rational& other){
+  if(overflow_) return *this;
+
+  auto n = (long long)numerator() * other.denominator()
+    + (long long)other.numerator() * denominator();
+  auto d = (long long)denominator() * other.denominator();
+
+  return normalized_reset(n, d);
+}
+
+inline
+Rational& Rational::operator-=(const Rational& other){
+  if(overflow_) return *this;
+
+  auto n = (long long)numerator() * other.denominator()
+    - (long long)other.numerator() * denominator();
+  auto d = (long long)denominator() * other.denominator();
+
+  return normalized_reset(n, d);
+}
+
+inline
+Rational& Rational::operator*=(const Rational& other){
+  if(overflow_) return *this;
+
+  auto n = (long long)numerator() * other.numerator();
+  auto d = (long long)denominator() * other.denominator();
+
+  return normalized_reset(n, d);
+}
+
+inline
+Rational& Rational::operator/=(const Rational& other){
+  if(overflow_) return *this;
+
+  auto n = (long long)numerator() * other.denominator();
+  auto d = (long long)denominator() * other.numerator();
+
+  return normalized_reset(n, d);
+}
+
+inline
+Rational& Rational::negate(){
+  if(overflow_) return *this;
+  return normalized_reset(-(long long)numerator(), (long long)denominator());
+}
+
+inline
+Rational& Rational::inverse(){
+  if(overflow_) return *this;
+  return normalized_reset((long long)denominator(), (long long)numerator());
+}
+
 // utilities
 template<typename T>
 T gcd(T m, T n){

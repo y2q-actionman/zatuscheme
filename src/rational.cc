@@ -36,56 +36,6 @@ Rational& Rational::normalized_reset(long long n, long long d){
   return *this;
 }
 
-Rational& Rational::operator+=(const Rational& other){
-  if(overflow_) return *this;
-
-  auto n = (long long)numerator() * other.denominator()
-    + other.numerator() * (long long)denominator();
-  auto d = (long long)denominator() * other.denominator();
-
-  return normalized_reset(n, d);
-}
-
-Rational& Rational::operator-=(const Rational& other){
-  if(overflow_) return *this;
-
-  auto n = (long long)numerator() * other.denominator()
-    - other.numerator() * (long long)denominator();
-  auto d = (long long)denominator() * other.denominator();
-
-  return normalized_reset(n, d);
-}
-
-Rational& Rational::operator*=(const Rational& other){
-  if(overflow_) return *this;
-
-  auto n = (long long)numerator() * other.numerator();
-  auto d = (long long)denominator() * other.denominator();
-
-  return normalized_reset(n, d);
-}
-
-Rational& Rational::operator/=(const Rational& other){
-  if(overflow_) return *this;
-
-  auto n = (long long)numerator() * other.denominator();
-  auto d = (long long)denominator() * other.numerator();
-
-  return normalized_reset(n, d);
-}
-
-Rational& Rational::negate(){
-  if(overflow_) return *this;
-
-  return normalized_reset(-(long long)numerator(), (long long)denominator());
-}
-
-Rational& Rational::inverse(){
-  if(overflow_) return *this;
-
-  return normalized_reset((long long)denominator(), (long long)numerator());
-}
-
 Rational rationalize(double answer, double error){
   // from:
   // http://en.wikipedia.org/wiki/Continued_fraction#Infinite_continued_fractions
