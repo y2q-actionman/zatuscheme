@@ -163,10 +163,8 @@ void proc_enter_native(const NProcedure* fun){
     if(info->move_ret == MoveReturnValue::t){
       vm.return_value = {p};
     }
-  }catch(const zs_error& e){
-    throw zs_error(printf_string("%s: %s",
-                                 find_builtin_nproc_name(fun),
-                                 e.what()));
+  }catch(Lisp_ptr p){
+    throw zs_error_arg1(find_builtin_nproc_name(fun), "", {p});
   }
 }
 
@@ -343,9 +341,8 @@ void proc_enter_srule(SyntaxRules* srule){
   try{
     auto code = srule->apply(args[0], args[1].get<Env*>());
     vm.return_value = {code};
-  }catch(const zs_error& e){
-    // TODO: add name to syntax-rules struct, and use that.
-    throw zs_error(printf_string("%s: %s", "syntax-rules", e.what()));
+  }catch(Lisp_ptr p){
+    throw zs_error_arg1("syntax-rules", "", {p});
   }
 }
 
@@ -669,9 +666,6 @@ void eval(){
       ++instruction_counter;
       if((instruction_counter % gc_invoke_interval) == 0)
         gc();
-    }catch(const zs_error& e){
-      // TODO: wrap with 'Condition' object instead of String.
-      invoke_exception_handler(zs_new<String>(e.what()));
     }catch(Lisp_ptr p){
       invoke_exception_handler(p);
     }
