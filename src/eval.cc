@@ -569,18 +569,6 @@ void vm_op_unwind_guard(){
   }
 }
 
-static void invoke_exception_handler(Lisp_ptr errobj){
-  if(vm.exception_handler.empty()){
-    throw errobj; // going to std::terminate (or handlers established by debug-build)
-  }
-
-  auto handler = vm.exception_handler.back();
-  vm.exception_handler.pop_back();
-
-  vm.stack.insert(vm.stack.end(), {errobj, {Ptr_tag::vm_argcount, 1}});
-  vm.code.insert(vm.code.end(), {vm_op_raise, handler, vm_op_proc_enter});
-}
-
 void eval(){
   while(!vm.code.empty()){
     try{
@@ -667,7 +655,15 @@ void eval(){
       if((instruction_counter % gc_invoke_interval) == 0)
         gc();
     }catch(Lisp_ptr p){
-      invoke_exception_handler(p);
+      if(vm.exception_handler.empty()){
+        throw p; // going to std::terminate (or handlers established by debug-build)
+      }
+
+      auto handler = vm.exception_handler.back();
+      vm.exception_handler.pop_back();
+
+      vm.stack.insert(vm.stack.end(), {p, {Ptr_tag::vm_argcount, 1}});
+      vm.code.insert(vm.code.end(), {vm_op_raise, handler, vm_op_proc_enter});
     }
   }
 
