@@ -53,6 +53,12 @@ Lisp_ptr zs_error_arg1(const char* context, const std::string& str){
   return zs_error_arg1(context, str, {});
 }
 
+Lisp_ptr zs_error_append(const char* context, Lisp_ptr p){
+  ostringstream oss;
+  oss << context << " : " << p;
+  return zs_new<String>(oss.str());
+}
+
 Lisp_ptr builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
   return zs_error_arg1(func_name,
                        printf_string("arg is not %s!", stringify(tag)),

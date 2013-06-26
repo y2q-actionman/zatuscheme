@@ -164,7 +164,7 @@ void proc_enter_native(const NProcedure* fun){
       vm.return_value = {p};
     }
   }catch(Lisp_ptr p){
-    throw zs_error_arg1(find_builtin_nproc_name(fun), "", {p});
+    throw zs_error_append(find_builtin_nproc_name(fun), p);
   }
 }
 
@@ -342,7 +342,7 @@ void proc_enter_srule(SyntaxRules* srule){
     auto code = srule->apply(args[0], args[1].get<Env*>());
     vm.return_value = {code};
   }catch(Lisp_ptr p){
-    throw zs_error_arg1("syntax-rules", "", {p});
+    throw zs_error_append("syntax-rules", {p});
   }
 }
 
@@ -393,7 +393,7 @@ void vm_op_proc_enter(){
   if(!is_procedure(proc.tag())){
     vm.code.pop_back();
     vm.stack.pop_back();
-    throw zs_error_arg1("eval error", "the object used for call is not a procedure", {proc});
+    throw zs_error_arg1(nullptr, "eval error: the object used for call is not a procedure", {proc});
   }
 
   assert(!vm.stack.empty());

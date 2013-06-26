@@ -7,7 +7,7 @@ SyntacticClosure::SyntacticClosure(Env* e, Lisp_ptr f, Lisp_ptr ex)
   : env_(e), free_names_(f), expr_(ex){
   for(auto i : f){
     if(!identifierp(i)){
-      throw zs_error_arg1("syntactic closure", "free-list has a non-identifier value", {i});
+      throw zs_error_arg1(nullptr, "syntactic closure: free-list has a non-identifier value", {i});
     }
   }
 }
