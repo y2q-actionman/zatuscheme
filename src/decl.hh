@@ -58,12 +58,9 @@ bool is_procedure(Ptr_tag);
 
 // declares generic facilities.
 
-// Type mapping - provided by overload
-template<typename EnumType, EnumType value>
+// Type mapping
+template<Ptr_tag value>
 struct to_type;
-// usage
-//   typedef typename to_type<Number::Type, Number::Type::integer>::type HogeT;
-
 
 template<typename enum_type, typename Arg>
 enum_type to_tag();

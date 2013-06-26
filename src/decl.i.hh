@@ -7,107 +7,107 @@
 
 // Type mapping
 template<>
-struct to_type<Ptr_tag, Ptr_tag::boolean>{
+struct to_type<Ptr_tag::boolean>{
   typedef bool type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::character>{
+struct to_type<Ptr_tag::character>{
   typedef char type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::cons>{
+struct to_type<Ptr_tag::cons>{
   typedef Cons* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::symbol>{
+struct to_type<Ptr_tag::symbol>{
   typedef Symbol* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::i_procedure>{
+struct to_type<Ptr_tag::i_procedure>{
   typedef IProcedure* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::n_procedure>{
+struct to_type<Ptr_tag::n_procedure>{
   typedef const NProcedure* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::continuation>{
+struct to_type<Ptr_tag::continuation>{
   typedef const Continuation* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::integer>{
+struct to_type<Ptr_tag::integer>{
   typedef int type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::rational>{
+struct to_type<Ptr_tag::rational>{
   typedef Rational* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::real>{
+struct to_type<Ptr_tag::real>{
   typedef double* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::complex>{
+struct to_type<Ptr_tag::complex>{
   typedef Complex* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::string>{
+struct to_type<Ptr_tag::string>{
   typedef String* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::vector>{
+struct to_type<Ptr_tag::vector>{
   typedef Vector* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::input_port>{
+struct to_type<Ptr_tag::input_port>{
   typedef InputPort* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::output_port>{
+struct to_type<Ptr_tag::output_port>{
   typedef OutputPort* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::env>{
+struct to_type<Ptr_tag::env>{
   typedef Env* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::syntactic_closure>{
+struct to_type<Ptr_tag::syntactic_closure>{
   typedef SyntacticClosure* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::syntax_rules>{
+struct to_type<Ptr_tag::syntax_rules>{
   typedef SyntaxRules* type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::vm_op>{
+struct to_type<Ptr_tag::vm_op>{
   typedef VMop type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::vm_argcount>{
+struct to_type<Ptr_tag::vm_argcount>{
   typedef int type;
 };
 
 template<>
-struct to_type<Ptr_tag, Ptr_tag::notation>{
+struct to_type<Ptr_tag::notation>{
   typedef Notation type;
 };
 

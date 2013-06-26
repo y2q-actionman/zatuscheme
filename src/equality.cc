@@ -53,14 +53,11 @@ bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
   
   if(a.tag() == Ptr_tag::rational){
-    typedef to_type<Ptr_tag, Ptr_tag::rational>::type RationalT;
-    return *a.get<RationalT>() == *b.get<RationalT>();
+    return *a.get<Rational*>() == *b.get<Rational*>();
   }else if(a.tag() == Ptr_tag::real){
-    typedef to_type<Ptr_tag, Ptr_tag::real>::type RealT;
-    return *a.get<RealT>() == *b.get<RealT>();
+    return *a.get<double*>() == *b.get<double*>();
   }else if(a.tag() == Ptr_tag::complex){
-    typedef to_type<Ptr_tag, Ptr_tag::complex>::type ComplexT;
-    return *a.get<ComplexT>() == *b.get<ComplexT>();
+    return *a.get<Complex*>() == *b.get<Complex*>();
   }else{
     return eq_internal(a, b);
   }

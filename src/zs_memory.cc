@@ -210,7 +210,7 @@ void gc_mark_lp(Lisp_ptr p){
 
 template<Ptr_tag tag>
 void gc_tagged_delete(void* p){
-  typedef typename to_type<Ptr_tag, tag>::type TargetT;
+  typedef typename to_type<tag>::type TargetT;
   delete static_cast<TargetT>(p);
 }
 
