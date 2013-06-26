@@ -553,13 +553,7 @@ void vm_op_raise(){
   throw vm.return_value_1();
 }
 
-void vm_op_unwind_guard(){
-  while(!vm.stack.empty()){
-    auto p = vm.stack.back();
-    vm.stack.pop_back();
-    if(p.get<VMop>() == vm_op_unwind_guard) break;
-  }
-
+void vm_op_pop_exception_handler(){
   if(!vm.exception_handler.empty()){
     vm.exception_handler.pop_back();
   }
@@ -707,8 +701,8 @@ const char* stringify(VMop op){
     return "splicing args";
   }else if(op == vm_op_raise){
     return "raise";
-  }else if(op == vm_op_unwind_guard){
-    return "unwind guard";
+  }else if(op == vm_op_pop_exception_handler){
+    return "pop exception handler";
   }else{
     return "unknown vm-op";
   }
