@@ -23,16 +23,13 @@ std::string printf_string(const char*, ...)
   }while(0)
 
 Lisp_ptr zs_error(const std::string&);
-
-Lisp_ptr zs_error_arg1(const char* context, const std::string& str,
-                       std::initializer_list<Lisp_ptr>);
-Lisp_ptr zs_error_arg1(const char* context, const std::string& str);
+Lisp_ptr zs_error(const std::string&, std::initializer_list<Lisp_ptr>);
 
 Lisp_ptr zs_error_append(const char*, Lisp_ptr);
 
-Lisp_ptr builtin_type_check_failed(const char*, Ptr_tag, Lisp_ptr);
+Lisp_ptr builtin_type_check_failed(Ptr_tag, Lisp_ptr);
 Lisp_ptr builtin_argcount_failed(const char*, int required, int max, int passed);
-Lisp_ptr builtin_identifier_check_failed(const char*, Lisp_ptr);
+Lisp_ptr builtin_identifier_check_failed(Lisp_ptr);
 Lisp_ptr builtin_range_check_failed(int max, int passed);
 
 #endif // ZS_ERROR_HH

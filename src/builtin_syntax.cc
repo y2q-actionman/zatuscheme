@@ -22,15 +22,15 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
-    throw zs_error_arg1(nullptr, "invalid args!", {args});
+    throw zs_error("invalid args!", {args});
   }
 
   if(!code){
-    throw zs_error_arg1(nullptr, "invalid body!");
+    throw zs_error("invalid body!");
   }
 
   if(nullp(code)){
-    throw zs_error_arg1(nullptr, "has no exprs.");
+    throw zs_error("has no exprs.");
   }
 
   return zs_new<IProcedure>(code, 
@@ -82,7 +82,7 @@ Lisp_ptr syntax_define(ZsArgs args){
 
     assert(expr_cons.get<Cons*>());
     if(!nullp(cdr(expr_cons.get<Cons*>()))){
-      throw zs_error_arg1(nullptr, "informal syntax: too long");
+      throw zs_error("informal syntax: too long");
     }
 
     vm.code.insert(vm.code.end(), {i1, vm_op_local_set, car(expr_cons.get<Cons*>())});
@@ -96,7 +96,7 @@ Lisp_ptr syntax_define(ZsArgs args){
     vm.code.insert(vm.code.end(), {funcname, vm_op_local_set, value});
     return {};
   }else{
-    throw zs_error_arg1(nullptr, "informal syntax!");
+    throw zs_error("informal syntax!");
   }
 }
 
@@ -152,7 +152,7 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
 
 Lisp_ptr syntax_unquote_splicing(ZsArgs args){
   if(args[0].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::cons, args[0]);
   }
 
   vm.return_value.assign(begin(args[0]), end(args[0]));
@@ -162,7 +162,7 @@ Lisp_ptr syntax_unquote_splicing(ZsArgs args){
 Lisp_ptr syntax_syntax_rules(ZsArgs args){
   auto env = args[1].get<Env*>();
   if(!env){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[1]);
+    throw builtin_type_check_failed(Ptr_tag::env, args[1]);
   }
 
   auto literals = nth_cons_list<1>(args[0]);
@@ -173,7 +173,7 @@ Lisp_ptr syntax_syntax_rules(ZsArgs args){
     
 Lisp_ptr syntax_internal_memv(ZsArgs args){
   if(args[1].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[1]);
+    throw builtin_type_check_failed(Ptr_tag::cons, args[1]);
   }
 
   for(auto i = begin(args[1]), e = end(args[1]); i != e; ++i){

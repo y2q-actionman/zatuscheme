@@ -27,7 +27,7 @@ static_assert(sizeof(int) < sizeof(long long),
 namespace {
 
 Lisp_ptr number_type_check_failed(Lisp_ptr p){
-  return zs_error_arg1(nullptr, "arg is not number!", {p});
+  return zs_error("arg is not number!", {p});
 }
 
 bool is_numeric_type(Lisp_ptr p){
@@ -114,7 +114,7 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
 struct inacceptable_number_type{
   template<typename T>
   bool operator()(T) const{
-    throw zs_error_arg1(nullptr, "number error: inacceptable type");
+    throw zs_error("number error: inacceptable type");
   }
 
   template<typename T>
@@ -543,11 +543,11 @@ Lisp_ptr number_e_to_i(ZsArgs args){
 Lisp_ptr internal_number_from_string(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
   if(!is_integer_type(args[1])){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[1]);
+    throw builtin_type_check_failed(Ptr_tag::integer, args[1]);
   }
 
   istringstream iss(*str);
@@ -560,7 +560,7 @@ Lisp_ptr internal_number_to_string(ZsArgs args){
   }
 
   if(!is_integer_type(args[1])){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::integer, args[1]);
+    throw builtin_type_check_failed(Ptr_tag::integer, args[1]);
   }
   auto radix = coerce<int>(args[1]);
 

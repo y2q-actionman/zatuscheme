@@ -26,16 +26,12 @@ std::string printf_string(const char* fmt, ...){
 
 // error functions
 Lisp_ptr zs_error(const std::string& str){
-  return zs_new<String>(str);
-}  
+  return zs_error(str, {});
+}
 
-Lisp_ptr zs_error_arg1(const char* context, const std::string& str,
-                       std::initializer_list<Lisp_ptr> args){
+Lisp_ptr zs_error(const std::string& str, std::initializer_list<Lisp_ptr> args){
   ostringstream oss;
 
-  if(context){
-    oss << context << " : ";
-  }
   oss << str;
   if(args.size() > 0){
     oss << " @ (";
@@ -49,33 +45,25 @@ Lisp_ptr zs_error_arg1(const char* context, const std::string& str,
   return zs_new<String>(oss.str());
 }
 
-Lisp_ptr zs_error_arg1(const char* context, const std::string& str){
-  return zs_error_arg1(context, str, {});
-}
-
 Lisp_ptr zs_error_append(const char* context, Lisp_ptr p){
   ostringstream oss;
   oss << context << " : " << p;
   return zs_new<String>(oss.str());
 }
 
-Lisp_ptr builtin_type_check_failed(const char* func_name, Ptr_tag tag, Lisp_ptr p){
-  return zs_error_arg1(func_name,
-                       printf_string("arg is not %s!", stringify(tag)),
-                       {p});
+Lisp_ptr builtin_type_check_failed(Ptr_tag tag, Lisp_ptr p){
+  return zs_error(printf_string("arg is not %s!", stringify(tag)), {p});
 }
 
 Lisp_ptr builtin_argcount_failed(const char* name, int required, int max, int passed){
-  return zs_error_arg1(name,
-                       printf_string("number of passed args is mismatched!!"
-                                     " (acceptable %d-%d args, passed %d)\n",
-                                    required, max, passed));
+  return zs_error(printf_string("%s: "
+                                "number of passed args is mismatched!!"
+                                " (acceptable %d-%d args, passed %d)\n",
+                                name, required, max, passed));
 }
 
-Lisp_ptr builtin_identifier_check_failed(const char* name, Lisp_ptr p){
-  return zs_error_arg1(name,
-                       "arg is not identifier!",
-                       {p});
+Lisp_ptr builtin_identifier_check_failed(Lisp_ptr p){
+  return zs_error("arg is not identifier!", {p});
 }
 
 Lisp_ptr builtin_range_check_failed(int max, int passed){

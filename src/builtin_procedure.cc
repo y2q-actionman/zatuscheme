@@ -13,7 +13,7 @@ using namespace std;
 namespace {
 
 Lisp_ptr procedure_type_check_failed(Lisp_ptr p){
-  return zs_error_arg1(nullptr, "arg is not procedure!", {p});
+  return zs_error("arg is not procedure!", {p});
 }
 
 } // namespace

@@ -34,7 +34,7 @@ static bool hard_repl_continue = true;
 Lisp_ptr traditional_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::i_procedure, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
   }
   auto info = *iproc->info();
   info.passing = Passing::quote;
@@ -52,7 +52,7 @@ Lisp_ptr gensym(ZsArgs){
 Lisp_ptr sc_macro_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::i_procedure, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
   }
 
   auto info = *iproc->info();
@@ -69,11 +69,11 @@ Lisp_ptr sc_macro_transformer(ZsArgs args){
 Lisp_ptr make_syntactic_closure(ZsArgs args){
   Env* e = args[0].get<Env*>();
   if(!e){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::env, args[0]);
   }
 
   if(args[1].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, args[1]);
+    throw builtin_type_check_failed(Ptr_tag::cons, args[1]);
   }
   Cons* c = args[1].get<Cons*>();
 
@@ -82,7 +82,7 @@ Lisp_ptr make_syntactic_closure(ZsArgs args){
 
 Lisp_ptr capture_syntactic_environment(ZsArgs args){
   if(args[0].tag() != Ptr_tag::i_procedure){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::i_procedure, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
   }
 
   auto iproc = args[0].get<IProcedure*>();
@@ -102,20 +102,20 @@ Lisp_ptr identifierp(ZsArgs args){
 Lisp_ptr identifier_eq(ZsArgs args){
   auto ident1_env = args[0].get<Env*>();
   if(!ident1_env){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::env, args[0]);
   }
 
   if(!identifierp(args[1])){
-    throw builtin_identifier_check_failed(nullptr, args[1]);
+    throw builtin_identifier_check_failed(args[1]);
   }
   
   auto ident2_env = args[2].get<Env*>();
   if(!ident2_env){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[2]);
+    throw builtin_type_check_failed(Ptr_tag::env, args[2]);
   }
 
   if(!identifierp(args[3])){
-    throw builtin_identifier_check_failed(nullptr, args[3]);
+    throw builtin_identifier_check_failed(args[3]);
   }
 
   return 
@@ -124,7 +124,7 @@ Lisp_ptr identifier_eq(ZsArgs args){
 
 Lisp_ptr make_synthetic_identifier(ZsArgs args){
   if(!identifierp(args[0])){
-    throw builtin_identifier_check_failed(nullptr, args[0]);
+    throw builtin_identifier_check_failed(args[0]);
   }
 
   return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
@@ -178,32 +178,32 @@ Lisp_ptr tmp_file(ZsArgs){
   auto fd = mkstemp(name);
   if(fd == -1){
     auto eno = errno;
-    throw zs_error_arg1(nullptr, printf_string("mkstemp(3) error: %s", strerror(eno)));
+    throw zs_error(printf_string("mkstemp(3) error: %s", strerror(eno)));
   }
 
   InputPort* i_port = zs_new_with_tag<ifstream, Ptr_tag::input_port>(name);
   if(!i_port || !*i_port){
-    throw zs_error_arg1(nullptr, "failed at opening file for input");
+    throw zs_error("failed at opening file for input");
   }
   
   OutputPort* o_port = zs_new_with_tag<ofstream, Ptr_tag::output_port>(name);
   if(!o_port || !*o_port){
-    throw zs_error_arg1(nullptr, "failed at opening file for output");
+    throw zs_error("failed at opening file for output");
   }
   
   if(close(fd) == -1){
     auto eno = errno;
-    throw zs_error_arg1(nullptr, printf_string("close(2) error: %s", strerror(eno)));
+    throw zs_error(printf_string("close(2) error: %s", strerror(eno)));
   }
 
   if(unlink(name) == -1){
     auto eno = errno;
-    throw zs_error_arg1(nullptr, printf_string("unlink(2) error: %s", strerror(eno)));
+    throw zs_error(printf_string("unlink(2) error: %s", strerror(eno)));
   }
 
   return make_cons_list({i_port, o_port});
 #else
-  throw zs_error_arg1(nullptr, "tmp-file is not supported");
+  throw zs_error("tmp-file is not supported");
 #endif
 }
 

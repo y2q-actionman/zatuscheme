@@ -22,12 +22,12 @@ template<typename IOType, typename F_IOType>
 Lisp_ptr port_open_file(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
   IOType* p = zs_new_with_tag<F_IOType, to_tag<Ptr_tag, IOType*>()>(*str);
   if(!p || !*p){
-    throw zs_error_arg1(nullptr, "failed at opening file");
+    throw zs_error("failed at opening file");
   }
   
   return {p};
@@ -37,7 +37,7 @@ template<typename IOType, typename F_IOType>
 Lisp_ptr port_close(ZsArgs args){
   auto p = args[0].get<IOType*>();
   if(!p){
-    throw builtin_type_check_failed(nullptr, to_tag<Ptr_tag, IOType*>(), args[0]);
+    throw builtin_type_check_failed(to_tag<Ptr_tag, IOType*>(), args[0]);
   }
 
   auto fio = dynamic_cast<F_IOType*>(p);
@@ -54,7 +54,7 @@ template<typename Fun>
 Lisp_ptr port_input_call(ZsArgs args, Fun fun){
   InputPort* p = args[0].get<InputPort*>();
   if(!p){
-    throw builtin_type_check_failed(nullptr, to_tag<Ptr_tag, InputPort*>(), args[0]);
+    throw builtin_type_check_failed(to_tag<Ptr_tag, InputPort*>(), args[0]);
   }
 
   return Lisp_ptr{fun(p)};
@@ -64,7 +64,7 @@ template<typename Fun>
 Lisp_ptr port_output_call(ZsArgs args, Fun fun){
   OutputPort* p = args[1].get<OutputPort*>();
   if(!p){
-    throw builtin_type_check_failed(nullptr, to_tag<Ptr_tag, OutputPort*>(), args[1]);
+    throw builtin_type_check_failed(to_tag<Ptr_tag, OutputPort*>(), args[1]);
   }
 
   return Lisp_ptr{fun(args[0], p)};
@@ -169,7 +169,7 @@ Lisp_ptr internal_port_write_char(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os) -> Lisp_ptr{
                             if(c.tag() != Ptr_tag::character){
-                              throw builtin_type_check_failed(nullptr, Ptr_tag::character, c);
+                              throw builtin_type_check_failed(Ptr_tag::character, c);
                             }
 
                             os->put(c.get<char>());

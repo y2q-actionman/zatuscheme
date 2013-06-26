@@ -393,7 +393,7 @@ void vm_op_proc_enter(){
   if(!is_procedure(proc.tag())){
     vm.code.pop_back();
     vm.stack.pop_back();
-    throw zs_error_arg1(nullptr, "eval error: the object used for call is not a procedure", {proc});
+    throw zs_error("eval error: the object used for call is not a procedure", {proc});
   }
 
   assert(!vm.stack.empty());
@@ -497,7 +497,7 @@ void vm_op_set(){
   vm.code.pop_back();
 
   if(!identifierp(var)){
-    throw builtin_identifier_check_failed("(set)", vm.code.back());
+    throw builtin_identifier_check_failed(vm.code.back());
   }
 
   auto val = vm.return_value_1();
@@ -531,7 +531,7 @@ void vm_op_local_set(){
   vm.code.pop_back();
 
   if(!identifierp(var)){
-    throw builtin_identifier_check_failed("(local set)", var);
+    throw builtin_identifier_check_failed(var);
   }
 
   local_set_with_identifier(vm.frame, var, vm.return_value_1()); 

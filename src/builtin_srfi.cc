@@ -13,21 +13,21 @@ namespace builtin {
 Lisp_ptr error(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
-  throw zs_error_arg1(nullptr, *str);
+  throw zs_error(*str);
 }
 
 Lisp_ptr with_exception_handler(ZsArgs args){
   Lisp_ptr handler = args[0];
   if(!is_procedure(handler.tag())){
-    throw zs_error_arg1(nullptr, "arg is not procedure!", {handler});
+    throw zs_error("arg is not procedure!", {handler});
   }
 
   Lisp_ptr thunk = args[1];
   if(!is_procedure(thunk.tag())){
-    throw zs_error_arg1(nullptr, "arg is not procedure!", {thunk});
+    throw zs_error("arg is not procedure!", {thunk});
   }
 
   args.cleanup();

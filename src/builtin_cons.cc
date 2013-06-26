@@ -16,11 +16,11 @@ template<typename Fun>
 inline
 Lisp_ptr with_nonnull_cons(Lisp_ptr p, Fun fun){
   if(p.tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::cons, p);
+    throw builtin_type_check_failed(Ptr_tag::cons, p);
   }
 
   if(nullp(p)){
-    throw zs_error_arg1(nullptr, "arg is null list!");
+    throw zs_error("arg is null list!");
   }
 
   return fun(p.get<Cons*>());

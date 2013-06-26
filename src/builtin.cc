@@ -54,7 +54,7 @@ namespace builtin {
 Lisp_ptr eval(ZsArgs args){
   auto env = args[1].get<Env*>();
   if(!env){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::env, args[1]);
+    throw builtin_type_check_failed(Ptr_tag::env, args[1]);
   }
 
   auto oldenv = vm.frame;
@@ -66,7 +66,7 @@ Lisp_ptr eval(ZsArgs args){
 Lisp_ptr load(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(nullptr, Ptr_tag::string, args[0]);
+    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
   ifstream ifs{*str};
@@ -186,8 +186,8 @@ const NProcedure* find_builtin_nproc(const char* name){
      ([=](const BuiltinNProc& bf){ return strcmp(name, bf.name) == 0; })){
     return &(p->func);
   }else{
-    throw zs_error_arg1(nullptr,
-                        printf_string("internal error: not registered native function! (%s)", name));
+    throw zs_error(printf_string("internal error: not registered native function! (%s)",
+                                 name));
   }
 }
 
