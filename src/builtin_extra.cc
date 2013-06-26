@@ -80,6 +80,11 @@ Lisp_ptr make_syntactic_closure(ZsArgs args){
   return zs_new<SyntacticClosure>(e, c, args[2]);
 }
 
+Lisp_ptr internal_current_environment(ZsArgs){
+  // assumes that native funcions don't introduce a new frame.
+  return vm.frame;
+}
+
 Lisp_ptr capture_syntactic_environment(ZsArgs args){
   if(args[0].tag() != Ptr_tag::i_procedure){
     throw builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
@@ -91,8 +96,12 @@ Lisp_ptr capture_syntactic_environment(ZsArgs args){
 
   return make_cons_list
     ({find_builtin_nproc("eval"),
-        make_cons_list({find_builtin_nproc("apply"), iproc, vm_op_get_current_env}),
-        vm_op_get_current_env});
+        make_cons_list(
+                       {find_builtin_nproc("apply"), iproc,
+                           make_cons_list({find_builtin_nproc("%current-environment")})
+                           }),
+        make_cons_list({find_builtin_nproc("%current-environment")})
+        });
 }
 
 Lisp_ptr identifierp(ZsArgs args){

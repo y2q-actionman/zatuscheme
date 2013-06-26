@@ -15,7 +15,6 @@ void vm_op_set();
 void vm_op_local_set();
 void vm_op_leave_winding();
 void vm_op_save_values_and_enter();
-void vm_op_get_current_env();
 void vm_op_raise();
 void vm_op_unwind_guard();
 

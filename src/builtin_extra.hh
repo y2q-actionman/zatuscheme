@@ -11,6 +11,8 @@ Lisp_ptr gensym(ZsArgs);
 Lisp_ptr sc_macro_transformer(ZsArgs);
 
 Lisp_ptr make_syntactic_closure(ZsArgs);
+
+Lisp_ptr internal_current_environment(ZsArgs);
 Lisp_ptr capture_syntactic_environment(ZsArgs);
 
 Lisp_ptr identifierp(ZsArgs);

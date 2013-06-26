@@ -549,10 +549,6 @@ void vm_op_save_values_and_enter(){
   vm.code.push_back(vm_op_proc_enter);
 }
 
-void vm_op_get_current_env(){
-  vm.return_value = {vm.frame};
-}
-
 void vm_op_raise(){
   throw vm.return_value_1();
 }
@@ -709,8 +705,6 @@ const char* stringify(VMop op){
     return "save values and enter";
   }else if(op == vm_op_stack_splicing){
     return "splicing args";
-  }else if(op == vm_op_get_current_env){
-    return "get current env";
   }else if(op == vm_op_raise){
     return "raise";
   }else if(op == vm_op_unwind_guard){

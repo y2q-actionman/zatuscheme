@@ -12,6 +12,9 @@
 {"make-syntactic-closure", {
     builtin::make_syntactic_closure,
     {3}}},
+{"%current-environment", {
+    builtin::internal_current_environment,
+    {0}}},
 {"capture-syntactic-environment", {
     builtin::capture_syntactic_environment,
     {1}}},
