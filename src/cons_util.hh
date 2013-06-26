@@ -7,8 +7,6 @@
 
 inline bool nullp(Lisp_ptr);
 
-void free_cons_list(Lisp_ptr);
-
 template<typename Iter>
 Lisp_ptr make_cons_list(Iter, Iter);
 

@@ -5,22 +5,6 @@
 
 #include <cassert>
 
-void free_cons_list(Lisp_ptr p){
-  // TODO: erase elements!
-  
-  auto i = begin(p);
-  while(i){
-    auto cell = i.base();
-    ++i;
-    zs_delete(cell.get<Cons*>());
-  }
-
-  if(!nullp(i.base())){
-    // erase element
-    ;
-  }
-}
-
 // GrowList class
 void GrowList::push(Lisp_ptr p){
   assert(head && next);
@@ -33,8 +17,13 @@ void GrowList::push(Lisp_ptr p){
 }
 
 GrowList::~GrowList(){
-  if(auto c = head.get<Cons*>()){
-    free_cons_list(c);
+  if(head){
+    auto i = begin(head);
+    while(i){
+      auto cell = i.base();
+      ++i;
+      zs_delete(cell.get<Cons*>());
+    }
   }
   // invalidate();
 }
