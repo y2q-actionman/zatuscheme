@@ -31,24 +31,7 @@ void local_set_with_identifier(Env* e, Lisp_ptr ident, Lisp_ptr value){
   ret = some value
 */
 void vm_op_arg_push(){
-  auto ret = vm.return_value_1();
-  auto& argc = vm.code[vm.code.size() - 1];
-  auto& args = vm.code[vm.code.size() - 2];
-
-  if(nullp(args)){
-    vm.stack.push_back(argc);
-    vm.code.erase(vm.code.end() - 2, vm.code.end());
-  }else{
-    // auto arg1 = nth_cons_list<0>(args); // the EXPR just evaled.
-    auto args_rest = nthcdr_cons_list<1>(args);
-    
-    vm.stack.push_back(ret);
-
-    args = args_rest;
-    argc = {Ptr_tag::vm_argcount, argc.get<int>() + 1};
-    vm.code.push_back(vm_op_arg_push);
-    vm.code.push_back(nth_cons_list<0>(args_rest));
-  }
+  vm.stack.push_back(vm.return_value_1());
 }
 
 
@@ -56,11 +39,17 @@ void function_call(Lisp_ptr proc){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
-  auto args_head = nthcdr_cons_list<1>(args); // skips first symbol
+  vector<Lisp_ptr> tmpv;
+  tmpv.assign(next(begin(args)), // skips first symbol
+              end(args));
 
-  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter,
-        args_head, {Ptr_tag::vm_argcount, 0},
-        vm_op_arg_push, nth_cons_list<0>(args_head)});
+  vm.code.insert(vm.code.end(), 
+                 {proc, vm_op_proc_enter,
+                  {Ptr_tag::vm_argcount, static_cast<int>(tmpv.size())}});
+
+  for(auto i = tmpv.rbegin(), e = tmpv.rend(); i != e; ++i){
+    vm.code.insert(vm.code.end(), {vm_op_arg_push, *i});
+  }
 }
 
 /*
@@ -75,35 +64,35 @@ void vm_op_macro_call(){
 
 /*
   return = an, an-1, ...
-  code = (this), <VMop arg push>, argcount[b], args(b)
+  code = (this), <VMop arg push>, ..., argcount[b]
   stack = bn, bn-1, ...
   ---
   return = {}
-  code = (this), <VMop arg push>, argcount[a+b], args(b)
+  code = ..., argcount[a+b]
   stack = bn, bn-1, ..., an, an-1, ...
 */
 void vm_op_stack_splicing(){
-  auto& op = vm.code[vm.code.size() - 1];
-  auto& outer_argc = vm.code[vm.code.size() - 2];
-  auto& outer_args = vm.code[vm.code.size() - 3];
-
-  if(op.tag() != Ptr_tag::vm_op
-     || outer_argc.tag() != Ptr_tag::vm_argcount){
+  if(vm.code.back().get<VMop>() != vm_op_arg_push){
     throw zs_error("eval internal error: stack-splicing operater is called in invalid context!\n");
   }
+  vm.code.pop_back();
 
   // pushes return-value to vm.stack
   int argc = vm.return_value.size();
   vm.stack.insert(vm.stack.end(), vm.return_value.begin(), vm.return_value.end());
 
-  // formatting vm.code to 'splicing is processed'
+  // formatting vm.code like 'splicing is processed'
   // see vm_op_arg_push()
-  auto outer_next_args = nthcdr_cons_list<1>(outer_args);
-  auto outer_next_arg1 = nth_cons_list<0>(outer_next_args);
+  for(auto i = vm.code.rbegin(), e = vm.code.rend(); i != e; i++){
+    if(i->tag() == Ptr_tag::vm_argcount){
+      // this '-1' negates function_call()'s estimation.
+      auto new_argc = i->get<int>() + argc - 1;
+      *i = {Ptr_tag::vm_argcount, new_argc};
+      return;
+    }
+  }
 
-  outer_argc = {Ptr_tag::vm_argcount, outer_argc.get<int>() + argc};
-  outer_args = outer_next_args;
-  vm.code.push_back(outer_next_arg1);
+  throw zs_error("eval internal error: stack-splicing cannot find corresponding vm_argcount marker!\n");
 }
 
 /*
@@ -632,9 +621,9 @@ void eval(){
         vm.return_value = {p};
         break;
 
-        // error
       case Ptr_tag::vm_argcount:
-        throw zs_error("eval internal error: vm-argcount is rest on VM code stack!\n");
+        vm.stack.push_back(p);
+        break;
 
       case Ptr_tag::notation:
       default:
