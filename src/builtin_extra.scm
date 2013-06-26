@@ -26,3 +26,7 @@ LOAD
 LOAD
 (define (close-syntax form env)
   (make-syntactic-closure env () form))
+
+LOAD
+(define (capture-syntactic-environment proc)
+  `(,eval (,proc (,%current-environment)) (,%current-environment)))

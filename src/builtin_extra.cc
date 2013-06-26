@@ -85,25 +85,6 @@ Lisp_ptr internal_current_environment(ZsArgs){
   return vm.frame;
 }
 
-Lisp_ptr capture_syntactic_environment(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::i_procedure){
-    throw builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
-  }
-
-  auto iproc = args[0].get<IProcedure*>();
-
-  assert(iproc && iproc->info());
-
-  return make_cons_list
-    ({find_builtin_nproc("eval"),
-        make_cons_list(
-                       {find_builtin_nproc("apply"), iproc,
-                           make_cons_list({find_builtin_nproc("%current-environment")})
-                           }),
-        make_cons_list({find_builtin_nproc("%current-environment")})
-        });
-}
-
 Lisp_ptr identifierp(ZsArgs args){
   return Lisp_ptr{identifierp(args[0])};
 }

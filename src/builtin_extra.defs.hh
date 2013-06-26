@@ -15,9 +15,6 @@
 {"%current-environment", {
     builtin::internal_current_environment,
     {0}}},
-{"capture-syntactic-environment", {
-    builtin::capture_syntactic_environment,
-    {1}}},
 {"identifier?", {
     builtin::identifierp,
     {1}}},
