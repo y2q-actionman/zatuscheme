@@ -18,17 +18,16 @@ LOAD
 
 LOAD
 (define (for-each proc . lists)
-  (define (worker lists)
-    (if (null? lists) #t
-        (let arg-collect ((args ()) (next-lists ()) (lis lists))
-          (if (null? lis)
-              (begin (apply proc (reverse args))
-                     (worker (reverse next-lists)))
-              (if (null? (car lis)) #f
-                  (arg-collect (cons (caar lis) args)
-                               (cons (cdar lis) next-lists)
-                               (cdr lis)))))))
-  (worker lists))
+  (if (null? lists) #t
+      (let arg-collect ((args ()) (next-lists ()) (lis lists))
+        (cond ((null? lis)
+               (apply proc (reverse args))
+               (apply for-each proc (reverse next-lists)))
+              ((null? (car lis)) #f)
+              (else
+               (arg-collect (cons (caar lis) args)
+                            (cons (cdar lis) next-lists)
+                            (cdr lis)))))))
 
 
 LOAD
