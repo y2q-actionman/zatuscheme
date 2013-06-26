@@ -114,115 +114,115 @@ struct to_type<Ptr_tag::notation>{
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, bool>(){
+Ptr_tag to_tag<bool>(){
   return Ptr_tag::boolean;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, char>(){
+Ptr_tag to_tag<char>(){
   return Ptr_tag::character;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Cons*>(){
+Ptr_tag to_tag<Cons*>(){
   return Ptr_tag::cons;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Symbol*>(){
+Ptr_tag to_tag<Symbol*>(){
   return Ptr_tag::symbol;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, IProcedure*>(){
+Ptr_tag to_tag<IProcedure*>(){
   return Ptr_tag::i_procedure;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, const NProcedure*>(){
+Ptr_tag to_tag<const NProcedure*>(){
   return Ptr_tag::n_procedure;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Continuation*>(){
+Ptr_tag to_tag<Continuation*>(){
   return Ptr_tag::continuation;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Rational*>(){
+Ptr_tag to_tag<Rational*>(){
   return Ptr_tag::rational;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, double*>(){
+Ptr_tag to_tag<double*>(){
   return Ptr_tag::real;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Complex*>(){
+Ptr_tag to_tag<Complex*>(){
   return Ptr_tag::complex;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, String*>(){
+Ptr_tag to_tag<String*>(){
   return Ptr_tag::string;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Vector*>(){
+Ptr_tag to_tag<Vector*>(){
   return Ptr_tag::vector;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, InputPort*>(){
+Ptr_tag to_tag<InputPort*>(){
   return Ptr_tag::input_port;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, OutputPort*>(){
+Ptr_tag to_tag<OutputPort*>(){
   return Ptr_tag::output_port;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Env*>(){
+Ptr_tag to_tag<Env*>(){
   return Ptr_tag::env;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, SyntacticClosure*>(){
+Ptr_tag to_tag<SyntacticClosure*>(){
   return Ptr_tag::syntactic_closure;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, SyntaxRules*>(){
+Ptr_tag to_tag<SyntaxRules*>(){
   return Ptr_tag::syntax_rules;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, VMop>(){
+Ptr_tag to_tag<VMop>(){
   return Ptr_tag::vm_op;
 }
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Ptr_tag, Notation>(){
+Ptr_tag to_tag<Notation>(){
   return Ptr_tag::notation;
 }
 

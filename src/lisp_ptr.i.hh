@@ -11,16 +11,16 @@
 
 inline constexpr
 Lisp_ptr::Lisp_ptr(bool b)
-  : tag_(to_tag<Ptr_tag, bool>()), u_(b){}
+  : tag_(to_tag<bool>()), u_(b){}
 
 inline constexpr
 Lisp_ptr::Lisp_ptr(char c)
-  : tag_(to_tag<Ptr_tag, char>()), u_(c){}
+  : tag_(to_tag<char>()), u_(c){}
 
 template<typename T>
 inline constexpr
 Lisp_ptr::Lisp_ptr(T p)
-  : tag_(to_tag<Ptr_tag, T>()), u_(p){
+  : tag_(to_tag<T>()), u_(p){
   static_assert(!std::is_fundamental<T>::value,
                 "Lisp_ptr cannot accept the specified type.");
 }
@@ -31,13 +31,13 @@ Lisp_ptr::Lisp_ptr(Ptr_tag p, int i)
 
 inline constexpr
 Lisp_ptr::Lisp_ptr(Notation n)
-  : tag_(Ptr_tag::notation), u_(static_cast<int>(n)){}
+  : tag_(to_tag<Notation>()), u_(static_cast<int>(n)){}
 
 
 template<>
 inline constexpr
 bool Lisp_ptr::get<bool>() const {
-  return (tag() == to_tag<Ptr_tag, bool>())
+  return (tag() == to_tag<bool>())
     ? u_.b_
     : operator bool(); // anything is #t, except #f and null
 }
@@ -45,22 +45,22 @@ bool Lisp_ptr::get<bool>() const {
 template<>
 inline constexpr
 char Lisp_ptr::get<char>() const {
-  return (tag() == to_tag<Ptr_tag, char>())
+  return (tag() == to_tag<char>())
     ? u_.c_ : '\0';
 }
 
 template<>
 inline constexpr
 VMop Lisp_ptr::get<VMop>() const {
-  return (tag() == to_tag<Ptr_tag, VMop>())
+  return (tag() == to_tag<VMop>())
      ? u_.f_ : nullptr;
 }
 
 template<>
 inline constexpr
 Notation Lisp_ptr::get<Notation>() const {
-  return  static_cast<Notation>
-    ((tag() == Ptr_tag::notation) ? u_.i_ : 0);
+  return static_cast<Notation>
+    ((tag() == to_tag<Notation>()) ? u_.i_ : 0);
 }
 
 template<>
@@ -102,7 +102,7 @@ T lisp_ptr_cast(void*, const void* cp,
 template<typename T>
 inline constexpr
 T Lisp_ptr::get() const {
-  return (tag() == to_tag<Ptr_tag, T>())
+  return (tag() == to_tag<T>())
     ? lisp_ptr_detail::lisp_ptr_cast<T>(u_.ptr_, u_.cptr_)
     : nullptr;
 }

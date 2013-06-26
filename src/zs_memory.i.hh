@@ -9,7 +9,7 @@
 
 template<typename T, typename... Args>
 T* zs_new(Args&&... args){
-  return zs_new_with_tag<T, to_tag<Ptr_tag, T*>()>(std::forward<Args>(args)...);
+  return zs_new_with_tag<T, to_tag<T*>()>(std::forward<Args>(args)...);
 }
 
 template<typename T, Ptr_tag tag, typename... Args>

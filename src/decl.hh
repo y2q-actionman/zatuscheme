@@ -56,21 +56,12 @@ const char* stringify(Ptr_tag);
 bool is_procedure(Ptr_tag);
 
 
-// declares generic facilities.
-
 // Type mapping
 template<Ptr_tag value>
 struct to_type;
 
-template<typename enum_type, typename Arg>
-enum_type to_tag();
-// usage
-//   to_tag<Token::Type, std::string>();
-
-
-// provided by overload
-//   template<typename Enum_type>
-//   const char* stringify(Enum_type);
+template<typename Arg>
+Ptr_tag to_tag();
 
 #include "decl.i.hh"
 
