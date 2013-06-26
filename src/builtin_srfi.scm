@@ -1,4 +1,8 @@
 LOAD
+(define (error reason . args)
+  (raise (apply string-append `(,reason) args)))
+
+LOAD
 (define (ignore-errors thunk)
   (call-with-current-continuation
    (lambda (cont)

@@ -10,15 +10,6 @@ using namespace std;
 
 namespace builtin {
 
-Lisp_ptr error(ZsArgs args){
-  auto str = args[0].get<String*>();
-  if(!str){
-    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
-  }
-
-  throw zs_error(*str);
-}
-
 Lisp_ptr with_exception_handler(ZsArgs args){
   Lisp_ptr handler = args[0];
   if(!is_procedure(handler.tag())){
