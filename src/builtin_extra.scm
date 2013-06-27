@@ -1,4 +1,7 @@
 LOAD
+(define list* %list*)
+
+LOAD
 (define (read-eval-print-loop)
   (define read-obj #f)
   (let repl-loop ()

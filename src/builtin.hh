@@ -17,7 +17,6 @@ void load_internal(std::istream&);
 void install_builtin();
 
 // finding NProcedure with name
-const NProcedure* find_builtin_nproc(const char*);
 const char* find_builtin_nproc_name(const NProcedure*);
 
 // builtin func struct

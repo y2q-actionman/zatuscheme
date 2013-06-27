@@ -28,14 +28,14 @@
     {2, 2, Passing::whole}}},
 
 // for cond
-{"memv", {
+{"%memv", {
     builtin::syntax_internal_memv,
     {2}}},
 
 // for quasiquote
-{"list*", {
+{"%list*", {
     builtin::syntax_internal_list_star,
     {1, Variadic::t}}},
-{"vector", {
+{"%vector", {
     builtin::syntax_internal_vector, 
     {1, Variadic::t}}},

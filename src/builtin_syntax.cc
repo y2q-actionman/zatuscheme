@@ -112,6 +112,8 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
   const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
   const auto unquote_sym = intern(*vm.symtable, "unquote");
   const auto unquote_splicing_sym = intern(*vm.symtable, "unquote-splicing");
+  const auto list_star_sym = intern(*vm.symtable, "%list*");
+  const auto vector_sym = intern(*vm.symtable, "%vector");
 
   GrowList gl;
 
@@ -138,14 +140,14 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
     }
     qq_elem(i.base());
 
-    return push_cons_list(find_builtin_nproc("list*"), gl.extract());
+    return push_cons_list(list_star_sym, gl.extract());
   }else if(arg.tag() == Ptr_tag::vector){
     auto v = arg.get<Vector*>();
     for(auto p : *v){
       qq_elem(p);
     }
 
-    return push_cons_list(find_builtin_nproc("vector"), gl.extract());
+    return push_cons_list(vector_sym, gl.extract());
   }else{
     UNEXP_DEFAULT();
   }

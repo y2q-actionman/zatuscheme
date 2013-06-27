@@ -112,12 +112,12 @@ LOAD
      (begin result1 result2 ...))
     ((case key
        ((atoms ...) result1 result2 ...))
-     (if (memv key (quote (atoms ...)))
+     (if (%memv key (quote (atoms ...)))
          (begin result1 result2 ...)))
     ((case key
        ((atoms ...) result1 result2 ...)
        clause clauses ...)
-     (if (memv key (quote (atoms ...)))
+     (if (%memv key (quote (atoms ...)))
          (begin result1 result2 ...)
          (case key clause clauses ...)))))
 

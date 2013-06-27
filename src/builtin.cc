@@ -168,31 +168,17 @@ void install_builtin(){
   eval();
 }
 
-
-template<typename Fun>
-static
-const BuiltinNProc* find_builtin_nproc_internal(Fun fun){
-  for(auto& i : builtin_syntax_funcs) if(fun(i)) return &i;
-  for(auto& i : builtin_funcs)        if(fun(i)) return &i;
-  for(auto& i : builtin_extra_funcs)  if(fun(i)) return &i;
-  return nullptr;
-}
-
-const NProcedure* find_builtin_nproc(const char* name){
-  if(auto p = find_builtin_nproc_internal
-     ([=](const BuiltinNProc& bf){ return strcmp(name, bf.name) == 0; })){
-    return &(p->func);
-  }else{
-    throw zs_error(printf_string("internal error: not registered native function! (%s)",
-                                 name));
-  }
-}
-
 const char* find_builtin_nproc_name(const NProcedure* nproc){
-  if(auto p = find_builtin_nproc_internal
-     ([=](const BuiltinNProc& bf){ return nproc == &bf.func; })){
-    return p->name;
-  }else{
-    return "(unknown native procedure)";
-  }
+  const auto fun = [=](const BuiltinNProc& bf){
+    return nproc == &bf.func;
+  };
+
+  for(auto& i : builtin_syntax_funcs)
+    if(fun(i)) return i.name;
+  for(auto& i : builtin_funcs)
+    if(fun(i)) return i.name;
+  for(auto& i : builtin_extra_funcs)
+    if(fun(i)) return i.name;
+
+  return "(unknown native procedure)";
 }
