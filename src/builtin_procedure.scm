@@ -1,17 +1,13 @@
 LOAD
 (define (map proc . lists)
-  (define (all-null? lists)
-    (cond ((null? lists) #t)
-          ((null? (car lists)) (all-null? (cdr lists)))
-          (else #f)))
   (define (worker lists rets)
-    (if (or (null? lists) (all-null? lists))
+    (if (null? lists)
         rets
         (let arg-collect ((args ()) (next-lists ()) (lis lists))
           (cond ((null? lis)
                  (worker next-lists (cons (apply proc args) rets)))
                 ((null? (car lis))
-                 (display "error_lengths_are_mismatched") (newline) #f)
+                 rets)
                 (else
                  (arg-collect (cons (caar lis) args)
                               (cons (cdar lis) next-lists)
