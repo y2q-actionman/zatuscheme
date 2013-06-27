@@ -17,11 +17,6 @@ std::string printf_string(const char*, ...)
     abort();\
   }while(0)
 
-#define UNEXP_CONVERSION(to) do{\
-    assert(((void)"unexpected conversion to "to"!", 0));\
-    abort();\
-  }while(0)
-
 Lisp_ptr zs_error(const std::string&);
 Lisp_ptr zs_error(const std::string&, std::initializer_list<Lisp_ptr>);
 

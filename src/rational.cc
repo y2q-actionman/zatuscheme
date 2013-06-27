@@ -123,8 +123,26 @@ Lisp_ptr to_exact(Lisp_ptr p){
     return wrap_number(static_cast<int>(*p.get<double*>()));
   case Ptr_tag::complex:
     throw zs_error("number error: conversion from complex to exact number is not supprted.\n");
+  case Ptr_tag::undefined:
+  case Ptr_tag::boolean:
+  case Ptr_tag::character:
+  case Ptr_tag::cons:
+  case Ptr_tag::symbol:
+  case Ptr_tag::i_procedure:
+  case Ptr_tag::n_procedure:
+  case Ptr_tag::continuation:
+  case Ptr_tag::string:
+  case Ptr_tag::vector:
+  case Ptr_tag::input_port:
+  case Ptr_tag::output_port:
+  case Ptr_tag::env:
+  case Ptr_tag::syntactic_closure:
+  case Ptr_tag::syntax_rules:
+  case Ptr_tag::vm_op:
+  case Ptr_tag::vm_argcount:
+  case Ptr_tag::notation:
   default:
-    UNEXP_CONVERSION("exact");
+    UNEXP_DEFAULT();
   }
 }
 
@@ -136,7 +154,25 @@ Lisp_ptr to_inexact(Lisp_ptr p){
   case Ptr_tag::real:
   case Ptr_tag::complex:
     return p;
+  case Ptr_tag::undefined:
+  case Ptr_tag::boolean:
+  case Ptr_tag::character:
+  case Ptr_tag::cons:
+  case Ptr_tag::symbol:
+  case Ptr_tag::i_procedure:
+  case Ptr_tag::n_procedure:
+  case Ptr_tag::continuation:
+  case Ptr_tag::string:
+  case Ptr_tag::vector:
+  case Ptr_tag::input_port:
+  case Ptr_tag::output_port:
+  case Ptr_tag::env:
+  case Ptr_tag::syntactic_closure:
+  case Ptr_tag::syntax_rules:
+  case Ptr_tag::vm_op:
+  case Ptr_tag::vm_argcount:
+  case Ptr_tag::notation:
   default:
-    UNEXP_CONVERSION("inexact");
+    UNEXP_DEFAULT();
   }
 }
