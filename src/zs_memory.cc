@@ -11,11 +11,6 @@
 #include "zs_error.hh"
 #include "rational.hh"
 
-#include <iostream>
-#include "printer.hh"
-
-// Assumes 'delete' is not called frequently.
-
 using namespace std;
 
 namespace {
