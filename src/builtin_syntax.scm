@@ -161,13 +161,7 @@ LOAD
   %undefined)
 
 LOAD
-(define-syntax let-syntax
-  (syntax-rules ()
-    ((_ x ...)
-     (let x ...))))
+(define let-syntax let)
 
 LOAD
-(define-syntax letrec-syntax
-  (syntax-rules ()
-    ((_ x ...)
-     (letrec x ...))))
+(define letrec-syntax letrec)
