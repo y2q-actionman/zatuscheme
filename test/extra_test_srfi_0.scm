@@ -9,6 +9,10 @@
 (test-eq 'ng
          (cond-expand (else 'ng)))
 
+(test-eq 'ng
+         (cond-expand (hoge 'ok)
+                      (else 'ng)))
+
 (test-eq 'ok
          (cond-expand ((and srfi-0 srfi-0)
                        'ok)

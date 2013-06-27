@@ -179,7 +179,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
   if(identifierp(pattern)){
     if(is_literal_identifier(sr, pattern)){
       // literal identifier
-      if(identifierp(form) && identifier_eq(sr.env(), pattern, form_env, form)){
+      if(identifierp(form) && eq_internal(pattern, form)){
         return {};
       }else{
         throw try_match_failed();
