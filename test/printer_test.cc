@@ -22,8 +22,8 @@ int main(){
   check_p(intern(*vm.symtable, "a b c "), "a b c ");
 
   // function (should be added in future)
-  check_p_success(static_cast<IProcedure*>(nullptr));
-  check_p_success(static_cast<const NProcedure*>(nullptr));
+  // check_p_success(static_cast<IProcedure*>(nullptr));
+  // check_p_success(static_cast<const NProcedure*>(nullptr));
 
   // number
   check_p({Ptr_tag::integer, 100}, "100");

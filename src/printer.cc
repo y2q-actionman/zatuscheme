@@ -194,16 +194,11 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
   case Ptr_tag::syntactic_closure: {
     auto sc = p.get<SyntacticClosure*>();
     if(flag == print_human_readable::t){
-      // f << "#<SyntacticClosure [";
-      f << "#<[";
+      f << "#<sc [";
     }
     print(f, sc->expr(), flag);
     if(flag == print_human_readable::t){
-      f << ']';
-      // f << " @ " << sc->env();
-      // if(identifierp(p))
-      //   f << " (alias)";
-      f << '>';
+      f << "]>";
     }
     break;
   }
@@ -217,23 +212,15 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
     break;
 
   case Ptr_tag::n_procedure:
-    f << "#<procedure ["
-      << find_builtin_nproc_name(p.get<const NProcedure*>())
-      << "] (native)>";
-    break;
-
   case Ptr_tag::i_procedure:
-    f << "#<procedure [";
-    if(auto iproc = p.get<IProcedure*>())
-      print(f, iproc->name(), flag);
-    f << "]>";
+  case Ptr_tag::continuation:
+  case Ptr_tag::syntax_rules:
+    f << "#<procedure [" << get_procname(p) << "]>";
     break;
 
-  case Ptr_tag::continuation:
   case Ptr_tag::input_port:
   case Ptr_tag::output_port:
   case Ptr_tag::env:
-  case Ptr_tag::syntax_rules:
     f << "#<" << stringify(p.tag()) << " " << p.get<void*>() << ">";
     break;
 
