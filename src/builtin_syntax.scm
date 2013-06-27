@@ -2,6 +2,9 @@ LOAD
 (define %undefined (if #f #f))
 
 LOAD
+(define define-syntax define)
+
+LOAD
 (define-syntax let
   (syntax-rules ()
     ((let ((name val) ...) body1 body2 ...)
@@ -159,10 +162,6 @@ LOAD
 LOAD
 (define (=> . _)
   %undefined)
-
-
-LOAD
-(define define-syntax define)
 
 LOAD
 (define let-syntax let)
