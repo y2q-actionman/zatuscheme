@@ -1,7 +1,8 @@
 #ifndef ZS_SCM_INCLUDE_HH
 #define ZS_SCM_INCLUDE_HH
 
-#include "util.hh"
+#define STRINGIFY(...) #__VA_ARGS__
+#define EXPAND_STRINGIFY(...) STRINGIFY(__VA_ARGS__)
 
 #define LOAD(...) "("EXPAND_STRINGIFY(__VA_ARGS__)")"
 

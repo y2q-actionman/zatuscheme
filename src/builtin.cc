@@ -16,7 +16,6 @@
 #include "vm.hh"
 #include "zs_memory.hh"
 #include "zs_scm_include.hh"
-#include "util.hh"
 
 #include "builtin_boolean.hh"
 #include "builtin_char.hh"
