@@ -10,6 +10,7 @@
 #include "config.h"
 
 #include "token.hh"
+#include "lisp_ptr.hh"
 #include "rational.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"

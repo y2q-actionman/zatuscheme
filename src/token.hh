@@ -4,7 +4,6 @@
 #include <iosfwd>
 
 #include "decl.hh"
-#include "lisp_ptr.hh"
 
 enum class Notation {
   l_paren, r_paren, vector_paren,
