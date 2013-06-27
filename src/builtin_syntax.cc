@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 
 #include "builtin_syntax.hh"
 #include "lisp_ptr.hh"
@@ -182,6 +183,20 @@ Lisp_ptr syntax_internal_memv(ZsArgs args){
   }
 
   return Lisp_ptr{false};
+}
+
+Lisp_ptr syntax_internal_list_star(ZsArgs args){
+  GrowList gl;
+
+  for(auto i = 0; i < args.size() - 1; ++i){
+    gl.push(args[i]);
+  }
+
+  return gl.extract_with_tail(args[args.size() - 1]);
+}
+
+Lisp_ptr syntax_internal_vector(ZsArgs args){
+  return {zs_new<Vector>(args.begin(), args.end())};
 }
 
 } // namespace builtin

@@ -59,15 +59,4 @@ Lisp_ptr cons_set_cdr(ZsArgs args){
                            [val](Cons* c){ return rplacd(c, val); });
 }
 
-
-Lisp_ptr cons_list_star(ZsArgs args){
-  GrowList gl;
-
-  for(auto i = 0; i < args.size() - 1; ++i){
-    gl.push(args[i]);
-  }
-
-  return gl.extract_with_tail(args[args.size() - 1]);
-}
-
 } // namespace builtin

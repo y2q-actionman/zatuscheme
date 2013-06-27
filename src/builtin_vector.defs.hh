@@ -6,9 +6,6 @@
 {"%make-vector2", {
     builtin::internal_vector_make,
     {2}}},
-{"vector", {
-    builtin::vector_vector, 
-    {1, Variadic::t}}},
 {"vector-length", {
     builtin::vector_length,
     {1}}},

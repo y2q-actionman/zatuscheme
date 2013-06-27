@@ -11,7 +11,6 @@ Lisp_ptr cons_car(ZsArgs);
 Lisp_ptr cons_cdr(ZsArgs);
 Lisp_ptr cons_set_car(ZsArgs);
 Lisp_ptr cons_set_cdr(ZsArgs);
-Lisp_ptr cons_list_star(ZsArgs);
 
 }
 
