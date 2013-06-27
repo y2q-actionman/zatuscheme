@@ -22,7 +22,7 @@ Lisp_ptr read_list(istream& f){
   auto p = tokenize(f);
 
   // first check
-  if(!p){
+  if(eof_object_p(p)){
     throw zs_error("reader error: reached EOF in a list.\n");
   }else if(p.tag() == Ptr_tag::notation){
     auto n = p.get<Notation>();
@@ -41,7 +41,7 @@ Lisp_ptr read_list(istream& f){
     
     // check next token
     p = tokenize(f);
-    if(!p){
+    if(eof_object_p(p)){
       throw zs_error("reader error: reached EOF in a list.\n");
     }else if(p.tag() == Ptr_tag::notation){
       auto n = p.get<Notation>();
@@ -50,7 +50,7 @@ Lisp_ptr read_list(istream& f){
       }else if(n == Notation::dot){ // dotted list
         auto ret = gl.extract_with_tail(read(f));
         p = tokenize(f);
-        if(!p || p.get<Notation>() != Notation::r_paren){
+        if(eof_object_p(p) || p.get<Notation>() != Notation::r_paren){
           throw zs_error("reader error: dotted list has two or more cdrs.\n");
         }
         return ret;
@@ -66,7 +66,7 @@ Lisp_ptr read_vector(istream& f){
 
   while(1){
     auto p = tokenize(f);
-    if(!p){
+    if(eof_object_p(p)){
       throw zs_error("reader error: reached EOF in a vector.\n");
     }else if(p.tag() == Ptr_tag::notation
              && p.get<Notation>() == Notation::r_paren){
@@ -84,16 +84,6 @@ Lisp_ptr read_abbrev(const char* name, istream& f){
 }
 
 Lisp_ptr read_la(istream& f, Lisp_ptr p){
-  if(!p){
-    // Checking "f.peek() == EOF" is needed because tokenize() may do 'unget(EOF)'
-    // TODO: remove all 'unget(EOF)' occurance.
-    if(f.eof() || f.peek() == EOF){
-      return Lisp_ptr{static_cast<char>(EOF)};
-    }else{
-      Lisp_ptr{};
-    }
-  }
-
   if(p.tag() != Ptr_tag::notation){
     return p;
   }

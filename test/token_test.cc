@@ -122,7 +122,7 @@ int main(){
   check_ident("   abc", "abc");
   check_ident("   abc    def ", "abc");
   check_ident(" ;hogehoge\n   abc", "abc");
-  check(" ;hogehoge\n"); // EOF
+  check(" ;hogehoge\n", Lisp_ptr{static_cast<char>(EOF)});
   check_ident("   abc;fhei", "abc");
 
   // boolean
@@ -183,7 +183,7 @@ int main(){
     check_string(ss, "ho()ge");
     check(ss, Notation::r_paren);
 
-    check(ss); // EOF
+    check(ss, Lisp_ptr{static_cast<char>(EOF)});
   }
 
   return RESULT;

@@ -643,7 +643,7 @@ Lisp_ptr tokenize(istream& f){
     }
 
   case EOF:
-    return {};
+    return Lisp_ptr{static_cast<char>(EOF)};
 
   default:
     if(isalpha(c) || is_special_initial(c)){
