@@ -156,12 +156,10 @@ LOAD
   x)
 
 LOAD
-(define (else . _)
-  %undefined)
+(define else %undefined)
 
 LOAD
-(define (=> . _)
-  %undefined)
+(define => %undefined)
 
 LOAD
 (define let-syntax let)

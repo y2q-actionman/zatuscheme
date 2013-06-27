@@ -380,8 +380,6 @@ void vm_op_proc_enter(){
   vm.code.pop_back();
 
   if(!is_procedure(proc.tag())){
-    vm.code.pop_back();
-    vm.stack.pop_back();
     throw zs_error("eval error: the object used for call is not a procedure", {proc});
   }
 

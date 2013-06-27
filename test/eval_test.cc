@@ -72,10 +72,10 @@ int main(){
   check_er("(begin 1 2 3)", "3");
 
   // informal syntaxes
-  //check_e_undef("else");
+  check_e_undef("else");
   check_e_undef("(else)");
   check_e_undef("(else 1)");
-  //check_e_undef("=>");
+  check_e_undef("=>");
   check_e_undef("(=>)");
   check_e_undef("(=> 1)");
 
