@@ -4,7 +4,6 @@
 #include "procedure.hh"
 #include "cons.hh"
 #include "cons_util.hh"
-#include "util.hh"
 #include "s_closure.hh"
 #include "s_rules.hh"
 #include "builtin.hh"

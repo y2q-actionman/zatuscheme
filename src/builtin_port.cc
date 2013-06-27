@@ -12,7 +12,6 @@
 #include "zs_error.hh"
 #include "vm.hh"
 #include "zs_memory.hh"
-#include "util.hh"
 
 using namespace std;
 

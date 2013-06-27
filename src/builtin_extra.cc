@@ -6,7 +6,6 @@
 #include "vm.hh"
 #include "procedure.hh"
 #include "s_closure.hh"
-#include "util.hh"
 #include "eval.hh"
 #include "env.hh"
 #include "equality.hh"

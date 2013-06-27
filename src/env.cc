@@ -2,7 +2,6 @@
 #include <ostream>
 
 #include "env.hh"
-#include "util.hh"
 #include "symbol.hh"
 #include "printer.hh"
 #include "zs_memory.hh"
@@ -66,8 +65,8 @@ Env* Env::fork() const{
 }
 
 std::ostream& operator<<(std::ostream& f, const Env& env){
-  f << "Env " << c_cast<void*>(&env)
-    << " (next=" << c_cast<void*>(env.next_) << ")\n";
+  f << "Env " << reinterpret_cast<const void*>(&env)
+    << " (next=" << reinterpret_cast<void*>(env.next_) << ")\n";
   for(auto e : env.map_){
     f << '\t' << e.first << "\t = " << e.second << '\n';
   }

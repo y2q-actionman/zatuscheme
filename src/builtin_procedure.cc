@@ -3,7 +3,6 @@
 #include "vm.hh"
 #include "procedure.hh"
 #include "eval.hh"
-#include "util.hh"
 #include "zs_error.hh"
 #include "cons_util.hh"
 #include "zs_memory.hh"

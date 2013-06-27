@@ -6,7 +6,6 @@
 #include "symbol.hh"
 #include "cons.hh"
 #include "cons_util.hh"
-#include "util.hh"
 #include "vm.hh"
 #include "eval.hh"
 #include "s_closure.hh"
@@ -159,7 +158,7 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
     if(vm.symtable->find(sym->name()) != vm.symtable->end()){
       f << sym->name();
     }else{
-      f << "#<uninterned '" << sym->name() << "' " << c_cast<void*>(sym) << ">";
+      f << "#<uninterned '" << sym->name() << "' " << reinterpret_cast<void*>(sym) << ">";
     }
     break;
   }

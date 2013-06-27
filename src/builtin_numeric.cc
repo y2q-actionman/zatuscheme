@@ -15,7 +15,6 @@
 #include "printer.hh"
 #include "equality.hh"
 #include "token.hh"
-#include "util.hh"
 #include "rational.hh"
 #include "zs_memory.hh"
 

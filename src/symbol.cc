@@ -3,7 +3,6 @@
 #include <ostream>
 
 #include "symbol.hh"
-#include "util.hh"
 
 using namespace std;
 
@@ -42,7 +41,7 @@ void unintern(SymTable& table, Symbol* s){
 
 std::ostream& operator<<(std::ostream& f, const SymTable& st){
   for(auto s : st){
-    f << s.first.c_str() << ' ' << c_cast<void*>(&s.second) << '\n';
+    f << s.first.c_str() << ' ' << reinterpret_cast<void*>(&s.second) << '\n';
   }
   return f;
 }

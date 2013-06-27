@@ -1,7 +1,6 @@
 #include <algorithm>
 
 #include "equality.hh"
-#include "util.hh"
 #include "printer.hh"
 #include "cons.hh"
 #include "cons_util.hh"
