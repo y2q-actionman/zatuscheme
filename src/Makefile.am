@@ -56,7 +56,7 @@ libzs_a_SOURCES = \
 		s_rules.cc s_rules.hh \
 		symbol.cc symbol.hh \
 		token.cc token.hh \
-		vm.cc vm.hh \
+		vm.cc vm.i.hh vm.hh \
 		zs.cc zs.hh \
 		zs_error.cc zs_error.hh \
 		zs_memory.cc zs_memory.hh zs_memory.i.hh

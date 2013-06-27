@@ -76,10 +76,11 @@ public:
 
 private:
   void invalidate();
-  bool valid() const;
 
   int size_; // not containing last vm_argcount
   IterType stack_iter_s_;
 };
+
+#include "vm.i.hh"
 
 #endif //VM_HH
