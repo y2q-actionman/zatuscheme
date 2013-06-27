@@ -95,3 +95,19 @@ LOAD
      (if test
          (begin result1 result2 ...)
          (guard-aux reraise clause1 clause2 ...)))))
+
+LOAD
+(define *features* `(srfi-0 srfi-23 srfi-35))
+
+//;; TODO: filter cond-expand keywords from form.
+LOAD
+(define-syntax cond-expand
+  (sc-macro-transformer
+   (lambda (form _)
+     `(begin
+        ,@(let loop ((f *features*) (defs ()))
+            (if (null? f)
+                defs
+                (loop (cdr f)
+                      (cons `(define ,(car f) #t) defs))))
+        (cond ,@(cdr form))))))
