@@ -23,10 +23,6 @@
     builtin::syntax_unquote_splicing,
     {1, Variadic::f, Passing::eval, Returning::stack_splice, MoveReturnValue::f}}},
 
-{"define-syntax", {
-    builtin::syntax_define,
-    {2, Variadic::f, Passing::whole}}},
-
 {"syntax-rules", {
     builtin::syntax_syntax_rules,
     {2, 2, Passing::whole}}},

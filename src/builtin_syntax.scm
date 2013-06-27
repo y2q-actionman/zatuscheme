@@ -160,6 +160,10 @@ LOAD
 (define (=> . _)
   %undefined)
 
+
+LOAD
+(define define-syntax define)
+
 LOAD
 (define let-syntax let)
 
