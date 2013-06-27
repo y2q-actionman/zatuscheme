@@ -159,45 +159,10 @@ T gcd(T m, T n){
   return m;
 }
 
-template<>
-inline
-int coerce(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::integer){
-    return p.get<int>();
-  }else{
-    UNEXP_DEFAULT();
-  }
-}
-
-template<>
-inline
-Rational coerce(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::rational){
-    return *p.get<Rational*>();
-  }else{
-    return Rational(p.get<int>(), 1);
-  }
-}
-
-template<>
-inline
-double coerce(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::real){
-    return *(p.get<double*>());
-  }else{
-    return static_cast<double>(coerce<Rational>(p));
-  }
-}
-
-template<>
-inline
-Complex coerce(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::complex){
-    return *(p.get<Complex*>());
-  }else{
-    return Complex(coerce<double>(p), 0);
-  }
-}
+template<> int coerce(Lisp_ptr);
+template<> Rational coerce(Lisp_ptr);
+template<> double coerce(Lisp_ptr);
+template<> Complex coerce(Lisp_ptr);
 
 inline
 Lisp_ptr wrap_number(int i){

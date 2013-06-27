@@ -111,9 +111,11 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
 }
 
 struct inacceptable_number_type{
+  static bool throw_error();
+
   template<typename T>
   bool operator()(T) const{
-    throw zs_error("number error: inacceptable type");
+    return throw_error();
   }
 
   template<typename T>
@@ -121,6 +123,11 @@ struct inacceptable_number_type{
     return operator()(t);
   }
 };
+
+bool inacceptable_number_type::throw_error(){
+  throw zs_error("number error: inacceptable type");
+}    
+
 
 struct identity{
   template<typename T>

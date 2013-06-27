@@ -103,6 +103,42 @@ Rational& Rational::expt(const Rational& other){
 
 
 // utilities
+template<>
+int coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::integer){
+    return p.get<int>();
+  }else{
+    UNEXP_DEFAULT();
+  }
+}
+
+template<>
+Rational coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::rational){
+    return *p.get<Rational*>();
+  }else{
+    return Rational(p.get<int>(), 1);
+  }
+}
+
+template<>
+double coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::real){
+    return *(p.get<double*>());
+  }else{
+    return static_cast<double>(coerce<Rational>(p));
+  }
+}
+
+template<>
+Complex coerce(Lisp_ptr p){
+  if(p.tag() == Ptr_tag::complex){
+    return *(p.get<Complex*>());
+  }else{
+    return Complex(coerce<double>(p), 0);
+  }
+}
+
 Lisp_ptr wrap_number(const Rational& q){
   if(q.is_convertible<int>()){
     return {Ptr_tag::integer, static_cast<int>(q)};
