@@ -14,6 +14,7 @@ enum class Notation {
     bar
     };
 
+// when reached EOF, returns eof-object.
 Lisp_ptr tokenize(std::istream&);
 
 // 'radix == 0' means 10 or the specified value of prefix.
