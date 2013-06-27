@@ -30,9 +30,6 @@ libzs_a_SOURCES = \
 		builtin_procedure.cc builtin_procedure.hh \
 		builtin_procedure.defs.hh \
 		builtin_procedure.scm \
-		builtin_srfi.cc builtin_srfi.hh \
-		builtin_srfi.defs.hh \
-		builtin_srfi.scm \
 		builtin_string.cc builtin_string.hh \
 		builtin_string.defs.hh \
 		builtin_string.scm \

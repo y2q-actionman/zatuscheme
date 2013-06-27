@@ -26,7 +26,6 @@
 #include "builtin_numeric.hh"
 #include "builtin_port.hh"
 #include "builtin_procedure.hh"
-#include "builtin_srfi.hh"
 #include "builtin_string.hh"
 #include "builtin_symbol.hh"
 #include "builtin_syntax.hh"
@@ -112,12 +111,10 @@ static const char* builtin_str =
 
 static const BuiltinNProc builtin_extra_funcs[] = {
 #include "builtin_extra.defs.hh"
-#include "builtin_srfi.defs.hh"
 };
 
 static const char* builtin_extra_str =
 #include "builtin_extra.scm"
-#include "builtin_srfi.scm"
 ;
 
 

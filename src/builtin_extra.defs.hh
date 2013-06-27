@@ -1,5 +1,11 @@
 // This file is intended to be included into an array of 'BuiltinFunc'
 
+{"transcript-on", {
+    builtin::transcript_on,
+    {0}}},
+{"transcript-off", {
+    builtin::transcript_off,
+    {0}}},
 {"traditional-transformer", {
     builtin::traditional_transformer,
     {1}}},
@@ -24,15 +30,15 @@
 {"make-synthetic-identifier", {
     builtin::make_synthetic_identifier,
     {1}}},
+{"with-exception-handler", {
+    builtin::with_exception_handler,
+    {2, 2, Passing::eval, Returning::pass, MoveReturnValue::f}}},
+{"raise", {
+    builtin::raise,
+    {1, 1}}},
 {"exit", {
     builtin::exit,
     {0, 1}}},
-{"transcript-on", {
-    builtin::transcript_on,
-    {0}}},
-{"transcript-off", {
-    builtin::transcript_off,
-    {0}}},
 {"hard-repl", {
     builtin::hard_repl,
     {0}}},

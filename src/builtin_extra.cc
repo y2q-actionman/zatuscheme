@@ -31,6 +31,16 @@ namespace builtin {
 // used for interacting between 'exit' and 'hard-repl'
 static bool hard_repl_continue = true;
 
+Lisp_ptr transcript_on(ZsArgs){
+  dump_mode = true;
+  return Lisp_ptr{true};
+}
+
+Lisp_ptr transcript_off(ZsArgs){
+  dump_mode = false;
+  return Lisp_ptr{true};
+}
+
 Lisp_ptr traditional_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
@@ -120,6 +130,32 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
   return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
 }
 
+Lisp_ptr with_exception_handler(ZsArgs args){
+  Lisp_ptr handler = args[0];
+  if(!is_procedure(handler.tag())){
+    throw zs_error("arg is not procedure!", {handler});
+  }
+
+  Lisp_ptr thunk = args[1];
+  if(!is_procedure(thunk.tag())){
+    throw zs_error("arg is not procedure!", {thunk});
+  }
+
+  args.cleanup();
+
+  vm.exception_handler.push_back(handler);
+  vm.code.push_back(vm_op_pop_exception_handler);
+
+  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  vm.code.insert(vm.code.end(), {thunk, vm_op_proc_enter});
+  return {};
+}
+
+Lisp_ptr raise(ZsArgs args){
+  vm.code.push_back(vm_op_raise);
+  return args[0];
+}
+
 Lisp_ptr exit(ZsArgs args){
   auto ret = (args.size() > 0) ? args[0] : Lisp_ptr{true};
   args.cleanup();
@@ -127,16 +163,6 @@ Lisp_ptr exit(ZsArgs args){
   vm.code.clear();
   hard_repl_continue = false;
   return ret;
-}
-
-Lisp_ptr transcript_on(ZsArgs){
-  dump_mode = true;
-  return Lisp_ptr{true};
-}
-
-Lisp_ptr transcript_off(ZsArgs){
-  dump_mode = false;
-  return Lisp_ptr{true};
 }
 
 Lisp_ptr hard_repl(ZsArgs args){
