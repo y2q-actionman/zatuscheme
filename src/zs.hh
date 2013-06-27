@@ -17,7 +17,6 @@
 #include "s_rules.hh"
 #include "symbol.hh"
 #include "token.hh"
-#include "util.hh"
 #include "vm.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
