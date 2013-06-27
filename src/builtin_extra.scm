@@ -133,5 +133,4 @@ LOAD
     ((cond-expand (srfi-35 body ...) more-clauses ...)
        (begin body ...))
     ((cond-expand (feature-id body ...) more-clauses ...)
-       (begin (display "aaa") (cond-expand more-clauses ...)))))
-
+       (begin (cond-expand more-clauses ...)))))
