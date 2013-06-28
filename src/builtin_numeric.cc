@@ -226,7 +226,7 @@ Lisp_ptr internal_number_min(ZsArgs args){
 Lisp_ptr internal_number_plus(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1) += Rational(i2); },
-                       [](Rational q1, const Rational& q2){ return q1 += q2; },
+                       [](Rational&& q1, const Rational& q2){ return q1 += q2; },
                        plus<double>(),
                        plus<const Complex&>());
 }
@@ -234,7 +234,7 @@ Lisp_ptr internal_number_plus(ZsArgs args){
 Lisp_ptr internal_number_multiple(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1) *= Rational(i2); },
-                       [](Rational q1, const Rational& q2){ return q1 *= q2; },
+                       [](Rational&& q1, const Rational& q2){ return q1 *= q2; },
                        multiplies<double>(),
                        multiplies<const Complex&>());
 }
@@ -242,7 +242,7 @@ Lisp_ptr internal_number_multiple(ZsArgs args){
 Lisp_ptr internal_number_minus(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1) -= Rational(i2); },
-                       [](Rational q1, const Rational& q2){ return q1 -= q2; },
+                       [](Rational&& q1, const Rational& q2){ return q1 -= q2; },
                        minus<double>(),
                        minus<const Complex&>());
 }
@@ -250,7 +250,7 @@ Lisp_ptr internal_number_minus(ZsArgs args){
 Lisp_ptr internal_number_divide(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1) /= Rational(i2); },
-                       [](Rational q1, const Rational& q2){ return q1 /= q2; },
+                       [](Rational&& q1, const Rational& q2){ return q1 /= q2; },
                        divides<double>(),
                        divides<const Complex&>());
 }
@@ -463,7 +463,7 @@ Lisp_ptr number_expt(ZsArgs args){
                        [](int i1, int i2){
                          return Rational(i1).expt(Rational(i2));
                        },
-                       [](Rational q1, const Rational& q2){
+                       [](Rational&& q1, const Rational& q2){
                          return q1.expt(q2);
                        },
                        [](double n1, double n2){
