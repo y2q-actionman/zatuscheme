@@ -42,9 +42,7 @@ ConsIter& ConsIter::operator++(){
     throw zs_error("cons list error: forwarded ConsIter pointing the tail of a dotted list!\n");
   }
 
-  if(auto c = p_.get<Cons*>()){
-    p_ = cdr(c);
-  }
+  p_ = cdr(p_.get<Cons*>());
   return *this;
 }
 
