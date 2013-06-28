@@ -28,16 +28,12 @@ using namespace std;
 
 namespace {
 
-template<typename charT>
-inline constexpr
-bool is_delimiter(charT c){
+bool is_delimiter(char c){
   return isspace(c) || c == '(' || c == ')'
     || c ==  '"' || c == ';' || c == EOF;
 }
 
-template<typename charT>
-inline
-bool is_special_initial(charT c){
+bool is_special_initial(char c){
   switch(c){
   case '!': case '$': case '%': case '&':
   case '*': case '/': case ':': case '<':
@@ -82,18 +78,18 @@ Lisp_ptr tokenize_identifier(istream& f, int first_char){
   return {intern(*vm.symtable, move(s))};
 }
 
-Lisp_ptr tokenize_character(istream& f){
-  // function for checking character-name
-  const auto check_name = [&](const char* str) -> bool {
-    for(const char* c = str; *c; ++c){
-      auto get_c = f.get();
-      if(get_c != tolower(*c) || is_delimiter(get_c)){
-        return false;
-      }
+static
+bool check_character_name(istream& f, const char* str){
+  for(const char* c = str; *c; ++c){
+    auto get_c = f.get();
+    if(get_c != ZS_CASE(*c) || is_delimiter(get_c)){
+      return false;
     }
-    return true;
-  };
+  }
+  return true;
+}
 
+Lisp_ptr tokenize_character(istream& f){
   auto ret_char = f.get();
   if(ret_char == EOF){
     throw zs_error("reader error: no char found after '#\\'!\n");
@@ -105,12 +101,12 @@ Lisp_ptr tokenize_character(istream& f){
     // check character name
     switch(ret_char){
     case 's': case 'S':
-      if(check_name("pace")){
+      if(check_character_name(f, "pace")){
         return Lisp_ptr{' '};
       }
       break;
     case 'n': case 'N':
-      if(check_name("ewline")){
+      if(check_character_name(f, "ewline")){
         return Lisp_ptr{'\n'};
       }
       break;

@@ -43,16 +43,6 @@ Rational::operator int() const{
 }
 
 inline
-Rational::operator double() const{
-  assert(is_convertible<double>());
-  if(overflow_){
-    return float_;
-  }else{
-    return static_cast<double>(numerator()) / static_cast<double>(denominator());
-  }
-}
-
-inline
 bool Rational::operator==(const Rational& other) const{
   if(overflow_) return false;
 
@@ -167,16 +157,6 @@ template<> Complex coerce(Lisp_ptr);
 inline
 Lisp_ptr wrap_number(int i){
   return {Ptr_tag::integer, i};
-}
-
-inline
-Lisp_ptr wrap_number(double d){
-  return {zs_new<double>(d)};
-}
-
-inline
-Lisp_ptr wrap_number(const Complex& z){
-  return {zs_new<Complex>(z)};
 }
 
 inline

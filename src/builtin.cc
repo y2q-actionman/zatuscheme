@@ -117,18 +117,20 @@ static const char* builtin_extra_str =
 ;
 
 
-void install_builtin(){
-  static constexpr auto install_native = [](const BuiltinNProc& bf){
-    vm.frame->local_set(intern(*vm.symtable, bf.name), {&bf.func});
-  };    
-  static constexpr auto install_string = [](const char* s){
-    istringstream iss{s};
-    load_internal(iss);
-  };    
-  static constexpr auto install_symbol = [](const char* name, Lisp_ptr value){
-    vm.frame->local_set(intern(*vm.symtable, name), value);
-  };
+static void install_native(const BuiltinNProc& bf){
+  vm.frame->local_set(intern(*vm.symtable, bf.name), {&bf.func});
+}
 
+static void install_string(const char* s){
+  istringstream iss{s};
+  load_internal(iss);
+}
+
+static void install_symbol(const char* name, Lisp_ptr value){
+  vm.frame->local_set(intern(*vm.symtable, name), value);
+}
+
+void install_builtin(){
   assert(vm.code.empty() && vm.stack.empty());
   assert(!vm.frame);
 

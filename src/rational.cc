@@ -37,6 +37,41 @@ Rational& Rational::normalized_reset(long long n, long long d){
   return *this;
 }
 
+Rational::operator double() const{
+  assert(is_convertible<double>());
+  if(overflow_){
+    return float_;
+  }else{
+    return static_cast<double>(numerator()) / static_cast<double>(denominator());
+  }
+}
+
+Rational& Rational::expt(const Rational& other){
+  if(other.denominator() != 1){
+    overflow_ = true;
+    float_ = std::pow(static_cast<double>(*this),
+                      static_cast<double>(other));
+    return *this;
+  }
+
+  const auto base_r = *this;
+  normalized_reset(1, 1);
+
+  auto ex = other.numerator();
+  for(; ex > 0; --ex){
+    operator*=(base_r);
+    if(overflow_) break;
+  }
+
+  if(overflow_){
+    auto base_d = static_cast<double>(base_r);
+    for(; ex > 0; --ex) float_ *= base_d;
+  }
+
+  return *this;
+}
+
+
 Rational rationalize(double answer, double error){
   // from:
   // http://en.wikipedia.org/wiki/Continued_fraction#Infinite_continued_fractions
@@ -75,32 +110,6 @@ Rational rationalize(double answer, double error){
 
   return Rational{h_0 , k_0};
 }
-
-Rational& Rational::expt(const Rational& other){
-  if(other.denominator() != 1){
-    overflow_ = true;
-    float_ = std::pow(static_cast<double>(*this),
-                      static_cast<double>(other));
-    return *this;
-  }
-
-  const auto base_r = *this;
-  normalized_reset(1, 1);
-
-  auto ex = other.numerator();
-  for(; ex > 0; --ex){
-    operator*=(base_r);
-    if(overflow_) break;
-  }
-
-  if(overflow_){
-    auto base_d = static_cast<double>(base_r);
-    for(; ex > 0; --ex) float_ *= base_d;
-  }
-
-  return *this;
-}
-
 
 // utilities
 template<>
@@ -148,6 +157,14 @@ Lisp_ptr wrap_number(const Rational& q){
     cerr << "integer overflow occured. coerced into real.\n";
     return {zs_new<double>(static_cast<double>(q))};
   }
+}
+
+Lisp_ptr wrap_number(double d){
+  return {zs_new<double>(d)};
+}
+
+Lisp_ptr wrap_number(const Complex& z){
+  return {zs_new<Complex>(z)};
 }
 
 Lisp_ptr to_exact(Lisp_ptr p){
