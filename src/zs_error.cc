@@ -25,6 +25,39 @@ std::string printf_string(const char* fmt, ...){
 }
 
 // error functions
+static
+Lisp_ptr zs_error_va(const char* fmt, Lisp_ptr p, va_list ap){
+  string str(ERROR_MESSAGE_LENGTH, '\0');
+
+  vsnprintf(&(str[0]), str.size(), fmt, ap);
+
+  if(p){
+    return zs_new<String>(move(str));
+  }else{
+    ostringstream oss;
+    oss << str << " @ (" << p << ")" << endl;
+    return zs_new<String>(oss.str());
+  }
+}
+
+Lisp_ptr zs_error(const char* fmt, ...){
+  va_list ap;
+  va_start(ap, fmt);
+  auto ret = zs_error_va(fmt, {}, ap);
+  va_end(ap);
+
+  return ret;
+}
+
+Lisp_ptr zs_error(const char* fmt, Lisp_ptr p, ...){
+  va_list ap;
+  va_start(ap, p);
+  auto ret = zs_error_va(fmt, p, ap);
+  va_end(ap);
+
+  return ret;
+}
+
 Lisp_ptr zs_error(const std::string& str){
   return zs_error(str, {});
 }

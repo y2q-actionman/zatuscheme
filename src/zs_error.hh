@@ -16,6 +16,14 @@ std::string printf_string(const char*, ...)
     abort();\
   }while(0)
 
+Lisp_ptr zs_error(const char*, ...)
+  __attribute__ ((format (printf, 1, 2)))
+  ;
+
+Lisp_ptr zs_error(const char*, Lisp_ptr, ...)
+  __attribute__ ((format (printf, 1, 3)))
+  ;
+
 Lisp_ptr zs_error(const std::string&);
 Lisp_ptr zs_error(const std::string&, Lisp_ptr);
 
