@@ -20,7 +20,7 @@ Lisp_ptr with_nonnull_cons(Lisp_ptr p, Fun fun){
   }
 
   if(nullp(p)){
-    throw zs_error("arg is null list!");
+    throw zs_error({}, "arg is null list!");
   }
 
   return fun(p.get<Cons*>());

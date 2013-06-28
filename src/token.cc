@@ -92,7 +92,7 @@ bool check_character_name(istream& f, const char* str){
 Lisp_ptr tokenize_character(istream& f){
   auto ret_char = f.get();
   if(ret_char == EOF){
-    throw zs_error("reader error: no char found after '#\\'!\n");
+    throw zs_error({}, "reader error: no char found after '#\\'!\n");
   }
 
   if(is_delimiter(f.peek())){
@@ -112,7 +112,7 @@ Lisp_ptr tokenize_character(istream& f){
       break;
     }
 
-    throw zs_error("reader error: not supported char name!\n");
+    throw zs_error({}, "reader error: not supported char name!\n");
   }
 }
 
@@ -130,7 +130,7 @@ Lisp_ptr tokenize_string(istream& f){
         s.push_back(c);
         break;
       default:
-        throw zs_error(printf_string("reader error: unknown string escape '%c' appeared.\n", c));
+        throw zs_error({}, "reader error: unknown string escape '%c' appeared.\n", c);
       }
       break;
     default:
@@ -138,7 +138,7 @@ Lisp_ptr tokenize_string(istream& f){
     }
   }
 
-  throw zs_error("reader error: not ended string!\n");
+  throw zs_error({}, "reader error: not ended string!\n");
 }
 
   // number parsers
@@ -183,14 +183,14 @@ pair<int, Exactness> parse_number_prefix(istream& f){
       r = 16;
       break;
     default:
-      throw zs_error(printf_string("reader error: unknown number prefix '%c' appeared!\n", c));
+      throw zs_error({}, "reader error: unknown number prefix '%c' appeared!\n", c);
     }
     
     if(e_appeared > 1)
-      throw zs_error(printf_string("reader error: duplicated number prefix appeared (%c)\n", c));
+      throw zs_error({}, "reader error: duplicated number prefix appeared (%c)\n", c);
 
     if(r_appeared > 1)
-      throw zs_error(printf_string("reader error: duplicated number prefix appeared (%c)\n", c));
+      throw zs_error({}, "reader error: duplicated number prefix appeared (%c)\n", c);
   }  
   
   return {r, e};
@@ -323,7 +323,7 @@ double zs_stof(istream& f, string s){
     if(f.peek() == '.'){
       dot_start = true;
     }else{
-      throw zs_error("reader error: no chars found for floating point number.\n");
+      throw zs_error({}, "reader error: no chars found for floating point number.\n");
     }
   }else{
     sharps_before_dot = eat_sharp(f, s);
@@ -351,7 +351,7 @@ double zs_stof(istream& f, string s){
     f.unget();
 
     if(dot_start && !digits_after_dot){
-      throw zs_error("reader error: a number starting with dot should have digits after it.\n");
+      throw zs_error({}, "reader error: a number starting with dot should have digits after it.\n");
     }
 
     eat_sharp(f, s);
@@ -381,7 +381,7 @@ double zs_stof(istream& f, string s){
       f.unget();
 
       if(!exp_digits){
-        throw zs_error("reader error: no number on exporational part\n");
+        throw zs_error({}, "reader error: no number on exporational part\n");
       }
     }
   }
@@ -389,7 +389,7 @@ double zs_stof(istream& f, string s){
   try{
     return std::stod(s, nullptr);
   }catch(const std::logic_error& err){
-    throw zs_error(printf_string("reader error: reading floating point number failed: %s\n", err.what()));
+    throw zs_error({}, "reader error: reading floating point number failed: %s\n", err.what());
   }
 }
 
@@ -414,7 +414,7 @@ Lisp_ptr parse_real_number(int radix, istream& f){
 
   if((c == '.') || (!digit_chars.first.empty() && check_decimal_suffix(c))){
     if(radix != 10){
-      throw zs_error(printf_string("reader error: non-decimal float is not supported. (radix %d)\n", radix));
+      throw zs_error({}, "reader error: non-decimal float is not supported. (radix %d)\n", radix);
     }
 
     // decimal float
@@ -424,7 +424,7 @@ Lisp_ptr parse_real_number(int radix, istream& f){
   }
 
   if(digit_chars.first.empty()){
-    throw zs_error("reader error: failed at reading a number's integer part\n");
+    throw zs_error({}, "reader error: failed at reading a number's integer part\n");
   }
 
   auto u1 = zs_stoi(radix, digit_chars.first);
@@ -445,7 +445,7 @@ Lisp_ptr parse_real_number(int radix, istream& f){
 
   auto digit_chars_2 = collect_integer_digits(radix, f);
   if(digit_chars_2.first.empty()){
-    throw zs_error("reader error: failed at reading a rational number's denominator\n");
+    throw zs_error({}, "reader error: failed at reading a rational number's denominator\n");
   }
 
   auto u2 = zs_stoi(radix, digit_chars_2.first);
@@ -493,7 +493,7 @@ Lisp_ptr  parse_complex(int radix, istream& f){
     auto imag = parse_real_number(radix, f);
 
     if(f.peek() != 'i' && f.peek() != 'I'){
-      throw zs_error("reader error: failed at reading a complex number's imaginary part.\n");
+      throw zs_error({}, "reader error: failed at reading a complex number's imaginary part.\n");
     }
     f.ignore(1);
 
@@ -504,7 +504,7 @@ Lisp_ptr  parse_complex(int radix, istream& f){
     if(first_char == '+' || first_char == '-'){
       return wrap_number(Complex(0, coerce<double>(real)));
     }else{
-      throw zs_error("reader error: failed at reading a complex number. ('i' appeared alone.)\n");
+      throw zs_error({}, "reader error: failed at reading a complex number. ('i' appeared alone.)\n");
     }
   default:
     f.unget();
@@ -524,7 +524,7 @@ Lisp_ptr parse_number(istream& f, int radix){
   const auto r = parse_complex(radix, f);
   if(!r){
     // TODO: add context information.
-    throw zs_error("parser error: cannot be read as number.\n");
+    throw zs_error({}, "parser error: cannot be read as number.\n");
   }
 
   switch(prefix_info.second){
@@ -592,7 +592,7 @@ Lisp_ptr tokenize(istream& f){
     case 3:
       return {intern(*vm.symtable, "...")};
     default:
-      throw zs_error(printf_string("reader error: %d dots appeared.\n", dots));
+      throw zs_error({}, "reader error: %d dots appeared.\n", dots);
     }
   }
 
@@ -634,9 +634,9 @@ Lisp_ptr tokenize(istream& f){
       }while(c != EOF && c != '>');
       f.unget();
 
-      throw zs_error("reader error: '#<...>' appeared ('not printable object' in this implementation.)\n");
+      throw zs_error({},"reader error: '#<...>' appeared ('not printable object' in this implementation.)\n");
     default:
-      throw zs_error(printf_string("reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c));
+      throw zs_error({}, "reader error: unknown sharp syntax '#%c' appeared.\n", sharp_c);
     }
 
   case EOF:
@@ -649,7 +649,7 @@ Lisp_ptr tokenize(istream& f){
       f.unget();
       return parse_number(f);
     }else{
-      throw zs_error(printf_string("reader error: invalid char '%c' appeared.\n", c));
+      throw zs_error({}, "reader error: invalid char '%c' appeared.\n", c);
     }
   }
 }

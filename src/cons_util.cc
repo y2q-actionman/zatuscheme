@@ -32,14 +32,14 @@ GrowList::~GrowList(){
 // ConsIter class
 Lisp_ptr* ConsIter::operator->() const{
   if(!(*this)){
-    throw zs_error("cons list error: dereferenced invalid ConsIter!\n");
+    throw zs_error({}, "cons list error: dereferenced invalid ConsIter!\n");
   }
   return &(p_.get<Cons*>()->car_);
 }
 
 ConsIter& ConsIter::operator++(){
   if(p_.tag() != Ptr_tag::cons){
-    throw zs_error("cons list error: forwarded ConsIter pointing the tail of a dotted list!\n");
+    throw zs_error(p_, "cons list error: forwarded ConsIter pointing the tail of a dotted list!\n");
   }
 
   p_ = cdr(p_.get<Cons*>());
@@ -54,7 +54,7 @@ ConsIter ConsIter::operator++(int){
 
 ConsIter begin(Lisp_ptr p){
   if(p.tag() != Ptr_tag::cons){
-    throw zs_error("cons func: value is not a list", p);
+    throw zs_error(p, "cons func: value is not a list");
   }
   return ConsIter(p);
 }

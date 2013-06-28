@@ -121,7 +121,7 @@ struct inacceptable_number_type{
 };
 
 bool inacceptable_number_type::throw_error(){
-  throw zs_error("number error: inacceptable type");
+  throw zs_error({}, "number error: inacceptable type");
 }    
 
 

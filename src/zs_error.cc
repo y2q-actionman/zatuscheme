@@ -3,6 +3,7 @@
 #include <cstdarg>
 #include <sstream>
 #include <cassert>
+#include <string>
 
 #include "zs_error.hh"
 #include "zs_memory.hh"
@@ -13,7 +14,8 @@ static const size_t ERROR_MESSAGE_LENGTH = 256;
 
 using namespace std;
 
-std::string printf_string(const char* fmt, ...){
+// error functions
+Lisp_ptr zs_error(Lisp_ptr p, const char* fmt, ...){
   string str(ERROR_MESSAGE_LENGTH, '\0');
 
   va_list ap;
@@ -21,57 +23,13 @@ std::string printf_string(const char* fmt, ...){
   vsnprintf(&(str[0]), str.size(), fmt, ap);
   va_end(ap);
 
-  return str;
-}
-
-// error functions
-static
-Lisp_ptr zs_error_va(const char* fmt, Lisp_ptr p, va_list ap){
-  string str(ERROR_MESSAGE_LENGTH, '\0');
-
-  vsnprintf(&(str[0]), str.size(), fmt, ap);
-
-  if(p){
+  if(!p){
     return zs_new<String>(move(str));
   }else{
     ostringstream oss;
     oss << str << " @ (" << p << ")" << endl;
     return zs_new<String>(oss.str());
   }
-}
-
-Lisp_ptr zs_error(const char* fmt, ...){
-  va_list ap;
-  va_start(ap, fmt);
-  auto ret = zs_error_va(fmt, {}, ap);
-  va_end(ap);
-
-  return ret;
-}
-
-Lisp_ptr zs_error(const char* fmt, Lisp_ptr p, ...){
-  va_list ap;
-  va_start(ap, p);
-  auto ret = zs_error_va(fmt, p, ap);
-  va_end(ap);
-
-  return ret;
-}
-
-Lisp_ptr zs_error(const std::string& str){
-  return zs_error(str, {});
-}
-
-Lisp_ptr zs_error(const std::string& str, Lisp_ptr p){
-  ostringstream oss;
-
-  oss << str;
-  if(p){
-    oss << " @ (" << p << ")";
-  }
-  oss << endl;
-  
-  return zs_new<String>(oss.str());
 }
 
 Lisp_ptr zs_error_append(const char* context, Lisp_ptr p){
@@ -81,29 +39,29 @@ Lisp_ptr zs_error_append(const char* context, Lisp_ptr p){
 }
 
 Lisp_ptr builtin_type_check_failed(Ptr_tag tag, Lisp_ptr p){
-  return zs_error(printf_string("arg is not %s!", stringify(tag)), p);
+  return zs_error(p, "arg is not %s!", stringify(tag));
 }
 
 Lisp_ptr builtin_argcount_failed(const char* name, int required, int max, int passed){
-  return zs_error(printf_string("%s: "
-                                "number of passed args is mismatched!!"
-                                " (acceptable %d-%d args, passed %d)\n",
-                                name, required, max, passed));
+  return zs_error({}, "%s: "
+                  "number of passed args is mismatched!!"
+                  " (acceptable %d-%d args, passed %d)\n",
+                  name, required, max, passed);
 }
 
 Lisp_ptr builtin_identifier_check_failed(Lisp_ptr p){
-  return zs_error("arg is not identifier!", p);
+  return zs_error(p, "arg is not identifier!");
 }
 
 Lisp_ptr builtin_range_check_failed(int max, int passed){
-  return zs_error(printf_string("index is out-of-bound ([0, %d), supplied %d\n",
-                                max, passed));
+  return zs_error({}, "index is out-of-bound ([0, %d), supplied %d\n",
+                  max, passed);
 }
 
 Lisp_ptr number_type_check_failed(Lisp_ptr p){
-  return zs_error("arg is not number!", p);
+  return zs_error(p, "arg is not number!");
 }
 
 Lisp_ptr procedure_type_check_failed(Lisp_ptr p){
-  return zs_error("arg is not procedure!", p);
+  return zs_error(p, "arg is not procedure!");
 }

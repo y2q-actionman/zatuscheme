@@ -26,7 +26,7 @@ Lisp_ptr port_open_file(ZsArgs args){
 
   IOType* p = zs_new_with_tag<F_IOType, to_tag<IOType*>()>(*str);
   if(!p || !*p){
-    throw zs_error("failed at opening file");
+    throw zs_error({}, "failed at opening file");
   }
   
   return {p};

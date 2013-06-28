@@ -23,15 +23,11 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
-    throw zs_error("invalid args!", args);
+    throw zs_error(args, "invalid args!");
   }
 
-  if(!code){
-    throw zs_error("invalid body!");
-  }
-
-  if(nullp(code)){
-    throw zs_error("has no exprs.");
+  if(!code || nullp(code)){
+    throw zs_error(code, "invalid body!");
   }
 
   return zs_new<IProcedure>(code, 
@@ -83,7 +79,7 @@ Lisp_ptr syntax_define(ZsArgs args){
 
     assert(expr_cons.get<Cons*>());
     if(!nullp(cdr(expr_cons.get<Cons*>()))){
-      throw zs_error("informal syntax: too long");
+      throw zs_error(args[0], "informal syntax: too long");
     }
 
     vm.code.insert(vm.code.end(), {i1, vm_op_local_set, car(expr_cons.get<Cons*>())});
@@ -97,7 +93,7 @@ Lisp_ptr syntax_define(ZsArgs args){
     vm.code.insert(vm.code.end(), {funcname, vm_op_local_set, value});
     return {};
   }else{
-    throw zs_error("informal syntax!");
+    throw zs_error(args[0], "informal syntax!");
   }
 }
 

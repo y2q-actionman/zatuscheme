@@ -49,11 +49,11 @@ bool is_ellipsis(Lisp_ptr p){
 
 void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
   if(p.tag() != Ptr_tag::cons)
-    throw zs_error(printf_string("internal %s: the passed list is a dotted list!\n", __func__));
+    throw zs_error(p, "internal %s: the passed list is a dotted list!\n", __func__);
 
   auto c = p.get<Cons*>();
   if(!c)
-    throw zs_error(printf_string("internal %s: the passed list is an empty list!\n", __func__));
+    throw zs_error(p, "internal %s: the passed list is an empty list!\n", __func__);
 
   if(nullp(cdr(c))){
     rplacd(c, make_cons_list({value}));
@@ -74,17 +74,17 @@ void push_tail_cons_list(Lisp_ptr* p, Lisp_ptr value){
 Lisp_ptr pick_first(Lisp_ptr p){
   if(p.tag() == Ptr_tag::cons){
     auto c = p.get<Cons*>();
-    if(!c) throw zs_error("the pattern is empty list");
+    if(!c) throw zs_error({}, "the pattern is empty list");
 
     return car(c);
   }else if(p.tag() == Ptr_tag::vector){
     auto v = p.get<Vector*>();
     assert(v);
-    if(v->empty()) throw zs_error("the pattern is empty vector");
+    if(v->empty()) throw zs_error({}, "the pattern is empty vector");
 
     return (*v)[0];
   }else{
-    throw zs_error("informal pattern passed!", p);
+    throw zs_error(p, "informal pattern passed!");
   }
 }
 
@@ -97,7 +97,7 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p, MatchSet tab){
       
     // pattern variable
     if(tab.find(p) != tab.end()){
-      throw zs_error("duplicated pattern variable!", p);
+      throw zs_error(p, "duplicated pattern variable!");
     }
     tab.insert(p);
     return;
@@ -207,17 +207,17 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       auto p_n = next(p_i);
       if((p_n) && is_ellipsis(*p_n)){
         if(eq_internal(*p_i, ignore_ident)){
-          throw zs_error("'...' is appeared following the first identifier");
+          throw zs_error({}, "'...' is appeared following the first identifier");
         }
 
         auto p_e = end(pattern);
         if(!nullp(p_e.base())){
-          throw zs_error("'...' is appeared in a inproper list pattern");
+          throw zs_error({}, "'...' is appeared in a inproper list pattern");
         }
 
         auto f_e = end(form);
         if(!nullp(f_e.base())){
-          throw zs_error("'...' is used for a inproper list form");
+          throw zs_error({}, "'...' is used for a inproper list form");
         }
 
         EqHashMap acc_map;
@@ -279,7 +279,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       auto p_n = next(p_i);
       if((p_n != p_e) && is_ellipsis(*p_n)){
         if(eq_internal(*p_i, ignore_ident)){
-          throw zs_error("'...' is appeared following the first identifier");
+          throw zs_error({}, "'...' is appeared following the first identifier");
         }
 
         // accumulating...
@@ -468,7 +468,7 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
     auto pat_i = begin(i);
     auto tmpl_i = next(pat_i);
     if(next(tmpl_i)){
-      throw zs_error("invalid pattern: too long", i);
+      throw zs_error(i, "invalid pattern: too long");
     }
       
     check_pattern(*this, *pat_i);
@@ -491,9 +491,9 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     }catch(const try_match_failed& e){
       continue;
     }catch(const expand_failed& e){
-      throw zs_error("expand failed!", form);
+      throw zs_error(form, "expand failed!");
     }
   }
 
-  throw zs_error("no matching pattern found!", form);
+  throw zs_error(form, "no matching pattern found!");
 }

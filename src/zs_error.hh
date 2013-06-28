@@ -1,31 +1,18 @@
 #ifndef ZS_ERROR_HH
 #define ZS_ERROR_HH
 
-#include <string>
 #include <cstdlib>
 #include <cassert>
 #include "decl.hh"
-#include "lisp_ptr.hh"
-
-std::string printf_string(const char*, ...)
-  __attribute__ ((format (printf, 1, 2)))
-  ;
 
 #define UNEXP_DEFAULT() do{\
     assert(((void)"unexpected default case!", 0));      \
     abort();\
   }while(0)
 
-Lisp_ptr zs_error(const char*, ...)
-  __attribute__ ((format (printf, 1, 2)))
+Lisp_ptr zs_error(Lisp_ptr, const char*, ...)
+  __attribute__ ((format (printf, 2, 3)))
   ;
-
-Lisp_ptr zs_error(const char*, Lisp_ptr, ...)
-  __attribute__ ((format (printf, 1, 3)))
-  ;
-
-Lisp_ptr zs_error(const std::string&);
-Lisp_ptr zs_error(const std::string&, Lisp_ptr);
 
 Lisp_ptr zs_error_append(const char*, Lisp_ptr);
 
