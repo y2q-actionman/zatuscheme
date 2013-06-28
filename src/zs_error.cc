@@ -70,3 +70,11 @@ Lisp_ptr builtin_range_check_failed(int max, int passed){
   return zs_error(printf_string("index is out-of-bound ([0, %d), supplied %d\n",
                                 max, passed));
 }
+
+Lisp_ptr number_type_check_failed(Lisp_ptr p){
+  return zs_error("arg is not number!", {p});
+}
+
+Lisp_ptr procedure_type_check_failed(Lisp_ptr p){
+  return zs_error("arg is not procedure!", {p});
+}

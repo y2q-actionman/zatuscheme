@@ -25,10 +25,6 @@ static_assert(sizeof(int) < sizeof(long long),
 
 namespace {
 
-Lisp_ptr number_type_check_failed(Lisp_ptr p){
-  return zs_error("arg is not number!", {p});
-}
-
 bool is_numeric_type(Lisp_ptr p){
   auto tag = p.tag();
   return (tag == Ptr_tag::integer

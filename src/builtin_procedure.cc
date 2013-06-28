@@ -9,14 +9,6 @@
 
 using namespace std;
 
-namespace {
-
-Lisp_ptr procedure_type_check_failed(Lisp_ptr p){
-  return zs_error("arg is not procedure!", {p});
-}
-
-} // namespace
-
 namespace builtin {
 
 Lisp_ptr procedurep(ZsArgs args){
