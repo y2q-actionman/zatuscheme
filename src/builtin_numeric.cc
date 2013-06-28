@@ -169,15 +169,15 @@ Lisp_ptr exactp(ZsArgs args){
 Lisp_ptr internal_number_equal(ZsArgs args){
   return number_binary(args[0], args[1],
                       equal_to<int>(),
-                      equal_to<Rational>(),
+                      equal_to<const Rational&>(),
                       equal_to<double>(),
-                      equal_to<Complex>());
+                      equal_to<const Complex&>());
 }
 
 Lisp_ptr internal_number_less(ZsArgs args){
   return number_binary(args[0], args[1],
                       less<int>(),
-                      less<Rational>(),
+                      less<const Rational&>(),
                       less<double>(),
                       inacceptable_number_type());
 }
@@ -185,7 +185,7 @@ Lisp_ptr internal_number_less(ZsArgs args){
 Lisp_ptr internal_number_greater(ZsArgs args){
   return number_binary(args[0], args[1],
                       greater<int>(),
-                      greater<Rational>(),
+                      greater<const Rational&>(),
                       greater<double>(),
                       inacceptable_number_type());
 }
@@ -193,7 +193,7 @@ Lisp_ptr internal_number_greater(ZsArgs args){
 Lisp_ptr internal_number_less_eq(ZsArgs args){
   return number_binary(args[0], args[1],
                       less_equal<int>(),
-                      less_equal<Rational>(),
+                      less_equal<const Rational&>(),
                       less_equal<double>(),
                       inacceptable_number_type());
 }
@@ -201,7 +201,7 @@ Lisp_ptr internal_number_less_eq(ZsArgs args){
 Lisp_ptr internal_number_greater_eq(ZsArgs args){
   return number_binary(args[0], args[1],
                       greater_equal<int>(),
-                      greater_equal<Rational>(),
+                      greater_equal<const Rational&>(),
                       greater_equal<double>(),
                       inacceptable_number_type());
 }
@@ -210,7 +210,7 @@ Lisp_ptr internal_number_greater_eq(ZsArgs args){
 Lisp_ptr internal_number_max(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return max(i1, i2); },
-                       [](Rational q1, Rational q2){ return max(q1, q2); },
+                       [](const Rational& q1, const Rational& q2){ return max(q1, q2); },
                        [](double d1, double d2){ return max(d1, d2); },
                        inacceptable_number_type());
 }
@@ -218,41 +218,41 @@ Lisp_ptr internal_number_max(ZsArgs args){
 Lisp_ptr internal_number_min(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return min(i1, i2); },
-                       [](Rational q1, Rational q2){ return min(q1, q2); },
+                       [](const Rational& q1, const Rational& q2){ return min(q1, q2); },
                        [](double d1, double d2){ return min(d1, d2); },
                        inacceptable_number_type());
 }
 
 Lisp_ptr internal_number_plus(ZsArgs args){
   return number_binary(args[0], args[1],
-                       [](int i1, int i2){ return Rational(i1, 1) += Rational(i2, 1); },
-                       [](Rational q1, Rational q2){ return q1 += q2; },
+                       [](int i1, int i2){ return Rational(i1) += Rational(i2); },
+                       [](Rational q1, const Rational& q2){ return q1 += q2; },
                        plus<double>(),
-                       plus<Complex>());
+                       plus<const Complex&>());
 }
 
 Lisp_ptr internal_number_multiple(ZsArgs args){
   return number_binary(args[0], args[1],
-                       [](int i1, int i2){ return Rational(i1, 1) *= Rational(i2, 1); },
-                       [](Rational q1, Rational q2){ return q1 *= q2; },
+                       [](int i1, int i2){ return Rational(i1) *= Rational(i2); },
+                       [](Rational q1, const Rational& q2){ return q1 *= q2; },
                        multiplies<double>(),
-                       multiplies<Complex>());
+                       multiplies<const Complex&>());
 }
 
 Lisp_ptr internal_number_minus(ZsArgs args){
   return number_binary(args[0], args[1],
-                       [](int i1, int i2){ return Rational(i1, 1) -= Rational(i2, 1); },
-                       [](Rational q1, Rational q2){ return q1 -= q2; },
+                       [](int i1, int i2){ return Rational(i1) -= Rational(i2); },
+                       [](Rational q1, const Rational& q2){ return q1 -= q2; },
                        minus<double>(),
-                       minus<Complex>());
+                       minus<const Complex&>());
 }
 
 Lisp_ptr internal_number_divide(ZsArgs args){
   return number_binary(args[0], args[1],
-                       [](int i1, int i2){ return Rational(i1, 1) /= Rational(i2, 1); },
-                       [](Rational q1, Rational q2){ return q1 /= q2; },
+                       [](int i1, int i2){ return Rational(i1) /= Rational(i2); },
+                       [](Rational q1, const Rational& q2){ return q1 /= q2; },
                        divides<double>(),
-                       divides<Complex>());
+                       divides<const Complex&>());
 }
 
 Lisp_ptr number_quot(ZsArgs args){
@@ -313,7 +313,7 @@ Lisp_ptr internal_number_lcm(ZsArgs args){
 Lisp_ptr number_numerator(ZsArgs args){
   return number_unary(args[0],
                       identity(),
-                      [](Rational q){ return q.numerator(); },
+                      [](const Rational& q){ return q.numerator(); },
                       inacceptable_number_type(),
                       inacceptable_number_type());
 }
@@ -321,7 +321,7 @@ Lisp_ptr number_numerator(ZsArgs args){
 Lisp_ptr number_denominator(ZsArgs args){
   return number_unary(args[0],
                       [](int){ return 1;},
-                      [](Rational q){ return q.denominator(); },
+                      [](const Rational& q){ return q.denominator(); },
                       inacceptable_number_type(),
                       inacceptable_number_type());
 }
@@ -330,7 +330,7 @@ Lisp_ptr number_denominator(ZsArgs args){
 Lisp_ptr number_floor(ZsArgs args){
   return number_unary(args[0],
                       identity(),
-                      [](Rational r){ return std::floor(static_cast<double>(r));},
+                      [](const Rational& r){ return std::floor(static_cast<double>(r));},
                       [](double d){ return std::floor(d);},
                       inacceptable_number_type());
 }
@@ -338,7 +338,7 @@ Lisp_ptr number_floor(ZsArgs args){
 Lisp_ptr number_ceil(ZsArgs args){
   return number_unary(args[0],
                       identity(),
-                      [](Rational r){ return std::ceil(static_cast<double>(r));},
+                      [](const Rational& r){ return std::ceil(static_cast<double>(r));},
                       [](double d){ return std::ceil(d);},
                       inacceptable_number_type());
 }
@@ -346,7 +346,7 @@ Lisp_ptr number_ceil(ZsArgs args){
 Lisp_ptr number_trunc(ZsArgs args){
   return number_unary(args[0],
                       identity(),
-                      [](Rational r){ return std::trunc(static_cast<double>(r));},
+                      [](const Rational& r){ return std::trunc(static_cast<double>(r));},
                       [](double d){ return std::trunc(d);},
                       inacceptable_number_type());
 }
@@ -354,7 +354,7 @@ Lisp_ptr number_trunc(ZsArgs args){
 Lisp_ptr number_round(ZsArgs args){
   return number_unary(args[0],
                       identity(),
-                      [](Rational r){ return std::round(static_cast<double>(r));},
+                      [](const Rational& r){ return std::round(static_cast<double>(r));},
                       [](double d){ return std::round(d);},
                       inacceptable_number_type());
 }
@@ -363,7 +363,7 @@ Lisp_ptr number_round(ZsArgs args){
 Lisp_ptr number_rationalize(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int){ return i1; },
-                       [](Rational q1, Rational){ return q1; },
+                       [](const Rational& q1, const Rational&){ return q1; },
                        [](double n1, double n2){
                          return rationalize(n1, n2);
                        },
@@ -374,65 +374,65 @@ Lisp_ptr number_rationalize(ZsArgs args){
 Lisp_ptr number_exp(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::exp(i);},
-                      [](Rational q){ return std::exp(static_cast<double>(q));},
+                      [](const Rational& q){ return std::exp(static_cast<double>(q));},
                       [](double d){ return std::exp(d);},
-                      [](Complex z){ return std::exp(z);});
+                      [](const Complex& z){ return std::exp(z);});
 }
 
 Lisp_ptr number_log(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::log(i);},
-                      [](Rational q){ return std::log(static_cast<double>(q));},
+                      [](const Rational& q){ return std::log(static_cast<double>(q));},
                       [](double d){ return std::log(d);},
-                      [](Complex z){ return std::log(z);});
+                      [](const Complex& z){ return std::log(z);});
 }
 
 Lisp_ptr number_sin(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::sin(i);},
-                      [](Rational q){ return std::sin(static_cast<double>(q));},
+                      [](const Rational& q){ return std::sin(static_cast<double>(q));},
                       [](double d){ return std::sin(d);},
-                      [](Complex z){ return std::sin(z);});
+                      [](const Complex& z){ return std::sin(z);});
 }
 
 Lisp_ptr number_cos(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::cos(i);},
-                      [](Rational q){ return std::cos(static_cast<double>(q));},
+                      [](const Rational& q){ return std::cos(static_cast<double>(q));},
                       [](double d){ return std::cos(d);},
-                      [](Complex z){ return std::cos(z);});
+                      [](const Complex& z){ return std::cos(z);});
 }
 
 Lisp_ptr number_tan(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::tan(i);},
-                      [](Rational q){ return std::tan(static_cast<double>(q));},
+                      [](const Rational& q){ return std::tan(static_cast<double>(q));},
                       [](double d){ return std::tan(d);},
-                      [](Complex z){ return std::tan(z);});
+                      [](const Complex& z){ return std::tan(z);});
 }
 
 Lisp_ptr number_asin(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::asin(i);},
-                      [](Rational q){ return std::asin(static_cast<double>(q));},
+                      [](const Rational& q){ return std::asin(static_cast<double>(q));},
                       [](double d){ return std::asin(d);},
-                      [](Complex z){ return std::asin(z);});
+                      [](const Complex& z){ return std::asin(z);});
 }
 
 Lisp_ptr number_acos(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::acos(i);},
-                      [](Rational q){ return std::acos(static_cast<double>(q));},
+                      [](const Rational& q){ return std::acos(static_cast<double>(q));},
                       [](double d){ return std::acos(d);},
-                      [](Complex z){ return std::acos(z);});
+                      [](const Complex& z){ return std::acos(z);});
 }
 
 Lisp_ptr internal_number_atan1(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::atan(i); },
-                      [](Rational q){ return std::atan(static_cast<double>(q));},
+                      [](const Rational& q){ return std::atan(static_cast<double>(q));},
                       [](double d){ return std::atan(d); },
-                      [](Complex z){ return std::atan(z); });
+                      [](const Complex& z){ return std::atan(z); });
 }
 
 Lisp_ptr internal_number_atan2(ZsArgs args){
@@ -440,7 +440,7 @@ Lisp_ptr internal_number_atan2(ZsArgs args){
                        [](int i1, int i2){
                          return std::atan2(i1, i2);
                        },
-                       [](Rational q1, Rational q2){
+                       [](const Rational& q1, const Rational& q2){
                          return std::atan2(static_cast<double>(q1), static_cast<double>(q2));
                        },
                        [](double d1, double d2){
@@ -452,24 +452,24 @@ Lisp_ptr internal_number_atan2(ZsArgs args){
 Lisp_ptr number_sqrt(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::sqrt(i);},
-                      [](Rational q){ return std::sqrt(static_cast<double>(q));},
+                      [](const Rational& q){ return std::sqrt(static_cast<double>(q));},
                       [](double d){ return std::sqrt(d);},
-                      [](Complex z){ return std::sqrt(z);});
+                      [](const Complex& z){ return std::sqrt(z);});
 }
 
 
 Lisp_ptr number_expt(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){
-                         return Rational(i1, 1).expt(Rational(i2, 1));
+                         return Rational(i1).expt(Rational(i2));
                        },
-                       [](Rational q1, Rational q2){
+                       [](Rational q1, const Rational& q2){
                          return q1.expt(q2);
                        },
                        [](double n1, double n2){
                          return std::pow(n1, n2);
                        },
-                       [](Complex z1, Complex z2){
+                       [](const Complex& z1, const Complex& z2){
                          return std::pow(z1, z2);
                        });
 }
@@ -479,7 +479,7 @@ Lisp_ptr number_rect(ZsArgs args){
                        [](int i1, int i2){
                          return Complex(i1, i2);
                        },
-                       [](Rational q1, Rational q2){
+                       [](const Rational& q1, const Rational& q2){
                          return Complex(static_cast<double>(q1), static_cast<double>(q2));
                        },
                        [](double n1, double n2){
@@ -494,7 +494,7 @@ Lisp_ptr number_polar(ZsArgs args){
                          return polar(static_cast<double>(i1),
                                       static_cast<double>(i2));
                        },
-                       [](Rational q1, Rational q2){
+                       [](const Rational& q1, const Rational& q2){
                          return polar(static_cast<double>(q1), static_cast<double>(q2));
                        },
                        [](double n1, double n2){
@@ -509,7 +509,7 @@ Lisp_ptr number_real(ZsArgs args){
                       inacceptable_number_type(),
                       inacceptable_number_type(),
                       inacceptable_number_type(),
-                      [](Complex z){ return z.real();});
+                      [](const Complex& z){ return z.real();});
 }
 
 Lisp_ptr number_imag(ZsArgs args){
@@ -517,7 +517,7 @@ Lisp_ptr number_imag(ZsArgs args){
                       inacceptable_number_type(),
                       inacceptable_number_type(),
                       inacceptable_number_type(),
-                      [](Complex z){ return z.imag();});
+                      [](const Complex& z){ return z.imag();});
 }
 
 Lisp_ptr number_mag(ZsArgs args){
@@ -525,7 +525,7 @@ Lisp_ptr number_mag(ZsArgs args){
                       inacceptable_number_type(),
                       inacceptable_number_type(),
                       inacceptable_number_type(),
-                      [](Complex z){ return std::abs(z);});
+                      [](const Complex& z){ return std::abs(z);});
 }
 
 Lisp_ptr number_angle(ZsArgs args){
@@ -533,7 +533,7 @@ Lisp_ptr number_angle(ZsArgs args){
                       inacceptable_number_type(),
                       inacceptable_number_type(),
                       inacceptable_number_type(),
-                      [](Complex z){ return arg(z);});
+                      [](const Complex& z){ return arg(z);});
 }
 
 

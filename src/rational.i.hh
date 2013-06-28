@@ -10,6 +10,12 @@
 #include "zs_memory.hh"
 
 inline
+Rational::Rational(int n)
+  : overflow_(false){
+  ratio_ = {n, 1};
+}
+
+inline
 Rational::Rational(long long n, long long d)
   : overflow_(false){
   normalized_reset(n, d);
