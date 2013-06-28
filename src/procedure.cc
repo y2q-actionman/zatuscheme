@@ -20,7 +20,7 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
   auto i = begin(args);
   for(; i; ++i){
     if(!identifierp(*i)){
-      throw zs_error("eval error: informal lambda list!", {args});
+      throw zs_error("eval error: informal lambda list!", args);
     }
     ++argc;
   }
@@ -29,7 +29,7 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
     return {argc, Variadic::f};
   }else{
     if(!identifierp(i.base())){
-      throw zs_error("eval error: informal lambda list!", {args});
+      throw zs_error("eval error: informal lambda list!", args);
     }
     return {argc, Variadic::t};
   }

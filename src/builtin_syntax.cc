@@ -23,7 +23,7 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
-    throw zs_error("invalid args!", {args});
+    throw zs_error("invalid args!", args);
   }
 
   if(!code){

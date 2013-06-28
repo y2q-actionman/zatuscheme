@@ -84,7 +84,7 @@ Lisp_ptr pick_first(Lisp_ptr p){
 
     return (*v)[0];
   }else{
-    throw zs_error("informal pattern passed!", {p});
+    throw zs_error("informal pattern passed!", p);
   }
 }
 
@@ -97,7 +97,7 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p, MatchSet tab){
       
     // pattern variable
     if(tab.find(p) != tab.end()){
-      throw zs_error("duplicated pattern variable!", {p});
+      throw zs_error("duplicated pattern variable!", p);
     }
     tab.insert(p);
     return;
@@ -468,7 +468,7 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
     auto pat_i = begin(i);
     auto tmpl_i = next(pat_i);
     if(next(tmpl_i)){
-      throw zs_error("invalid pattern: too long", {i});
+      throw zs_error("invalid pattern: too long", i);
     }
       
     check_pattern(*this, *pat_i);
@@ -491,9 +491,9 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     }catch(const try_match_failed& e){
       continue;
     }catch(const expand_failed& e){
-      throw zs_error("expand failed!", {form});
+      throw zs_error("expand failed!", form);
     }
   }
 
-  throw zs_error("no matching pattern found!", {form});
+  throw zs_error("no matching pattern found!", form);
 }

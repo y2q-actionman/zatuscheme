@@ -2,7 +2,6 @@
 #define ZS_ERROR_HH
 
 #include <string>
-#include <initializer_list>
 #include <cstdlib>
 #include <cassert>
 #include "decl.hh"
@@ -18,7 +17,7 @@ std::string printf_string(const char*, ...)
   }while(0)
 
 Lisp_ptr zs_error(const std::string&);
-Lisp_ptr zs_error(const std::string&, std::initializer_list<Lisp_ptr>);
+Lisp_ptr zs_error(const std::string&, Lisp_ptr);
 
 Lisp_ptr zs_error_append(const char*, Lisp_ptr);
 

@@ -29,16 +29,12 @@ Lisp_ptr zs_error(const std::string& str){
   return zs_error(str, {});
 }
 
-Lisp_ptr zs_error(const std::string& str, std::initializer_list<Lisp_ptr> args){
+Lisp_ptr zs_error(const std::string& str, Lisp_ptr p){
   ostringstream oss;
 
   oss << str;
-  if(args.size() > 0){
-    oss << " @ (";
-    for(auto p : args){
-      oss << p << " ";
-    }
-    oss << ")";
+  if(p){
+    oss << " @ (" << p << ")";
   }
   oss << endl;
   
@@ -52,7 +48,7 @@ Lisp_ptr zs_error_append(const char* context, Lisp_ptr p){
 }
 
 Lisp_ptr builtin_type_check_failed(Ptr_tag tag, Lisp_ptr p){
-  return zs_error(printf_string("arg is not %s!", stringify(tag)), {p});
+  return zs_error(printf_string("arg is not %s!", stringify(tag)), p);
 }
 
 Lisp_ptr builtin_argcount_failed(const char* name, int required, int max, int passed){
@@ -63,7 +59,7 @@ Lisp_ptr builtin_argcount_failed(const char* name, int required, int max, int pa
 }
 
 Lisp_ptr builtin_identifier_check_failed(Lisp_ptr p){
-  return zs_error("arg is not identifier!", {p});
+  return zs_error("arg is not identifier!", p);
 }
 
 Lisp_ptr builtin_range_check_failed(int max, int passed){
@@ -72,9 +68,9 @@ Lisp_ptr builtin_range_check_failed(int max, int passed){
 }
 
 Lisp_ptr number_type_check_failed(Lisp_ptr p){
-  return zs_error("arg is not number!", {p});
+  return zs_error("arg is not number!", p);
 }
 
 Lisp_ptr procedure_type_check_failed(Lisp_ptr p){
-  return zs_error("arg is not procedure!", {p});
+  return zs_error("arg is not procedure!", p);
 }

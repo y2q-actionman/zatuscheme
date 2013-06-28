@@ -132,12 +132,12 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
 Lisp_ptr with_exception_handler(ZsArgs args){
   Lisp_ptr handler = args[0];
   if(!is_procedure(handler.tag())){
-    throw zs_error("arg is not procedure!", {handler});
+    throw zs_error("arg is not procedure!", handler);
   }
 
   Lisp_ptr thunk = args[1];
   if(!is_procedure(thunk.tag())){
-    throw zs_error("arg is not procedure!", {thunk});
+    throw zs_error("arg is not procedure!", thunk);
   }
 
   args.cleanup();
