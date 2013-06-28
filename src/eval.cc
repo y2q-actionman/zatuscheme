@@ -331,7 +331,7 @@ void proc_enter_srule(SyntaxRules* srule){
     auto code = srule->apply(args[0], args[1].get<Env*>());
     vm.return_value = {code};
   }catch(Lisp_ptr p){
-    throw zs_error_append("syntax-rules", {p});
+    throw zs_error_append("syntax-rules", p);
   }
 }
 
@@ -380,7 +380,7 @@ void vm_op_proc_enter(){
   vm.code.pop_back();
 
   if(!is_procedure(proc.tag())){
-    throw zs_error(proc, "eval error: the object used for call is not a procedure");
+    throw procedure_type_check_failed(proc);
   }
 
   assert(!vm.stack.empty());
