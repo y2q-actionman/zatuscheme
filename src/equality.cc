@@ -1,12 +1,10 @@
 #include <algorithm>
 
-#include "equality.hh"
-#include "printer.hh"
 #include "cons.hh"
 #include "cons_util.hh"
-#include "s_closure.hh"
-#include "zs_error.hh"
+#include "equality.hh"
 #include "rational.hh"
+#include "zs_error.hh"
 
 using namespace std;
 

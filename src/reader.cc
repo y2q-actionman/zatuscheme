@@ -1,16 +1,13 @@
-#include <utility>
 #include <istream>
 
-#include "reader.hh"
-#include "vm.hh"
-#include "zs_error.hh"
-#include "lisp_ptr.hh"
-#include "token.hh"
 #include "cons.hh"
 #include "cons_util.hh"
-#include "symbol.hh"
-#include "rational.hh"
+#include "lisp_ptr.hh"
+#include "reader.hh"
+#include "token.hh"
+#include "zs_error.hh"
 #include "zs_memory.hh"
+#include "vm.hh"
 
 using namespace std;
 

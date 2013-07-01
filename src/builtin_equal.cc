@@ -1,4 +1,5 @@
 #include "builtin_equal.hh"
+#include "equality.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
 

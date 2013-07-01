@@ -1,12 +1,13 @@
 #include <cassert>
 #include <string>
 
-#include "procedure.hh"
+#include "builtin.hh"
 #include "cons.hh"
 #include "cons_util.hh"
+#include "procedure.hh"
 #include "s_closure.hh"
 #include "s_rules.hh"
-#include "builtin.hh"
+#include "zs_error.hh"
 
 using namespace proc_flag;
 

@@ -1,13 +1,12 @@
-#include <stdexcept>
-#include <utility>
-#include <climits>
 #include <cassert>
+#include <climits>
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 
 #include "rational.hh"
-#include "zs_memory.hh"
 #include "zs_error.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 

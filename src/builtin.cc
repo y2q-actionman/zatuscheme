@@ -7,6 +7,7 @@
 
 #include "builtin.hh"
 #include "eval.hh"
+#include "env.hh"
 #include "lisp_ptr.hh"
 #include "procedure.hh"
 #include "reader.hh"

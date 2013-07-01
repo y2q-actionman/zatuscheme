@@ -4,9 +4,6 @@
 #include "lisp_ptr.hh"
 #include "procedure.hh"
 
-#include <vector>
-#include <utility>
-
 class SyntaxRules{
 public:
   SyntaxRules(Env*, Lisp_ptr literals, Lisp_ptr rules);

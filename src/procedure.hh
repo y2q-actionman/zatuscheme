@@ -4,7 +4,6 @@
 #include <utility>
 #include <limits>
 #include "lisp_ptr.hh"
-#include "env.hh"
 #include "vm.hh"
 
 typedef Lisp_ptr(*NativeFunc)(ZsArgs);
@@ -62,9 +61,6 @@ struct ProcInfo {
       move_ret(m),
       leaving(l){}
 };
-
-// static_assert(sizeof(ProcInfo) == (sizeof(int) + sizeof(int) + sizeof(int)),
-//               "ProcInfo became too big!!");
 
 std::pair<int, proc_flag::Variadic> parse_func_arg(Lisp_ptr);
 

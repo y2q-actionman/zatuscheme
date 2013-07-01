@@ -1,14 +1,12 @@
 #ifndef VM_HH
 #define VM_HH
 
+#include <iosfwd>
 #include <memory>
 #include <vector>
-#include <iosfwd>
 
 #include "lisp_ptr.hh"
-#include "cons.hh"
 #include "symbol.hh"
-#include "env.hh"
 
 class VM {
 public:

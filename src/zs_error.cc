@@ -1,14 +1,12 @@
-#include <cstdio>
-#include <utility>
 #include <cstdarg>
+#include <cstdio>
 #include <sstream>
-#include <cassert>
 #include <string>
 
-#include "zs_error.hh"
-#include "zs_memory.hh"
 #include "lisp_ptr.hh"
 #include "printer.hh"
+#include "zs_error.hh"
+#include "zs_memory.hh"
 
 static const size_t ERROR_MESSAGE_LENGTH = 256;
 

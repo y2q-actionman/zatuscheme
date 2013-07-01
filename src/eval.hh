@@ -1,8 +1,7 @@
 #ifndef EVAL_HH
 #define EVAL_HH
 
-#include "lisp_ptr.hh"
-#include "procedure.hh"
+#include "decl.hh"
 
 // primitives for syntax call
 constexpr VMop vm_op_nop = nullptr;

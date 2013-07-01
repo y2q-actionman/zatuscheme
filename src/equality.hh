@@ -1,7 +1,6 @@
 #ifndef EQUALITY_HH
 #define EQUALITY_HH
 
-#include <functional>
 #include <cstddef>
 #include "lisp_ptr.hh"
 

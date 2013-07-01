@@ -1,9 +1,8 @@
+#include <cassert>
+
 #include "cons_util.hh"
 #include "lisp_ptr.hh"
-#include "cons.hh"
-#include "zs_memory.hh"
-
-#include <cassert>
+#include "zs_error.hh"
 
 // GrowList class
 void GrowList::push(Lisp_ptr p){

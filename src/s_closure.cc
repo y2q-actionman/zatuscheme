@@ -1,7 +1,7 @@
-#include "s_closure.hh"
 #include "cons_util.hh"
-#include "zs_error.hh"
 #include "env.hh"
+#include "s_closure.hh"
+#include "zs_error.hh"
 
 SyntacticClosure::SyntacticClosure(Env* e, Lisp_ptr f, Lisp_ptr ex)
   : env_(e), free_names_(f), expr_(ex){

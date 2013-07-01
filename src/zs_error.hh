@@ -1,8 +1,8 @@
 #ifndef ZS_ERROR_HH
 #define ZS_ERROR_HH
 
-#include <cstdlib>
 #include <cassert>
+#include <cstdlib>
 #include "decl.hh"
 
 #define UNEXP_DEFAULT() do{\

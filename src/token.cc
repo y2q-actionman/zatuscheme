@@ -1,17 +1,16 @@
-#include <istream>
-#include <cstdlib>
-#include <cstring>
-#include <stdexcept>
-#include <climits>
-#include <iostream>
 #include <cctype>
+#include <climits>
+#include <cstdlib>
+#include <iostream>
+#include <istream>
+#include <stdexcept>
 #include <string>
 
 #include "config.h"
 
-#include "token.hh"
 #include "lisp_ptr.hh"
 #include "rational.hh"
+#include "token.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
 #include "vm.hh"

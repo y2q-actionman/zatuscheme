@@ -1,18 +1,17 @@
-#include <algorithm>
 #include <iterator>
 #include <unordered_set>
 #include <unordered_map>
-#include <utility>
+#include <vector>
 
+#include "builtin_extra.hh"
+#include "cons_util.hh"
+#include "equality.hh"
+#include "printer.hh"
 #include "s_rules.hh"
 #include "s_closure.hh"
-#include "cons_util.hh"
-#include "env.hh"
+#include "symbol.hh"
 #include "zs_error.hh"
-#include "builtin_extra.hh"
-#include "printer.hh"
-#include "equality.hh"
-#include "eval.hh"
+#include "zs_memory.hh"
 
 using namespace std;
 

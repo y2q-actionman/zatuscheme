@@ -1,17 +1,18 @@
 #include <cassert>
 #include <ostream>
 
-#include "lisp_ptr.hh"
-#include "printer.hh"
-#include "symbol.hh"
 #include "cons.hh"
 #include "cons_util.hh"
-#include "vm.hh"
 #include "eval.hh"
-#include "s_closure.hh"
-#include "builtin.hh"
+#include "lisp_ptr.hh"
+#include "printer.hh"
+#include "procedure.hh"
 #include "rational.hh"
+#include "symbol.hh"
+#include "s_closure.hh"
 #include "token.hh"
+#include "vm.hh"
+#include "zs_error.hh"
 
 using namespace std;
 

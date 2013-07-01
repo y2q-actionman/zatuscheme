@@ -1,15 +1,15 @@
 #include <unordered_map>
-#include <algorithm>
-#include "zs_memory.hh"
-#include "vm.hh"
+
 #include "cons.hh"
 #include "env.hh"
 #include "procedure.hh"
-#include "s_closure.hh"
-#include "symbol.hh"
-#include "s_rules.hh"
-#include "zs_error.hh"
 #include "rational.hh"
+#include "s_closure.hh"
+#include "s_rules.hh"
+#include "symbol.hh"
+#include "zs_error.hh"
+#include "zs_memory.hh"
+#include "vm.hh"
 
 using namespace std;
 

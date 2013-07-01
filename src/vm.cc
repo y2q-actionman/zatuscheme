@@ -1,10 +1,8 @@
-#include <cassert>
-#include <ostream>
 #include <exception>
+#include <ostream>
 
-#include "vm.hh"
-#include "env.hh"
 #include "printer.hh"
+#include "vm.hh"
 #include "zs_memory.hh"
 
 VM vm;

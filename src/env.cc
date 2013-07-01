@@ -1,8 +1,6 @@
-#include <utility>
 #include <ostream>
 
 #include "env.hh"
-#include "symbol.hh"
 #include "printer.hh"
 #include "zs_memory.hh"
 

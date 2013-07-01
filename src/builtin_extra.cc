@@ -3,6 +3,7 @@
 
 #include "builtin_extra.hh"
 #include "cons_util.hh"
+#include "env.hh"
 #include "eval.hh"
 #include "lisp_ptr.hh"
 #include "printer.hh"

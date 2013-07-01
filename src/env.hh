@@ -1,11 +1,11 @@
 #ifndef ENV_HH
 #define ENV_HH
 
-#include <unordered_map>
 #include <iosfwd>
+#include <unordered_map>
 
-#include "lisp_ptr.hh"
 #include "equality.hh"
+#include "lisp_ptr.hh"
 
 class Env {
 public:

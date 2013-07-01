@@ -5,7 +5,6 @@
 #error "Please include via parent file"
 #endif
 
-#include <utility>
 #include "zs_error.hh"
 #include "zs_memory.hh"
 
