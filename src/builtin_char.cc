@@ -1,4 +1,3 @@
-#include <functional>
 #include <cctype>
 
 #include "builtin_char.hh"

@@ -1,11 +1,9 @@
 #include "builtin_cons.hh"
-#include "lisp_ptr.hh"
-#include "vm.hh"
 #include "cons.hh"
 #include "cons_util.hh"
-#include "printer.hh"
+#include "lisp_ptr.hh"
+#include "vm.hh"
 #include "zs_error.hh"
-#include "equality.hh"
 #include "zs_memory.hh"
 
 using namespace std;

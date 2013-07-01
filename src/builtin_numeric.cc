@@ -1,21 +1,17 @@
-#include <iterator>             // next, prev
 #include <algorithm>            // max, min
-#include <cstdlib>              // abs
 #include <cmath>
-#include <sstream>
+#include <cstdlib>              // abs
 #include <functional>
-#include <iostream>             // warning messages
+#include <sstream>
 
 #include "builtin_numeric.hh"
-#include "vm.hh"
-#include "builtin.hh"
-#include "zs_error.hh"
-#include "lisp_ptr.hh"
 #include "eval.hh"
+#include "lisp_ptr.hh"
 #include "printer.hh"
-#include "equality.hh"
-#include "token.hh"
 #include "rational.hh"
+#include "token.hh"
+#include "vm.hh"
+#include "zs_error.hh"
 #include "zs_memory.hh"
 
 using namespace std;

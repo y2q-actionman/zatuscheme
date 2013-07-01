@@ -1,16 +1,10 @@
-#include <vector>
-#include <utility>
-#include <functional>
-#include <string>
 #include <cstring>
-#include <algorithm>
+#include <string>
 
 #include "builtin_string.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
-#include "eval.hh"
 #include "zs_error.hh"
-#include "cons_util.hh"
 #include "zs_memory.hh"
 
 using namespace std;

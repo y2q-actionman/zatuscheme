@@ -2,16 +2,14 @@
 #include <vector>
 
 #include "builtin_syntax.hh"
-#include "lisp_ptr.hh"
-#include "vm.hh"
-#include "eval.hh"
-#include "zs_error.hh"
-#include "procedure.hh"
-#include "printer.hh"
 #include "cons_util.hh"
+#include "eval.hh"
+#include "lisp_ptr.hh"
+#include "procedure.hh"
 #include "s_closure.hh"
 #include "s_rules.hh"
-#include "builtin.hh"
+#include "vm.hh"
+#include "zs_error.hh"
 #include "zs_memory.hh"
 
 using namespace std;

@@ -1,7 +1,7 @@
 #include "builtin_symbol.hh"
 #include "lisp_ptr.hh"
-#include "vm.hh"
 #include "symbol.hh"
+#include "vm.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
 

@@ -1,19 +1,17 @@
-#include <sstream>
+#include <iostream>
 #include <istream>
 #include <fstream>
-#include <iostream>
-#include <cstring>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include "builtin.hh"
-#include "zs_error.hh"
-#include "procedure.hh"
-#include "lisp_ptr.hh"
 #include "eval.hh"
+#include "lisp_ptr.hh"
+#include "procedure.hh"
 #include "reader.hh"
-#include "printer.hh"
 #include "vm.hh"
+#include "zs_error.hh"
 #include "zs_memory.hh"
 #include "zs_scm_include.hh"
 

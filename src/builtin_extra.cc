@@ -1,19 +1,16 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 #include "builtin_extra.hh"
-#include "lisp_ptr.hh"
-#include "vm.hh"
-#include "procedure.hh"
-#include "s_closure.hh"
-#include "eval.hh"
-#include "env.hh"
-#include "equality.hh"
-#include "builtin.hh"
-#include "zs_error.hh"
 #include "cons_util.hh"
-#include "reader.hh"
+#include "eval.hh"
+#include "lisp_ptr.hh"
 #include "printer.hh"
+#include "procedure.hh"
+#include "reader.hh"
+#include "s_closure.hh"
+#include "vm.hh"
+#include "zs_error.hh"
 #include "zs_memory.hh"
 
 #ifdef _POSIX_C_SOURCE

@@ -1,16 +1,15 @@
-#include <cassert>
+#include <fstream>
+#include <iostream>
 #include <istream>
 #include <ostream>
-#include <fstream>
 #include <sstream>
-#include <iostream>
 
 #include "builtin_port.hh"
 #include "lisp_ptr.hh"
-#include "reader.hh"
 #include "printer.hh"
-#include "zs_error.hh"
+#include "reader.hh"
 #include "vm.hh"
+#include "zs_error.hh"
 #include "zs_memory.hh"
 
 using namespace std;
