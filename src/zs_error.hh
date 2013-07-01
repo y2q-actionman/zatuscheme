@@ -10,8 +10,8 @@
     abort();\
   }while(0)
 
-Lisp_ptr zs_error(Lisp_ptr, const char*, ...)
-  __attribute__ ((format (printf, 2, 3)))
+void throw_zs_error(Lisp_ptr, const char*, ...)
+  __attribute__ ((noreturn, format (printf, 2, 3)))
   ;
 
 void throw_zs_error_append(const char*, Lisp_ptr)

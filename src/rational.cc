@@ -175,7 +175,7 @@ Lisp_ptr to_exact(Lisp_ptr p){
   case Ptr_tag::real:
     return wrap_number(static_cast<int>(*p.get<double*>()));
   case Ptr_tag::complex:
-    throw zs_error(p, "number error: conversion from complex to exact number is not supprted.\n");
+    throw_zs_error(p, "number error: conversion from complex to exact number is not supprted.\n");
   case Ptr_tag::undefined:
   case Ptr_tag::boolean:
   case Ptr_tag::character:

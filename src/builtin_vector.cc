@@ -17,7 +17,7 @@ Lisp_ptr internal_vector_make(ZsArgs args){
 
   auto count = args[0].get<int>();
   if(count < 0){
-    throw zs_error(args[0], "passed size is invalid");
+    throw_zs_error(args[0], "passed size is invalid");
   }    
 
   return {zs_new<Vector>(count, args[1])};

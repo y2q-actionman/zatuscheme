@@ -193,32 +193,32 @@ Lisp_ptr tmp_file(ZsArgs){
   auto fd = mkstemp(name);
   if(fd == -1){
     auto eno = errno;
-    throw zs_error({}, "mkstemp(3) error: %s", strerror(eno));
+    throw_zs_error({}, "mkstemp(3) error: %s", strerror(eno));
   }
 
   InputPort* i_port = zs_new_with_tag<ifstream, Ptr_tag::input_port>(name);
   if(!i_port || !*i_port){
-    throw zs_error({}, "failed at opening file for input");
+    throw_zs_error({}, "failed at opening file for input");
   }
   
   OutputPort* o_port = zs_new_with_tag<ofstream, Ptr_tag::output_port>(name);
   if(!o_port || !*o_port){
-    throw zs_error({}, "failed at opening file for output");
+    throw_zs_error({}, "failed at opening file for output");
   }
   
   if(close(fd) == -1){
     auto eno = errno;
-    throw zs_error({}, "close(2) error: %s", strerror(eno));
+    throw_zs_error({}, "close(2) error: %s", strerror(eno));
   }
 
   if(unlink(name) == -1){
     auto eno = errno;
-    throw zs_error({}, "unlink(2) error: %s", strerror(eno));
+    throw_zs_error({}, "unlink(2) error: %s", strerror(eno));
   }
 
   return make_cons_list({i_port, o_port});
 #else
-  throw zs_error({}, "tmp-file is not supported");
+  throw_zs_error({}, "tmp-file is not supported");
 #endif
 }
 

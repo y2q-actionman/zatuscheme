@@ -23,13 +23,13 @@ Lisp_ptr read_list(istream& f){
 
   // first check
   if(eof_object_p(p)){
-    throw zs_error({}, "reader error: reached EOF in a list.\n");
+    throw_zs_error({}, "reader error: reached EOF in a list.\n");
   }else if(p.tag() == Ptr_tag::notation){
     auto n = p.get<Notation>();
     if(n == Notation::r_paren){ // empty list
       return Cons::NIL;
     }else if(n == Notation::dot){
-      throw zs_error({}, "reader error: dotted list has no car.\n");
+      throw_zs_error({}, "reader error: dotted list has no car.\n");
     }
   }
 
@@ -42,7 +42,7 @@ Lisp_ptr read_list(istream& f){
     // check next token
     p = tokenize(f);
     if(eof_object_p(p)){
-      throw zs_error({}, "reader error: reached EOF in a list.\n");
+      throw_zs_error({}, "reader error: reached EOF in a list.\n");
     }else if(p.tag() == Ptr_tag::notation){
       auto n = p.get<Notation>();
       if(n == Notation::r_paren){ // proper list
@@ -51,7 +51,7 @@ Lisp_ptr read_list(istream& f){
         auto ret = gl.extract_with_tail(read(f));
         p = tokenize(f);
         if(eof_object_p(p) || p.get<Notation>() != Notation::r_paren){
-          throw zs_error({}, "reader error: dotted list has two or more cdrs.\n");
+          throw_zs_error({}, "reader error: dotted list has two or more cdrs.\n");
         }
         return ret;
       }
@@ -67,7 +67,7 @@ Lisp_ptr read_vector(istream& f){
   while(1){
     auto p = tokenize(f);
     if(eof_object_p(p)){
-      throw zs_error({}, "reader error: reached EOF in a vector.\n");
+      throw_zs_error({}, "reader error: reached EOF in a vector.\n");
     }else if(p.tag() == Ptr_tag::notation
              && p.get<Notation>() == Notation::r_paren){
       return {v};
@@ -110,17 +110,17 @@ Lisp_ptr read_la(istream& f, Lisp_ptr p){
       
   case Notation::l_bracket:
   case Notation::l_brace:
-    throw zs_error(p, "reader error: not supported notation!");
+    throw_zs_error(p, "reader error: not supported notation!");
 
   case Notation::r_paren:
   case Notation::r_bracket:
   case Notation::r_brace:
-    throw zs_error(p, "reader error: closing notation appeared alone!");
+    throw_zs_error(p, "reader error: closing notation appeared alone!");
 
   case Notation::dot:
   case Notation::bar:
   default:
-    throw zs_error(p, "reader error: unexpected notation was passed!");
+    throw_zs_error(p, "reader error: unexpected notation was passed!");
   }
 }
 

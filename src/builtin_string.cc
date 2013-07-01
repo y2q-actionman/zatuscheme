@@ -41,7 +41,7 @@ Lisp_ptr internal_string_make(ZsArgs args){
 
   auto char_count = args[0].get<int>();
   if(char_count < 0){
-    throw zs_error(args[0], "passed size is invalid");
+    throw_zs_error(args[0], "passed size is invalid");
   }    
 
   if(args[1].tag() != Ptr_tag::character){

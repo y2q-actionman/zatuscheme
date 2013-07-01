@@ -73,7 +73,7 @@ void vm_op_macro_call(){
 */
 void vm_op_stack_splicing(){
   if(vm.code.back().get<VMop>() != vm_op_arg_push){
-    throw zs_error({}, "eval internal error: stack-splicing operater is called in invalid context!\n");
+    throw_zs_error({}, "eval internal error: stack-splicing operater is called in invalid context!\n");
   }
   vm.code.pop_back();
 
@@ -92,7 +92,7 @@ void vm_op_stack_splicing(){
     }
   }
 
-  throw zs_error({}, "eval internal error: stack-splicing cannot find corresponding vm_argcount marker!\n");
+  throw_zs_error({}, "eval internal error: stack-splicing cannot find corresponding vm_argcount marker!\n");
 }
 
 /*
@@ -218,14 +218,14 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   // variadic arg push
   if(info->max_args > info->required_args){
     if(!identifierp(arg_name)){
-      throw zs_error({}, "eval error: no arg name for variadic arg!\n");
+      throw_zs_error({}, "eval error: no arg name for variadic arg!\n");
     }
 
     auto var_args = make_cons_list(i, arg_end);
     local_set_with_identifier(vm.frame, arg_name, var_args);
   }else{
     if(i != arg_end){
-      throw zs_error({}, "eval error: corrupted stack -- passed too much args!\n");
+      throw_zs_error({}, "eval error: corrupted stack -- passed too much args!\n");
     }
   }
 
