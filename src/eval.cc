@@ -153,7 +153,7 @@ void proc_enter_native(const NProcedure* fun){
       vm.return_value = {p};
     }
   }catch(Lisp_ptr p){
-    throw zs_error_append(find_builtin_nproc_name(fun), p);
+    throw_zs_error_append(find_builtin_nproc_name(fun), p);
   }
 }
 
@@ -331,7 +331,7 @@ void proc_enter_srule(SyntaxRules* srule){
     auto code = srule->apply(args[0], args[1].get<Env*>());
     vm.return_value = {code};
   }catch(Lisp_ptr p){
-    throw zs_error_append("syntax-rules", p);
+    throw_zs_error_append("syntax-rules", p);
   }
 }
 

@@ -32,10 +32,10 @@ Lisp_ptr zs_error(Lisp_ptr p, const char* fmt, ...){
   }
 }
 
-Lisp_ptr zs_error_append(const char* context, Lisp_ptr p){
+void throw_zs_error_append(const char* context, Lisp_ptr p){
   ostringstream oss;
   oss << context << " : " << p;
-  return zs_new<String>(oss.str());
+  throw Lisp_ptr{zs_new<String>(oss.str())};
 }
 
 void throw_builtin_type_check_failed(Ptr_tag tag, Lisp_ptr p){

@@ -14,7 +14,9 @@ Lisp_ptr zs_error(Lisp_ptr, const char*, ...)
   __attribute__ ((format (printf, 2, 3)))
   ;
 
-Lisp_ptr zs_error_append(const char*, Lisp_ptr);
+void throw_zs_error_append(const char*, Lisp_ptr)
+  __attribute__ ((noreturn))
+  ;
 
 void throw_builtin_type_check_failed(Ptr_tag, Lisp_ptr)
   __attribute__ ((noreturn))
