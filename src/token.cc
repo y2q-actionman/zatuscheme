@@ -1,7 +1,6 @@
 #include <cctype>
 #include <climits>
 #include <cstdlib>
-#include <iostream>
 #include <istream>
 #include <stdexcept>
 #include <string>
@@ -279,7 +278,7 @@ Lisp_ptr zs_stoi(int radix, const string& s){
     if(tmp > INT_MAX) break;
   }
 
-  cerr << "passed integer fallen into float (" << s << ")\n";
+  print_zs_warning("passed integer fallen into float (%s)", s.c_str());
 
   double d = static_cast<double>(tmp);
 

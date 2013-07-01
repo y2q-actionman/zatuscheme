@@ -169,7 +169,6 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   // tail call check
   if(!vm.code.empty()
      && vm.code.back().get<VMop>() == vm_op_leave_frame){
-    // cout << "tail call!" << endl;
     vm.code.pop_back();
     vm_op_leave_frame();
   }
@@ -641,12 +640,12 @@ void eval(){
   }
 
   if(!vm.code.empty()){
-    cerr << "eval internal warning: VM code stack is broken!\n";
+    print_zs_warning("eval internal warning: VM code stack is broken!");
     vm.code.clear();
   }
 
   if(!vm.stack.empty()){
-    cerr << "eval internal warning: VM stack is broken! (stack has values unexpectedly.)\n";
+    print_zs_warning("eval internal warning: VM stack is broken! (stack has values unexpectedly.)");
     vm.stack.clear();
   }
 }

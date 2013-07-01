@@ -1,5 +1,6 @@
 #include <cstdarg>
 #include <cstdio>
+#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -12,13 +13,18 @@ static const size_t ERROR_MESSAGE_LENGTH = 256;
 
 using namespace std;
 
+static
+string vprintf_string(const char* fmt, va_list ap){
+  string str(ERROR_MESSAGE_LENGTH, '\0');
+  vsnprintf(&(str[0]), str.size(), fmt, ap);
+  return str;
+}
+
 // error functions
 void throw_zs_error(Lisp_ptr p, const char* fmt, ...){
-  string str(ERROR_MESSAGE_LENGTH, '\0');
-
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(&(str[0]), str.size(), fmt, ap);
+  auto str = vprintf_string(fmt, ap);
   va_end(ap);
 
   if(!p){
@@ -63,3 +69,13 @@ void throw_number_type_check_failed(Lisp_ptr p){
 void throw_procedure_type_check_failed(Lisp_ptr p){
   throw_zs_error(p, "arg is not procedure!");
 }
+
+void print_zs_warning(const char* fmt, ...){
+  va_list ap;
+  va_start(ap, fmt);
+  auto str = vprintf_string(fmt, ap);
+  va_end(ap);
+
+  cerr << str << endl;
+}
+

@@ -37,4 +37,8 @@ void throw_procedure_type_check_failed(Lisp_ptr)
   __attribute__ ((noreturn))
   ;
 
+void print_zs_warning(const char*, ...)
+  __attribute__ ((format (printf, 1, 2)))
+  ;
+
 #endif // ZS_ERROR_HH

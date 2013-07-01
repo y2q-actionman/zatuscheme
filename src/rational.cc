@@ -1,7 +1,6 @@
 #include <cassert>
 #include <climits>
 #include <cmath>
-#include <iostream>
 #include <stdexcept>
 
 #include "rational.hh"
@@ -153,7 +152,7 @@ Lisp_ptr wrap_number(const Rational& q){
   }else if(q.is_convertible<Rational>()){
     return {zs_new<Rational>(q)};
   }else{
-    cerr << "integer overflow occured. coerced into real.\n";
+    print_zs_warning("integer overflow occured. coerced into real.");
     return {zs_new<double>(static_cast<double>(q))};
   }
 }

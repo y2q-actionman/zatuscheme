@@ -1,5 +1,4 @@
 #include <fstream>
-#include <iostream>
 #include <istream>
 #include <ostream>
 #include <sstream>
@@ -40,7 +39,7 @@ Lisp_ptr port_close(ZsArgs args){
 
   auto fio = dynamic_cast<F_IOType*>(p);
   if(!fio){
-    cerr << "warning: passed port is not associated to file\n";
+    print_zs_warning("warning: passed port is not associated to file");
     return Lisp_ptr{false};
   }
 
