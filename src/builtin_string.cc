@@ -21,7 +21,7 @@ template<typename Fun>
 Lisp_ptr internal_string_cmp(ZsArgs args, Fun fun){
   for(auto p : args){
     if(p.tag() != Ptr_tag::string){
-      throw builtin_type_check_failed(Ptr_tag::string, p);
+      throw_builtin_type_check_failed(Ptr_tag::string, p);
     }
   }
 
@@ -36,7 +36,7 @@ namespace builtin {
 
 Lisp_ptr internal_string_make(ZsArgs args){
   if(args[0].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed(Ptr_tag::integer, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::integer, args[0]);
   }
 
   auto char_count = args[0].get<int>();
@@ -45,7 +45,7 @@ Lisp_ptr internal_string_make(ZsArgs args){
   }    
 
   if(args[1].tag() != Ptr_tag::character){
-    throw builtin_type_check_failed(Ptr_tag::character, args[1]);
+    throw_builtin_type_check_failed(Ptr_tag::character, args[1]);
   }
   
   return {zs_new<String>(char_count, args[1].get<char>())};
@@ -54,7 +54,7 @@ Lisp_ptr internal_string_make(ZsArgs args){
 Lisp_ptr string_length(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
   // TODO: add range check, and remove cast
@@ -65,16 +65,16 @@ Lisp_ptr string_length(ZsArgs args){
 Lisp_ptr string_ref(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
   if(args[1].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed(Ptr_tag::integer, args[1]);
+    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
   }
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw builtin_range_check_failed(str->length(), ind);
+    throw_builtin_range_check_failed(str->length(), ind);
   }
 
   return Lisp_ptr{(*str)[ind]};
@@ -83,21 +83,21 @@ Lisp_ptr string_ref(ZsArgs args){
 Lisp_ptr string_set(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
   if(args[1].tag() != Ptr_tag::integer){
-    throw builtin_type_check_failed(Ptr_tag::integer, args[1]);
+    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
   }
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw builtin_range_check_failed(str->length(), ind);
+    throw_builtin_range_check_failed(str->length(), ind);
   }
 
   auto ch = args[2].get<char>();
   if(!ch){
-    throw builtin_type_check_failed(Ptr_tag::character, args[2]);
+    throw_builtin_type_check_failed(Ptr_tag::character, args[2]);
   }
 
   (*str)[ind] = ch;

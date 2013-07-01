@@ -461,7 +461,7 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
   : env_(e), literals_(lits), rules_(rls){
   for(auto i : lits){
     if(!identifierp(i))
-      throw builtin_identifier_check_failed(i);
+      throw_builtin_identifier_check_failed(i);
   }
 
   for(auto i : rls){

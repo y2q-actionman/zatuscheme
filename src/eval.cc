@@ -140,7 +140,7 @@ void proc_enter_native(const NProcedure* fun){
   auto argc = vm.stack.back().get<int>();
 
   if(!((info->required_args <= argc) && (argc <= info->max_args))){
-    throw builtin_argcount_failed(find_builtin_nproc_name(fun),
+    throw_builtin_argcount_failed(find_builtin_nproc_name(fun),
                                   info->required_args, info->max_args,
                                   argc);
   }
@@ -325,7 +325,7 @@ void proc_enter_srule(SyntaxRules* srule){
   ZsArgs args;
 
   if(args.size() != 2)
-    throw builtin_argcount_failed("syntax-rules entry", 2, 2, args.size());
+    throw_builtin_argcount_failed("syntax-rules entry", 2, 2, args.size());
 
   try{
     auto code = srule->apply(args[0], args[1].get<Env*>());
@@ -380,7 +380,7 @@ void vm_op_proc_enter(){
   vm.code.pop_back();
 
   if(!is_procedure(proc.tag())){
-    throw procedure_type_check_failed(proc);
+    throw_procedure_type_check_failed(proc);
   }
 
   assert(!vm.stack.empty());
@@ -396,14 +396,9 @@ void vm_op_proc_enter(){
     }else{
       namestr = "(?)";
     }
-    // XXX: incomprehensible
-    // This local value is required, for avoiding a strange state.
-    // If throws directly, std::uncaught_exception() returns true,
-    // but std::current_exception() returns NULL object.
-    auto e = builtin_argcount_failed(namestr,
-                                     info->required_args,
-                                     info->max_args, argc);
-    throw e;
+    throw_builtin_argcount_failed(namestr,
+                                  info->required_args,
+                                  info->max_args, argc);
   }
 
   switch(info->returning){
@@ -484,7 +479,7 @@ void vm_op_set(){
   vm.code.pop_back();
 
   if(!identifierp(var)){
-    throw builtin_identifier_check_failed(vm.code.back());
+    throw_builtin_identifier_check_failed(vm.code.back());
   }
 
   auto val = vm.return_value_1();
@@ -518,7 +513,7 @@ void vm_op_local_set(){
   vm.code.pop_back();
 
   if(!identifierp(var)){
-    throw builtin_identifier_check_failed(var);
+    throw_builtin_identifier_check_failed(var);
   }
 
   local_set_with_identifier(vm.frame, var, vm.return_value_1()); 

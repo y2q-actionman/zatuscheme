@@ -16,11 +16,23 @@ Lisp_ptr zs_error(Lisp_ptr, const char*, ...)
 
 Lisp_ptr zs_error_append(const char*, Lisp_ptr);
 
-Lisp_ptr builtin_type_check_failed(Ptr_tag, Lisp_ptr);
-Lisp_ptr builtin_argcount_failed(const char*, int required, int max, int passed);
-Lisp_ptr builtin_identifier_check_failed(Lisp_ptr);
-Lisp_ptr builtin_range_check_failed(int max, int passed);
-Lisp_ptr number_type_check_failed(Lisp_ptr);
-Lisp_ptr procedure_type_check_failed(Lisp_ptr);
+void throw_builtin_type_check_failed(Ptr_tag, Lisp_ptr)
+  __attribute__ ((noreturn))
+  ;
+void throw_builtin_argcount_failed(const char*, int required, int max, int passed)
+  __attribute__ ((noreturn))
+  ;
+void throw_builtin_identifier_check_failed(Lisp_ptr)
+  __attribute__ ((noreturn))
+  ;
+void throw_builtin_range_check_failed(int max, int passed)
+  __attribute__ ((noreturn))
+  ;
+void throw_number_type_check_failed(Lisp_ptr)
+  __attribute__ ((noreturn))
+  ;
+void throw_procedure_type_check_failed(Lisp_ptr)
+  __attribute__ ((noreturn))
+  ;
 
 #endif // ZS_ERROR_HH

@@ -43,7 +43,7 @@ Lisp_ptr transcript_off(ZsArgs){
 Lisp_ptr traditional_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
   }
   auto info = *iproc->info();
   info.passing = Passing::quote;
@@ -61,7 +61,7 @@ Lisp_ptr gensym(ZsArgs){
 Lisp_ptr sc_macro_transformer(ZsArgs args){
   auto iproc = args[0].get<IProcedure*>();
   if(!iproc){
-    throw builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
   }
 
   auto info = *iproc->info();
@@ -78,11 +78,11 @@ Lisp_ptr sc_macro_transformer(ZsArgs args){
 Lisp_ptr make_syntactic_closure(ZsArgs args){
   Env* e = args[0].get<Env*>();
   if(!e){
-    throw builtin_type_check_failed(Ptr_tag::env, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::env, args[0]);
   }
 
   if(args[1].tag() != Ptr_tag::cons){
-    throw builtin_type_check_failed(Ptr_tag::cons, args[1]);
+    throw_builtin_type_check_failed(Ptr_tag::cons, args[1]);
   }
   Cons* c = args[1].get<Cons*>();
 
@@ -101,20 +101,20 @@ Lisp_ptr identifierp(ZsArgs args){
 Lisp_ptr identifier_eq(ZsArgs args){
   auto ident1_env = args[0].get<Env*>();
   if(!ident1_env){
-    throw builtin_type_check_failed(Ptr_tag::env, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::env, args[0]);
   }
 
   if(!identifierp(args[1])){
-    throw builtin_identifier_check_failed(args[1]);
+    throw_builtin_identifier_check_failed(args[1]);
   }
   
   auto ident2_env = args[2].get<Env*>();
   if(!ident2_env){
-    throw builtin_type_check_failed(Ptr_tag::env, args[2]);
+    throw_builtin_type_check_failed(Ptr_tag::env, args[2]);
   }
 
   if(!identifierp(args[3])){
-    throw builtin_identifier_check_failed(args[3]);
+    throw_builtin_identifier_check_failed(args[3]);
   }
 
   return 
@@ -123,7 +123,7 @@ Lisp_ptr identifier_eq(ZsArgs args){
 
 Lisp_ptr make_synthetic_identifier(ZsArgs args){
   if(!identifierp(args[0])){
-    throw builtin_identifier_check_failed(args[0]);
+    throw_builtin_identifier_check_failed(args[0]);
   }
 
   return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
@@ -132,12 +132,12 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
 Lisp_ptr with_exception_handler(ZsArgs args){
   Lisp_ptr handler = args[0];
   if(!is_procedure(handler.tag())){
-    throw procedure_type_check_failed(handler);
+    throw_procedure_type_check_failed(handler);
   }
 
   Lisp_ptr thunk = args[1];
   if(!is_procedure(thunk.tag())){
-    throw procedure_type_check_failed(thunk);
+    throw_procedure_type_check_failed(thunk);
   }
 
   args.cleanup();

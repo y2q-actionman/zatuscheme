@@ -38,30 +38,30 @@ Lisp_ptr zs_error_append(const char* context, Lisp_ptr p){
   return zs_new<String>(oss.str());
 }
 
-Lisp_ptr builtin_type_check_failed(Ptr_tag tag, Lisp_ptr p){
-  return zs_error(p, "arg is not %s!", stringify(tag));
+void throw_builtin_type_check_failed(Ptr_tag tag, Lisp_ptr p){
+  throw zs_error(p, "arg is not %s!", stringify(tag));
 }
 
-Lisp_ptr builtin_argcount_failed(const char* name, int required, int max, int passed){
-  return zs_error({}, "%s: "
-                  "number of passed args is mismatched!!"
-                  " (acceptable %d-%d args, passed %d)\n",
-                  name, required, max, passed);
+void throw_builtin_argcount_failed(const char* name, int required, int max, int passed){
+  throw zs_error({}, "%s: "
+                 "number of passed args is mismatched!!"
+                 " (acceptable %d-%d args, passed %d)\n",
+                 name, required, max, passed);
 }
 
-Lisp_ptr builtin_identifier_check_failed(Lisp_ptr p){
-  return zs_error(p, "arg is not identifier!");
+void throw_builtin_identifier_check_failed(Lisp_ptr p){
+  throw zs_error(p, "arg is not identifier!");
 }
 
-Lisp_ptr builtin_range_check_failed(int max, int passed){
-  return zs_error({}, "index is out-of-bound ([0, %d), supplied %d\n",
-                  max, passed);
+void throw_builtin_range_check_failed(int max, int passed){
+  throw zs_error({}, "index is out-of-bound ([0, %d), supplied %d\n",
+                 max, passed);
 }
 
-Lisp_ptr number_type_check_failed(Lisp_ptr p){
-  return zs_error(p, "arg is not number!");
+void throw_number_type_check_failed(Lisp_ptr p){
+  throw zs_error(p, "arg is not number!");
 }
 
-Lisp_ptr procedure_type_check_failed(Lisp_ptr p){
-  return zs_error(p, "arg is not procedure!");
+void throw_procedure_type_check_failed(Lisp_ptr p){
+  throw zs_error(p, "arg is not procedure!");
 }

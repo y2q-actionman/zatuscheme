@@ -61,7 +61,7 @@ Lisp_ptr number_unary(Lisp_ptr arg1,
                       const IFun& ifun, const QFun& qfun,
                       const RFun& rfun, const CFun& cfun){
   if(!is_numeric_type(arg1)){
-    throw number_type_check_failed(arg1);
+    throw_number_type_check_failed(arg1);
   }
 
   if(is_integer_type(arg1)){
@@ -82,11 +82,11 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
                        const IFun& ifun, const QFun& qfun,
                        const RFun& rfun, const CFun& cfun){
   if(!is_numeric_type(arg1)){
-    throw number_type_check_failed(arg1);
+    throw_number_type_check_failed(arg1);
   }
 
   if(!is_numeric_type(arg2)){
-    throw number_type_check_failed(arg2);
+    throw_number_type_check_failed(arg2);
   }
   
   if(is_integer_type(arg1) && is_integer_type(arg2)){
@@ -545,11 +545,11 @@ Lisp_ptr number_e_to_i(ZsArgs args){
 Lisp_ptr internal_number_from_string(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
   if(!is_integer_type(args[1])){
-    throw builtin_type_check_failed(Ptr_tag::integer, args[1]);
+    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
   }
 
   istringstream iss(*str);
@@ -558,11 +558,11 @@ Lisp_ptr internal_number_from_string(ZsArgs args){
 
 Lisp_ptr internal_number_to_string(ZsArgs args){
   if(!is_numeric_type(args[0])){
-    throw number_type_check_failed(args[0]);
+    throw_number_type_check_failed(args[0]);
   }
 
   if(!is_integer_type(args[1])){
-    throw builtin_type_check_failed(Ptr_tag::integer, args[1]);
+    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
   }
   auto radix = coerce<int>(args[1]);
 

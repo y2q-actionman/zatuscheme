@@ -52,7 +52,7 @@ namespace builtin {
 Lisp_ptr eval(ZsArgs args){
   auto env = args[1].get<Env*>();
   if(!env){
-    throw builtin_type_check_failed(Ptr_tag::env, args[1]);
+    throw_builtin_type_check_failed(Ptr_tag::env, args[1]);
   }
 
   auto oldenv = vm.frame;
@@ -64,7 +64,7 @@ Lisp_ptr eval(ZsArgs args){
 Lisp_ptr load(ZsArgs args){
   auto str = args[0].get<String*>();
   if(!str){
-    throw builtin_type_check_failed(Ptr_tag::string, args[0]);
+    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
   }
 
   ifstream ifs{*str};
