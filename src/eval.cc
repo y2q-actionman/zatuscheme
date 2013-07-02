@@ -53,12 +53,7 @@ void function_call(Lisp_ptr proc){
   }
 }
 
-/*
-  ret = expanded proc
-  ----
-  code = proc
-*/
-void vm_op_macro_call(){
+void vm_op_reevaluate(){
   vm.code.insert(vm.code.end(),
                  vm.return_value.begin(), vm.return_value.end());
 }  
@@ -405,7 +400,7 @@ void vm_op_proc_enter(){
   case Returning::pass:
     break;
   case Returning::code:
-    vm.code.push_back(vm_op_macro_call);
+    vm.code.push_back(vm_op_reevaluate);
     break;
   case Returning::stack_splice:
     vm.code.push_back(vm_op_stack_splicing);
@@ -655,8 +650,8 @@ const char* stringify(VMop op){
     return "NOP / arg bottom";
   }else if(op == vm_op_arg_push){
     return "arg push";
-  }else if(op == vm_op_macro_call){
-    return "macro call";
+  }else if(op == vm_op_reevaluate){
+    return "reevaluate";
   }else if(op == vm_op_call){
     return "call";
   }else if(op == vm_op_leave_frame){
