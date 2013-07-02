@@ -241,7 +241,7 @@ int eat_sharp(istream& f, string& o){
 }
 
 
-pair<string, Exactness> collect_integer_digits(int radix, istream& f){
+pair<string, Exactness> collect_integer_digits(istream& f, int radix){
   decltype(f.get()) c;
   string s;
 
@@ -391,7 +391,7 @@ double zs_stof(istream& f, string s){
   }
 }
 
-Lisp_ptr parse_real_number(int radix, istream& f){
+Lisp_ptr parse_real_number(istream& f, int radix){
   int sign = 1;
 
   switch(f.peek()){
@@ -407,7 +407,7 @@ Lisp_ptr parse_real_number(int radix, istream& f){
     break;
   }
 
-  auto digit_chars = collect_integer_digits(radix, f);
+  auto digit_chars = collect_integer_digits(f, radix);
   auto c = f.peek();
 
   if((c == '.') || (!digit_chars.first.empty() && check_decimal_suffix(c))){
@@ -441,7 +441,7 @@ Lisp_ptr parse_real_number(int radix, istream& f){
   // rational
   f.ignore(1);
 
-  auto digit_chars_2 = collect_integer_digits(radix, f);
+  auto digit_chars_2 = collect_integer_digits(f, radix);
   if(digit_chars_2.first.empty()){
     throw_zs_error({}, "reader error: failed at reading a rational number's denominator\n");
   }
@@ -458,7 +458,7 @@ Lisp_ptr parse_real_number(int radix, istream& f){
   }
 }
 
-Lisp_ptr  parse_complex(int radix, istream& f){
+Lisp_ptr parse_complex(istream& f, int radix){
   const auto first_char = f.peek();
 
   // treating +i, -i. (dirty part!)
@@ -472,11 +472,11 @@ Lisp_ptr  parse_complex(int radix, istream& f){
   }
 
   // has real part
-  auto real = parse_real_number(radix, f);
+  auto real = parse_real_number(f, radix);
 
   switch(auto c = f.get()){
   case '@': {// polar literal
-    auto deg = parse_real_number(radix, f);
+    auto deg = parse_real_number(f, radix);
         
     return wrap_number(polar(coerce<double>(real), coerce<double>(deg)));
   }
@@ -488,7 +488,7 @@ Lisp_ptr  parse_complex(int radix, istream& f){
       return wrap_number(Complex(coerce<double>(real), sign));
     }
     
-    auto imag = parse_real_number(radix, f);
+    auto imag = parse_real_number(f, radix);
 
     if(f.peek() != 'i' && f.peek() != 'I'){
       throw_zs_error({}, "reader error: failed at reading a complex number's imaginary part.\n");
@@ -519,7 +519,7 @@ Lisp_ptr parse_number(istream& f, int radix){
     radix = prefix_info.first;
   }
 
-  const auto r = parse_complex(radix, f);
+  const auto r = parse_complex(f, radix);
   if(!r){
     // TODO: add context information.
     throw_zs_error({}, "parser error: cannot be read as number.\n");
