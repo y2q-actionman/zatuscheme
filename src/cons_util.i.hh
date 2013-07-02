@@ -72,11 +72,6 @@ Lisp_ptr nthcdr_cons_list(Lisp_ptr p){
 
 // GrowList class
 inline
-GrowList::GrowList()
-  : head(Cons::NIL), next(&head)
-{}
-
-inline
 Lisp_ptr GrowList::extract(){
   return extract_with_tail(Cons::NIL);
 }

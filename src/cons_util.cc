@@ -5,6 +5,10 @@
 #include "zs_error.hh"
 
 // GrowList class
+GrowList::GrowList()
+  : head(Cons::NIL), next(&head)
+{}
+
 GrowList::~GrowList(){
   if(head){
     auto i = begin(head);
