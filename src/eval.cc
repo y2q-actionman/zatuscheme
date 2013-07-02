@@ -497,13 +497,7 @@ void vm_op_set(){
   }
 }
 
-/*
-  stack = (variable name)
-  ----
-  stack = ()
-  return-value is setted.
-*/
-void vm_op_local_set(){
+void vm_op_define(){
   auto var = vm.code.back();
   vm.code.pop_back();
 
@@ -511,7 +505,13 @@ void vm_op_local_set(){
     throw_builtin_identifier_check_failed(var);
   }
 
-  local_set_with_identifier(vm.frame, var, vm.return_value_1()); 
+  auto val = vm.return_value_1();
+
+  if(is_procedure(val.tag()) && !get_procname(val)){
+    set_procname(val, var);
+  }
+
+  local_set_with_identifier(vm.frame, var, val); 
 }
 
 void vm_op_leave_winding(){
@@ -668,8 +668,8 @@ const char* stringify(VMop op){
     return "if";
   }else if(op == vm_op_set){
     return "set";
-  }else if(op == vm_op_local_set){
-    return "local set";
+  }else if(op == vm_op_define){
+    return "define";
   }else if(op == vm_op_leave_winding){
     return "leave winding";
   }else if(op == vm_op_save_values_and_enter){

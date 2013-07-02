@@ -27,6 +27,12 @@ public:
   const Lisp_ptr& rules() const
   { return rules_; }
 
+  Lisp_ptr name() const
+  { return name_; }
+  
+  void set_name(Lisp_ptr n)
+  { name_ = n; }
+  
   Lisp_ptr apply(Lisp_ptr, Env*) const;
 
 private:
@@ -41,6 +47,7 @@ private:
   Env* const env_;
   const Lisp_ptr literals_;
   const Lisp_ptr rules_;
+  Lisp_ptr name_;
 };
 
 #endif // S_RULES_HH

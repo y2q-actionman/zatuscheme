@@ -66,8 +66,8 @@ std::pair<int, proc_flag::Variadic> parse_func_arg(Lisp_ptr);
 
 class IProcedure{
 public:
-  IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr al, Env* e, Lisp_ptr n)
-    : info_(pi), code_(code), arg_list_(al),  env_(e), name_(n){}
+  IProcedure(Lisp_ptr code, const ProcInfo& pi, Lisp_ptr al, Env* e)
+    : info_(pi), code_(code), arg_list_(al), env_(e), name_(){}
 
   IProcedure(const IProcedure&) = default;
   IProcedure(IProcedure&&) = default;
@@ -91,6 +91,9 @@ public:
   
   Lisp_ptr name() const
   { return name_; }
+  
+  void set_name(Lisp_ptr n)
+  { name_ = n; }
   
 private:
   ProcInfo info_;
@@ -126,7 +129,7 @@ private:
 
 class Continuation{
 public:
-  Continuation(const VM&);
+  explicit Continuation(const VM&);
 
   Continuation(const Continuation&) = delete;
   Continuation(Continuation&&) = delete;
@@ -142,12 +145,20 @@ public:
   const VM& get() const
   { return vm_; }
 
+  Lisp_ptr name() const
+  { return name_; }
+  
+  void set_name(Lisp_ptr n)
+  { name_ = n; }
+  
 private:
   static constexpr ProcInfo cont_procinfo = ProcInfo{0, proc_flag::Variadic::t};
   const VM vm_;
+  Lisp_ptr name_;
 };
 
 const ProcInfo* get_procinfo(Lisp_ptr);
 Lisp_ptr get_procname(Lisp_ptr);
+void set_procname(Lisp_ptr, Lisp_ptr);
 
 #endif //PROCEDURE_HH

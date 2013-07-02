@@ -17,7 +17,7 @@ using namespace proc_flag;
 
 namespace {
 
-Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
+Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
   auto arg_info = parse_func_arg(args);
 
   if(arg_info.first < 0){
@@ -30,7 +30,7 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code, Lisp_ptr name){
 
   return zs_new<IProcedure>(code, 
                             ProcInfo{arg_info.first, arg_info.second},
-                            args, vm.frame, name);
+                            args, vm.frame);
 }
 
 } // namespace
@@ -49,7 +49,7 @@ Lisp_ptr syntax_lambda(ZsArgs wargs){
   auto args = nth_cons_list<1>(wargs[0]);
   auto body = nthcdr_cons_list<2>(wargs[0]);
 
-  return lambda_internal(args, body, {});
+  return lambda_internal(args, body);
 }
 
 Lisp_ptr syntax_if(ZsArgs args){
@@ -80,15 +80,15 @@ Lisp_ptr syntax_define(ZsArgs args){
       throw_zs_error(args[0], "informal syntax: too long");
     }
 
-    vm.code.insert(vm.code.end(), {i1, vm_op_local_set, car(expr_cons.get<Cons*>())});
+    vm.code.insert(vm.code.end(), {i1, vm_op_define, car(expr_cons.get<Cons*>())});
     return {};
   }else if(i1.tag() == Ptr_tag::cons){ // i1 points (funcname . arg-list)
     auto funcname = nth_cons_list<0>(i1);
     auto arg_list = nthcdr_cons_list<1>(i1);
     auto code = nthcdr_cons_list<2>(args[0]);
 
-    auto value = lambda_internal(arg_list, code, funcname);
-    vm.code.insert(vm.code.end(), {funcname, vm_op_local_set, value});
+    auto value = lambda_internal(arg_list, code);
+    vm.code.insert(vm.code.end(), {funcname, vm_op_define, value});
     return {};
   }else{
     throw_zs_error(args[0], "informal syntax!");

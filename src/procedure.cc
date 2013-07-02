@@ -40,7 +40,8 @@ std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
 
 constexpr ProcInfo Continuation::cont_procinfo;
 
-Continuation::Continuation(const VM& v) : vm_(v){}
+Continuation::Continuation(const VM& v)
+  : vm_(v), name_(){}
 
 Continuation::~Continuation() = default;
 
@@ -79,9 +80,33 @@ Lisp_ptr get_procname(Lisp_ptr p){
     assert(nproc);
     return zs_new<String>(find_builtin_nproc_name(nproc));
   }else if(p.tag() == Ptr_tag::continuation){
-    return zs_new<String>("(continuation)");
+    auto cont = p.get<Continuation*>();
+    assert(cont);
+    return cont->name();
   }else if(p.tag() == Ptr_tag::syntax_rules){
-    return zs_new<String>("(syntax-rules)");
+    auto srule = p.get<SyntaxRules*>();
+    assert(srule);
+    return srule->name();
+  }else{
+    UNEXP_DEFAULT();
+  }
+}
+
+void set_procname(Lisp_ptr p, Lisp_ptr n){
+  if(p.tag() == Ptr_tag::i_procedure){
+    auto iproc = p.get<IProcedure*>();
+    assert(iproc);
+    iproc->set_name(n);
+  }else if(p.tag() == Ptr_tag::n_procedure){
+    return;
+  }else if(p.tag() == Ptr_tag::continuation){
+    auto cont = p.get<Continuation*>();
+    assert(cont);
+    cont->set_name(n);
+  }else if(p.tag() == Ptr_tag::syntax_rules){
+    auto srule = p.get<SyntaxRules*>();
+    assert(srule);
+    srule->set_name(n);
   }else{
     UNEXP_DEFAULT();
   }
