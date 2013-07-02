@@ -15,7 +15,7 @@ using namespace std;
 
 namespace {
 
-enum MarkBit {
+enum class MarkBit {
   unmarked = 0,
   marked = 1
 };
@@ -48,13 +48,13 @@ namespace {
 
 bool gc_is_marked_ptr(void* p){
   auto i = arena.find(p);
-  return (i == end(arena)) || i->second.mark;
+  return (i == end(arena)) || (i->second.mark != MarkBit::unmarked);
 }
 
 void gc_mark_ptr(void* p){
   auto i = arena.find(p);
 
-  if(i != end(arena) && !i->second.mark){
+  if(i != end(arena) && i->second.mark == MarkBit::unmarked){
     i->second.mark = MarkBit::marked;
   }
 }

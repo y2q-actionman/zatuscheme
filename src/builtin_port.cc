@@ -149,7 +149,7 @@ Lisp_ptr port_eof_p(ZsArgs args){
 Lisp_ptr internal_port_write(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os) -> bool{
-                            print(*os, c, print_human_readable::f);
+                            print(*os, c, PrintReadable::f);
                             return true;
                           });
 }
@@ -157,7 +157,7 @@ Lisp_ptr internal_port_write(ZsArgs args){
 Lisp_ptr internal_port_display(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os) -> bool{
-                            print(*os, c, print_human_readable::t);
+                            print(*os, c, PrintReadable::t);
                             return true;
                           });
 }

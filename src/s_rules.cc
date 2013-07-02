@@ -18,9 +18,9 @@ using namespace std;
 namespace {
 
 // internal types
-typedef std::unordered_map<Lisp_ptr, Lisp_ptr, eq_hash_obj, eq_obj> EqHashMap;
-typedef std::unordered_set<Lisp_ptr, eq_hash_obj, eq_obj> MatchSet;
-typedef std::unordered_map<Lisp_ptr, SyntacticClosure*, eq_hash_obj, eq_obj> ExpandMap;
+typedef std::unordered_map<Lisp_ptr, Lisp_ptr, EqHashObj, EqObj> EqHashMap;
+typedef std::unordered_set<Lisp_ptr, EqHashObj, EqObj> MatchSet;
+typedef std::unordered_map<Lisp_ptr, SyntacticClosure*, EqHashObj, EqObj> ExpandMap;
 
 // error classes
 struct try_match_failed{};

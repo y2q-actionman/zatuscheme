@@ -3,7 +3,7 @@
 
 #include "lisp_ptr.hh"
 
-struct Cons {
+class Cons {
   friend class GrowList;
   friend class ConsIter;
 

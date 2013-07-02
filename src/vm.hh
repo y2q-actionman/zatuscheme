@@ -10,7 +10,7 @@
 
 class VM {
 public:
-  struct winding {
+  struct Winding {
     Lisp_ptr before;
     Lisp_ptr thunk;
     Lisp_ptr after;
@@ -35,7 +35,7 @@ public:
   std::vector<Lisp_ptr> stack;
   std::vector<Lisp_ptr> return_value;
 
-  std::vector<winding> extent;
+  std::vector<Winding> extent;
   std::shared_ptr<SymTable> symtable;
   Env* frame;
   std::vector<Lisp_ptr> exception_handler;

@@ -563,7 +563,7 @@ Lisp_ptr internal_number_to_string(ZsArgs args){
   auto radix = coerce<int>(args[1]);
 
   ostringstream oss;
-  print(oss, args[0], print_human_readable::f, radix);
+  print(oss, args[0], PrintReadable::f, radix);
 
   return {zs_new<String>(oss.str())};
 }

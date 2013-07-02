@@ -9,8 +9,7 @@
 
 class Env {
 public:
-  typedef std::unordered_map<Lisp_ptr, Lisp_ptr,
-                             eq_hash_obj, eq_obj>
+  typedef std::unordered_map<Lisp_ptr, Lisp_ptr, EqHashObj, EqObj>
     map_type;
 
   Env(const Env&) = delete;

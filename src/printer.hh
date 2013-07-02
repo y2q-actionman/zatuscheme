@@ -4,16 +4,16 @@
 #include <iosfwd>
 #include "lisp_ptr.hh"
 
-enum class print_human_readable{ f, t };
+enum class PrintReadable{ f, t };
 
 void print(std::ostream&, Lisp_ptr,
-           print_human_readable flag = print_human_readable::f,
+           PrintReadable flag = PrintReadable::f,
            int radix = 10);
 
 // for debug;
 inline
 std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
-  print(o, p, print_human_readable::t);
+  print(o, p, PrintReadable::t);
   return o;
 }
 

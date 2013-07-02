@@ -11,8 +11,8 @@ bool equal_internal(Lisp_ptr, Lisp_ptr);
 size_t eq_hash(const Lisp_ptr&);
 
 // function object
-struct eq_obj;
-struct eq_hash_obj;
+struct EqObj;
+struct EqHashObj;
 
 #include "equality.i.hh"
 

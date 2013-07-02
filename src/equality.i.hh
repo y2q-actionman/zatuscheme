@@ -5,13 +5,13 @@
 #error "Please include via parent file"
 #endif
 
-struct eq_obj {
+struct EqObj {
   bool operator()(const Lisp_ptr& a, const Lisp_ptr& b) const{
     return eq_internal(a, b);
   }
 };
     
-struct eq_hash_obj{
+struct EqHashObj{
   size_t operator()(const Lisp_ptr& p) const{
     return eq_hash(p);
   }

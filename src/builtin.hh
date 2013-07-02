@@ -21,7 +21,7 @@ const char* find_builtin_nproc_name(const NProcedure*);
 
 // builtin func struct
 struct BuiltinNProc {
-  const char* name;
+  const char* const name;
   const NProcedure func;
 
   // this constructor is required for static initialization

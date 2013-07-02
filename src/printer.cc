@@ -59,7 +59,7 @@ void print_integer(ostream& f, int i, int radix){
   }
 }
 
-void print_vector(ostream& f, const Vector* v, print_human_readable flag){
+void print_vector(ostream& f, const Vector* v, PrintReadable flag){
   auto i = v->begin();
   const auto e = v->end();
 
@@ -75,7 +75,7 @@ void print_vector(ostream& f, const Vector* v, print_human_readable flag){
   f.put(')');
 }
 
-void print_list(ostream& f, Lisp_ptr l, print_human_readable flag){
+void print_list(ostream& f, Lisp_ptr l, PrintReadable flag){
   assert(l.tag() == Ptr_tag::cons);
 
   f.put('(');
@@ -94,8 +94,8 @@ void print_list(ostream& f, Lisp_ptr l, print_human_readable flag){
   f.put(')');
 }
 
-void print_char(ostream& f, char c, print_human_readable flag){
-  if(flag == print_human_readable::t){
+void print_char(ostream& f, char c, PrintReadable flag){
+  if(flag == PrintReadable::t){
     f.put(c);
   }else{
     switch(c){
@@ -112,8 +112,8 @@ void print_char(ostream& f, char c, print_human_readable flag){
   }
 }
   
-void print_string(ostream& f, const char* str, print_human_readable flag){
-  if(flag == print_human_readable::t){
+void print_string(ostream& f, const char* str, PrintReadable flag){
+  if(flag == PrintReadable::t){
     f << str;
   }else{
     f.put('\"');
@@ -136,7 +136,7 @@ void print_string(ostream& f, const char* str, print_human_readable flag){
 
 } // namespace
 
-void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
+void print(ostream& f, Lisp_ptr p, PrintReadable flag, int radix){
   switch(p.tag()){
   case Ptr_tag::undefined:
     f << "#<undefined>";
@@ -194,11 +194,11 @@ void print(ostream& f, Lisp_ptr p, print_human_readable flag, int radix){
 
   case Ptr_tag::syntactic_closure: {
     auto sc = p.get<SyntacticClosure*>();
-    if(flag == print_human_readable::t){
+    if(flag == PrintReadable::t){
       f << "#<sc [";
     }
     print(f, sc->expr(), flag);
-    if(flag == print_human_readable::t){
+    if(flag == PrintReadable::t){
       f << "]>";
     }
     break;
