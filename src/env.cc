@@ -12,36 +12,25 @@ Env::Env(Env* e)
 
 Env::~Env(){}
 
-template<typename Fun>
-Lisp_ptr Env::traverse(Lisp_ptr key, Fun f){
+pair<Lisp_ptr, bool> Env::find(Lisp_ptr s){
   for(auto e = this; e; e = e->next_){
-    auto ei = e->map_.find(key);
+    auto ei = e->map_.find(s);
     if(ei != e->map_.end()){
-      return f(e, ei);
+      return {ei->second, true};
     }
   }
-  return {};
-}
-
-bool Env::is_bound(Lisp_ptr s){
-  return static_cast<bool>
-    (traverse(s, [](Env*, Env::map_type::iterator){
-        return Lisp_ptr{true};
-      }));
-}
-
-Lisp_ptr Env::find(Lisp_ptr s){
-  return traverse(s, [](Env*, Env::map_type::iterator ei){
-      return ei->second;
-    });
+  return {{}, false};
 }
 
 void Env::set(Lisp_ptr s, Lisp_ptr p){
-  traverse(s, [&](Env* e, Env::map_type::iterator ei) -> Lisp_ptr{
+  for(auto e = this; e; e = e->next_){
+    auto ei = e->map_.find(s);
+    if(ei != e->map_.end()){
       e->map_.erase(ei);
       e->map_.insert({s, p});
-      return {};
-    });
+      return;
+    }
+  }
 }
 
 void Env::local_set(Lisp_ptr s, Lisp_ptr p){

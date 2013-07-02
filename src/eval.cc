@@ -482,7 +482,7 @@ void vm_op_set(){
   if(var.tag() == Ptr_tag::symbol){
     vm.frame->set(var, val);
   }else if(var.tag() == Ptr_tag::syntactic_closure){
-    if(vm.frame->is_bound(var)){
+    if(vm.frame->find(var).second){
       // bound alias
       vm.frame->set(var, val);
     }else{
@@ -545,7 +545,7 @@ void eval(){
 
       switch(p.tag()){
       case Ptr_tag::symbol:
-        vm.return_value = {vm.frame->find(p)};
+        vm.return_value = {vm.frame->find(p).first};
         break;
     
       case Ptr_tag::cons:
@@ -565,9 +565,9 @@ void eval(){
         break;
 
       case Ptr_tag::syntactic_closure:
-        if(identifierp(p) && vm.frame->is_bound(p)){
+        if(identifierp(p) && vm.frame->find(p).second){
           // bound alias
-          vm.return_value = {vm.frame->find(p)};
+          vm.return_value = {vm.frame->find(p).first};
         }else{
           // not-bound syntax closure
           auto sc = p.get<SyntacticClosure*>();
@@ -581,7 +581,7 @@ void eval(){
           }else{
             newenv = sc->env()->push();
             for(auto i : sc->free_names()){
-              auto val = vm.frame->find(i);
+              auto val = vm.frame->find(i).first;
               local_set_with_identifier(newenv, i, val);
             }
           }

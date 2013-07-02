@@ -27,5 +27,6 @@ bool identifierp(Lisp_ptr p){
 
 bool identifier_eq(Env* ident1_env, Lisp_ptr ident1,
                    Env* ident2_env, Lisp_ptr ident2){
-  return eq_internal(ident1_env->find(ident1), ident2_env->find(ident2));
+  return eq_internal(ident1_env->find(ident1).first,
+                     ident2_env->find(ident2).first);
 }

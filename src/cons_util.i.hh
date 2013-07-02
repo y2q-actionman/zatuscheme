@@ -25,15 +25,11 @@ Lisp_ptr make_cons_list(Iter b, Iter e){
     return Cons::NIL;
   }
 
-  auto i = b;
   GrowList gw;
 
-  while(1){
-    gw.push(Lisp_ptr{*i});
-
-    ++i;
-    if(i == e) break;
-  }
+  do{
+    gw.push(Lisp_ptr{*b});
+  }while(++b != e);
 
   return gw.extract();
 }
