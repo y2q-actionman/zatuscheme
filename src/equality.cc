@@ -82,7 +82,7 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
   }
 }
 
-size_t eq_hash(const Lisp_ptr& p){
+size_t eq_hash(Lisp_ptr p){
   auto tag_hash = hash<int>()(static_cast<int>(p.tag()));
   size_t val_hash;
 
