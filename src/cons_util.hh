@@ -5,7 +5,7 @@
 #include <iterator>
 #include "cons.hh"
 
-inline bool nullp(Lisp_ptr);
+bool nullp(Lisp_ptr);
 
 template<typename Iter>
 Lisp_ptr make_cons_list(Iter, Iter);

@@ -233,3 +233,8 @@ void print(ostream& f, Lisp_ptr p, PrintReadable flag, int radix){
     break;
   }
 }
+
+std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
+  print(o, p, PrintReadable::t);
+  return o;
+}

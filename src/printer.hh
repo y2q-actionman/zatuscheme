@@ -11,10 +11,6 @@ void print(std::ostream&, Lisp_ptr,
            int radix = 10);
 
 // for debug;
-inline
-std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
-  print(o, p, PrintReadable::t);
-  return o;
-}
+std::ostream& operator<<(std::ostream&, Lisp_ptr);
 
 #endif //PRINTER_HH
