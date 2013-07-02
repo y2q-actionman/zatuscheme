@@ -173,7 +173,7 @@ Lisp_ptr syntax_internal_memv(ZsArgs args){
     throw_builtin_type_check_failed(Ptr_tag::cons, args[1]);
   }
 
-  for(auto i = begin(args[1]), e = end(args[1]); i != e; ++i){
+  for(auto i = begin(args[1]); i; ++i){
     if(eqv_internal(args[0], *i))
       return i.base();
   }
