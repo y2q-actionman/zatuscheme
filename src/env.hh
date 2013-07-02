@@ -22,7 +22,7 @@ public:
   Env& operator=(const Env&) = delete;
   Env& operator=(Env&&) = delete;
 
-  std::pair<Lisp_ptr, bool> find(Lisp_ptr);
+  std::pair<Lisp_ptr, bool> find(Lisp_ptr) const;
   void set(Lisp_ptr, Lisp_ptr);
   void local_set(Lisp_ptr, Lisp_ptr);
 

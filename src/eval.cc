@@ -102,8 +102,8 @@ void macro_call(Lisp_ptr proc){
   vm.stack.pop_back();
 
   int argc = 0;
-  for(auto p : nthcdr_cons_list<1>(args)){
-    vm.stack.push_back(p);
+  for(auto i = next(begin(args)); i; ++i){
+    vm.stack.push_back(*i);
     ++argc;
   }
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
@@ -118,8 +118,8 @@ void macro_call(Lisp_ptr proc){
   stack = (whole args, arg-bottom)
 */
 void whole_call(Lisp_ptr proc){
-  vm.stack.push_back(vm.frame);
-  vm.stack.push_back({Ptr_tag::vm_argcount, 2});
+  vm.stack.insert(vm.stack.end(),
+                  {vm.frame, {Ptr_tag::vm_argcount, 2}});
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
 }
 
@@ -191,8 +191,8 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   }
 
   // == processing args ==
-  Lisp_ptr arg_name = fun->arg_list();
-  Lisp_ptr argc = vm.stack.back();
+  auto arg_name = fun->arg_list();
+  auto argc = vm.stack.back();
   vm.stack.pop_back();
 
   auto arg_start = vm.stack.end() - argc.get<int>();
@@ -216,8 +216,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       throw_zs_error({}, "eval error: no arg name for variadic arg!\n");
     }
 
-    auto var_args = make_cons_list(i, arg_end);
-    local_set_with_identifier(vm.frame, arg_name, var_args);
+    local_set_with_identifier(vm.frame, arg_name, make_cons_list(i, arg_end));
   }else{
     if(i != arg_end){
       throw_zs_error({}, "eval error: corrupted stack -- passed too much args!\n");
@@ -234,7 +233,8 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
 
   // set up lambda body code
   vector<Lisp_ptr> tmpv;
-  tmpv.assign(begin(fun->get()), end(fun->get()));
+  for(auto j = begin(fun->get()); j; ++j)
+    tmpv.push_back(*j);
 
   vm.code.insert(vm.code.end(), tmpv.rbegin(), tmpv.rend());
 }
@@ -323,8 +323,7 @@ void proc_enter_srule(SyntaxRules* srule){
     throw_builtin_argcount_failed("syntax-rules entry", 2, 2, args.size());
 
   try{
-    auto code = srule->apply(args[0], args[1].get<Env*>());
-    vm.return_value = {code};
+    vm.return_value = {srule->apply(args[0], args[1].get<Env*>())};
   }catch(Lisp_ptr p){
     throw_zs_error_append("syntax-rules", p);
   }
@@ -385,7 +384,7 @@ void vm_op_proc_enter(){
 
   if(!(info->required_args <= argc && argc <= info->max_args)){
     auto name = get_procname(proc);
-    const char* namestr = nullptr;
+    const char* namestr;
     if(auto str = name.get<String*>()){
       namestr = str->c_str();
     }else{
@@ -519,11 +518,11 @@ void vm_op_leave_winding(){
 }
 
 void vm_op_save_values_and_enter(){
-  auto proc = vm.code[vm.code.size() - 1];
-  vm.code.back() = zs_new<Vector>(vm.return_value);
-  vm.code.push_back(vm_op_restore_values);
-  vm.code.push_back(proc);
-  vm.code.push_back(vm_op_proc_enter);
+  auto proc = vm.code.back();
+  vm.code.pop_back();
+  vm.code.insert(vm.code.end(),
+                 {zs_new<Vector>(vm.return_value), 
+                  vm_op_restore_values, proc, vm_op_proc_enter});
 }
 
 void vm_op_raise(){
@@ -550,8 +549,7 @@ void eval(){
     
       case Ptr_tag::cons:
         if(auto c = p.get<Cons*>()){
-          vm.code.push_back(vm_op_call);
-          vm.code.push_back(car(c));
+          vm.code.insert(vm.code.end(), {vm_op_call, car(c)});
           vm.stack.push_back(p);
         }else{
           vm.return_value = {Cons::NIL};
@@ -565,10 +563,16 @@ void eval(){
         break;
 
       case Ptr_tag::syntactic_closure:
-        if(identifierp(p) && vm.frame->find(p).second){
-          // bound alias
-          vm.return_value = {vm.frame->find(p).first};
-        }else{
+        if(identifierp(p)){
+          auto val = vm.frame->find(p);
+          if(val.second){
+            // bound alias
+            vm.return_value = {val.first};
+            break;
+          }
+        }
+
+        {
           // not-bound syntax closure
           auto sc = p.get<SyntacticClosure*>();
           assert(sc);
@@ -580,18 +584,17 @@ void eval(){
             newenv = sc->env();
           }else{
             newenv = sc->env()->push();
-            for(auto i : sc->free_names()){
-              auto val = vm.frame->find(i).first;
-              local_set_with_identifier(newenv, i, val);
+            for(auto i = begin(sc->free_names()); i; ++i){
+              local_set_with_identifier(newenv, *i,
+                                        vm.frame->find(*i).first);
             }
           }
 
           vm.frame = newenv;
-          vm.code.push_back(oldenv);
-          vm.code.push_back(vm_op_leave_frame);
-          vm.code.push_back(sc->expr());
+          vm.code.insert(vm.code.end(),
+                         {oldenv, vm_op_leave_frame, sc->expr()});
+          break;
         }
-        break;
 
         // self-evaluating
       case Ptr_tag::undefined:

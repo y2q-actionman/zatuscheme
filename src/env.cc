@@ -12,7 +12,7 @@ Env::Env(Env* e)
 
 Env::~Env(){}
 
-pair<Lisp_ptr, bool> Env::find(Lisp_ptr s){
+pair<Lisp_ptr, bool> Env::find(Lisp_ptr s) const{
   for(auto e = this; e; e = e->next_){
     auto ei = e->map_.find(s);
     if(ei != e->map_.end()){
