@@ -5,16 +5,6 @@
 #include "zs_error.hh"
 
 // GrowList class
-void GrowList::push(Lisp_ptr p){
-  assert(head && next);
-  assert(nullp(*next));
-
-  auto newc = zs_new<Cons>(p, Cons::NIL);
-  
-  *next = {newc};
-  next = &(newc->cdr_);
-}
-
 GrowList::~GrowList(){
   if(head){
     auto i = begin(head);
@@ -26,6 +16,29 @@ GrowList::~GrowList(){
   }
   // invalidate();
 }
+
+void GrowList::push(Lisp_ptr p){
+  assert(head && next);
+  assert(nullp(*next));
+
+  auto newc = zs_new<Cons>(p, Cons::NIL);
+  
+  *next = {newc};
+  next = &(newc->cdr_);
+}
+
+Lisp_ptr GrowList::extract_with_tail(Lisp_ptr p){
+  *next = p;
+  auto ret = head;
+  invalidate();
+  return ret;
+}
+
+void GrowList::invalidate(){
+  assert(head && next);
+  head = {};
+  next = nullptr;
+}  
 
 
 // ConsIter class

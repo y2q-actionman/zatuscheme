@@ -25,12 +25,6 @@ Lisp_ptr nthcdr_cons_list(Lisp_ptr);
 
 
 class GrowList {
-  Lisp_ptr head;
-  Lisp_ptr* next;
-
-private:
-  void invalidate();
-
 public:
   GrowList();
   // GrowList(Cons*); // starting with an existing list.
@@ -45,6 +39,12 @@ public:
   void push(Lisp_ptr);
   Lisp_ptr extract();
   Lisp_ptr extract_with_tail(Lisp_ptr);
+
+private:
+  Lisp_ptr head;
+  Lisp_ptr* next;
+
+  void invalidate();
 };
 
 
