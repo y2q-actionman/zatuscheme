@@ -57,9 +57,9 @@ int main(){
   check_er("(define x 1)", "1");
   check_er("x", "1");
   check_er("(+ x x)", "2");
-  //check(test_undef, "(define else 1)");
-  check_er("(define else_ 1)", "1");
-  check_er("else_", "1");
+  // check_e_undef("(define x)");
+  check_e_undef("(define x 1 2)");
+  check_e_undef("(define x 1 2 3)");
 
   // syntax: set!
   check_er("(set! x 100)", "100");

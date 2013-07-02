@@ -46,20 +46,15 @@ Lisp_ptr syntax_quote(ZsArgs args){
 }
 
 Lisp_ptr syntax_lambda(ZsArgs wargs){
-  auto args = nth_cons_list<1>(wargs[0]);
-  auto body = nthcdr_cons_list<2>(wargs[0]);
-
-  return lambda_internal(args, body);
+  return lambda_internal(nth_cons_list<1>(wargs[0]), // args
+                         nthcdr_cons_list<2>(wargs[0])); // body
 }
 
 Lisp_ptr syntax_if(ZsArgs args){
-  assert(args.size() == 2 || args.size() == 3);
-
-  Lisp_ptr test = args[0];
-  Lisp_ptr conseq = args[1];
-  Lisp_ptr alt = (args.size() == 3) ? args[2] : Lisp_ptr();
-    
-  vm.return_value = {alt, conseq, vm_op_if, test};
+  vm.return_value = {(args.size() == 3) ? args[2] : Lisp_ptr(), // alt
+                     args[1],   // conseq
+                     vm_op_if,
+                     args[0]};  // test
   return {};
 }
 
@@ -82,13 +77,12 @@ Lisp_ptr syntax_define(ZsArgs args){
 
     vm.code.insert(vm.code.end(), {i1, vm_op_define, car(expr_cons.get<Cons*>())});
     return {};
-  }else if(i1.tag() == Ptr_tag::cons){ // i1 points (funcname . arg-list)
-    auto funcname = nth_cons_list<0>(i1);
-    auto arg_list = nthcdr_cons_list<1>(i1);
-    auto code = nthcdr_cons_list<2>(args[0]);
-
-    auto value = lambda_internal(arg_list, code);
-    vm.code.insert(vm.code.end(), {funcname, vm_op_define, value});
+  }else if(i1.tag() == Ptr_tag::cons){
+    vm.code.insert(vm.code.end(),
+                   {nth_cons_list<0>(i1), // funcname
+                    vm_op_define,
+                    lambda_internal(nthcdr_cons_list<1>(i1), // arg_list
+                                    nthcdr_cons_list<2>(args[0]))}); // code
     return {};
   }else{
     throw_zs_error(args[0], "informal syntax!");
@@ -162,10 +156,9 @@ Lisp_ptr syntax_syntax_rules(ZsArgs args){
     throw_builtin_type_check_failed(Ptr_tag::env, args[1]);
   }
 
-  auto literals = nth_cons_list<1>(args[0]);
-  auto rest = nthcdr_cons_list<2>(args[0]);
-
-  return zs_new<SyntaxRules>(env, literals, rest);
+  return zs_new<SyntaxRules>(env,
+                             nth_cons_list<1>(args[0]), // literals
+                             nthcdr_cons_list<2>(args[0])); // rest
 }
     
 Lisp_ptr syntax_internal_memv(ZsArgs args){
