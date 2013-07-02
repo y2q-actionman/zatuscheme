@@ -41,8 +41,9 @@ void function_call(Lisp_ptr proc){
   vm.stack.pop_back();
 
   vector<Lisp_ptr> tmpv;
-  tmpv.assign(next(begin(args)), // skips first symbol
-              end(args));
+  for(auto i = next(begin(args)); i; ++i){ 
+    tmpv.push_back(*i);
+  }
 
   vm.code.insert(vm.code.end(), 
                  {proc, vm_op_proc_enter,
