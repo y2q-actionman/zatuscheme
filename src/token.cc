@@ -195,36 +195,31 @@ pair<int, Exactness> parse_number_prefix(istream& f){
 }
 
 int char_to_int(int radix, int c){
-  switch(radix){
-  case 16: goto xdigit;
-  case 10: goto digit;
-  case 8:  goto octet;
-  case 2:  goto binary;
-  default: UNEXP_DEFAULT();
+  int ret;
+
+  switch(c){
+  case 'f': case 'F': ret = 15; break;
+  case 'e': case 'E': ret = 14; break;
+  case 'd': case 'D': ret = 13; break;
+  case 'c': case 'C': ret = 12; break;
+  case 'b': case 'B': ret = 11; break;
+  case 'a': case 'A': ret = 10; break;
+  case '9': ret = 9; break;
+  case '8': ret = 8; break;
+  case '7': ret = 7; break;
+  case '6': ret = 6; break;
+  case '5': ret = 5; break;
+  case '4': ret = 4; break;
+  case '3': ret = 3; break;
+  case '2': ret = 2; break;
+  case '1': ret = 1; break;
+  case '0': ret = 0; break;
+  default: ret = -1; break;
   }
 
- xdigit:
-  if(c == 'f' || c == 'F') return 15;
-  if(c == 'e' || c == 'E') return 14;
-  if(c == 'd' || c == 'D') return 13;
-  if(c == 'c' || c == 'C') return 12;
-  if(c == 'b' || c == 'B') return 11;
-  if(c == 'a' || c == 'A') return 10;
- digit:
-  if(c == '9') return 9;
-  if(c == '8') return 8;
- octet:
-  if(c == '7') return 7;
-  if(c == '6') return 6;
-  if(c == '5') return 5;
-  if(c == '4') return 4;
-  if(c == '3') return 3;
-  if(c == '2') return 2;
- binary:
-  if(c == '1') return 1;
-  if(c == '0') return 0;
+  if(ret >= radix) return -1;
 
-  return -1;
+  return ret;
 }
 
 int eat_sharp(istream& f, string& o){
@@ -519,10 +514,16 @@ Lisp_ptr parse_number(istream& f, int radix){
     radix = prefix_info.first;
   }
 
+  switch(radix){
+  case 16: case 10: case 8: case 2:
+    break;
+  default:
+    throw_zs_error(wrap_number(radix), "reader error: not supported radix");
+  }
+
   const auto r = parse_complex(f, radix);
   if(!r){
-    // TODO: add context information.
-    throw_zs_error({}, "parser error: cannot be read as number.\n");
+    throw_zs_error({}, "reader error: cannot be read as number.");
   }
 
   switch(prefix_info.second){
