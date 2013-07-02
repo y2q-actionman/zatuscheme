@@ -10,6 +10,8 @@
     abort();\
   }while(0)
 
+void zs_terminate_handler() noexcept;
+
 void throw_zs_error(Lisp_ptr, const char*, ...)
   __attribute__ ((noreturn, format (printf, 2, 3)))
   ;

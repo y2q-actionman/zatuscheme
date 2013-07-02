@@ -1,5 +1,6 @@
 #include <cstdarg>
 #include <cstdio>
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -12,6 +13,28 @@
 static const size_t ERROR_MESSAGE_LENGTH = 256;
 
 using namespace std;
+
+void zs_terminate_handler() noexcept{
+  std::set_terminate(nullptr);
+
+  try{
+    rethrow_exception(current_exception());
+  }catch(const Lisp_ptr& errobj){
+    cerr << "uncaught exception!\n"
+         << "raised object: " << errobj << '\n'
+         << endl;
+  }catch(const std::exception& e){
+    cerr << "uncaught system exception!\n"
+         << "what: " << e.what()
+         << endl;
+  }catch(...){
+    cerr << "unexpected internal exception!\n"
+         << endl;
+  }
+
+  cerr << "Aborting..." << endl;
+  abort();
+}
 
 static
 string vprintf_string(const char* fmt, va_list ap){
