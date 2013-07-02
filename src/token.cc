@@ -184,10 +184,7 @@ pair<int, Exactness> parse_number_prefix(istream& f){
       throw_zs_error({}, "reader error: unknown number prefix '%c' appeared!\n", c);
     }
     
-    if(e_appeared > 1)
-      throw_zs_error({}, "reader error: duplicated number prefix appeared (%c)\n", c);
-
-    if(r_appeared > 1)
+    if(e_appeared > 1 || r_appeared > 1)
       throw_zs_error({}, "reader error: duplicated number prefix appeared (%c)\n", c);
   }  
   

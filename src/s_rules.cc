@@ -37,8 +37,7 @@ bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
 
 bool is_ellipsis(Lisp_ptr p){
   if(p.tag() == Ptr_tag::symbol){
-    auto sym = p.get<Symbol*>();
-    return sym->name() == "...";
+    return p.get<Symbol*>()->name() == "...";
   }else if(p.tag() == Ptr_tag::syntactic_closure){
     return is_ellipsis(p.get<SyntacticClosure*>()->expr());
   }else{

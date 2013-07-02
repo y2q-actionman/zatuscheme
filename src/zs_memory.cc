@@ -29,9 +29,8 @@ static unordered_map<void*, MarkObj> arena;
 
 }
 
-void* zs_m_in(void* p, Ptr_tag tag){
+void zs_m_in(void* p, Ptr_tag tag){
   arena[p] = {tag, MarkBit::unmarked};
-  return p;
 }
 
 void zs_m_out(void* p){

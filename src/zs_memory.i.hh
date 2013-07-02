@@ -15,7 +15,8 @@ T* zs_new(Args&&... args){
 template<typename T, Ptr_tag tag, typename... Args>
 T* zs_new_with_tag(Args&&... args){
   auto p = new T(std::forward<Args>(args)...);
-  return static_cast<T*>(zs_m_in(p, tag));
+  zs_m_in(p, tag);
+  return p;
 }
 
 template<typename T>
