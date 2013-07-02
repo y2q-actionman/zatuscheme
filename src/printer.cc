@@ -156,10 +156,13 @@ void print(ostream& f, Lisp_ptr p, PrintReadable flag, int radix){
 
   case Ptr_tag::symbol: {
     auto sym = p.get<Symbol*>();
-    if(vm.symtable->find(sym->name()) != vm.symtable->end()){
-      f << sym->name();
-    }else{
-      f << "#<uninterned '" << sym->name() << "' " << reinterpret_cast<void*>(sym) << ">";
+    auto interned = vm.symtable->find(sym->name()) != vm.symtable->end();
+    if(!interned){
+      f << "#<uninterned '";
+    }
+    f << sym->name();
+    if(!interned){
+      f << "' " << reinterpret_cast<void*>(sym) << ">";
     }
     break;
   }
