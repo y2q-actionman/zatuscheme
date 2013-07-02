@@ -32,12 +32,12 @@ Lisp_ptr char_conversion(Lisp_ptr arg1, const Fun& fun){
 namespace builtin {
 
 Lisp_ptr internal_char_casecmp(ZsArgs args){
-  for(auto p : args){
-    if(p.tag() != Ptr_tag::character){
-      throw_builtin_type_check_failed(Ptr_tag::character, p);
-    }
-  }
-    
+  if(args[0].tag() != Ptr_tag::character)
+    throw_builtin_type_check_failed(Ptr_tag::character, args[0]);
+
+  if(args[1].tag() != Ptr_tag::character)
+    throw_builtin_type_check_failed(Ptr_tag::character, args[1]);
+
   return Lisp_ptr{Ptr_tag::integer,
       tolower(args[0].get<char>()) - tolower(args[1].get<char>())};
 }

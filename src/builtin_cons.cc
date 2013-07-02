@@ -12,7 +12,7 @@ namespace {
 
 template<typename Fun>
 inline
-Lisp_ptr with_nonnull_cons(Lisp_ptr p, Fun fun){
+Lisp_ptr with_nonnull_cons(const Lisp_ptr& p, Fun fun){
   if(p.tag() != Ptr_tag::cons){
     throw_builtin_type_check_failed(Ptr_tag::cons, p);
   }

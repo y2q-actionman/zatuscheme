@@ -128,12 +128,12 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
 }
 
 Lisp_ptr with_exception_handler(ZsArgs args){
-  Lisp_ptr handler = args[0];
+  auto handler = args[0];
   if(!is_procedure(handler.tag())){
     throw_procedure_type_check_failed(handler);
   }
 
-  Lisp_ptr thunk = args[1];
+  auto thunk = args[1];
   if(!is_procedure(thunk.tag())){
     throw_procedure_type_check_failed(thunk);
   }
