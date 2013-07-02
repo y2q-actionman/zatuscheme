@@ -121,6 +121,8 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
       return arg;
     }
 
+    gl.push(list_star_sym);
+
     // generic lists
     auto i = begin(arg);
     for(; i; ++i){
@@ -128,14 +130,16 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
     }
     qq_elem(i.base());
 
-    return push_cons_list(list_star_sym, gl.extract());
+    return gl.extract();
   }else if(arg.tag() == Ptr_tag::vector){
+    gl.push(vector_sym);
+
     auto v = arg.get<Vector*>();
     for(auto p : *v){
       qq_elem(p);
     }
 
-    return push_cons_list(vector_sym, gl.extract());
+    return gl.extract();
   }else{
     UNEXP_DEFAULT();
   }

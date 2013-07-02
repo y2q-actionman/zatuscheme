@@ -39,11 +39,6 @@ Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
   return make_cons_list(begin(lis), end(lis));
 }
 
-inline
-Lisp_ptr push_cons_list(Lisp_ptr p, Lisp_ptr q){
-  return Lisp_ptr(zs_new<Cons>(p, q));
-}
-
 
 // nth family
 template<unsigned n>

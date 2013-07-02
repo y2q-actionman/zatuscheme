@@ -12,8 +12,6 @@ Lisp_ptr make_cons_list(Iter, Iter);
 
 Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr>);
 
-Lisp_ptr push_cons_list(Lisp_ptr, Lisp_ptr);
-
 
 template<unsigned>
 constexpr
