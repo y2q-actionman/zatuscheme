@@ -57,7 +57,7 @@ int main(){
   check_er("(define x 1)", "1");
   check_er("x", "1");
   check_er("(+ x x)", "2");
-  // check_e_undef("(define x)");
+  check_e_undef("(define x)");
   check_e_undef("(define x 1 2)");
   check_e_undef("(define x 1 2 3)");
 

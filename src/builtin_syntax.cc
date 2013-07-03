@@ -64,25 +64,34 @@ Lisp_ptr syntax_set(ZsArgs args){
 }
 
 Lisp_ptr syntax_define(ZsArgs args){
-  auto i1 = nth_cons_list<1>(args[0]);
+  auto form_iter = begin(args[0]);
+  ++form_iter;                  // skips symbol 'define'
 
   // extracting
-  if(identifierp(i1)){         // i1 points variable's name.
-    auto expr_cons = nthcdr_cons_list<2>(args[0]);
+  if(identifierp(*form_iter)){         // points variable's name.
+    auto ident = *form_iter;
 
-    assert(expr_cons.get<Cons*>());
-    if(!nullp(cdr(expr_cons.get<Cons*>()))){
+    if(!++form_iter){
+      throw_zs_error(args[0], "informal syntax: too short");
+    }
+      
+    auto expr = *form_iter;
+
+    if(++form_iter || !nullp(form_iter.base())){
       throw_zs_error(args[0], "informal syntax: too long");
     }
 
-    vm.code.insert(vm.code.end(), {i1, vm_op_define, car(expr_cons.get<Cons*>())});
+    vm.code.insert(vm.code.end(), {ident, vm_op_define, expr});
     return {};
-  }else if(i1.tag() == Ptr_tag::cons){
+  }else if(form_iter->tag() == Ptr_tag::cons){
+    auto largs = *form_iter;
+    ++form_iter;
+    auto code = form_iter.base();
     vm.code.insert(vm.code.end(),
-                   {nth_cons_list<0>(i1), // funcname
+                   {nth_cons_list<0>(largs), // funcname
                     vm_op_define,
-                    lambda_internal(nthcdr_cons_list<1>(i1), // arg_list
-                                    nthcdr_cons_list<2>(args[0]))}); // code
+                    lambda_internal(nthcdr_cons_list<1>(largs), // arg_list
+                                    code)});
     return {};
   }else{
     throw_zs_error(args[0], "informal syntax!");
