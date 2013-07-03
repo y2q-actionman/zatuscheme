@@ -63,29 +63,19 @@ Lisp_ptr syntax_set(ZsArgs args){
 }
 
 Lisp_ptr syntax_define(ZsArgs args){
-  auto form_iter = begin(args[0]);
-  ++form_iter;                  // skips symbol 'define'
+  if(identifierp(args[0])){
+    auto& ident = args[0];
 
-  // extracting
-  if(identifierp(*form_iter)){         // points variable's name.
-    auto ident = *form_iter;
-
-    if(!++form_iter){
-      throw_zs_error(args[0], "informal syntax: too short");
+    if(nullp(args[1]) || !nullp(nthcdr_cons_list<1>(args[1]))){
+      throw_zs_error(args[1], "informal length");
     }
-      
-    auto expr = *form_iter;
-
-    if(++form_iter || !nullp(form_iter.base())){
-      throw_zs_error(args[0], "informal syntax: too long");
-    }
+    auto expr = nth_cons_list<0>(args[1]);
 
     vm.code.insert(vm.code.end(), {ident, vm_op_define, expr});
     return {};
-  }else if(form_iter->tag() == Ptr_tag::cons){
-    auto largs = *form_iter;
-    ++form_iter;
-    auto code = form_iter.base();
+  }else if(args[0].tag() == Ptr_tag::cons){
+    auto& largs = args[0];
+    auto& code = args[1];
     vm.code.insert(vm.code.end(),
                    {nth_cons_list<0>(largs), // funcname
                     vm_op_define,

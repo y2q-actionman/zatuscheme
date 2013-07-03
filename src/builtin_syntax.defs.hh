@@ -14,7 +14,7 @@
     {2, 2, Passing::quote, Returning::code, MoveReturnValue::f}}},
 {"define", {
     builtin::syntax_define,
-    {2, Variadic::f, Passing::whole}}},
+    {1, Variadic::t, Passing::quote}}},
 
 {"quasiquote", {
     builtin::syntax_quasiquote,
