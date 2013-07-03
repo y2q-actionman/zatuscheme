@@ -7,7 +7,6 @@
 #include "lisp_ptr.hh"
 #include "rational.hh"
 #include "token.hh"
-#include "zs_case.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
 #include "vm.hh"
@@ -49,7 +48,7 @@ void skip_intertoken_space(istream& f){
 
 
 Lisp_ptr tokenize_identifier(istream& f, int first_char){
-  string s(1, ZS_CASE(first_char));
+  string s(1, tolower(first_char));
 
   // subsequent
   decltype(f.get()) c;
@@ -58,7 +57,7 @@ Lisp_ptr tokenize_identifier(istream& f, int first_char){
         && (isalpha(c) || is_special_initial(c) 
             || isdigit(c) || c == '+' || c == '-'
             || c == '.' || c == '@')){
-    s.push_back(ZS_CASE(c));
+    s.push_back(tolower(c));
   }
   f.unget();
 
@@ -70,7 +69,7 @@ static
 bool check_character_name(istream& f, const char* str){
   for(const char* c = str; *c; ++c){
     auto get_c = f.get();
-    if(get_c != ZS_CASE(*c) || is_delimiter(get_c)){
+    if(get_c != tolower(*c) || is_delimiter(get_c)){
       return false;
     }
   }

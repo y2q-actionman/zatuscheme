@@ -3,7 +3,6 @@
 #include "builtin_char.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
-#include "zs_case.hh"
 #include "zs_error.hh"
 
 using namespace std;
@@ -40,7 +39,7 @@ Lisp_ptr internal_char_casecmp(ZsArgs args){
     throw_builtin_type_check_failed(Ptr_tag::character, args[1]);
 
   return Lisp_ptr{Ptr_tag::integer,
-      ZS_CASE(args[0].get<char>()) - ZS_CASE(args[1].get<char>())};
+      tolower(args[0].get<char>()) - tolower(args[1].get<char>())};
 }
 
 Lisp_ptr char_isalpha(ZsArgs args){
