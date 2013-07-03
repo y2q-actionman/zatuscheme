@@ -5,26 +5,24 @@ AC_PREREQ([2.68])
 AC_INIT([zatuscheme], [alpha.1], [http://github.com/y2q-actionman/zatuscheme/issues])
 AM_INIT_AUTOMAKE([foreign parallel-tests])
 AC_CONFIG_SRCDIR([src/token.cc])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-AC_PROG_CXX([g++])
-AC_PROG_CC
-AC_PROG_RANLIB
+AC_LANG([C++])
+AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 
-## add C++0x flags
-## TODO: check for compiler's C++0x support
-CXXFLAGS="${CXXFLAGS} -std=c++0x"
+AC_PROG_RANLIB
 
 # Checks for libraries.
 
 # Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([floor pow sqrt strcasecmp strerror])
+AC_CHECK_FUNCS([strcasecmp])
 
 ## case selection
 AC_ARG_ENABLE([case],
