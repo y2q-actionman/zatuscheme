@@ -90,7 +90,7 @@ Lisp_ptr syntax_define(ZsArgs args){
 }
 
 Lisp_ptr syntax_quasiquote(ZsArgs args){
-  auto arg = nth_cons_list<1>(args[0]);
+  auto& arg = args[0];
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
     // acting as a normal quote.
