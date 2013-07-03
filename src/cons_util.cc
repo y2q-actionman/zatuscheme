@@ -69,9 +69,6 @@ ConsIter ConsIter::operator++(int){
 }
 
 ConsIter begin(Lisp_ptr p){
-  if(p.tag() != Ptr_tag::cons){
-    throw_zs_error(p, "cons func: value is not a list");
-  }
   return ConsIter(p);
 }
 

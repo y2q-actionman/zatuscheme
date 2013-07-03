@@ -36,7 +36,7 @@ void vm_op_arg_push(){
 }
 
 
-void function_call(Lisp_ptr proc){
+void eval_call(Lisp_ptr proc){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
@@ -92,13 +92,7 @@ void vm_op_stack_splicing(){
   throw_zs_error({}, "eval internal error: stack-splicing cannot find corresponding vm_argcount marker!\n");
 }
 
-/*
-  stack[0] = whole args
-  ----
-  code = (call kind, proc, macro call)
-  stack = (arg1, arg2, ..., arg-bottom)
-*/
-void macro_call(Lisp_ptr proc){
+void quote_call(Lisp_ptr proc){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
@@ -192,7 +186,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   }
 
   // == processing args ==
-  auto arg_name = fun->arg_list();
+  auto arg_name_i = begin(fun->arg_list());
   auto argc = vm.stack.back();
   vm.stack.pop_back();
 
@@ -202,22 +196,21 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
 
   // normal arg push
   for(; i != arg_end; ++i){
-    auto arg_name_cell = arg_name.get<Cons*>();
-    if(!arg_name_cell){
+    if(!arg_name_i){
       break;
     }
    
-    local_set_with_identifier(vm.frame, car(arg_name_cell), *i);
-    arg_name = cdr(arg_name_cell);
+    local_set_with_identifier(vm.frame, *arg_name_i, *i);
+    ++arg_name_i;
   }
 
   // variadic arg push
   if(info->max_args > info->required_args){
-    if(!identifierp(arg_name)){
+    if(!identifierp(arg_name_i.base())){
       throw_zs_error({}, "eval error: no arg name for variadic arg!\n");
     }
 
-    local_set_with_identifier(vm.frame, arg_name, make_cons_list(i, arg_end));
+    local_set_with_identifier(vm.frame, arg_name_i.base(), make_cons_list(i, arg_end));
   }else{
     if(i != arg_end){
       throw_zs_error({}, "eval error: corrupted stack -- passed too much args!\n");
@@ -346,7 +339,7 @@ void vm_op_call(){
     // We must process args, even this situation is almost wrong.
     // This is required for using a continuation in args. If no global
     // jump occured, errors are reported after.
-    return function_call(proc);
+    return eval_call(proc);
   }
 
   const ProcInfo* info = get_procinfo(proc);
@@ -354,9 +347,9 @@ void vm_op_call(){
 
   switch(info->passing){
   case Passing::eval:
-    return function_call(proc);
+    return eval_call(proc);
   case Passing::quote:
-    return macro_call(proc);
+    return quote_call(proc);
   case Passing::whole:
     return whole_call(proc);
   default:
