@@ -12,10 +12,6 @@
 using namespace proc_flag;
 
 std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
-  if(identifierp(args)){
-    return {0, Variadic::t};
-  }
-
   int argc = 0;
 
   auto i = begin(args);
