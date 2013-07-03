@@ -1,7 +1,6 @@
 #include <cassert>
 #include <iostream>
 
-#include "builtin.hh"
 #include "cons.hh"
 #include "cons_util.hh"
 #include "equality.hh"
@@ -146,7 +145,7 @@ void proc_enter_native(const NProcedure* fun){
   auto argc = vm.stack.back().get<int>();
 
   if(!((info->required_args <= argc) && (argc <= info->max_args))){
-    throw_builtin_argcount_failed(find_builtin_nproc_name(fun),
+    throw_builtin_argcount_failed(get_procname(fun),
                                   info->required_args, info->max_args,
                                   argc);
   }
@@ -159,7 +158,7 @@ void proc_enter_native(const NProcedure* fun){
       vm.return_value = {p};
     }
   }catch(Lisp_ptr p){
-    throw_zs_error_append(find_builtin_nproc_name(fun), p);
+    throw_zs_error_append(get_procname(fun), p);
   }
 }
 
@@ -331,12 +330,12 @@ void proc_enter_srule(SyntaxRules* srule){
   ZsArgs args;
 
   if(args.size() != 2)
-    throw_builtin_argcount_failed("syntax-rules entry", 2, 2, args.size());
+    throw_builtin_argcount_failed(srule->name(), 2, 2, args.size());
 
   try{
     vm.return_value = {srule->apply(args[0], args[1].get<Env*>())};
   }catch(Lisp_ptr p){
-    throw_zs_error_append("syntax-rules", p);
+    throw_zs_error_append(srule->name(), p);
   }
 }
 
@@ -394,14 +393,7 @@ void vm_op_proc_enter(){
   auto argc = vm.stack.back().get<int>();
 
   if(!(info->required_args <= argc && argc <= info->max_args)){
-    auto name = get_procname(proc);
-    const char* namestr;
-    if(auto str = name.get<String*>()){
-      namestr = str->c_str();
-    }else{
-      namestr = "(?)";
-    }
-    throw_builtin_argcount_failed(namestr,
+    throw_builtin_argcount_failed(get_procname(proc),
                                   info->required_args,
                                   info->max_args, argc);
   }

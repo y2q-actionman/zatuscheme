@@ -16,14 +16,14 @@ void throw_zs_error(Lisp_ptr, const char*, ...)
   __attribute__ ((noreturn, format (printf, 2, 3)))
   ;
 
-void throw_zs_error_append(const char*, Lisp_ptr)
+void throw_zs_error_append(Lisp_ptr, Lisp_ptr)
   __attribute__ ((noreturn))
   ;
 
 void throw_builtin_type_check_failed(Ptr_tag, Lisp_ptr)
   __attribute__ ((noreturn))
   ;
-void throw_builtin_argcount_failed(const char*, int required, int max, int passed)
+void throw_builtin_argcount_failed(Lisp_ptr, int required, int max, int passed)
   __attribute__ ((noreturn))
   ;
 void throw_builtin_identifier_check_failed(Lisp_ptr)

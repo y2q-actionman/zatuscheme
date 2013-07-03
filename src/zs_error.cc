@@ -59,7 +59,7 @@ void throw_zs_error(Lisp_ptr p, const char* fmt, ...){
   }
 }
 
-void throw_zs_error_append(const char* context, Lisp_ptr p){
+void throw_zs_error_append(Lisp_ptr context, Lisp_ptr p){
   ostringstream oss;
   oss << context << " : " << p;
   throw Lisp_ptr{zs_new<String>(oss.str())};
@@ -69,11 +69,11 @@ void throw_builtin_type_check_failed(Ptr_tag tag, Lisp_ptr p){
   throw_zs_error(p, "arg is not %s!", stringify(tag));
 }
 
-void throw_builtin_argcount_failed(const char* name, int required, int max, int passed){
-  throw_zs_error({}, "%s: "
+void throw_builtin_argcount_failed(Lisp_ptr name, int required, int max, int passed){
+  throw_zs_error(name,
                  "number of passed args is mismatched!!"
                  " (acceptable %d-%d args, passed %d)\n",
-                 name, required, max, passed);
+                 required, max, passed);
 }
 
 void throw_builtin_identifier_check_failed(Lisp_ptr p){
@@ -101,4 +101,3 @@ void print_zs_warning(const char* fmt, ...){
 
   cerr << str << endl;
 }
-
