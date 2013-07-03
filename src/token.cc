@@ -1,26 +1,16 @@
-#include <cctype>
 #include <climits>
 #include <cstdlib>
 #include <istream>
 #include <stdexcept>
 #include <string>
 
-#include "config.h"
-
 #include "lisp_ptr.hh"
 #include "rational.hh"
 #include "token.hh"
+#include "zs_case.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
 #include "vm.hh"
-
-#ifdef USE_CASE_UPPER
-# define ZS_CASE(c) toupper(c)
-#elif USE_CASE_LOWER
-# define ZS_CASE(c) tolower(c)
-#else
-# define ZS_CASE(c) c
-#endif
 
 using namespace std;
 
