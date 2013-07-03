@@ -4,6 +4,7 @@
 #include "builtin_string.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
+#include "zs_case.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
 
@@ -104,7 +105,7 @@ Lisp_ptr internal_string_strcmp(ZsArgs args){
 }
 
 Lisp_ptr internal_string_strcasecmp(ZsArgs args){
-  return internal_string_cmp(move(args), strcasecmp);
+  return internal_string_cmp(move(args), ZS_STRCASECMP);
 }
 
 } // namespace builtin

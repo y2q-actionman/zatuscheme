@@ -84,7 +84,7 @@ void check_ident(T&& t, const char* expect){
 #elif USE_CASE_LOWER
     s.push_back(tolower(*p));
 #else
-    s.push_back(*p);
+    s.push_back(tolower(*p));
 #endif
   }
 
