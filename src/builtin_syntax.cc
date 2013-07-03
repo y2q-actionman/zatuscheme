@@ -45,9 +45,8 @@ Lisp_ptr syntax_quote(ZsArgs args){
   }
 }
 
-Lisp_ptr syntax_lambda(ZsArgs wargs){
-  return lambda_internal(nth_cons_list<1>(wargs[0]), // args
-                         nthcdr_cons_list<2>(wargs[0])); // body
+Lisp_ptr syntax_lambda(ZsArgs args){
+  return lambda_internal(args[0], args[1]);
 }
 
 Lisp_ptr syntax_if(ZsArgs args){

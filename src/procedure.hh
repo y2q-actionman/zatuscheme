@@ -34,6 +34,8 @@ struct ProcInfo {
   proc_flag::MoveReturnValue move_ret;
   proc_flag::Leaving leaving;
 
+  static const auto variadic_argcount = std::numeric_limits<decltype(max_args)>::max();
+
   constexpr ProcInfo(int rargs,
                      int margs,
                      proc_flag::Passing p = proc_flag::Passing::eval,
@@ -55,11 +57,14 @@ struct ProcInfo {
                      proc_flag::MoveReturnValue m = proc_flag::MoveReturnValue::t,
                      proc_flag::Leaving l = proc_flag::Leaving::immediate)
     : required_args(rargs),
-      max_args((v == proc_flag::Variadic::t) ? std::numeric_limits<decltype(max_args)>::max() : rargs),
+      max_args((v == proc_flag::Variadic::t) ? variadic_argcount : rargs),
       passing(p),
       returning(r),
       move_ret(m),
       leaving(l){}
+
+  constexpr bool is_variadic() const
+  { return (max_args == variadic_argcount); }
 };
 
 std::pair<int, proc_flag::Variadic> parse_func_arg(Lisp_ptr);

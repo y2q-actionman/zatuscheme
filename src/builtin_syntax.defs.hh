@@ -5,7 +5,7 @@
     {1, 1, Passing::quote}}},
 {"lambda", {
     builtin::syntax_lambda,
-    {2, Variadic::f, Passing::whole}}},
+    {1, Variadic::t, Passing::quote}}},
 {"if", {
     builtin::syntax_if,
     {2, 3, Passing::quote, Returning::code, MoveReturnValue::f}}},

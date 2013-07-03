@@ -96,11 +96,26 @@ void quote_call(Lisp_ptr proc){
   auto args = vm.stack.back();
   vm.stack.pop_back();
 
+  auto info = get_procinfo(proc);
+
   int argc = 0;
-  for(auto i = next(begin(args)); i; ++i){
+  auto i = next(begin(args));
+
+  // required args
+  for(; i && argc < info->required_args; ++i, ++argc){
     vm.stack.push_back(*i);
-    ++argc;
   }
+  
+  // variadic/optional args
+  if(info->is_variadic()){
+    vm.stack.push_back(i.base());
+    ++argc;
+  }else{
+    for(; i; ++i, ++argc){
+      vm.stack.push_back(*i);
+    }
+  }
+
   vm.stack.push_back({Ptr_tag::vm_argcount, argc});
 
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
@@ -206,7 +221,13 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
       throw_zs_error(fun, "eval error: no arg name for variadic arg!\n");
     }
 
-    local_set_with_identifier(vm.frame, arg_name_i.base(), make_cons_list(arg_i, arg_end));
+    if(info->passing == Passing::quote && info->is_variadic()){
+      assert(distance(arg_i, arg_end) == 1);
+      assert(arg_i->tag() == Ptr_tag::cons);
+      local_set_with_identifier(vm.frame, arg_name_i.base(), *arg_i);
+    }else{
+      local_set_with_identifier(vm.frame, arg_name_i.base(), make_cons_list(arg_i, arg_end));
+    }
   }else{
     if(arg_i != arg_end || arg_name_i){
       throw_zs_error(fun, "eval error: corrupted stack -- passed too much args!\n");
