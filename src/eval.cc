@@ -187,33 +187,29 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
 
   // == processing args ==
   auto arg_name_i = begin(fun->arg_list());
-  auto argc = vm.stack.back();
+
+  const auto argc = vm.stack.back();
   vm.stack.pop_back();
 
-  auto arg_start = vm.stack.end() - argc.get<int>();
-  auto arg_end = vm.stack.end();
-  auto i = arg_start;
+  const auto arg_end = vm.stack.end();
+  const auto arg_start = arg_end - argc.get<int>();
+  auto arg_i = arg_start;
 
   // normal arg push
-  for(; i != arg_end; ++i){
-    if(!arg_name_i){
-      break;
-    }
-   
-    local_set_with_identifier(vm.frame, *arg_name_i, *i);
-    ++arg_name_i;
+  for(; arg_i != arg_end && arg_name_i; ++arg_i, ++arg_name_i){
+    local_set_with_identifier(vm.frame, *arg_name_i, *arg_i);
   }
 
   // variadic arg push
   if(info->max_args > info->required_args){
     if(!identifierp(arg_name_i.base())){
-      throw_zs_error({}, "eval error: no arg name for variadic arg!\n");
+      throw_zs_error(fun, "eval error: no arg name for variadic arg!\n");
     }
 
-    local_set_with_identifier(vm.frame, arg_name_i.base(), make_cons_list(i, arg_end));
+    local_set_with_identifier(vm.frame, arg_name_i.base(), make_cons_list(arg_i, arg_end));
   }else{
-    if(i != arg_end){
-      throw_zs_error({}, "eval error: corrupted stack -- passed too much args!\n");
+    if(arg_i != arg_end || arg_name_i){
+      throw_zs_error(fun, "eval error: corrupted stack -- passed too much args!\n");
     }
   }
 
