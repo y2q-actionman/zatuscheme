@@ -105,7 +105,7 @@ Lisp_ptr internal_string_strcmp(ZsArgs args){
 }
 
 Lisp_ptr internal_string_strcasecmp(ZsArgs args){
-  return internal_string_cmp(move(args), ZS_STRCASECMP);
+  return internal_string_cmp(move(args), zs_strcasecmp);
 }
 
 } // namespace builtin

@@ -18,4 +18,10 @@ int zs_strcasecmp(const char* s1, const char* s2){
   return tolower(*s1) - tolower(*s2);
 }
 
-#endif // HAVE_STRCASECMP
+#endif // !defined HAVE_STRCASECMP
+
+int zs_charcasecmp(char c1, char c2){
+  char s1[2] = {c1, '\0'};
+  char s2[2] = {c2, '\0'};
+  return zs_strcasecmp(s1, s2);
+}

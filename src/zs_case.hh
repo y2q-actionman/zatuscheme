@@ -3,12 +3,15 @@
 
 #include "config.h"
 
+#define ZS_IDENTIFIER_CASE std::tolower
+
 #if HAVE_STRCASECMP
 # include <strings.h>
-# define ZS_STRCASECMP strcasecmp
+# define zs_strcasecmp strcasecmp
 #else
 int zs_strcasecmp(const char*, const char*);
-# define ZS_STRCASECMP zs_strcasecmp
 #endif
+
+int zs_charcasecmp(char, char);
 
 #endif // ZS_CASE_HH
