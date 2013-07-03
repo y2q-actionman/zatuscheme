@@ -1,7 +1,6 @@
 #include <cassert>
 #include <climits>
 #include <cmath>
-#include <stdexcept>
 
 #include "rational.hh"
 #include "zs_error.hh"
@@ -12,7 +11,7 @@ using namespace std;
 // TODO: make this as constructor.
 Rational& Rational::normalized_reset(long long n, long long d){
   if(d == 0)
-    throw std::domain_error("Rational::denominator is 0");
+    throw_zs_error({}, "Rational::denominator is 0");
 
   auto gcd_val = gcd(n, d);
   n /= gcd_val;
