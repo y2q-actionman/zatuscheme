@@ -18,6 +18,7 @@
 #include "symbol.hh"
 #include "token.hh"
 #include "vm.hh"
+#include "zs_case.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
 

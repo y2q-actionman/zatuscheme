@@ -79,13 +79,7 @@ template<typename T>
 void check_ident(T&& t, const char* expect){
   string s;
   for(auto p = expect; *p; ++p){
-#ifdef USE_CASE_UPPER
-    s.push_back(toupper(*p));
-#elif USE_CASE_LOWER
-    s.push_back(tolower(*p));
-#else
-    s.push_back(tolower(*p));
-#endif
+    s.push_back(ZS_IDENTIFIER_CASE(*p));
   }
 
   check(forward<T>(t), intern(*vm.symtable, s));
