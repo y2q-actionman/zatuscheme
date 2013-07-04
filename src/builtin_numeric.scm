@@ -96,6 +96,9 @@ LOAD
   (%fold %gcd 0 n))
 
 LOAD
+(define (%lcm n m)
+  (abs (/ (%* n m) (%gcd n m))))
+LOAD
 (define (lcm . n)
   (%fold %lcm 1 n))
 

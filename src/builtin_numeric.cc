@@ -268,16 +268,6 @@ Lisp_ptr internal_number_gcd(ZsArgs args){
                        inacceptable_number_type());
 }
 
-Lisp_ptr internal_number_lcm(ZsArgs args){
-  return number_binary(args[0], args[1],
-                       [](int i1, int i2){
-                         return abs(i1 * i2 / gcd(i1, i2));
-                       },
-                       inacceptable_number_type(),
-                       inacceptable_number_type(),
-                       inacceptable_number_type());
-}
-
 Lisp_ptr number_numerator(ZsArgs args){
   return number_unary(args[0],
                       identity(),

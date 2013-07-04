@@ -27,7 +27,6 @@ Lisp_ptr number_rem(ZsArgs);
 Lisp_ptr number_mod(ZsArgs);
 
 Lisp_ptr internal_number_gcd(ZsArgs);
-Lisp_ptr internal_number_lcm(ZsArgs);
 
 Lisp_ptr number_numerator(ZsArgs);
 Lisp_ptr number_denominator(ZsArgs);

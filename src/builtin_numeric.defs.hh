@@ -61,9 +61,6 @@
 {"%gcd", {
     builtin::internal_number_gcd,
     {2}}},
-{"%lcm", {
-    builtin::internal_number_lcm,
-    {2}}},
 
 {"numerator", {
     builtin::number_numerator,
