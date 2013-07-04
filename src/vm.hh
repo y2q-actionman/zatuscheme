@@ -59,7 +59,7 @@ public:
 
   
   Lisp_ptr& operator[](int i) const
-  { return *(stack_iter_s_ + i); }
+  { return stack_iter_s_[i]; }
 
   int size() const
   { return size_; }
