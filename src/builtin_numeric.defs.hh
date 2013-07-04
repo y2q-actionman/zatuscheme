@@ -27,15 +27,6 @@
 {"%<", {
     builtin::internal_number_less,
     {2}}},
-{"%>", {
-    builtin::internal_number_greater,
-    {2}}},
-{"%<=", {
-    builtin::internal_number_less_eq,
-    {2}}},
-{"%>=", {
-    builtin::internal_number_greater_eq,
-    {2}}},
 
 {"%max", {
     builtin::internal_number_max,

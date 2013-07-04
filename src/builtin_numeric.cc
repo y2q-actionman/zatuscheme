@@ -174,30 +174,6 @@ Lisp_ptr internal_number_less(ZsArgs args){
                       inacceptable_number_type());
 }
 
-Lisp_ptr internal_number_greater(ZsArgs args){
-  return number_binary(args[0], args[1],
-                      greater<int>(),
-                      greater<const Rational&>(),
-                      greater<double>(),
-                      inacceptable_number_type());
-}
-  
-Lisp_ptr internal_number_less_eq(ZsArgs args){
-  return number_binary(args[0], args[1],
-                      less_equal<int>(),
-                      less_equal<const Rational&>(),
-                      less_equal<double>(),
-                      inacceptable_number_type());
-}
-  
-Lisp_ptr internal_number_greater_eq(ZsArgs args){
-  return number_binary(args[0], args[1],
-                      greater_equal<int>(),
-                      greater_equal<const Rational&>(),
-                      greater_equal<double>(),
-                      inacceptable_number_type());
-}
-
 
 Lisp_ptr internal_number_max(ZsArgs args){
   return number_binary(args[0], args[1],

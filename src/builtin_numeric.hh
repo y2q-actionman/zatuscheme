@@ -14,9 +14,6 @@ Lisp_ptr exactp(ZsArgs);
 
 Lisp_ptr internal_number_equal(ZsArgs);
 Lisp_ptr internal_number_less(ZsArgs);
-Lisp_ptr internal_number_greater(ZsArgs);
-Lisp_ptr internal_number_less_eq(ZsArgs);
-Lisp_ptr internal_number_greater_eq(ZsArgs);
 
 Lisp_ptr internal_number_max(ZsArgs);
 Lisp_ptr internal_number_min(ZsArgs);

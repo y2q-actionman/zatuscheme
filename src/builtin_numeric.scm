@@ -18,12 +18,22 @@ LOAD
 
 LOAD
 (define = (%number-cmp %=))
+
 LOAD
 (define < (%number-cmp %<))
+
+LOAD
+(define (%> n1 n2) (%< n2 n1))
 LOAD
 (define > (%number-cmp %>))
+
+LOAD
+(define (%<= n1 n2) (not (%< n2 n1)))
 LOAD
 (define <= (%number-cmp %<=))
+
+LOAD
+(define (%>= n1 n2) (not (%< n1 n2)))
 LOAD
 (define >= (%number-cmp %>=))
 
