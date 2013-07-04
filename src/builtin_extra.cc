@@ -180,40 +180,54 @@ Lisp_ptr hard_repl(ZsArgs args){
 
 Lisp_ptr tmp_file(ZsArgs){
 #ifdef _POSIX_C_SOURCE
-  char name[] = 
+
 #ifdef P_tmpdir
-    P_tmpdir
+# define ZS_TMPDIR P_tmpdir
 #else
-    "/tmp"
+# define ZS_TMPDIR "/tmp"
 #endif
-    "/zs_temp_file_XXXXXX";
 
-  auto fd = mkstemp(name);
-  if(fd == -1){
-    auto eno = errno;
-    throw_zs_error({}, "mkstemp(3) error: %s", strerror(eno));
-  }
+#define ZS_TMPFILE ZS_TMPDIR"/zs_temp_file_XXXXXX"
 
-  InputPort* i_port = zs_new_with_tag<ifstream, Ptr_tag::input_port>(name);
+  struct FdHolder{
+    int fd;
+    char name[sizeof(ZS_TMPFILE)];
+
+    FdHolder() : fd(-1), name(){
+      strcpy(name, ZS_TMPFILE);
+
+      fd = mkstemp(name);
+      if(fd == -1){
+        auto eno = errno;
+        throw_zs_error({}, "mkstemp(3) error: %s", strerror(eno));
+      }
+    }
+
+    ~FdHolder(){
+      if(close(fd) == -1){
+        auto eno = errno;
+        print_zs_warning("close(2) error: %s", strerror(eno));
+      }
+
+      if(unlink(name) == -1){
+        auto eno = errno;
+        print_zs_warning("unlink(2) error: %s", strerror(eno));
+      }
+    }
+  };
+
+  FdHolder fdh;
+
+  InputPort* i_port = zs_new_with_tag<ifstream, Ptr_tag::input_port>(fdh.name);
   if(!i_port || !*i_port){
     throw_zs_error({}, "failed at opening file for input");
   }
   
-  OutputPort* o_port = zs_new_with_tag<ofstream, Ptr_tag::output_port>(name);
+  OutputPort* o_port = zs_new_with_tag<ofstream, Ptr_tag::output_port>(fdh.name);
   if(!o_port || !*o_port){
     throw_zs_error({}, "failed at opening file for output");
   }
   
-  if(close(fd) == -1){
-    auto eno = errno;
-    throw_zs_error({}, "close(2) error: %s", strerror(eno));
-  }
-
-  if(unlink(name) == -1){
-    auto eno = errno;
-    throw_zs_error({}, "unlink(2) error: %s", strerror(eno));
-  }
-
   return make_cons_list({i_port, o_port});
 #else
   throw_zs_error({}, "tmp-file is not supported");
