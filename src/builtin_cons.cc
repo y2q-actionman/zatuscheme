@@ -13,15 +13,12 @@ namespace {
 template<typename Fun>
 inline
 Lisp_ptr with_nonnull_cons(const Lisp_ptr& p, Fun fun){
-  if(p.tag() != Ptr_tag::cons){
-    throw_builtin_type_check_failed(Ptr_tag::cons, p);
+  auto c = p.get<Cons*>();
+  if(!c){
+    throw_zs_error(p, "invalid list!");
   }
 
-  if(nullp(p)){
-    throw_zs_error({}, "arg is null list!");
-  }
-
-  return fun(p.get<Cons*>());
+  return fun(c);
 }
 
 } // namespace
