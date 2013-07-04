@@ -152,6 +152,26 @@ LOAD
      y)))
 
 LOAD
+(define-syntax delay
+  (syntax-rules ()
+    ((delay expression)
+     (%make-promise (lambda () expression)))))
+
+LOAD
+(define (%make-promise proc)
+  (let ((result-ready? #f)
+        (result #f))
+    (lambda ()
+      (if result-ready?
+          result
+          (let ((x (proc)))
+            (if result-ready?
+                result
+                (begin (set! result-ready? #t)
+                       (set! result x)
+                       result)))))))
+
+LOAD
 (define (unquote x)
   x)
 
