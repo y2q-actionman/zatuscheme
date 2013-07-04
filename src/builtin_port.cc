@@ -133,12 +133,12 @@ Lisp_ptr internal_port_read(ZsArgs args){
 
 Lisp_ptr internal_port_read_char(ZsArgs args){
   return port_input_call(move(args),
-                         [](std::istream* is) -> char { return is->get(); });
+                         [](std::istream* is){ return static_cast<char>(is->get()); });
 }
 
 Lisp_ptr internal_port_peek_char(ZsArgs args){
   return port_input_call(move(args),
-                         [](std::istream* is) -> char{ return is->peek(); });
+                         [](std::istream* is){ return static_cast<char>(is->peek()); });
 }
 
 Lisp_ptr port_eof_p(ZsArgs args){

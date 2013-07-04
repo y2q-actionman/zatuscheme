@@ -27,8 +27,8 @@ Rational& Rational::normalized_reset(long long n, long long d){
     overflow_ = true;
     float_ = (double)n / (double)d;
   }else{
-    ratio_.n_ = n;
-    ratio_.d_ = d;
+    ratio_.n_ = static_cast<int>(n);
+    ratio_.d_ = static_cast<int>(d);
   }
 
   return *this;
@@ -81,7 +81,7 @@ Rational rationalize(double answer, double error){
 
   while(1){
     auto int_p = (long long)floor(d);
-    auto frac_p = d - int_p;
+    auto frac_p = d - floor(d);
     d = 1 / frac_p;
 
     h_0 = int_p * h_1 + h_2;
