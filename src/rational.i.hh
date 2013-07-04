@@ -56,30 +56,10 @@ bool Rational::operator==(const Rational& other) const{
 }
 
 inline
-bool Rational::operator!=(const Rational& other) const{
-  return !(*this == other);
-}
-
-inline
 bool Rational::operator<(const Rational& other) const{
   if(overflow_) return false;
 
   return (numerator() * other.denominator()) < (other.numerator() * denominator());
-}
-
-inline
-bool Rational::operator>(const Rational& other) const{
-  return (other < *this);
-}
-
-inline
-bool Rational::operator<=(const Rational& other) const{
-  return !(other < *this);
-}
-
-inline
-bool Rational::operator>=(const Rational& other) const{
-  return !(*this < other);
 }
 
 inline

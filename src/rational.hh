@@ -27,12 +27,8 @@ public:
   operator double() const;
 
   bool operator==(const Rational&) const;
-  bool operator!=(const Rational&) const;
 
   bool operator<(const Rational&) const;
-  bool operator>(const Rational&) const;
-  bool operator<=(const Rational&) const;
-  bool operator>=(const Rational&) const;
 
   Rational& operator+=(const Rational&);
   Rational& operator-=(const Rational&);
