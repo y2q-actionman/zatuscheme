@@ -5,11 +5,12 @@
 
 #if HAVE_STRCASECMP
 # include <strings.h>
+#endif
+
 int zs_strcasecmp(const char* s1, const char* s2){
+#if HAVE_STRCASECMP
   return strcasecmp(s1, s2);
-}
 #else
-int zs_strcasecmp(const char* s1, const char* s2){
   for(; *s1 && *s2; s1++, s2++){
     auto c1 = std::tolower(*s1);
     auto c2 = std::tolower(*s2);
@@ -17,10 +18,9 @@ int zs_strcasecmp(const char* s1, const char* s2){
       return c1 - c2;
     }
   }
-
   return std::tolower(*s1) - std::tolower(*s2);
+#endif // HAVE_STRCASECMP
 }
-#endif // !defined HAVE_STRCASECMP
 
 int zs_charcasecmp(char c1, char c2){
   char s1[2] = {c1, '\0'};
