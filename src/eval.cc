@@ -350,7 +350,7 @@ void proc_enter_srule(SyntaxRules* srule){
 void vm_op_call(){
   auto proc = vm.return_value_1();
 
-  if(!is_procedure(proc.tag())){
+  if(!is_procedure(proc)){
     // NOTE: too ad-hoc. should be rewritten.
     // We must process args, even this situation is almost wrong.
     // This is required for using a continuation in args. If no global
@@ -383,7 +383,7 @@ void vm_op_proc_enter(){
   auto proc = vm.code.back();
   vm.code.pop_back();
 
-  if(!is_procedure(proc.tag())){
+  if(!is_procedure(proc)){
     throw_procedure_type_check_failed(proc);
   }
 
@@ -509,7 +509,7 @@ void vm_op_define(){
 
   auto val = vm.return_value_1();
 
-  if(is_procedure(val.tag()) && !get_procname(val)){
+  if(is_procedure(val) && !get_procname(val)){
     set_procname(val, var);
   }
 

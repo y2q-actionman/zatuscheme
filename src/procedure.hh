@@ -162,6 +162,7 @@ private:
   Lisp_ptr name_;
 };
 
+bool is_procedure(Lisp_ptr);
 const ProcInfo* get_procinfo(Lisp_ptr);
 Lisp_ptr get_procname(Lisp_ptr);
 void set_procname(Lisp_ptr, Lisp_ptr);

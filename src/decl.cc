@@ -51,30 +51,3 @@ const char* stringify(Ptr_tag p){
     return "(unknown PTR type)";
   }
 }
-
-bool is_procedure(Ptr_tag tag){
-  switch(tag){
-  case Ptr_tag::i_procedure:
-  case Ptr_tag::n_procedure:
-  case Ptr_tag::continuation:
-  case Ptr_tag::syntax_rules:
-    return true;
-
-  case Ptr_tag::undefined: case Ptr_tag::boolean:
-  case Ptr_tag::character: case Ptr_tag::cons:
-  case Ptr_tag::symbol:
-  case Ptr_tag::integer: case Ptr_tag::rational:
-  case Ptr_tag::real:    case Ptr_tag::complex:
-  case Ptr_tag::string:    case Ptr_tag::vector:
-  case Ptr_tag::input_port: case Ptr_tag::output_port:
-  case Ptr_tag::env:
-  case Ptr_tag::syntactic_closure:
-  case Ptr_tag::vm_op:
-  case Ptr_tag::vm_argcount:
-  case Ptr_tag::notation:
-    return false;
-
-  default:
-    UNEXP_DEFAULT();
-  }
-}

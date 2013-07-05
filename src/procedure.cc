@@ -84,6 +84,15 @@ auto access_proc(Lisp_ptr p, IFun ifun, NFun nfun, CFun cfun, SFun sfun, DFun df
   }
 }
 
+bool is_procedure(Lisp_ptr p){
+  return access_proc(p,
+                     [](IProcedure*){ return true; },
+                     [](const NProcedure*){ return true; },
+                     [](Continuation*){ return true; },
+                     [](SyntaxRules*){ return true; },
+                     [](){ return false; });
+}
+
 const ProcInfo* get_procinfo(Lisp_ptr p){
   return access_proc(p,
                      [](IProcedure* iproc){ return iproc->info(); },
