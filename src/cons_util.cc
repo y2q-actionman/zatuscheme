@@ -4,6 +4,10 @@
 #include "lisp_ptr.hh"
 #include "zs_error.hh"
 
+Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
+  return make_cons_list(begin(lis), end(lis));
+}
+
 // GrowList class
 GrowList::GrowList()
   : head(Cons::NIL), next(&head)

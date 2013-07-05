@@ -34,11 +34,6 @@ Lisp_ptr make_cons_list(Iter b, Iter e){
   return gw.extract();
 }
 
-inline
-Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
-  return make_cons_list(begin(lis), end(lis));
-}
-
 
 // nth family
 template<unsigned n>
