@@ -21,6 +21,10 @@ VM::~VM() = default;
 
 VM& VM::operator=(const VM&) = default;
 
+Lisp_ptr VM::return_value_1(){
+  return (return_value.empty()) ? Lisp_ptr{} : return_value[0];
+}
+
 std::ostream& operator<<(std::ostream& f, const VM& v){
   f << "--- [code] ---\n";
   for(auto i = v.code.rbegin(), e = v.code.rend(); i != e; ++i){

@@ -25,8 +25,7 @@ public:
   VM& operator=(const VM&);
   VM& operator=(VM&&) = delete;
 
-  Lisp_ptr return_value_1()
-  { return (return_value.empty()) ? Lisp_ptr{} : return_value[0]; }
+  Lisp_ptr return_value_1();
 
   friend std::ostream& operator<<(std::ostream&, const VM&);
 
