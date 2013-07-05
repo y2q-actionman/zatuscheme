@@ -22,11 +22,25 @@ static_assert(sizeof(int) < sizeof(long long),
 namespace {
 
 bool is_numeric_type(Lisp_ptr p){
-  auto tag = p.tag();
-  return (tag == Ptr_tag::integer
-          || tag == Ptr_tag::rational
-          || tag == Ptr_tag::real
-          || tag == Ptr_tag::complex);
+  switch(p.tag()){
+  case Ptr_tag::integer:
+  case Ptr_tag::rational:
+  case Ptr_tag::real:
+  case Ptr_tag::complex:
+    return true;
+  case Ptr_tag::undefined: case Ptr_tag::boolean:
+  case Ptr_tag::character: case Ptr_tag::cons:
+  case Ptr_tag::symbol:
+  case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
+  case Ptr_tag::continuation: case Ptr_tag::syntax_rules:
+  case Ptr_tag::string:    case Ptr_tag::vector:
+  case Ptr_tag::input_port: case Ptr_tag::output_port:
+  case Ptr_tag::env:  case Ptr_tag::syntactic_closure:
+  case Ptr_tag::vm_op: case Ptr_tag::vm_argcount:
+  case Ptr_tag::notation:
+  default:
+    return false;
+  }
 }
 
 bool is_integer_type(Lisp_ptr p){
