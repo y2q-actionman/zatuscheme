@@ -27,8 +27,8 @@ struct try_match_failed{};
 struct expand_failed {};
 
 bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
-  for(auto l : sr.literals()){
-    if(eq_internal(l, p)){
+  for(auto i = begin(sr.literals()); i; ++i){
+    if(eq_internal(*i, p)){
       return true;
     }
   }
@@ -457,16 +457,16 @@ constexpr ProcInfo SyntaxRules::sr_procinfo;
 
 SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
   : env_(e), literals_(lits), rules_(rls), name_(){
-  for(auto i : lits){
-    if(!identifierp(i))
-      throw_builtin_identifier_check_failed(i);
+  for(auto i = begin(lits); i; ++i){
+    if(!identifierp(*i))
+      throw_builtin_identifier_check_failed(*i);
   }
 
-  for(auto i : rls){
-    auto pat_i = begin(i);
+  for(auto i = begin(rls); i; ++i){
+    auto pat_i = begin(*i);
     auto tmpl_i = next(pat_i);
     if(next(tmpl_i)){
-      throw_zs_error(i, "invalid pattern: too long");
+      throw_zs_error(*i, "invalid pattern: too long");
     }
       
     check_pattern(*this, *pat_i);
@@ -476,9 +476,9 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
 SyntaxRules::~SyntaxRules() = default;
 
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
-  for(auto i : this->rules()){
-    auto pat = nth_cons_list<0>(i);
-    auto tmpl = nth_cons_list<1>(i);
+  for(auto i = begin(rules()); i; ++i){
+    auto pat = nth_cons_list<0>(*i);
+    auto tmpl = nth_cons_list<1>(*i);
     auto ignore_ident = pick_first(pat);
 
     try{
