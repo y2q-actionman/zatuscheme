@@ -37,20 +37,18 @@ Lisp_ptr make_cons_list(Iter b, Iter e){
 
 // nth family
 template<unsigned n>
-constexpr
 Lisp_ptr nth_cons_list(Lisp_ptr p){
-  // This cast is for telling a type to the compiler. 
+  // This cast is required for telling a type to the compiler (g++-4.6). 
   return car(static_cast<Lisp_ptr>(nthcdr_cons_list<n>(p)).get<Cons*>());
 }
 
 template<>
-constexpr
+inline
 Lisp_ptr nthcdr_cons_list<0u>(Lisp_ptr p){
   return p;
 }
 
 template<unsigned n>
-constexpr
 Lisp_ptr nthcdr_cons_list(Lisp_ptr p){
   return nthcdr_cons_list<n-1>(cdr(p.get<Cons*>()));
 }
