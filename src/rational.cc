@@ -147,7 +147,7 @@ Complex coerce(Lisp_ptr p){
 
 Lisp_ptr wrap_number(const Rational& q){
   if(q.is_convertible<int>()){
-    return {Ptr_tag::integer, static_cast<int>(q)};
+    return Lisp_ptr{static_cast<int>(q)};
   }else if(q.is_convertible<Rational>()){
     return {zs_new<Rational>(q)};
   }else{

@@ -26,7 +26,7 @@ int main(){
   // check_p_success(static_cast<const NProcedure*>(nullptr));
 
   // number
-  check_p({Ptr_tag::integer, 100}, "100");
+  check_p(Lisp_ptr{100}, "100");
   check_p(new double(1.1), "1.1");
 
   // string

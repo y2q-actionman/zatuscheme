@@ -7,8 +7,7 @@
 
 #include <type_traits>
 
-// ptr class definitions
-
+// Lisp_ptr constructors
 inline constexpr
 Lisp_ptr::Lisp_ptr(bool b)
   : tag_(to_tag<bool>()), u_(b){}
@@ -16,6 +15,10 @@ Lisp_ptr::Lisp_ptr(bool b)
 inline constexpr
 Lisp_ptr::Lisp_ptr(char c)
   : tag_(to_tag<char>()), u_(c){}
+
+inline constexpr
+Lisp_ptr::Lisp_ptr(int i)
+  : tag_(to_tag<int>()), u_(i){}
 
 template<typename T>
 inline constexpr
@@ -25,16 +28,12 @@ Lisp_ptr::Lisp_ptr(T p)
                 "Lisp_ptr cannot accept the specified type.");
 }
 
-inline constexpr
-Lisp_ptr::Lisp_ptr(Ptr_tag p, int i)
-  : tag_(p), u_(i){}
-
 template<>
 inline constexpr
 Lisp_ptr::Lisp_ptr<Notation>(Notation n)
   : tag_(to_tag<Notation>()), u_(static_cast<int>(n)){}
 
-
+// Lisp_ptr getters
 template<>
 inline constexpr
 bool Lisp_ptr::get<bool>() const {
@@ -48,6 +47,13 @@ inline constexpr
 char Lisp_ptr::get<char>() const {
   return (tag() == to_tag<char>())
     ? u_.c_ : '\0';
+}
+
+template<>
+inline constexpr
+int Lisp_ptr::get<int>() const {
+  return (tag() == Ptr_tag::integer)
+    ? u_.i_ : 0;
 }
 
 template<>
@@ -69,13 +75,6 @@ inline constexpr
 Notation Lisp_ptr::get<Notation>() const {
   return static_cast<Notation>
     ((tag() == to_tag<Notation>()) ? u_.i_ : 0);
-}
-
-template<>
-inline constexpr
-int Lisp_ptr::get<int>() const {
-  return (tag() == Ptr_tag::integer)
-    ? u_.i_ : 0;
 }
 
 template<>

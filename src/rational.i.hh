@@ -141,7 +141,7 @@ template<> Complex coerce(Lisp_ptr);
 
 inline
 Lisp_ptr wrap_number(int i){
-  return {Ptr_tag::integer, i};
+  return Lisp_ptr{i};
 }
 
 inline

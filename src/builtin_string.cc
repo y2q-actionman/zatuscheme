@@ -21,7 +21,7 @@ Lisp_ptr internal_string_cmp(ZsArgs&& args, Fun fun){
     s[i] = args[i].get<String*>()->c_str();
   }
 
-  return Lisp_ptr{Ptr_tag::integer, fun(s[0], s[1])};
+  return Lisp_ptr{fun(s[0], s[1])};
 }
 
 } // namespace
@@ -52,8 +52,7 @@ Lisp_ptr string_length(ZsArgs args){
   }
 
   // TODO: add range check, and remove cast
-  return Lisp_ptr{Ptr_tag::integer,
-      static_cast<int>(str->length())};
+  return Lisp_ptr{static_cast<int>(str->length())};
 }
 
 Lisp_ptr string_ref(ZsArgs args){

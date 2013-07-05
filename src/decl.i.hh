@@ -156,6 +156,12 @@ Ptr_tag to_tag<Continuation*>(){
 
 template<>
 inline constexpr
+Ptr_tag to_tag<int>(){
+  return Ptr_tag::integer;
+}
+
+template<>
+inline constexpr
 Ptr_tag to_tag<Rational*>(){
   return Ptr_tag::rational;
 }

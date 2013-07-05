@@ -43,8 +43,7 @@ void check(const char* input, const T& expect){
 // printing test
 void check(int i, int radix, const char* expect){
   stringstream ss;
-  print(ss, Lisp_ptr{Ptr_tag::integer, i},
-        PrintReadable::f, radix);
+  print(ss, Lisp_ptr{i}, PrintReadable::f, radix);
 
   if(ss.str() != expect){
     cerr << "[failed] printed " << ss.str() << ", expected " << expect << "\n";

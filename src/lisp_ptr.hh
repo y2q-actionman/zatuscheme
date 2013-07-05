@@ -8,8 +8,8 @@ public:
   constexpr Lisp_ptr() : tag_(Ptr_tag::undefined), u_(){}
   explicit constexpr Lisp_ptr(bool); // fundamental types are 'explicit'
   explicit constexpr Lisp_ptr(char);
+  explicit constexpr Lisp_ptr(int);
   template<typename T> constexpr Lisp_ptr(T); // non-fundamental type
-  constexpr Lisp_ptr(Ptr_tag, int); // integer, argcount
 
   Lisp_ptr(const Lisp_ptr&) = default;
   Lisp_ptr(Lisp_ptr&&) = default;

@@ -28,8 +28,7 @@ Lisp_ptr vector_length(ZsArgs args){
   }
 
   // TODO: add range check, and remove cast
-  return Lisp_ptr{Ptr_tag::integer,
-      static_cast<int>(v->size())};
+  return Lisp_ptr{static_cast<int>(v->size())};
 }
 
 Lisp_ptr vector_ref(ZsArgs args){

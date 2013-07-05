@@ -40,7 +40,7 @@ Lisp_ptr internal_char_casecmp(ZsArgs args){
     c[i] = args[i].get<char>();
   }
 
-  return Lisp_ptr{Ptr_tag::integer, zs_charcasecmp(c[0], c[1])};
+  return Lisp_ptr{zs_charcasecmp(c[0], c[1])};
 }
 
 Lisp_ptr char_isalpha(ZsArgs args){
@@ -67,7 +67,7 @@ Lisp_ptr char_islower(ZsArgs args){
 Lisp_ptr char_to_int(ZsArgs args){
   return char_conversion(args[0],
                          [](char c){
-                           return Lisp_ptr(Ptr_tag::integer, c);
+                           return Lisp_ptr{static_cast<int>(c)};
                          });
 }
 
