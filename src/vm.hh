@@ -58,7 +58,7 @@ public:
   ZsArgs& operator=(ZsArgs&&);
 
   
-  Lisp_ptr& operator[](int i) const
+  const Lisp_ptr& operator[](int i) const
   { return stack_iter_s_[i]; }
 
   int size() const

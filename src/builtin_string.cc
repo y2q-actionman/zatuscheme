@@ -13,16 +13,15 @@ using namespace std;
 namespace {
 
 template<typename Fun>
-Lisp_ptr internal_string_cmp(ZsArgs args, Fun fun){
-  for(auto p : args){
-    if(p.tag() != Ptr_tag::string){
-      throw_builtin_type_check_failed(Ptr_tag::string, p);
-    }
+Lisp_ptr internal_string_cmp(ZsArgs&& args, Fun fun){
+  const char* s[2];
+  for(auto i = 0; i < 2; ++i){
+    if(args[i].tag() != Ptr_tag::string)
+      throw_builtin_type_check_failed(Ptr_tag::string, args[i]);
+    s[i] = args[i].get<String*>()->c_str();
   }
 
-  return Lisp_ptr{Ptr_tag::integer,
-      fun(args[0].get<String*>()->c_str(),
-          args[1].get<String*>()->c_str())};
+  return Lisp_ptr{Ptr_tag::integer, fun(s[0], s[1])};
 }
 
 } // namespace

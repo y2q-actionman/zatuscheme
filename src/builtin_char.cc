@@ -33,14 +33,14 @@ Lisp_ptr char_conversion(Lisp_ptr arg1, const Fun& fun){
 namespace builtin {
 
 Lisp_ptr internal_char_casecmp(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::character)
-    throw_builtin_type_check_failed(Ptr_tag::character, args[0]);
+  char c[2];
+  for(auto i = 0; i < 2; ++i){
+    if(args[i].tag() != Ptr_tag::character)
+      throw_builtin_type_check_failed(Ptr_tag::character, args[i]);
+    c[i] = args[i].get<char>();
+  }
 
-  if(args[1].tag() != Ptr_tag::character)
-    throw_builtin_type_check_failed(Ptr_tag::character, args[1]);
-
-  return Lisp_ptr{Ptr_tag::integer,
-      zs_charcasecmp(args[0].get<char>(), args[1].get<char>())};
+  return Lisp_ptr{Ptr_tag::integer, zs_charcasecmp(c[0], c[1])};
 }
 
 Lisp_ptr char_isalpha(ZsArgs args){

@@ -11,7 +11,6 @@ using namespace std;
 namespace {
 
 template<typename Fun>
-inline
 Lisp_ptr with_nonnull_cons(const Lisp_ptr& p, Fun fun){
   auto c = p.get<Cons*>();
   if(!c){
