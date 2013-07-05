@@ -16,7 +16,7 @@ using namespace std;
 namespace {
 
 template<typename IOType, typename F_IOType>
-Lisp_ptr port_open_file(ZsArgs args){
+Lisp_ptr port_open_file(ZsArgs&& args){
   auto str = args[0].get<String*>();
   if(!str){
     throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
@@ -31,7 +31,7 @@ Lisp_ptr port_open_file(ZsArgs args){
 }  
 
 template<typename IOType, typename F_IOType>
-Lisp_ptr port_close(ZsArgs args){
+Lisp_ptr port_close(ZsArgs&& args){
   auto p = args[0].get<IOType*>();
   if(!p){
     throw_builtin_type_check_failed(to_tag<IOType*>(), args[0]);
@@ -48,7 +48,7 @@ Lisp_ptr port_close(ZsArgs args){
 }
 
 template<typename Fun>
-Lisp_ptr port_input_call(ZsArgs args, Fun fun){
+Lisp_ptr port_input_call(ZsArgs&& args, Fun fun){
   InputPort* p = args[0].get<InputPort*>();
   if(!p){
     throw_builtin_type_check_failed(to_tag<InputPort*>(), args[0]);
@@ -58,13 +58,14 @@ Lisp_ptr port_input_call(ZsArgs args, Fun fun){
 }
 
 template<typename Fun>
-Lisp_ptr port_output_call(ZsArgs args, Fun fun){
+Lisp_ptr port_output_call(ZsArgs&& args, Fun fun){
   OutputPort* p = args[1].get<OutputPort*>();
   if(!p){
     throw_builtin_type_check_failed(to_tag<OutputPort*>(), args[1]);
   }
 
-  return Lisp_ptr{fun(args[0], p)};
+  fun(args[0], p);
+  return Lisp_ptr{true};
 }
 
 
@@ -148,29 +149,26 @@ Lisp_ptr port_eof_p(ZsArgs args){
 
 Lisp_ptr internal_port_write(ZsArgs args){
   return port_output_call(move(args),
-                          [](Lisp_ptr c, std::ostream* os) -> bool{
+                          [](Lisp_ptr c, std::ostream* os){
                             print(*os, c, PrintReadable::f);
-                            return true;
                           });
 }
 
 Lisp_ptr internal_port_display(ZsArgs args){
   return port_output_call(move(args),
-                          [](Lisp_ptr c, std::ostream* os) -> bool{
+                          [](Lisp_ptr c, std::ostream* os){
                             print(*os, c, PrintReadable::t);
-                            return true;
                           });
 }
 
 Lisp_ptr internal_port_write_char(ZsArgs args){
   return port_output_call(move(args),
-                          [](Lisp_ptr c, std::ostream* os) -> Lisp_ptr{
+                          [](Lisp_ptr c, std::ostream* os){
                             if(c.tag() != Ptr_tag::character){
                               throw_builtin_type_check_failed(Ptr_tag::character, c);
                             }
 
                             os->put(c.get<char>());
-                            return c;
                           });
 }
 
