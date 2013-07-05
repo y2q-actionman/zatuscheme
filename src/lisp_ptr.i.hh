@@ -29,8 +29,9 @@ inline constexpr
 Lisp_ptr::Lisp_ptr(Ptr_tag p, int i)
   : tag_(p), u_(i){}
 
+template<>
 inline constexpr
-Lisp_ptr::Lisp_ptr(Notation n)
+Lisp_ptr::Lisp_ptr<Notation>(Notation n)
   : tag_(to_tag<Notation>()), u_(static_cast<int>(n)){}
 
 
