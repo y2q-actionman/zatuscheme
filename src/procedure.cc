@@ -42,68 +42,73 @@ Continuation::Continuation(const VM& v)
 Continuation::~Continuation() = default;
 
 
-const ProcInfo* get_procinfo(Lisp_ptr p){
-  if(!is_procedure(p.tag())) return nullptr;
-
-  if(p.tag() == Ptr_tag::i_procedure){
+template<typename IFun, typename NFun, typename CFun, typename SFun, typename DFun>
+auto access_proc(Lisp_ptr p, IFun ifun, NFun nfun, CFun cfun, SFun sfun, DFun dfun)
+  -> decltype(ifun(nullptr)){
+  switch(p.tag()){
+  case Ptr_tag::i_procedure: {
     auto iproc = p.get<IProcedure*>();
     assert(iproc);
-    return iproc->info();
-  }else if(p.tag() == Ptr_tag::n_procedure){
+    return ifun(iproc);
+  }
+  case Ptr_tag::n_procedure: {
     auto nproc = p.get<const NProcedure*>();
     assert(nproc);
-    return nproc->info();
-  }else if(p.tag() == Ptr_tag::continuation){
+    return nfun(nproc);
+  }
+  case Ptr_tag::continuation: {
     auto cont = p.get<Continuation*>();
     assert(cont);
-    return cont->info();
-  }else if(p.tag() == Ptr_tag::syntax_rules){
+    return cfun(cont);
+  }
+  case Ptr_tag::syntax_rules: {
     auto srule = p.get<SyntaxRules*>();
     assert(srule);
-    return srule->info();
-  }else{
+    return sfun(srule);
+  }
+  case Ptr_tag::undefined: case Ptr_tag::boolean:
+  case Ptr_tag::character: case Ptr_tag::cons:
+  case Ptr_tag::symbol:
+  case Ptr_tag::integer: case Ptr_tag::rational:
+  case Ptr_tag::real:    case Ptr_tag::complex:
+  case Ptr_tag::string:    case Ptr_tag::vector:
+  case Ptr_tag::input_port: case Ptr_tag::output_port:
+  case Ptr_tag::env:
+  case Ptr_tag::syntactic_closure:
+  case Ptr_tag::vm_op:
+  case Ptr_tag::vm_argcount:
+  case Ptr_tag::notation:
+    return dfun();
+  default:
     UNEXP_DEFAULT();
   }
+}
+
+const ProcInfo* get_procinfo(Lisp_ptr p){
+  return access_proc(p,
+                     [](IProcedure* iproc){ return iproc->info(); },
+                     [](const NProcedure* nproc){ return nproc->info(); },
+                     [](Continuation* cont){ return cont->info(); },
+                     [](SyntaxRules* srule){ return srule->info(); },
+                     [](){ return nullptr; });
 }
 
 Lisp_ptr get_procname(Lisp_ptr p){
-  if(p.tag() == Ptr_tag::i_procedure){
-    auto iproc = p.get<IProcedure*>();
-    assert(iproc);
-    return iproc->name();
-  }else if(p.tag() == Ptr_tag::n_procedure){
-    auto nproc = p.get<const NProcedure*>();
-    assert(nproc);
-    return zs_new<String>(find_builtin_nproc_name(nproc));
-  }else if(p.tag() == Ptr_tag::continuation){
-    auto cont = p.get<Continuation*>();
-    assert(cont);
-    return cont->name();
-  }else if(p.tag() == Ptr_tag::syntax_rules){
-    auto srule = p.get<SyntaxRules*>();
-    assert(srule);
-    return srule->name();
-  }else{
-    UNEXP_DEFAULT();
-  }
+  return access_proc(p,
+                     [](IProcedure* iproc){ return iproc->name(); },
+                     [](const NProcedure* nproc){
+                       return zs_new<String>(find_builtin_nproc_name(nproc));
+                     },
+                     [](Continuation* cont){ return cont->name(); },
+                     [](SyntaxRules* srule){ return srule->name(); },
+                     []() -> Lisp_ptr { UNEXP_DEFAULT(); });
 }
 
 void set_procname(Lisp_ptr p, Lisp_ptr n){
-  if(p.tag() == Ptr_tag::i_procedure){
-    auto iproc = p.get<IProcedure*>();
-    assert(iproc);
-    iproc->set_name(n);
-  }else if(p.tag() == Ptr_tag::n_procedure){
-    return;
-  }else if(p.tag() == Ptr_tag::continuation){
-    auto cont = p.get<Continuation*>();
-    assert(cont);
-    cont->set_name(n);
-  }else if(p.tag() == Ptr_tag::syntax_rules){
-    auto srule = p.get<SyntaxRules*>();
-    assert(srule);
-    srule->set_name(n);
-  }else{
-    UNEXP_DEFAULT();
-  }
+  return access_proc(p,
+                     [&](IProcedure* iproc){ iproc->set_name(n); },
+                     [](const NProcedure*){},
+                     [&](Continuation* cont){ cont->set_name(n); },
+                     [&](SyntaxRules* srule){ srule->set_name(n); },
+                     [](){ UNEXP_DEFAULT(); });
 }
