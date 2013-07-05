@@ -58,6 +58,13 @@ VMop Lisp_ptr::get<VMop>() const {
 
 template<>
 inline constexpr
+VMArgcount Lisp_ptr::get<VMArgcount>() const {
+  return static_cast<VMArgcount>
+    ((tag() == to_tag<VMArgcount>()) ? u_.i_ : 0);
+}
+
+template<>
+inline constexpr
 Notation Lisp_ptr::get<Notation>() const {
   return static_cast<Notation>
     ((tag() == to_tag<Notation>()) ? u_.i_ : 0);
@@ -66,8 +73,7 @@ Notation Lisp_ptr::get<Notation>() const {
 template<>
 inline constexpr
 int Lisp_ptr::get<int>() const {
-  return (tag() == Ptr_tag::integer
-          || tag() == Ptr_tag::vm_argcount)
+  return (tag() == Ptr_tag::integer)
     ? u_.i_ : 0;
 }
 

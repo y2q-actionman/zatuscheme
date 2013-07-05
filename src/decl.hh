@@ -24,6 +24,13 @@ class Env;
 class SyntacticClosure;
 class SyntaxRules;
 typedef void(*VMop)();
+
+struct VMArgcount{
+  int value;
+  explicit constexpr VMArgcount(int i) : value(i){}
+  constexpr operator int(){ return value; }
+};
+
 enum class Notation;
 
 // Type tag

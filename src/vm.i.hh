@@ -7,7 +7,7 @@
 
 inline
 ZsArgs::ZsArgs()
-  : size_(vm.stack.back().get<int>()),
+  : size_(vm.stack.back().get<VMArgcount>()),
     stack_iter_s_(vm.stack.end() - (size_ + 1)){}
 
 inline

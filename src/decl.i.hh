@@ -103,7 +103,7 @@ struct to_type<Ptr_tag::vm_op>{
 
 template<>
 struct to_type<Ptr_tag::vm_argcount>{
-  typedef int type;
+  typedef VMArgcount type;
 };
 
 template<>
@@ -218,6 +218,12 @@ template<>
 inline constexpr
 Ptr_tag to_tag<VMop>(){
   return Ptr_tag::vm_op;
+}
+
+template<>
+inline constexpr
+Ptr_tag to_tag<VMArgcount>(){
+  return Ptr_tag::vm_argcount;
 }
 
 template<>

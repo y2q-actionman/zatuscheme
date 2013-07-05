@@ -40,7 +40,7 @@ Lisp_ptr apply(ZsArgs args){
       ++argc;
     }
   }
-  vm.stack.push_back({Ptr_tag::vm_argcount, argc});
+  vm.stack.push_back(VMArgcount{argc});
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
   return {};
 }
@@ -66,7 +66,7 @@ Lisp_ptr call_with_values(ZsArgs args){
   vm.code.insert(vm.code.end(), {procs[1], vm_op_proc_enter, vm_op_move_values});
 
   // first proc, calling with zero args.
-  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  vm.stack.push_back(VMArgcount{0});
   vm.code.insert(vm.code.end(), {procs[0], vm_op_proc_enter});
   return {};
 }
@@ -83,7 +83,7 @@ Lisp_ptr call_cc(ZsArgs args){
   args.cleanup();
 
   auto cont = zs_new<Continuation>(vm);
-  vm.stack.insert(vm.stack.end(), {cont, {Ptr_tag::vm_argcount, 1}});
+  vm.stack.insert(vm.stack.end(), {cont, VMArgcount{1}});
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
   return {};
 }
@@ -104,17 +104,17 @@ Lisp_ptr dynamic_wind(ZsArgs args){
   vm.code.push_back(vm_op_leave_winding);
 
   // third proc call
-  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  vm.stack.push_back(VMArgcount{0});
   vm.code.push_back(procs[2]);
   vm.code.push_back(vm_op_save_values_and_enter);
 
   // second proc call
-  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  vm.stack.push_back(VMArgcount{0});
   vm.code.push_back(procs[1]);
   vm.code.push_back(vm_op_proc_enter);
 
   // first proc, calling with zero args.
-  vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+  vm.stack.push_back(VMArgcount{0});
   vm.code.insert(vm.code.end(), {procs[0], vm_op_proc_enter});
   return {};
 }

@@ -208,7 +208,7 @@ void print(ostream& f, Lisp_ptr p, PrintReadable flag, int radix){
   }
 
   case Ptr_tag::vm_argcount:
-    f << "#<argcount " << p.get<int>() << ">";
+    f << "#<argcount " << static_cast<int>(p.get<VMArgcount>()) << ">";
     break;
 
   case Ptr_tag::vm_op:

@@ -46,7 +46,7 @@ void eval_call(Lisp_ptr proc){
 
   vm.code.insert(vm.code.end(), 
                  {proc, vm_op_proc_enter,
-                  {Ptr_tag::vm_argcount, static_cast<int>(tmpv.size())}});
+                  VMArgcount{static_cast<int>(tmpv.size())}});
 
   for(auto i = tmpv.rbegin(), e = tmpv.rend(); i != e; ++i){
     vm.code.insert(vm.code.end(), {vm_op_arg_push, *i});
@@ -82,8 +82,8 @@ void vm_op_stack_splicing(){
   for(auto i = vm.code.rbegin(), e = vm.code.rend(); i != e; i++){
     if(i->tag() == Ptr_tag::vm_argcount){
       // this '-1' negates function_call()'s estimation.
-      auto new_argc = i->get<int>() + argc - 1;
-      *i = {Ptr_tag::vm_argcount, new_argc};
+      auto new_argc = i->get<VMArgcount>() + argc - 1;
+      *i = VMArgcount{new_argc};
       return;
     }
   }
@@ -115,7 +115,7 @@ void quote_call(Lisp_ptr proc){
     }
   }
 
-  vm.stack.push_back({Ptr_tag::vm_argcount, argc});
+  vm.stack.push_back(VMArgcount{argc});
 
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
 }
@@ -128,7 +128,7 @@ void quote_call(Lisp_ptr proc){
 */
 void whole_call(Lisp_ptr proc){
   vm.stack.insert(vm.stack.end(),
-                  {vm.frame, {Ptr_tag::vm_argcount, 2}});
+                  {vm.frame, VMArgcount{2}});
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
 }
 
@@ -142,7 +142,7 @@ void proc_enter_native(const NProcedure* fun){
   assert(info);
 
   assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
-  auto argc = vm.stack.back().get<int>();
+  auto argc = vm.stack.back().get<VMArgcount>();
 
   if(!((info->required_args <= argc) && (argc <= info->max_args))){
     throw_builtin_argcount_failed(get_procname(fun),
@@ -206,7 +206,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   vm.stack.pop_back();
 
   const auto arg_end = vm.stack.end();
-  const auto arg_start = arg_end - argc.get<int>();
+  const auto arg_start = arg_end - argc.get<VMArgcount>();
   auto arg_i = arg_start;
 
   // normal arg push
@@ -293,7 +293,7 @@ void vm_op_replace_vm(){
 
   // processes 'before' windings
   for(unsigned i = wind_index; i < vm.extent.size(); ++i){
-    vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+    vm.stack.push_back(VMArgcount{0});
     vm.code.insert(vm.code.end(), {vm.extent[i].before, vm_op_proc_enter});
   }
 }
@@ -321,7 +321,7 @@ void proc_enter_cont(Continuation* c){
   for(unsigned i = vm.extent.size() - 1;
       (i >= wind_index) && (static_cast<signed>(i) >= 0);
       --i){
-    vm.stack.push_back({Ptr_tag::vm_argcount, 0});
+    vm.stack.push_back(VMArgcount{0});
     vm.code.insert(vm.code.end(), {vm.extent[i].after, vm_op_proc_enter});
   }
 }
@@ -390,7 +390,7 @@ void vm_op_proc_enter(){
   assert(!vm.stack.empty());
 
   auto info = get_procinfo(proc);
-  auto argc = vm.stack.back().get<int>();
+  auto argc = vm.stack.back().get<VMArgcount>();
 
   if(!(info->required_args <= argc && argc <= info->max_args)){
     throw_builtin_argcount_failed(get_procname(proc),
@@ -433,7 +433,7 @@ void vm_op_proc_enter(){
 void vm_op_move_values(){
   int argc = vm.return_value.size();
   vm.stack.insert(vm.stack.end(), vm.return_value.begin(), vm.return_value.end());
-  vm.stack.push_back({Ptr_tag::vm_argcount, argc});
+  vm.stack.push_back(VMArgcount{argc});
 }
  
 /*
@@ -635,7 +635,7 @@ void eval(){
       auto handler = vm.exception_handler.back();
       vm.exception_handler.pop_back();
 
-      vm.stack.insert(vm.stack.end(), {p, {Ptr_tag::vm_argcount, 1}});
+      vm.stack.insert(vm.stack.end(), {p, VMArgcount{1}});
       vm.code.insert(vm.code.end(), {vm_op_raise, handler, vm_op_proc_enter});
     }
   }
