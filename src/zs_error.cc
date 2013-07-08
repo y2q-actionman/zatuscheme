@@ -7,6 +7,7 @@
 
 #include "lisp_ptr.hh"
 #include "printer.hh"
+#include "rational.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
 
@@ -106,5 +107,11 @@ void print_zs_warning(const char* fmt, ...){
 void check_type(Ptr_tag tag, Lisp_ptr p){
   if(p.tag() != tag){
     throw_builtin_type_check_failed(tag, p);
+  }
+}
+
+void check_numeric_type(Lisp_ptr p){
+  if(!is_numeric_type(p)){
+    throw_number_type_check_failed(p);
   }
 }

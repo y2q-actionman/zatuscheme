@@ -25,9 +25,7 @@ template<typename IFun, typename QFun, typename RFun, typename CFun>
 Lisp_ptr number_unary(Lisp_ptr arg1,
                       const IFun& ifun, const QFun& qfun,
                       const RFun& rfun, const CFun& cfun){
-  if(!is_numeric_type(arg1)){
-    throw_number_type_check_failed(arg1);
-  }
+  check_numeric_type(arg1);
 
   if(is_numeric_convertible(arg1, Ptr_tag::integer)){
     return wrap_number(ifun(coerce<int>(arg1)));
@@ -46,13 +44,8 @@ template<typename IFun, typename QFun, typename RFun, typename CFun>
 Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
                        const IFun& ifun, const QFun& qfun,
                        const RFun& rfun, const CFun& cfun){
-  if(!is_numeric_type(arg1)){
-    throw_number_type_check_failed(arg1);
-  }
-
-  if(!is_numeric_type(arg2)){
-    throw_number_type_check_failed(arg2);
-  }
+  check_numeric_type(arg1);
+  check_numeric_type(arg2);
   
   if(is_numeric_convertible(arg1, Ptr_tag::integer)
      && is_numeric_convertible(arg2, Ptr_tag::integer)){
@@ -487,10 +480,7 @@ Lisp_ptr internal_number_from_string(ZsArgs args){
 }
 
 Lisp_ptr internal_number_to_string(ZsArgs args){
-  if(!is_numeric_type(args[0])){
-    throw_number_type_check_failed(args[0]);
-  }
-
+  check_numeric_type(args[0]);
   check_type(Ptr_tag::integer, args[1]);
 
   auto radix = coerce<int>(args[1]);
