@@ -411,15 +411,28 @@ void vm_op_proc_enter(){
     UNEXP_DEFAULT();
   }
 
-  if(auto ifun = proc.get<IProcedure*>()){
-    proc_enter_interpreted(ifun, info);
-  }else if(auto nfun = proc.get<const NProcedure*>()){
-    proc_enter_native(nfun);
-  }else if(auto cont = proc.get<Continuation*>()){
-    proc_enter_cont(cont);
-  }else if(auto srule = proc.get<SyntaxRules*>()){
-    proc_enter_srule(srule);
-  }else{
+  switch(proc.tag()){
+  case Ptr_tag::i_procedure:
+    return proc_enter_interpreted(proc.get<IProcedure*>(), info);
+  case Ptr_tag::n_procedure:
+    return proc_enter_native(proc.get<const NProcedure*>());
+  case Ptr_tag::continuation:
+    return proc_enter_cont(proc.get<Continuation*>());
+  case Ptr_tag::syntax_rules:
+    return proc_enter_srule(proc.get<SyntaxRules*>());
+  case Ptr_tag::undefined: case Ptr_tag::boolean:
+  case Ptr_tag::character: case Ptr_tag::cons:
+  case Ptr_tag::symbol:
+  case Ptr_tag::integer: case Ptr_tag::rational:
+  case Ptr_tag::real:    case Ptr_tag::complex:
+  case Ptr_tag::string:    case Ptr_tag::vector:
+  case Ptr_tag::input_port: case Ptr_tag::output_port:
+  case Ptr_tag::env:
+  case Ptr_tag::syntactic_closure:
+  case Ptr_tag::vm_op:
+  case Ptr_tag::vm_argcount:
+  case Ptr_tag::notation:
+  default:
     UNEXP_DEFAULT();
   }
 }
