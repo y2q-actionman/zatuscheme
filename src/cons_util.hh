@@ -58,17 +58,13 @@ public:
   ConsIter& operator=(const ConsIter&) = default;
   ConsIter& operator=(ConsIter&&) = default;
 
-  Lisp_ptr operator*() const
-  { return car(p_.get<Cons*>()); }
-
+  Lisp_ptr operator*() const;
   Lisp_ptr* operator->() const;
 
   ConsIter& operator++();
   ConsIter operator++(int);
 
-  explicit operator bool() const
-  { return (p_.get<Cons*>()); }
-
+  explicit operator bool() const;
 
   Lisp_ptr base() const
   { return p_; }
