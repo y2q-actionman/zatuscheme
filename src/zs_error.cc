@@ -8,6 +8,7 @@
 #include "lisp_ptr.hh"
 #include "printer.hh"
 #include "rational.hh"
+#include "s_closure.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
 
@@ -113,5 +114,11 @@ void check_type(Ptr_tag tag, Lisp_ptr p){
 void check_numeric_type(Lisp_ptr p){
   if(!is_numeric_type(p)){
     throw_number_type_check_failed(p);
+  }
+}
+
+void check_identifier_type(Lisp_ptr p){
+  if(!identifierp(p)){
+    throw_builtin_identifier_check_failed(p);
   }
 }

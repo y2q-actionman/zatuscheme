@@ -92,25 +92,19 @@ Lisp_ptr identifier_eq(ZsArgs args){
   check_type(Ptr_tag::env, args[0]);
   auto ident1_env = args[0].get<Env*>();
 
-  if(!identifierp(args[1])){
-    throw_builtin_identifier_check_failed(args[1]);
-  }
+  check_identifier_type(args[1]);
   
   check_type(Ptr_tag::env, args[2]);
   auto ident2_env = args[2].get<Env*>();
 
-  if(!identifierp(args[3])){
-    throw_builtin_identifier_check_failed(args[3]);
-  }
+  check_identifier_type(args[3]);
 
   return 
     Lisp_ptr{identifier_eq(ident1_env, args[1], ident2_env, args[3])};
 }
 
 Lisp_ptr make_synthetic_identifier(ZsArgs args){
-  if(!identifierp(args[0])){
-    throw_builtin_identifier_check_failed(args[0]);
-  }
+  check_identifier_type(args[0]);
 
   return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
 }

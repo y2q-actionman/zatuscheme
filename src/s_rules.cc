@@ -458,8 +458,7 @@ constexpr ProcInfo SyntaxRules::sr_procinfo;
 SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
   : env_(e), literals_(lits), rules_(rls), name_(){
   for(auto i = begin(lits); i; ++i){
-    if(!identifierp(*i))
-      throw_builtin_identifier_check_failed(*i);
+    check_identifier_type(*i);
   }
 
   for(auto i = begin(rls); i; ++i){

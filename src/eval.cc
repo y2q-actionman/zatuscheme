@@ -475,9 +475,7 @@ void vm_op_set(){
   auto var = vm.code.back();
   vm.code.pop_back();
 
-  if(!identifierp(var)){
-    throw_builtin_identifier_check_failed(vm.code.back());
-  }
+  check_identifier_type(var);
 
   auto val = vm.return_value_1();
 
@@ -503,9 +501,7 @@ void vm_op_define(){
   auto var = vm.code.back();
   vm.code.pop_back();
 
-  if(!identifierp(var)){
-    throw_builtin_identifier_check_failed(var);
-  }
+  check_identifier_type(var);
 
   auto val = vm.return_value_1();
 
