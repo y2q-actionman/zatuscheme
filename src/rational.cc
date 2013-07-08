@@ -170,17 +170,14 @@ bool is_numeric_type(Lisp_ptr p){
 bool is_numeric_convertible(Lisp_ptr p, Ptr_tag tag){
   switch(p.tag()){
   case Ptr_tag::integer:
-    return (tag == Ptr_tag::integer
-            || tag == Ptr_tag::rational
-            || tag == Ptr_tag::real
-            || tag == Ptr_tag::complex);
+    if(tag == Ptr_tag::integer) return true;
+    // fall through
   case Ptr_tag::rational:
-    return (tag == Ptr_tag::rational
-            || tag == Ptr_tag::real
-            || tag == Ptr_tag::complex);
+    if(tag == Ptr_tag::rational) return true;
+    // fall through
   case Ptr_tag::real:
-    return (tag == Ptr_tag::real
-            || tag == Ptr_tag::complex);
+    if(tag == Ptr_tag::real) return true;
+    // fall through
   case Ptr_tag::complex:
     return (tag == Ptr_tag::complex);
   case Ptr_tag::undefined: case Ptr_tag::boolean:
