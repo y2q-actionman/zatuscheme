@@ -10,21 +10,17 @@ using namespace std;
 namespace builtin {
 
 Lisp_ptr symbol_to_string(ZsArgs args){
-  auto sym = args[0].get<Symbol*>();
-  if(!sym){
-    throw_builtin_type_check_failed(Ptr_tag::symbol, {args[0]});
-  }
+  check_type(Ptr_tag::symbol, args[0]);
 
+  auto sym = args[0].get<Symbol*>();
   // TODO: support invariant string!
   return {zs_new<String>(sym->name())};
 }
 
 Lisp_ptr symbol_from_string(ZsArgs args){
-  auto str = args[0].get<String*>();
-  if(!str){
-    throw_builtin_type_check_failed(Ptr_tag::symbol, {args[0]});
-  }
+  check_type(Ptr_tag::string, args[0]);
 
+  auto str = args[0].get<String*>();
   return {intern(*vm.symtable, *str)};
 }
 

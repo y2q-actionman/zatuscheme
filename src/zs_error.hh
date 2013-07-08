@@ -43,4 +43,6 @@ void print_zs_warning(const char*, ...)
   __attribute__ ((format (printf, 1, 2)))
   ;
 
+void check_type(Ptr_tag, Lisp_ptr);
+
 #endif // ZS_ERROR_HH

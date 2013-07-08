@@ -9,9 +9,7 @@ using namespace std;
 namespace builtin {
 
 Lisp_ptr internal_vector_make(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::integer){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[0]);
-  }
+  check_type(Ptr_tag::integer, args[0]);
 
   auto count = args[0].get<int>();
   if(count < 0){
@@ -22,24 +20,18 @@ Lisp_ptr internal_vector_make(ZsArgs args){
 }
 
 Lisp_ptr vector_length(ZsArgs args){
+  check_type(Ptr_tag::vector, args[0]);
   auto v = args[0].get<Vector*>();
-  if(!v){
-    throw_builtin_type_check_failed(Ptr_tag::vector, args[0]);
-  }
 
   // TODO: add range check, and remove cast
   return Lisp_ptr{static_cast<int>(v->size())};
 }
 
 Lisp_ptr vector_ref(ZsArgs args){
-  auto v = args[0].get<Vector*>();
-  if(!v){
-    throw_builtin_type_check_failed(Ptr_tag::vector, args[0]);
-  }
+  check_type(Ptr_tag::vector, args[0]);
+  check_type(Ptr_tag::integer, args[1]);
 
-  if(args[1].tag() != Ptr_tag::integer){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
-  }
+  auto v = args[0].get<Vector*>();
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
@@ -50,14 +42,10 @@ Lisp_ptr vector_ref(ZsArgs args){
 }
 
 Lisp_ptr vector_set(ZsArgs args){
-  auto v = args[0].get<Vector*>();
-  if(!v){
-    throw_builtin_type_check_failed(Ptr_tag::vector, args[0]);
-  }
+  check_type(Ptr_tag::vector, args[0]);
+  check_type(Ptr_tag::integer, args[1]);
 
-  if(args[1].tag() != Ptr_tag::integer){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
-  }
+  auto v = args[0].get<Vector*>();
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){

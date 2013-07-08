@@ -49,10 +49,9 @@ void load_internal(std::istream& ss){
 namespace builtin {
 
 Lisp_ptr eval(ZsArgs args){
+  check_type(Ptr_tag::env, args[1]);
+
   auto env = args[1].get<Env*>();
-  if(!env){
-    throw_builtin_type_check_failed(Ptr_tag::env, args[1]);
-  }
 
   auto oldenv = vm.frame;
   vm.frame = env;
@@ -61,10 +60,9 @@ Lisp_ptr eval(ZsArgs args){
 }
 
 Lisp_ptr load(ZsArgs args){
+  check_type(Ptr_tag::string, args[0]);
+
   auto str = args[0].get<String*>();
-  if(!str){
-    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
-  }
 
   ifstream ifs{*str};
   load_internal(ifs);

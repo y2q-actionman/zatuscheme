@@ -39,10 +39,9 @@ Lisp_ptr transcript_off(ZsArgs){
 }
 
 Lisp_ptr traditional_transformer(ZsArgs args){
+  check_type(Ptr_tag::i_procedure, args[0]);
+
   auto iproc = args[0].get<IProcedure*>();
-  if(!iproc){
-    throw_builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
-  }
   auto info = *iproc->info();
   info.passing = Passing::quote;
   info.returning = Returning::code;
@@ -57,11 +56,9 @@ Lisp_ptr gensym(ZsArgs){
 }
 
 Lisp_ptr sc_macro_transformer(ZsArgs args){
-  auto iproc = args[0].get<IProcedure*>();
-  if(!iproc){
-    throw_builtin_type_check_failed(Ptr_tag::i_procedure, args[0]);
-  }
+  check_type(Ptr_tag::i_procedure, args[0]);
 
+  auto iproc = args[0].get<IProcedure*>();
   auto info = *iproc->info();
 
   info.passing = Passing::whole;
@@ -74,16 +71,11 @@ Lisp_ptr sc_macro_transformer(ZsArgs args){
 }
 
 Lisp_ptr make_syntactic_closure(ZsArgs args){
-  Env* e = args[0].get<Env*>();
-  if(!e){
-    throw_builtin_type_check_failed(Ptr_tag::env, args[0]);
-  }
+  check_type(Ptr_tag::env, args[0]);
+  check_type(Ptr_tag::cons, args[1]);
 
-  if(args[1].tag() != Ptr_tag::cons){
-    throw_builtin_type_check_failed(Ptr_tag::cons, args[1]);
-  }
-  Cons* c = args[1].get<Cons*>();
-
+  auto e = args[0].get<Env*>();
+  auto c = args[1].get<Cons*>();
   return zs_new<SyntacticClosure>(e, c, args[2]);
 }
 
@@ -97,19 +89,15 @@ Lisp_ptr identifierp(ZsArgs args){
 }
 
 Lisp_ptr identifier_eq(ZsArgs args){
+  check_type(Ptr_tag::env, args[0]);
   auto ident1_env = args[0].get<Env*>();
-  if(!ident1_env){
-    throw_builtin_type_check_failed(Ptr_tag::env, args[0]);
-  }
 
   if(!identifierp(args[1])){
     throw_builtin_identifier_check_failed(args[1]);
   }
   
+  check_type(Ptr_tag::env, args[2]);
   auto ident2_env = args[2].get<Env*>();
-  if(!ident2_env){
-    throw_builtin_type_check_failed(Ptr_tag::env, args[2]);
-  }
 
   if(!identifierp(args[3])){
     throw_builtin_identifier_check_failed(args[3]);

@@ -144,29 +144,22 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
 }
 
 Lisp_ptr syntax_unquote_splicing(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::cons){
-    throw_builtin_type_check_failed(Ptr_tag::cons, args[0]);
-  }
+  check_type(Ptr_tag::cons, args[0]);
 
   vm.return_value.assign(begin(args[0]), end(args[0]));
   return {};
 }
 
 Lisp_ptr syntax_syntax_rules(ZsArgs args){
-  auto env = args[1].get<Env*>();
-  if(!env){
-    throw_builtin_type_check_failed(Ptr_tag::env, args[1]);
-  }
+  check_type(Ptr_tag::env, args[1]);
 
-  return zs_new<SyntaxRules>(env,
+  return zs_new<SyntaxRules>(args[1].get<Env*>(),
                              nth_cons_list<1>(args[0]), // literals
                              nthcdr_cons_list<2>(args[0])); // rest
 }
     
 Lisp_ptr syntax_internal_memv(ZsArgs args){
-  if(args[1].tag() != Ptr_tag::cons){
-    throw_builtin_type_check_failed(Ptr_tag::cons, args[1]);
-  }
+  check_type(Ptr_tag::cons, args[1]);
 
   for(auto i = begin(args[1]); i; ++i){
     if(eqv_internal(args[0], *i))

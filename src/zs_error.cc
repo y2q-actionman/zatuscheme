@@ -102,3 +102,9 @@ void print_zs_warning(const char* fmt, ...){
 
   cerr << str << endl;
 }
+
+void check_type(Ptr_tag tag, Lisp_ptr p){
+  if(p.tag() != tag){
+    throw_builtin_type_check_failed(tag, p);
+  }
+}

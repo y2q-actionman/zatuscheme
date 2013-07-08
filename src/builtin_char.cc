@@ -21,9 +21,7 @@ Lisp_ptr char_pred(Lisp_ptr arg1, const Fun& fun){
 
 template<typename Fun>
 Lisp_ptr char_conversion(Lisp_ptr arg1, const Fun& fun){
-  if(arg1.tag() != Ptr_tag::character){
-    throw_builtin_type_check_failed(Ptr_tag::character, arg1);
-  }
+  check_type(Ptr_tag::character, arg1);
 
   return Lisp_ptr{fun(arg1.get<char>())};
 }
@@ -35,8 +33,7 @@ namespace builtin {
 Lisp_ptr internal_char_casecmp(ZsArgs args){
   char c[2];
   for(auto i = 0; i < 2; ++i){
-    if(args[i].tag() != Ptr_tag::character)
-      throw_builtin_type_check_failed(Ptr_tag::character, args[i]);
+    check_type(Ptr_tag::character, args[i]);
     c[i] = args[i].get<char>();
   }
 
@@ -72,9 +69,7 @@ Lisp_ptr char_to_int(ZsArgs args){
 }
 
 Lisp_ptr char_from_int(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::integer){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[0]);
-  }
+  check_type(Ptr_tag::integer, args[0]);
 
   return Lisp_ptr{static_cast<char>(args[0].get<int>())};
 }

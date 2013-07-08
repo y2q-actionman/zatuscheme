@@ -519,15 +519,10 @@ Lisp_ptr number_e_to_i(ZsArgs args){
 
 
 Lisp_ptr internal_number_from_string(ZsArgs args){
+  check_type(Ptr_tag::string, args[0]);
+  check_type(Ptr_tag::integer, args[1]);
+
   auto str = args[0].get<String*>();
-  if(!str){
-    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
-  }
-
-  if(!is_integer_type(args[1])){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
-  }
-
   istringstream iss(*str);
   return parse_number(iss, coerce<int>(args[1]));
 }
@@ -537,9 +532,8 @@ Lisp_ptr internal_number_to_string(ZsArgs args){
     throw_number_type_check_failed(args[0]);
   }
 
-  if(!is_integer_type(args[1])){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
-  }
+  check_type(Ptr_tag::integer, args[1]);
+
   auto radix = coerce<int>(args[1]);
 
   ostringstream oss;

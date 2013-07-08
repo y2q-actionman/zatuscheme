@@ -16,8 +16,7 @@ template<typename Fun>
 Lisp_ptr internal_string_cmp(ZsArgs&& args, Fun fun){
   const char* s[2];
   for(auto i = 0; i < 2; ++i){
-    if(args[i].tag() != Ptr_tag::string)
-      throw_builtin_type_check_failed(Ptr_tag::string, args[i]);
+    check_type(Ptr_tag::string, args[i]);
     s[i] = args[i].get<String*>()->c_str();
   }
 
@@ -29,41 +28,30 @@ Lisp_ptr internal_string_cmp(ZsArgs&& args, Fun fun){
 namespace builtin {
 
 Lisp_ptr internal_string_make(ZsArgs args){
-  if(args[0].tag() != Ptr_tag::integer){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[0]);
-  }
+  check_type(Ptr_tag::integer, args[0]);
 
   auto char_count = args[0].get<int>();
   if(char_count < 0){
     throw_zs_error(args[0], "passed size is invalid");
   }    
 
-  if(args[1].tag() != Ptr_tag::character){
-    throw_builtin_type_check_failed(Ptr_tag::character, args[1]);
-  }
+  check_type(Ptr_tag::character, args[1]);
   
   return {zs_new<String>(char_count, args[1].get<char>())};
 }
 
 Lisp_ptr string_length(ZsArgs args){
-  auto str = args[0].get<String*>();
-  if(!str){
-    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
-  }
+  check_type(Ptr_tag::string, args[0]);
 
   // TODO: add range check, and remove cast
-  return Lisp_ptr{static_cast<int>(str->length())};
+  return Lisp_ptr{static_cast<int>(args[0].get<String*>()->length())};
 }
 
 Lisp_ptr string_ref(ZsArgs args){
+  check_type(Ptr_tag::string, args[0]);
   auto str = args[0].get<String*>();
-  if(!str){
-    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
-  }
 
-  if(args[1].tag() != Ptr_tag::integer){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
-  }
+  check_type(Ptr_tag::integer, args[1]);
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
@@ -74,24 +62,18 @@ Lisp_ptr string_ref(ZsArgs args){
 }
 
 Lisp_ptr string_set(ZsArgs args){
+  check_type(Ptr_tag::string, args[0]);
   auto str = args[0].get<String*>();
-  if(!str){
-    throw_builtin_type_check_failed(Ptr_tag::string, args[0]);
-  }
 
-  if(args[1].tag() != Ptr_tag::integer){
-    throw_builtin_type_check_failed(Ptr_tag::integer, args[1]);
-  }
+  check_type(Ptr_tag::integer, args[1]);
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
     throw_builtin_range_check_failed(str->length(), ind);
   }
 
+  check_type(Ptr_tag::character, args[2]);
   auto ch = args[2].get<char>();
-  if(!ch){
-    throw_builtin_type_check_failed(Ptr_tag::character, args[2]);
-  }
 
   (*str)[ind] = ch;
   return Lisp_ptr{ch};
