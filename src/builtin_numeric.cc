@@ -21,51 +21,6 @@ static_assert(sizeof(int) < sizeof(long long),
 
 namespace {
 
-bool is_numeric_type(Lisp_ptr p){
-  switch(p.tag()){
-  case Ptr_tag::integer:
-  case Ptr_tag::rational:
-  case Ptr_tag::real:
-  case Ptr_tag::complex:
-    return true;
-  case Ptr_tag::undefined: case Ptr_tag::boolean:
-  case Ptr_tag::character: case Ptr_tag::cons:
-  case Ptr_tag::symbol:
-  case Ptr_tag::i_procedure: case Ptr_tag::n_procedure:
-  case Ptr_tag::continuation: case Ptr_tag::syntax_rules:
-  case Ptr_tag::string:    case Ptr_tag::vector:
-  case Ptr_tag::input_port: case Ptr_tag::output_port:
-  case Ptr_tag::env:  case Ptr_tag::syntactic_closure:
-  case Ptr_tag::vm_op: case Ptr_tag::vm_argcount:
-  case Ptr_tag::notation:
-  default:
-    return false;
-  }
-}
-
-bool is_integer_type(Lisp_ptr p){
-  return (p.tag() == Ptr_tag::integer);
-}
-
-bool is_rational_type(Lisp_ptr p){
-  return (p.tag() == Ptr_tag::rational)
-    || is_integer_type(p);
-}
-
-bool is_real_type(Lisp_ptr p){
-  return (p.tag() == Ptr_tag::real)
-    || is_rational_type(p);
-}
-
-bool is_complex_type(Lisp_ptr p){
-  return (p.tag() == Ptr_tag::complex)
-    || is_real_type(p);
-}
-
-//
-// implementation utilities
-//
-
 template<typename IFun, typename QFun, typename RFun, typename CFun>
 Lisp_ptr number_unary(Lisp_ptr arg1,
                       const IFun& ifun, const QFun& qfun,
@@ -74,13 +29,13 @@ Lisp_ptr number_unary(Lisp_ptr arg1,
     throw_number_type_check_failed(arg1);
   }
 
-  if(is_integer_type(arg1)){
+  if(is_numeric_convertible(arg1, Ptr_tag::integer)){
     return wrap_number(ifun(coerce<int>(arg1)));
-  }else if(is_rational_type(arg1)){
+  }else if(is_numeric_convertible(arg1, Ptr_tag::rational)){
     return wrap_number(qfun(coerce<Rational>(arg1)));
-  }else if(is_real_type(arg1)){
+  }else if(is_numeric_convertible(arg1, Ptr_tag::real)){
     return wrap_number(rfun(coerce<double>(arg1)));
-  }else if(is_complex_type(arg1)){
+  }else if(is_numeric_convertible(arg1, Ptr_tag::complex)){
     return wrap_number(cfun(coerce<Complex>(arg1)));
   }else{
     UNEXP_DEFAULT();
@@ -99,16 +54,20 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
     throw_number_type_check_failed(arg2);
   }
   
-  if(is_integer_type(arg1) && is_integer_type(arg2)){
+  if(is_numeric_convertible(arg1, Ptr_tag::integer)
+     && is_numeric_convertible(arg2, Ptr_tag::integer)){
     return wrap_number(ifun(coerce<int>(arg1),
                             coerce<int>(arg2)));
-  }else if(is_rational_type(arg1) && is_rational_type(arg2)){
+  }else if(is_numeric_convertible(arg1, Ptr_tag::rational)
+           && is_numeric_convertible(arg2, Ptr_tag::rational)){
     return wrap_number(qfun(coerce<Rational>(arg1),
                             coerce<Rational>(arg2)));
-  }else if(is_real_type(arg1) && is_real_type(arg2)){
+  }else if(is_numeric_convertible(arg1, Ptr_tag::real)
+           && is_numeric_convertible(arg2, Ptr_tag::real)){
     return wrap_number(rfun(coerce<double>(arg1),
                             coerce<double>(arg2)));
-  }else if(is_complex_type(arg1) && is_complex_type(arg2)){
+  }else if(is_numeric_convertible(arg1, Ptr_tag::complex)
+           && is_numeric_convertible(arg2, Ptr_tag::complex)){
     return wrap_number(cfun(coerce<Complex>(arg1),
                             coerce<Complex>(arg2)));
   }else{
@@ -152,19 +111,19 @@ Lisp_ptr numberp(ZsArgs args){
 }
 
 Lisp_ptr complexp(ZsArgs args){
-  return Lisp_ptr{is_complex_type(args[0])};
+  return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::complex)};
 }
 
 Lisp_ptr realp(ZsArgs args){
-  return Lisp_ptr{is_real_type(args[0])};
+  return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::real)};
 }
 
 Lisp_ptr rationalp(ZsArgs args){
-  return Lisp_ptr{is_rational_type(args[0])};
+  return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::rational)};
 }
 
 Lisp_ptr integerp(ZsArgs args){
-  return Lisp_ptr{is_integer_type(args[0])};
+  return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::integer)};
 }
 
 Lisp_ptr exactp(ZsArgs args){

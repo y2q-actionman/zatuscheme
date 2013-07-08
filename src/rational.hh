@@ -60,6 +60,9 @@ template<typename T> T gcd(T, T);
 
 template<typename T> T coerce(Lisp_ptr);
 
+bool is_numeric_type(Lisp_ptr);
+bool is_numeric_convertible(Lisp_ptr, Ptr_tag);
+
 Lisp_ptr wrap_number(int);
 Lisp_ptr wrap_number(const Rational&);
 Lisp_ptr wrap_number(double);
