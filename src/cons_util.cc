@@ -19,7 +19,8 @@ GrowList::~GrowList(){
     while(i){
       auto cell = i.base();
       ++i;
-      zs_delete(cell.get<Cons*>());
+      if(cell.tag() == Ptr_tag::cons)
+        zs_delete(cell.get<Cons*>());
     }
   }
   // invalidate();

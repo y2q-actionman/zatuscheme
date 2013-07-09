@@ -68,7 +68,8 @@ void vm_op_reevaluate(){
   stack = bn, bn-1, ..., an, an-1, ...
 */
 void vm_op_stack_splicing(){
-  if(vm.code.back().get<VMop>() != vm_op_arg_push){
+  if(vm.code.back().tag() != Ptr_tag::vm_op
+     || vm.code.back().get<VMop>() != vm_op_arg_push){
     throw_zs_error({}, "eval internal error: stack-splicing operater is called in invalid context!\n");
   }
   vm.code.pop_back();
@@ -172,6 +173,7 @@ void proc_enter_native(const NProcedure* fun){
 void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   // tail call check
   if(!vm.code.empty()
+     && vm.code.back().tag() == Ptr_tag::vm_op
      && vm.code.back().get<VMop>() == vm_op_leave_frame){
     vm.code.pop_back();
     vm_op_leave_frame();
@@ -203,6 +205,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   auto arg_name_i = begin(fun->arg_list());
 
   const auto argc = vm.stack.back();
+  assert(argc.tag() == Ptr_tag::vm_argcount);
   vm.stack.pop_back();
 
   const auto arg_end = vm.stack.end();
@@ -262,6 +265,7 @@ static unsigned get_wind_index(const VM& va, const VM& vb){
 
 void vm_op_restore_values(){
   auto values_p = vm.code.back();
+  assert(values_p.tag() == Ptr_tag::vector);
   auto values = values_p.get<Vector*>();
   assert(values);
   vm.code.pop_back();
@@ -273,7 +277,7 @@ void vm_op_restore_values(){
 void vm_op_replace_vm(){
   auto cont = vm.code.back();
   vm.code.pop_back();
-  assert(cont.get<Continuation*>());
+  assert(cont.tag() == Ptr_tag::continuation);
 
   auto values = vm.code.back();
   vm.code.pop_back();
@@ -331,6 +335,8 @@ void proc_enter_srule(SyntaxRules* srule){
 
   if(args.size() != 2)
     throw_builtin_argcount_failed(srule->name(), 2, 2, args.size());
+
+  check_type(Ptr_tag::env, args[1]);
 
   try{
     vm.return_value = {srule->apply(args[0], args[1].get<Env*>())};
@@ -390,6 +396,8 @@ void vm_op_proc_enter(){
   assert(!vm.stack.empty());
 
   auto info = get_procinfo(proc);
+
+  assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
   auto argc = vm.stack.back().get<VMArgcount>();
 
   if(!(info->required_args <= argc && argc <= info->max_args)){

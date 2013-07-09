@@ -47,7 +47,9 @@ Lisp_ptr read_list(istream& f){
       }else if(n == Notation::dot){ // dotted list
         auto ret = gl.extract_with_tail(read(f));
         p = tokenize(f);
-        if(eof_object_p(p) || p.get<Notation>() != Notation::r_paren){
+        if(eof_object_p(p)
+           || p.tag() != Ptr_tag::notation
+           || p.get<Notation>() != Notation::r_paren){
           throw_zs_error({}, "reader error: dotted list has two or more cdrs.\n");
         }
         return ret;

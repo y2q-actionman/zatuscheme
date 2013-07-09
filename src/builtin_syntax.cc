@@ -113,10 +113,12 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
     }
 
     // check unquote -- like `,x
-    auto first_sym = nth_cons_list<0>(arg).get<Symbol*>();
-    if(first_sym == unquote_sym
-       || first_sym == unquote_splicing_sym){
-      return arg;
+    if(nth_cons_list<0>(arg).tag() == Ptr_tag::symbol){
+      auto first_sym = nth_cons_list<0>(arg).get<Symbol*>();
+      if(first_sym == unquote_sym
+         || first_sym == unquote_splicing_sym){
+        return arg;
+      }
     }
 
     gl.push(list_star_sym);

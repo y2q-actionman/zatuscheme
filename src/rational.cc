@@ -123,7 +123,7 @@ Rational coerce(Lisp_ptr p){
   if(p.tag() == Ptr_tag::rational){
     return *p.get<Rational*>();
   }else{
-    return Rational(p.get<int>(), 1);
+    return Rational(coerce<int>(p), 1);
   }
 }
 
