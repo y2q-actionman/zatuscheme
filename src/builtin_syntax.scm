@@ -180,10 +180,13 @@ LOAD
      ,x)
     ((_ ,@x)
      ,@x)
-    ((_ x)
+    ((_ (x ...))
      (%quasiquote x))
-    ((_ x ...)
-     (%quasiquote x ...))))
+    ((_ #()) #())
+    ((_ #(x ...))
+     (%quasiquote x))
+    ((_ x)
+     (quote x))))
 
 LOAD
 (define (unquote x)

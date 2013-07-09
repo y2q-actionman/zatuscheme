@@ -90,10 +90,8 @@ Lisp_ptr syntax_define(ZsArgs args){
 Lisp_ptr syntax_internal_quasiquote(ZsArgs args){
   auto& arg = args[0];
 
-  if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
-    // acting as a normal quote.
-    return make_cons_list({intern(*vm.symtable, "quote"), arg});
-  }
+  assert(arg.tag() == Ptr_tag::cons
+         || arg.tag() == Ptr_tag::vector);
 
   const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
   const auto list_star_sym = intern(*vm.symtable, "%list*");
