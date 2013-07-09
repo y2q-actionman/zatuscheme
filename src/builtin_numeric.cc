@@ -483,7 +483,7 @@ Lisp_ptr internal_number_to_string(ZsArgs args){
   check_numeric_type(args[0]);
   check_type(Ptr_tag::integer, args[1]);
 
-  auto radix = coerce<int>(args[1]);
+  auto radix = args[1].get<int>();
 
   ostringstream oss;
   print(oss, args[0], PrintReadable::f, radix);
