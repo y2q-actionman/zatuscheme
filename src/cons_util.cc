@@ -97,3 +97,11 @@ ConsIter end(Lisp_ptr p){
   while(i) ++i;
   return i;
 }
+
+bool operator==(const ConsIter& i1, const ConsIter& i2){
+  return eq_internal(i1.base(), i2.base());
+}
+
+bool operator!=(const ConsIter& i1, const ConsIter& i2){
+  return !eq_internal(i1.base(), i2.base());
+}

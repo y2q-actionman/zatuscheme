@@ -60,16 +60,4 @@ Lisp_ptr GrowList::extract(){
   return extract_with_tail(Cons::NIL);
 }
 
-
-// ConsIter class
-inline
-bool operator==(const ConsIter& i1, const ConsIter& i2){
-  return eq_internal(i1.base(), i2.base());
-}
-
-inline
-bool operator!=(const ConsIter& i1, const ConsIter& i2){
-  return !eq_internal(i1.base(), i2.base());
-}
-
 #endif //CONS_UTIL_I_HH
