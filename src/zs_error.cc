@@ -102,7 +102,7 @@ void check_range(Lisp_ptr p, size_t min, size_t max){
   check_type(Ptr_tag::integer, p);
   auto idx = p.get<int>();
 
-  if(idx < min || idx >= max){
+  if(idx < static_cast<signed>(min) || idx >= static_cast<signed>(max)){
     // The 'z' specifier is a C99 feature, included in C++11.
     throw_zs_error({}, "inacceptable index ([%zd, %zd), supplied %d\n",
                    min, max, idx);
