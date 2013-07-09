@@ -280,15 +280,15 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         // accumulating...
         EqHashMap acc_map;
         ensure_binding(acc_map, sr, ignore_ident, *p_i,
-                       [](){ return zs_new<Vector>(); });
+                       [](){ return Cons::NIL; });
 
         for(; f_i != f_e; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
 
           for(auto i : m){
             auto place = acc_map.find(i.first);
-            assert(place->second.tag() == Ptr_tag::vector);
-            place->second.get<Vector*>()->push_back(i.second);
+            assert(place->second.tag() == Ptr_tag::cons);
+            push_tail_cons_list(&place->second, i.second);
           }
         }
 
@@ -325,14 +325,7 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
   EqHashMap ret;
 
   for(auto i : match_obj){
-    if(i.second.tag() == Ptr_tag::vector){
-      auto v = i.second.get<Vector*>();
-
-      if(pick_depth < static_cast<signed>(v->size())){
-        ret.insert({i.first, (*v)[pick_depth]});
-        continue;
-      }
-    }else if(i.second.tag() == Ptr_tag::cons){
+    if(i.second.tag() == Ptr_tag::cons){
       ConsIter ci = begin(i.second);
       std::advance(ci, pick_depth);
       auto nthcdr = ci.base();

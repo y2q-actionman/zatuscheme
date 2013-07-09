@@ -88,10 +88,6 @@ Lisp_ptr syntax_define(ZsArgs args){
 }
 
 Lisp_ptr syntax_internal_quasiquote_vector(ZsArgs args){
-  auto& arg = args[0];
-
-  assert(arg.tag() == Ptr_tag::vector);
-
   const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
   const auto vector_sym = intern(*vm.symtable, "%vector");
 
@@ -103,9 +99,8 @@ Lisp_ptr syntax_internal_quasiquote_vector(ZsArgs args){
 
   gl.push(vector_sym);
 
-  auto v = arg.get<Vector*>();
-  for(auto p : *v){
-    qq_elem(p);
+  for(auto i = begin(args[0]); i; ++i){
+    qq_elem(*i);
   }
 
   return gl.extract();
