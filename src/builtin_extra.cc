@@ -110,15 +110,11 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
 }
 
 Lisp_ptr with_exception_handler(ZsArgs args){
-  auto handler = args[0];
-  if(!is_procedure(handler)){
-    throw_procedure_type_check_failed(handler);
-  }
+  check_procedure_type(args[0]);
+  check_procedure_type(args[1]);
 
+  auto handler = args[0];
   auto thunk = args[1];
-  if(!is_procedure(thunk)){
-    throw_procedure_type_check_failed(thunk);
-  }
 
   args.cleanup();
 

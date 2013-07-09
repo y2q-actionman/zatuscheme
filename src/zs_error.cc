@@ -7,6 +7,7 @@
 
 #include "lisp_ptr.hh"
 #include "printer.hh"
+#include "procedure.hh"
 #include "rational.hh"
 #include "s_closure.hh"
 #include "zs_error.hh"
@@ -120,5 +121,11 @@ void check_numeric_type(Lisp_ptr p){
 void check_identifier_type(Lisp_ptr p){
   if(!identifierp(p)){
     throw_builtin_identifier_check_failed(p);
+  }
+}
+
+void check_procedure_type(Lisp_ptr p){
+  if(!is_procedure(p)){
+    throw_procedure_type_check_failed(p);
   }
 }

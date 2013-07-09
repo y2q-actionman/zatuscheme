@@ -389,9 +389,7 @@ void vm_op_proc_enter(){
   auto proc = vm.code.back();
   vm.code.pop_back();
 
-  if(!is_procedure(proc)){
-    throw_procedure_type_check_failed(proc);
-  }
+  check_procedure_type(proc);
 
   assert(!vm.stack.empty());
 

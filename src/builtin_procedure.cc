@@ -18,11 +18,9 @@ Lisp_ptr procedurep(ZsArgs args){
 }
 
 Lisp_ptr apply(ZsArgs args){
-  auto proc = args[0];
-  if(!is_procedure(proc)){
-    throw_procedure_type_check_failed(proc);
-  }
+  check_procedure_type(args[0]);
 
+  auto proc = args[0];
   std::vector<Lisp_ptr> a_args(next(begin(args)), end(args));
   
   args.cleanup();
@@ -54,9 +52,7 @@ Lisp_ptr call_with_values(ZsArgs args){
   Lisp_ptr procs[2];
 
   for(int i = 0; i < 2; ++i){
-    if(!is_procedure(args[i])){
-      throw_procedure_type_check_failed(args[i]);
-    }
+    check_procedure_type(args[i]);
     procs[i] = args[i];
   }
 
@@ -72,13 +68,9 @@ Lisp_ptr call_with_values(ZsArgs args){
 }
 
 Lisp_ptr call_cc(ZsArgs args){
-  Lisp_ptr proc;
+  check_procedure_type(args[0]);
 
-  if(!is_procedure(args[0])){
-    throw_procedure_type_check_failed(args[0]);
-  }
-
-  proc = args[0];
+  auto proc = args[0];
 
   args.cleanup();
 
@@ -92,9 +84,7 @@ Lisp_ptr dynamic_wind(ZsArgs args){
   Lisp_ptr procs[3];
 
   for(int i = 0; i < 3; ++i){
-    if(!is_procedure(args[i])){
-      throw_procedure_type_check_failed(args[i]);
-    }
+    check_procedure_type(args[i]);
     procs[i] = args[i];
   }
 
