@@ -16,8 +16,8 @@
     builtin::syntax_define,
     {1, Variadic::t, Passing::quote}}},
 
-{"quasiquote", {
-    builtin::syntax_quasiquote,
+{"%quasiquote", {
+    builtin::syntax_internal_quasiquote,
     {1, Variadic::f, Passing::quote, Returning::code}}},
 {"unquote-splicing", {
     builtin::syntax_unquote_splicing,

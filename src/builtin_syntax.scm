@@ -172,6 +172,20 @@ LOAD
                        result)))))))
 
 LOAD
+(define-syntax quasiquote
+  (syntax-rules (unquote unquote-splicing quasiquote)
+    ((_ ())
+     ())
+    ((_ ,x)
+     ,x)
+    ((_ ,@x)
+     ,@x)
+    ((_ x)
+     (%quasiquote x))
+    ((_ x ...)
+     (%quasiquote x ...))))
+
+LOAD
 (define (unquote x)
   x)
 

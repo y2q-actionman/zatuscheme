@@ -87,7 +87,7 @@ Lisp_ptr syntax_define(ZsArgs args){
   }
 }
 
-Lisp_ptr syntax_quasiquote(ZsArgs args){
+Lisp_ptr syntax_internal_quasiquote(ZsArgs args){
   auto& arg = args[0];
 
   if(arg.tag() != Ptr_tag::cons && arg.tag() != Ptr_tag::vector){
@@ -96,8 +96,6 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
   }
 
   const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
-  const auto unquote_sym = intern(*vm.symtable, "unquote");
-  const auto unquote_splicing_sym = intern(*vm.symtable, "unquote-splicing");
   const auto list_star_sym = intern(*vm.symtable, "%list*");
   const auto vector_sym = intern(*vm.symtable, "%vector");
 
@@ -108,18 +106,19 @@ Lisp_ptr syntax_quasiquote(ZsArgs args){
   };
 
   if(arg.tag() == Ptr_tag::cons){
-    if(nullp(arg)){
-      return Cons::NIL;
-    }
+    assert(!nullp(arg));
 
-    // check unquote -- like `,x
+    // check unquote -- like `,xn
+#ifndef NDEBUG
+    const auto unquote_sym = intern(*vm.symtable, "unquote");
+    const auto unquote_splicing_sym = intern(*vm.symtable, "unquote-splicing");
+
     if(nth_cons_list<0>(arg).tag() == Ptr_tag::symbol){
       auto first_sym = nth_cons_list<0>(arg).get<Symbol*>();
-      if(first_sym == unquote_sym
-         || first_sym == unquote_splicing_sym){
-        return arg;
-      }
+      assert(first_sym != unquote_sym);
+      assert(first_sym != unquote_splicing_sym);
     }
+#endif
 
     gl.push(list_star_sym);
 
