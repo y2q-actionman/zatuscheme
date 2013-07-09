@@ -135,12 +135,9 @@ void whole_call(Lisp_ptr proc){
 
 
 
-void proc_enter_native(const NProcedure* fun){
+void proc_enter_native(const NProcedure* fun, const ProcInfo* info, ZsArgs&& args){
   auto native_func = fun->get();
   assert(native_func);
-
-  auto info = fun->info();
-  assert(info);
 
 #ifndef NDEBUG
   assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
@@ -149,7 +146,6 @@ void proc_enter_native(const NProcedure* fun){
 #endif
 
   try{
-    ZsArgs args;
     auto p = native_func(move(args));
 
     if(info->move_ret == MoveReturnValue::t){
@@ -167,7 +163,7 @@ void proc_enter_native(const NProcedure* fun){
   code = (body1, body2, ..., leave_frame)
   stack = ()
 */
-void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
+void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info, ZsArgs&& args){
   // tail call check
   if(!vm.code.empty()
      && vm.code.back().tag() == Ptr_tag::vm_op
@@ -200,8 +196,6 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
 
   // == processing args ==
   auto arg_name_i = begin(fun->arg_list());
-
-  ZsArgs args;
 
   const auto arg_end = args.end();
   auto arg_i = args.begin();
@@ -302,7 +296,7 @@ void vm_op_replace_vm(){
   ----
   replaces VM!
 */
-void proc_enter_cont(Continuation* c){
+void proc_enter_cont(Continuation* c, ZsArgs&& args){
   auto& next_vm = c->get();
 
   // finds dynamic-winds for processing..
@@ -310,7 +304,6 @@ void proc_enter_cont(Continuation* c){
 
   // saves arguments .
   // They become return-values of the passed continuation.
-  ZsArgs args;
   auto ret_values = zs_new<Vector>(begin(args), end(args));
   args.cleanup();
 
@@ -325,9 +318,7 @@ void proc_enter_cont(Continuation* c){
   }
 }
 
-void proc_enter_srule(SyntaxRules* srule){
-  ZsArgs args;
-
+void proc_enter_srule(SyntaxRules* srule, ZsArgs&& args){
   assert(args.size() == 2);
 
   check_type(Ptr_tag::env, args[1]);
@@ -390,14 +381,13 @@ void vm_op_proc_enter(){
   auto info = get_procinfo(proc);
 
   assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
-  auto argc = vm.stack.back().get<VMArgcount>();
+  ZsArgs args;
 
-  if(!(info->required_args <= argc && argc <= info->max_args)){
+  if(!(info->required_args <= args.size() && args.size() <= info->max_args)){
     throw_zs_error(get_procname(proc),
                    "number of passed args is mismatched!!"
                    " (acceptable %d-%d args, passed %d)\n",
-                   info->required_args, info->max_args,
-                   static_cast<int>(argc));
+                   info->required_args, info->max_args, args.size());
   }
 
   switch(info->returning){
@@ -415,13 +405,13 @@ void vm_op_proc_enter(){
 
   switch(proc.tag()){
   case Ptr_tag::i_procedure:
-    return proc_enter_interpreted(proc.get<IProcedure*>(), info);
+    return proc_enter_interpreted(proc.get<IProcedure*>(), info, move(args));
   case Ptr_tag::n_procedure:
-    return proc_enter_native(proc.get<const NProcedure*>());
+    return proc_enter_native(proc.get<const NProcedure*>(), info, move(args));
   case Ptr_tag::continuation:
-    return proc_enter_cont(proc.get<Continuation*>());
+    return proc_enter_cont(proc.get<Continuation*>(), move(args));
   case Ptr_tag::syntax_rules:
-    return proc_enter_srule(proc.get<SyntaxRules*>());
+    return proc_enter_srule(proc.get<SyntaxRules*>(), move(args));
   case Ptr_tag::undefined: case Ptr_tag::boolean:
   case Ptr_tag::character: case Ptr_tag::cons:
   case Ptr_tag::symbol:
