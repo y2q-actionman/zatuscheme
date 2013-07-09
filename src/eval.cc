@@ -142,14 +142,11 @@ void proc_enter_native(const NProcedure* fun){
   auto info = fun->info();
   assert(info);
 
+#ifndef NDEBUG
   assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
   auto argc = vm.stack.back().get<VMArgcount>();
-
-  if(!((info->required_args <= argc) && (argc <= info->max_args))){
-    throw_builtin_argcount_failed(get_procname(fun),
-                                  info->required_args, info->max_args,
-                                  argc);
-  }
+  assert((info->required_args <= argc) && (argc <= info->max_args));
+#endif
 
   try{
     ZsArgs args;
@@ -333,8 +330,7 @@ void proc_enter_cont(Continuation* c){
 void proc_enter_srule(SyntaxRules* srule){
   ZsArgs args;
 
-  if(args.size() != 2)
-    throw_builtin_argcount_failed(srule->name(), 2, 2, args.size());
+  assert(args.size() == 2);
 
   check_type(Ptr_tag::env, args[1]);
 
