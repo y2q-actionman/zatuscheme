@@ -182,6 +182,8 @@ LOAD
      ,@x)
     ((_ (x ...))
      (%quasiquote x))
+    ((_ (x ... . y))
+     (%quasiquote x . y))
     ((_ #()) #())
     ((_ #(x ...))
      (%quasiquote x))

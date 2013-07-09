@@ -11,6 +11,9 @@
 (test-equal '(1) `(1))
 (test-equal '(1) `(,1))
 
+(test-equal '(1 . 2) `(1 . 2))
+(test-equal '(1 2 . 3) `(1 2 . 3))
+
 (define (retlist) (list 1 2 3))
 (test-equal '(1 2 3) (retlist))
 (test-equal '(0 (1 2 3)) `(0,(retlist)))
