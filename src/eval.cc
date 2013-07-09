@@ -459,9 +459,13 @@ void vm_op_leave_frame(){
   stack = (consequent or alternative)
 */
 void vm_op_if(){
-  auto test_result = vm.return_value_1();
+  auto test = vm.return_value_1();
 
-  if(test_result.get<bool>()){
+  // anything is #t, except #f and null
+  auto b = (test.tag() == Ptr_tag::boolean)
+    ? test.get<bool>() : test.operator bool();
+
+  if(b){
     auto conseq = vm.code.back();
     vm.code.pop_back();
     vm.code.back() = conseq;

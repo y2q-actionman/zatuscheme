@@ -5,6 +5,7 @@
 #error "Please include via parent file"
 #endif
 
+#include <cassert>
 #include <type_traits>
 
 // Lisp_ptr constructors
@@ -35,46 +36,45 @@ Lisp_ptr::Lisp_ptr<Notation>(Notation n)
 
 // Lisp_ptr getters
 template<>
-inline constexpr
+inline
 bool Lisp_ptr::get<bool>() const {
-  return (tag() == to_tag<bool>())
-    ? u_.b_
-    : operator bool(); // anything is #t, except #f and null
+  assert(tag() == to_tag<bool>());
+  return u_.b_;
 }
 
 template<>
-inline constexpr
+inline
 char Lisp_ptr::get<char>() const {
-  return (tag() == to_tag<char>())
-    ? u_.c_ : '\0';
+  assert(tag() == to_tag<char>());
+  return u_.c_;
 }
 
 template<>
-inline constexpr
+inline
 int Lisp_ptr::get<int>() const {
-  return (tag() == Ptr_tag::integer)
-    ? u_.i_ : 0;
+  assert(tag() == to_tag<int>());
+  return u_.i_;
 }
 
 template<>
-inline constexpr
+inline
 VMop Lisp_ptr::get<VMop>() const {
-  return (tag() == to_tag<VMop>())
-     ? u_.f_ : nullptr;
+  assert(tag() == to_tag<VMop>());
+  return u_.f_;
 }
 
 template<>
-inline constexpr
+inline
 VMArgcount Lisp_ptr::get<VMArgcount>() const {
-  return static_cast<VMArgcount>
-    ((tag() == to_tag<VMArgcount>()) ? u_.i_ : 0);
+  assert(tag() == to_tag<VMArgcount>());
+  return static_cast<VMArgcount>(u_.i_);
 }
 
 template<>
-inline constexpr
+inline
 Notation Lisp_ptr::get<Notation>() const {
-  return static_cast<Notation>
-    ((tag() == to_tag<Notation>()) ? u_.i_ : 0);
+  assert(tag() == to_tag<Notation>());
+  return static_cast<Notation>(u_.i_);
 }
 
 template<>
@@ -106,11 +106,10 @@ T lisp_ptr_cast(void*, const void* cp,
 }
 
 template<typename T>
-inline constexpr
+inline
 T Lisp_ptr::get() const {
-  return (tag() == to_tag<T>())
-    ? lisp_ptr_detail::lisp_ptr_cast<T>(u_.ptr_, u_.cptr_)
-    : nullptr;
+  assert(tag() == to_tag<T>());
+  return lisp_ptr_detail::lisp_ptr_cast<T>(u_.ptr_, u_.cptr_);
 }
 
 #endif // LISP_PTR_I_HH

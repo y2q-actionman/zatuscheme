@@ -24,7 +24,6 @@ public:
   { return tag_; }
 
   template<typename T>
-  constexpr
   T get() const;
 
   explicit constexpr operator bool() const
