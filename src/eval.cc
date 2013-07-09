@@ -201,13 +201,10 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   // == processing args ==
   auto arg_name_i = begin(fun->arg_list());
 
-  const auto argc = vm.stack.back();
-  assert(argc.tag() == Ptr_tag::vm_argcount);
-  vm.stack.pop_back();
+  ZsArgs args;
 
-  const auto arg_end = vm.stack.end();
-  const auto arg_start = arg_end - argc.get<VMArgcount>();
-  auto arg_i = arg_start;
+  const auto arg_end = args.end();
+  auto arg_i = args.begin();
 
   // normal arg push
   for(; arg_i != arg_end && arg_name_i; ++arg_i, ++arg_name_i){
@@ -221,6 +218,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
     }
 
     if(info->passing == Passing::quote && info->is_variadic()){
+      // see 'quote_call()'
       assert(distance(arg_i, arg_end) == 1);
       assert(arg_i->tag() == Ptr_tag::cons);
       local_set_with_identifier(vm.frame, arg_name_i.base(), *arg_i);
@@ -234,7 +232,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info){
   }
 
   // cleaning stack
-  vm.stack.erase(arg_start, arg_end);
+  args.cleanup();
 
   // adds procedure's name
   if(fun->name()){
