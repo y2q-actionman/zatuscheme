@@ -87,14 +87,52 @@ Lisp_ptr syntax_define(ZsArgs args){
   }
 }
 
-Lisp_ptr syntax_internal_quasiquote(ZsArgs args){
+Lisp_ptr syntax_internal_quasiquote_list(ZsArgs args){
   auto& arg = args[0];
 
-  assert(arg.tag() == Ptr_tag::cons
-         || arg.tag() == Ptr_tag::vector);
+  assert(arg.tag() == Ptr_tag::cons);
 
   const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
   const auto list_star_sym = intern(*vm.symtable, "%list*");
+
+  GrowList gl;
+
+  const auto qq_elem = [&](Lisp_ptr p){
+    gl.push(make_cons_list({quasiquote_sym, p}));
+  };
+
+  assert(!nullp(arg));
+
+  // check unquote -- like `,xn
+#ifndef NDEBUG
+  const auto unquote_sym = intern(*vm.symtable, "unquote");
+  const auto unquote_splicing_sym = intern(*vm.symtable, "unquote-splicing");
+
+  if(nth_cons_list<0>(arg).tag() == Ptr_tag::symbol){
+    auto first_sym = nth_cons_list<0>(arg).get<Symbol*>();
+    assert(first_sym != unquote_sym);
+    assert(first_sym != unquote_splicing_sym);
+  }
+#endif
+
+  gl.push(list_star_sym);
+
+  // generic lists
+  auto i = begin(arg);
+  for(; i; ++i){
+    qq_elem(*i);
+  }
+  qq_elem(i.base());
+
+  return gl.extract();
+}
+
+Lisp_ptr syntax_internal_quasiquote_vector(ZsArgs args){
+  auto& arg = args[0];
+
+  assert(arg.tag() == Ptr_tag::vector);
+
+  const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
   const auto vector_sym = intern(*vm.symtable, "%vector");
 
   GrowList gl;
@@ -103,43 +141,14 @@ Lisp_ptr syntax_internal_quasiquote(ZsArgs args){
     gl.push(make_cons_list({quasiquote_sym, p}));
   };
 
-  if(arg.tag() == Ptr_tag::cons){
-    assert(!nullp(arg));
+  gl.push(vector_sym);
 
-    // check unquote -- like `,xn
-#ifndef NDEBUG
-    const auto unquote_sym = intern(*vm.symtable, "unquote");
-    const auto unquote_splicing_sym = intern(*vm.symtable, "unquote-splicing");
-
-    if(nth_cons_list<0>(arg).tag() == Ptr_tag::symbol){
-      auto first_sym = nth_cons_list<0>(arg).get<Symbol*>();
-      assert(first_sym != unquote_sym);
-      assert(first_sym != unquote_splicing_sym);
-    }
-#endif
-
-    gl.push(list_star_sym);
-
-    // generic lists
-    auto i = begin(arg);
-    for(; i; ++i){
-      qq_elem(*i);
-    }
-    qq_elem(i.base());
-
-    return gl.extract();
-  }else if(arg.tag() == Ptr_tag::vector){
-    gl.push(vector_sym);
-
-    auto v = arg.get<Vector*>();
-    for(auto p : *v){
-      qq_elem(p);
-    }
-
-    return gl.extract();
-  }else{
-    UNEXP_DEFAULT();
+  auto v = arg.get<Vector*>();
+  for(auto p : *v){
+    qq_elem(p);
   }
+
+  return gl.extract();
 }
 
 Lisp_ptr syntax_unquote_splicing(ZsArgs args){
