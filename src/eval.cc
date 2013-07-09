@@ -395,9 +395,11 @@ void vm_op_proc_enter(){
   auto argc = vm.stack.back().get<VMArgcount>();
 
   if(!(info->required_args <= argc && argc <= info->max_args)){
-    throw_builtin_argcount_failed(get_procname(proc),
-                                  info->required_args,
-                                  info->max_args, argc);
+    throw_zs_error(get_procname(proc),
+                   "number of passed args is mismatched!!"
+                   " (acceptable %d-%d args, passed %d)\n",
+                   info->required_args, info->max_args,
+                   static_cast<int>(argc));
   }
 
   switch(info->returning){

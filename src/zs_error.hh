@@ -2,6 +2,7 @@
 #define ZS_ERROR_HH
 
 #include <cassert>
+#include <climits>
 #include <cstdlib>
 #include "decl.hh"
 
@@ -20,25 +21,6 @@ void throw_zs_error_append(Lisp_ptr, Lisp_ptr)
   __attribute__ ((noreturn))
   ;
 
-void throw_builtin_type_check_failed(Ptr_tag, Lisp_ptr)
-  __attribute__ ((noreturn))
-  ;
-void throw_builtin_argcount_failed(Lisp_ptr, int required, int max, int passed)
-  __attribute__ ((noreturn))
-  ;
-void throw_builtin_identifier_check_failed(Lisp_ptr)
-  __attribute__ ((noreturn))
-  ;
-void throw_builtin_range_check_failed(size_t min, size_t max, int passed)
-  __attribute__ ((noreturn))
-  ;
-void throw_number_type_check_failed(Lisp_ptr)
-  __attribute__ ((noreturn))
-  ;
-void throw_procedure_type_check_failed(Lisp_ptr)
-  __attribute__ ((noreturn))
-  ;
-
 void print_zs_warning(const char*, ...)
   __attribute__ ((format (printf, 1, 2)))
   ;
@@ -47,7 +29,6 @@ void check_type(Ptr_tag, Lisp_ptr);
 void check_numeric_type(Lisp_ptr);
 void check_identifier_type(Lisp_ptr);
 void check_procedure_type(Lisp_ptr);
-void check_range(Lisp_ptr, size_t);
-void check_range(Lisp_ptr, size_t, size_t);
+void check_range(Lisp_ptr, size_t, size_t = INT_MAX);
 
 #endif // ZS_ERROR_HH

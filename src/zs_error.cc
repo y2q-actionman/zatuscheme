@@ -1,4 +1,3 @@
-#include <climits>
 #include <cstdarg>
 #include <cstdio>
 #include <exception>
@@ -69,35 +68,6 @@ void throw_zs_error_append(Lisp_ptr context, Lisp_ptr p){
   throw Lisp_ptr{zs_new<String>(oss.str())};
 }
 
-void throw_builtin_type_check_failed(Ptr_tag tag, Lisp_ptr p){
-  throw_zs_error(p, "arg is not %s!", stringify(tag));
-}
-
-void throw_builtin_argcount_failed(Lisp_ptr name, int required, int max, int passed){
-  throw_zs_error(name,
-                 "number of passed args is mismatched!!"
-                 " (acceptable %d-%d args, passed %d)\n",
-                 required, max, passed);
-}
-
-void throw_builtin_identifier_check_failed(Lisp_ptr p){
-  throw_zs_error(p, "arg is not identifier!");
-}
-
-void throw_builtin_range_check_failed(size_t min, size_t max, int passed){
-  // The 'z' specifier is a C99 feature, included in C++11.
-  throw_zs_error({}, "inacceptable index ([%zd, %zd), supplied %d\n",
-                 min, max, passed);
-}
-
-void throw_number_type_check_failed(Lisp_ptr p){
-  throw_zs_error(p, "arg is not number!");
-}
-
-void throw_procedure_type_check_failed(Lisp_ptr p){
-  throw_zs_error(p, "arg is not procedure!");
-}
-
 void print_zs_warning(const char* fmt, ...){
   va_list ap;
   va_start(ap, fmt);
@@ -109,30 +79,26 @@ void print_zs_warning(const char* fmt, ...){
 
 void check_type(Ptr_tag tag, Lisp_ptr p){
   if(p.tag() != tag){
-    throw_builtin_type_check_failed(tag, p);
+    throw_zs_error(p, "arg is not %s!", stringify(tag));
   }
 }
 
 void check_numeric_type(Lisp_ptr p){
   if(!is_numeric_type(p)){
-    throw_number_type_check_failed(p);
+    throw_zs_error(p, "arg is not number!");
   }
 }
 
 void check_identifier_type(Lisp_ptr p){
   if(!identifierp(p)){
-    throw_builtin_identifier_check_failed(p);
+    throw_zs_error(p, "arg is not identifier!");
   }
 }
 
 void check_procedure_type(Lisp_ptr p){
   if(!is_procedure(p)){
-    throw_procedure_type_check_failed(p);
+    throw_zs_error(p, "arg is not procedure!");
   }
-}
-
-void check_range(Lisp_ptr p, size_t min){
-  check_range(p, min, INT_MAX);
 }
 
 void check_range(Lisp_ptr p, size_t min, size_t max){
@@ -140,6 +106,8 @@ void check_range(Lisp_ptr p, size_t min, size_t max){
   auto idx = p.get<int>();
 
   if(idx < min || idx >= max){
-    throw_builtin_range_check_failed(min, max, idx);
+    // The 'z' specifier is a C99 feature, included in C++11.
+    throw_zs_error({}, "inacceptable index ([%zd, %zd), supplied %d\n",
+                   min, max, idx);
   }
 }
