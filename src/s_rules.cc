@@ -215,7 +215,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         ensure_binding(acc_map, sr, ignore_ident, *p_i,
                        [](){ return Cons::NIL; });
 
-        for(; f_i != f_e; ++f_i){
+        for(; f_i; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
 
           for(auto i : m){
