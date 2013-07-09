@@ -29,7 +29,7 @@ void throw_builtin_argcount_failed(Lisp_ptr, int required, int max, int passed)
 void throw_builtin_identifier_check_failed(Lisp_ptr)
   __attribute__ ((noreturn))
   ;
-void throw_builtin_range_check_failed(size_t max, int passed)
+void throw_builtin_range_check_failed(int min, int max, int passed)
   __attribute__ ((noreturn))
   ;
 void throw_number_type_check_failed(Lisp_ptr)

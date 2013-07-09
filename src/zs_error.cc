@@ -83,10 +83,10 @@ void throw_builtin_identifier_check_failed(Lisp_ptr p){
   throw_zs_error(p, "arg is not identifier!");
 }
 
-void throw_builtin_range_check_failed(size_t max, int passed){
+void throw_builtin_range_check_failed(int min, int max, int passed){
   // The 'z' specifier is a C99 feature, included in C++11.
-  throw_zs_error({}, "index is out-of-bound ([0, %zu), supplied %d\n",
-                 max, passed);
+  throw_zs_error({}, "inacceptable index ([%d, %d), supplied %d\n",
+                 min, max, passed);
 }
 
 void throw_number_type_check_failed(Lisp_ptr p){

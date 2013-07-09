@@ -1,3 +1,5 @@
+#include <climits>
+
 #include "builtin_vector.hh"
 #include "lisp_ptr.hh"
 #include "vm.hh"
@@ -13,7 +15,7 @@ Lisp_ptr internal_vector_make(ZsArgs args){
 
   auto count = args[0].get<int>();
   if(count < 0){
-    throw_zs_error(args[0], "passed size is invalid");
+    throw_builtin_range_check_failed(0, INT_MAX, count);
   }    
 
   return {zs_new<Vector>(count, args[1])};
@@ -35,7 +37,7 @@ Lisp_ptr vector_ref(ZsArgs args){
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
-    throw_builtin_range_check_failed(v->size(), ind);
+    throw_builtin_range_check_failed(0, v->size(), ind);
   }
 
   return (*v)[ind];
@@ -49,7 +51,7 @@ Lisp_ptr vector_set(ZsArgs args){
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(v->size())){
-    throw_builtin_range_check_failed(v->size(), ind);
+    throw_builtin_range_check_failed(0, v->size(), ind);
   }
 
   (*v)[ind] = args[2];

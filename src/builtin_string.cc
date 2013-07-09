@@ -1,3 +1,4 @@
+#include <climits>
 #include <cstring>
 #include <string>
 
@@ -32,7 +33,7 @@ Lisp_ptr internal_string_make(ZsArgs args){
 
   auto char_count = args[0].get<int>();
   if(char_count < 0){
-    throw_zs_error(args[0], "passed size is invalid");
+    throw_builtin_range_check_failed(0, INT_MAX, char_count);
   }    
 
   check_type(Ptr_tag::character, args[1]);
@@ -55,7 +56,7 @@ Lisp_ptr string_ref(ZsArgs args){
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw_builtin_range_check_failed(str->length(), ind);
+    throw_builtin_range_check_failed(0, str->length(), ind);
   }
 
   return Lisp_ptr{(*str)[ind]};
@@ -69,7 +70,7 @@ Lisp_ptr string_set(ZsArgs args){
   auto ind = args[1].get<int>();
 
   if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw_builtin_range_check_failed(str->length(), ind);
+    throw_builtin_range_check_failed(0, str->length(), ind);
   }
 
   check_type(Ptr_tag::character, args[2]);
