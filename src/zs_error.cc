@@ -1,3 +1,4 @@
+#include <climits>
 #include <cstdarg>
 #include <cstdio>
 #include <exception>
@@ -83,9 +84,9 @@ void throw_builtin_identifier_check_failed(Lisp_ptr p){
   throw_zs_error(p, "arg is not identifier!");
 }
 
-void throw_builtin_range_check_failed(int min, int max, int passed){
+void throw_builtin_range_check_failed(size_t min, size_t max, int passed){
   // The 'z' specifier is a C99 feature, included in C++11.
-  throw_zs_error({}, "inacceptable index ([%d, %d), supplied %d\n",
+  throw_zs_error({}, "inacceptable index ([%zd, %zd), supplied %d\n",
                  min, max, passed);
 }
 
@@ -127,5 +128,18 @@ void check_identifier_type(Lisp_ptr p){
 void check_procedure_type(Lisp_ptr p){
   if(!is_procedure(p)){
     throw_procedure_type_check_failed(p);
+  }
+}
+
+void check_range(Lisp_ptr p, size_t min){
+  check_range(p, min, INT_MAX);
+}
+
+void check_range(Lisp_ptr p, size_t min, size_t max){
+  check_type(Ptr_tag::integer, p);
+  auto idx = p.get<int>();
+
+  if(idx < min || idx >= max){
+    throw_builtin_range_check_failed(min, max, idx);
   }
 }

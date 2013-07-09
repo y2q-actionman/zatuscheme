@@ -29,15 +29,11 @@ Lisp_ptr internal_string_cmp(ZsArgs&& args, Fun fun){
 namespace builtin {
 
 Lisp_ptr internal_string_make(ZsArgs args){
-  check_type(Ptr_tag::integer, args[0]);
-
-  auto char_count = args[0].get<int>();
-  if(char_count < 0){
-    throw_builtin_range_check_failed(0, INT_MAX, char_count);
-  }    
-
+  check_range(args[0], 0);
   check_type(Ptr_tag::character, args[1]);
   
+  auto char_count = args[0].get<int>();
+
   return {zs_new<String>(char_count, args[1].get<char>())};
 }
 
@@ -52,12 +48,8 @@ Lisp_ptr string_ref(ZsArgs args){
   check_type(Ptr_tag::string, args[0]);
   auto str = args[0].get<String*>();
 
-  check_type(Ptr_tag::integer, args[1]);
+  check_range(args[1], 0, str->length());
   auto ind = args[1].get<int>();
-
-  if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw_builtin_range_check_failed(0, str->length(), ind);
-  }
 
   return Lisp_ptr{(*str)[ind]};
 }
@@ -66,12 +58,8 @@ Lisp_ptr string_set(ZsArgs args){
   check_type(Ptr_tag::string, args[0]);
   auto str = args[0].get<String*>();
 
-  check_type(Ptr_tag::integer, args[1]);
+  check_range(args[1], 0, str->length());
   auto ind = args[1].get<int>();
-
-  if(ind < 0 || ind >= static_cast<signed>(str->length())){
-    throw_builtin_range_check_failed(0, str->length(), ind);
-  }
 
   check_type(Ptr_tag::character, args[2]);
   auto ch = args[2].get<char>();

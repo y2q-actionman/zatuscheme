@@ -29,7 +29,7 @@ void throw_builtin_argcount_failed(Lisp_ptr, int required, int max, int passed)
 void throw_builtin_identifier_check_failed(Lisp_ptr)
   __attribute__ ((noreturn))
   ;
-void throw_builtin_range_check_failed(int min, int max, int passed)
+void throw_builtin_range_check_failed(size_t min, size_t max, int passed)
   __attribute__ ((noreturn))
   ;
 void throw_number_type_check_failed(Lisp_ptr)
@@ -47,5 +47,7 @@ void check_type(Ptr_tag, Lisp_ptr);
 void check_numeric_type(Lisp_ptr);
 void check_identifier_type(Lisp_ptr);
 void check_procedure_type(Lisp_ptr);
+void check_range(Lisp_ptr, size_t);
+void check_range(Lisp_ptr, size_t, size_t);
 
 #endif // ZS_ERROR_HH
