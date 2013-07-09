@@ -39,25 +39,20 @@ void zs_terminate_handler() noexcept{
   abort();
 }
 
-static
-string vprintf_string(const char* fmt, va_list ap){
-  string str(ERROR_MESSAGE_LENGTH, '\0');
-  vsnprintf(&(str[0]), str.size(), fmt, ap);
-  return str;
-}
-
 // error functions
 void throw_zs_error(Lisp_ptr p, const char* fmt, ...){
+  char strbuf[ERROR_MESSAGE_LENGTH];
+
   va_list ap;
   va_start(ap, fmt);
-  auto str = vprintf_string(fmt, ap);
+  vsnprintf(strbuf, sizeof(strbuf), fmt, ap);
   va_end(ap);
 
   if(!p){
-    throw Lisp_ptr{zs_new<String>(move(str))};
+    throw Lisp_ptr{zs_new<String>(strbuf)};
   }else{
     ostringstream oss;
-    oss << str << " @ (" << p << ")" << endl;
+    oss << strbuf << " @ (" << p << ")" << endl;
     throw Lisp_ptr{zs_new<String>(oss.str())};
   }
 }
@@ -69,12 +64,14 @@ void throw_zs_error_append(Lisp_ptr context, Lisp_ptr p){
 }
 
 void print_zs_warning(const char* fmt, ...){
+  char strbuf[ERROR_MESSAGE_LENGTH];
+
   va_list ap;
   va_start(ap, fmt);
-  auto str = vprintf_string(fmt, ap);
+  vsnprintf(strbuf, sizeof(strbuf), fmt, ap);
   va_end(ap);
 
-  cerr << str << endl;
+  cerr << strbuf << endl;
 }
 
 void check_type(Ptr_tag tag, Lisp_ptr p){
