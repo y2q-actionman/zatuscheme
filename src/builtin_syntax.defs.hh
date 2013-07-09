@@ -16,9 +16,6 @@
     builtin::syntax_define,
     {1, Variadic::t, Passing::quote}}},
 
-{"%quasiquote-vector", {
-    builtin::syntax_internal_quasiquote_vector,
-    {1, Variadic::f, Passing::quote, Returning::code}}},
 {"unquote-splicing", {
     builtin::syntax_unquote_splicing,
     {1, Variadic::f, Passing::eval, Returning::stack_splice, MoveReturnValue::f}}},

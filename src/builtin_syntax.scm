@@ -182,9 +182,10 @@ LOAD
      ,@x)
     ((_ (x . y))
      (%list* (quasiquote x) (quasiquote y)))
-    ((_ #()) #())
+    ((_ #())
+     (%vector))
     ((_ #(x ...))
-     (%quasiquote-vector x))
+     (%vector ,@(quasiquote x)))
     ((_ x)
      (quote x))))
 

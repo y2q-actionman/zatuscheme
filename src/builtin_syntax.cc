@@ -87,25 +87,6 @@ Lisp_ptr syntax_define(ZsArgs args){
   }
 }
 
-Lisp_ptr syntax_internal_quasiquote_vector(ZsArgs args){
-  const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
-  const auto vector_sym = intern(*vm.symtable, "%vector");
-
-  GrowList gl;
-
-  const auto qq_elem = [&](Lisp_ptr p){
-    gl.push(make_cons_list({quasiquote_sym, p}));
-  };
-
-  gl.push(vector_sym);
-
-  for(auto i = begin(args[0]); i; ++i){
-    qq_elem(*i);
-  }
-
-  return gl.extract();
-}
-
 Lisp_ptr syntax_unquote_splicing(ZsArgs args){
   check_type(Ptr_tag::cons, args[0]);
 
