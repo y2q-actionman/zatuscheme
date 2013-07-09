@@ -87,48 +87,6 @@ Lisp_ptr syntax_define(ZsArgs args){
   }
 }
 
-Lisp_ptr syntax_internal_quasiquote_list(ZsArgs args){
-  auto& arg = args[0];
-
-  assert(arg.tag() == Ptr_tag::cons);
-
-  const auto quasiquote_sym = intern(*vm.symtable, "quasiquote");
-  const auto list_star_sym = intern(*vm.symtable, "%list*");
-
-  GrowList gl;
-
-  const auto qq_elem = [&](Lisp_ptr p){
-    gl.push(make_cons_list({quasiquote_sym, p}));
-  };
-
-  assert(!nullp(arg));
-
-  // check unquote -- like `,xn
-#ifndef NDEBUG
-  const auto unquote_sym = intern(*vm.symtable, "unquote");
-  const auto unquote_splicing_sym = intern(*vm.symtable, "unquote-splicing");
-
-  if(nth_cons_list<0>(arg).tag() == Ptr_tag::symbol){
-    auto first_sym = nth_cons_list<0>(arg).get<Symbol*>();
-    assert(first_sym != unquote_sym);
-    assert(first_sym != unquote_splicing_sym);
-  }
-#endif
-
-  gl.push(list_star_sym);
-
-  // generic lists
-  auto i = begin(arg);
-  for(; i; ++i){
-    qq_elem(*i);
-  }
-  assert(!i);
-
-  qq_elem(args[1]);
-
-  return gl.extract();
-}
-
 Lisp_ptr syntax_internal_quasiquote_vector(ZsArgs args){
   auto& arg = args[0];
 

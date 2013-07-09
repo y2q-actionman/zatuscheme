@@ -16,9 +16,6 @@
     builtin::syntax_define,
     {1, Variadic::t, Passing::quote}}},
 
-{"%quasiquote-list", {
-    builtin::syntax_internal_quasiquote_list,
-    {2, Variadic::f, Passing::quote, Returning::code}}},
 {"%quasiquote-vector", {
     builtin::syntax_internal_quasiquote_vector,
     {1, Variadic::f, Passing::quote, Returning::code}}},
