@@ -6,6 +6,9 @@
 #include "zs_error.hh"
 #include "zs_memory.hh"
 
+static_assert(sizeof(int) < sizeof(long long),
+              "integer overflow cannot be treated properly");
+
 using namespace std;
 
 // TODO: make this as constructor.

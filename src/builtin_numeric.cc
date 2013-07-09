@@ -16,9 +16,6 @@
 
 using namespace std;
 
-static_assert(sizeof(int) < sizeof(long long),
-              "integer overflow cannot be treated properly");
-
 namespace {
 
 template<typename IFun, typename QFun, typename RFun, typename CFun>
