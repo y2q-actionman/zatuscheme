@@ -209,14 +209,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         }
 
         auto p_e = end(pattern);
-        if(!nullp(p_e.base())){
-          throw_zs_error({}, "'...' is appeared in a inproper list pattern");
-        }
-
         auto f_e = end(form);
-        if(!nullp(f_e.base())){
-          throw_zs_error({}, "'...' is used for a inproper list form");
-        }
 
         EqHashMap acc_map;
         ensure_binding(acc_map, sr, ignore_ident, *p_i,
@@ -233,6 +226,10 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         }
 
         match_obj.insert(begin(acc_map), end(acc_map));
+
+        auto tail = try_match_1(sr, ignore_ident, p_e.base(), form_env, f_e.base());
+        match_obj.insert(begin(tail), end(tail));
+
         return match_obj;
       }
 

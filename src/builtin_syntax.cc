@@ -122,7 +122,9 @@ Lisp_ptr syntax_internal_quasiquote_list(ZsArgs args){
   for(; i; ++i){
     qq_elem(*i);
   }
-  qq_elem(i.base());
+  assert(!i);
+
+  qq_elem(args[1]);
 
   return gl.extract();
 }
