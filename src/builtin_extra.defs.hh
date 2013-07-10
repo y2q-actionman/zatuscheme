@@ -32,7 +32,7 @@
     {1}}},
 {"with-exception-handler", {
     builtin::with_exception_handler,
-    {2, 2, Passing::eval, Returning::pass, MoveReturnValue::f}}},
+    {2, 2}}},
 {"raise", {
     builtin::raise,
     {1, 1}}},
