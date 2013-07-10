@@ -95,13 +95,11 @@ Lisp_ptr dynamic_wind(ZsArgs args){
 
   // third proc call
   vm.stack.push_back(VMArgcount{0});
-  vm.code.push_back(procs[2]);
-  vm.code.push_back(vm_op_save_values_and_enter);
+  vm.code.insert(vm.code.end(), {procs[2], vm_op_save_values_and_enter});
 
   // second proc call
   vm.stack.push_back(VMArgcount{0});
-  vm.code.push_back(procs[1]);
-  vm.code.push_back(vm_op_proc_enter);
+  vm.code.insert(vm.code.end(), {procs[1], vm_op_proc_enter});
 
   // first proc, calling with zero args.
   vm.stack.push_back(VMArgcount{0});
