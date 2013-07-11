@@ -546,7 +546,7 @@ void vm_op_pop_exception_handler(){
 void eval(){
   while(!vm.code.empty()){
     try{
-      if(dump_mode) cout << vm << endl;
+      if(dump_mode) clog << vm << endl;
       auto p = vm.code.back();
       vm.code.pop_back();
 
