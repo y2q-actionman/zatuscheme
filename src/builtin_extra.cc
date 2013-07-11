@@ -109,6 +109,7 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
   return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
 }
 
+#if 0
 Lisp_ptr with_exception_handler(ZsArgs args){
   check_procedure_type(args[0]);
   check_procedure_type(args[1]);
@@ -123,6 +124,14 @@ Lisp_ptr with_exception_handler(ZsArgs args){
 
   vm.stack.push_back(VMArgcount{0});
   vm.code.insert(vm.code.end(), {thunk, vm_op_proc_enter});
+  return {};
+}
+#endif
+
+Lisp_ptr internal_push_exception_handler(ZsArgs args){
+  check_procedure_type(args[0]);
+
+  vm.exception_handler.push_back(args[0]);
   return {};
 }
 

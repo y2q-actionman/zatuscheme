@@ -39,6 +39,13 @@ LOAD
   (raise (apply string-append `(,reason) args)))
 
 LOAD
+(define (with-exception-handler handler thunk)
+  (call-with-current-continuation
+   (lambda (cont)
+     (%push-exception-handler handler)
+     (cont (thunk)))))
+
+LOAD
 (define (ignore-errors thunk)
   (call-with-current-continuation
    (lambda (cont)

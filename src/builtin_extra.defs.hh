@@ -30,9 +30,14 @@
 {"make-synthetic-identifier", {
     builtin::make_synthetic_identifier,
     {1}}},
+#if 0
 {"with-exception-handler", {
     builtin::with_exception_handler,
     {2, 2}}},
+#endif
+{"%push-exception-handler", {
+    builtin::internal_push_exception_handler,
+    {1}}},
 {"raise", {
     builtin::raise,
     {1, 1}}},
