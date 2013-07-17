@@ -35,8 +35,6 @@ private:
   Symbol& operator=(const Symbol&) = delete;
   Symbol& operator=(Symbol&&) = delete;
 
-  void rebind(const std::string*);
-
 private:
   const std::string* name_;
   // add pointer to symbol table?

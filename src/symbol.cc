@@ -8,12 +8,7 @@ using namespace std;
 
 constexpr inline
 Symbol::Symbol()
-  : name_(){} // assumes this is immediately set by rebind()
-
-inline
-void Symbol::rebind(const std::string* s){
-  name_ = s;
-}
+  : name_(){} // assumes this is immediately set by intern()
 
 Symbol* intern(SymTable& table, const string& s){
   auto i = table.find(s);
@@ -29,7 +24,7 @@ Symbol* intern(SymTable& table, const string& s){
     assert(ins_ret.second);
 
     auto ins_iter = ins_ret.first;
-    ins_iter->second.rebind(&ins_iter->first);
+    ins_iter->second.name_ = &ins_iter->first;
     return &ins_iter->second;
   }
 }
