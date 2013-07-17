@@ -139,11 +139,7 @@ void proc_enter_native(const NProcedure* fun, const ProcInfo* info, ZsArgs&& arg
   auto native_func = fun->get();
   assert(native_func);
 
-#ifndef NDEBUG
-  assert(vm.stack.back().tag() == Ptr_tag::vm_argcount);
-  auto argc = vm.stack.back().get<VMArgcount>();
-  assert((info->required_args <= argc) && (argc <= info->max_args));
-#endif
+  assert(info->required_args <= args.size() && args.size() <= info->max_args);
 
   try{
     auto p = native_func(move(args));
