@@ -15,8 +15,8 @@ public:
   SyntacticClosure& operator=(SyntacticClosure&&) = delete;
 
   Env* env() const { return env_; }
-  Lisp_ptr free_names() const { return free_names_; }
-  Lisp_ptr expr() const { return expr_; }
+  const Lisp_ptr& free_names() const { return free_names_; }
+  const Lisp_ptr& expr() const { return expr_; }
 
 private:
   Env* env_;
