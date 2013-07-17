@@ -26,8 +26,7 @@ void Env::set(Lisp_ptr s, Lisp_ptr p){
   for(auto e = this; e; e = e->next_){
     auto ei = e->map_.find(s);
     if(ei != e->map_.end()){
-      e->map_.erase(ei);
-      e->map_.insert({s, p});
+      e->map_[s] = p;
       return;
     }
   }
