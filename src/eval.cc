@@ -170,11 +170,10 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info, ZsArgs&& args
 
   // == entering frame ==
   auto oldenv = vm.frame;
-  if(auto closure = fun->closure()){
-    vm.frame = closure->push();
-  }else{
-    vm.frame = vm.frame->push();
-  }
+
+  auto closure = fun->closure();
+  assert(closure);
+  vm.frame = closure->push();
 
   switch(fun->info()->leaving){
   case Leaving::immediate:
