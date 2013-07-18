@@ -1,6 +1,7 @@
 #ifndef LISP_PTR_HH
 #define LISP_PTR_HH
 
+#include <cstdint>
 #include "decl.hh"
 
 class Lisp_ptr {
@@ -31,19 +32,17 @@ public:
 
 private:
   union lisp_ptr_u{
-    constexpr lisp_ptr_u(){}
+    constexpr lisp_ptr_u() : i_(0){}
     constexpr lisp_ptr_u(void* p) : ptr_(p){}
     constexpr lisp_ptr_u(const void* p) : cptr_(p){}
-    constexpr lisp_ptr_u(bool b) : b_(b){}
-    constexpr lisp_ptr_u(char c) : c_(c){}
+    constexpr lisp_ptr_u(bool b) : i_(b){}
+    constexpr lisp_ptr_u(char c) : i_(c){}
     constexpr lisp_ptr_u(int i) : i_(i){}
     constexpr lisp_ptr_u(void(*f)()) : f_(f){}
 
+    intptr_t i_;
     void* ptr_;
     const void* cptr_;
-    bool b_;
-    char c_;
-    int i_;
     void (*f_)(void);
   };
 

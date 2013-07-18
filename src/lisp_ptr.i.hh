@@ -39,21 +39,21 @@ template<>
 inline
 bool Lisp_ptr::get<bool>() const {
   assert(tag() == to_tag<bool>());
-  return u_.b_;
+  return static_cast<bool>(u_.i_);
 }
 
 template<>
 inline
 char Lisp_ptr::get<char>() const {
   assert(tag() == to_tag<char>());
-  return u_.c_;
+  return static_cast<char>(u_.i_);
 }
 
 template<>
 inline
 int Lisp_ptr::get<int>() const {
   assert(tag() == to_tag<int>());
-  return u_.i_;
+  return static_cast<int>(u_.i_);
 }
 
 template<>
