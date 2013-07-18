@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <functional>
 
 #include "cons.hh"
 #include "cons_util.hh"
@@ -48,8 +47,4 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
   }else{
     return eqv_internal(a, b);
   }
-}
-
-size_t eq_hash(Lisp_ptr p){
-  return std::hash<void*>()(p.get<void*>());
 }

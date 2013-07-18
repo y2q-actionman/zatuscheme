@@ -5,6 +5,13 @@
 #error "Please include via parent file"
 #endif
 
+#include <functional>
+
+inline
+size_t eq_hash(Lisp_ptr p){
+  return std::hash<void*>()(p.get<void*>());
+}
+
 struct EqObj {
   bool operator()(Lisp_ptr a, Lisp_ptr b) const{
     return eq_internal(a, b);
