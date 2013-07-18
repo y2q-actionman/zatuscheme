@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <functional>
 
 #include "cons.hh"
 #include "cons_util.hh"
@@ -9,42 +10,8 @@
 using namespace std;
 
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
-  if(a.tag() != b.tag()) return false;
-
-  switch(a.tag()){
-  case Ptr_tag::undefined:
-    return true;
-  case Ptr_tag::boolean:
-    return a.get<bool>() == b.get<bool>();
-  case Ptr_tag::character:
-     // this can be moved into eqv? in R5RS, but char is contained in Lisp_ptr.
-    return a.get<char>() == b.get<char>();
-  case Ptr_tag::integer:
-    return a.get<int>() == b.get<int>();
-  case Ptr_tag::notation:
-    return a.get<Notation>() == b.get<Notation>();
-  case Ptr_tag::cons:
-  case Ptr_tag::symbol:
-  case Ptr_tag::i_procedure:
-  case Ptr_tag::n_procedure:
-  case Ptr_tag::continuation:
-  case Ptr_tag::rational:
-  case Ptr_tag::real:
-  case Ptr_tag::complex:
-  case Ptr_tag::string:
-  case Ptr_tag::vector:
-  case Ptr_tag::input_port:
-  case Ptr_tag::output_port:
-  case Ptr_tag::env:
-  case Ptr_tag::syntactic_closure:
-  case Ptr_tag::syntax_rules:
-  case Ptr_tag::vm_op:
-    return a.get<void*>() == b.get<void*>();
-  case Ptr_tag::vm_argcount:
-    return a.get<VMArgcount>() == b.get<VMArgcount>();
-  default:
-    UNEXP_DEFAULT();
-  }
+  return (a.tag() == b.tag()
+          && a.get<void*>() == b.get<void*>());
 }
 
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
@@ -84,49 +51,5 @@ bool equal_internal(Lisp_ptr a, Lisp_ptr b){
 }
 
 size_t eq_hash(Lisp_ptr p){
-  auto tag_hash = hash<int>()(static_cast<int>(p.tag()));
-  size_t val_hash;
-
-  switch(p.tag()){
-  case Ptr_tag::undefined:
-    val_hash = hash<void*>()(nullptr);
-    break;
-  case Ptr_tag::boolean:
-    val_hash = hash<bool>()(p.get<bool>());
-    break;
-  case Ptr_tag::character:
-    val_hash = hash<char>()(p.get<char>());
-    break;
-  case Ptr_tag::integer:
-    val_hash = hash<int>()(p.get<int>());
-    break;
-  case Ptr_tag::notation:
-    val_hash = hash<int>()(static_cast<int>(p.get<Notation>()));
-    break;
-  case Ptr_tag::cons:
-  case Ptr_tag::symbol:
-  case Ptr_tag::i_procedure:
-  case Ptr_tag::n_procedure:
-  case Ptr_tag::continuation:
-  case Ptr_tag::rational:
-  case Ptr_tag::real:
-  case Ptr_tag::complex:
-  case Ptr_tag::string:
-  case Ptr_tag::vector:
-  case Ptr_tag::input_port:
-  case Ptr_tag::output_port:
-  case Ptr_tag::env:
-  case Ptr_tag::syntactic_closure:
-  case Ptr_tag::syntax_rules:
-  case Ptr_tag::vm_op:
-    val_hash = hash<void*>()(p.get<void*>());
-    break;
-  case Ptr_tag::vm_argcount:
-    val_hash = hash<int>()(static_cast<int>(p.get<VMArgcount>()));
-    break;
-  default:
-    UNEXP_DEFAULT();
-  }
-
-  return tag_hash ^ val_hash;
+  return std::hash<void*>()(p.get<void*>());
 }
