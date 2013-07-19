@@ -28,15 +28,14 @@ Lisp_ptr::Lisp_ptr(int i)
 template<typename T>
 inline constexpr
 Lisp_ptr::Lisp_ptr(T p)
-  : tag_(to_tag<T>()), u_(p){
+  : tag_(to_tag<T>()),
+    u_(static_cast<typename std::conditional<std::is_enum<T>::value,
+                                             decltype(lisp_ptr_u::i_),
+                                             T>
+                   ::type>(p)){
   static_assert(!std::is_fundamental<T>::value,
                 "Lisp_ptr cannot accept the specified type.");
 }
-
-template<>
-inline constexpr
-Lisp_ptr::Lisp_ptr<Notation>(Notation n)
-  : tag_(to_tag<Notation>()), u_(static_cast<int>(n)){}
 
 // Lisp_ptr getters
 template<>
