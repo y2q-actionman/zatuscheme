@@ -30,7 +30,7 @@ public:
   explicit constexpr operator bool() const
   { return (tag_ != Ptr_tag::undefined); }
 
-private:
+  // storage
   union lisp_ptr_u{
     constexpr lisp_ptr_u(int i) : i_(i){}
     constexpr lisp_ptr_u(void* p) : ptr_(p){}

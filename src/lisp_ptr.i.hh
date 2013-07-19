@@ -48,26 +48,8 @@ VMArgcount Lisp_ptr::get<VMArgcount>() const {
 
 template<>
 inline constexpr
-intptr_t Lisp_ptr::get<intptr_t>() const{
-  return u_.i_;
-}
-
-template<>
-inline constexpr
 void* Lisp_ptr::get<void*>() const{
   return u_.ptr_;
-}
-
-template<>
-inline constexpr
-const void* Lisp_ptr::get<const void*>() const{
-  return u_.cptr_;
-}
-
-template<>
-inline constexpr
-void (*Lisp_ptr::get<void(*)(void)>())(void) const{
-  return u_.f_;
 }
 
 namespace lisp_ptr_detail {
@@ -76,7 +58,7 @@ template<typename T>
 inline constexpr
 T lisp_ptr_cast(const Lisp_ptr& p,
                 typename std::enable_if<std::is_integral<T>::value>::type* = nullptr){
-  return static_cast<T>(p.get<intptr_t>());
+  return static_cast<T>(p.u_.i_);
 }
 
 template<typename T>
@@ -87,7 +69,7 @@ T lisp_ptr_cast(const Lisp_ptr& p,
   // static_assert(std::is_convertible<typename std::underlying_type<T>::type,
   //                                   intptr_t>::value,
   //               "inacceptable enum type");
-  return static_cast<T>(p.get<intptr_t>());
+  return static_cast<T>(p.u_.i_);
 }
 
 template<typename T>
@@ -97,9 +79,9 @@ T lisp_ptr_cast(const Lisp_ptr& p,
                 typename std::enable_if<
                   std::is_function<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
-  static_assert(std::is_same<T, void(*)(void)>::value,
+  static_assert(std::is_same<T, decltype(p.u_.f_)>::value,
                 "inacceptable function-pointer type");
-  return static_cast<T>(p.get<void(*)(void)>());
+  return static_cast<T>(p.u_.f_);
 }
 
 template<typename T>
@@ -112,7 +94,7 @@ T lisp_ptr_cast(const Lisp_ptr& p,
                 typename std::enable_if<
                   !std::is_const<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
-  return static_cast<T>(p.get<void*>());
+  return static_cast<T>(p.u_.ptr_);
 }
 
 template<typename T>
@@ -125,7 +107,7 @@ T lisp_ptr_cast(const Lisp_ptr& p,
                 typename std::enable_if<
                   std::is_const<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
-  return static_cast<T>(p.get<const void*>());
+  return static_cast<T>(p.u_.cptr_);
 }
 
 }
