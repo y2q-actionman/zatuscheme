@@ -10,6 +10,10 @@
 
 // Lisp_ptr constructors
 inline constexpr
+Lisp_ptr::Lisp_ptr()
+ : tag_(Ptr_tag::undefined), u_(0){}
+
+inline constexpr
 Lisp_ptr::Lisp_ptr(bool b)
   : tag_(to_tag<bool>()), u_(b){}
 

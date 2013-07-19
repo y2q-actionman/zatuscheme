@@ -6,7 +6,7 @@
 
 class Lisp_ptr {
 public:
-  constexpr Lisp_ptr() : tag_(Ptr_tag::undefined), u_(){}
+  constexpr Lisp_ptr();
   explicit constexpr Lisp_ptr(bool); // fundamental types are 'explicit'
   explicit constexpr Lisp_ptr(char);
   explicit constexpr Lisp_ptr(int);
@@ -32,12 +32,9 @@ public:
 
 private:
   union lisp_ptr_u{
-    constexpr lisp_ptr_u() : i_(0){}
+    constexpr lisp_ptr_u(int i) : i_(i){}
     constexpr lisp_ptr_u(void* p) : ptr_(p){}
     constexpr lisp_ptr_u(const void* p) : cptr_(p){}
-    constexpr lisp_ptr_u(bool b) : i_(b){}
-    constexpr lisp_ptr_u(char c) : i_(c){}
-    constexpr lisp_ptr_u(int i) : i_(i){}
     constexpr lisp_ptr_u(void(*f)()) : f_(f){}
 
     intptr_t i_;
