@@ -58,13 +58,6 @@ int Lisp_ptr::get<int>() const {
 
 template<>
 inline
-VMop Lisp_ptr::get<VMop>() const {
-  assert(tag() == to_tag<VMop>());
-  return u_.f_;
-}
-
-template<>
-inline
 VMArgcount Lisp_ptr::get<VMArgcount>() const {
   assert(tag() == to_tag<VMArgcount>());
   return static_cast<VMArgcount>(u_.i_);
@@ -87,7 +80,10 @@ namespace lisp_ptr_detail {
 
 template<typename T>
 inline constexpr
-T lisp_ptr_cast(void* p, const void*,
+T lisp_ptr_cast(void* p, const void*, void(*)(void),
+                typename std::enable_if<
+                  !std::is_function<typename std::remove_pointer<T>::type>::value
+                  >::type* = nullptr,
                 typename std::enable_if<
                   !std::is_const<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
@@ -96,11 +92,23 @@ T lisp_ptr_cast(void* p, const void*,
 
 template<typename T>
 inline constexpr
-T lisp_ptr_cast(void*, const void* cp,
+T lisp_ptr_cast(void*, const void* cp, void(*)(void),
+                typename std::enable_if<
+                  !std::is_function<typename std::remove_pointer<T>::type>::value
+                  >::type* = nullptr,
                 typename std::enable_if<
                   std::is_const<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
   return static_cast<T>(cp);
+}
+
+template<typename T>
+inline constexpr
+T lisp_ptr_cast(void*, const void*, void(*fp)(void),
+                typename std::enable_if<
+                  std::is_function<typename std::remove_pointer<T>::type>::value
+                  >::type* = nullptr){
+  return static_cast<T>(fp);
 }
 
 }
@@ -109,7 +117,7 @@ template<typename T>
 inline
 T Lisp_ptr::get() const {
   assert(tag() == to_tag<T>());
-  return lisp_ptr_detail::lisp_ptr_cast<T>(u_.ptr_, u_.cptr_);
+  return lisp_ptr_detail::lisp_ptr_cast<T>(u_.ptr_, u_.cptr_, u_.f_);
 }
 
 #endif // LISP_PTR_I_HH
