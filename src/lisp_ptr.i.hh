@@ -41,27 +41,6 @@ Lisp_ptr::Lisp_ptr<Notation>(Notation n)
 // Lisp_ptr getters
 template<>
 inline
-bool Lisp_ptr::get<bool>() const {
-  assert(tag() == to_tag<bool>());
-  return static_cast<bool>(u_.i_);
-}
-
-template<>
-inline
-char Lisp_ptr::get<char>() const {
-  assert(tag() == to_tag<char>());
-  return static_cast<char>(u_.i_);
-}
-
-template<>
-inline
-int Lisp_ptr::get<int>() const {
-  assert(tag() == to_tag<int>());
-  return static_cast<int>(u_.i_);
-}
-
-template<>
-inline
 VMArgcount Lisp_ptr::get<VMArgcount>() const {
   assert(tag() == to_tag<VMArgcount>());
   return static_cast<VMArgcount>(u_.i_);
@@ -72,6 +51,12 @@ inline
 Notation Lisp_ptr::get<Notation>() const {
   assert(tag() == to_tag<Notation>());
   return static_cast<Notation>(u_.i_);
+}
+
+template<>
+inline constexpr
+intptr_t Lisp_ptr::get<intptr_t>() const{
+  return u_.i_;
 }
 
 template<>
@@ -97,6 +82,26 @@ namespace lisp_ptr_detail {
 template<typename T>
 inline constexpr
 T lisp_ptr_cast(const Lisp_ptr& p,
+                typename std::enable_if<std::is_integral<T>::value>::type* = nullptr){
+  return static_cast<T>(p.get<intptr_t>());
+}
+
+template<typename T>
+inline constexpr
+T lisp_ptr_cast(const Lisp_ptr& p,
+                typename std::enable_if<std::is_pointer<T>::value>::type* = nullptr,
+                typename std::enable_if<
+                  std::is_function<typename std::remove_pointer<T>::type>::value
+                  >::type* = nullptr){
+  static_assert(std::is_same<T, void(*)(void)>::value,
+                "inacceptable function-pointer type");
+  return static_cast<T>(p.get<void(*)(void)>());
+}
+
+template<typename T>
+inline constexpr
+T lisp_ptr_cast(const Lisp_ptr& p,
+                typename std::enable_if<std::is_pointer<T>::value>::type* = nullptr,
                 typename std::enable_if<
                   !std::is_function<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr,
@@ -109,6 +114,7 @@ T lisp_ptr_cast(const Lisp_ptr& p,
 template<typename T>
 inline constexpr
 T lisp_ptr_cast(const Lisp_ptr& p,
+                typename std::enable_if<std::is_pointer<T>::value>::type* = nullptr,
                 typename std::enable_if<
                   !std::is_function<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr,
@@ -116,17 +122,6 @@ T lisp_ptr_cast(const Lisp_ptr& p,
                   std::is_const<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
   return static_cast<T>(p.get<const void*>());
-}
-
-template<typename T>
-inline constexpr
-T lisp_ptr_cast(const Lisp_ptr& p,
-                typename std::enable_if<
-                  std::is_function<typename std::remove_pointer<T>::type>::value
-                  >::type* = nullptr){
-  static_assert(std::is_same<T, void(*)(void)>::value,
-                "inacceptable function-pointer type");
-  return static_cast<T>(p.get<void(*)(void)>());
 }
 
 }
