@@ -2,15 +2,20 @@
 #define LISP_PTR_HH
 
 #include <cstdint>
+#include <type_traits>
 #include "decl.hh"
 
 class Lisp_ptr {
 public:
   constexpr Lisp_ptr();
-  explicit constexpr Lisp_ptr(bool); // fundamental types are 'explicit'
-  explicit constexpr Lisp_ptr(char);
-  explicit constexpr Lisp_ptr(int);
-  template<typename T> constexpr Lisp_ptr(T); // non-fundamental type
+
+  template<typename T>
+  explicit constexpr
+  Lisp_ptr(T, typename std::enable_if<std::is_integral<T>::value>::type* = nullptr);
+
+  template<typename T>
+  constexpr
+  Lisp_ptr(T, typename std::enable_if<!std::is_integral<T>::value>::type* = nullptr);
 
   Lisp_ptr(const Lisp_ptr&) = default;
   Lisp_ptr(Lisp_ptr&&) = default;

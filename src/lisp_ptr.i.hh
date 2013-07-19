@@ -6,36 +6,27 @@
 #endif
 
 #include <cassert>
-#include <type_traits>
 
 // Lisp_ptr constructors
 inline constexpr
 Lisp_ptr::Lisp_ptr()
  : tag_(Ptr_tag::undefined), u_(0){}
 
+template<typename T>
 inline constexpr
-Lisp_ptr::Lisp_ptr(bool b)
-  : tag_(to_tag<bool>()), u_(b){}
-
-inline constexpr
-Lisp_ptr::Lisp_ptr(char c)
-  : tag_(to_tag<char>()), u_(c){}
-
-inline constexpr
-Lisp_ptr::Lisp_ptr(int i)
-  : tag_(to_tag<int>()), u_(i){}
+Lisp_ptr::Lisp_ptr(T p,
+                   typename std::enable_if<std::is_integral<T>::value>::type*)
+  : tag_(to_tag<T>()), u_(p){}
 
 template<typename T>
 inline constexpr
-Lisp_ptr::Lisp_ptr(T p)
+Lisp_ptr::Lisp_ptr(T p,
+                   typename std::enable_if<!std::is_integral<T>::value>::type*)
   : tag_(to_tag<T>()),
     u_(static_cast<typename std::conditional<std::is_enum<T>::value,
                                              decltype(lisp_ptr_u::i_),
                                              T>
-                   ::type>(p)){
-  static_assert(!std::is_fundamental<T>::value,
-                "Lisp_ptr cannot accept the specified type.");
-}
+       ::type>(p)){}
 
 // Lisp_ptr getters
 template<>
