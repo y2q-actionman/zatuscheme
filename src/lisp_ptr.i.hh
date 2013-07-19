@@ -47,13 +47,6 @@ VMArgcount Lisp_ptr::get<VMArgcount>() const {
 }
 
 template<>
-inline
-Notation Lisp_ptr::get<Notation>() const {
-  assert(tag() == to_tag<Notation>());
-  return static_cast<Notation>(u_.i_);
-}
-
-template<>
 inline constexpr
 intptr_t Lisp_ptr::get<intptr_t>() const{
   return u_.i_;
@@ -68,7 +61,7 @@ void* Lisp_ptr::get<void*>() const{
 template<>
 inline constexpr
 const void* Lisp_ptr::get<const void*>() const{
-  return u_.ptr_;
+  return u_.cptr_;
 }
 
 template<>
@@ -83,6 +76,17 @@ template<typename T>
 inline constexpr
 T lisp_ptr_cast(const Lisp_ptr& p,
                 typename std::enable_if<std::is_integral<T>::value>::type* = nullptr){
+  return static_cast<T>(p.get<intptr_t>());
+}
+
+template<typename T>
+inline constexpr
+T lisp_ptr_cast(const Lisp_ptr& p,
+                typename std::enable_if<std::is_enum<T>::value>::type* = nullptr){
+  // GCC 4.6 cannot accept below..
+  // static_assert(std::is_convertible<typename std::underlying_type<T>::type,
+  //                                   intptr_t>::value,
+  //               "inacceptable enum type");
   return static_cast<T>(p.get<intptr_t>());
 }
 
