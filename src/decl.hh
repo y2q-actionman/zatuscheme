@@ -66,6 +66,7 @@ template<Ptr_tag value>
 struct to_type;
 
 template<typename Arg>
+constexpr
 Ptr_tag to_tag();
 
 #include "decl.i.hh"

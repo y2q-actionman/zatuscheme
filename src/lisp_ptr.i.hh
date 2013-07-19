@@ -76,39 +76,53 @@ void* Lisp_ptr::get<void*>() const{
   return u_.ptr_;
 }
 
+template<>
+inline constexpr
+const void* Lisp_ptr::get<const void*>() const{
+  return u_.ptr_;
+}
+
+template<>
+inline constexpr
+void (*Lisp_ptr::get<void(*)(void)>())(void) const{
+  return u_.f_;
+}
+
 namespace lisp_ptr_detail {
 
 template<typename T>
 inline constexpr
-T lisp_ptr_cast(void* p, const void*, void(*)(void),
+T lisp_ptr_cast(const Lisp_ptr& p,
                 typename std::enable_if<
                   !std::is_function<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr,
                 typename std::enable_if<
                   !std::is_const<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
-  return static_cast<T>(p);
+  return static_cast<T>(p.get<void*>());
 }
 
 template<typename T>
 inline constexpr
-T lisp_ptr_cast(void*, const void* cp, void(*)(void),
+T lisp_ptr_cast(const Lisp_ptr& p,
                 typename std::enable_if<
                   !std::is_function<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr,
                 typename std::enable_if<
                   std::is_const<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
-  return static_cast<T>(cp);
+  return static_cast<T>(p.get<const void*>());
 }
 
 template<typename T>
 inline constexpr
-T lisp_ptr_cast(void*, const void*, void(*fp)(void),
+T lisp_ptr_cast(const Lisp_ptr& p,
                 typename std::enable_if<
                   std::is_function<typename std::remove_pointer<T>::type>::value
                   >::type* = nullptr){
-  return static_cast<T>(fp);
+  static_assert(std::is_same<T, void(*)(void)>::value,
+                "inacceptable function-pointer type");
+  return static_cast<T>(p.get<void(*)(void)>());
 }
 
 }
@@ -116,8 +130,9 @@ T lisp_ptr_cast(void*, const void*, void(*fp)(void),
 template<typename T>
 inline
 T Lisp_ptr::get() const {
+  static_assert(to_tag<T>() != Ptr_tag::undefined, "inacceptable type");
   assert(tag() == to_tag<T>());
-  return lisp_ptr_detail::lisp_ptr_cast<T>(u_.ptr_, u_.cptr_, u_.f_);
+  return lisp_ptr_detail::lisp_ptr_cast<T>(*this);
 }
 
 #endif // LISP_PTR_I_HH
