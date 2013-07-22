@@ -385,22 +385,17 @@ Lisp_ptr expand(ExpandMap& expand_ctx,
 
       // check ellipsis
       if(i_next && is_ellipsis(*i_next)){
-        int depth = 0;
-        while(1){
+        for(int depth = 0; true; ++depth){
           auto emap = remake_matchobj(match_obj, depth);
           try{
-            auto ex = expand(expand_ctx, emap, sr, *i);
-            gl.push(ex);
-            ++depth;
+            gl.push(expand(expand_ctx, emap, sr, *i));
           }catch(const expand_failed& e){
             break;
           }
         }
-
-        ++i;
+        i = i_next;
       }else{
-        auto ex = expand(expand_ctx, match_obj, sr, *i);
-        gl.push(ex);
+        gl.push(expand(expand_ctx, match_obj, sr, *i));
       }
     }
 
@@ -416,22 +411,17 @@ Lisp_ptr expand(ExpandMap& expand_ctx,
 
       // check ellipsis
       if((i_next != i_end) && is_ellipsis(*i_next)){
-        int depth = 0;
-        while(1){
+        for(int depth = 0; true; ++depth){
           auto emap = remake_matchobj(match_obj, depth);
           try{
-            auto ex = expand(expand_ctx, emap, sr, *i);
-            vec.push_back(ex);
-            ++depth;
+            vec.push_back(expand(expand_ctx, emap, sr, *i));
           }catch(const expand_failed& e){
             break;
           }
         }
-
-        ++i;
+        i = i_next;
       }else{
-        auto ex = expand(expand_ctx, match_obj, sr, *i);
-        vec.push_back(ex);
+        vec.push_back(expand(expand_ctx, match_obj, sr, *i));
       }
     }
 
