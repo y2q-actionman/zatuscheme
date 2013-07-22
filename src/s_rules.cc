@@ -327,7 +327,11 @@ EqHashMap remake_matchobj(const EqHashMap& match_obj, int pick_depth){
   for(auto i : match_obj){
     if(i.second.tag() == Ptr_tag::cons){
       auto ci = begin(i.second);
-      std::advance(ci, pick_depth);
+
+      for(int d = 0; d < pick_depth; ++d){
+        if(!ci) break;
+        ++ci;
+      }
 
       if(ci){
         ret.insert({i.first, *ci});
