@@ -399,8 +399,7 @@ Lisp_ptr expand(ExpandMap& expand_ctx,
       }
     }
 
-    auto ex = expand(expand_ctx, match_obj, sr, i.base());
-    return gl.extract_with_tail(ex);
+    return gl.extract_with_tail(expand(expand_ctx, match_obj, sr, i.base()));
   }else if(tmpl.tag() == Ptr_tag::vector){
     auto t_vec = tmpl.get<Vector*>();
 
