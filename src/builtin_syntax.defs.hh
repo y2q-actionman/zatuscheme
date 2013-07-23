@@ -8,10 +8,10 @@
     {1, Variadic::t, Passing::quote}}},
 {"if", {
     builtin::syntax_if,
-    {2, 3, Passing::quote, Returning::code, MoveReturnValue::f}}},
+    {2, 3, Passing::quote}}},
 {"set!", {
     builtin::syntax_set,
-    {2, 2, Passing::quote, Returning::code, MoveReturnValue::f}}},
+    {2, 2, Passing::quote}}},
 {"define", {
     builtin::syntax_define,
     {1, Variadic::t, Passing::quote}}},

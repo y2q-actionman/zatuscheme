@@ -50,15 +50,17 @@ Lisp_ptr syntax_lambda(ZsArgs args){
 }
 
 Lisp_ptr syntax_if(ZsArgs args){
-  vm.return_value = {(args.size() == 3) ? args[2] : Lisp_ptr(), // alt
+  vm.code.insert(vm.code.end(),
+                 {(args.size() == 3) ? args[2] : Lisp_ptr(), // alt
                      args[1],   // conseq
                      vm_op_if,
-                     args[0]};  // test
+                     args[0]});  // test
   return {};
 }
 
 Lisp_ptr syntax_set(ZsArgs args){
-  vm.return_value = {args[0], vm_op_set, args[1]};
+  vm.code.insert(vm.code.end(),
+                 {args[0], vm_op_set, args[1]});
   return {};
 }
 

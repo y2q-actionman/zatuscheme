@@ -55,7 +55,8 @@ Lisp_ptr eval(ZsArgs args){
 
   auto oldenv = vm.frame;
   vm.frame = env;
-  vm.return_value = {oldenv, vm_op_leave_frame, args[0]};
+  vm.code.insert(vm.code.end(),
+                 {oldenv, vm_op_leave_frame, args[0]});
   return {};
 }
 

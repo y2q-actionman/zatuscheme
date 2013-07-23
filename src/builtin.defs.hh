@@ -2,7 +2,7 @@
 
 {"eval", {
     builtin::eval,
-    {2, 2, Passing::eval, Returning::code, MoveReturnValue::f}}},
+    {2, 2, Passing::eval}}},
 
 {"load", {
     builtin::load,
