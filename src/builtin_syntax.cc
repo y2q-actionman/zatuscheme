@@ -97,11 +97,7 @@ Lisp_ptr syntax_unquote_splicing(ZsArgs args){
 }
 
 Lisp_ptr syntax_syntax_rules(ZsArgs args){
-  check_type(Ptr_tag::env, args[1]);
-
-  return zs_new<SyntaxRules>(args[1].get<Env*>(),
-                             nth_cons_list<1>(args[0]), // literals
-                             nthcdr_cons_list<2>(args[0])); // rest
+  return zs_new<SyntaxRules>(vm.frame, args[0], args[1]);
 }
     
 Lisp_ptr syntax_internal_memv(ZsArgs args){

@@ -22,7 +22,7 @@
 
 {"syntax-rules", {
     builtin::syntax_syntax_rules,
-    {2, 2, Passing::whole}}},
+    {1, Variadic::t, Passing::quote}}},
 
 // for cond
 {"%memv", {
