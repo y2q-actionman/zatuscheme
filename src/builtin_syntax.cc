@@ -67,17 +67,17 @@ Lisp_ptr syntax_set(ZsArgs args){
 Lisp_ptr syntax_define(ZsArgs args){
   if(identifierp(args[0])){
     auto& ident = args[0];
+    auto& expr = args[1];
 
-    if(nullp(args[1]) || !nullp(nthcdr_cons_list<1>(args[1]))){
-      throw_zs_error(args[1], "informal length");
+    if(!nullp(args[2])){
+      throw_zs_error(args[2], "informal length");
     }
-    auto expr = nth_cons_list<0>(args[1]);
 
     vm.code.insert(vm.code.end(), {ident, vm_op_define, expr});
     return {};
   }else if(args[0].tag() == Ptr_tag::cons){
     auto& largs = args[0];
-    auto& code = args[1];
+    auto code = zs_new<Cons>(args[1], args[2]);
     vm.code.insert(vm.code.end(),
                    {nth_cons_list<0>(largs), // funcname
                     vm_op_define,

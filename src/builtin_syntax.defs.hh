@@ -14,7 +14,7 @@
     {2, 2, Passing::quote}}},
 {"define", {
     builtin::syntax_define,
-    {1, Variadic::t, Passing::quote}}},
+    {2, Variadic::t, Passing::quote}}},
 
 {"unquote-splicing", {
     builtin::syntax_unquote_splicing,
