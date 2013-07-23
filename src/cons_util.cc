@@ -52,25 +52,23 @@ void GrowList::invalidate(){
 
 // ConsIter class
 Lisp_ptr ConsIter::operator*() const{
-  if(p_.tag() != Ptr_tag::cons){
-    return Cons::NIL;
-  }else{
-    return car(p_.get<Cons*>());
+  if(!*this){
+    throw_zs_error(p_, "cons list error: dereferenced invalid ConsIter!\n");
   }
+  return car(p_.get<Cons*>());
 }
 
 Lisp_ptr* ConsIter::operator->() const{
-  if(!(*this)){
-    throw_zs_error({}, "cons list error: dereferenced invalid ConsIter!\n");
+  if(!*this){
+    throw_zs_error(p_, "cons list error: dereferenced invalid ConsIter!\n");
   }
   return &(p_.get<Cons*>()->car_);
 }
 
 ConsIter& ConsIter::operator++(){
-  if(p_.tag() != Ptr_tag::cons){
-    throw_zs_error(p_, "cons list error: forwarded ConsIter pointing the tail of a dotted list!\n");
+  if(!*this){
+    throw_zs_error(p_, "cons list error: advanced invalid ConsIter!\n");
   }
-
   p_ = cdr(p_.get<Cons*>());
   return *this;
 }
