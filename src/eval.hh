@@ -4,7 +4,6 @@
 #include "decl.hh"
 
 // primitives for syntax call
-constexpr VMop vm_op_nop = nullptr;
 void vm_op_call();
 void vm_op_proc_enter();
 void vm_op_move_values();

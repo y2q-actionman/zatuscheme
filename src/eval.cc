@@ -559,10 +559,11 @@ void eval(){
         }
         break;
 
-      case Ptr_tag::vm_op:
-        if(auto op = p.get<VMop>()){
-          op();
-        }
+      case Ptr_tag::vm_op: {
+        auto op = p.get<VMop>();
+        assert(op);
+        op();
+      }
         break;
 
       case Ptr_tag::syntactic_closure:
@@ -580,9 +581,7 @@ void eval(){
           auto sc = p.get<SyntacticClosure*>();
           assert(sc);
 
-          auto oldenv = vm.frame;
           Env* newenv;
-
           if(!sc->free_names()){
             newenv = sc->env();
           }else{
@@ -593,6 +592,7 @@ void eval(){
             }
           }
 
+          auto oldenv = vm.frame;
           vm.frame = newenv;
           vm.code.insert(vm.code.end(),
                          {oldenv, vm_op_leave_frame, sc->expr()});
@@ -652,9 +652,7 @@ void eval(){
 }
 
 const char* stringify(VMop op){
-  if(op == vm_op_nop){
-    return "NOP / arg bottom";
-  }else if(op == vm_op_arg_push){
+  if(op == vm_op_arg_push){
     return "arg push";
   }else if(op == vm_op_reevaluate){
     return "reevaluate";
