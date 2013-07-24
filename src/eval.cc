@@ -566,7 +566,7 @@ void eval(){
       }
         break;
 
-      case Ptr_tag::syntactic_closure:
+      case Ptr_tag::syntactic_closure: {
         if(identifierp(p)){
           auto val = vm.frame->find(p);
           if(val.second){
@@ -576,28 +576,22 @@ void eval(){
           }
         }
 
-        {
-          // not-bound syntax closure
-          auto sc = p.get<SyntacticClosure*>();
-          assert(sc);
+        // not-bound syntax closure
+        auto sc = p.get<SyntacticClosure*>();
+        assert(sc);
 
-          Env* newenv;
-          if(!sc->free_names()){
-            newenv = sc->env();
-          }else{
-            newenv = sc->env()->push();
-            for(auto i = begin(sc->free_names()); i; ++i){
-              local_set_with_identifier(newenv, *i,
-                                        vm.frame->find(*i).first);
-            }
-          }
-
-          auto oldenv = vm.frame;
-          vm.frame = newenv;
-          vm.code.insert(vm.code.end(),
-                         {oldenv, vm_op_leave_frame, sc->expr()});
-          break;
+        auto newenv = sc->env()->push();
+        for(auto i = begin(sc->free_names()); i; ++i){
+          local_set_with_identifier(newenv, *i,
+                                    vm.frame->find(*i).first);
         }
+
+        auto oldenv = vm.frame;
+        vm.frame = newenv;
+        vm.code.insert(vm.code.end(),
+                       {oldenv, vm_op_leave_frame, sc->expr()});
+      }
+        break;
 
         // self-evaluating
       case Ptr_tag::undefined:
