@@ -12,12 +12,8 @@ namespace {
 
 template<typename Fun>
 Lisp_ptr with_nonnull_cons(const Lisp_ptr& p, Fun fun){
-  auto c = p.get<Cons*>();
-  if(!c){
-    throw_zs_error(p, "invalid list!");
-  }
-
-  return fun(c);
+  check_nonnull_cons(p);
+  return fun(p.get<Cons*>());
 }
 
 } // namespace

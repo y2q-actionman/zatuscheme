@@ -6,6 +6,7 @@
 #endif
 
 #include "equality.hh"
+#include "zs_error.hh"
 #include "zs_memory.hh"
 
 inline
@@ -16,6 +17,12 @@ bool nullp(Lisp_ptr p){
                 "NIL's pointer part is not nullptr!");
   return (p.tag() == Ptr_tag::cons)
     && (p.get<void*>() == nullptr);
+}
+
+inline
+bool is_nonnull_cons(Lisp_ptr p){
+  return (p.tag() == Ptr_tag::cons)
+    && (p.get<void*>() != nullptr);
 }
 
 // make_cons_list 
@@ -38,6 +45,7 @@ Lisp_ptr make_cons_list(Iter b, Iter e){
 // nth family
 template<unsigned n>
 Lisp_ptr nth_cons_list(Lisp_ptr p){
+  check_nonnull_cons(p);
   // This cast is required for telling a type to the compiler (g++-4.6). 
   return car(static_cast<Lisp_ptr>(nthcdr_cons_list<n>(p)).get<Cons*>());
 }
@@ -50,6 +58,7 @@ Lisp_ptr nthcdr_cons_list<0u>(Lisp_ptr p){
 
 template<unsigned n>
 Lisp_ptr nthcdr_cons_list(Lisp_ptr p){
+  check_nonnull_cons(p);
   return nthcdr_cons_list<n-1>(cdr(p.get<Cons*>()));
 }
 

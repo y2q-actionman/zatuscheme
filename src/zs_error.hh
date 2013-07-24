@@ -29,6 +29,7 @@ void check_type(Ptr_tag, Lisp_ptr);
 void check_numeric_type(Lisp_ptr);
 void check_identifier_type(Lisp_ptr);
 void check_procedure_type(Lisp_ptr);
+void check_nonnull_cons(Lisp_ptr);
 void check_range(Lisp_ptr, size_t, size_t = INT_MAX);
 
 #endif // ZS_ERROR_HH

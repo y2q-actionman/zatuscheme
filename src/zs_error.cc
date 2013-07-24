@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 
+#include "cons_util.hh"
 #include "lisp_ptr.hh"
 #include "printer.hh"
 #include "procedure.hh"
@@ -95,6 +96,12 @@ void check_identifier_type(Lisp_ptr p){
 void check_procedure_type(Lisp_ptr p){
   if(!is_procedure(p)){
     throw_zs_error(p, "arg is not procedure!");
+  }
+}
+
+void check_nonnull_cons(Lisp_ptr p){
+  if(!is_nonnull_cons(p)){
+    throw_zs_error(p, "arg is not cons or null list!");
   }
 }
 

@@ -6,6 +6,7 @@
 #include "cons.hh"
 
 bool nullp(Lisp_ptr);
+bool is_nonnull_cons(Lisp_ptr);
 
 template<typename Iter>
 Lisp_ptr make_cons_list(Iter, Iter);
