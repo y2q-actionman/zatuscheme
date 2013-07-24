@@ -135,14 +135,14 @@ void gc_mark_lp(Lisp_ptr p){
     break;
 
     // container
-  case Ptr_tag::cons: {
-    auto c = p.get<Cons*>();
-    gc_mark_ptr(c);
+  case Ptr_tag::cons:
+    if(auto c = p.get<Cons*>()){
+      gc_mark_ptr(c);
 
-    gc_mark_lp(car(c));
-    gc_mark_lp(cdr(c));
+      gc_mark_lp(car(c));
+      gc_mark_lp(cdr(c));
+    }
     break;
-  }
 
   case Ptr_tag::i_procedure: {
     auto iproc = p.get<IProcedure*>();

@@ -71,10 +71,9 @@ void push_tail_cons_list(Lisp_ptr* p, Lisp_ptr value){
 
 Lisp_ptr pick_first(Lisp_ptr p){
   if(p.tag() == Ptr_tag::cons){
-    auto c = p.get<Cons*>();
-    if(!c) throw_zs_error({}, "the pattern is empty list");
+    check_nonnull_cons(p);
 
-    return car(c);
+    return nth_cons_list<0>(p);
   }else if(p.tag() == Ptr_tag::vector){
     auto v = p.get<Vector*>();
     assert(v);
