@@ -552,7 +552,7 @@ void eval(){
     
       case Ptr_tag::cons:
         if(auto c = p.get<Cons*>()){
-          vm.code.insert(vm.code.end(), {vm_op_call, car(c)});
+          vm.code.insert(vm.code.end(), {vm_op_call, c->car});
           vm.stack.push_back(p);
         }else{
           vm.return_value = {Cons::NIL};

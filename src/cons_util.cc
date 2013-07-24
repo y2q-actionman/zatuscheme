@@ -33,7 +33,7 @@ void GrowList::push(Lisp_ptr p){
   auto newc = zs_new<Cons>(p, Cons::NIL);
   
   *next = {newc};
-  next = &(newc->cdr_);
+  next = &newc->cdr;
 }
 
 Lisp_ptr GrowList::extract_with_tail(Lisp_ptr p){
@@ -53,17 +53,17 @@ void GrowList::invalidate(){
 // ConsIter class
 Lisp_ptr ConsIter::operator*() const{
   check_nonnull_cons(p_);
-  return car(p_.get<Cons*>());
+  return p_.get<Cons*>()->car;
 }
 
 Lisp_ptr* ConsIter::operator->() const{
   check_nonnull_cons(p_);
-  return &(p_.get<Cons*>()->car_);
+  return &p_.get<Cons*>()->car;
 }
 
 ConsIter& ConsIter::operator++(){
   check_nonnull_cons(p_);
-  p_ = cdr(p_.get<Cons*>());
+  p_ = p_.get<Cons*>()->cdr;
   return *this;
 }
 

@@ -29,24 +29,24 @@ Lisp_ptr cons_cons(ZsArgs args){
 }
 
 Lisp_ptr cons_car(ZsArgs args){
-  return with_nonnull_cons(args[0], [](Cons* c) { return car(c); });
+  return with_nonnull_cons(args[0], [](Cons* c) { return c->car; });
 }
 
 Lisp_ptr cons_cdr(ZsArgs args){
-  return with_nonnull_cons(args[0], [](Cons* c) { return cdr(c); });
+  return with_nonnull_cons(args[0], [](Cons* c) { return c->cdr; });
 }
 
 
 Lisp_ptr cons_set_car(ZsArgs args){
   auto& val = args[1];
   return with_nonnull_cons(args[0],
-                           [&](Cons* c){ return rplaca(c, val); });
+                           [&](Cons* c){ return c->car = val; });
 }
 
 Lisp_ptr cons_set_cdr(ZsArgs args){
   auto& val = args[1];
   return with_nonnull_cons(args[0],
-                           [&](Cons* c){ return rplacd(c, val); });
+                           [&](Cons* c){ return c->cdr = val; });
 }
 
 } // namespace builtin

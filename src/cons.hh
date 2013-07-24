@@ -3,14 +3,10 @@
 
 #include "lisp_ptr.hh"
 
-class Cons {
-  friend class GrowList;
-  friend class ConsIter;
-
-public:
+struct Cons {
   static constexpr Lisp_ptr NIL = Lisp_ptr{static_cast<Cons*>(nullptr)};
 
-  constexpr Cons(Lisp_ptr = Lisp_ptr(), Lisp_ptr = Lisp_ptr());
+  constexpr Cons(Lisp_ptr a, Lisp_ptr d) : car(a), cdr(d){}
   Cons(const Cons&) = default;
   Cons(Cons&&) = default;
 
@@ -19,16 +15,8 @@ public:
   Cons& operator=(const Cons&) = default;
   Cons& operator=(Cons&&) = default;
 
-  friend Lisp_ptr car(Cons*);
-  friend Lisp_ptr cdr(Cons*);
-  friend Lisp_ptr rplaca(Cons*, Lisp_ptr);
-  friend Lisp_ptr rplacd(Cons*, Lisp_ptr);
-
-private:
-  Lisp_ptr car_;
-  Lisp_ptr cdr_;
+  Lisp_ptr car;
+  Lisp_ptr cdr;
 };
-
-#include "cons.i.hh"
 
 #endif // CONS_HH

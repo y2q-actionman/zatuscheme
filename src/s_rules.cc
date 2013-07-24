@@ -53,10 +53,10 @@ void push_tail_cons_list_nl(Lisp_ptr p, Lisp_ptr value){
   if(!c)
     throw_zs_error(p, "internal %s: the passed list is an empty list!\n", __func__);
 
-  if(nullp(cdr(c))){
-    rplacd(c, make_cons_list({value}));
+  if(nullp(c->cdr)){
+    c->cdr = make_cons_list({value});
   }else{
-    push_tail_cons_list_nl(cdr(c), value);
+    push_tail_cons_list_nl(c->cdr, value);
   }
 }
 

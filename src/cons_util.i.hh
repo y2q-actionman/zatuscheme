@@ -47,7 +47,7 @@ template<unsigned n>
 Lisp_ptr nth_cons_list(Lisp_ptr p){
   check_nonnull_cons(p);
   // This cast is required for telling a type to the compiler (g++-4.6). 
-  return car(static_cast<Lisp_ptr>(nthcdr_cons_list<n>(p)).get<Cons*>());
+  return static_cast<Lisp_ptr>(nthcdr_cons_list<n>(p)).get<Cons*>()->car;
 }
 
 template<>
@@ -59,7 +59,7 @@ Lisp_ptr nthcdr_cons_list<0u>(Lisp_ptr p){
 template<unsigned n>
 Lisp_ptr nthcdr_cons_list(Lisp_ptr p){
   check_nonnull_cons(p);
-  return nthcdr_cons_list<n-1>(cdr(p.get<Cons*>()));
+  return nthcdr_cons_list<n-1>(p.get<Cons*>()->cdr);
 }
 
 

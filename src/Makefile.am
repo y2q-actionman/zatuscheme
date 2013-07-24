@@ -41,7 +41,7 @@ libzs_a_SOURCES = \
 		builtin_vector.cc builtin_vector.hh \
 		builtin_vector.defs.hh \
 		builtin_vector.scm \
-		cons.cc cons.hh cons.i.hh \
+		cons.cc cons.hh \
 		cons_util.cc cons_util.hh cons_util.i.hh \
 		decl.hh decl.cc decl.i.hh \
 		env.cc env.hh \
