@@ -11,7 +11,7 @@ using namespace std;
 namespace builtin {
 
 Lisp_ptr cons_pairp(ZsArgs args){
-  return Lisp_ptr{(args[0].tag() == Ptr_tag::cons) && !nullp(args[0])};
+  return Lisp_ptr{is_nonnull_cons(args[0])};
 }
 
 Lisp_ptr cons_cons(ZsArgs args){
