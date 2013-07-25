@@ -74,9 +74,7 @@ Lisp_ptr make_syntactic_closure(ZsArgs args){
   check_type(Ptr_tag::env, args[0]);
   check_type(Ptr_tag::cons, args[1]);
 
-  auto e = args[0].get<Env*>();
-  auto c = args[1].get<Cons*>();
-  return zs_new<SyntacticClosure>(e, c, args[2]);
+  return zs_new<SyntacticClosure>(args[0].get<Env*>(), args[1], args[2]);
 }
 
 Lisp_ptr internal_current_environment(ZsArgs){
