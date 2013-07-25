@@ -32,10 +32,17 @@ LOAD
     (object))
 
 LOAD
+(define-syntax %prog1
+  (syntax-rules ()
+    ((_ x y ...)
+     (let ((ret x))
+       y ...
+       ret))))
+
+LOAD
 (define (dynamic-wind before thunk after)
   (%push-winding before thunk after)
   (before)
-  (let ((ret (thunk)))
-    (after)
-    (%pop-winding)
-    ret))
+  (%prog1 (thunk)
+          (after)
+          (%pop-winding)))
