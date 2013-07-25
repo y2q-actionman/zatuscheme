@@ -516,18 +516,6 @@ void vm_op_define(){
   local_set_with_identifier(vm.frame, var, val); 
 }
 
-void vm_op_leave_winding(){
-  vm.extent.pop_back();
-}
-
-void vm_op_save_values_and_enter(){
-  auto proc = vm.code.back();
-  vm.code.pop_back();
-  vm.code.insert(vm.code.end(),
-                 {zs_new<Vector>(vm.return_value), 
-                  vm_op_restore_values, proc, vm_op_proc_enter});
-}
-
 void vm_op_raise(){
   throw vm.return_value_1();
 }
@@ -662,10 +650,6 @@ const char* stringify(VMop op){
     return "set";
   }else if(op == vm_op_define){
     return "define";
-  }else if(op == vm_op_leave_winding){
-    return "leave winding";
-  }else if(op == vm_op_save_values_and_enter){
-    return "save values and enter";
   }else if(op == vm_op_stack_splicing){
     return "splicing args";
   }else if(op == vm_op_raise){

@@ -15,6 +15,9 @@
 {"call-with-current-continuation", {
     builtin::call_cc,
     {1, 1}}},
-{"dynamic-wind", {
-    builtin::dynamic_wind,
-    {3, 3}}},
+{"%push-winding", {
+    builtin::internal_push_winding,
+    {3}}},
+{"%pop-winding", {
+    builtin::internal_pop_winding,
+    {0}}},

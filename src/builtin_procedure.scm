@@ -30,3 +30,12 @@ LOAD
 LOAD
 (define (force object)
     (object))
+
+LOAD
+(define (dynamic-wind before thunk after)
+  (%push-winding before thunk after)
+  (before)
+  (let ((ret (thunk)))
+    (after)
+    (%pop-winding)
+    ret))

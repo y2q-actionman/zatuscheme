@@ -80,7 +80,7 @@ Lisp_ptr call_cc(ZsArgs args){
   return {};
 }
 
-Lisp_ptr dynamic_wind(ZsArgs args){
+Lisp_ptr internal_push_winding(ZsArgs args){
   Lisp_ptr procs[3];
 
   for(int i = 0; i < 3; ++i){
@@ -88,23 +88,16 @@ Lisp_ptr dynamic_wind(ZsArgs args){
     procs[i] = args[i];
   }
 
-  args.cleanup();
-
   vm.extent.push_back({procs[0], procs[1], procs[2]});
-  vm.code.push_back(vm_op_leave_winding);
+  return {};
+}
 
-  // third proc call
-  vm.stack.push_back(VMArgcount{0});
-  vm.code.insert(vm.code.end(), {procs[2], vm_op_save_values_and_enter});
-
-  // second proc call
-  vm.stack.push_back(VMArgcount{0});
-  vm.code.insert(vm.code.end(), {procs[1], vm_op_proc_enter});
-
-  // first proc, calling with zero args.
-  vm.stack.push_back(VMArgcount{0});
-  vm.code.insert(vm.code.end(), {procs[0], vm_op_proc_enter});
+Lisp_ptr internal_pop_winding(ZsArgs){
+  if(!vm.extent.empty()){
+    vm.extent.pop_back();
+  }
   return {};
 }
 
 } // namespace builtin
+
