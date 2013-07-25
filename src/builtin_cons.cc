@@ -8,16 +8,6 @@
 
 using namespace std;
 
-namespace {
-
-template<typename Fun>
-Lisp_ptr with_nonnull_cons(const Lisp_ptr& p, Fun fun){
-  check_nonnull_cons(p);
-  return fun(p.get<Cons*>());
-}
-
-} // namespace
-
 namespace builtin {
 
 Lisp_ptr cons_pairp(ZsArgs args){
@@ -29,24 +19,23 @@ Lisp_ptr cons_cons(ZsArgs args){
 }
 
 Lisp_ptr cons_car(ZsArgs args){
-  return with_nonnull_cons(args[0], [](Cons* c) { return c->car; });
+  check_nonnull_cons(args[0]);
+  return args[0].get<Cons*>()->car;
 }
 
 Lisp_ptr cons_cdr(ZsArgs args){
-  return with_nonnull_cons(args[0], [](Cons* c) { return c->cdr; });
+  check_nonnull_cons(args[0]);
+  return args[0].get<Cons*>()->cdr;
 }
 
-
 Lisp_ptr cons_set_car(ZsArgs args){
-  auto& val = args[1];
-  return with_nonnull_cons(args[0],
-                           [&](Cons* c){ return c->car = val; });
+  check_nonnull_cons(args[0]);
+  return (args[0].get<Cons*>()->car = args[1]);
 }
 
 Lisp_ptr cons_set_cdr(ZsArgs args){
-  auto& val = args[1];
-  return with_nonnull_cons(args[0],
-                           [&](Cons* c){ return c->cdr = val; });
+  check_nonnull_cons(args[0]);
+  return (args[0].get<Cons*>()->cdr = args[1]);
 }
 
 } // namespace builtin
