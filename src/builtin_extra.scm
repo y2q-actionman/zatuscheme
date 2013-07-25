@@ -40,10 +40,10 @@ LOAD
 
 LOAD
 (define (with-exception-handler handler thunk)
-  (call-with-current-continuation
-   (lambda (cont)
-     (%push-exception-handler handler)
-     (cont (thunk)))))
+  (%push-exception-handler handler)
+  (let ((ret (thunk)))
+    (%pop-exception-handler)
+    ret))
 
 LOAD
 (define (ignore-errors thunk)

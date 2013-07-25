@@ -532,12 +532,6 @@ void vm_op_raise(){
   throw vm.return_value_1();
 }
 
-void vm_op_pop_exception_handler(){
-  if(!vm.exception_handler.empty()){
-    vm.exception_handler.pop_back();
-  }
-}
-
 void eval(){
   while(!vm.code.empty()){
     try{
@@ -676,8 +670,6 @@ const char* stringify(VMop op){
     return "splicing args";
   }else if(op == vm_op_raise){
     return "raise";
-  }else if(op == vm_op_pop_exception_handler){
-    return "pop exception handler";
   }else{
     return "unknown vm-op";
   }

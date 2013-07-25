@@ -14,7 +14,6 @@ void vm_op_define();
 void vm_op_leave_winding();
 void vm_op_save_values_and_enter();
 void vm_op_raise();
-void vm_op_pop_exception_handler();
 
 // main loop
 void eval();

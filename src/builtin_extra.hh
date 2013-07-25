@@ -21,8 +21,8 @@ Lisp_ptr identifier_eq(ZsArgs);
 Lisp_ptr make_synthetic_identifier(ZsArgs);
 
 // error functions
-// Lisp_ptr with_exception_handler(ZsArgs);
 Lisp_ptr internal_push_exception_handler(ZsArgs);
+Lisp_ptr internal_pop_exception_handler(ZsArgs);
 Lisp_ptr raise(ZsArgs);
 
 // extensions

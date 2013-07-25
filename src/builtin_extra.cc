@@ -109,29 +109,17 @@ Lisp_ptr make_synthetic_identifier(ZsArgs args){
   return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
 }
 
-#if 0
-Lisp_ptr with_exception_handler(ZsArgs args){
-  check_procedure_type(args[0]);
-  check_procedure_type(args[1]);
-
-  auto handler = args[0];
-  auto thunk = args[1];
-
-  args.cleanup();
-
-  vm.exception_handler.push_back(handler);
-  vm.code.push_back(vm_op_pop_exception_handler);
-
-  vm.stack.push_back(VMArgcount{0});
-  vm.code.insert(vm.code.end(), {thunk, vm_op_proc_enter});
-  return {};
-}
-#endif
-
 Lisp_ptr internal_push_exception_handler(ZsArgs args){
   check_procedure_type(args[0]);
 
   vm.exception_handler.push_back(args[0]);
+  return {};
+}
+
+Lisp_ptr internal_pop_exception_handler(ZsArgs){
+  if(!vm.exception_handler.empty()){
+    vm.exception_handler.pop_back();
+  }
   return {};
 }
 
