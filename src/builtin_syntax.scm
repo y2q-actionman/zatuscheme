@@ -185,7 +185,7 @@ LOAD
     ((_ #())
      (%vector))
     ((_ #(x ...))
-     (%vector ,@(quasiquote x)))
+     (%vector ,@(quasiquote (x ...))))
     ((_ x)
      (quote x))))
 
