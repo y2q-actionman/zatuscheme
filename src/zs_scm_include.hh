@@ -4,8 +4,6 @@
 #define STRINGIFY(...) #__VA_ARGS__
 #define EXPAND_STRINGIFY(...) STRINGIFY(__VA_ARGS__)
 
-#define LOAD(...) "("EXPAND_STRINGIFY(__VA_ARGS__)")"
-
 /*
 LOAD allows to include a Scheme code as C string.
 Example:
@@ -21,5 +19,8 @@ Notes:
 
   - If not in literal, '\' (backslash) is reduced.
 */
+#define LOAD(...) "("EXPAND_STRINGIFY(__VA_ARGS__)")"
+
+#define NEWLINE_CHAR #\\newline
 
 #endif // ZS_SCM_INCLUDE_HH

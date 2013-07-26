@@ -1,6 +1,6 @@
 LOAD
 (define (newline . args)
-  (apply write-char %newline-char args))
+  (apply write-char NEWLINE_CHAR args))
 
 LOAD
 (define (current-input-port) CURRENT_INPUT_PORT_SYMNAME)

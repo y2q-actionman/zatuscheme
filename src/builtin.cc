@@ -151,7 +151,6 @@ void install_builtin(){
   install_symbol(EXPAND_STRINGIFY(CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
   install_symbol(EXPAND_STRINGIFY(NULL_ENV_SYMNAME), null_env);
   install_symbol(EXPAND_STRINGIFY(R5RS_ENV_SYMNAME), vm.frame);
-  install_symbol(EXPAND_STRINGIFY(NEWLINE_CHAR_SYMNAME), Lisp_ptr{'\n'});
   for(auto& i : builtin_funcs) install_native(i);
   install_string(builtin_str);
   eval();
