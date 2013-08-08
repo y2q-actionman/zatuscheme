@@ -32,17 +32,24 @@ LOAD
     (object))
 
 LOAD
-(define-syntax %prog1
+(define-syntax %multiple-value-list
+  (syntax-rules ()
+    ((_ form)
+     (call-with-values (lambda () form) list))))
+
+LOAD
+(define-syntax %multiple-value-prog1
   (syntax-rules ()
     ((_ x y ...)
-     (let ((ret x))
+     (let ((ret (%multiple-value-list x)))
        y ...
-       ret))))
+       (apply values ret)))))
 
 LOAD
 (define (dynamic-wind before thunk after)
   (%push-winding before thunk after)
   (before)
-  (%prog1 (thunk)
-          (after)
-          (%pop-winding)))
+  (%multiple-value-prog1
+   (thunk)
+   (after)
+   (%pop-winding)))

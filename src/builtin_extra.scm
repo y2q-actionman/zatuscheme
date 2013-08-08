@@ -41,8 +41,9 @@ LOAD
 LOAD
 (define (with-exception-handler handler thunk)
   (%push-exception-handler handler)
-  (%prog1 (thunk)
-          (%pop-exception-handler)))
+  (%multiple-value-prog1
+   (thunk)
+   (%pop-exception-handler)))
 
 LOAD
 (define (ignore-errors thunk)
