@@ -88,17 +88,13 @@ Lisp_ptr identifierp(ZsArgs args){
 
 Lisp_ptr identifier_eq(ZsArgs args){
   check_type(Ptr_tag::env, args[0]);
-  auto ident1_env = args[0].get<Env*>();
-
   check_identifier_type(args[1]);
-  
   check_type(Ptr_tag::env, args[2]);
-  auto ident2_env = args[2].get<Env*>();
-
   check_identifier_type(args[3]);
 
   return 
-    Lisp_ptr{identifier_eq(ident1_env, args[1], ident2_env, args[3])};
+    Lisp_ptr{identifier_eq(args[0].get<Env*>(), args[1],
+                           args[2].get<Env*>(), args[3])};
 }
 
 Lisp_ptr make_synthetic_identifier(ZsArgs args){
