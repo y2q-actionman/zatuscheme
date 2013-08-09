@@ -387,8 +387,13 @@ Lisp_ptr number_expt(ZsArgs args){
                        [](Rational&& q1, const Rational& q2){
                          return q1.expt(q2);
                        },
-                       [](double n1, double n2){
-                         return std::pow(n1, n2);
+                       [](double n1, double n2) -> Lisp_ptr{
+                         double dummy;
+                         if(n1 < 0 && modf(n2, &dummy) > 0){
+                           return wrap_number(std::pow(Complex(n1), n2));
+                         }else{
+                           return wrap_number(std::pow(n1, n2));
+                         }
                        },
                        [](const Complex& z1, const Complex& z2){
                          return std::pow(z1, z2);

@@ -149,4 +149,9 @@ Lisp_ptr wrap_number(bool b){
   return Lisp_ptr{b};
 }
 
+inline
+Lisp_ptr wrap_number(Lisp_ptr p){
+  return p;
+}
+
 #endif // RATIONAL_I_HH
