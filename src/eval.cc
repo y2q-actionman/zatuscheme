@@ -34,25 +34,6 @@ void vm_op_arg_push(){
   vm.stack.push_back(vm.return_value_1());
 }
 
-
-void eval_call(Lisp_ptr proc){
-  auto args = vm.stack.back();
-  vm.stack.pop_back();
-
-  vector<Lisp_ptr> tmpv;
-  for(auto i = next(begin(args)); i; ++i){ 
-    tmpv.push_back(*i);
-  }
-
-  vm.code.insert(vm.code.end(), 
-                 {proc, vm_op_proc_enter,
-                  VMArgcount{static_cast<int>(tmpv.size())}});
-
-  for(auto i = tmpv.rbegin(), e = tmpv.rend(); i != e; ++i){
-    vm.code.insert(vm.code.end(), {vm_op_arg_push, *i});
-  }
-}
-
 void vm_op_reevaluate(){
   vm.code.insert(vm.code.end(),
                  vm.return_value.begin(), vm.return_value.end());
@@ -91,49 +72,6 @@ void vm_op_stack_splicing(){
 
   throw_zs_error({}, "eval internal error: stack-splicing cannot find corresponding vm_argcount marker!\n");
 }
-
-void quote_call(Lisp_ptr proc){
-  auto args = vm.stack.back();
-  vm.stack.pop_back();
-
-  auto info = get_procinfo(proc);
-
-  int argc = 0;
-  auto i = next(begin(args));
-
-  // required args
-  for(; i && argc < info->required_args; ++i, ++argc){
-    vm.stack.push_back(*i);
-  }
-  
-  // variadic/optional args
-  if(info->is_variadic()){
-    vm.stack.push_back(i.base());
-    ++argc;
-  }else{
-    for(; i; ++i, ++argc){
-      vm.stack.push_back(*i);
-    }
-  }
-
-  vm.stack.push_back(VMArgcount{argc});
-
-  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
-}
-
-/*
-  stack[0] = whole args
-  ----
-  code = (call kind, proc)
-  stack = (whole args, arg-bottom)
-*/
-void whole_call(Lisp_ptr proc){
-  vm.stack.insert(vm.stack.end(),
-                  {vm.frame, VMArgcount{2}});
-  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
-}
-
-
 
 void proc_enter_native(const NProcedure* fun, const ProcInfo* info, ZsArgs&& args){
   auto native_func = fun->get();
@@ -336,24 +274,63 @@ void proc_enter_srule(SyntaxRules* srule, ZsArgs&& args){
 void vm_op_call(){
   auto proc = vm.return_value_1();
 
-  if(!is_procedure(proc)){
-    // NOTE: too ad-hoc. should be rewritten.
-    // We must process args, even this situation is almost wrong.
-    // This is required for using a continuation in args. If no global
-    // jump occured, errors are reported after.
-    return eval_call(proc);
+  auto p = (is_procedure(proc)) 
+    ? get_procinfo(proc)->passing
+    : Passing::eval;
+  // NOTE: the default 'Passing::eval' is too ad-hoc.
+  // We must process args, even this situation is almost wrong.
+  // This is required for using a continuation in args. If no global
+  // jump occured, errors are reported after.
+
+  // common args
+  auto args = vm.stack.back();
+  vm.stack.pop_back();
+
+  // common 'entering' code.
+  vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
+
+  switch(p){
+  case Passing::eval: {
+    vector<Lisp_ptr> tmpv;
+    for(auto i = next(begin(args)); i; ++i){ 
+      tmpv.push_back(*i);
+    }
+
+    vm.code.push_back(VMArgcount{static_cast<int>(tmpv.size())});
+
+    for(auto i = tmpv.rbegin(), e = tmpv.rend(); i != e; ++i){
+      vm.code.insert(vm.code.end(), {vm_op_arg_push, *i});
+    }
+    return;
   }
+  case Passing::quote: {
+    auto info = get_procinfo(proc);
 
-  const ProcInfo* info = get_procinfo(proc);
-  assert(info);
+    int argc = 0;
+    auto i = next(begin(args));
 
-  switch(info->passing){
-  case Passing::eval:
-    return eval_call(proc);
-  case Passing::quote:
-    return quote_call(proc);
+    // required args
+    for(; i && argc < info->required_args; ++i, ++argc){
+      vm.stack.push_back(*i);
+    }
+  
+    // variadic/optional args
+    if(info->is_variadic()){
+      vm.stack.push_back(i.base());
+      ++argc;
+    }else{
+      for(; i; ++i, ++argc){
+        vm.stack.push_back(*i);
+      }
+    }
+
+    vm.stack.push_back(VMArgcount{argc});
+    return;
+  }
   case Passing::whole:
-    return whole_call(proc);
+    vm.stack.insert(vm.stack.end(),
+                    {args, vm.frame, VMArgcount{2}});
+    return;
   default:
     UNEXP_DEFAULT();
   }
