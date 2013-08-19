@@ -71,13 +71,14 @@ bool stream_ready(istream* is){
     return true; // error (EOF)
   }else{
     // These extra check is required in libstdc++,
-    // because a fstream reached EOF returns 0.
-    if(is->eof() || is->bad() || is->fail())
+    // because a fstream which reached EOF returns 0.
+    if(!is->good())
       return true;
 
-    // We can check that 'fd points the file's end, just'.
-    // Though, the operation for getting position (seekoff())
-    // may block. SO COMPLICATED.
+    // We can check that 'fd points just the file's end'.
+    // Though, the standard operation for getting
+    // position (seekoff()) may block. 
+    // How to be nonblock? SO COMPLICATED.
     //
     // In libstdc++, we can see whether the stream 
     // can be blocked or not by getting the type 
