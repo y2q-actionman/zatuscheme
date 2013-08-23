@@ -23,10 +23,6 @@ const unsigned gc_invoke_interval = 0x100u;
 
 namespace {
 
-void local_set_with_identifier(Env* e, Lisp_ptr ident, Lisp_ptr value){
-  e->local_set(ident, value);
-}
-
 /*
   ret = some value
 */
@@ -135,7 +131,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info, ZsArgs&& args
 
   // normal arg push
   for(; arg_i != arg_end && arg_name_i; ++arg_i, ++arg_name_i){
-    local_set_with_identifier(vm.frame, *arg_name_i, *arg_i);
+    vm.frame->local_set(*arg_name_i, *arg_i);
   }
 
   // variadic arg push
@@ -148,9 +144,9 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info, ZsArgs&& args
       // see 'quote_call()'
       assert(distance(arg_i, arg_end) == 1);
       assert(arg_i->tag() == Ptr_tag::cons);
-      local_set_with_identifier(vm.frame, arg_name_i.base(), *arg_i);
+      vm.frame->local_set(arg_name_i.base(), *arg_i);
     }else{
-      local_set_with_identifier(vm.frame, arg_name_i.base(), make_cons_list(arg_i, arg_end));
+      vm.frame->local_set(arg_name_i.base(), make_cons_list(arg_i, arg_end));
     }
   }else{
     if(arg_i != arg_end || arg_name_i){
@@ -163,7 +159,7 @@ void proc_enter_interpreted(IProcedure* fun, const ProcInfo* info, ZsArgs&& args
 
   // adds procedure's name
   if(fun->name()){
-    local_set_with_identifier(vm.frame, fun->name(), fun);
+    vm.frame->local_set(fun->name(), fun);
   }
 
   // set up lambda body code
@@ -490,7 +486,7 @@ void vm_op_define(){
     set_procname(val, var);
   }
 
-  local_set_with_identifier(vm.frame, var, val); 
+  vm.frame->local_set(var, val); 
 }
 
 void vm_op_raise(){
@@ -541,8 +537,7 @@ void eval(){
 
         auto newenv = sc->env()->push();
         for(auto i = begin(sc->free_names()); i; ++i){
-          local_set_with_identifier(newenv, *i,
-                                    vm.frame->find(*i).first);
+          newenv->local_set(*i, vm.frame->find(*i).first);
         }
 
         auto oldenv = vm.frame;
