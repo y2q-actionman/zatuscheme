@@ -108,7 +108,7 @@ LOAD
 
 LOAD
 (define-syntax cond-expand
-  (syntax-rules (and or not else srfi-0 srfi-23 srfi-35)
+  (syntax-rules (and or not else srfi-0 srfi-23 srfi-34)
     ((cond-expand) (error "Unfulfilled cond-expand"))
     ((cond-expand (else body ...))
      (begin body ...))
@@ -140,7 +140,7 @@ LOAD
        (begin body ...))
     ((cond-expand (srfi-23 body ...) more-clauses ...)
        (begin body ...))
-    ((cond-expand (srfi-35 body ...) more-clauses ...)
+    ((cond-expand (srfi-34 body ...) more-clauses ...)
        (begin body ...))
     ((cond-expand (feature-id body ...) more-clauses ...)
        (begin (cond-expand more-clauses ...)))))
