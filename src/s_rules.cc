@@ -125,10 +125,8 @@ void check_pattern(const SyntaxRules& sr, Lisp_ptr p){
 }
 
 
-template<typename DefaultGen>
 void ensure_binding(EqHashMap& match_obj,
-                    const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
-                    const DefaultGen& default_gen_func){
+                    const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern){
   if(identifierp(pattern)){
     if(is_literal_identifier(sr, pattern)){
       return; // literal identifier
@@ -136,7 +134,7 @@ void ensure_binding(EqHashMap& match_obj,
 
     // non-literal identifier
     if(!eq_internal(ignore_ident, pattern)){
-      match_obj.insert({pattern, default_gen_func()});
+      match_obj.insert({pattern, Cons::NIL});
     }
     return;
   }else if(pattern.tag() == Ptr_tag::cons){
@@ -152,18 +150,18 @@ void ensure_binding(EqHashMap& match_obj,
         return;
       }
       
-      ensure_binding(match_obj, sr, ignore_ident, *p_i, default_gen_func);
+      ensure_binding(match_obj, sr, ignore_ident, *p_i);
     }
 
     if(!nullp(p_i.base())){
       // dotted list case
-      ensure_binding(match_obj, sr, ignore_ident, p_i.base(), default_gen_func);
+      ensure_binding(match_obj, sr, ignore_ident, p_i.base());
     }
   }else if(pattern.tag() == Ptr_tag::vector){
     auto p_v = pattern.get<Vector*>();
 
     for(auto p : *p_v){
-      ensure_binding(match_obj, sr, ignore_ident, p, default_gen_func);
+      ensure_binding(match_obj, sr, ignore_ident, p);
     }
   }else{
     return;
@@ -211,8 +209,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         auto f_e = end(form);
 
         EqHashMap acc_map;
-        ensure_binding(acc_map, sr, ignore_ident, *p_i,
-                       [](){ return Cons::NIL; });
+        ensure_binding(acc_map, sr, ignore_ident, *p_i);
 
         for(; f_i; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
@@ -278,8 +275,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
         // accumulating...
         EqHashMap acc_map;
-        ensure_binding(acc_map, sr, ignore_ident, *p_i,
-                       [](){ return Cons::NIL; });
+        ensure_binding(acc_map, sr, ignore_ident, *p_i);
 
         for(; f_i != f_e; ++f_i){
           auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
