@@ -3,7 +3,3 @@
 {"eval", {
     builtin::eval,
     {2, 2, Passing::eval}}},
-
-{"load", {
-    builtin::load,
-    {1}}},

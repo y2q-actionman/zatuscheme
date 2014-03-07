@@ -9,3 +9,15 @@ LOAD
 LOAD
 (define (interaction-environment)
   INTERACTION_ENV_SYMNAME)
+
+LOAD
+(define (load filename)
+  "This code uses interaction-environment implicitly"
+  (call-with-input-file filename
+    (lambda (s)
+      (let loop ((form (read s)))
+	(if (eof-object? form)
+	    form
+	    (begin
+	      (eval form (interaction-environment))
+	      (loop (read s))))))))
