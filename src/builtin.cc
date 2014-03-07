@@ -60,6 +60,14 @@ Lisp_ptr eval(ZsArgs args){
   return {};
 }
 
+Lisp_ptr load(ZsArgs args){
+  check_type(Ptr_tag::string, args[0]);
+
+  ifstream ifs{*args[0].get<String*>()};
+  load_from_stream(ifs);
+  return Lisp_ptr{true};
+}
+
 } // namespace builtin
 
 static const BuiltinNProc builtin_syntax_funcs[] = {
