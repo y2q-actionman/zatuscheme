@@ -12,7 +12,7 @@
 #define NULL_ENV_SYMNAME *null-env-value*
 #define INTERACTION_ENV_SYMNAME *interaction-env-value*
 
-void load_internal(std::istream&);
+void load_from_stream(std::istream&);
 void install_builtin();
 
 // finding NProcedure with name

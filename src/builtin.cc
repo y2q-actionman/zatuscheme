@@ -32,7 +32,7 @@
 using namespace std;
 using namespace proc_flag;
 
-void load_internal(std::istream& ss){
+void load_from_stream(std::istream& ss){
   vector<Lisp_ptr> tmpv;
 
   while(ss){
@@ -111,7 +111,7 @@ static void install_native(const BuiltinNProc& bf){
 
 static void install_string(const char* s){
   istringstream iss{s};
-  load_internal(iss);
+  load_from_stream(iss);
 }
 
 static void install_symbol(const char* name, Lisp_ptr value){
