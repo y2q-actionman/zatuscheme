@@ -60,7 +60,7 @@ void gc_mark_ptr(void* p){
   
 void gc_mark_lp(Lisp_ptr p);
     
-void gc_mark(const VM& v){
+void gc_mark_vm(const VM& v){
   for(auto i : v.code){
     gc_mark_lp(i);
   }
@@ -79,7 +79,7 @@ void gc_mark(const VM& v){
     gc_mark_lp(i.after);
   }
   
-  gc_mark(v.frame);
+  gc_mark_env(v.frame);
 
   for(auto i : v.exception_handler){
     gc_mark_lp(i);
@@ -88,7 +88,7 @@ void gc_mark(const VM& v){
 
 } // namespace
 
-void gc_mark(Env* e){
+void gc_mark_env(Env* e){
   if(!e) return;
   if(gc_is_marked_ptr(e)) return;
 
@@ -97,7 +97,7 @@ void gc_mark(Env* e){
     gc_mark_lp(i.first);
     gc_mark_lp(i.second);
   }
-  gc_mark(e->next_);
+  gc_mark_env(e->next_);
 }
 
 namespace {
@@ -150,7 +150,7 @@ void gc_mark_lp(Lisp_ptr p){
 
     gc_mark_lp(iproc->arg_list());
     gc_mark_lp(iproc->get());
-    gc_mark(iproc->closure());
+    gc_mark_env(iproc->closure());
     gc_mark_lp(iproc->name());
     break;
   }
@@ -159,7 +159,7 @@ void gc_mark_lp(Lisp_ptr p){
     auto c = p.get<Continuation*>();
     gc_mark_ptr(c);
 
-    gc_mark(c->get());
+    gc_mark_vm(c->get());
     break;
   }
 
@@ -174,14 +174,14 @@ void gc_mark_lp(Lisp_ptr p){
   }
 
   case Ptr_tag::env:
-    gc_mark(p.get<Env*>());
+    gc_mark_env(p.get<Env*>());
     break;
 
   case Ptr_tag::syntactic_closure: {
     auto sc = p.get<SyntacticClosure*>();
     gc_mark_ptr(sc);
 
-    gc_mark(sc->env());
+    gc_mark_env(sc->env());
     gc_mark_lp(sc->free_names());
     gc_mark_lp(sc->expr());
     break;
@@ -191,7 +191,7 @@ void gc_mark_lp(Lisp_ptr p){
     auto sr = p.get<SyntaxRules*>();
     gc_mark_ptr(sr);
 
-    gc_mark(sr->env());
+    gc_mark_env(sr->env());
     gc_mark_lp(sr->literals());
     gc_mark_lp(sr->rules());
     break;
@@ -291,6 +291,6 @@ void gc_sweep(){
 } // namespace
 
 void gc(){
-  gc_mark(vm);
+  gc_mark_vm(vm);
   gc_sweep();
 }
