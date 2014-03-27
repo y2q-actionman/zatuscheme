@@ -6,10 +6,10 @@
 namespace builtin {
 
 Lisp_ptr numberp(ZsArgs);
-Lisp_ptr complexp(ZsArgs);
-Lisp_ptr realp(ZsArgs);
-Lisp_ptr rationalp(ZsArgs);
-Lisp_ptr integerp(ZsArgs);
+Lisp_ptr internal_complexp(ZsArgs);
+Lisp_ptr internal_realp(ZsArgs);
+Lisp_ptr internal_rationalp(ZsArgs);
+Lisp_ptr internal_integerp(ZsArgs);
 Lisp_ptr exactp(ZsArgs);
 
 Lisp_ptr internal_number_equal(ZsArgs);

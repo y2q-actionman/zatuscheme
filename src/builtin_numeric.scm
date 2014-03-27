@@ -4,6 +4,24 @@ LOAD
       (%fold proc (apply proc init (car lis)) (cdr lis))))
 
 LOAD
+(define complex? %complex?)
+
+LOAD
+(define (real? obj)
+  (or (%real? obj)
+      (and (%complex? obj)
+	   (%= 0 (imag-part obj)))))
+
+LOAD
+(define rational? %rational?)
+
+LOAD
+(define (integer? obj)
+  (or (%integer? obj)
+      (and (real? obj)
+	   (%= obj (round obj)))))
+
+LOAD
 (define (inexact? n)
   (if (number? n) (not (exact? n)) #f))
 
@@ -43,19 +61,19 @@ LOAD
 
 LOAD
 (define (positive? n)
-  (if (real? n) (> n 0) #f))
+  (if (%real? n) (> n 0) #f))
 
 LOAD
 (define (negative? n)
-  (if (real? n) (< n 0) #f))
+  (if (%real? n) (< n 0) #f))
 
 LOAD
 (define (odd? n)
-  (if (integer? n) (= 1 (modulo n 2)) #f))
+  (if (%integer? n) (= 1 (modulo n 2)) #f))
 
 LOAD
 (define (even? n)
-  (if (integer? n) (= 0 (modulo n 2)) #f))
+  (if (%integer? n) (= 0 (modulo n 2)) #f))
 
 LOAD
 (define (max n . m)

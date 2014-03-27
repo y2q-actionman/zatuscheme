@@ -100,19 +100,19 @@ Lisp_ptr numberp(ZsArgs args){
   return Lisp_ptr{is_numeric_type(args[0])};
 }
 
-Lisp_ptr complexp(ZsArgs args){
+Lisp_ptr internal_complexp(ZsArgs args){
   return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::complex)};
 }
 
-Lisp_ptr realp(ZsArgs args){
+Lisp_ptr internal_realp(ZsArgs args){
   return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::real)};
 }
 
-Lisp_ptr rationalp(ZsArgs args){
+Lisp_ptr internal_rationalp(ZsArgs args){
   return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::rational)};
 }
 
-Lisp_ptr integerp(ZsArgs args){
+Lisp_ptr internal_integerp(ZsArgs args){
   return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::integer)};
 }
 

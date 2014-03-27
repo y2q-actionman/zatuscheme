@@ -4,17 +4,17 @@
     builtin::numberp,
     {1}}},
 
-{"complex?", {
-    builtin::complexp,
+{"%complex?", {
+    builtin::internal_complexp,
     {1}}},
-{"real?", {
-    builtin::realp,
+{"%real?", {
+    builtin::internal_realp,
     {1}}},
-{"rational?", {
-    builtin::rationalp,
+{"%rational?", {
+    builtin::internal_rationalp,
     {1}}},
-{"integer?", {
-    builtin::integerp,
+{"%integer?", {
+    builtin::internal_integerp,
     {1}}},
 
 {"exact?", {

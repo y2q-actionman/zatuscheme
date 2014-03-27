@@ -13,11 +13,11 @@
 (test-eq #f (rational? 3+4i))
 (test-eq #f (integer? 3+4i))
 
-(test-eq #t (number? 3.0))
-(test-eq #t (complex? 3.0))
-(test-eq #t (real? 3.0))
-(test-eq #f (rational? 3.0))
-(test-eq #f (integer? 3.0))
+(test-eq #t (number? 3.1))
+(test-eq #t (complex? 3.1))
+(test-eq #t (real? 3.1))
+(test-eq #f (rational? 3.1))
+(test-eq #f (integer? 3.1))
 
 (test-eq #t (number? 3/4))
 (test-eq #t (complex? 3/4))
@@ -36,14 +36,14 @@
 (test-eq #t (complex? 3+4i))
 (test-eq #t (complex? 3))
 (test-eq #t (real? 3))
-;; (test-eq #t (real? -2.5+0.0i))
+(test-eq #t (real? -2.5+0.0i))
 (test-eq #t (real? #e1))
 (test-eq #t (real? #e1e10))
 (test-eq #t (rational? 6/10))
 (test-eq #t (rational? 6/3))
 ;; (test-eq #t (integer? 3+0i))
-;; (test-eq #t (integer? 3.0))
-;; (test-eq #t (integer? 8/4))
+(test-eq #t (integer? 3.0))
+(test-eq #t (integer? 8/4))
 
 
 ;; exactness
@@ -142,11 +142,13 @@
 ;; min / max
 (test-eqv 4 (max 1 2 3 4))
 (test-approximate 4 (max -1 2.1 3 4) 0.001)
-(test-eq #f (integer? (max -1 2.1 3 4)))
+(test-eq #t (integer? (max -1 2.1 3 4)))
+(test-eq #t (inexact? (max -1 2.1 3 4)))
 
 (test-eqv 1 (min 1 2 3 4))
 (test-approximate -1 (min -1 2.1 3 4) 0.001)
-(test-eq #f (integer? (min -1 2.1 3 4)))
+(test-eq #t (integer? (min -1 2.1 3 4)))
+(test-eq #t (inexact? (min -1 2.1 3 4)))
 
 
 ;; +-*/
