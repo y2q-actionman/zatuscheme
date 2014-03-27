@@ -300,6 +300,7 @@ Lisp_ptr number_exp(ZsArgs args){
                       [](const Complex& z){ return std::exp(z);});
 }
 
+  // TODO: float domain error -> complex conversion
 Lisp_ptr number_log(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::log(i);},
@@ -332,6 +333,7 @@ Lisp_ptr number_tan(ZsArgs args){
                       [](const Complex& z){ return std::tan(z);});
 }
 
+  // TODO: float domain error -> complex conversion
 Lisp_ptr number_asin(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::asin(i);},
@@ -340,6 +342,7 @@ Lisp_ptr number_asin(ZsArgs args){
                       [](const Complex& z){ return std::asin(z);});
 }
 
+  // TODO: float domain error -> complex conversion
 Lisp_ptr number_acos(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::acos(i);},
@@ -370,6 +373,7 @@ Lisp_ptr internal_number_atan2(ZsArgs args){
                        inacceptable_number_type());
 }
 
+  // TODO: float domain error -> complex conversion
 Lisp_ptr number_sqrt(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::sqrt(i);},
@@ -379,6 +383,7 @@ Lisp_ptr number_sqrt(ZsArgs args){
 }
 
 
+  // TODO: float domain error -> complex conversion
 Lisp_ptr number_expt(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){
