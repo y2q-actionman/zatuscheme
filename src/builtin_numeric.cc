@@ -1,4 +1,5 @@
 #include <algorithm>            // max, min
+#include <cfenv>
 #include <cmath>
 #include <cstdlib>              // abs
 #include <functional>
@@ -24,13 +25,24 @@ Lisp_ptr number_unary(Lisp_ptr arg1,
                       const RFun& rfun, const CFun& cfun){
   check_numeric_type(arg1);
 
+  feclearexcept(FE_ALL_EXCEPT);
   if(is_numeric_convertible(arg1, Ptr_tag::integer)){
-    return wrap_number(ifun(coerce<int>(arg1)));
+    auto ret = ifun(coerce<int>(arg1));
+    if (fetestexcept(FE_INVALID))
+      goto fallback_complex;
+    return wrap_number(ret);
   }else if(is_numeric_convertible(arg1, Ptr_tag::rational)){
-    return wrap_number(qfun(coerce<Rational>(arg1)));
+    auto ret = qfun(coerce<Rational>(arg1));
+    if (fetestexcept(FE_INVALID))
+      goto fallback_complex;
+    return wrap_number(ret);
   }else if(is_numeric_convertible(arg1, Ptr_tag::real)){
-    return wrap_number(rfun(coerce<double>(arg1)));
+    auto ret = rfun(coerce<double>(arg1));
+    if (fetestexcept(FE_INVALID))
+      goto fallback_complex;
+    return wrap_number(ret);
   }else if(is_numeric_convertible(arg1, Ptr_tag::complex)){
+  fallback_complex:
     return wrap_number(cfun(coerce<Complex>(arg1)));
   }else{
     UNEXP_DEFAULT();
@@ -44,20 +56,28 @@ Lisp_ptr number_binary(Lisp_ptr arg1, Lisp_ptr arg2,
   check_numeric_type(arg1);
   check_numeric_type(arg2);
   
+  feclearexcept(FE_ALL_EXCEPT);
   if(is_numeric_convertible(arg1, Ptr_tag::integer)
      && is_numeric_convertible(arg2, Ptr_tag::integer)){
-    return wrap_number(ifun(coerce<int>(arg1),
-                            coerce<int>(arg2)));
+    auto ret = ifun(coerce<int>(arg1), coerce<int>(arg2));
+    if (fetestexcept(FE_INVALID))
+      goto fallback_complex;
+    return wrap_number(ret);
   }else if(is_numeric_convertible(arg1, Ptr_tag::rational)
            && is_numeric_convertible(arg2, Ptr_tag::rational)){
-    return wrap_number(qfun(coerce<Rational>(arg1),
-                            coerce<Rational>(arg2)));
+    auto ret = qfun(coerce<Rational>(arg1), coerce<Rational>(arg2));
+    if (fetestexcept(FE_INVALID))
+      goto fallback_complex;
+    return wrap_number(ret);
   }else if(is_numeric_convertible(arg1, Ptr_tag::real)
            && is_numeric_convertible(arg2, Ptr_tag::real)){
-    return wrap_number(rfun(coerce<double>(arg1),
-                            coerce<double>(arg2)));
+    auto ret = rfun(coerce<double>(arg1), coerce<double>(arg2));
+    if (fetestexcept(FE_INVALID))
+      goto fallback_complex;
+    return wrap_number(ret);
   }else if(is_numeric_convertible(arg1, Ptr_tag::complex)
            && is_numeric_convertible(arg2, Ptr_tag::complex)){
+  fallback_complex:
     return wrap_number(cfun(coerce<Complex>(arg1),
                             coerce<Complex>(arg2)));
   }else{
@@ -307,7 +327,6 @@ Lisp_ptr number_exp(ZsArgs args){
                       [](const Complex& z){ return std::exp(z);});
 }
 
-  // TODO: float domain error -> complex conversion
 Lisp_ptr number_log(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::log(i);},
@@ -340,7 +359,6 @@ Lisp_ptr number_tan(ZsArgs args){
                       [](const Complex& z){ return std::tan(z);});
 }
 
-  // TODO: float domain error -> complex conversion
 Lisp_ptr number_asin(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::asin(i);},
@@ -349,7 +367,6 @@ Lisp_ptr number_asin(ZsArgs args){
                       [](const Complex& z){ return std::asin(z);});
 }
 
-  // TODO: float domain error -> complex conversion
 Lisp_ptr number_acos(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::acos(i);},
@@ -380,7 +397,6 @@ Lisp_ptr internal_number_atan2(ZsArgs args){
                        inacceptable_number_type());
 }
 
-  // TODO: float domain error -> complex conversion
 Lisp_ptr number_sqrt(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::sqrt(i);},
@@ -389,8 +405,6 @@ Lisp_ptr number_sqrt(ZsArgs args){
                       [](const Complex& z){ return std::sqrt(z);});
 }
 
-
-  // TODO: float domain error -> complex conversion
 Lisp_ptr number_expt(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){
@@ -399,13 +413,8 @@ Lisp_ptr number_expt(ZsArgs args){
                        [](Rational&& q1, const Rational& q2){
                          return q1.expt(q2);
                        },
-                       [](double n1, double n2) -> Lisp_ptr{
-                         double dummy;
-                         if(n1 < 0 && modf(n2, &dummy) > 0){
-                           return wrap_number(std::pow(Complex(n1), n2));
-                         }else{
-                           return wrap_number(std::pow(n1, n2));
-                         }
+                       [](double n1, double n2){
+			 return wrap_number(std::pow(n1, n2));
                        },
                        [](const Complex& z1, const Complex& z2){
                          return std::pow(z1, z2);
@@ -429,8 +438,7 @@ Lisp_ptr number_rect(ZsArgs args){
 Lisp_ptr number_polar(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){
-                         return polar(static_cast<double>(i1),
-                                      static_cast<double>(i2));
+                         return polar(static_cast<double>(i1), static_cast<double>(i2));
                        },
                        [](const Rational& q1, const Rational& q2){
                          return polar(static_cast<double>(q1), static_cast<double>(q2));

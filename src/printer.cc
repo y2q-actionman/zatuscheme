@@ -183,7 +183,7 @@ void print(ostream& f, Lisp_ptr p, PrintReadable flag, int radix){
 
   case Ptr_tag::complex: {
     auto z = p.get<Complex*>();
-    f << z->real() << showpos << z->imag() << noshowpos;
+    f << z->real() << showpos << z->imag() << noshowpos << 'i';
   }
     break;
 
