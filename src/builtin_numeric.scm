@@ -19,7 +19,7 @@ LOAD
 (define (integer? obj)
   (or (%integer? obj)
       (and (real? obj)
-	   (%= obj (round obj)))))
+	   (%= (real-part obj) (round (real-part obj))))))
 
 LOAD
 (define (inexact? n)

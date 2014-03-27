@@ -91,6 +91,13 @@ struct identity{
   }
 };
 
+struct constant_0{
+  template<typename T>
+  T operator()(T) const{
+    return static_cast<T>(0);
+  }
+};
+
 
 } // namespace
 
@@ -437,33 +444,33 @@ Lisp_ptr number_polar(ZsArgs args){
 
 Lisp_ptr number_real(ZsArgs args){
   return number_unary(args[0],
-                      inacceptable_number_type(),
-                      inacceptable_number_type(),
-                      inacceptable_number_type(),
+		      identity(),
+		      identity(),
+		      identity(),
                       [](const Complex& z){ return z.real();});
 }
 
 Lisp_ptr number_imag(ZsArgs args){
   return number_unary(args[0],
-                      inacceptable_number_type(),
-                      inacceptable_number_type(),
-                      inacceptable_number_type(),
+		      constant_0(),
+		      constant_0(),
+		      constant_0(),
                       [](const Complex& z){ return z.imag();});
 }
 
 Lisp_ptr number_mag(ZsArgs args){
   return number_unary(args[0],
-                      inacceptable_number_type(),
-                      inacceptable_number_type(),
-                      inacceptable_number_type(),
+		      identity(),
+		      identity(),
+		      identity(),
                       [](const Complex& z){ return std::abs(z);});
 }
 
 Lisp_ptr number_angle(ZsArgs args){
   return number_unary(args[0],
-                      inacceptable_number_type(),
-                      inacceptable_number_type(),
-                      inacceptable_number_type(),
+		      constant_0(),
+		      constant_0(),
+		      constant_0(),
                       [](const Complex& z){ return arg(z);});
 }
 

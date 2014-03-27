@@ -41,7 +41,7 @@
 (test-eq #t (real? #e1e10))
 (test-eq #t (rational? 6/10))
 (test-eq #t (rational? 6/3))
-;; (test-eq #t (integer? 3+0i))
+(test-eq #t (integer? 3+0i))
 (test-eq #t (integer? 3.0))
 (test-eq #t (integer? 8/4))
 
