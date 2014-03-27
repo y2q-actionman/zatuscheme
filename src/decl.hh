@@ -13,7 +13,7 @@ class Cons;
 class Symbol;
 class IProcedure;
 class NProcedure;
-class Continuation;
+class VM;
 class Rational;
 typedef std::complex<double> Complex;
 typedef std::string String;

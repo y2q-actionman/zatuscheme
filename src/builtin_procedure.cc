@@ -71,11 +71,9 @@ Lisp_ptr call_cc(ZsArgs args){
   check_procedure_type(args[0]);
 
   auto proc = args[0];
-
   args.cleanup();
 
-  auto cont = zs_new<Continuation>(vm);
-  vm.stack.insert(vm.stack.end(), {cont, VMArgcount{1}});
+  vm.stack.insert(vm.stack.end(), {zs_new<VM>(vm), VMArgcount{1}});
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
   return {};
 }

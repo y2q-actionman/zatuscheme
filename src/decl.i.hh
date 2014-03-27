@@ -38,7 +38,7 @@ struct to_type<Ptr_tag::n_procedure>{
 
 template<>
 struct to_type<Ptr_tag::continuation>{
-  typedef const Continuation* type;
+  typedef VM* type;
 };
 
 template<>
@@ -150,7 +150,7 @@ Ptr_tag to_tag<const NProcedure*>(){
 
 template<>
 inline constexpr
-Ptr_tag to_tag<Continuation*>(){
+Ptr_tag to_tag<VM*>(){
   return Ptr_tag::continuation;
 }
 

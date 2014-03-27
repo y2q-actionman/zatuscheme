@@ -12,7 +12,8 @@ VM::VM() : code(), stack(),
            extent(),
            symtable(),
            frame(nullptr),
-           exception_handler()
+           exception_handler(),
+	   name()
 {}
 
 VM::VM(const VM&) = default;

@@ -38,6 +38,8 @@ public:
   std::shared_ptr<SymTable> symtable;
   Env* frame;
   std::vector<Lisp_ptr> exception_handler;
+
+  Lisp_ptr name;
 };
 
 extern VM vm;

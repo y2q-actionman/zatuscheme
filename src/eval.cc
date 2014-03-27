@@ -201,14 +201,13 @@ void vm_op_replace_vm(){
   vm.code.pop_back();
   assert(values.tag() == Ptr_tag::vector);
 
-
-  auto& next_vm = cont.get<Continuation*>()->get();
+  auto next_vm = cont.get<VM*>();
   
   // finds dynamic-winds for processing..
-  const auto wind_index = get_wind_index(vm, next_vm);
+  const auto wind_index = get_wind_index(vm, *next_vm);
 
   // ====== replaces vm! ======
-  vm = next_vm;
+  vm = *next_vm;
 
   // restores old return values
   vm.code.insert(vm.code.end(), {values, vm_op_restore_values});
@@ -225,18 +224,16 @@ void vm_op_replace_vm(){
   ----
   replaces VM!
 */
-void proc_enter_cont(Continuation* c, ZsArgs&& args){
-  auto& next_vm = c->get();
-
+void proc_enter_cont(VM* next_vm, ZsArgs&& args){
   // finds dynamic-winds for processing..
-  const auto wind_index = get_wind_index(vm, next_vm);
+  const auto wind_index = get_wind_index(vm, *next_vm);
 
   // saves arguments .
   // They become return-values of the passed continuation.
   auto ret_values = zs_new<Vector>(begin(args), end(args));
   args.cleanup();
 
-  vm.code.insert(vm.code.end(), {ret_values, c, vm_op_replace_vm});
+  vm.code.insert(vm.code.end(), {ret_values, next_vm, vm_op_replace_vm});
 
   // processes 'after' windings
   for(unsigned i = vm.extent.size() - 1;
@@ -377,7 +374,7 @@ void vm_op_proc_enter(){
   case Ptr_tag::n_procedure:
     return proc_enter_native(proc.get<const NProcedure*>(), info, move(args));
   case Ptr_tag::continuation:
-    return proc_enter_cont(proc.get<Continuation*>(), move(args));
+    return proc_enter_cont(proc.get<VM*>(), move(args));
   case Ptr_tag::syntax_rules:
     return proc_enter_srule(proc.get<SyntaxRules*>(), move(args));
   case Ptr_tag::undefined: case Ptr_tag::boolean:

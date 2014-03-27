@@ -60,30 +60,32 @@ void gc_mark_ptr(void* p){
   
 void gc_mark_lp(Lisp_ptr p);
     
-void gc_mark_vm(const VM& v){
-  for(auto i : v.code){
+void gc_mark_vm(VM* vm){
+  for(auto i : vm->code){
     gc_mark_lp(i);
   }
 
-  for(auto i : v.stack){
+  for(auto i : vm->stack){
     gc_mark_lp(i);
   }
 
-  for(auto i : v.return_value){
+  for(auto i : vm->return_value){
     gc_mark_lp(i);
   }
 
-  for(auto i : v.extent){
+  for(auto i : vm->extent){
     gc_mark_lp(i.before);
     gc_mark_lp(i.thunk);
     gc_mark_lp(i.after);
   }
   
-  gc_mark_env(v.frame);
+  gc_mark_env(vm->frame);
 
-  for(auto i : v.exception_handler){
+  for(auto i : vm->exception_handler){
     gc_mark_lp(i);
   }
+
+  gc_mark_lp(vm->name);
 }
 
 } // namespace
@@ -156,10 +158,10 @@ void gc_mark_lp(Lisp_ptr p){
   }
 
   case Ptr_tag::continuation: {
-    auto c = p.get<Continuation*>();
+    auto c = p.get<VM*>();
     gc_mark_ptr(c);
 
-    gc_mark_vm(c->get());
+    gc_mark_vm(c);
     break;
   }
 
@@ -291,6 +293,6 @@ void gc_sweep(){
 } // namespace
 
 void gc(){
-  gc_mark_vm(vm);
+  gc_mark_vm(&vm);
   gc_sweep();
 }

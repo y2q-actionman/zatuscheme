@@ -132,36 +132,6 @@ private:
   const NativeFunc n_func_;
 };
 
-class Continuation{
-public:
-  explicit Continuation(const VM&);
-
-  Continuation(const Continuation&) = delete;
-  Continuation(Continuation&&) = delete;
-
-  ~Continuation();
-  
-  Continuation& operator=(const Continuation&) = delete;
-  Continuation& operator=(Continuation&&) = delete;
-
-  const ProcInfo* info() const
-  { return &cont_procinfo; }
-
-  const VM& get() const
-  { return vm_; }
-
-  Lisp_ptr name() const
-  { return name_; }
-  
-  void set_name(Lisp_ptr n)
-  { name_ = n; }
-  
-private:
-  static constexpr ProcInfo cont_procinfo = ProcInfo{0, proc_flag::Variadic::t};
-  const VM vm_;
-  Lisp_ptr name_;
-};
-
 bool is_procedure(Lisp_ptr);
 const ProcInfo* get_procinfo(Lisp_ptr);
 Lisp_ptr get_procname(Lisp_ptr);
