@@ -139,7 +139,7 @@ Lisp_ptr hard_repl(ZsArgs args){
   while(hard_repl_continue){
     cout << ">> " << flush;
     vm.code.push_back(read(cin));
-    eval();
+    start_evaluation();
     for(auto& p : vm.return_value){
       print(cout, p);
       cout << endl;

@@ -14,7 +14,7 @@ void vm_op_define();
 void vm_op_raise();
 
 // main loop
-void eval();
+void start_evaluation();
 
 // for debug
 const char* stringify(VMop);

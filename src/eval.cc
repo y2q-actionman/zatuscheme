@@ -490,7 +490,7 @@ void vm_op_raise(){
   throw vm.return_value_1();
 }
 
-void eval(){
+void start_evaluation(){
   while(!vm.code.empty()){
     try{
       if(dump_mode) clog << vm << endl;

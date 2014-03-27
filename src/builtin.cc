@@ -138,7 +138,7 @@ void install_builtin(){
   vm.frame = zs_new<Env>(nullptr);
   for(auto& i : builtin_syntax_funcs) install_native(i);
   install_string(builtin_syntax_str);
-  eval();
+  start_evaluation();
   assert(vm.code.empty() && vm.stack.empty());
 
   auto null_env = vm.frame;
@@ -151,7 +151,7 @@ void install_builtin(){
   install_symbol(EXPAND_STRINGIFY(R5RS_ENV_SYMNAME), vm.frame);
   for(auto& i : builtin_funcs) install_native(i);
   install_string(builtin_str);
-  eval();
+  start_evaluation();
   assert(vm.code.empty() && vm.stack.empty());
 
   // interaction-environment
@@ -161,7 +161,7 @@ void install_builtin(){
   vm.frame = i_env;
   for(auto& i : builtin_extra_funcs) install_native(i);
   install_string(builtin_extra_str);
-  eval();
+  start_evaluation();
 }
 
 const char* find_builtin_nproc_name(const NProcedure* nproc){
