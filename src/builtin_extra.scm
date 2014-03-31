@@ -35,6 +35,10 @@ LOAD
   `(,eval (,proc (,%current-environment)) (,%current-environment)))
 
 LOAD
+(define (make-synthetic-identifier identifier)
+  (make-syntactic-closure (%make-empty-environment) () identifier))
+
+LOAD
 (define (error reason . args)
   (raise (apply string-append `(,reason) args)))
 

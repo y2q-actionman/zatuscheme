@@ -97,10 +97,8 @@ Lisp_ptr identifier_eq(ZsArgs args){
                            args[2].get<Env*>(), args[3])};
 }
 
-Lisp_ptr make_synthetic_identifier(ZsArgs args){
-  check_identifier_type(args[0]);
-
-  return zs_new<SyntacticClosure>(zs_new<Env>(nullptr), Cons::NIL, args[0]);
+Lisp_ptr internal_make_empty_environment(ZsArgs){
+  return zs_new<Env>(nullptr);
 }
 
 Lisp_ptr internal_push_exception_handler(ZsArgs args){

@@ -18,7 +18,7 @@ Lisp_ptr internal_current_environment(ZsArgs);
 
 Lisp_ptr identifierp(ZsArgs);
 Lisp_ptr identifier_eq(ZsArgs);
-Lisp_ptr make_synthetic_identifier(ZsArgs);
+Lisp_ptr internal_make_empty_environment(ZsArgs);
 
 // error functions
 Lisp_ptr internal_push_exception_handler(ZsArgs);

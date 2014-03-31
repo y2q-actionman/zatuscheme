@@ -27,9 +27,9 @@
 {"identifier=?", {
     builtin::identifier_eq,
     {4}}},
-{"make-synthetic-identifier", {
-    builtin::make_synthetic_identifier,
-    {1}}},
+{"%make-empty-environment", {
+    builtin::internal_make_empty_environment,
+    {0}}},
 {"%push-exception-handler", {
     builtin::internal_push_exception_handler,
     {1}}},
