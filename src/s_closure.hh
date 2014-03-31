@@ -9,7 +9,7 @@ public:
   SyntacticClosure(const SyntacticClosure&) = delete;
   SyntacticClosure(SyntacticClosure&&) = delete;
 
-  ~SyntacticClosure();
+  ~SyntacticClosure() = default;
 
   SyntacticClosure& operator=(const SyntacticClosure&) = delete;
   SyntacticClosure& operator=(SyntacticClosure&&) = delete;

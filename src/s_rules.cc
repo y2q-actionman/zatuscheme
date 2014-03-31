@@ -450,8 +450,6 @@ SyntaxRules::SyntaxRules(Env* e, Lisp_ptr lits, Lisp_ptr rls)
   }
 }
 
-SyntaxRules::~SyntaxRules() = default;
-
 Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
   for(auto i = begin(rules()); i; ++i){
     auto pat = nth_cons_list<0>(*i);

@@ -10,7 +10,7 @@ public:
   SyntaxRules(const SyntaxRules&) = delete;
   SyntaxRules(SyntaxRules&&) = delete;
 
-  ~SyntaxRules();
+  ~SyntaxRules() = default;
 
   SyntaxRules& operator=(const SyntaxRules&) = delete;
   SyntaxRules& operator=(SyntaxRules&&) = delete;

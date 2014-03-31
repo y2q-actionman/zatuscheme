@@ -10,8 +10,6 @@ SyntacticClosure::SyntacticClosure(Env* e, Lisp_ptr f, Lisp_ptr ex)
   }
 }
 
-SyntacticClosure::~SyntacticClosure() = default;
-
 // checks recursively
 bool identifierp(Lisp_ptr p){
   if(p.tag() == Ptr_tag::symbol){
