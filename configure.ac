@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT([zatuscheme], [alpha.1], [http://github.com/y2q-actionman/zatuscheme/issues])
+AC_INIT([zatuscheme], [beta], [http://github.com/y2q-actionman/zatuscheme/issues])
 AM_INIT_AUTOMAKE([foreign parallel-tests])
 AC_CONFIG_SRCDIR([src/token.cc])
 AC_CONFIG_MACRO_DIR([m4])
