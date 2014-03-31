@@ -27,8 +27,8 @@ Rational& Rational::normalized_reset(long long n, long long d){
 
   if(n < INT_MIN || n > INT_MAX
      || d < INT_MIN || d > INT_MAX){
-    overflow_ = true;
     float_ = (double)n / (double)d;
+    overflow_ = true;
   }else{
     ratio_.n_ = static_cast<int>(n);
     ratio_.d_ = static_cast<int>(d);
@@ -48,9 +48,9 @@ Rational::operator double() const{
 
 Rational& Rational::expt(const Rational& other){
   if(other.denominator() != 1){
-    overflow_ = true;
     float_ = std::pow(static_cast<double>(*this),
                       static_cast<double>(other));
+    overflow_ = true;
     return *this;
   }
 
