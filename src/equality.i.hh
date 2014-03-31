@@ -8,6 +8,12 @@
 #include <functional>
 
 inline
+bool eq_internal(Lisp_ptr a, Lisp_ptr b){
+  return (a.tag() == b.tag()
+          && a.get<void*>() == b.get<void*>());
+}
+
+inline
 size_t eq_hash(Lisp_ptr p){
   return std::hash<void*>()(p.get<void*>());
 }

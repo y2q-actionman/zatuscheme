@@ -8,11 +8,6 @@
 
 using namespace std;
 
-bool eq_internal(Lisp_ptr a, Lisp_ptr b){
-  return (a.tag() == b.tag()
-          && a.get<void*>() == b.get<void*>());
-}
-
 bool eqv_internal(Lisp_ptr a, Lisp_ptr b){
   if(a.tag() != b.tag()) return false;
   

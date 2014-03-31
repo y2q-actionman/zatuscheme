@@ -1,5 +1,3 @@
-#include <cassert>
-
 #include "cons_util.hh"
 #include "lisp_ptr.hh"
 #include "zs_error.hh"
@@ -9,10 +7,6 @@ Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
 }
 
 // GrowList class
-GrowList::GrowList()
-  : head(Cons::NIL), next(&head)
-{}
-
 GrowList::~GrowList(){
   if(head){
     auto i = begin(head);
@@ -42,12 +36,6 @@ Lisp_ptr GrowList::extract_with_tail(Lisp_ptr p){
   invalidate();
   return ret;
 }
-
-void GrowList::invalidate(){
-  assert(head && next);
-  head = {};
-  next = nullptr;
-}  
 
 
 // ConsIter class
@@ -88,12 +76,4 @@ ConsIter end(Lisp_ptr p){
   auto i = begin(p);
   while(i) ++i;
   return i;
-}
-
-bool operator==(const ConsIter& i1, const ConsIter& i2){
-  return eq_internal(i1.base(), i2.base());
-}
-
-bool operator!=(const ConsIter& i1, const ConsIter& i2){
-  return !eq_internal(i1.base(), i2.base());
 }

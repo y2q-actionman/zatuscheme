@@ -5,6 +5,8 @@
 #error "Please include via parent file"
 #endif
 
+#include <cassert>
+
 #include "equality.hh"
 #include "zs_error.hh"
 #include "zs_memory.hh"
@@ -65,8 +67,32 @@ Lisp_ptr nthcdr_cons_list(Lisp_ptr p){
 
 // GrowList class
 inline
+GrowList::GrowList()
+  : head(Cons::NIL), next(&head)
+{}
+
+inline
 Lisp_ptr GrowList::extract(){
   return extract_with_tail(Cons::NIL);
+}
+
+inline
+void GrowList::invalidate(){
+  assert(head && next);
+  head = {};
+  next = nullptr;
+}  
+
+
+// ConsIter class
+inline
+bool operator==(const ConsIter& i1, const ConsIter& i2){
+  return eq_internal(i1.base(), i2.base());
+}
+
+inline
+bool operator!=(const ConsIter& i1, const ConsIter& i2){
+  return !eq_internal(i1.base(), i2.base());
 }
 
 #endif //CONS_UTIL_I_HH
