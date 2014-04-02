@@ -170,7 +170,7 @@ void ensure_binding(EqHashMap& match_obj,
 
 EqHashMap
 try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern, 
-            Env* form_env, Lisp_ptr form){
+            Lisp_ptr form){
   if(identifierp(pattern)){
     if(is_literal_identifier(sr, pattern)){
       // literal identifier
@@ -212,7 +212,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         ensure_binding(acc_map, sr, ignore_ident, *p_i);
 
         for(; f_i; ++f_i){
-          auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
+          auto m = try_match_1(sr, ignore_ident, *p_i, *f_i);
 
           for(auto i : m){
             auto place = acc_map.find(i.first);
@@ -223,7 +223,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
         match_obj.insert(begin(acc_map), end(acc_map));
 
-        auto tail = try_match_1(sr, ignore_ident, p_e.base(), form_env, f_e.base());
+        auto tail = try_match_1(sr, ignore_ident, p_e.base(), f_e.base());
         match_obj.insert(begin(tail), end(tail));
 
         return match_obj;
@@ -231,7 +231,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
       if(!f_i) break; // this check is delayed to here, for checking the ellipsis.
 
-      auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
+      auto m = try_match_1(sr, ignore_ident, *p_i, *f_i);
       match_obj.insert(begin(m), end(m));
 
       assert(f_i);
@@ -245,7 +245,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         throw try_match_failed();
       }
 
-      auto m = try_match_1(sr, ignore_ident, p_i.base(), form_env, f_i.base());
+      auto m = try_match_1(sr, ignore_ident, p_i.base(), f_i.base());
       match_obj.insert(begin(m), end(m));
       return match_obj;
     }else if(!p_i && !f_i){
@@ -278,7 +278,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
         ensure_binding(acc_map, sr, ignore_ident, *p_i);
 
         for(; f_i != f_e; ++f_i){
-          auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
+          auto m = try_match_1(sr, ignore_ident, *p_i, *f_i);
 
           for(auto i : m){
             auto place = acc_map.find(i.first);
@@ -293,7 +293,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
 
       if(f_i == f_e) break; // this check is delayed to here, for checking the ellipsis.
 
-      auto m = try_match_1(sr, ignore_ident, *p_i, form_env, *f_i);
+      auto m = try_match_1(sr, ignore_ident, *p_i, *f_i);
       match_obj.insert(begin(m), end(m));
 
       assert(f_i != f_e);
@@ -457,7 +457,12 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
     auto ignore_ident = pick_first(pat);
 
     try{
-      auto match_ret = try_match_1(*this, ignore_ident, pat, form_env, form);
+      // Currnetly, the argument 'form_env' is not used.
+      // After the expantion, we will return to the outer environment,
+      // and that is just the 'form_env'. So, we will evaluate 'form'
+      // with 'form_env' at that time.
+      (void)form_env;
+      auto match_ret = try_match_1(*this, ignore_ident, pat, form);
 
       ExpandMap expand_ctx;
       return expand(expand_ctx, match_ret, *this, tmpl);
