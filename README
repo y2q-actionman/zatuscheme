@@ -1,8 +1,8 @@
 ;; -*- mode: org -*-
 
 * 概要
-  zatuscheme は、 R5RS 準拠を目指して作られている Scheme インタプリタで
-  す。C++11 で記述されています。
+  zatuscheme は、 R5RS 準拠の Scheme インタプリタです。
+  C++11 で記述されています。
 
 * build, install
 ** zip パッケージから
