@@ -36,7 +36,7 @@ Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
 
 namespace builtin {
 
-Lisp_ptr syntax_quote(ZsArgs args){
+Lisp_ptr quote(ZsArgs args){
   if(args[0].tag() == Ptr_tag::syntactic_closure){
     return args[0].get<SyntacticClosure*>()->expr();
   }else{
@@ -44,11 +44,11 @@ Lisp_ptr syntax_quote(ZsArgs args){
   }
 }
 
-Lisp_ptr syntax_lambda(ZsArgs args){
+Lisp_ptr lambda(ZsArgs args){
   return lambda_internal(args[0], args[1]);
 }
 
-Lisp_ptr syntax_if(ZsArgs args){
+Lisp_ptr if_(ZsArgs args){
   vm.code.insert(vm.code.end(),
                  {(args.size() == 3) ? args[2] : Lisp_ptr(), // alt
                      args[1],   // conseq
@@ -57,13 +57,13 @@ Lisp_ptr syntax_if(ZsArgs args){
   return {};
 }
 
-Lisp_ptr syntax_set(ZsArgs args){
+Lisp_ptr set(ZsArgs args){
   vm.code.insert(vm.code.end(),
                  {args[0], vm_op_set, args[1]});
   return {};
 }
 
-Lisp_ptr syntax_define(ZsArgs args){
+Lisp_ptr define(ZsArgs args){
   if(identifierp(args[0])){
     auto& ident = args[0];
     auto& expr = args[1];
@@ -88,18 +88,18 @@ Lisp_ptr syntax_define(ZsArgs args){
   }
 }
 
-Lisp_ptr syntax_unquote_splicing(ZsArgs args){
+Lisp_ptr unquote_splicing(ZsArgs args){
   check_type(Ptr_tag::cons, args[0]);
 
   vm.return_value.assign(begin(args[0]), end(args[0]));
   return {};
 }
 
-Lisp_ptr syntax_syntax_rules(ZsArgs args){
+Lisp_ptr syntax_rules(ZsArgs args){
   return zs_new<SyntaxRules>(vm.frame, args[0], args[1]);
 }
     
-Lisp_ptr syntax_internal_memv(ZsArgs args){
+Lisp_ptr memv(ZsArgs args){
   check_type(Ptr_tag::cons, args[1]);
 
   for(auto i = begin(args[1]); i; ++i){
@@ -110,7 +110,7 @@ Lisp_ptr syntax_internal_memv(ZsArgs args){
   return Lisp_ptr{false};
 }
 
-Lisp_ptr syntax_internal_list_star(ZsArgs args){
+Lisp_ptr list_star(ZsArgs args){
   GrowList gl;
 
   for(auto i = 0; i < args.size() - 1; ++i){

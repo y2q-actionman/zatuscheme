@@ -1,5 +1,19 @@
 LOAD
+(%define define %define)
+LOAD
+(define quote %quote)
+LOAD
+(define lambda %lambda)
+LOAD
+(define if %if)
+LOAD
+(define set! %set!)
+
+LOAD
 (define %undefined (if #f #f))
+
+LOAD
+(define syntax-rules %syntax-rules)
 
 LOAD
 (define define-syntax define)
@@ -83,6 +97,12 @@ LOAD
      (if test
          (begin result1 result2 ...)
          (cond clause1 clause2 ...)))))
+
+LOAD
+(define else %undefined)
+
+LOAD
+(define => %undefined)
 
 LOAD
 (define-syntax and
@@ -192,15 +212,10 @@ LOAD
 LOAD
 (define (unquote x)
   x)
-
 LOAD
-(define else %undefined)
-
-LOAD
-(define => %undefined)
+(define unquote-splicing %unquote-splicing)
 
 LOAD
 (define let-syntax let)
-
 LOAD
 (define letrec-syntax letrec)
