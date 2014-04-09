@@ -78,7 +78,7 @@ Lisp_ptr call_cc(ZsArgs args){
   return {};
 }
 
-Lisp_ptr internal_push_winding(ZsArgs args){
+Lisp_ptr push_winding(ZsArgs args){
   Lisp_ptr procs[3];
 
   for(int i = 0; i < 3; ++i){
@@ -90,7 +90,7 @@ Lisp_ptr internal_push_winding(ZsArgs args){
   return {};
 }
 
-Lisp_ptr internal_pop_winding(ZsArgs){
+Lisp_ptr pop_winding(ZsArgs){
   if(!vm.extent.empty()){
     vm.extent.pop_back();
   }

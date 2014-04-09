@@ -1,4 +1,10 @@
 LOAD
+(define procedure? %procedure?)
+
+LOAD
+(define apply %apply)
+
+LOAD
 (define (map proc . lists)
   (define (worker lists rets)
     (if (null? lists)
@@ -30,6 +36,15 @@ LOAD
 LOAD
 (define (force object)
     (object))
+
+LOAD
+(define call-with-current-continuation %call-with-current-continuation)
+
+LOAD
+(define values %values)
+
+LOAD
+(define call-with-values %call-with-values)
 
 LOAD
 (define-syntax %multiple-value-list
