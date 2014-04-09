@@ -1,7 +1,5 @@
 LOAD
-(define (%fold proc init lis)
-  (if (null? lis) init
-      (%fold proc (apply proc init (car lis)) (cdr lis))))
+(define number? %number?)
 
 LOAD
 (define complex? %complex?)
@@ -10,7 +8,7 @@ LOAD
 (define (real? obj)
   (or (%real? obj)
       (and (%complex? obj)
-	   (%= 0 (imag-part obj)))))
+	   (%= 0 (%imag-part obj)))))
 
 LOAD
 (define rational? %rational?)
@@ -19,7 +17,10 @@ LOAD
 (define (integer? obj)
   (or (%integer? obj)
       (and (real? obj)
-	   (%= (real-part obj) (round (real-part obj))))))
+	   (%= (%real-part obj) (%round (%real-part obj))))))
+
+LOAD
+(define exact? %exact?)
 
 LOAD
 (define (inexact? n)
@@ -76,6 +77,11 @@ LOAD
   (if (%integer? n) (= 0 (modulo n 2)) #f))
 
 LOAD
+(define (%fold proc init lis)
+  (if (null? lis) init
+      (%fold proc (apply proc init (car lis)) (cdr lis))))
+
+LOAD
 (define (max n . m)
   (%fold %max n m))
 
@@ -106,8 +112,11 @@ LOAD
   (if (negative? n) (- n) n))
 
 LOAD
-(define (atan n . m)
-  (if (null? m) (%atan1 n) (apply %atan2 `(,n) m)))
+(define quotient %quotient)
+LOAD
+(define remainder %remainder)
+LOAD
+(define modulo %modulo)
 
 LOAD
 (define (gcd . n)
@@ -119,6 +128,65 @@ LOAD
 LOAD
 (define (lcm . n)
   (%fold %lcm 1 n))
+
+LOAD
+(define numerator %numerator)
+LOAD
+(define denominator %denominator)
+
+LOAD
+(define floor %floor)
+LOAD
+(define ceiling %ceiling)
+LOAD
+(define truncate %truncate)
+LOAD
+(define round %round)
+
+LOAD
+(define rationalize %rationalize)
+
+LOAD
+(define exp %exp)
+LOAD
+(define log %log)
+LOAD
+(define sin %sin)
+LOAD
+(define cos %cos)
+LOAD
+(define tan %tan)
+LOAD
+(define asin %asin)
+LOAD
+(define acos %acos)
+LOAD
+(define (atan n . m)
+  (if (null? m) (%atan1 n) (apply %atan2 `(,n) m)))
+
+LOAD
+(define sqrt %sqrt)
+
+LOAD
+(define expt %expt)
+
+LOAD
+(define make-rectangular %make-rectangular)
+LOAD
+(define make-polar %make-polar)
+LOAD
+(define real-part %real-part)
+LOAD
+(define imag-part %imag-part)
+LOAD
+(define magnitude %magnitude)
+LOAD
+(define angle %angle)
+
+LOAD
+(define exact->inexact %exact->inexact)
+LOAD
+(define inexact->exact %inexact->exact)
 
 LOAD
 (define (string->number str . radix)

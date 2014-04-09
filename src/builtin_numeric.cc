@@ -127,19 +127,19 @@ Lisp_ptr numberp(ZsArgs args){
   return Lisp_ptr{is_numeric_type(args[0])};
 }
 
-Lisp_ptr internal_complexp(ZsArgs args){
+Lisp_ptr complexp(ZsArgs args){
   return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::complex)};
 }
 
-Lisp_ptr internal_realp(ZsArgs args){
+Lisp_ptr realp(ZsArgs args){
   return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::real)};
 }
 
-Lisp_ptr internal_rationalp(ZsArgs args){
+Lisp_ptr rationalp(ZsArgs args){
   return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::rational)};
 }
 
-Lisp_ptr internal_integerp(ZsArgs args){
+Lisp_ptr integerp(ZsArgs args){
   return Lisp_ptr{is_numeric_convertible(args[0], Ptr_tag::integer)};
 }
 
@@ -148,7 +148,7 @@ Lisp_ptr exactp(ZsArgs args){
                   || args[0].tag() == Ptr_tag::rational};
 }
 
-Lisp_ptr internal_number_equal(ZsArgs args){
+Lisp_ptr number_equal(ZsArgs args){
   return number_binary(args[0], args[1],
                       equal_to<int>(),
                       equal_to<const Rational&>(),
@@ -156,7 +156,7 @@ Lisp_ptr internal_number_equal(ZsArgs args){
                       equal_to<const Complex&>());
 }
 
-Lisp_ptr internal_number_less(ZsArgs args){
+Lisp_ptr number_less(ZsArgs args){
   return number_binary(args[0], args[1],
                       less<int>(),
                       less<const Rational&>(),
@@ -165,7 +165,7 @@ Lisp_ptr internal_number_less(ZsArgs args){
 }
 
 
-Lisp_ptr internal_number_max(ZsArgs args){
+Lisp_ptr number_max(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return max(i1, i2); },
                        [](const Rational& q1, const Rational& q2){ return max(q1, q2); },
@@ -173,7 +173,7 @@ Lisp_ptr internal_number_max(ZsArgs args){
                        inacceptable_number_type());
 }
 
-Lisp_ptr internal_number_min(ZsArgs args){
+Lisp_ptr number_min(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return min(i1, i2); },
                        [](const Rational& q1, const Rational& q2){ return min(q1, q2); },
@@ -181,7 +181,7 @@ Lisp_ptr internal_number_min(ZsArgs args){
                        inacceptable_number_type());
 }
 
-Lisp_ptr internal_number_plus(ZsArgs args){
+Lisp_ptr number_plus(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1) += Rational(i2); },
                        [](Rational&& q1, const Rational& q2){ return q1 += q2; },
@@ -189,7 +189,7 @@ Lisp_ptr internal_number_plus(ZsArgs args){
                        plus<const Complex&>());
 }
 
-Lisp_ptr internal_number_multiple(ZsArgs args){
+Lisp_ptr number_multiple(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1) *= Rational(i2); },
                        [](Rational&& q1, const Rational& q2){ return q1 *= q2; },
@@ -197,7 +197,7 @@ Lisp_ptr internal_number_multiple(ZsArgs args){
                        multiplies<const Complex&>());
 }
 
-Lisp_ptr internal_number_minus(ZsArgs args){
+Lisp_ptr number_minus(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1) -= Rational(i2); },
                        [](Rational&& q1, const Rational& q2){ return q1 -= q2; },
@@ -205,7 +205,7 @@ Lisp_ptr internal_number_minus(ZsArgs args){
                        minus<const Complex&>());
 }
 
-Lisp_ptr internal_number_divide(ZsArgs args){
+Lisp_ptr number_divide(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){ return Rational(i1) /= Rational(i2); },
                        [](Rational&& q1, const Rational& q2){ return q1 /= q2; },
@@ -248,7 +248,7 @@ Lisp_ptr number_mod(ZsArgs args){
                        inacceptable_number_type());
 }
 
-Lisp_ptr internal_number_gcd(ZsArgs args){
+Lisp_ptr number_gcd(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){
                          return gcd(i1, i2);
@@ -375,7 +375,7 @@ Lisp_ptr number_acos(ZsArgs args){
                       [](const Complex& z){ return std::acos(z);});
 }
 
-Lisp_ptr internal_number_atan1(ZsArgs args){
+Lisp_ptr number_atan1(ZsArgs args){
   return number_unary(args[0],
                       [](int i){ return std::atan(i); },
                       [](const Rational& q){ return std::atan(static_cast<double>(q));},
@@ -383,7 +383,7 @@ Lisp_ptr internal_number_atan1(ZsArgs args){
                       [](const Complex& z){ return std::atan(z); });
 }
 
-Lisp_ptr internal_number_atan2(ZsArgs args){
+Lisp_ptr number_atan2(ZsArgs args){
   return number_binary(args[0], args[1],
                        [](int i1, int i2){
                          return std::atan2(i1, i2);
@@ -492,7 +492,7 @@ Lisp_ptr number_e_to_i(ZsArgs args){
 }
 
 
-Lisp_ptr internal_number_from_string(ZsArgs args){
+Lisp_ptr number_from_string(ZsArgs args){
   check_type(Ptr_tag::string, args[0]);
   check_type(Ptr_tag::integer, args[1]);
 
@@ -501,7 +501,7 @@ Lisp_ptr internal_number_from_string(ZsArgs args){
   return parse_number(iss, coerce<int>(args[1]));
 }
 
-Lisp_ptr internal_number_to_string(ZsArgs args){
+Lisp_ptr number_to_string(ZsArgs args){
   check_numeric_type(args[0]);
   check_type(Ptr_tag::integer, args[1]);
 
