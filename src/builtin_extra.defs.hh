@@ -38,7 +38,7 @@
     {0}}},
 {"raise", {
     builtin::raise,
-    {1, 1}}},
+    {1}}},
 {"exit", {
     builtin::exit,
     {0, 1}}},

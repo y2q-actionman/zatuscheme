@@ -11,10 +11,10 @@
     {0, Variadic::t, Passing::eval, Returning::pass, MoveReturnValue::f}}},
 {"call-with-values", {
     builtin::call_with_values,
-    {2, 2}}},
+    {2}}},
 {"call-with-current-continuation", {
     builtin::call_cc,
-    {1, 1}}},
+    {1}}},
 {"%push-winding", {
     builtin::internal_push_winding,
     {3}}},

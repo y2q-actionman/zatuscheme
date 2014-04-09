@@ -2,7 +2,7 @@
 
 {"quote", {
     builtin::syntax_quote,
-    {1, 1, Passing::quote}}},
+    {1, Variadic::f, Passing::quote}}},
 {"lambda", {
     builtin::syntax_lambda,
     {1, Variadic::t, Passing::quote}}},
@@ -11,7 +11,7 @@
     {2, 3, Passing::quote}}},
 {"set!", {
     builtin::syntax_set,
-    {2, 2, Passing::quote}}},
+    {2, Variadic::f, Passing::quote}}},
 {"define", {
     builtin::syntax_define,
     {2, Variadic::t, Passing::quote}}},
