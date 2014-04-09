@@ -1,12 +1,15 @@
 LOAD
-(define (newline . args)
-  (apply write-char NEWLINE_CHAR args))
-
+(define input-port? %input-port?)
 LOAD
-(define (current-input-port) CURRENT_INPUT_PORT_SYMNAME)
-
+(define output-port? %output-port?)
 LOAD
-(define (current-output-port) CURRENT_OUTPUT_PORT_SYMNAME)
+(define open-input-file %open-input-file)
+LOAD
+(define open-output-file %open-output-file)
+LOAD
+(define close-input-port %close-input-port)
+LOAD
+(define close-output-port %close-output-port)
 
 LOAD
 (define (call-with-input-file string proc)
@@ -21,6 +24,11 @@ LOAD
          (ret (proc port)))
     (close-output-port port)
     ret))
+
+LOAD
+(define (current-input-port) CURRENT_INPUT_PORT_SYMNAME)
+LOAD
+(define (current-output-port) CURRENT_OUTPUT_PORT_SYMNAME)
 
 LOAD
 (define (with-input-from-file string thunk)
@@ -43,7 +51,6 @@ LOAD
 LOAD
 (define (%read-funcs fun)
   (lambda args (apply fun (if (null? args) (current-input-port) args))))
-
 LOAD
 (define read (%read-funcs %read))
 LOAD
@@ -54,12 +61,19 @@ LOAD
 (define char-ready? (%read-funcs %char-ready?))
 
 LOAD
+(define eof-object? %eof-object?)
+
+LOAD
 (define (%write-funcs fun)
   (lambda (p . args) (apply fun `(,p) (if (null? args) (current-output-port) args))))
-
 LOAD
 (define write (%write-funcs %write))
 LOAD
 (define display (%write-funcs %display))
 LOAD
 (define write-char (%write-funcs %write-char))
+
+LOAD
+(define (newline . args)
+  (apply write-char NEWLINE_CHAR args))
+

@@ -119,17 +119,17 @@ Lisp_ptr port_close_o(ZsArgs args){
 }
 
 
-Lisp_ptr internal_port_read(ZsArgs args){
+Lisp_ptr port_read(ZsArgs args){
   return port_input_call(move(args),
                          [](std::istream* is){ return read(*is); });
 }
 
-Lisp_ptr internal_port_read_char(ZsArgs args){
+Lisp_ptr port_read_char(ZsArgs args){
   return port_input_call(move(args),
                          [](std::istream* is){ return static_cast<char>(is->get()); });
 }
 
-Lisp_ptr internal_port_peek_char(ZsArgs args){
+Lisp_ptr port_peek_char(ZsArgs args){
   return port_input_call(move(args),
                          [](std::istream* is){ return static_cast<char>(is->peek()); });
 }
@@ -139,21 +139,21 @@ Lisp_ptr port_eof_p(ZsArgs args){
 }  
 
 
-Lisp_ptr internal_port_write(ZsArgs args){
+Lisp_ptr port_write(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os){
                             print(*os, c, PrintReadable::f);
                           });
 }
 
-Lisp_ptr internal_port_display(ZsArgs args){
+Lisp_ptr port_display(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os){
                             print(*os, c, PrintReadable::t);
                           });
 }
 
-Lisp_ptr internal_port_write_char(ZsArgs args){
+Lisp_ptr port_write_char(ZsArgs args){
   return port_output_call(move(args),
                           [](Lisp_ptr c, std::ostream* os){
                             check_type(Ptr_tag::character, c);
@@ -162,12 +162,12 @@ Lisp_ptr internal_port_write_char(ZsArgs args){
                           });
 }
 
-Lisp_ptr internal_port_char_ready(ZsArgs args){
+Lisp_ptr port_char_ready(ZsArgs args){
   return port_input_call(move(args), stream_ready);
 }
 
 // SRFI-6
-Lisp_ptr internal_port_open_input_string(ZsArgs args){
+Lisp_ptr port_open_input_string(ZsArgs args){
   check_type(Ptr_tag::string, args[0]);
 
   auto str = args[0].get<String*>();
@@ -179,7 +179,7 @@ Lisp_ptr internal_port_open_input_string(ZsArgs args){
   return {p};
 }  
 
-Lisp_ptr internal_port_open_output_string(ZsArgs){
+Lisp_ptr port_open_output_string(ZsArgs){
   OutputPort* p = zs_new_with_tag<ostringstream, Ptr_tag::output_port>();
   if(!p || !*p){
     throw_zs_error({}, "failed at opening file");
@@ -188,7 +188,7 @@ Lisp_ptr internal_port_open_output_string(ZsArgs){
   return {p};
 }
 
-Lisp_ptr internal_port_get_output_string(ZsArgs args){
+Lisp_ptr port_get_output_string(ZsArgs args){
   check_type(Ptr_tag::output_port, args[0]);
 
   auto oss = dynamic_cast<ostringstream*>(args[0].get<OutputPort*>());
