@@ -14,15 +14,15 @@ Lisp_ptr gensym(ZsArgs);
 
 Lisp_ptr sc_macro_transformer(ZsArgs);
 Lisp_ptr make_syntactic_closure(ZsArgs);
-Lisp_ptr internal_current_environment(ZsArgs);
+Lisp_ptr current_environment(ZsArgs);
 
 Lisp_ptr identifierp(ZsArgs);
 Lisp_ptr identifier_eq(ZsArgs);
-Lisp_ptr internal_make_empty_environment(ZsArgs);
+Lisp_ptr make_empty_environment(ZsArgs);
 
 // error functions
-Lisp_ptr internal_push_exception_handler(ZsArgs);
-Lisp_ptr internal_pop_exception_handler(ZsArgs);
+Lisp_ptr push_exception_handler(ZsArgs);
+Lisp_ptr pop_exception_handler(ZsArgs);
 Lisp_ptr raise(ZsArgs);
 
 // extensions

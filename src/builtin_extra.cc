@@ -77,7 +77,7 @@ Lisp_ptr make_syntactic_closure(ZsArgs args){
   return zs_new<SyntacticClosure>(args[0].get<Env*>(), args[1], args[2]);
 }
 
-Lisp_ptr internal_current_environment(ZsArgs){
+Lisp_ptr current_environment(ZsArgs){
   // assumes that native funcions don't introduce a new frame.
   return vm.frame;
 }
@@ -97,18 +97,18 @@ Lisp_ptr identifier_eq(ZsArgs args){
                            args[2].get<Env*>(), args[3])};
 }
 
-Lisp_ptr internal_make_empty_environment(ZsArgs){
+Lisp_ptr make_empty_environment(ZsArgs){
   return zs_new<Env>(nullptr);
 }
 
-Lisp_ptr internal_push_exception_handler(ZsArgs args){
+Lisp_ptr push_exception_handler(ZsArgs args){
   check_procedure_type(args[0]);
 
   vm.exception_handler.push_back(args[0]);
   return {};
 }
 
-Lisp_ptr internal_pop_exception_handler(ZsArgs){
+Lisp_ptr pop_exception_handler(ZsArgs){
   if(!vm.exception_handler.empty()){
     vm.exception_handler.pop_back();
   }

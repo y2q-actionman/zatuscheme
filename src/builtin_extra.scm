@@ -2,20 +2,21 @@ LOAD
 (define list* %list*)
 
 LOAD
-(define (read-eval-print-loop)
-  (define read-obj #f)
-  (let repl-loop ()
-    (display ">> ")
-    (set! read-obj (read))
-    (if (eof-object? read-obj) #t
-        (begin
-          (call-with-current-continuation
-           (lambda (c)
-             (with-exception-handler
-              (lambda (e) (display e) (c #f))
-              (lambda () (display (eval read-obj (interaction-environment)))))))
-          (newline)
-          (repl-loop)))))
+(define transcript-on %transcript-on)
+LOAD
+(define transcript-off %transcript-off)
+
+LOAD
+(define traditional-transformer %traditional-transformer)
+
+LOAD
+(define gensym %gensym)
+
+LOAD
+(define sc-macro-transformer %sc-macro-transformer)
+
+LOAD
+(define make-syntactic-closure %make-syntactic-closure)
 
 LOAD
 (define (rsc-macro-transformer fun)
@@ -35,8 +36,16 @@ LOAD
   `(,eval (,proc (,%current-environment)) (,%current-environment)))
 
 LOAD
+(define identifier? %identifier?)
+LOAD
+(define identifier=? %identifier=?)
+
+LOAD
 (define (make-synthetic-identifier identifier)
   (make-syntactic-closure (%make-empty-environment) () identifier))
+
+LOAD
+(define raise %raise)
 
 LOAD
 (define (error reason . args)
@@ -159,3 +168,25 @@ LOAD
        (begin body ...))
     ((cond-expand (feature-id body ...) more-clauses ...)
        (begin (cond-expand more-clauses ...)))))
+
+LOAD
+(define (read-eval-print-loop)
+  (define read-obj #f)
+  (let repl-loop ()
+    (display ">> ")
+    (set! read-obj (read))
+    (if (eof-object? read-obj) #t
+        (begin
+          (call-with-current-continuation
+           (lambda (c)
+             (with-exception-handler
+              (lambda (e) (display e) (c #f))
+              (lambda () (display (eval read-obj (interaction-environment)))))))
+          (newline)
+          (repl-loop)))))
+
+LOAD
+(define exit %exit)
+
+LOAD
+(define tmp-file %tmp-file)
