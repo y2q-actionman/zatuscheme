@@ -166,4 +166,37 @@ Lisp_ptr internal_port_char_ready(ZsArgs args){
   return port_input_call(move(args), stream_ready);
 }
 
+// SRFI-6
+Lisp_ptr internal_port_open_input_string(ZsArgs args){
+  check_type(Ptr_tag::string, args[0]);
+
+  auto str = args[0].get<String*>();
+  InputPort* p = zs_new_with_tag<istringstream, Ptr_tag::input_port>(*str);
+  if(!p || !*p){
+    throw_zs_error({}, "failed at opening file");
+  }
+  
+  return {p};
+}  
+
+Lisp_ptr internal_port_open_output_string(ZsArgs){
+  OutputPort* p = zs_new_with_tag<ostringstream, Ptr_tag::output_port>();
+  if(!p || !*p){
+    throw_zs_error({}, "failed at opening file");
+  }
+  
+  return {p};
+}
+
+Lisp_ptr internal_port_get_output_string(ZsArgs args){
+  check_type(Ptr_tag::output_port, args[0]);
+
+  auto oss = dynamic_cast<ostringstream*>(args[0].get<OutputPort*>());
+  if(!oss){
+    throw_zs_error(args[0], "not a string port");
+  }
+  
+  return zs_new<String>(oss->str());
+}
+
 } // namespace builtin

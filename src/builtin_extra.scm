@@ -111,8 +111,17 @@ LOAD
          (guard-aux reraise clause1 clause2 ...)))))
 
 LOAD
+(define open-input-string %open-input-string)
+
+LOAD
+(define open-output-string %open-output-string)
+
+LOAD
+(define get-output-string %get-output-string)
+
+LOAD
 (define-syntax cond-expand
-  (syntax-rules (and or not else srfi-0 srfi-23 srfi-34)
+  (syntax-rules (and or not else srfi-0 srfi-6 srfi-23 srfi-34)
     ((cond-expand) (error "Unfulfilled cond-expand"))
     ((cond-expand (else body ...))
      (begin body ...))
@@ -141,6 +150,8 @@ LOAD
          (cond-expand more-clauses ...))
        (else body ...)))
     ((cond-expand (srfi-0 body ...) more-clauses ...)
+       (begin body ...))
+    ((cond-expand (srfi-6 body ...) more-clauses ...)
        (begin body ...))
     ((cond-expand (srfi-23 body ...) more-clauses ...)
        (begin body ...))

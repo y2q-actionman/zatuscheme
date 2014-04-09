@@ -41,6 +41,7 @@ TESTS = $(check_PROGRAMS) \
 	extra_test_exit1.scm \
 	extra_test_error.scm \
 	extra_test_srfi_0.scm \
+	extra_test_srfi_6.scm \
 	r5rs_pitfall.scm
 
 XFAIL_TESTS = extra_test_exit1.scm

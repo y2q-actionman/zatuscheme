@@ -48,3 +48,13 @@
 {"%char-ready?",
     builtin::internal_port_char_ready,
     {1}},
+
+{"%open-input-string",
+    builtin::internal_port_open_input_string,
+    {1}},
+{"%open-output-string",
+    builtin::internal_port_open_output_string,
+    {0}},
+{"%get-output-string",
+    builtin::internal_port_get_output_string,
+    {1}},

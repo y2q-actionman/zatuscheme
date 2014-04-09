@@ -21,6 +21,10 @@ Lisp_ptr internal_port_write_char(ZsArgs);
 
 Lisp_ptr internal_port_char_ready(ZsArgs);
 
+Lisp_ptr internal_port_open_input_string(ZsArgs);
+Lisp_ptr internal_port_open_output_string(ZsArgs);
+Lisp_ptr internal_port_get_output_string(ZsArgs);
+
 }
 
 #endif // BUILTIN_PORT_HH
