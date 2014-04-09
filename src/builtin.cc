@@ -90,17 +90,20 @@ static const char* builtin_syntax_str =
 #include "builtin_syntax.scm"
 ;
 
+// sequenced by dependencies
 static const char* builtin_str =
+#include "builtin_symbol.scm"	// (independent)
+#include "builtin_equal.scm"	// (independent)
+
+#include "builtin_boolean.scm"	// equal
+#include "builtin_cons.scm"	// equal
+
 #include "builtin.scm"
-#include "builtin_boolean.scm"
 #include "builtin_char.scm"
-#include "builtin_cons.scm"
-#include "builtin_equal.scm"
 #include "builtin_numeric.scm"
 #include "builtin_port.scm"
 #include "builtin_procedure.scm"
 #include "builtin_string.scm"
-#include "builtin_symbol.scm"
 #include "builtin_vector.scm"
 ;
 
