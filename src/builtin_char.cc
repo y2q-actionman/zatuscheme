@@ -30,7 +30,7 @@ Lisp_ptr char_conversion(Lisp_ptr arg1, const Fun& fun){
 
 namespace builtin {
 
-Lisp_ptr internal_char_casecmp(ZsArgs args){
+Lisp_ptr char_casecmp(ZsArgs args){
   check_type(Ptr_tag::character, args[0]);
   check_type(Ptr_tag::character, args[1]);
 

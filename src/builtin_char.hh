@@ -5,7 +5,7 @@
 
 namespace builtin {
 
-Lisp_ptr internal_char_casecmp(ZsArgs);
+Lisp_ptr char_casecmp(ZsArgs);
 
 Lisp_ptr char_isalpha(ZsArgs);
 Lisp_ptr char_isdigit(ZsArgs);
