@@ -1,50 +1,50 @@
-// This file is intended to be included into an array of 'BuiltinFunc'
+// This file is intended to be included into an array of 'NProcedure'
 
-{"transcript-on", {
+{"transcript-on",
     builtin::transcript_on,
-    {0}}},
-{"transcript-off", {
+    {0}},
+{"transcript-off",
     builtin::transcript_off,
-    {0}}},
-{"traditional-transformer", {
+    {0}},
+{"traditional-transformer",
     builtin::traditional_transformer,
-    {1}}},
-{"gensym", {
+    {1}},
+{"gensym",
     builtin::gensym,
-    {0}}},
-{"sc-macro-transformer", {
+    {0}},
+{"sc-macro-transformer",
     builtin::sc_macro_transformer,
-    {1}}},
-{"make-syntactic-closure", {
+    {1}},
+{"make-syntactic-closure",
     builtin::make_syntactic_closure,
-    {3}}},
-{"%current-environment", {
+    {3}},
+{"%current-environment",
     builtin::internal_current_environment,
-    {0}}},
-{"identifier?", {
+    {0}},
+{"identifier?",
     builtin::identifierp,
-    {1}}},
-{"identifier=?", {
+    {1}},
+{"identifier=?",
     builtin::identifier_eq,
-    {4}}},
-{"%make-empty-environment", {
+    {4}},
+{"%make-empty-environment",
     builtin::internal_make_empty_environment,
-    {0}}},
-{"%push-exception-handler", {
+    {0}},
+{"%push-exception-handler",
     builtin::internal_push_exception_handler,
-    {1}}},
-{"%pop-exception-handler", {
+    {1}},
+{"%pop-exception-handler",
     builtin::internal_pop_exception_handler,
-    {0}}},
-{"raise", {
+    {0}},
+{"raise",
     builtin::raise,
-    {1}}},
-{"exit", {
+    {1}},
+{"exit",
     builtin::exit,
-    {0, 1}}},
-{"hard-repl", {
+    {0, 1}},
+{"hard-repl",
     builtin::hard_repl,
-    {0}}},
-{"tmp-file", {
+    {0}},
+{"tmp-file",
     builtin::tmp_file,
-    {0}}},
+    {0}},

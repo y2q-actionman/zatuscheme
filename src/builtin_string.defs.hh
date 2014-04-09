@@ -1,24 +1,24 @@
-// This file is intended to be included into an array of 'BuiltinFunc'
+// This file is intended to be included into an array of 'NProcedure'
 
-{"string?", {
+{"string?",
     builtin::type_check_pred<Ptr_tag::string>,
-    {1}}},
-{"%make-string2", {
+    {1}},
+{"%make-string2",
     builtin::internal_string_make,
-    {2}}},
-{"string-length", {
+    {2}},
+{"string-length",
     builtin::string_length,
-    {1}}},
-{"string-ref", {
+    {1}},
+{"string-ref",
     builtin::string_ref,
-    {2}}},
-{"string-set!", {
+    {2}},
+{"string-set!",
     builtin::string_set,
-    {3}}},
+    {3}},
 
-{"%string-strcmp", {
+{"%string-strcmp",
     builtin::internal_string_strcmp,
-    {2}}},
-{"%string-strcasecmp", {
+    {2}},
+{"%string-strcasecmp",
     builtin::internal_string_strcasecmp,
-    {2}}},
+    {2}},

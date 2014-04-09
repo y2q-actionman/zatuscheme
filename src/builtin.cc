@@ -70,7 +70,7 @@ Lisp_ptr load(ZsArgs args){
 
 } // namespace builtin
 
-static const BuiltinNProc builtin_syntax_funcs[] = {
+static const NProcedure builtin_syntax_funcs[] = {
 #include "builtin_syntax.defs.hh"
 };
 
@@ -78,7 +78,7 @@ static const char* builtin_syntax_str =
 #include "builtin_syntax.scm"
 ;
 
-static const BuiltinNProc builtin_funcs[] = {
+static const NProcedure builtin_funcs[] = {
 #include "builtin.defs.hh"
 #include "builtin_boolean.defs.hh"
 #include "builtin_char.defs.hh"
@@ -104,7 +104,7 @@ static const char* builtin_str =
 #include "builtin_vector.scm"
 ;
 
-static const BuiltinNProc builtin_extra_funcs[] = {
+static const NProcedure builtin_extra_funcs[] = {
 #include "builtin_extra.defs.hh"
 };
 
@@ -113,8 +113,8 @@ static const char* builtin_extra_str =
 ;
 
 
-static void install_native(const BuiltinNProc& bf){
-  vm.frame->local_set(intern(*vm.symtable, bf.name), {&bf.func});
+static void install_native(const NProcedure& n){
+  vm.frame->local_set(intern(*vm.symtable, n.name()), {&n});
 }
 
 static void install_string(const char* s){
@@ -162,19 +162,4 @@ void install_builtin(){
   for(auto& i : builtin_extra_funcs) install_native(i);
   install_string(builtin_extra_str);
   start_evaluation();
-}
-
-const char* find_builtin_nproc_name(const NProcedure* nproc){
-  const auto fun = [=](const BuiltinNProc& bf){
-    return nproc == &bf.func;
-  };
-
-  for(auto& i : builtin_syntax_funcs)
-    if(fun(i)) return i.name;
-  for(auto& i : builtin_funcs)
-    if(fun(i)) return i.name;
-  for(auto& i : builtin_extra_funcs)
-    if(fun(i)) return i.name;
-
-  return "(unknown native procedure)";
 }

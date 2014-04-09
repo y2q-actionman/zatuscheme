@@ -1,11 +1,11 @@
-// This file is intended to be included into an array of 'BuiltinFunc'
+// This file is intended to be included into an array of 'NProcedure'
 
-{"eq?", {
+{"eq?",
     builtin::eq,
-    {2}}},
-{"eqv?", {
+    {2}},
+{"eqv?",
     builtin::eqv,
-    {2}}},
-{"equal?", {
+    {2}},
+{"equal?",
     builtin::equal,
-    {2}}},
+    {2}},

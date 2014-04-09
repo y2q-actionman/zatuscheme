@@ -1,50 +1,50 @@
-// This file is intended to be included into an array of 'BuiltinFunc'
+// This file is intended to be included into an array of 'NProcedure'
 
-{"input-port?", {
+{"input-port?",
     builtin::type_check_pred<Ptr_tag::input_port>,
-    {1}}},
-{"output-port?", {
+    {1}},
+{"output-port?",
     builtin::type_check_pred<Ptr_tag::output_port>,
-    {1}}},
+    {1}},
 
-{"open-input-file", {
+{"open-input-file",
     builtin::port_open_file_i,
-    {1}}},
-{"open-output-file", {
+    {1}},
+{"open-output-file",
     builtin::port_open_file_o,
-    {1}}},
+    {1}},
 
-{"close-input-port", {
+{"close-input-port",
     builtin::port_close_i,
-    {1}}},
-{"close-output-port", {
+    {1}},
+{"close-output-port",
     builtin::port_close_o,
-    {1}}},
+    {1}},
 
-{"%read", {
+{"%read",
     builtin::internal_port_read,
-    {1}}},
-{"%read-char", {
+    {1}},
+{"%read-char",
     builtin::internal_port_read_char,
-    {1}}},
-{"%peek-char", {
+    {1}},
+{"%peek-char",
     builtin::internal_port_peek_char,
-    {1}}},
+    {1}},
 
-{"eof-object?", {
+{"eof-object?",
     builtin::port_eof_p,
-    {1}}},
+    {1}},
 
-{"%write", {
+{"%write",
     builtin::internal_port_write,
-    {2}}},
-{"%display", {
+    {2}},
+{"%display",
     builtin::internal_port_display,
-    {2}}},
-{"%write-char", {
+    {2}},
+{"%write-char",
     builtin::internal_port_write_char,
-    {2}}},
+    {2}},
 
-{"%char-ready?", {
+{"%char-ready?",
     builtin::internal_port_char_ready,
-    {1}}},
+    {1}},

@@ -1,23 +1,23 @@
-// This file is intended to be included into an array of 'BuiltinFunc'
+// This file is intended to be included into an array of 'NProcedure'
 
-{"pair?", {
+{"pair?",
     builtin::cons_pairp,
-    {1}}},
+    {1}},
 
-{"cons", {
+{"cons",
     builtin::cons_cons,
-    {2}}},
+    {2}},
 
-{"car", {
+{"car",
     builtin::cons_car,
-    {1}}},
-{"cdr", {
+    {1}},
+{"cdr",
     builtin::cons_cdr,
-    {1}}},
+    {1}},
 
-{"set-car!", {
+{"set-car!",
     builtin::cons_set_car,
-    {2}}},
-{"set-cdr!", {
+    {2}},
+{"set-cdr!",
     builtin::cons_set_cdr,
-    {2}}},
+    {2}},

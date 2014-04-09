@@ -1,155 +1,155 @@
-// This file is intended to be included into an array of 'BuiltinFunc'
+// This file is intended to be included into an array of 'NProcedure'
 
-{"number?", {
+{"number?",
     builtin::numberp,
-    {1}}},
+    {1}},
 
-{"%complex?", {
+{"%complex?",
     builtin::internal_complexp,
-    {1}}},
-{"%real?", {
+    {1}},
+{"%real?",
     builtin::internal_realp,
-    {1}}},
-{"%rational?", {
+    {1}},
+{"%rational?",
     builtin::internal_rationalp,
-    {1}}},
-{"%integer?", {
+    {1}},
+{"%integer?",
     builtin::internal_integerp,
-    {1}}},
+    {1}},
 
-{"exact?", {
+{"exact?",
     builtin::exactp,
-    {1}}},
+    {1}},
 
-{"%=", {
+{"%=",
     builtin::internal_number_equal,
-    {2}}},
-{"%<", {
+    {2}},
+{"%<",
     builtin::internal_number_less,
-    {2}}},
+    {2}},
 
-{"%max", {
+{"%max",
     builtin::internal_number_max,
-    {2}}},
-{"%min", {
+    {2}},
+{"%min",
     builtin::internal_number_min,
-    {2}}},
+    {2}},
 
-{"%+", {
+{"%+",
     builtin::internal_number_plus,
-    {2}}},
-{"%*", {
+    {2}},
+{"%*",
     builtin::internal_number_multiple,
-    {2}}},
-{"%-", {
+    {2}},
+{"%-",
     builtin::internal_number_minus,
-    {2}}},
-{"%/", {
+    {2}},
+{"%/",
     builtin::internal_number_divide,
-    {2}}},
+    {2}},
 
-{"quotient", {
+{"quotient",
     builtin::number_quot,
-    {2}}},
-{"remainder", {
+    {2}},
+{"remainder",
     builtin::number_rem,
-    {2}}},
-{"modulo", {
+    {2}},
+{"modulo",
     builtin::number_mod,
-    {2}}},
+    {2}},
 
-{"%gcd", {
+{"%gcd",
     builtin::internal_number_gcd,
-    {2}}},
+    {2}},
 
-{"numerator", {
+{"numerator",
     builtin::number_numerator,
-    {1}}},
-{"denominator", {
+    {1}},
+{"denominator",
     builtin::number_denominator,
-    {1}}},
+    {1}},
 
-{"floor", {
+{"floor",
     builtin::number_floor,
-    {1}}},
-{"ceiling", {
+    {1}},
+{"ceiling",
     builtin::number_ceil,
-    {1}}},
-{"truncate", {
+    {1}},
+{"truncate",
     builtin::number_trunc,
-    {1}}},
-{"round", {
+    {1}},
+{"round",
     builtin::number_round,
-    {1}}},
+    {1}},
 
-{"rationalize", {
+{"rationalize",
     builtin::number_rationalize,
-    {2}}},
+    {2}},
 
-{"exp", {
+{"exp",
     builtin::number_exp,
-    {1}}},
-{"log", {
+    {1}},
+{"log",
     builtin::number_log,
-    {1}}},
-{"sin", {
+    {1}},
+{"sin",
     builtin::number_sin,
-    {1}}},
-{"cos", {
+    {1}},
+{"cos",
     builtin::number_cos,
-    {1}}},
-{"tan", {
+    {1}},
+{"tan",
     builtin::number_tan,
-    {1}}},
-{"asin", {
+    {1}},
+{"asin",
     builtin::number_asin,
-    {1}}},
-{"acos", {
+    {1}},
+{"acos",
     builtin::number_acos,
-    {1}}},
-{"%atan1", {
+    {1}},
+{"%atan1",
     builtin::internal_number_atan1,
-    {1}}},
-{"%atan2", {
+    {1}},
+{"%atan2",
     builtin::internal_number_atan2,
-    {2}}},
+    {2}},
 
-{"sqrt", {
+{"sqrt",
     builtin::number_sqrt,
-    {1}}},
-{"expt", {
+    {1}},
+{"expt",
     builtin::number_expt,
-    {2}}},
+    {2}},
 
-{"make-rectangular", {
+{"make-rectangular",
     builtin::number_rect,
-    {2}}},
-{"make-polar", {
+    {2}},
+{"make-polar",
     builtin::number_polar,
-    {2}}},
-{"real-part", {
+    {2}},
+{"real-part",
     builtin::number_real,
-    {1}}},
-{"imag-part", {
+    {1}},
+{"imag-part",
     builtin::number_imag,
-    {1}}},
-{"magnitude", {
+    {1}},
+{"magnitude",
     builtin::number_mag,
-    {1}}},
-{"angle", {
+    {1}},
+{"angle",
     builtin::number_angle,
-    {1}}},
+    {1}},
 
-{"inexact->exact", {
+{"inexact->exact",
     builtin::number_i_to_e,
-    {1}}},
-{"exact->inexact", {
+    {1}},
+{"exact->inexact",
     builtin::number_e_to_i,
-    {1}}},
+    {1}},
 
-{"%string->number2", {
+{"%string->number2",
     builtin::internal_number_from_string,
-    {2}}},
-{"%number->string2", {
+    {2}},
+{"%number->string2",
     builtin::internal_number_to_string,
-    {2}}},
+    {2}},

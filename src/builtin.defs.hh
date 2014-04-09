@@ -1,8 +1,8 @@
-// This file is intended to be included into an array of 'BuiltinFunc'
+// This file is intended to be included into an array of 'NProcedure'
 
-{"eval", {
+{"eval",
     builtin::eval,
-    {2}}},
-{"load", {
+    {2}},
+{"load",
     builtin::load,
-    {1}}},
+    {1}},

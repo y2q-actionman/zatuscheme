@@ -15,19 +15,6 @@
 void load_from_stream(std::istream&);
 void install_builtin();
 
-// finding NProcedure with name
-const char* find_builtin_nproc_name(const NProcedure*);
-
-// builtin func struct
-struct BuiltinNProc {
-  const char* const name;
-  const NProcedure func;
-
-  // this constructor is required for static initialization
-  constexpr BuiltinNProc(const char* n, const NProcedure& f)
-    : name(n), func(f){};
-};
-
 // type check predicate
 namespace builtin {
 

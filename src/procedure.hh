@@ -110,8 +110,8 @@ private:
 
 class NProcedure{
 public:
-  constexpr NProcedure(NativeFunc f, const ProcInfo& pi)
-    : info_(pi), n_func_(f){}
+  constexpr NProcedure(const char* n, NativeFunc f, const ProcInfo& pi)
+    : name_(n), n_func_(f), info_(pi){}
 
   NProcedure(const NProcedure&) = default;
   NProcedure(NProcedure&&) = default;
@@ -127,9 +127,13 @@ public:
   NativeFunc get() const
   { return n_func_; }
 
+  const char* name() const
+  { return name_; }
+  
 private:
-  const ProcInfo info_;
+  const char* name_;
   const NativeFunc n_func_;
+  const ProcInfo info_;
 };
 
 bool is_procedure(Lisp_ptr);

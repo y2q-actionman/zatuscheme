@@ -95,7 +95,7 @@ Lisp_ptr get_procname(Lisp_ptr p){
   return access_proc(p,
                      [](IProcedure* iproc){ return iproc->name(); },
                      [](const NProcedure* nproc){
-                       return zs_new<String>(find_builtin_nproc_name(nproc));
+                       return zs_new<String>(nproc->name());
                      },
                      [](VM* cont){ return cont->name; },
                      [](SyntaxRules* srule){ return srule->name(); },
