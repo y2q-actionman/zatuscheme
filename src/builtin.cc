@@ -97,14 +97,12 @@ static const char* builtin_str =
 #include "builtin_boolean.scm"	// equal
 #include "builtin_cons.scm"	// equal
 #include "builtin_procedure.scm" // cons
-#include "builtin_port.scm"	// cons, procedure
 #include "builtin_numeric.scm"	// boolean, cons, procedure
 #include "builtin_char.scm"	// numeric
 #include "builtin_vector.scm"	// cons, numeric, procedure
 #include "builtin_string.scm"	// cons, char, numeric, procedure
-
-
-#include "builtin.scm"
+#include "builtin_port.scm"	// cons, procedure
+#include "builtin.scm"		// numeric
 ;
 
 static const char* builtin_extra_str =
