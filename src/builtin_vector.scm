@@ -1,9 +1,21 @@
 LOAD
+(define vector? %vector?)
+
+LOAD
 (define (make-vector k . fill)
   (apply %make-vector2 `(,k) (if (null? fill) %undefined fill)))
 
 LOAD
 (define vector %vector)
+
+LOAD
+(define vector-length %vector-length)
+
+LOAD
+(define vector-ref %vector-ref)
+
+LOAD
+(define vector-set! %vector-set!)
 
 LOAD
 (define (vector-fill! vec fill)

@@ -1,11 +1,11 @@
 // This file is intended to be included into an array of 'NProcedure'
 
-{"eq?",
+{"%eq?",
     builtin::eq,
     {2}},
-{"eqv?",
+{"%eqv?",
     builtin::eqv,
     {2}},
-{"equal?",
+{"%equal?",
     builtin::equal,
     {2}},

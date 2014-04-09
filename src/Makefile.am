@@ -18,6 +18,7 @@ libzs_a_SOURCES = \
 		builtin_cons.scm \
 		builtin_equal.cc builtin_equal.hh \
 		builtin_equal.defs.hh \
+		builtin_equal.scm \
 		builtin_extra.cc builtin_extra.hh \
 		builtin_extra.defs.hh \
 		builtin_extra.scm \

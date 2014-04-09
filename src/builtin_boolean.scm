@@ -1,2 +1,5 @@
 LOAD
-(define (not x) (eq? x #f))
+(define boolean? %boolean?)
+
+LOAD
+(define (not x) (%eq? x #f))

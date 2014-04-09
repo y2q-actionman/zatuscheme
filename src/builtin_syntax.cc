@@ -121,8 +121,4 @@ Lisp_ptr syntax_internal_list_star(ZsArgs args){
   return gl.extract_with_tail(args[args.size() - 1]);
 }
 
-Lisp_ptr syntax_internal_vector(ZsArgs args){
-  return {zs_new<Vector>(args.begin(), args.end())};
-}
-
 } // namespace builtin

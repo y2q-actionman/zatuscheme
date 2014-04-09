@@ -10,11 +10,15 @@ using namespace std;
 
 namespace builtin {
 
-Lisp_ptr internal_vector_make(ZsArgs args){
+Lisp_ptr vector_make(ZsArgs args){
   check_range(args[0], 0);
   auto count = args[0].get<int>();
 
   return {zs_new<Vector>(count, args[1])};
+}
+
+Lisp_ptr vector_vector(ZsArgs args){
+  return {zs_new<Vector>(args.begin(), args.end())};
 }
 
 Lisp_ptr vector_length(ZsArgs args){

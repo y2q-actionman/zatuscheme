@@ -33,6 +33,3 @@
 {"%list*",
     builtin::syntax_internal_list_star,
     {1, Variadic::t}},
-{"%vector",
-    builtin::syntax_internal_vector, 
-    {1, Variadic::t}},

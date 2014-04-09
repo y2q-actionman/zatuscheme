@@ -70,43 +70,38 @@ Lisp_ptr load(ZsArgs args){
 
 } // namespace builtin
 
-static const NProcedure builtin_syntax_funcs[] = {
-#include "builtin_syntax.defs.hh"
-};
-
-static const char* builtin_syntax_str =
-#include "builtin_syntax.scm"
-;
-
 static const NProcedure builtin_funcs[] = {
 #include "builtin.defs.hh"
 #include "builtin_boolean.defs.hh"
 #include "builtin_char.defs.hh"
 #include "builtin_cons.defs.hh"
 #include "builtin_equal.defs.hh"
+#include "builtin_extra.defs.hh"
 #include "builtin_numeric.defs.hh"
 #include "builtin_port.defs.hh"
 #include "builtin_procedure.defs.hh"
 #include "builtin_string.defs.hh"
 #include "builtin_symbol.defs.hh"
+#include "builtin_syntax.defs.hh"
 #include "builtin_vector.defs.hh"
 };
+
+static const char* builtin_syntax_str =
+#include "builtin_syntax.scm"
+;
 
 static const char* builtin_str =
 #include "builtin.scm"
 #include "builtin_boolean.scm"
 #include "builtin_char.scm"
 #include "builtin_cons.scm"
+#include "builtin_equal.scm"
 #include "builtin_numeric.scm"
 #include "builtin_port.scm"
 #include "builtin_procedure.scm"
 #include "builtin_string.scm"
 #include "builtin_vector.scm"
 ;
-
-static const NProcedure builtin_extra_funcs[] = {
-#include "builtin_extra.defs.hh"
-};
 
 static const char* builtin_extra_str =
 #include "builtin_extra.scm"
@@ -134,9 +129,10 @@ void install_builtin(){
   assert(!vm.symtable);
   vm.symtable.reset(new SymTable());
 
-  // null-environment
+  // null-environment; native funcs (prefixed %) and syntax
   vm.frame = zs_new<Env>(nullptr);
-  for(auto& i : builtin_syntax_funcs) install_native(i);
+  for(auto& i : builtin_funcs)
+    install_native(i);
   install_string(builtin_syntax_str);
   start_evaluation();
   assert(vm.code.empty() && vm.stack.empty());
@@ -149,17 +145,15 @@ void install_builtin(){
   install_symbol(EXPAND_STRINGIFY(CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
   install_symbol(EXPAND_STRINGIFY(NULL_ENV_SYMNAME), null_env);
   install_symbol(EXPAND_STRINGIFY(R5RS_ENV_SYMNAME), vm.frame);
-  for(auto& i : builtin_funcs) install_native(i);
   install_string(builtin_str);
   start_evaluation();
   assert(vm.code.empty() && vm.stack.empty());
 
-  // interaction-environment
+  // interaction-environment; has srfi and out extensions.
   auto i_env = vm.frame->push();
   install_symbol(EXPAND_STRINGIFY(INTERACTION_ENV_SYMNAME), i_env);
 
   vm.frame = i_env;
-  for(auto& i : builtin_extra_funcs) install_native(i);
   install_string(builtin_extra_str);
   start_evaluation();
 }

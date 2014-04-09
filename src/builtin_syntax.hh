@@ -15,7 +15,6 @@ Lisp_ptr syntax_syntax_rules(ZsArgs);
 
 Lisp_ptr syntax_internal_memv(ZsArgs);
 Lisp_ptr syntax_internal_list_star(ZsArgs);
-Lisp_ptr syntax_internal_vector(ZsArgs);
 
 } 
 

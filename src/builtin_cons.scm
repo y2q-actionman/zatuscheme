@@ -59,7 +59,7 @@ LOAD
 
 LOAD
 (define (null? x)
-  (eq? x ()))
+  (%eq? x ()))
 
 LOAD
 (define (list? obj)
@@ -121,11 +121,11 @@ LOAD
     fun))
 
 LOAD
-(define memq (%mem-funcs eq?))
+(define memq (%mem-funcs %eq?))
 LOAD
-(define memv (%mem-funcs eqv?))
+(define memv (%mem-funcs %eqv?))
 LOAD
-(define member (%mem-funcs equal?))
+(define member (%mem-funcs %equal?))
 
 
 LOAD
@@ -138,8 +138,8 @@ LOAD
     fun))
 
 LOAD
-(define assq (%ass-funcs eq?))
+(define assq (%ass-funcs %eq?))
 LOAD
-(define assv (%ass-funcs eqv?))
+(define assv (%ass-funcs %eqv?))
 LOAD
-(define assoc (%ass-funcs equal?))
+(define assoc (%ass-funcs %equal?))
