@@ -36,6 +36,7 @@ libzs_a_SOURCES = \
 		builtin_string.scm \
 		builtin_symbol.cc builtin_symbol.hh \
 		builtin_symbol.defs.hh \
+		builtin_symbol.scm \
 		builtin_syntax.cc builtin_syntax.hh \
 		builtin_syntax.defs.hh \
 		builtin_syntax.scm \

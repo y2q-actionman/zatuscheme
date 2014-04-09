@@ -28,7 +28,7 @@ Lisp_ptr internal_string_cmp(ZsArgs&& args, Fun fun){
 
 namespace builtin {
 
-Lisp_ptr internal_string_make(ZsArgs args){
+Lisp_ptr string_make(ZsArgs args){
   check_range(args[0], 0);
   check_type(Ptr_tag::character, args[1]);
   
@@ -69,11 +69,11 @@ Lisp_ptr string_set(ZsArgs args){
 }
 
 
-Lisp_ptr internal_string_strcmp(ZsArgs args){
+Lisp_ptr string_strcmp(ZsArgs args){
   return internal_string_cmp(move(args), strcmp);
 }
 
-Lisp_ptr internal_string_strcasecmp(ZsArgs args){
+Lisp_ptr string_strcasecmp(ZsArgs args){
   return internal_string_cmp(move(args), zs_strcasecmp);
 }
 

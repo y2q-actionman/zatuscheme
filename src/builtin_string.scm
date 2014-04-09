@@ -1,4 +1,7 @@
 LOAD
+(define string? %string?)
+
+LOAD
 (define (make-string k . char)
   (apply %make-string2 `(,k) (if (null? char) (integer->char 0) char)))
 
@@ -8,8 +11,15 @@ LOAD
          (str (make-string size)))
     (let loop ((i 0) (cs chars))
       (if (null? cs) str
-          (begin (string-set! str i (car cs))
+          (begin (%string-set! str i (car cs))
                  (loop (+ i 1) (cdr cs)))))))
+
+LOAD
+(define string-length %string-length)
+LOAD
+(define string-ref %string-ref)
+LOAD
+(define string-set! %string-set!)
 
 LOAD
 (define (%string-cmp op)

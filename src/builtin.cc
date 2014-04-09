@@ -100,6 +100,7 @@ static const char* builtin_str =
 #include "builtin_port.scm"
 #include "builtin_procedure.scm"
 #include "builtin_string.scm"
+#include "builtin_symbol.scm"
 #include "builtin_vector.scm"
 ;
 
