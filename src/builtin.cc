@@ -68,6 +68,11 @@ Lisp_ptr load(ZsArgs args){
   return Lisp_ptr{true};
 }
 
+Lisp_ptr push_environment(ZsArgs){
+  vm.frame = vm.frame->push();
+  return Lisp_ptr{vm.frame};
+}
+
 } // namespace builtin
 
 static const NProcedure builtin_funcs[] = {
@@ -86,12 +91,11 @@ static const NProcedure builtin_funcs[] = {
 #include "builtin_vector.defs.hh"
 };
 
-static const char* builtin_syntax_str =
+static const char* builtin_str =
 #include "builtin_syntax.scm"
-;
 
 // sequenced by dependencies
-static const char* builtin_str =
+#include "builtin_r5rs_begin.scm"
 #include "builtin_symbol.scm"	// (independent)
 #include "builtin_equal.scm"	// (independent)
 #include "builtin_boolean.scm"	// equal
@@ -103,21 +107,10 @@ static const char* builtin_str =
 #include "builtin_string.scm"	// cons, char, numeric, procedure
 #include "builtin_port.scm"	// cons, procedure
 #include "builtin.scm"		// numeric
-;
+#include "builtin_r5rs_end.scm"
 
-static const char* builtin_extra_str =
 #include "builtin_extra.scm"
 ;
-
-
-static void install_native(const NProcedure& n){
-  vm.frame->local_set(intern(*vm.symtable, n.name()), {&n});
-}
-
-static void install_string(const char* s){
-  istringstream iss{s};
-  load_from_stream(iss);
-}
 
 static void install_symbol(const char* name, Lisp_ptr value){
   vm.frame->local_set(intern(*vm.symtable, name), value);
@@ -131,31 +124,21 @@ void install_builtin(){
   assert(!vm.symtable);
   vm.symtable.reset(new SymTable());
 
-  // null-environment; native funcs (prefixed %) and syntax
+  // null-environment
   vm.frame = zs_new<Env>(nullptr);
-  for(auto& i : builtin_funcs)
-    install_native(i);
-  install_string(builtin_syntax_str);
-  start_evaluation();
-  assert(vm.code.empty() && vm.stack.empty());
 
-  auto null_env = vm.frame;
-
-  // r5rs-environment
-  vm.frame = vm.frame->push();
+  // internal symbols (prefixed %)
   install_symbol(EXPAND_STRINGIFY(CURRENT_INPUT_PORT_SYMNAME), &std::cin);
   install_symbol(EXPAND_STRINGIFY(CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
-  install_symbol(EXPAND_STRINGIFY(NULL_ENV_SYMNAME), null_env);
-  install_symbol(EXPAND_STRINGIFY(R5RS_ENV_SYMNAME), vm.frame);
-  install_string(builtin_str);
-  start_evaluation();
-  assert(vm.code.empty() && vm.stack.empty());
+  install_symbol(EXPAND_STRINGIFY(NULL_ENV_SYMNAME), {});
+  install_symbol(EXPAND_STRINGIFY(R5RS_ENV_SYMNAME), {});
+  install_symbol(EXPAND_STRINGIFY(INTERACTION_ENV_SYMNAME), {});
 
-  // interaction-environment; has srfi and out extensions.
-  auto i_env = vm.frame->push();
-  install_symbol(EXPAND_STRINGIFY(INTERACTION_ENV_SYMNAME), i_env);
+  for(auto& i : builtin_funcs)
+    vm.frame->local_set(intern(*vm.symtable, i.name()), {&i});
 
-  vm.frame = i_env;
-  install_string(builtin_extra_str);
+  // interpreted start!
+  istringstream iss{builtin_str};
+  load_from_stream(iss);
   start_evaluation();
 }

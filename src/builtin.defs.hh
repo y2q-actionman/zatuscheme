@@ -6,3 +6,6 @@
 {"%load",
     builtin::load,
     {1}},
+{"%push-environment",
+    builtin::push_environment,
+    {0}},

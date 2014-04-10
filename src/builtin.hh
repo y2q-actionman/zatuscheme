@@ -6,11 +6,11 @@
 #include "procedure.hh"
 #include "vm.hh"
 
-#define CURRENT_INPUT_PORT_SYMNAME *current-input-port-value*
-#define CURRENT_OUTPUT_PORT_SYMNAME *current-output-port-value*
-#define R5RS_ENV_SYMNAME *r5rs-env-value*
-#define NULL_ENV_SYMNAME *null-env-value*
-#define INTERACTION_ENV_SYMNAME *interaction-env-value*
+#define CURRENT_INPUT_PORT_SYMNAME %current-input-port-value
+#define CURRENT_OUTPUT_PORT_SYMNAME %current-output-port-value
+#define R5RS_ENV_SYMNAME %r5rs-env-value
+#define NULL_ENV_SYMNAME %null-env-value
+#define INTERACTION_ENV_SYMNAME %interaction-env-value
 
 void load_from_stream(std::istream&);
 void install_builtin();
