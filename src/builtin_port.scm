@@ -13,17 +13,19 @@ LOAD
 
 LOAD
 (define (call-with-input-file string proc)
-  (let* ((port (open-input-file string))
-         (ret (proc port)))
-    (close-input-port port)
-    ret))
+  (let ((port %undefined))
+    (dynamic-wind
+	(lambda () (set! port (open-input-file string)))
+	(lambda () (proc port))
+	(lambda () (close-input-port port)))))
 
 LOAD
 (define (call-with-output-file string proc)
-  (let* ((port (open-output-file string))
-         (ret (proc port)))
-    (close-output-port port)
-    ret))
+  (let ((port %undefined))
+    (dynamic-wind
+	(lambda () (set! port (open-output-file string)))
+	(lambda () (proc port))
+	(lambda () (close-output-port port)))))
 
 LOAD
 (define (current-input-port) CURRENT_INPUT_PORT_SYMNAME)
