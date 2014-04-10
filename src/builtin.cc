@@ -130,9 +130,6 @@ void install_builtin(){
   // internal symbols (prefixed %)
   install_symbol(EXPAND_STRINGIFY(CURRENT_INPUT_PORT_SYMNAME), &std::cin);
   install_symbol(EXPAND_STRINGIFY(CURRENT_OUTPUT_PORT_SYMNAME), &std::cout);
-  install_symbol(EXPAND_STRINGIFY(NULL_ENV_SYMNAME), {});
-  install_symbol(EXPAND_STRINGIFY(R5RS_ENV_SYMNAME), {});
-  install_symbol(EXPAND_STRINGIFY(INTERACTION_ENV_SYMNAME), {});
 
   for(auto& i : builtin_funcs)
     vm.frame->local_set(intern(*vm.symtable, i.name()), {&i});

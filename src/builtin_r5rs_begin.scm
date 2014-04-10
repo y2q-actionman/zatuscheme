@@ -1,5 +1,8 @@
 LOAD
-(set! NULL_ENV_SYMNAME (%current-environment))
+(define %null-env-value (%current-environment))
 
 LOAD
-(%push-environment)
+(define %r5rs-env-value (%push-environment))
+
+LOAD
+(define %interaction-env-value %undefined)
