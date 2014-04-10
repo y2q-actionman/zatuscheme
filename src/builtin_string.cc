@@ -32,9 +32,7 @@ Lisp_ptr string_make(ZsArgs args){
   check_range(args[0], 0);
   check_type(Ptr_tag::character, args[1]);
   
-  auto char_count = args[0].get<int>();
-
-  return {zs_new<String>(char_count, args[1].get<char>())};
+  return {zs_new<String>(args[0].get<int>(), args[1].get<char>())};
 }
 
 Lisp_ptr string_length(ZsArgs args){

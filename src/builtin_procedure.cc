@@ -79,14 +79,11 @@ Lisp_ptr call_cc(ZsArgs args){
 }
 
 Lisp_ptr push_winding(ZsArgs args){
-  Lisp_ptr procs[3];
-
-  for(int i = 0; i < 3; ++i){
-    check_procedure_type(args[i]);
-    procs[i] = args[i];
+  for(auto& i : args){
+    check_procedure_type(i);
   }
 
-  vm.extent.push_back({procs[0], procs[1], procs[2]});
+  vm.extent.push_back({args[0], args[1], args[2]});
   return {};
 }
 
