@@ -59,10 +59,7 @@ Lisp_ptr char_islower(ZsArgs args){
 
 
 Lisp_ptr char_to_int(ZsArgs args){
-  return char_conversion(args[0],
-                         [](char c){
-                           return Lisp_ptr{static_cast<int>(c)};
-                         });
+  return char_conversion(args[0], [](char c) -> int { return c; });
 }
 
 Lisp_ptr char_from_int(ZsArgs args){
@@ -73,12 +70,12 @@ Lisp_ptr char_from_int(ZsArgs args){
 
 Lisp_ptr char_toupper(ZsArgs args){
   return char_conversion(args[0],
-                         [](char c){ return static_cast<char>(std::toupper(c)); });
+                         [](char c) -> char { return std::toupper(c); });
 }
 
 Lisp_ptr char_tolower(ZsArgs args){
   return char_conversion(args[0],
-                         [](char c){ return static_cast<char>(std::tolower(c)); });
+                         [](char c) -> char { return std::tolower(c); });
 }
 
 } // namespace builtin
