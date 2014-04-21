@@ -27,17 +27,19 @@ namespace proc_flag {
 }
 
 struct ProcInfo {
-  int required_args;
-  int max_args;
+  typedef int ArgsType;
+
+  ArgsType required_args;
+  ArgsType max_args;
   proc_flag::Passing passing;
   proc_flag::Returning returning;
   proc_flag::MoveReturnValue move_ret;
   proc_flag::Leaving leaving;
 
-  static const auto variadic_argcount = std::numeric_limits<decltype(max_args)>::max();
+  static const auto variadic_argcount = std::numeric_limits<ArgsType>::max();
 
-  constexpr ProcInfo(int rargs,
-                     int margs,
+  constexpr ProcInfo(ArgsType rargs,
+                     ArgsType margs,
                      proc_flag::Passing p = proc_flag::Passing::eval,
                      proc_flag::Returning r = proc_flag::Returning::pass,
                      proc_flag::MoveReturnValue m = proc_flag::MoveReturnValue::t,
@@ -50,7 +52,7 @@ struct ProcInfo {
       leaving(l){}
 
   // TODO: use delegating constructor
-  constexpr ProcInfo(int rargs,
+  constexpr ProcInfo(ArgsType rargs,
                      proc_flag::Variadic v = proc_flag::Variadic::f,
                      proc_flag::Passing p = proc_flag::Passing::eval,
                      proc_flag::Returning r = proc_flag::Returning::pass,
@@ -67,7 +69,7 @@ struct ProcInfo {
   { return (max_args == variadic_argcount); }
 };
 
-std::pair<int, proc_flag::Variadic> parse_func_arg(Lisp_ptr);
+std::pair<ProcInfo::ArgsType, proc_flag::Variadic> parse_func_arg(Lisp_ptr);
 
 class IProcedure{
 public:

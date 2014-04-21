@@ -11,8 +11,8 @@
 
 using namespace proc_flag;
 
-std::pair<int, Variadic> parse_func_arg(Lisp_ptr args){
-  int argc = 0;
+std::pair<ProcInfo::ArgsType, Variadic> parse_func_arg(Lisp_ptr args){
+  ProcInfo::ArgsType argc = 0;
 
   auto i = begin(args);
   for(; i; ++i){
