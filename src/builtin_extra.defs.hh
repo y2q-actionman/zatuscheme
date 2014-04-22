@@ -1,11 +1,8 @@
 // This file is intended to be included into an array of 'NProcedure'
 
-{"%transcript-on",
-    builtin::transcript_on,
-    {0}},
-{"%transcript-off",
-    builtin::transcript_off,
-    {0}},
+{"%transcript-set-state",
+    builtin::transcript_set_state,
+    {1}},
 {"%traditional-transformer",
     builtin::traditional_transformer,
     {1}},

@@ -28,14 +28,10 @@ namespace builtin {
 // used for interacting between 'exit' and 'hard-repl'
 static bool hard_repl_continue = true;
 
-Lisp_ptr transcript_on(ZsArgs){
-  dump_mode = true;
-  return Lisp_ptr{true};
-}
-
-Lisp_ptr transcript_off(ZsArgs){
-  dump_mode = false;
-  return Lisp_ptr{true};
+Lisp_ptr transcript_set_state(ZsArgs args){
+  check_type(Ptr_tag::boolean, args[0]);
+  dump_mode = args[0].get<bool>();
+  return args[0];
 }
 
 Lisp_ptr traditional_transformer(ZsArgs args){

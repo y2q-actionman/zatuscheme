@@ -5,8 +5,7 @@
 
 namespace builtin {
 
-Lisp_ptr transcript_on(ZsArgs);
-Lisp_ptr transcript_off(ZsArgs);
+Lisp_ptr transcript_set_state(ZsArgs);
 
 // macros
 Lisp_ptr traditional_transformer(ZsArgs);

@@ -2,9 +2,11 @@ LOAD
 (define list* %list*)
 
 LOAD
-(define transcript-on %transcript-on)
+(define (transcript-on)
+  (%transcript-set-state #t))
 LOAD
-(define transcript-off %transcript-off)
+(define (transcript-off)
+  (%transcript-set-state #f))
 
 LOAD
 (define traditional-transformer %traditional-transformer)
