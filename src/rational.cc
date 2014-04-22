@@ -47,27 +47,23 @@ Rational::operator double() const{
 }
 
 Rational& Rational::expt(const Rational& other){
-  if(other.denominator() != 1){
-    float_ = std::pow(static_cast<double>(*this),
-                      static_cast<double>(other));
-    overflow_ = true;
-    return *this;
-  }
-
   const auto base_r = *this;
+  
+  if(other.denominator() != 1)
+    goto expt_overflow;
+
   normalized_reset(1, 1);
-
-  auto ex = other.numerator();
-  for(; ex > 0; --ex){
+  for(auto ex = other.numerator(); ex > 0; --ex){
     operator*=(base_r);
-    if(overflow_) break;
+    if(overflow_)
+      goto expt_overflow;
   }
+  return *this;
 
-  if(overflow_){
-    auto base_d = static_cast<double>(base_r);
-    for(; ex > 0; --ex) float_ *= base_d;
-  }
-
+ expt_overflow:
+  float_ = std::pow(static_cast<double>(base_r),
+		    static_cast<double>(other));
+  overflow_ = true;
   return *this;
 }
 
