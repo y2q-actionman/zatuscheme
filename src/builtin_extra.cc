@@ -92,9 +92,9 @@ Lisp_ptr identifier_eq(ZsArgs args){
   check_type(Ptr_tag::env, args[2]);
   check_identifier_type(args[3]);
 
-  return 
-    Lisp_ptr{identifier_eq(args[0].get<Env*>(), args[1],
-                           args[2].get<Env*>(), args[3])};
+  return
+    Lisp_ptr{eq_internal(args[0].get<Env*>()->find(args[1]).first,
+			 args[2].get<Env*>()->find(args[3]).first)};
 }
 
 Lisp_ptr make_empty_environment(ZsArgs){
