@@ -22,7 +22,11 @@
 #include "zs_error.hh"
 #include "zs_memory.hh"
 
+namespace zs {
+
 void zs_init();
 int zs_exit_status();
+
+} // namespace zs
 
 #endif //ZS_HH

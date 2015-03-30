@@ -9,17 +9,20 @@
 #define CURRENT_INPUT_PORT_SYMNAME %current-input-port-value
 #define CURRENT_OUTPUT_PORT_SYMNAME %current-output-port-value
 
+namespace zs {
+
 void load_from_stream(std::istream&);
 void install_builtin();
 
-// type check predicate
 namespace builtin {
 
+// type check predicate
 template <Ptr_tag p>
 Lisp_ptr type_check_pred(ZsArgs args){
   return Lisp_ptr{args[0].tag() == p};
 }
 
 } // namespace builtin
+} // namespace zs
 
 #endif // BUILTIN_HH

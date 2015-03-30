@@ -8,6 +8,8 @@
 #include "lisp_ptr.hh"
 #include "symbol.hh"
 
+namespace zs {
+
 class VM {
 public:
   struct Winding {
@@ -79,6 +81,11 @@ private:
   int size_; // not containing last vm_argcount
   IterType stack_iter_s_;
 };
+
+ZsArgs::IterType begin(const ZsArgs&);
+ZsArgs::IterType end(const ZsArgs&);
+
+} // namespace zs
 
 #include "vm.i.hh"
 

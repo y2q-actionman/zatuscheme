@@ -4,6 +4,8 @@
 #include <iosfwd>
 #include "lisp_ptr.hh"
 
+namespace zs {
+
 enum class PrintReadable{ f, t };
 
 void print(std::ostream&, Lisp_ptr,
@@ -12,5 +14,7 @@ void print(std::ostream&, Lisp_ptr,
 
 // for debug;
 std::ostream& operator<<(std::ostream&, Lisp_ptr);
+
+} // namespace zs
 
 #endif //PRINTER_HH

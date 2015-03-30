@@ -3,6 +3,8 @@
 
 using namespace std;
 
+namespace zs {
+
 std::ostream& operator<<(std::ostream& o, Ptr_tag t){
   return (o << stringify(t));
 }
@@ -22,3 +24,5 @@ std::ostream& operator<<(std::ostream& o, proc_flag::Variadic v){
 std::ostream& operator<<(std::ostream& o, Notation n){
   return (o << stringify(n));
 }
+
+} // namespace zs

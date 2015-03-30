@@ -11,6 +11,7 @@
 #include "cons_util.hh"
 
 using namespace std;
+using namespace zs;
 
 Lisp_ptr read_from_string(const char* s){
   stringstream ss(s);

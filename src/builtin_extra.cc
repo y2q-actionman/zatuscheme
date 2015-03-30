@@ -21,8 +21,9 @@
 #endif
 
 using namespace std;
-using namespace proc_flag;
+using namespace zs::proc_flag;
 
+namespace zs {
 namespace builtin {
 
 // used for interacting between 'exit' and 'hard-repl'
@@ -200,3 +201,4 @@ Lisp_ptr tmp_file(ZsArgs){
 }
 
 } // namespace builtin
+} // namespace zs

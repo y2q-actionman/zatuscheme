@@ -2,6 +2,7 @@
 #include "test_util.hh"
 
 using namespace std;
+using namespace zs;
 
 int main(){
   zs_init();

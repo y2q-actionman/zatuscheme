@@ -25,7 +25,7 @@ void with_expect_error(Fun f){
   test_util_detail::with_null_stream wns;
   try{
     f();
-  }catch(Lisp_ptr errobj){
+  }catch(zs::Lisp_ptr errobj){
     std::cerr << errobj << std::endl;
   }
 }

@@ -7,6 +7,8 @@
 
 #include <cassert>
 
+namespace zs {
+
 // Lisp_ptr constructors
 inline constexpr
 Lisp_ptr::Lisp_ptr()
@@ -111,5 +113,7 @@ T Lisp_ptr::get() const {
   assert(tag() == to_tag<T>());
   return lisp_ptr_detail::lisp_ptr_cast<T>(*this);
 }
+
+} // namespace zs
 
 #endif // LISP_PTR_I_HH

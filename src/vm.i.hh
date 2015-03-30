@@ -5,6 +5,8 @@
 #error "Please include via parent file"
 #endif
 
+namespace zs {
+
 inline
 ZsArgs::ZsArgs()
   : size_(vm.stack.back().get<VMArgcount>()),
@@ -34,5 +36,17 @@ inline
 void ZsArgs::invalidate(){
   size_ = -1;
 }
+
+inline
+ZsArgs::IterType begin(const ZsArgs& args) {
+  return args.begin();
+}
+
+inline
+ZsArgs::IterType end(const ZsArgs& args) {
+  return args.end();
+}
+
+} // namespace zs
 
 #endif // VM_I_HH

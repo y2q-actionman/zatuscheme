@@ -3,6 +3,8 @@
 
 #include "lisp_ptr.hh"
 
+namespace zs {
+
 class SyntacticClosure{
 public:
   SyntacticClosure(Env*, Lisp_ptr free_names, Lisp_ptr expr);
@@ -25,5 +27,7 @@ private:
 };
 
 bool identifierp(Lisp_ptr);
+
+} // namespace zs
 
 #endif // S_CLOSURE_HH

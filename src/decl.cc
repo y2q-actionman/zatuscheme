@@ -1,6 +1,8 @@
 #include "decl.hh"
 #include "zs_error.hh"
 
+namespace zs {
+
 const char* stringify(Ptr_tag p){
   switch(p){
   case Ptr_tag::undefined:
@@ -51,3 +53,5 @@ const char* stringify(Ptr_tag p){
     return "(unknown PTR type)";
   }
 }
+
+} // namespace zs

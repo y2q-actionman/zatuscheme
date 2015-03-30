@@ -5,6 +5,8 @@
 #include "vm.hh"
 #include "zs_memory.hh"
 
+namespace zs {
+
 VM vm;
 
 VM::VM() : code(), stack(),
@@ -81,3 +83,5 @@ void ZsArgs::cleanup(){
     invalidate();
   }
 }
+
+} // namespace zs

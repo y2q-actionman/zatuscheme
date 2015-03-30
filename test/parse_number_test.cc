@@ -3,6 +3,7 @@
 #include "test_util.hh"
 
 using namespace std;
+using namespace zs;
 
 template<typename T>
 void fail_message(istream& i, Lisp_ptr p, T expect){

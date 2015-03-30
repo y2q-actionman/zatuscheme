@@ -8,6 +8,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr vector_make(ZsArgs args){
@@ -50,3 +51,4 @@ Lisp_ptr vector_set(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

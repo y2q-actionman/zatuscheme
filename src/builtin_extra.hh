@@ -3,6 +3,7 @@
 
 #include "builtin.hh"
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr transcript_set_state(ZsArgs);
@@ -28,6 +29,8 @@ Lisp_ptr raise(ZsArgs);
 Lisp_ptr exit(ZsArgs);
 Lisp_ptr hard_repl(ZsArgs);
 Lisp_ptr tmp_file(ZsArgs);
+
+}
 }
 
 #endif // BUILTIN_EXTRA_HH

@@ -8,6 +8,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 template<typename Fun>
@@ -79,3 +80,4 @@ Lisp_ptr char_tolower(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

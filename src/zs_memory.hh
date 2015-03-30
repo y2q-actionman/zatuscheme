@@ -3,6 +3,8 @@
 
 #include "decl.hh"
 
+namespace zs {
+
 // primitives
 void zs_m_in(void* p, Ptr_tag tag);
 void zs_m_out(void* p);
@@ -19,6 +21,8 @@ void zs_delete(T*);
 
 // run GC
 void gc();
+
+} // namespace zs
 
 #include "zs_memory.i.hh"
 

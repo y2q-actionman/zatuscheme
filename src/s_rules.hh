@@ -4,6 +4,8 @@
 #include "lisp_ptr.hh"
 #include "procedure.hh"
 
+namespace zs {
+
 class SyntaxRules{
 public:
   SyntaxRules(Env*, Lisp_ptr literals, Lisp_ptr rules);
@@ -49,5 +51,7 @@ private:
   const Lisp_ptr rules_;
   Lisp_ptr name_;
 };
+
+} // namespace zs
 
 #endif // S_RULES_HH

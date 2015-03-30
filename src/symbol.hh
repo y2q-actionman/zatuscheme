@@ -5,6 +5,8 @@
 #include <string>
 #include <iosfwd>
 
+namespace zs {
+
 class Symbol;
 
 // SymTable declarations.
@@ -39,5 +41,7 @@ private:
   const std::string* name_;
   // add pointer to symbol table?
 };
+
+} // namespace zs
 
 #endif // SYMBOL_HH

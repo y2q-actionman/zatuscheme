@@ -5,6 +5,8 @@
 #include <iterator>
 #include "cons.hh"
 
+namespace zs {
+
 bool nullp(Lisp_ptr);
 bool is_nonnull_cons(Lisp_ptr);
 
@@ -80,6 +82,8 @@ bool operator!=(const ConsIter&, const ConsIter&);
 ConsIter begin(Lisp_ptr);
 ConsIter end(Lisp_ptr);
   
+} // namespace zs
+
 #include "cons_util.i.hh"
 
 #endif //CONS_UTIL_HH

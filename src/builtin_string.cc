@@ -11,6 +11,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 template<typename Fun>
@@ -76,3 +77,4 @@ Lisp_ptr string_strcasecmp(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

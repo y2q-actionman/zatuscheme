@@ -3,6 +3,7 @@
 
 #include "builtin.hh"
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr char_casecmp(ZsArgs);
@@ -17,6 +18,7 @@ Lisp_ptr char_from_int(ZsArgs);
 Lisp_ptr char_toupper(ZsArgs);
 Lisp_ptr char_tolower(ZsArgs);
 
-}
+} // namespace builtin
+} // namespace zs
 
 #endif // BUILTIN_CHAR_HH

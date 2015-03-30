@@ -9,7 +9,9 @@
 #include "s_rules.hh"
 #include "zs_error.hh"
 
-using namespace proc_flag;
+using namespace zs::proc_flag;
+
+namespace zs {
 
 std::pair<ProcInfo::ArgsType, Variadic> parse_func_arg(Lisp_ptr args){
   ProcInfo::ArgsType argc = 0;
@@ -110,3 +112,5 @@ void set_procname(Lisp_ptr p, Lisp_ptr n){
                      [&](SyntaxRules* srule){ srule->set_name(n); },
                      [](){ UNEXP_DEFAULT(); });
 }
+
+} // namespace zs

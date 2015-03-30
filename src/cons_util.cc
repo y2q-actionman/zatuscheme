@@ -2,6 +2,8 @@
 #include "lisp_ptr.hh"
 #include "zs_error.hh"
 
+namespace zs {
+
 Lisp_ptr make_cons_list(std::initializer_list<Lisp_ptr> lis){
   return make_cons_list(begin(lis), end(lis));
 }
@@ -77,3 +79,5 @@ ConsIter end(Lisp_ptr p){
   while(i) ++i;
   return i;
 }
+
+} // namespace zs

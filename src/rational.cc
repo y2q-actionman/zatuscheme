@@ -11,6 +11,8 @@ static_assert(sizeof(int) < sizeof(long long),
 
 using namespace std;
 
+namespace zs {
+
 // TODO: make this as constructor.
 Rational& Rational::normalized_reset(long long n, long long d){
   if(d == 0)
@@ -275,3 +277,5 @@ Lisp_ptr to_inexact(Lisp_ptr p){
     UNEXP_DEFAULT();
   }
 }
+
+} // namespace zs

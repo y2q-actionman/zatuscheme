@@ -3,6 +3,7 @@
 
 #include "builtin.hh"
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr port_open_file_i(ZsArgs);
@@ -25,6 +26,7 @@ Lisp_ptr port_open_input_string(ZsArgs);
 Lisp_ptr port_open_output_string(ZsArgs);
 Lisp_ptr port_get_output_string(ZsArgs);
 
+}
 }
 
 #endif // BUILTIN_PORT_HH

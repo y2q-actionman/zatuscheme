@@ -13,6 +13,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 enum class MarkBit {
@@ -296,3 +297,5 @@ void gc(){
   gc_mark_vm(&vm);
   gc_sweep();
 }
+
+} // namespace zs

@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace zs {
+
 void zs_init(){
   std::ios::sync_with_stdio(false);
   std::set_terminate(zs_terminate_handler);
@@ -22,3 +24,5 @@ int zs_exit_status(){
     return (val) ? EXIT_SUCCESS : EXIT_FAILURE;
   }
 }
+
+} // namespace zs

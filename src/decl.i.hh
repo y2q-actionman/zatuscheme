@@ -5,6 +5,8 @@
 #error "Please include via parent file"
 #endif
 
+namespace zs {
+
 // Type mapping
 template<>
 struct to_type<Ptr_tag::boolean>{
@@ -237,5 +239,7 @@ inline constexpr
 Ptr_tag to_tag<Notation>(){
   return Ptr_tag::notation;
 }
+
+} // namespace zs
 
 #endif // DECL_I_HH

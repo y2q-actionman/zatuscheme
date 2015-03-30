@@ -7,7 +7,8 @@
 #include "describe.hh"
 
 using namespace std;
-using namespace proc_flag;
+using namespace zs;
+using namespace zs::proc_flag;
 
 typedef decltype(parse_func_arg({})) ArgT;
 

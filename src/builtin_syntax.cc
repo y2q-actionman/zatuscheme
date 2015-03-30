@@ -12,8 +12,9 @@
 #include "zs_memory.hh"
 
 using namespace std;
-using namespace proc_flag;
+using namespace zs::proc_flag;
 
+namespace zs {
 namespace {
 
 Lisp_ptr lambda_internal(Lisp_ptr args, Lisp_ptr code){
@@ -121,3 +122,4 @@ Lisp_ptr list_star(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

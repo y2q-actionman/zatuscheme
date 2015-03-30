@@ -13,6 +13,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 template<typename IOType, typename F_IOType>
@@ -200,3 +201,4 @@ Lisp_ptr port_get_output_string(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

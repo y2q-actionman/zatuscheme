@@ -3,6 +3,7 @@
 
 #include "builtin.hh"
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr quote(ZsArgs);
@@ -16,6 +17,7 @@ Lisp_ptr syntax_rules(ZsArgs);
 Lisp_ptr memv(ZsArgs);
 Lisp_ptr list_star(ZsArgs);
 
-} 
+}
+}
 
 #endif // BUILTIN_SYNTAX_HH

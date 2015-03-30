@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace zs {
+
 constexpr inline
 Symbol::Symbol()
   : name_(){} // assumes this is immediately set by intern()
@@ -40,3 +42,5 @@ std::ostream& operator<<(std::ostream& f, const SymTable& st){
   }
   return f;
 }
+
+} // namespace zs

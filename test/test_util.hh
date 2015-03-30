@@ -5,10 +5,10 @@
 
 #include "lisp_ptr.hh"
 
-Lisp_ptr read_from_string(const char*);
-Lisp_ptr eval_text(const char*);
+zs::Lisp_ptr read_from_string(const char*);
+zs::Lisp_ptr eval_text(const char*);
 
-Lisp_ptr zs_call(std::initializer_list<Lisp_ptr>);
+zs::Lisp_ptr zs_call(std::initializer_list<zs::Lisp_ptr>);
 
 
 template<typename Fun>
@@ -18,10 +18,10 @@ void with_expect_error(Fun);
 extern int RESULT;
 
 // (pass) -> print -> strcmp
-bool check_p(Lisp_ptr input, const char* expect);
+bool check_p(zs::Lisp_ptr input, const char* expect);
 
 // (pass) -> checks printable
-bool check_p_success(Lisp_ptr);
+bool check_p_success(zs::Lisp_ptr);
 
 // read -> print -> strcmp
 bool check_r(const char* input, const char* expect);

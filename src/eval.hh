@@ -3,6 +3,8 @@
 
 #include "decl.hh"
 
+namespace zs {
+
 // primitives for syntax call
 void vm_op_call();
 void vm_op_proc_enter();
@@ -21,5 +23,7 @@ const char* stringify(VMop);
 extern bool dump_mode;
 extern unsigned instruction_counter;
 extern const unsigned gc_invoke_interval;
+
+} // namespace zs
 
 #endif // EVAL_HH

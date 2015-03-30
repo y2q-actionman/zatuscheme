@@ -6,6 +6,8 @@
 
 using namespace std;
 
+namespace zs {
+
 Env::Env(Env* e)
   : map_(), next_(e){
 }
@@ -58,3 +60,5 @@ std::ostream& operator<<(std::ostream& f, const Env& env){
   }
   return f;
 }
+
+} // namespace zs

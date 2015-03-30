@@ -8,6 +8,8 @@
 #include "zs_error.hh"
 #include "zs_memory.hh"
 
+namespace zs {
+
 inline
 Rational::Rational(int n)
   : overflow_(false){
@@ -153,5 +155,7 @@ inline
 Lisp_ptr wrap_number(Lisp_ptr p){
   return p;
 }
+
+} // namespace zs
 
 #endif // RATIONAL_I_HH

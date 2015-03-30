@@ -14,6 +14,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 bool is_delimiter(char c){
@@ -672,3 +673,5 @@ const char* stringify(Notation n){
     return "(unknown token notation)";
   }
 }
+
+} // namespace zs

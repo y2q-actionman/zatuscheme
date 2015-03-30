@@ -3,6 +3,8 @@
 
 #include "lisp_ptr.hh"
 
+namespace zs {
+
 class Rational {
 public:
   explicit Rational(int);
@@ -72,6 +74,8 @@ Lisp_ptr wrap_number(Lisp_ptr);
 
 Lisp_ptr to_exact(Lisp_ptr);
 Lisp_ptr to_inexact(Lisp_ptr);
+
+} // namespace zs
 
 #include "rational.i.hh"
 

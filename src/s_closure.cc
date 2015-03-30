@@ -3,6 +3,8 @@
 #include "s_closure.hh"
 #include "zs_error.hh"
 
+namespace zs {
+
 SyntacticClosure::SyntacticClosure(Env* e, Lisp_ptr f, Lisp_ptr ex)
   : env_(e), free_names_(f), expr_(ex){
   for(auto i : f){
@@ -20,3 +22,5 @@ bool identifierp(Lisp_ptr p){
     return false;
   }
 }
+
+} // namespace zs

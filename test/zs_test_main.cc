@@ -2,6 +2,7 @@
 #include <fstream>
 
 using namespace std;
+using namespace zs;
 
 int main(int argc, const char* argz[]){
   if(argc <= 1){

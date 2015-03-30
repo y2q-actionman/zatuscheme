@@ -3,6 +3,8 @@
 
 #include "lisp_ptr.hh"
 
+namespace zs {
+
 struct Cons {
   static constexpr Lisp_ptr NIL = Lisp_ptr{static_cast<Cons*>(nullptr)};
 
@@ -18,5 +20,7 @@ struct Cons {
   Lisp_ptr car;
   Lisp_ptr cdr;
 };
+
+} // namespace zs
 
 #endif // CONS_HH

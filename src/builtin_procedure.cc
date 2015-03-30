@@ -11,6 +11,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr procedurep(ZsArgs args){
@@ -95,4 +96,4 @@ Lisp_ptr pop_winding(ZsArgs){
 }
 
 } // namespace builtin
-
+} // namespace zs

@@ -7,6 +7,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr symbol_to_string(ZsArgs args){
@@ -25,3 +26,4 @@ Lisp_ptr symbol_from_string(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

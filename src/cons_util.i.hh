@@ -11,6 +11,8 @@
 #include "zs_error.hh"
 #include "zs_memory.hh"
 
+namespace zs {
+
 inline
 bool nullp(Lisp_ptr p){
   // When Lisp_ptr::get<Cons*>() became constexpr,
@@ -94,5 +96,7 @@ inline
 bool operator!=(const ConsIter& i1, const ConsIter& i2){
   return !eq_internal(i1.base(), i2.base());
 }
+
+} // namespace zs
 
 #endif //CONS_UTIL_I_HH

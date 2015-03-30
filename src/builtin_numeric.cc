@@ -17,6 +17,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 template<typename IFun, typename QFun, typename RFun, typename CFun>
@@ -514,3 +515,4 @@ Lisp_ptr number_to_string(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

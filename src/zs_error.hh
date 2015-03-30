@@ -11,6 +11,8 @@
     abort();\
   }while(0)
 
+namespace zs {
+
 void zs_terminate_handler() noexcept;
 
 void throw_zs_error(Lisp_ptr, const char*, ...)
@@ -31,5 +33,7 @@ void check_identifier_type(Lisp_ptr);
 void check_procedure_type(Lisp_ptr);
 void check_nonnull_cons(Lisp_ptr);
 void check_range(Lisp_ptr, size_t, size_t = INT_MAX);
+
+} // namespace zs
 
 #endif // ZS_ERROR_HH

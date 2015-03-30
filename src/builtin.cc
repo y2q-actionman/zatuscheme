@@ -30,7 +30,9 @@
 #include "builtin_vector.hh"
 
 using namespace std;
-using namespace proc_flag;
+using namespace zs::proc_flag;
+
+namespace zs {
 
 void load_from_stream(std::istream& ss){
   vector<Lisp_ptr> tmpv;
@@ -139,3 +141,5 @@ void install_builtin(){
   load_from_stream(iss);
   start_evaluation();
 }
+
+} // namespace zs

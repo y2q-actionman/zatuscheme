@@ -16,6 +16,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 void print_binary(ostream& f, int i){
@@ -241,3 +242,5 @@ std::ostream& operator<<(std::ostream& o, Lisp_ptr p){
   print(o, p, PrintReadable::t);
   return o;
 }
+
+} // namespace zs

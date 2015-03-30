@@ -15,6 +15,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 // internal types
@@ -475,3 +476,5 @@ Lisp_ptr SyntaxRules::apply(Lisp_ptr form, Env* form_env) const{
 
   throw_zs_error(form, "no matching pattern found!");
 }
+
+} // namespace zs

@@ -3,6 +3,7 @@
 
 #include "builtin.hh"
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr numberp(ZsArgs);
@@ -64,6 +65,7 @@ Lisp_ptr number_e_to_i(ZsArgs);
 Lisp_ptr number_from_string(ZsArgs);
 Lisp_ptr number_to_string(ZsArgs);
 
+}
 }
 
 #endif // BUILTIN_NUMERIC_HH

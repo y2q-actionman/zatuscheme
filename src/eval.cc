@@ -15,7 +15,9 @@
 #include "zs_memory.hh"
 
 using namespace std;
-using namespace proc_flag;
+using namespace zs::proc_flag;
+
+namespace zs {
 
 bool dump_mode = false;
 unsigned instruction_counter = 0;
@@ -627,3 +629,5 @@ const char* stringify(VMop op){
     return "unknown vm-op";
   }
 }
+
+} // namespace zs

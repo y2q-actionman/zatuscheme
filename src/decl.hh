@@ -6,6 +6,8 @@
 #include <iosfwd>
 #include <complex>
 
+namespace zs {
+
 // typedefs & declarations
 class Lisp_ptr;
 
@@ -68,6 +70,8 @@ struct to_type;
 template<typename Arg>
 constexpr
 Ptr_tag to_tag();
+
+} // namespace zs
 
 #include "decl.i.hh"
 

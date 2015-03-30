@@ -2,6 +2,7 @@
 #include <sstream>
 
 using namespace std;
+using namespace zs;
 
 int main(int argc, const char* argz[]){
   static const char* default_code[] = {"", "(read-eval-print-loop)"};

@@ -8,6 +8,8 @@
 #include "equality.hh"
 #include "lisp_ptr.hh"
 
+namespace zs {
+
 class Env {
 public:
   typedef std::unordered_map<Lisp_ptr, Lisp_ptr, EqHashObj, EqObj>
@@ -36,5 +38,7 @@ private:
   map_type map_;
   Env* next_;
 };
+
+} // namespace zs
 
 #endif // ENV_HH

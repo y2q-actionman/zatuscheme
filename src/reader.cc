@@ -11,6 +11,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace {
 
 Lisp_ptr read_la(istream&, Lisp_ptr);
@@ -133,3 +134,5 @@ bool eof_object_p(Lisp_ptr p){
   return (p.tag() == Ptr_tag::character)
     && (p.get<char>() == EOF);
 }
+
+} // namespace zs

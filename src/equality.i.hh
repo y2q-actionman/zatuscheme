@@ -7,6 +7,8 @@
 
 #include <functional>
 
+namespace zs {
+
 inline
 bool eq_internal(Lisp_ptr a, Lisp_ptr b){
   return (a.tag() == b.tag()
@@ -29,5 +31,7 @@ struct EqHashObj{
     return eq_hash(p);
   }
 };
+
+} // namespace zs
 
 #endif // EQUALITY_I_HH

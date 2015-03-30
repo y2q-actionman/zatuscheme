@@ -5,6 +5,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr eq(ZsArgs args){
@@ -20,3 +21,4 @@ Lisp_ptr equal(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

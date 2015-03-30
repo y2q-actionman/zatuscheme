@@ -6,6 +6,8 @@
 #include "lisp_ptr.hh"
 #include "vm.hh"
 
+namespace zs {
+
 typedef Lisp_ptr(*NativeFunc)(ZsArgs);
 
 namespace proc_flag {
@@ -142,5 +144,7 @@ bool is_procedure(Lisp_ptr);
 const ProcInfo* get_procinfo(Lisp_ptr);
 Lisp_ptr get_procname(Lisp_ptr);
 void set_procname(Lisp_ptr, Lisp_ptr);
+
+} // namespace zs
 
 #endif //PROCEDURE_HH

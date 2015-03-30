@@ -8,6 +8,7 @@
 
 using namespace std;
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr cons_pairp(ZsArgs args){
@@ -39,3 +40,4 @@ Lisp_ptr cons_set_cdr(ZsArgs args){
 }
 
 } // namespace builtin
+} // namespace zs

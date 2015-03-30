@@ -1,6 +1,8 @@
 #include "zs.hh"
 #include "test_util.hh"
 
+using namespace zs;
+
 int main(){
   zs_init();
 

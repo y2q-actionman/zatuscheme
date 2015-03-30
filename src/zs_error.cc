@@ -18,6 +18,8 @@ static const size_t ERROR_MESSAGE_LENGTH = 256;
 
 using namespace std;
 
+namespace zs {
+
 void zs_terminate_handler() noexcept{
   std::set_terminate(nullptr);
 
@@ -115,3 +117,5 @@ void check_range(Lisp_ptr p, size_t min, size_t max){
                    min, max, idx);
   }
 }
+
+} // namespace zs

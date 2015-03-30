@@ -5,6 +5,8 @@
 
 #include "decl.hh"
 
+namespace zs {
+
 enum class Notation {
   l_paren, r_paren, vector_paren,
     quote, quasiquote, comma, comma_at, dot,
@@ -20,5 +22,7 @@ Lisp_ptr tokenize(std::istream&);
 Lisp_ptr parse_number(std::istream&, int radix = 0);
 
 const char* stringify(Notation);
+
+} // namespace zs
 
 #endif // TOKEN_HH

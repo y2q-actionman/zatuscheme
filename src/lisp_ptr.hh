@@ -5,6 +5,8 @@
 #include <type_traits>
 #include "decl.hh"
 
+namespace zs {
+
 class Lisp_ptr {
 public:
   constexpr Lisp_ptr();
@@ -51,6 +53,8 @@ public:
   Ptr_tag tag_;
   lisp_ptr_u u_;
 };
+
+} // namespace zs
 
 #include "lisp_ptr.i.hh"
 

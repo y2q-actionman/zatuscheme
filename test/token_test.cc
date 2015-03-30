@@ -15,6 +15,7 @@
 #define PRINT_BUFSIZE 100
 
 using namespace std;
+using namespace zs;
 
 template<typename T, typename Pos>
 void fail_message(istream& f, const Pos& b_pos,

@@ -3,6 +3,7 @@
 
 #include "builtin.hh"
 
+namespace zs {
 namespace builtin {
 
 Lisp_ptr vector_make(ZsArgs);
@@ -11,6 +12,7 @@ Lisp_ptr vector_length(ZsArgs);
 Lisp_ptr vector_ref(ZsArgs);
 Lisp_ptr vector_set(ZsArgs);
 
+}
 }
 
 #endif // BUILTIN_VECTOR_HH
