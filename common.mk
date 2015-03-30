@@ -3,7 +3,7 @@ warning_flags = -Wall -Wextra -Wformat=2 -Winit-self -Wshadow\
 		-Wlogical-op -Wredundant-decls\
 		-Wswitch-enum\
 		-pedantic\
-		-fno-nonansi-builtins
+		-fno-nonansi-builtins -Wundef
 #		-Wzero-as-null-pointer-constant
 
 release_flags = -DNDEBUG
