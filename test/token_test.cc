@@ -61,7 +61,7 @@ void check(istream& f, Lisp_ptr expect){
 
   const auto tok = tokenize(f);
 
-  if(!equal_internal(tok, expect)){
+  if(!equal(tok, expect)){
     fail_message(f, init_pos, tok, expect);
   }
 }

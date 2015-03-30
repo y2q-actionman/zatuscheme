@@ -6,9 +6,9 @@
 
 namespace zs {
 
-bool eq_internal(Lisp_ptr, Lisp_ptr);
-bool eqv_internal(Lisp_ptr, Lisp_ptr);
-bool equal_internal(Lisp_ptr, Lisp_ptr);
+bool eq(Lisp_ptr, Lisp_ptr);
+bool eqv(Lisp_ptr, Lisp_ptr);
+bool equal(Lisp_ptr, Lisp_ptr);
 
 size_t eq_hash(Lisp_ptr);
 

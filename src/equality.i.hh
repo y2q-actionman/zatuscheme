@@ -10,7 +10,7 @@
 namespace zs {
 
 inline
-bool eq_internal(Lisp_ptr a, Lisp_ptr b){
+bool eq(Lisp_ptr a, Lisp_ptr b){
   return (a.tag() == b.tag()
           && a.get<void*>() == b.get<void*>());
 }
@@ -22,7 +22,7 @@ size_t eq_hash(Lisp_ptr p){
 
 struct EqObj {
   bool operator()(Lisp_ptr a, Lisp_ptr b) const{
-    return eq_internal(a, b);
+    return eq(a, b);
   }
 };
     

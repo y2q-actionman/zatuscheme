@@ -89,12 +89,12 @@ void GrowList::invalidate(){
 // ConsIter class
 inline
 bool operator==(const ConsIter& i1, const ConsIter& i2){
-  return eq_internal(i1.base(), i2.base());
+  return eq(i1.base(), i2.base());
 }
 
 inline
 bool operator!=(const ConsIter& i1, const ConsIter& i2){
-  return !eq_internal(i1.base(), i2.base());
+  return !eq(i1.base(), i2.base());
 }
 
 } // namespace zs

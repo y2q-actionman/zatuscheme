@@ -191,7 +191,7 @@ bool check_er(const char* input, const char* expect){
   auto r = read_from_string(expect);
   assert(r);
 
-  auto ret = eqv_internal(e, r);
+  auto ret = eqv(e, r);
   if(!ret){
     cerr << "[failed] expected " << expect << ", but got ";
     print(cerr, e);

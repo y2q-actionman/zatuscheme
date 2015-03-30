@@ -29,7 +29,7 @@ struct expand_failed {};
 
 bool is_literal_identifier(const SyntaxRules& sr, Lisp_ptr p){
   for(auto i = begin(sr.literals()); i; ++i){
-    if(eq_internal(*i, p)){
+    if(eq(*i, p)){
       return true;
     }
   }
@@ -134,7 +134,7 @@ void ensure_binding(EqHashMap& match_obj,
     }
 
     // non-literal identifier
-    if(!eq_internal(ignore_ident, pattern)){
+    if(!eq(ignore_ident, pattern)){
       match_obj.insert({pattern, Cons::NIL});
     }
     return;
@@ -175,7 +175,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
   if(identifierp(pattern)){
     if(is_literal_identifier(sr, pattern)){
       // literal identifier
-      if(identifierp(form) && eq_internal(pattern, form)){
+      if(identifierp(form) && eq(pattern, form)){
         return {};
       }else{
         throw try_match_failed();
@@ -185,7 +185,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
     // non-literal identifier
     EqHashMap match_obj;
 
-    if(!eq_internal(ignore_ident, pattern)){
+    if(!eq(ignore_ident, pattern)){
       match_obj.insert({pattern, form});
     }
     return match_obj;
@@ -202,7 +202,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       // checks ellipsis
       auto p_n = next(p_i);
       if((p_n) && is_ellipsis(*p_n)){
-        if(eq_internal(*p_i, ignore_ident)){
+        if(eq(*p_i, ignore_ident)){
           throw_zs_error({}, "'...' is appeared following the first identifier");
         }
 
@@ -270,7 +270,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       // checks ellipsis
       auto p_n = next(p_i);
       if((p_n != p_e) && is_ellipsis(*p_n)){
-        if(eq_internal(*p_i, ignore_ident)){
+        if(eq(*p_i, ignore_ident)){
           throw_zs_error({}, "'...' is appeared following the first identifier");
         }
 
@@ -309,7 +309,7 @@ try_match_1(const SyntaxRules& sr, Lisp_ptr ignore_ident, Lisp_ptr pattern,
       throw try_match_failed();
     }
   }else{
-    if(equal_internal(pattern, form)){
+    if(equal(pattern, form)){
       return {};
     }else{
       throw try_match_failed();

@@ -177,7 +177,7 @@ static unsigned get_wind_index(const VM& va, const VM& vb){
   unsigned w = 0;
   while((w < va.extent.size())
         && (w < vb.extent.size())
-        && eq_internal(va.extent[w].thunk, vb.extent[w].thunk)){
+        && eq(va.extent[w].thunk, vb.extent[w].thunk)){
     ++w;
   }
   return w;

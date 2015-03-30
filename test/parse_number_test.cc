@@ -36,7 +36,7 @@ void check(const char* input, const T& expect){
   stringstream ss(input);
   auto n = parse_number(ss);
   
-  if(!equal_internal(n, wrap_number(expect))){
+  if(!equal(n, wrap_number(expect))){
     fail_message(ss, n, expect);
   }
 }

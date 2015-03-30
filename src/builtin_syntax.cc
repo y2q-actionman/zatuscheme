@@ -104,7 +104,7 @@ Lisp_ptr memv(ZsArgs args){
   check_type(Ptr_tag::cons, args[1]);
 
   for(auto i = begin(args[1]); i; ++i){
-    if(eqv_internal(args[0], *i))
+    if(zs::eqv(args[0], *i))
       return i.base();
   }
 

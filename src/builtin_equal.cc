@@ -9,15 +9,15 @@ namespace zs {
 namespace builtin {
 
 Lisp_ptr eq(ZsArgs args){
-  return Lisp_ptr{eq_internal(args[0], args[1])};
+  return Lisp_ptr{zs::eq(args[0], args[1])};
 }
 
 Lisp_ptr eqv(ZsArgs args){
-  return Lisp_ptr{eqv_internal(args[0], args[1])};
+  return Lisp_ptr{zs::eqv(args[0], args[1])};
 }
 
 Lisp_ptr equal(ZsArgs args){
-  return Lisp_ptr{equal_internal(args[0], args[1])};
+  return Lisp_ptr{zs::equal(args[0], args[1])};
 }
 
 } // namespace builtin
