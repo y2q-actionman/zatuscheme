@@ -28,17 +28,19 @@ Lisp_ptr apply(ZsArgs args){
 
   // simulating function_call()
   int argc = 0;
-  for(auto i : a_args){
-    if(i.tag() == Ptr_tag::cons){
-      for(auto p : i){
-        vm.stack.push_back(p);
-        ++argc;
-      }
-    }else{
-      vm.stack.push_back(i);
-      ++argc;
-    }
+  auto prev_last_i = prev(end(a_args));
+  for(auto i = begin(a_args); i != prev_last_i; ++i){
+    vm.stack.push_back(*i);
+    ++argc;
   }
+  // last arg -- traverses the list.
+  auto last_elem = *prev_last_i;
+  check_type(Ptr_tag::cons, last_elem);
+  for(auto p : last_elem){
+    vm.stack.push_back(p);
+    ++argc;
+  }
+  
   vm.stack.push_back(VMArgcount{argc});
   vm.code.insert(vm.code.end(), {proc, vm_op_proc_enter});
   return {};

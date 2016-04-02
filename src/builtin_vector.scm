@@ -3,7 +3,8 @@ LOAD
 
 LOAD
 (define (make-vector k . fill)
-  (apply %make-vector2 `(,k) (if (null? fill) %undefined fill)))
+  (if (null? fill) (%make-vector2 k %undefined)
+      (apply %make-vector2 k fill)))
 
 LOAD
 (define vector %vector)

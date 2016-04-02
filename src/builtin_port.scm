@@ -52,7 +52,9 @@ LOAD
 
 LOAD
 (define (%read-funcs fun)
-  (lambda args (apply fun (if (null? args) (current-input-port) args))))
+  (lambda args
+    (if (null? args) (fun (current-input-port))
+	(apply fun args))))
 LOAD
 (define read (%read-funcs %read))
 LOAD
@@ -67,7 +69,9 @@ LOAD
 
 LOAD
 (define (%write-funcs fun)
-  (lambda (p . args) (apply fun `(,p) (if (null? args) (current-output-port) args))))
+  (lambda (p . args)
+    (if (null? args) (fun p (current-output-port))
+	(apply fun p args))))
 LOAD
 (define write (%write-funcs %write))
 LOAD
@@ -78,4 +82,3 @@ LOAD
 LOAD
 (define (newline . args)
   (apply write-char NEWLINE_CHAR args))
-

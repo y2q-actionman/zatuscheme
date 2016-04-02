@@ -2,7 +2,7 @@
 
 ;; control funcs
 (test-eqv 7 (apply + (list 3 4)))
-(test-eqv 10 (apply + (list 3 4) (list 1 2)))
+(test-eqv 10 (apply + 3 4 (list 1 2)))
 
 (define compose
   (lambda (f g)

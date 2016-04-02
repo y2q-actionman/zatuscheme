@@ -79,7 +79,7 @@ LOAD
 LOAD
 (define (%fold proc init lis)
   (if (null? lis) init
-      (%fold proc (apply proc init (car lis)) (cdr lis))))
+      (%fold proc (proc init (car lis)) (cdr lis))))
 
 LOAD
 (define (max n . m)
@@ -162,7 +162,7 @@ LOAD
 (define acos %acos)
 LOAD
 (define (atan n . m)
-  (if (null? m) (%atan1 n) (apply %atan2 `(,n) m)))
+  (if (null? m) (%atan1 n) (apply %atan2 n m)))
 
 LOAD
 (define sqrt %sqrt)
@@ -191,9 +191,9 @@ LOAD
 LOAD
 (define (string->number str . radix)
   (if (null? radix) (%string->number2 str 10)
-      (apply %string->number2 `(,str) radix))) 
+      (apply %string->number2 str radix))) 
 
 LOAD
 (define (number->string num . radix)
   (if (null? radix) (%number->string2 num 10)
-      (apply %number->string2 `(,num) radix))) 
+      (apply %number->string2 num radix))) 

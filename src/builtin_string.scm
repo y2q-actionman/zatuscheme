@@ -3,7 +3,8 @@ LOAD
 
 LOAD
 (define (make-string k . char)
-  (apply %make-string2 `(,k) (if (null? char) (integer->char 0) char)))
+  (if (null? char) (%make-string2 k (integer->char 0))
+      (apply %make-string2 k char)))
 
 LOAD
 (define (string . chars)

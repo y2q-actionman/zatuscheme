@@ -51,7 +51,7 @@ LOAD
 
 LOAD
 (define (error reason . args)
-  (raise (apply string-append `(,reason) args)))
+  (raise (apply string-append reason args)))
 
 LOAD
 (define (with-exception-handler handler thunk)
