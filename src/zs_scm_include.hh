@@ -19,7 +19,7 @@ Notes:
 
   - If not in literal, '\' (backslash) is reduced.
 */
-#define LOAD(...) "("EXPAND_STRINGIFY(__VA_ARGS__)")"
+#define LOAD(...)	"(" EXPAND_STRINGIFY(__VA_ARGS__) ")"
 
 #define NEWLINE_CHAR #\\newline
 

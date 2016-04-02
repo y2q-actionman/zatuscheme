@@ -23,7 +23,7 @@ public:
   int denominator() const
   { return ratio_.d_; }
 
-  template <typename T> bool is_convertible() const;
+  template <typename T> bool is_convertible() const = delete;
 
   operator int() const;
   operator double() const;

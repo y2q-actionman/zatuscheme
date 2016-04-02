@@ -22,9 +22,6 @@ Rational::Rational(long long n, long long d)
   normalized_reset(n, d);
 }
 
-template <typename T>
-bool Rational::is_convertible() const = delete;
-
 template <>
 inline
 bool Rational::is_convertible<int>() const{

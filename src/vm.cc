@@ -10,7 +10,7 @@ namespace zs {
 VM vm;
 
 VM::VM() : code(), stack(),
-           return_value(1, {}),
+           return_value(1, Lisp_ptr{}),
            extent(),
            symtable(),
            frame(nullptr),

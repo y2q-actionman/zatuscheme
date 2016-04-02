@@ -1,8 +1,8 @@
-# emacs
+## emacs
 *~
 TAGS
 
-# autotools
+## autotools
 *.log
 Makefile
 config.h
@@ -14,15 +14,17 @@ autom4te.cache
 
 stamp-h1
 
-# autotools distribute files
+## autotools distribute files
 *.in
 aclocal.m4
 configure
 depcomp
 install-sh
 missing
+*.trs
+test-driver
 
-# binaries
+## binaries
 *.o
 *.a
 *_test
